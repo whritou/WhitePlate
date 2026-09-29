@@ -1,0 +1,13 @@
+{
+  "HomePage": {
+    "title": "Project ready!",
+    "description": "The WhitePlate frontend is ready for development.",
+    "ready": "You may now add components and start building.",
+    "buttonAvailable": "We've already added the button component for you.",
+    "button": "Button",
+    "themeHint": "(Press {key} to toggle dark mode)",
+    "languageSelector": "Choose language",
+    "english": "English",
+    "french": "French"
+  }
+}

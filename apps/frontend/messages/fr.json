@@ -1,0 +1,13 @@
+{
+  "HomePage": {
+    "title": "Le projet est prêt !",
+    "description": "Le frontend WhitePlate est prêt pour le développement.",
+    "ready": "Vous pouvez maintenant ajouter des composants et commencer le développement.",
+    "buttonAvailable": "Le composant bouton est déjà disponible.",
+    "button": "Bouton",
+    "themeHint": "(Appuyez sur {key} pour changer le thème sombre)",
+    "languageSelector": "Choisir la langue",
+    "english": "Anglais",
+    "french": "Français"
+  }
+}
