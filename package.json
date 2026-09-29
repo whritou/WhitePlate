@@ -1,0 +1,23 @@
+{
+  "name": "whiteplate",
+  "version": "1.0.0",
+  "description": "",
+  "homepage": "https://github.com/whritou/WhitePlate#readme",
+  "bugs": {
+    "url": "https://github.com/whritou/WhitePlate/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/whritou/WhitePlate.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}

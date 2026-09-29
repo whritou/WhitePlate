@@ -1,0 +1,69 @@
+# WhitePlate frontend architecture
+
+Status: implemented scaffold, reviewed on 2026-09-28. Commands are in the [package README](../../apps/frontend/README.md) and [development guide](../development.md).
+
+## Stack and source map
+
+Next.js 16.3.4, React 19.2.8, strict TypeScript, Tailwind CSS 4, `next-intl`, and `next-themes` are wired into the application. Base UI and `class-variance-authority` implement the existing button. Exact dependencies are recorded in the package manifest and lockfile.
+
+```text
+apps/frontend/
+  app/
+    [locale]/layout.tsx       # Locale validation, fonts, HTML, providers
+    [locale]/page.tsx         # Translated starter page and metadata
+    globals.css              # Tailwind imports and theme tokens
+    favicon.ico
+  components/
+    theme-provider.tsx       # next-themes and keyboard shortcut
+    ui/button.tsx            # Base UI button and style variants
+  hooks/                     # Placeholder
+  i18n/
+    routing.ts               # en/fr; default en
+    request.ts               # Request locale and message loading
+    navigation.ts            # Locale-aware navigation exports
+  messages/en.json
+  messages/fr.json
+  lib/utils.ts               # Re-exports cn from the cn package
+  public/                    # Placeholder
+  proxy.ts
+  next.config.ts
+  postcss.config.mjs
+  components.json
+```
+
+No `src/` folder exists. The TypeScript alias `@/*` resolves to the frontend root.
+
+## Request and locale lifecycle
+
+1. `next.config.ts` installs the `next-intl` plugin using `i18n/request.ts`.
+2. `proxy.ts` delegates to `next-intl/middleware`. The matcher excludes paths beginning with `api`, `_next`, or `_vercel`, and paths containing a dot. It does not resolve tenants.
+3. Routing supports `en` and `fr`, with locale prefixes enabled by the library defaults. Locale resolution prefers a supported URL prefix, then the locale cookie, then `Accept-Language`, then `en`. Test header negotiation with a fresh cookie jar.
+4. `i18n/request.ts` loads the matching catalog, falling back to the configured default when the requested locale is unsupported.
+5. `app/[locale]/layout.tsx` awaits `params`, independently validates the route locale, invokes `notFound()` if invalid, sets the request locale, and supplies messages to `NextIntlClientProvider`.
+6. `page.tsx` uses server-side `getTranslations` for the page and metadata. Links from `i18n/navigation.ts` switch locale while pointing to `/` within that locale.
+
+`generateStaticParams` enumerates both locales. The only application page is the starter home page; `/menu` and `/admin/orders` do not exist. Locale segments are not tenant identifiers. Unsupported path behavior should be tested through Proxy, not inferred solely from the layout guard.
+
+## Rendering and theme
+
+The layout and page are Server Components. The layout imports Inter, Roboto, and Geist Mono through `next/font/google`, so compilation may need network access to fetch font resources. `ThemeProvider` is a Client Component using the `dark` class and the system theme by default.
+
+Its `d` shortcut ignores repeated/prevented events, Ctrl/Alt/Meta combinations, and input, textarea, select, or contenteditable targets. Shift is not excluded. `suppressHydrationWarning` is applied on `<html>` to accommodate theme-class changes; it is not a general hydration-error workaround.
+
+The theme currently changes light/dark appearance only. There is no restaurant-specific branding source. The sample button has no checkout or other business action.
+
+## Styling and UI conventions
+
+`app/globals.css` imports Tailwind, `tw-animate-css`, and shadcn styles, and maps CSS tokens through `@theme inline`. PostCSS uses `@tailwindcss/postcss`. There is no `tailwind.config.ts`; do not copy Tailwind 3 setup instructions into this app.
+
+The button uses Base UI, not a Radix component API. `components.json` records the `base-lyra` style and aliases. `lib/utils.ts` re-exports `cn`; the button currently imports it directly from the package. Reuse existing utilities rather than adding another class-merging implementation.
+
+## Extending the frontend
+
+- Add new pages beneath `app/[locale]/` unless the feature deliberately needs a nonlocalized route.
+- Add the same message keys and interpolation variables to both catalogs. Use localized navigation helpers for internal app links.
+- Keep server-only credentials and backend work on the server. Use Client Components where browser APIs or interactive state are needed; interactive providers may wrap a server-rendered subtree.
+- TanStack Query, Axios, SignalR, and Zustand are dependencies only. Introduce providers/clients/stores when a feature requires them and document their lifecycle.
+- For future tenant features, include tenant and locale in relevant cache keys and isolate cart persistence by tenant. Do not share authenticated data across tenants.
+
+Read `apps/frontend/AGENTS.md` and the relevant installed guide under `node_modules/next/dist/docs/` before Next.js code changes. See [coding standards](../coding-standards.md), [test plan](../functional-test-plan.md), and [system architecture](WHITEPLATE_SYSTEM_ARCHITECTURE.md).

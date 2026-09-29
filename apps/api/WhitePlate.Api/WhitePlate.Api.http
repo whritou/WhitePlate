@@ -1,0 +1,10 @@
+@WhitePlate_Api_HostAddress = http://localhost:5182
+
+GET {{WhitePlate_Api_HostAddress}}/openapi/v1.json
+Accept: application/json
+
+### Provision bistro locally first; see docs/development.md
+GET http://bistro.localhost:5182/api/v1/tenant
+Accept: application/json
+
+###

@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="WhitePlate.Domain/WhitePlate.Domain.csproj" />
+  <Project Path="WhitePlate.Application/WhitePlate.Application.csproj" />
+  <Project Path="WhitePlate.Infrastructure/WhitePlate.Infrastructure.csproj" />
+  <Project Path="WhitePlate.Api/WhitePlate.Api.csproj" />
+  <Project Path="tests/WhitePlate.Tests/WhitePlate.Tests.csproj" />
+</Solution>
