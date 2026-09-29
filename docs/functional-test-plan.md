@@ -1,6 +1,6 @@
 # Functional test plan
 
-This is an acceptance plan, not a test-results report. The API test suite covers tenant/organization/staff/catalog behavior, checkout pricing/idempotency, order workflow, body/rate limits, outbox dispatch, and hub authorization. Manual live OIDC/SignalR and frontend integration checks remain. The earlier documentation audit is in [documentation review](documentation-review.md).
+This is an acceptance plan, not a test-results report. The API suite covers tenant/organization/staff/catalog behavior, verified email and invitation binding, checkout pricing/idempotency, order workflow, body/rate limits, outbox dispatch, and hub authorization. Live OAuth, Resend delivery, database migrations, browser auth flows, and SignalR acceptance remain to be run. The earlier documentation audit is in [documentation review](documentation-review.md).
 
 ## 1. Current scaffold checks
 
@@ -8,13 +8,13 @@ Start services using the [development guide](development.md). Use fresh browser 
 
 | ID | Action | Expected result |
 | --- | --- | --- |
-| CUR-01 | Open `/en` and `/fr` on the frontend | Translated starter text, localized title/description, and matching HTML `lang` |
+| CUR-01 | Open `/en` and `/fr` on the frontend | Localized account entry links and title/description, with matching HTML `lang` |
 | CUR-02 | Request `/` with `Accept-Language: fr`, no cookies; repeat with `en` | Redirect to the matching supported locale |
 | CUR-03 | Choose French using the page link, then visit `/` with the same cookie jar | Remembered locale takes precedence over browser language; explicit `/en` still selects English |
 | CUR-04 | Press `d` outside editable controls | Theme toggles; reload preserves the explicit selection through next-themes |
-| CUR-05 | Press Ctrl/Alt/Meta+D, hold D for repeats, or type in an input/textarea/select/contenteditable control | App shortcut does not toggle for these cases; use a controlled fixture if a text-entry control is needed, because the current home page has none |
-| CUR-06 | Navigate language links and the sample button with the keyboard | Focus is visible and controls have accessible names; sample button is not expected to perform a business action |
-| CUR-07 | Run frontend lint, typecheck, build separately | Each exits successfully; record tool/runtime failures separately rather than calling the whole set passed |
+| CUR-05 | Press Ctrl/Alt/Meta+D, hold D for repeats, or type in auth inputs/selects | Theme shortcut does not trigger while typing or for modified/repeated key presses |
+| CUR-06 | Navigate language, sign-in, signup, and auth-form controls with the keyboard | Focus is visible and controls have accessible names; localized routes resolve correctly |
+| CUR-07 | Run frontend tests, lint, typecheck, and build separately | Each exits successfully; record tool/runtime failures separately rather than calling the whole set passed |
 | CUR-08 | Run the API solution tests and request `/WeatherForecast` | API tests pass; the removed sample route returns `404` |
 | CUR-09 | Fetch `/openapi/v1.json` and `/swagger` in Development | OpenAPI JSON documents current API routes, omits `/WeatherForecast`, and Swagger UI returns `200` |
 | CUR-10 | Start API with Production environment and no Development launch profile, then request OpenAPI | `404`; use an explicit test port and the intended HTTP/HTTPS configuration |
@@ -31,11 +31,28 @@ if (-not $spec.paths.'/api/v1/tenants/{tenantId}/catalog') { throw 'Catalog mana
 Invoke-WebRequest http://localhost:5182/swagger -NoProxy | Select-Object -ExpandProperty StatusCode
 ```
 
-The local Neon `test` branch and the OpenAPI/Swagger endpoints were verified on 2026-09-29. The branch currently has no organization/tenant fixture; staff calls also need a configured OIDC issuer, and a valid tenant call returns `404` until an operator provisions an organization and restaurant. The xUnit API tests run through an in-memory host and do not detect every local port, external OIDC, or Windows logging issue.
+The local Neon `test` branch and the OpenAPI/Swagger endpoints were verified on 2026-09-29. The branch currently has no organization/tenant fixture; a valid tenant call returns `404` until an organization and restaurant are provisioned. The xUnit API tests run through an in-memory host and do not detect every local port, external OAuth, or Windows logging issue. Migration seven and Better Auth's `auth` schema are not yet applied.
 
 ## 2. Live integration and frontend acceptance scenarios
 
-Automated tests cover the API behaviors in the contracts. These scenarios check the configured OIDC issuer, live PostgreSQL behavior, real SignalR connections, and frontend flows. Before execution, provision two tenants A/B with distinct staff identities and menus; include an unavailable product, stale order version, and malformed/expired credentials.
+Automated tests cover the API behaviors in the contracts. These scenarios check the configured Better Auth issuer, live PostgreSQL behavior, real SignalR connections, and frontend flows. Before execution, provision two tenants A/B with distinct staff identities and menus; include an unavailable product, stale order version, and malformed/expired credentials.
+
+### Authentication and onboarding
+
+These browser scenarios are acceptance criteria and were not run during this implementation. Configure Better Auth's `auth` schema, apply the reviewed `StaffInvitationRecipientEmail` EF migration to a disposable/test database, register Google and Microsoft callback URLs, and configure a verified Resend sender first.
+
+| ID | Scenario | Required outcome | Priority |
+| --- | --- | --- | --- |
+| AUTH-01 | Sign up with email/password | Verification email arrives; session/API access is denied until email is verified |
+| AUTH-02 | Sign in with Google and Microsoft | Callback creates or signs in account; Microsoft contact email is verified before API access; same-email linking follows the configured trusted-provider rule |
+| AUTH-03 | Request password reset for an existing and unknown address | Same generic response; known address gets an expiring reset link; successful reset revokes prior sessions |
+| AUTH-04 | Open expired, tampered, and valid verification/reset links | Invalid/expired links show localized recovery states; valid links complete their intended change |
+| AUTH-05 | Sign up for an organization with a verified account | API creates organization and first owner; unverified users are rejected; tenant IDs from browser input do not grant ownership |
+| AUTH-06 | Invite owner and restaurant staff by email, then accept as that verified address | Email contains one-time seven-day invite; matching verified address gains only the encoded role/scope |
+| AUTH-07 | Try invitation as another address, unverified account, expired/revoked/reused token | No membership is created; API preserves opaque not-found behavior |
+| AUTH-08 | Cause Resend invitation delivery to fail | Server revokes the just-created invite, returns a safe retryable error, and does not expose raw API tokens |
+| AUTH-09 | Inspect browser requests and call `/api/auth/token` directly | No API bearer token appears in client-visible responses; token endpoint returns 404 to browser HTTP |
+| AUTH-10 | Exercise auth routes at narrow/mobile and keyboard-only sizes in English/French | Labels, focus, loading/error/success states, and localized links remain usable |
 
 ### Tenant boundaries
 
@@ -70,13 +87,13 @@ Automated tests cover the API behaviors in the contracts. These scenarios check 
 | DB-02 | Advance status, repeat same status, attempt skipped/backward transition | Agreed lifecycle enforced; repeat is no-op success; invalid transition proposed `409` | High |
 | DB-03 | Make a status update under latency, rejection, and stale version | If optimistic UI is used, rollback/refetch on failure; stale write never silently overwrites newer state | High |
 | DB-04 | Call protected endpoints with missing/expired token, wrong role, or foreign-tenant ID | `401`, `403`, or non-disclosing `404` as specified; UI login redirect tested separately | Critical |
-| DB-05 | Request another tenant's SignalR group or reconnect after permissions change | Membership checks reject unauthorized subscription; verify live token/group behavior against OIDC | Critical |
+| DB-05 | Request another tenant's SignalR group or reconnect after permissions change | Membership checks reject unauthorized subscription; verify live Better Auth token/group behavior | Critical |
 | DB-06 | Disconnect, miss events, reconnect; duplicate or reorder messages | Authoritative refetch restores state; duplicates do not create duplicate orders | High |
 | DB-07 | Fail notification delivery after database commit | The dispatcher retries; order remains durable and REST recovery stays authoritative | High |
 
 ## 3. Automation strategy
 
-Playwright and Vitest are installed, but no frontend configs, test files, or scripts exist. The backend has xUnit v3 tests under `apps/api/tests/WhitePlate.Tests`, organized into `Api`, `Application`, `Architecture`, `Domain`, and `Infrastructure`. The backend suite covers restaurant domain, application, persistence, ownership, and HTTP behavior. Run `dotnet test apps/api/WhitePlate.slnx` from the repository root.
+Vitest runs the frontend unit suite with `npm run test`; it includes focused checks for the shared API request factory methods, authorization header, safe error mapping, and path boundary. Playwright is installed but has no browser-test configuration. The backend has xUnit v3 tests under `apps/api/tests/WhitePlate.Tests`, organized into `Api`, `Application`, `Architecture`, `Domain`, and `Infrastructure`. The backend suite covers restaurant domain, application, persistence, ownership, and HTTP behavior. Run `dotnet test apps/api/WhitePlate.slnx` from the repository root.
 
 Prioritize backend integration tests for tenant boundaries, persistence constraints, transactions, and concurrency against the selected real PostgreSQL version. Browser tests should cover localized navigation, checkout, and dashboard recovery. Unit tests should cover pricing/lifecycle invariants rather than duplicate framework behavior. Avoid timing-only assertions such as “instantly”; define observable synchronization and a bounded wait.
 

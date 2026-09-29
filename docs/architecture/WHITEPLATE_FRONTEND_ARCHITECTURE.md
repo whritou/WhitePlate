@@ -1,6 +1,6 @@
 # WhitePlate frontend architecture
 
-Status: implemented scaffold, reviewed on 2026-09-28. Commands are in the [package README](../../apps/frontend/README.md) and [development guide](../development.md).
+Status: localized Better Auth flows, server-only API BFF, organization signup, and email-bound staff invitation UI are wired in source. OAuth/email credentials and Better Auth schema migration are not configured; see [authentication setup](../development.md#authentication-configuration). Commands are in the [package README](../../apps/frontend/README.md) and [development guide](../development.md).
 
 ## Stack and source map
 
@@ -9,13 +9,14 @@ Next.js 16.3.4, React 19.2.8, strict TypeScript, Tailwind CSS 4, `next-intl`, an
 ```text
 apps/frontend/
   app/
-    [locale]/layout.tsx       # Locale validation, fonts, HTML, providers
-    [locale]/page.tsx         # Translated starter page and metadata
-    globals.css              # Tailwind imports and theme tokens
-    favicon.ico
+    [locale]/                 # Auth, organization, invitation, and localized pages
+    api/auth/[...all]/        # Better Auth handlers; browser token endpoint blocked
+    .well-known/              # API JWT issuer metadata
+    globals.css               # Tailwind imports and theme tokens
   components/
-    theme-provider.tsx       # next-themes and keyboard shortcut
-    ui/button.tsx            # Base UI button and style variants
+    auth/                     # Auth and organization/invitation forms
+    theme-provider.tsx        # next-themes and keyboard shortcut
+    ui/button.tsx             # Base UI button and style variants
   hooks/                     # Placeholder
   i18n/
     routing.ts               # en/fr; default en
@@ -23,6 +24,9 @@ apps/frontend/
     navigation.ts            # Locale-aware navigation exports
   messages/en.json
   messages/fr.json
+  lib/auth.ts                # Better Auth, PostgreSQL schema, OAuth, mail and RS256 JWT
+  lib/api/                   # Safe API request factory and authenticated server client
+  lib/organization-actions.ts # Organization, invitation, and acceptance actions
   lib/utils.ts               # Re-exports cn from the cn package
   public/                    # Placeholder
   proxy.ts
@@ -39,14 +43,14 @@ No `src/` folder exists. The TypeScript alias `@/*` resolves to the frontend roo
 2. `proxy.ts` delegates to `next-intl/middleware`. The matcher excludes paths beginning with `api`, `_next`, or `_vercel`, and paths containing a dot. It does not resolve tenants.
 3. Routing supports `en` and `fr`, with locale prefixes enabled by the library defaults. Locale resolution prefers a supported URL prefix, then the locale cookie, then `Accept-Language`, then `en`. Test header negotiation with a fresh cookie jar.
 4. `i18n/request.ts` loads the matching catalog, falling back to the configured default when the requested locale is unsupported.
-5. `app/[locale]/layout.tsx` awaits `params`, independently validates the route locale, invokes `notFound()` if invalid, sets the request locale, and supplies messages to `NextIntlClientProvider`.
+5. `app/[locale]/layout.tsx` awaits `params`, independently validates the route locale, invokes `notFound()` if invalid, sets the request locale, and supplies messages to `NextIntlClientProvider`. Locale-aware translations, navigation, `useLocale`, and `getLocale` use this request configuration; call sites pass a locale only when deliberately switching languages.
 6. `page.tsx` uses server-side `getTranslations` for the page and metadata. Links from `i18n/navigation.ts` switch locale while pointing to `/` within that locale.
 
-`generateStaticParams` enumerates both locales. The only application page is the starter home page; `/menu` and `/admin/orders` do not exist. Locale segments are not tenant identifiers. Unsupported path behavior should be tested through Proxy, not inferred solely from the layout guard.
+`generateStaticParams` enumerates both locales. Localized sign-in/sign-up, email recovery/verification, organization signup/team, and invitation acceptance pages are implemented. Locale segments are not tenant identifiers. Unsupported path behavior should be tested through Proxy, not inferred solely from the layout guard.
 
 ## Rendering and theme
 
-The layout and page are Server Components. The layout imports Inter, Roboto, and Geist Mono through `next/font/google`, so compilation may need network access to fetch font resources. `ThemeProvider` is a Client Component using the `dark` class and the system theme by default.
+Auth pages keep session checks and protected API access on the server. `lib/api/` provides the shared GET/POST/PUT/DELETE request factory, maps failures to safe result codes, and logs only bounded diagnostic metadata. Its server-only client validates the request origin, requires a verified Better Auth session, obtains a short-lived API JWT, and sends it directly to `API_BASE_URL`; token requests through `/api/auth/token` are blocked from browser HTTP access. Resend delivery remains a separate server-only provider request. `ThemeProvider` is a Client Component using the `dark` class and the system theme by default.
 
 Its `d` shortcut ignores repeated/prevented events, Ctrl/Alt/Meta combinations, and input, textarea, select, or contenteditable targets. Shift is not excluded. `suppressHydrationWarning` is applied on `<html>` to accommodate theme-class changes; it is not a general hydration-error workaround.
 
@@ -62,7 +66,7 @@ The button uses Base UI, not a Radix component API. `components.json` records th
 
 - Add new pages beneath `app/[locale]/` unless the feature deliberately needs a nonlocalized route.
 - Add the same message keys and interpolation variables to both catalogs. Use localized navigation helpers for internal app links.
-- Keep server-only credentials and backend work on the server. Use Client Components where browser APIs or interactive state are needed; interactive providers may wrap a server-rendered subtree.
+- Keep Better Auth secrets, provider credentials, Resend key, and API bearer tokens on the server. Use Client Components for interactive forms and call server actions for organization, invitation, and other protected API work.
 - TanStack Query, Axios, SignalR, and Zustand are dependencies only. Introduce providers/clients/stores when a feature requires them and document their lifecycle.
 - For future tenant features, include tenant and locale in relevant cache keys and isolate cart persistence by tenant. Do not share authenticated data across tenants.
 

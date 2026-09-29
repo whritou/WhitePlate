@@ -20,14 +20,27 @@ namespace WhitePlate.Api.Configuration;
 
 public static class ServiceRegistration
 {
-    public static IServiceCollection AddWhitePlate(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddWhitePlate(this IServiceCollection services, IConfiguration configuration, bool requireAuthenticationConfiguration = false)
     {
+        var issuer = configuration["Authentication:Issuer"];
+        var audience = configuration["Authentication:Audience"];
+        if (requireAuthenticationConfiguration &&
+            (!Uri.TryCreate(issuer, UriKind.Absolute, out var productionIssuer) ||
+             productionIssuer.Scheme != Uri.UriSchemeHttps || string.IsNullOrWhiteSpace(audience)))
+            throw new InvalidOperationException("Production requires an HTTPS Authentication:Issuer and Authentication:Audience.");
+
         services.AddHttpContextAccessor();
         services.AddScoped<ICurrentIdentity, HttpCurrentIdentity>();
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
         {
-            options.Authority = configuration["Authentication:Authority"];
-            options.Audience = configuration["Authentication:Audience"];
+            if (Uri.TryCreate(issuer, UriKind.Absolute, out var issuerUri) &&
+                (issuerUri.Scheme is "https" or "http") && !string.IsNullOrWhiteSpace(audience))
+            {
+                options.MetadataAddress = $"{issuer!.TrimEnd('/')}/.well-known/openid-configuration";
+                options.RequireHttpsMetadata = issuerUri.Scheme == Uri.UriSchemeHttps;
+                options.TokenValidationParameters.ValidIssuer = issuer;
+                options.TokenValidationParameters.ValidAudience = audience;
+            }
             options.MapInboundClaims = false;
             options.Events = new JwtBearerEvents
             {
@@ -94,6 +107,7 @@ public static class ServiceRegistration
         services.AddScoped<IOrganizationRepository, OrganizationProvisioningRepository>();
         services.AddScoped<ProvisionOrganizationCommandHandler>();
         services.AddScoped<RenameOrganizationCommandHandler>();
+        services.AddScoped<CreateOrganizationCommandHandler>();
         services.AddScoped<IStaffInvitationRepository, StaffInvitationRepository>();
         services.AddScoped<CreateStaffInvitationCommandHandler>();
         services.AddScoped<RevokeStaffInvitationCommandHandler>();

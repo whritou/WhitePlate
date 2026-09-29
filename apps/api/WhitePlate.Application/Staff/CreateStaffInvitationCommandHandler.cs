@@ -13,6 +13,8 @@ public sealed class CreateStaffInvitationCommandHandler(IStaffMembershipReposito
     {
         ArgumentNullException.ThrowIfNull(command);
         cancellationToken.ThrowIfCancellationRequested();
+        if (!command.Identity.EmailVerified || string.IsNullOrWhiteSpace(command.Identity.Email))
+            return Result<StaffInvitationDto>.Failure(new ApplicationError(ErrorCode.Forbidden));
         if (!await memberships.IsOrganizationOwnerAsync(command.OrganizationId, command.Identity, cancellationToken))
             return Result<StaffInvitationDto>.Failure(new ApplicationError(ErrorCode.NotFound));
 
@@ -26,8 +28,17 @@ public sealed class CreateStaffInvitationCommandHandler(IStaffMembershipReposito
 
         var now = timeProvider.GetUtcNow();
         var (token, hash) = InvitationToken.Create();
-        var invitation = StaffInvitation.Create(command.OrganizationId, command.TenantId, command.Role,
-            hash, now.AddDays(7), now);
+        StaffInvitation invitation;
+        try
+        {
+            invitation = StaffInvitation.Create(command.OrganizationId, command.TenantId, command.Role,
+                command.RecipientEmail, hash, now.AddDays(7), now);
+        }
+        catch (WhitePlate.Domain.Common.DomainRuleException exception)
+        {
+            return Result<StaffInvitationDto>.Failure(new ApplicationError(ErrorCode.ValidationFailed,
+                new ValidationIssue(exception.Field, exception.Code, exception.Message)));
+        }
         await invitations.AddAsync(invitation, cancellationToken);
         return Result<StaffInvitationDto>.Success(new StaffInvitationDto(invitation.Id, token, invitation.ExpiresAt));
     }

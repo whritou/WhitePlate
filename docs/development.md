@@ -1,6 +1,6 @@
 # Development guide
 
-This guide runs the frontend scaffold and the .NET API. The weather example is removed. The organization/tenant, OIDC membership, catalog management, checkout, staff order workflow, and SignalR outbox API are implemented. Local Swagger and the current schema have been verified against a Neon test branch. Provider credentials, production domain/TLS/CORS, and production migration deployment remain deployment work.
+This guide runs the frontend and .NET API. The frontend now includes Better Auth email/password, Google and Microsoft sign-in, verification/reset email, organization signup, and email-bound staff invitation flows. The API validates Better Auth JWTs and retains persisted membership authorization. Provider credentials, Better Auth schema setup, the generated EF recipient-email migration, production domain/TLS/CORS, and live browser OAuth/email acceptance remain deployment work.
 
 ## Prerequisites and layout
 
@@ -30,7 +30,7 @@ dotnet restore apps/api/WhitePlate.slnx
 dotnet run --project apps/api/WhitePlate.Api/WhitePlate.Api.csproj --launch-profile http
 ```
 
-Visit [Swagger UI](http://localhost:5182/swagger) to inspect and call the API, or open [OpenAPI JSON](http://localhost:5182/openapi/v1.json). Swagger is enabled automatically in Development. The frontend does not consume this API yet. Stop either server with Ctrl+C in its terminal.
+Visit [Swagger UI](http://localhost:5182/swagger) to inspect and call the API, or open [OpenAPI JSON](http://localhost:5182/openapi/v1.json). Swagger is enabled automatically in Development. The localized auth and organization pages use Next.js server actions as a BFF for protected API calls. Stop either server with Ctrl+C in its terminal.
 
 For HTTPS, trust the development certificate if needed, then select the HTTPS profile:
 
@@ -54,19 +54,27 @@ An HTTP-only API run may warn that it cannot determine the HTTPS port. This does
 
 | Source | Current purpose |
 | --- | --- |
-| `apps/frontend/next.config.ts` | next-intl plugin; no API rewrite/base URL |
+| `apps/frontend/next.config.ts` | next-intl plugin; server actions use `API_BASE_URL` |
 | `apps/frontend/i18n/routing.ts` | Supported locales and default |
 | `apps/frontend/messages/*.json` | Translated interface text |
 | `apps/api/WhitePlate.Api/appsettings.json` | Logging, `AllowedHosts: "*"`, and `Tenancy:BaseDomain` (local default `localhost`) |
-| `apps/api/WhitePlate.Api/appsettings.Development.json` | Development logging |
+| `apps/api/WhitePlate.Api/appsettings.Development.json` | Development logging and local Better Auth issuer/audience |
 | `apps/api/WhitePlate.Api/Properties/launchSettings.json` | Local URLs and Development environment |
 | `global.json` | Selects Microsoft Testing Platform for .NET 10 test runs; does not pin SDK version |
 
-API persistence needs server-only `ConnectionStrings__WhitePlate`. Set `Tenancy__BaseDomain` to the domain whose immediate subdomains identify tenants. Protected routes require `Authentication__Authority` and `Authentication__Audience`; browser CORS origins are supplied through `Cors__AllowedOrigins`. Checkout rate limits use `CheckoutRateLimit:PermitLimit`, `CheckoutRateLimit:WindowSeconds`, and `CheckoutRateLimit:QueueLimit`. Swagger is on by default in Development and can be enabled in a deployment with `Swagger__Enabled=true`.
+API persistence needs server-only `ConnectionStrings__WhitePlate`. Set `Tenancy__BaseDomain` to the domain whose immediate subdomains identify tenants. Protected routes require `Authentication__Issuer` (Better Auth base URL) and `Authentication__Audience` (same value as frontend `API_AUDIENCE`); production startup fails when either is absent. Browser CORS origins are supplied through `Cors__AllowedOrigins`. Checkout rate limits use `CheckoutRateLimit:PermitLimit`, `CheckoutRateLimit:WindowSeconds`, and `CheckoutRateLimit:QueueLimit`. Swagger is on by default in Development and can be enabled in a deployment with `Swagger__Enabled=true`.
 
-The Neon `WhitePlate` project has a `test` branch and a `neondb` database. All six migrations through `IdempotencyTenantOwnership` were applied to the test branch on 2026-09-29; production was not changed. The API's pooled test-branch connection is stored in this machine's .NET User Secrets, outside the repository. Swagger and the OpenAPI document returned successfully from the local API, and a request through the tenant resolver reached Neon and returned the expected `404` for an unprovisioned tenant. The branch does not yet contain an organization, tenant, menu, or sample order. Staff endpoints require OIDC `Authority`/`Audience` configuration and an operator-provisioned owner.
+The Neon `WhitePlate` project has a `test` branch and a `neondb` database. Six EF migrations through `IdempotencyTenantOwnership` were applied to the test branch on 2026-09-29; the generated seventh migration adding invitation recipient email has not been applied, and production was not changed. Better Auth's separate `auth` schema has not been migrated. The API's pooled test-branch connection is stored in this machine's .NET User Secrets, outside the repository. Swagger and the OpenAPI document returned successfully from the local API, and a request through the tenant resolver reached Neon and returned the expected `404` for an unprovisioned tenant. The branch does not yet contain an organization, tenant, menu, or sample order.
 
 ASP.NET Core variables override configuration using double underscores. `ASPNETCORE_ENVIRONMENT` controls Development defaults; launch profiles set Development. The host also supports User Secrets for the runtime connection string. EF tooling reads the connection environment variable directly. Never put credentials in source, command arguments, or `NEXT_PUBLIC_*` variables.
+
+## Authentication configuration
+
+Copy `apps/frontend/.env.example` to `apps/frontend/.env.local` and set server-only values. `DATABASE_URL` must point to PostgreSQL with permission to create/use the separate `auth` schema. Run `npm run auth:migrate` to create Better Auth's tables; `npm run auth:generate` prints the schema for review. The CLI could not connect during this implementation because no usable auth database credential was available. Do not run the auth migration against production until its SQL/schema target has been reviewed.
+
+Set Google OAuth redirect URI to `http://localhost:3000/api/auth/callback/google` and Microsoft/Entra redirect URI to `http://localhost:3000/api/auth/callback/microsoft` for local development; use the corresponding HTTPS host in deployment. Configure a verified Resend sender in `RESEND_FROM_EMAIL` and an API key in `RESEND_API_KEY`. The UI hides provider buttons when their credentials are absent in development. Production requires HTTPS URLs, a 32-character Better Auth secret, both OAuth providers, Resend settings, an auth database URL, and API audience/base URL.
+
+The frontend routes are `/[locale]/sign-in`, `/sign-up`, `/forgot-password`, `/reset-password`, `/verify-email`, `/organization/sign-up`, `/organization`, `/organization/team`, and `/invitations/accept`. Its Better Auth endpoint is `/api/auth/*`; the OIDC discovery document and JWKS endpoint are `/.well-known/openid-configuration` and `/api/auth/jwks`. The Next.js server exchanges its authenticated session for a short-lived API JWT; it does not expose that token to browser code. For schema status, see the [database guide](database/database-schema.md#implemented-organization-tenant-catalog-and-order-schema) and [authentication decision](architecture/decisions/0002-authentication.md).
 
 ## Tenant database and local provisioning
 
@@ -92,19 +100,19 @@ dotnet run --project apps/api/WhitePlate.Api --no-launch-profile -- --provision-
 dotnet run --project apps/api/WhitePlate.Api --launch-profile http
 ```
 
-Review migration SQL before applying it. The application does not migrate/seed on startup. Use a migration-capable operator credential for schema deployment, then a restricted application credential for runtime. The six migrations create tenant/organization/staff/catalog/order snapshot tables, idempotency records, and the transactional order outbox. Production migration rollout, backup/rollback, and deployment remain operational decisions.
+Review migration SQL before applying it. The application does not migrate/seed on startup. Use a migration-capable operator credential for schema deployment, then a restricted application credential for runtime. The six applied migrations create tenant/organization/staff/catalog/order snapshot tables, idempotency records, and the transactional order outbox; migration seven adds invitation recipient email but is not applied. Better Auth separately manages its `auth` schema. Production migration rollout, backup/rollback, and deployment remain operational decisions.
 
-The `--provision-organization` switch runs the operator command that creates an organization and first owner identity from `--name`, `--issuer`, and `--subject` configuration, then exits without opening a listener. Example, using a configured connection string:
+The public organization signup endpoint now creates the first verified-email owner. The `--provision-organization` switch remains for operator migration/backfill and creates an organization and first owner identity from `--name`, `--issuer`, and `--subject`, then exits without opening a listener. Example, using a configured connection string:
 
 ```powershell
-dotnet run --project apps/api/WhitePlate.Api/WhitePlate.Api.csproj --no-launch-profile -- --provision-organization --name 'WhitePlate Demo' --issuer 'https://YOUR-OIDC-ISSUER/' --subject 'YOUR-OWNER-SUBJECT'
+dotnet run --project apps/api/WhitePlate.Api/WhitePlate.Api.csproj --no-launch-profile -- --provision-organization --name 'WhitePlate Demo' --issuer 'https://YOUR-AUTH-DOMAIN/' --subject 'YOUR-OWNER-SUBJECT'
 ```
 
-The legacy `--provision-tenant` path remains for local migration/backfill work. Provisioning requires server/database access; there is no public signup. Names are trimmed, 1–200 characters; subdomains normalize to lowercase ASCII DNS labels, 1–63 characters. `www`, `api`, `admin`, `app` are reserved.
+The legacy `--provision-tenant` path remains for local migration/backfill work. Organization self-signup uses the verified Better Auth account; staff invites can be accepted only by that exact verified recipient email. Names are trimmed, 1–200 characters; subdomains normalize to lowercase ASCII DNS labels, 1–63 characters. `www`, `api`, `admin`, `app` are reserved.
 
 Call `http://bistro.localhost:5182/api/v1/tenant`. If local wildcard DNS does not resolve, use `curl.exe --resolve bistro.localhost:5182:127.0.0.1 http://bistro.localhost:5182/api/v1/tenant`. Configure real DNS/TLS and `Tenancy__BaseDomain` for deployment. The API reads the actual Host header; forwarded-host and tenant headers are ignored. This selects public metadata and does not authorize staff. Do not enable forwarded-header trust without a separate proxy design.
 
-Without a connection string, OpenAPI remains available, while routes requiring persistence return a safe 500; invalid tenant hosts return 404 before database access. Missing migrations/database failures are never reported as a missing tenant. Swagger's Authorize button requires the deployment's OIDC issuer/audience and an issuer-minted bearer token.
+Without a connection string, OpenAPI remains available, while routes requiring persistence return a safe 500; invalid tenant hosts return 404 before database access. Missing migrations/database failures are never reported as a missing tenant. Swagger's Authorize button requires a Better Auth JWT minted for the configured issuer/audience.
 
 For later schema changes, run `dotnet ef migrations add NAME --project apps/api/WhitePlate.Infrastructure --output-dir Persistence/Migrations`, inspect generated SQL and add relational tests. Never hand-edit generated snapshots or application startup to silently create a production schema.
 
@@ -114,6 +122,7 @@ From `apps/frontend`:
 
 ```sh
 npm run lint
+npm run test
 npm run typecheck
 npm run build
 ```
@@ -127,7 +136,7 @@ dotnet test apps/api/WhitePlate.slnx
 dotnet publish apps/api/WhitePlate.Api/WhitePlate.Api.csproj -c Release
 ```
 
-The xUnit v3 suite uses Microsoft Testing Platform selected in root `global.json` and includes Domain, Application, Infrastructure, project-dependency, and HTTP tests. Use `--no-restore` only when dependencies have already been restored. There is no frontend test script or CI workflow. Root `npm test` deliberately exits with the template's “no test specified” error. See [backend architecture](architecture/WHITEPLATE_BACKEND_ARCHITECTURE.md), [functional checks](functional-test-plan.md), and the [earlier review baseline](documentation-review.md).
+The xUnit v3 suite uses Microsoft Testing Platform selected in root `global.json` and includes Domain, Application, Infrastructure, project-dependency, and HTTP tests. Use `--no-restore` only when dependencies have already been restored. The frontend Vitest suite currently covers the API request factory. There is no CI workflow. Root `npm test` deliberately exits with the template's “no test specified” error. See [backend architecture](architecture/WHITEPLATE_BACKEND_ARCHITECTURE.md), [functional checks](functional-test-plan.md), and the [earlier review baseline](documentation-review.md).
 
 ## Optional API container
 

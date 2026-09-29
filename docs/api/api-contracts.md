@@ -1,6 +1,6 @@
 # API contracts
 
-Status: the organization, identity membership, tenant, manager catalog, checkout, order workflow, idempotency, and SignalR outbox paths below are wired in the .NET host. The OIDC provider and production domain/CORS settings are deployment inputs; the local Neon test branch has the current migrations.
+Status: the Better Auth frontend, email/password and social auth routes, server-side API token exchange, organization signup, and email-bound invitations are wired in source. API behavior is covered by its automated suite. Provider credentials, Better Auth schema migration, the new EF migration, production domain/CORS settings, and browser-to-provider acceptance remain deployment/verification work.
 
 ## 1. HTTP routes
 
@@ -10,14 +10,15 @@ All paths are rooted at `/api/v1`. Success responses contain the resource direct
 | --- | --- | --- |
 | `GET /tenant` | Public, resolved restaurant host | Return active tenant id, name, and subdomain; invalid/unknown/inactive host receives `404` |
 | `GET /menu` | Public, resolved restaurant host | Return currency and ordered categories with available, non-archived products and options |
-| `GET /organizations` | OIDC authenticated owner | List the caller's organizations |
-| `GET /organizations/{organizationId}/restaurants` | OIDC authenticated owner | List restaurants owned by the organization |
-| `PATCH /organizations/{organizationId}` | OIDC authenticated owner | Rename an owned organization |
-| `POST /organizations/{organizationId}/restaurants` | OIDC authenticated owner | Create a restaurant tenant with EUR, USD, or GBP currency |
-| `POST /organizations/{organizationId}/invitations` | OIDC authenticated owner | Create a single-use seven-day owner or restaurant staff invitation; token is returned once |
-| `DELETE /organizations/{organizationId}/invitations/{invitationId}` | OIDC authenticated owner | Revoke an invitation |
-| `POST /invitations/accept` | OIDC authenticated invitee | Accept an invitation for the validated issuer/subject identity |
-| `GET /me` | OIDC authenticated | Return the current identity and its organization/restaurant memberships |
+| `POST /organizations` | Better Auth bearer, verified email | Create an organization and make the caller its first owner |
+| `GET /organizations` | Better Auth bearer, owner | List the caller's organizations |
+| `GET /organizations/{organizationId}/restaurants` | Better Auth bearer, owner | List restaurants owned by the organization |
+| `PATCH /organizations/{organizationId}` | Better Auth bearer, owner | Rename an owned organization |
+| `POST /organizations/{organizationId}/restaurants` | Better Auth bearer, owner | Create a restaurant tenant with EUR, USD, or GBP currency |
+| `POST /organizations/{organizationId}/invitations` | Better Auth bearer, verified owner | Create a single-use seven-day invitation bound to the request email and role; token is returned once to the server action |
+| `DELETE /organizations/{organizationId}/invitations/{invitationId}` | Better Auth bearer, owner | Revoke an invitation |
+| `POST /invitations/accept` | Better Auth bearer, verified invitee | Accept only when the JWT verified email matches the invitation email |
+| `GET /me` | Better Auth bearer | Return the current identity and its organization/restaurant memberships |
 | `GET /tenants/{tenantId}/catalog` | Organization owner or restaurant manager | Read tenant catalog entries, including archived entries and discount state |
 | `POST /tenants/{tenantId}/categories` | Organization owner or restaurant manager | Create a category |
 | `PUT /tenants/{tenantId}/categories/{categoryId}` | Organization owner or restaurant manager | Update a category name and sort order |
@@ -37,7 +38,7 @@ All paths are rooted at `/api/v1`. Success responses contain the resource direct
 | `POST /orders` | Public, resolved restaurant host | Price and create an order; requires `Idempotency-Key` |
 | `GET /tenants/{tenantId}/orders` | Restaurant owner, manager, or kitchen staff | Read bounded, cursor-paginated order summaries; optional status filter |
 | `PATCH /tenants/{tenantId}/orders/{orderId}/status` | Restaurant owner, manager, or kitchen staff | Change status with a required `If-Match` version |
-| `/hubs/orders` | OIDC authenticated SignalR connection | Join authorized restaurant groups and receive `order.changed` events |
+| `/hubs/orders` | Better Auth JWT authenticated SignalR connection | Join authorized restaurant groups and receive `order.changed` events |
 | `GET /openapi/v1.json`, `GET /swagger` | Anonymous when enabled | OpenAPI 3.1 JSON and interactive Swagger UI |
 
 The tenant ID in a protected route selects a resource. Every catalog/order query and mutation checks the authenticated issuer/subject membership for that tenant. Foreign or missing resource IDs return the same `404`. Kitchen staff can read/progress orders but cannot cancel them; owner/manager cancellation is allowed for incomplete orders.
@@ -46,11 +47,11 @@ The tenant ID in a protected route selects a resource. Every catalog/order query
 
 ## 2. Authentication and tenancy
 
-Staff routes validate bearer access tokens from an external OIDC provider. Configure `Authentication:Authority` and `Authentication:Audience`; WhitePlate does not issue or refresh tokens. A person is identified by the validated issuer/subject pair. Persisted organization-owner and restaurant memberships determine access; token-supplied tenant IDs are not authorization. OpenAPI declares Bearer security per protected route, so Swagger UI's Authorize control accepts an issuer-minted access token once the provider is configured.
+Better Auth issues short-lived RS256 JWTs from the Next.js server. The API discovers signing keys from `{Authentication:Issuer}/.well-known/openid-configuration` and validates issuer and audience. Configure `Authentication:Issuer` to the exact Better Auth base URL and `Authentication:Audience` to the same value as `API_AUDIENCE`. The browser session cookie stays in the browser; the server-side BFF obtains API tokens and calls the API without exposing bearer tokens to client JavaScript. A person is identified by validated issuer/subject. Persisted organization-owner and restaurant memberships determine access; token-supplied tenant IDs are not authorization. OpenAPI declares Bearer security per protected route.
 
 Roles are `OrganizationOwner`, `RestaurantManager`, and `KitchenStaff`. An organization owner can manage that organization's restaurants and invitations. Restaurant managers manage that restaurant's catalog/orders. Kitchen staff can read and progress its orders. Restaurant tenant resolution for public routes accepts exactly one subdomain label below `Tenancy:BaseDomain`; unknown, inactive, nested, and foreign-domain hosts return `404`.
 
-The first organization/owner is created by the operator-only `--provision-organization` command using the configured PostgreSQL connection, organization name, OIDC issuer, and subject. There is no public signup. See the [development guide](../development.md#tenant-database-and-local-provisioning).
+New customers use the localized organization signup flow, which creates the organization and its verified-email owner through `POST /organizations`. The operator-only `--provision-organization` command remains available for migrations/backfill using an issuer and subject. Staff invitations carry a normalized recipient email; accepting requires a verified JWT email with the same normalized address. See the [authentication decision](../architecture/decisions/0002-authentication.md) and [development guide](../development.md#authentication-configuration).
 
 ## 3. Pricing, checkout, and order workflow
 

@@ -1,14 +1,19 @@
 # WhitePlate system architecture
 
-Status: organization/staff, tenant menus and catalog management, checkout, order workflow, idempotency, transactional outbox, and SignalR server delivery are implemented. The Neon test branch and local Swagger have been verified. Frontend integration and deployment-specific OIDC/domain configuration remain open.
+Status: email/password and Google/Microsoft auth, localized recovery and verification pages, organization signup, email-bound invitations, server-side API JWT exchange, and backend identity verification are wired in source. The backend tests pass. Better Auth's `auth` schema and the generated invitation-email EF migration have not been applied; live provider/email and browser-flow checks remain open.
 
 ## Current runtime
 
 ```mermaid
 flowchart LR
     Browser[Browser] --> Proxy["Next.js proxy.ts: locale negotiation"]
-    Proxy --> Page["Localized layout and starter page"]
-    Page --> Theme["Theme provider and Button"]
+    Proxy --> Page["Localized auth and organization pages"]
+    Page --> Auth["Better Auth session cookie"]
+    Auth --> BFF["Next.js server actions: short-lived API JWT"]
+    BFF --> Api["ASP.NET Core API"]
+    Api --> Database[(PostgreSQL business schema)]
+    Auth --> AuthDb[(PostgreSQL auth schema)]
+    Email["Resend verification, reset, invitation"] --> Browser
     Swagger["Swagger UI or external API client"] --> Api["ASP.NET Core API controller"]
     Api --> Application["Application commands and queries"]
     Application --> Domain["Domain rules and snapshots"]
@@ -17,7 +22,7 @@ flowchart LR
     Api --> Spec["Development: /openapi/v1.json"]
 ```
 
-The frontend does not call the API today. The API uses EF Core/PostgreSQL, host resolution, external OIDC token validation, organization ownership, staff memberships, tenant menu and catalog management, public checkout, staff order workflow, tenant-scoped idempotency, transactional outbox delivery, and SignalR subscriptions.
+The Next.js BFF calls protected API endpoints server-side and never returns API bearer tokens to client JavaScript. Better Auth sessions use an HttpOnly cookie; Better Auth stores auth records/signing keys in its separate PostgreSQL `auth` schema and issues RS256 JWTs. The API validates issuer, audience and JWKS, then uses persisted organization/restaurant membership for authorization.
 
 ## Repository map
 
@@ -62,13 +67,13 @@ Empty directories are not preserved by Git unless given a tracked file. Build ou
 
 The Next.js App Router app renders `/en` and `/fr`. `next-intl` resolves the locale and supplies messages; `next-themes` manages the theme. Source folders sit directly under `apps/frontend`, and `@/*` points there. See [frontend architecture](WHITEPLATE_FRONTEND_ARCHITECTURE.md) for the request lifecycle.
 
-Axios, TanStack Query, Zustand, and the SignalR client are installed but not integrated. No BFF route handlers, Query provider, cart store, backend URL, tenant routing, or restaurant UI exists. The approved API scope has no persisted cart.
+Auth BFF route handlers and API server actions are implemented. Axios, TanStack Query, Zustand, and the SignalR client remain unintegrated. Tenant storefront routing, cart store, catalog UI, and restaurant order dashboard are not implemented. The approved API scope has no persisted cart.
 
 ## API boundary
 
-`Program.cs` registers controllers, OpenAPI/Swagger UI, OIDC authentication/authorization, CORS, tenant resolution, EF Core repositories, SignalR, and the hosted outbox dispatcher. OpenAPI is mapped in Development or when explicitly enabled. See [backend architecture](WHITEPLATE_BACKEND_ARCHITECTURE.md), [API contracts](../api/api-contracts.md), and [development](../development.md).
+`Program.cs` registers controllers, OpenAPI/Swagger UI, Better Auth JWT bearer validation, authorization, CORS, tenant resolution, EF Core repositories, SignalR, and the hosted outbox dispatcher. OpenAPI is mapped in Development or when explicitly enabled. Production startup requires issuer and audience. See [backend architecture](WHITEPLATE_BACKEND_ARCHITECTURE.md), [API contracts](../api/api-contracts.md), and [development](../development.md).
 
-The separate projects and inward dependency direction are implemented and tested. EF Core migrations, centralized errors, OIDC bearer validation, CORS, tenant-owned organization/staff/catalog/order data, checkout/idempotency, order concurrency, and the outbox/SignalR server path are wired. The application still needs deployment configuration for a real OIDC issuer, tenant DNS/TLS, CORS origins, and production migrations.
+The separate projects and inward dependency direction are implemented and tested. The Better Auth issuer/JWKS integration is wired; external Google/Microsoft and Resend credentials, auth schema migration, invitation-email migration, tenant DNS/TLS, CORS origins, and production migrations still need deployment setup.
 
 ## Runtime and deployment
 
@@ -76,7 +81,7 @@ Run the apps independently using the [development guide](../development.md). The
 
 ## Implemented business architecture
 
-The product direction is a shared-schema, multi-tenant restaurant service with a Next.js storefront/dashboard, an ASP.NET Core API, PostgreSQL persistence, and SignalR order notifications. The backend behavior is implemented; no frontend integration or public production deployment exists.
+The product direction is a shared-schema, multi-tenant restaurant service with a Next.js storefront/dashboard, an ASP.NET Core API, PostgreSQL persistence, and SignalR order notifications. Authentication and organization-onboarding frontend integration is wired in source; the catalog/order dashboard and public production deployment remain unimplemented.
 
 The project boundaries own these business features:
 

@@ -95,6 +95,8 @@ public sealed class TenantEndpointTests
         {
             connection.Open();
             builder.UseEnvironment("Production");
+            builder.UseSetting("Authentication:Issuer", "https://localhost:3000");
+            builder.UseSetting("Authentication:Audience", "whiteplate-api");
             builder.ConfigureLogging(logging => logging.ClearProviders());
             builder.ConfigureServices(services =>
             {

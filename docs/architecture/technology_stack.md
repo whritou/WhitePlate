@@ -35,7 +35,7 @@ The manifest also includes `clsx`, `tailwind-merge`, Lucide, and the shadcn CLI.
 
 ## Configured per deployment
 
-EF Core and PostgreSQL implement organizations, tenants, catalog, order snapshots, idempotency, and outbox persistence. The six current migrations are applied to the Neon `test` branch; production remains unchanged. OIDC authority/audience and CORS origins are deployment settings; the provider is not selected. MediatR, Compose and GitHub Actions remain unimplemented. No deployment host or CI policy is selected in executable configuration.
+EF Core and PostgreSQL implement organizations, tenants, catalog, order snapshots, idempotency, and outbox persistence. Six EF migrations are applied to Neon `test`; the generated seventh invitation-email migration is unapplied. Better Auth stores users/sessions/rate limits/JWT keys in a separate CLI-managed PostgreSQL `auth` schema, whose migration is unapplied. Google/Microsoft OAuth, Resend credentials, production issuer/audience and CORS origins need deployment configuration. MediatR, Compose and GitHub Actions remain unimplemented. No deployment host or CI policy is selected in executable configuration.
 
 The ASP.NET Core SignalR server, tenant-authenticated hub, and outbox dispatcher are registered and mapped. The frontend SignalR client package is not integrated into an application flow.
 

@@ -7,7 +7,7 @@ var provisionTenant = args.Contains("--provision-tenant", StringComparer.Ordinal
 var provisionOrganization = args.Contains("--provision-organization", StringComparer.Ordinal);
 var builder = WebApplication.CreateBuilder(args.Where(argument => argument is not "--provision-tenant" and not "--provision-organization").ToArray());
 
-builder.Services.AddWhitePlate(builder.Configuration);
+builder.Services.AddWhitePlate(builder.Configuration, builder.Environment.IsProduction());
 // EF diagnostics can include provider exception details; centralized logging uses safe metadata.
 builder.Logging.AddFilter("Microsoft.EntityFrameworkCore", LogLevel.None);
 

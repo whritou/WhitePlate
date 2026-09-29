@@ -104,6 +104,8 @@ public sealed class WeatherForecastEndpointTests
         new WebApplicationFactory<Program>().WithWebHostBuilder(builder =>
         {
             builder.UseSetting("environment", environment);
+            builder.UseSetting("Authentication:Issuer", "https://localhost:3000");
+            builder.UseSetting("Authentication:Audience", "whiteplate-api");
             builder.UseSetting("Swagger:Enabled", enableSwagger.ToString());
             builder.ConfigureLogging(logging => logging.ClearProviders());
         });

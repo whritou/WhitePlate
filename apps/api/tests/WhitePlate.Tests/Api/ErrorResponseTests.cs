@@ -95,6 +95,8 @@ public sealed class ErrorResponseTests
         new WebApplicationFactory<Program>().WithWebHostBuilder(builder =>
         {
             builder.UseEnvironment(environment);
+            builder.UseSetting("Authentication:Issuer", "https://localhost:3000");
+            builder.UseSetting("Authentication:Audience", "whiteplate-api");
             builder.ConfigureLogging(logging => logging.ClearProviders());
             builder.ConfigureServices(services =>
             {

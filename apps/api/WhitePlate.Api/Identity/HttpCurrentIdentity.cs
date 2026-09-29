@@ -14,10 +14,12 @@ public sealed class HttpCurrentIdentity(IHttpContextAccessor contextAccessor) : 
             if (principal?.Identity?.IsAuthenticated != true) return null;
             var issuer = principal.FindFirst("iss")?.Value;
             var subject = principal.FindFirst("sub")?.Value;
+            var email = principal.FindFirst("email")?.Value;
+            var emailVerified = bool.TryParse(principal.FindFirst("email_verified")?.Value, out var verified) && verified;
             if (issuer is null || subject is null) return null;
             try
             {
-                return ExternalIdentity.Create(issuer, subject);
+                return ExternalIdentity.Create(issuer, subject, email, emailVerified);
             }
             catch (DomainRuleException)
             {

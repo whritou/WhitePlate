@@ -1,12 +1,14 @@
 # Database schema and tenant model
 
-Status: organization, tenant, staff membership/invitation, catalog, order snapshots, idempotency, and outbox mappings are implemented in EF Core/PostgreSQL. Six migrations through `IdempotencyTenantOwnership` are applied to the Neon `test` branch on 2026-09-29. Production has not been migrated.
+Status: organization, tenant, staff membership/invitation, catalog, order snapshots, idempotency, and outbox mappings are implemented in EF Core/PostgreSQL. Six migrations through `IdempotencyTenantOwnership` are applied to the Neon `test` branch on 2026-09-29. A seventh migration adding nullable `StaffInvitations.RecipientEmail` is generated but has not been applied. Better Auth owns a separate `auth` schema; its schema migration has not been run. Production has not been migrated.
 
 ## Implemented organization, tenant, catalog and order schema
 
 Current EF model includes `Organizations`, `OrganizationOwnerMemberships`, `RestaurantMemberships`, `StaffInvitations`, `Tenants`, `MenuCategories`, `Products`, `ProductOptionGroups`, `ProductOptions`, `PromotionDiscounts`, `Orders`, `OrderLines`, `OrderLineOptions`, `OrderIdempotencyRecords`, and `OrderOutboxMessages`. Restaurant-owned catalog/order/idempotency/outbox rows carry `TenantId`. Catalog relationships use composite alternate keys and foreign keys so products, groups and options cannot reference another restaurant's parent. Order product and option labels/prices are snapshots and do not cascade with later catalog edits.
 
-Tenant currency is restricted by Domain to EUR, GBP, or USD. Prices and totals use PostgreSQL numeric precision and C# decimals. Membership identity is issuer plus subject; invitations and idempotency keys are stored as hashes. Order version and outbox leases are EF concurrency tokens. Migrations are `InitialTenants`, `OrganizationAndTenantOwnership`, `StaffMembershipsAndInvitations`, `OrderSnapshots`, `OrderCheckoutOutbox`, and `IdempotencyTenantOwnership`. Migration 5 adds the order line snapshot support fields, idempotency table, and outbox; migration 6 adds the tenant foreign key for idempotency records. Review generated SQL before deployment. No startup migration runs automatically.
+Tenant currency is restricted by Domain to EUR, GBP, or USD. Prices and totals use PostgreSQL numeric precision and C# decimals. Membership identity is issuer plus subject; invitations and idempotency keys are stored as hashes. Staff invitations also store the normalized intended recipient email; legacy invitations with a null email cannot be accepted. Order version and outbox leases are EF concurrency tokens. The seventh migration is `StaffInvitationRecipientEmail`. Review generated SQL before deployment. No startup migration runs automatically.
+
+The Better Auth PostgreSQL adapter stores users, accounts, sessions, verification tokens, rate-limit records, and JWT signing keys in schema `auth`, separate from the EF-managed business schema. The Better Auth CLI owns that schema through `npm run auth:migrate`; EF migrations must not manage these tables. The auth migration has not yet been run because no usable Better Auth `DATABASE_URL` was available to the CLI. The auth tables and EF migration must be deployed before enabling account signup or email-bound invitations against a shared database.
 
 `OrderIdempotencyRecords` enforces one key hash per tenant, retains a request hash and serialized create receipt for 24 hours, and references the tenant. `OrderOutboxMessages` records event ID, tenant, event payload, occurrence/availability timestamps, lease, retry count, and optional delivery timestamp. Creation/status changes and event records share one transaction. The outbox is at-least-once; consumers deduplicate by event ID.
 
@@ -104,7 +106,7 @@ erDiagram
     }
 ```
 
-Names in this ERD are conceptual, not generated SQL. `CUSTOMER_ORDER` avoids ambiguity with SQL `ORDER`. `STAFF_MEMBERSHIP` represents persisted issuer/subject access; WhitePlate does not store local passwords. The OIDC provider is still a deployment choice.
+Names in this ERD are conceptual, not generated SQL. `CUSTOMER_ORDER` avoids ambiguity with SQL `ORDER`. `STAFF_MEMBERSHIP` represents persisted issuer/subject access; Better Auth owns account passwords and sessions in a separate schema.
 
 The approved first release has no persisted guest cart, payment, inventory reservation, or pickup scheduling. Checkout accepts a submitted order request and persists the order snapshots and idempotency receipt.
 

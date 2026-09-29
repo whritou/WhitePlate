@@ -17,12 +17,26 @@ namespace WhitePlate.Api.Controllers;
 public sealed class OrganizationsController(
     ICurrentIdentity currentIdentity,
     CreateRestaurantCommandHandler createRestaurant,
+    CreateOrganizationCommandHandler createOrganization,
     CreateStaffInvitationCommandHandler createInvitation,
     RevokeStaffInvitationCommandHandler revokeInvitation,
     IOrganizationRepository organizations,
     RenameOrganizationCommandHandler renameOrganization,
     ApiErrorMapper errors) : ControllerBase
 {
+    [HttpPost]
+    [ProducesResponseType<OrganizationDto>(StatusCodes.Status201Created)]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status403Forbidden, "application/problem+json")]
+    public async Task<ActionResult<OrganizationDto>> Create(CreateOrganizationRequest request,
+        CancellationToken cancellationToken)
+    {
+        var identity = currentIdentity.Identity;
+        if (identity is null) return Unauthorized();
+        var result = await createOrganization.HandleAsync(request.Name, identity, cancellationToken);
+        if (!result.IsSuccess) return errors.ToActionResult(errors.Create(HttpContext, result.Error));
+        return StatusCode(StatusCodes.Status201Created, result.Value);
+    }
+
     [HttpGet]
     [ProducesResponseType<OrganizationDto[]>(StatusCodes.Status200OK)]
     public async Task<ActionResult<IReadOnlyList<OrganizationDto>>> List(CancellationToken cancellationToken)
@@ -86,7 +100,7 @@ public sealed class OrganizationsController(
             return errors.ToActionResult(errors.Create(HttpContext, new ApplicationError(ErrorCode.ValidationFailed,
                 new ValidationIssue("role", "invalid_role", "Invitation role is not supported."))));
         var result = await createInvitation.HandleAsync(new CreateStaffInvitationCommand(organizationId,
-            request.TenantId, role, identity), cancellationToken);
+            request.TenantId, request.Email, role, identity), cancellationToken);
         if (!result.IsSuccess) return errors.ToActionResult(errors.Create(HttpContext, result.Error));
         var invitation = result.Value;
         return StatusCode(StatusCodes.Status201Created,

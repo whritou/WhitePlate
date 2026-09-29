@@ -50,3 +50,33 @@ The 2 Mermaid blocks were checked for closed fences and diagram declarations, bu
 | Planned | Product/security/storage decisions unresolved | Resolve dependent entries in the roadmap before claiming working restaurant functionality |
 
 These findings capture the earlier review. The [development guide](development.md) records current commands, and the [roadmap](development-roadmap.md) records remaining decisions without silently choosing product requirements.
+
+## Authentication implementation verification — 2026-09-29
+
+The Better Auth feature was added after the historical baseline above. The frontend's existing lint/build toolchain failures reproduced unchanged; these are not authentication-specific results. `apps/frontend/.env.example` contains placeholders only and is now exempted from the package ignore rule.
+
+| Check | Result |
+| --- | --- |
+| `dotnet test apps/api/WhitePlate.slnx --no-restore -c Release` | Passed: 129 tests, 0 failures |
+| `node node_modules/typescript/bin/tsc --noEmit` from frontend | Passed after the auth routes and forms were added |
+| `node node_modules/eslint/bin/eslint.js .` from frontend | Failed at existing ESLint 10 / eslint-plugin-react incompatibility: `contextOrFilename.getFilename is not a function` |
+| `node node_modules/next/dist/bin/next build` from frontend | Failed when Turbopack attempted to spawn a Node worker: Windows access denied, OS error 5 |
+| Better Auth CLI migration generation | Could not connect because no usable auth `DATABASE_URL` was available; no database was modified |
+| EF migration `StaffInvitationRecipientEmail` | Generated and covered by the API suite, not applied to Neon or production |
+| Browser OAuth, verification/reset mail, staff invite email and acceptance | Not run; provider credentials and schema migrations are not configured |
+
+The exact runtime prerequisites and migration ownership are documented in the [auth setup](development.md#authentication-configuration), [schema guide](database/database-schema.md), and [authentication decision](architecture/decisions/0002-authentication.md).
+
+## API request and locale refactor verification — 2026-09-29
+
+The authenticated server API client now centralizes GET/POST/PUT/DELETE calls, returns sanitized result codes, and records bounded server diagnostics. Locale is established by the localized root layout; components use next-intl request/client locale context, leaving explicit locale only on the intentional language switcher. See the [frontend architecture](architecture/WHITEPLATE_FRONTEND_ARCHITECTURE.md) for the request and locale lifecycle.
+
+| Check | Result |
+| --- | --- |
+| `node node_modules/vitest/vitest.mjs run` from frontend | Passed: 6 API request factory tests |
+| `node node_modules/typescript/bin/tsc --noEmit` from frontend | Passed |
+| `node node_modules/eslint/bin/eslint.js` from frontend | Failed in the existing ESLint 10 / `eslint-plugin-react` incompatibility (`contextOrFilename.getFilename is not a function`); it fails while loading `react/display-name` before reporting file findings |
+| `node node_modules/next/dist/bin/next build` from frontend | Failed when Turbopack tried to spawn a Node worker (Windows access denied, OS error 5), matching the prior environment limitation |
+| `dotnet test apps/api/WhitePlate.slnx --no-restore -c Release` | Passed: 129 tests, 0 failures |
+
+The shell did not expose `npm` on `PATH`; installed package-local CLIs were run with the bundled Node runtime. Resend provider requests remain direct server-only calls; no browser page or component performs an API fetch. No commit or push was created.

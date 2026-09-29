@@ -10,8 +10,8 @@ public sealed class StaffInvitationTests
     {
         var now = DateTimeOffset.Parse("2026-09-29T10:00:00Z");
         var invitation = StaffInvitation.Create(Guid.NewGuid(), Guid.NewGuid(), InvitationRole.KitchenStaff,
-            new string('a', 64), now.AddDays(7), now);
-        var identity = ExternalIdentity.Create("https://identity.example.test/", "kitchen-1");
+            "Kitchen@Example.test", new string('a', 64), now.AddDays(7), now);
+        var identity = ExternalIdentity.Create("https://identity.example.test/", "kitchen-1", "kitchen@example.test", true);
 
         Assert.True(invitation.TryAccept(identity, now.AddMinutes(1)));
         Assert.False(invitation.TryAccept(identity, now.AddMinutes(2)));
@@ -23,11 +23,11 @@ public sealed class StaffInvitationTests
     {
         var now = DateTimeOffset.Parse("2026-09-29T10:00:00Z");
         var revoked = StaffInvitation.Create(Guid.NewGuid(), null, InvitationRole.OrganizationOwner,
-            new string('a', 64), now.AddDays(7), now);
+            "owner@example.test", new string('a', 64), now.AddDays(7), now);
         revoked.Revoke();
         var expired = StaffInvitation.Create(Guid.NewGuid(), Guid.NewGuid(), InvitationRole.RestaurantManager,
-            new string('b', 64), now.AddDays(1), now);
-        var identity = ExternalIdentity.Create("https://identity.example.test/", "manager-1");
+            "manager@example.test", new string('b', 64), now.AddDays(1), now);
+        var identity = ExternalIdentity.Create("https://identity.example.test/", "manager-1", "manager@example.test", true);
 
         Assert.False(revoked.TryAccept(identity, now));
         Assert.False(expired.TryAccept(identity, now.AddDays(1)));
@@ -38,8 +38,23 @@ public sealed class StaffInvitationTests
     {
         var now = DateTimeOffset.UtcNow;
         Assert.Throws<DomainRuleException>(() => StaffInvitation.Create(Guid.NewGuid(), Guid.NewGuid(),
-            InvitationRole.OrganizationOwner, new string('a', 64), now.AddDays(1), now));
+            InvitationRole.OrganizationOwner, "owner@example.test", new string('a', 64), now.AddDays(1), now));
         Assert.Throws<DomainRuleException>(() => StaffInvitation.Create(Guid.NewGuid(), null,
-            InvitationRole.KitchenStaff, new string('a', 64), now.AddDays(1), now));
+            InvitationRole.KitchenStaff, "kitchen@example.test", new string('a', 64), now.AddDays(1), now));
+    }
+
+    [Fact]
+    public void InvitationRequiresVerifiedEmailThatMatchesTheRecipient()
+    {
+        var now = DateTimeOffset.UtcNow;
+        var invitation = StaffInvitation.Create(Guid.NewGuid(), Guid.NewGuid(), InvitationRole.KitchenStaff,
+            "invited@example.test", new string('c', 64), now.AddDays(1), now);
+
+        Assert.False(invitation.TryAccept(ExternalIdentity.Create("https://identity.example.test/", "a",
+            "other@example.test", true), now));
+        Assert.False(invitation.TryAccept(ExternalIdentity.Create("https://identity.example.test/", "b",
+            "invited@example.test", false), now));
+        Assert.True(invitation.TryAccept(ExternalIdentity.Create("https://identity.example.test/", "c",
+            "INVITED@example.test", true), now));
     }
 }

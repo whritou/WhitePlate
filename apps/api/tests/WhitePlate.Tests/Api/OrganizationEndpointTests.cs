@@ -71,6 +71,49 @@ public sealed class OrganizationEndpointTests
     }
 
     [Fact]
+    public async Task VerifiedUserCanCreateOrganizationAndFirstOwnerMembership()
+    {
+        using var factory = new OrganizationFactory();
+        using var client = factory.CreateClient();
+        using (var setupScope = factory.Services.CreateScope())
+            await setupScope.ServiceProvider.GetRequiredService<WhitePlateDbContext>().Database.EnsureCreatedAsync(
+                TestContext.Current.CancellationToken);
+        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", "new-owner");
+
+        using var response = await client.PostAsJsonAsync("/api/v1/organizations", new { name = "  New Restaurant Group  " },
+            TestContext.Current.CancellationToken);
+
+        Assert.True(response.StatusCode == HttpStatusCode.Created,
+            $"Expected created but got {(int)response.StatusCode}: {await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken)}");
+        using var json = JsonDocument.Parse(await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
+        var organizationId = json.RootElement.GetProperty("id").GetGuid();
+        Assert.Equal("New Restaurant Group", json.RootElement.GetProperty("name").GetString());
+        using var scope = factory.Services.CreateScope();
+        var database = scope.ServiceProvider.GetRequiredService<WhitePlateDbContext>();
+        Assert.True(await database.OrganizationOwnerMemberships.AnyAsync(member => member.OrganizationId == organizationId &&
+            member.Subject == "new-owner", TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
+    public async Task OrganizationCreationRequiresVerifiedEmail()
+    {
+        using var factory = new OrganizationFactory();
+        using var client = factory.CreateClient();
+        using (var setupScope = factory.Services.CreateScope())
+            await setupScope.ServiceProvider.GetRequiredService<WhitePlateDbContext>().Database.EnsureCreatedAsync(
+                TestContext.Current.CancellationToken);
+        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", "unverified");
+
+        using var response = await client.PostAsJsonAsync("/api/v1/organizations", new { name = "Nope" },
+            TestContext.Current.CancellationToken);
+
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+        using var scope = factory.Services.CreateScope();
+        Assert.Empty(await scope.ServiceProvider.GetRequiredService<WhitePlateDbContext>().Organizations.ToListAsync(
+            TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
     public async Task OwnerCanIssueSingleUseInvitationThatBindsTheAcceptingOidcIdentity()
     {
         using var factory = new OrganizationFactory();
@@ -82,7 +125,7 @@ public sealed class OrganizationEndpointTests
         var restaurant = await restaurantResponse.Content.ReadFromJsonAsync<WhitePlate.Api.Contracts.TenantResponse>(TestContext.Current.CancellationToken);
 
         using var invitationResponse = await client.PostAsJsonAsync($"/api/v1/organizations/{organizationId}/invitations",
-            new { tenantId = restaurant!.Id, role = "KitchenStaff" }, TestContext.Current.CancellationToken);
+            new { tenantId = restaurant!.Id, email = "kitchen-1@example.test", role = "KitchenStaff" }, TestContext.Current.CancellationToken);
 
         Assert.Equal(HttpStatusCode.Created, invitationResponse.StatusCode);
         using var invitationJson = JsonDocument.Parse(await invitationResponse.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
@@ -101,6 +144,31 @@ public sealed class OrganizationEndpointTests
             $"Expected no-content but got {(int)accepted.StatusCode}: {await accepted.Content.ReadAsStringAsync(TestContext.Current.CancellationToken)}");
         Assert.True(await database.RestaurantMemberships.AnyAsync(membership => membership.TenantId == restaurant.Id &&
             membership.Subject == "kitchen-1" && membership.Role == WhitePlate.Domain.Tenants.RestaurantRole.Kitchen,
+            TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
+    public async Task InvitationAcceptanceRequiresMatchingVerifiedRecipientEmail()
+    {
+        using var factory = new OrganizationFactory();
+        var (organizationId, ownerIdentity) = await factory.SeedOwnerAsync();
+        using var client = factory.CreateClient();
+        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", ownerIdentity.Subject);
+        using var restaurantResponse = await client.PostAsJsonAsync($"/api/v1/organizations/{organizationId}/restaurants",
+            new { name = "Bistro", subdomain = "bistro", currency = "EUR" }, TestContext.Current.CancellationToken);
+        var restaurant = await restaurantResponse.Content.ReadFromJsonAsync<WhitePlate.Api.Contracts.TenantResponse>(TestContext.Current.CancellationToken);
+        using var invitationResponse = await client.PostAsJsonAsync($"/api/v1/organizations/{organizationId}/invitations",
+            new { tenantId = restaurant!.Id, email = "invited@example.test", role = "KitchenStaff" },
+            TestContext.Current.CancellationToken);
+        using var invitationJson = JsonDocument.Parse(await invitationResponse.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
+        var token = invitationJson.RootElement.GetProperty("token").GetString();
+
+        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", "kitchen-1");
+        using var response = await client.PostAsJsonAsync("/api/v1/invitations/accept", new { token }, TestContext.Current.CancellationToken);
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        using var scope = factory.Services.CreateScope();
+        Assert.Empty(await scope.ServiceProvider.GetRequiredService<WhitePlateDbContext>().RestaurantMemberships.ToListAsync(
             TestContext.Current.CancellationToken));
     }
 
@@ -134,7 +202,7 @@ public sealed class OrganizationEndpointTests
             new { name = "Bistro", subdomain = "bistro", currency = "EUR" }, TestContext.Current.CancellationToken);
         var restaurant = await restaurantResponse.Content.ReadFromJsonAsync<WhitePlate.Api.Contracts.TenantResponse>(TestContext.Current.CancellationToken);
         using var invitationResponse = await client.PostAsJsonAsync($"/api/v1/organizations/{organizationId}/invitations",
-            new { tenantId = restaurant!.Id, role = "RestaurantManager" }, TestContext.Current.CancellationToken);
+            new { tenantId = restaurant!.Id, email = "manager-1@example.test", role = "RestaurantManager" }, TestContext.Current.CancellationToken);
         using var inviteJson = JsonDocument.Parse(await invitationResponse.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
         var token = inviteJson.RootElement.GetProperty("token").GetString();
         client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", "manager-1");
@@ -213,7 +281,7 @@ public sealed class OrganizationEndpointTests
 
         client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", ownerIdentity.Subject);
         using var kitchenInviteResponse = await client.PostAsJsonAsync($"/api/v1/organizations/{organizationId}/invitations",
-            new { tenantId = restaurant.Id, role = "KitchenStaff" }, TestContext.Current.CancellationToken);
+            new { tenantId = restaurant.Id, email = "kitchen-1@example.test", role = "KitchenStaff" }, TestContext.Current.CancellationToken);
         using var kitchenInvite = JsonDocument.Parse(await kitchenInviteResponse.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
         client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", "kitchen-1");
         using var kitchenAccepted = await client.PostAsJsonAsync("/api/v1/invitations/accept",
@@ -232,6 +300,8 @@ public sealed class OrganizationEndpointTests
         {
             connection.Open();
             builder.UseEnvironment("Production");
+            builder.UseSetting("Authentication:Issuer", "https://localhost:3000");
+            builder.UseSetting("Authentication:Audience", "whiteplate-api");
             builder.ConfigureLogging(logging => logging.ClearProviders());
             builder.ConfigureServices(services =>
             {
@@ -275,7 +345,9 @@ public sealed class OrganizationEndpointTests
             var claims = new[]
             {
                 new Claim("iss", "https://identity.example.test/"),
-                new Claim("sub", subject)
+                new Claim("sub", subject),
+                new Claim("email", $"{subject}@example.test"),
+                new Claim("email_verified", subject == "unverified" ? "false" : "true")
             };
             var principal = new ClaimsPrincipal(new ClaimsIdentity(claims, Scheme.Name));
             return Task.FromResult(AuthenticateResult.Success(new AuthenticationTicket(principal, Scheme.Name)));

@@ -23,6 +23,12 @@
 - API/data changes need matching contract/schema updates. Do not describe EF filters, authentication, a database, or SignalR as active until runtime wiring and verification exist.
 - Do not hand-edit generated `.next`, `node_modules`, `bin`, `obj`, IDE state, or generated API specifications. Change source/configuration instead.
 
+## Project kanban workflow
+
+- Before starting any WhitePlate task, look up the [WhitePlate project kanban](https://github.com/users/whritou/projects/1/views/1). Find its existing card, status, and scope so work does not duplicate or contradict planned tasks. If the task has no card, add one before beginning, using the project documentation to capture its scope and acceptance criteria.
+- After finishing or pausing work, update that card with the actual result, verification evidence, and remaining work. Move it to `Done` only when its scope is complete; otherwise keep it in the column that reflects its current state (`Backlog`, `Ready`, `In progress`, or `In review`).
+- Keep the board aligned with repository documentation: record unresolved decisions as backlog work, and do not mark proposed or unverified behavior complete.
+
 ## Verification and handoff
 
 From `apps/frontend`: `npm run lint`, `npm run typecheck`, and `npm run build` as appropriate. From the repository root: `dotnet test apps/api/WhitePlate.slnx` for the API solution. Use the [test plan](docs/functional-test-plan.md) for broader runtime checks. The current backend tests cover the sample endpoint and project boundaries, not restaurant business behavior.

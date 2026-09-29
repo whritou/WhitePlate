@@ -40,7 +40,7 @@ For future business use cases:
 
 ## Tests and documentation
 
-Run checks appropriate to the change and report failures honestly. The xUnit suite covers tenant use cases/host boundaries, organization/staff authorization, catalog invariants and management, relational persistence, safe errors, checkout HTTP pricing/idempotency/body/rate rules, order concurrency, outbox dispatch, hub authorization and project dependencies. Frontend integration, live OIDC/SignalR connections and production PostgreSQL concurrency still need broader validation. New behavior needs meaningful invariant, authorization, integration, or browser coverage as described in the [test plan](functional-test-plan.md).
+Run checks appropriate to the change and report failures honestly. The xUnit suite covers tenant use cases/host boundaries, verified-email organization/staff authorization, catalog invariants and management, relational persistence, safe errors, checkout HTTP pricing/idempotency/body/rate rules, order concurrency, outbox dispatch, hub authorization and project dependencies. Live OAuth/Resend/browser flows, SignalR connections, and production PostgreSQL concurrency still need broader validation. New behavior needs meaningful invariant, authorization, integration, or browser coverage as described in the [test plan](functional-test-plan.md).
 
 Use test drivem development method to implement new features.
 

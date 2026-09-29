@@ -12,14 +12,14 @@ public sealed class StaffInvitationUseCaseTests
     {
         var organizationId = Guid.NewGuid();
         var tenantId = Guid.NewGuid();
-        var identity = ExternalIdentity.Create("https://identity.example.test/", "owner");
+        var identity = ExternalIdentity.Create("https://identity.example.test/", "owner", "owner@example.test", true);
         var repository = new InvitationRepositoryStub(organizationId, tenantId);
         var handler = new CreateStaffInvitationCommandHandler(
             new MembershipRepositoryStub(organizationId, identity), repository,
             new FixedTimeProvider(DateTimeOffset.Parse("2026-09-29T10:00:00Z")));
 
         var result = await handler.HandleAsync(new CreateStaffInvitationCommand(organizationId, tenantId,
-            InvitationRole.KitchenStaff, identity), TestContext.Current.CancellationToken);
+            "kitchen@example.test", InvitationRole.KitchenStaff, identity), TestContext.Current.CancellationToken);
 
         Assert.True(result.IsSuccess);
         Assert.Equal(64, result.Value.Token.Length);
@@ -32,13 +32,13 @@ public sealed class StaffInvitationUseCaseTests
     [Fact]
     public async Task DoesNotCreateInvitationForAnUnownedRestaurant()
     {
-        var identity = ExternalIdentity.Create("https://identity.example.test/", "owner");
+        var identity = ExternalIdentity.Create("https://identity.example.test/", "owner", "owner@example.test", true);
         var repository = new InvitationRepositoryStub(Guid.NewGuid(), Guid.NewGuid());
         var handler = new CreateStaffInvitationCommandHandler(
             new MembershipRepositoryStub(Guid.NewGuid(), identity), repository, TimeProvider.System);
 
         var result = await handler.HandleAsync(new CreateStaffInvitationCommand(Guid.NewGuid(), Guid.NewGuid(),
-            InvitationRole.KitchenStaff, identity), TestContext.Current.CancellationToken);
+            "kitchen@example.test", InvitationRole.KitchenStaff, identity), TestContext.Current.CancellationToken);
 
         Assert.Equal(0, repository.Writes);
         Assert.False(result.IsSuccess);

@@ -25,10 +25,10 @@ public sealed class StaffInvitationRepositoryTests
         var tokenHash = new string('a', 64);
         var now = DateTimeOffset.Parse("2026-09-29T10:00:00Z");
         database.StaffInvitations.Add(StaffInvitation.Create(organization.Id, restaurant.Id,
-            InvitationRole.KitchenStaff, tokenHash, now.AddDays(7), now));
+            InvitationRole.KitchenStaff, "kitchen@example.test", tokenHash, now.AddDays(7), now));
         await database.SaveChangesAsync(TestContext.Current.CancellationToken);
         var repository = new StaffInvitationRepository(database);
-        var identity = ExternalIdentity.Create("https://identity.example.test/", "kitchen-1");
+        var identity = ExternalIdentity.Create("https://identity.example.test/", "kitchen-1", "kitchen@example.test", true);
 
         Assert.True(await repository.AcceptAsync(tokenHash, identity, now.AddMinutes(1), TestContext.Current.CancellationToken));
         Assert.False(await repository.AcceptAsync(tokenHash, identity, now.AddMinutes(2), TestContext.Current.CancellationToken));

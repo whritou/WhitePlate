@@ -1,6 +1,6 @@
 # Tenant isolation and security boundaries
 
-Status: persisted organization/tenant ownership, external OIDC bearer validation, owner and restaurant memberships, invitation acceptance, public host resolution, manager catalog management, order authorization/rate limiting, and tenant-scoped SignalR/outbox delivery are implemented. OIDC provider selection and production domain/TLS/proxy/CORS configuration remain deployment work.
+Status: Better Auth RS256 JWT bearer validation, persisted organization/tenant ownership, owner and restaurant memberships, verified-email organization signup, recipient-bound invitation acceptance, public host resolution, manager catalog management, order authorization/rate limiting, and tenant-scoped SignalR/outbox delivery are wired in source. Google/Microsoft/Resend credentials, both pending schema migrations, and production domain/TLS/proxy/CORS remain deployment work.
 
 ## Implemented foundation
 
@@ -42,12 +42,12 @@ Background jobs must carry a validated tenant context. Elevated cross-tenant mai
 
 ## Authentication and operational decisions
 
-The external identity provider is not selected; set `Authentication:Authority` and `Authentication:Audience` for the chosen OIDC issuer. WhitePlate accepts bearer tokens but does not issue them. Role permissions are implemented through persisted memberships. Cookie/BFF token transport is not implemented; if added, it needs a CSRF strategy. Browser CORS origins must be explicitly configured. Public checkout enforces a 16 KiB body cap, validation bounds, per-tenant/client rate limits, and 24-hour idempotency.
+Better Auth issues short-lived RS256 JWTs. The API validates discovery/JWKS from `Authentication:Issuer` and the configured `Authentication:Audience`; production fails closed when either setting is missing. The Next.js server exchanges a valid Better Auth session for API tokens and keeps them server-side. Browser session cookies use same-origin server actions for protected work. Role permissions come from persisted memberships; browser-supplied tenant identity never grants access. Email-bound invitations require a verified JWT email that matches the normalized intended recipient. Google/Microsoft and Resend credentials, the Better Auth auth-schema migration, the EF recipient-email migration, and production TLS/CORS remain deployment requirements. Public checkout enforces a 16 KiB body cap, validation bounds, per-tenant/client rate limits, and 24-hour idempotency.
 
 Keep secrets on the server, avoid logging tokens/customer payloads, and define order/customer retention. Production needs TLS, trusted proxy configuration, and error responses without diagnostic internals. These are requirements to implement when the corresponding services exist, not claims about the scaffold.
 
 ## Verification requirement
 
-Automated tests use two tenants with distinct staff and data. They exercise foreign IDs, spoofed headers, relationship assignments, public tenant reads, catalog writes/archives, order reads/status changes, checkout idempotency, hub negotiation, and authorized subscription checks. Verify both response and persisted state: an error response alone does not prove that a forbidden write was not applied. Browser/cache behavior and a live OIDC SignalR connection still need end-to-end testing.
+Automated tests use two tenants with distinct staff and data. They exercise foreign IDs, spoofed headers, relationship assignments, public tenant reads, catalog writes/archives, order reads/status changes, checkout idempotency, hub negotiation, verified email, invitation email binding, and authorized subscription checks. Verify both response and persisted state: an error response alone does not prove that a forbidden write was not applied. Live OAuth/email callbacks, browser session/cache behavior, and a SignalR connection against configured Better Auth still need end-to-end testing.
 
 See the [functional test plan](../functional-test-plan.md), [API contract](../api/api-contracts.md), and [open decisions](../development-roadmap.md).

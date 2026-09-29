@@ -221,6 +221,10 @@ namespace WhitePlate.Infrastructure.Persistence.Migrations
                     b.Property<Guid>("OrganizationId")
                         .HasColumnType("uuid");
 
+                    b.Property<string>("RecipientEmail")
+                        .HasMaxLength(254)
+                        .HasColumnType("character varying(254)");
+
                     b.Property<string>("Role")
                         .IsRequired()
                         .HasMaxLength(32)

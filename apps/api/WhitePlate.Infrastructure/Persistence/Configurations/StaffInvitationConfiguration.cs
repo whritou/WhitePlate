@@ -14,6 +14,7 @@ public sealed class StaffInvitationConfiguration : IEntityTypeConfiguration<Staf
         builder.HasKey(invitation => invitation.Id);
         builder.Property(invitation => invitation.Id).ValueGeneratedNever();
         builder.Property(invitation => invitation.Role).HasConversion<string>().HasMaxLength(32).IsRequired();
+        builder.Property(invitation => invitation.RecipientEmail).HasMaxLength(254);
         builder.Property(invitation => invitation.TokenHash).IsRequired().HasMaxLength(64);
         builder.HasIndex(invitation => invitation.TokenHash).IsUnique();
         builder.Property(invitation => invitation.ExpiresAt).IsRequired();
