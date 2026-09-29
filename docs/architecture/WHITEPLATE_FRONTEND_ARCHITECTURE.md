@@ -1,6 +1,6 @@
 # WhitePlate frontend architecture
 
-Status: localized Better Auth flows, server-only API BFF, organization signup, and email-bound staff invitation UI are wired in source. OAuth/email credentials and Better Auth schema migration are not configured; see [authentication setup](../development.md#authentication-configuration). Commands are in the [package README](../../apps/frontend/README.md) and [development guide](../development.md).
+Status: localized Better Auth flows, server-only API BFF, organization signup, and email-bound staff invitation UI are wired in source. The Better Auth schema is migrated on Neon `test`, and email/password signup plus invitation acceptance were verified there with locally intercepted email. OAuth/real email credentials and production schema setup remain; see [authentication setup](../development.md#authentication-configuration). Commands are in the [package README](../../apps/frontend/README.md) and [development guide](../development.md).
 
 ## Stack and source map
 

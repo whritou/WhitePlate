@@ -1,6 +1,6 @@
 # WhitePlate system architecture
 
-Status: email/password and Google/Microsoft auth, localized recovery and verification pages, organization signup, email-bound invitations, server-side API JWT exchange, and backend identity verification are wired in source. The backend tests pass. Better Auth's `auth` schema and the generated invitation-email EF migration have not been applied; live provider/email and browser-flow checks remain open.
+Status: email/password and Google/Microsoft auth, localized recovery and verification pages, organization signup, email-bound invitations, server-side API JWT exchange, and backend identity verification are wired in source. The backend tests pass. Better Auth's `auth` schema and the invitation-email EF migration are applied on Neon `test`; email/password signup and invitation acceptance are verified there with locally intercepted email. Live provider/email and browser-flow checks remain open.
 
 ## Current runtime
 
@@ -73,7 +73,7 @@ Auth BFF route handlers and API server actions are implemented. Axios, TanStack 
 
 `Program.cs` registers controllers, OpenAPI/Swagger UI, Better Auth JWT bearer validation, authorization, CORS, tenant resolution, EF Core repositories, SignalR, and the hosted outbox dispatcher. OpenAPI is mapped in Development or when explicitly enabled. Production startup requires issuer and audience. See [backend architecture](WHITEPLATE_BACKEND_ARCHITECTURE.md), [API contracts](../api/api-contracts.md), and [development](../development.md).
 
-The separate projects and inward dependency direction are implemented and tested. The Better Auth issuer/JWKS integration is wired; external Google/Microsoft and Resend credentials, auth schema migration, invitation-email migration, tenant DNS/TLS, CORS origins, and production migrations still need deployment setup.
+The separate projects and inward dependency direction are implemented and tested. The Better Auth issuer/JWKS integration is wired; the auth schema and invitation-email migration are applied on Neon `test`, and the local email/password signup/invitation path was verified. External Google/Microsoft and Resend credentials, browser checks, tenant DNS/TLS, CORS origins, and production migrations still need deployment setup.
 
 ## Runtime and deployment
 

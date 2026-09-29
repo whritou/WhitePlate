@@ -28,6 +28,6 @@ WhitePlate has persisted organization ownership and restaurant memberships in it
 
 ## Consequences and deployment status
 
-The frontend, API validation, and API contracts are wired in source. Google/Microsoft OAuth applications and Resend sender credentials must be configured. Better Auth's generated schema must be reviewed and migrated into the `auth` schema; the new EF migration adding invitation recipient email must also be reviewed and applied. Neither migration runs at application startup, and neither has been applied to Neon or production as part of this feature. Browser end-to-end testing with live provider credentials remains required.
+The frontend, API validation, and API contracts are wired in source. On 2026-09-29, all seven EF migrations and Better Auth's generated schema were applied to Neon `test`; the email/password signup and invitation acceptance path was exercised against that database with local email interception. Neither migration runs at application startup, and production remains unmigrated. The Better Auth CLI reports a `rateLimit.lastRequest` type difference (`int8` in PostgreSQL versus `number` expected); investigate before production rollout. Google/Microsoft OAuth applications, Resend sender credentials, and browser end-to-end testing with live provider credentials remain outstanding.
 
 See [API contracts](../../api/api-contracts.md), [database schema](../../database/database-schema.md), [tenant security](../tenancy-and-security.md), and [local setup](../../development.md#authentication-configuration).

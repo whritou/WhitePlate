@@ -23,7 +23,7 @@ Open `/en` or `/fr` on `http://localhost:3000`. Press `d` outside text-entry con
 
 Vitest runs without a separate configuration file. Playwright is installed but has no browser-test configuration yet.
 
-Copy `.env.example` to `.env.local`, configure a PostgreSQL database and provider credentials, then run `npm run auth:migrate` to create Better Auth's separate `auth` schema. The migration was not applied for this change because a usable `DATABASE_URL` credential was unavailable. The API also needs `Authentication__Issuer=http://localhost:3000` and `Authentication__Audience=whiteplate-api` locally. Production requires HTTPS and all Better Auth/Google/Microsoft/Resend settings; see the [authentication setup](../../docs/development.md#authentication-configuration).
+Copy `.env.example` to `.env.local` and configure the PostgreSQL database and provider credentials. Better Auth's separate `auth` schema is migrated on the Neon test branch; for another database, run `npm run auth:migrate`. The API also needs `Authentication__Issuer=http://localhost:3000` and `Authentication__Audience=whiteplate-api` locally. Production requires HTTPS and all Better Auth/Google/Microsoft/Resend settings; see the [authentication setup](../../docs/development.md#authentication-configuration).
 
 Auth URLs: `/[locale]/sign-in`, `/sign-up`, `/forgot-password`, `/reset-password`, `/verify-email`, `/organization/sign-up`, `/organization`, `/organization/team`, and `/invitations/accept`. Better Auth handlers are at `/api/auth/*`.
 

@@ -1,6 +1,6 @@
 # API contracts
 
-Status: the Better Auth frontend, email/password and social auth routes, server-side API token exchange, organization signup, and email-bound invitations are wired in source. API behavior is covered by its automated suite. Provider credentials, Better Auth schema migration, the new EF migration, production domain/CORS settings, and browser-to-provider acceptance remain deployment/verification work.
+Status: the Better Auth frontend, email/password and social auth routes, server-side API token exchange, organization signup, and email-bound invitations are wired in source. API behavior is covered by its automated suite. Both the Better Auth auth schema and EF invitation-email migration are applied on Neon `test`; email/password signup, organization creation, and invitation acceptance were exercised against that database using locally intercepted email delivery. Provider credentials, production domain/CORS settings, browser OAuth, real email delivery, and production migrations remain deployment/verification work.
 
 ## 1. HTTP routes
 

@@ -61,9 +61,12 @@ The Better Auth feature was added after the historical baseline above. The front
 | `node node_modules/typescript/bin/tsc --noEmit` from frontend | Passed after the auth routes and forms were added |
 | `node node_modules/eslint/bin/eslint.js .` from frontend | Failed at existing ESLint 10 / eslint-plugin-react incompatibility: `contextOrFilename.getFilename is not a function` |
 | `node node_modules/next/dist/bin/next build` from frontend | Failed when Turbopack attempted to spawn a Node worker: Windows access denied, OS error 5 |
-| Better Auth CLI migration generation | Could not connect because no usable auth `DATABASE_URL` was available; no database was modified |
-| EF migration `StaffInvitationRecipientEmail` | Generated and covered by the API suite, not applied to Neon or production |
-| Browser OAuth, verification/reset mail, staff invite email and acceptance | Not run; provider credentials and schema migrations are not configured |
+| Better Auth auth schema | Initially unconfigured; applied to Neon `test` on 2026-09-29 and verified by querying all six expected tables. Production unchanged. |
+| EF migration `StaffInvitationRecipientEmail` | Applied to Neon `test` on 2026-09-29 and verified in EF history and `StaffInvitations.RecipientEmail`. Production unchanged. |
+| Local email/password signup and invitation acceptance | Passed against Neon `test` on 2026-09-29 using `.invalid` addresses and locally intercepted Resend messages. Signup, email verification, organization creation, invite creation, acceptance, and resulting membership succeeded. |
+| Browser OAuth, real verification/reset email, and provider acceptance | Not run; OAuth/Resend credentials are not configured. |
+
+The test database now contains test-only signup and organization/membership records from the local acceptance flow. The test email delivery was intercepted locally; no email was sent. The Better Auth CLI also reported that `rateLimit.lastRequest` is `bigint/int8` in PostgreSQL while it expected `number`; signup worked, but this type warning should be reconciled before production. The database credential appeared in a tool result during connection-string inspection and should be rotated. The API process on port 5182 pre-existed this work and was left running; the verification API used a separate Release build on port 5184 and was stopped afterward.
 
 The exact runtime prerequisites and migration ownership are documented in the [auth setup](development.md#authentication-configuration), [schema guide](database/database-schema.md), and [authentication decision](architecture/decisions/0002-authentication.md).
 

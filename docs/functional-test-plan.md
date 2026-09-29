@@ -1,6 +1,6 @@
 # Functional test plan
 
-This is an acceptance plan, not a test-results report. The API suite covers tenant/organization/staff/catalog behavior, verified email and invitation binding, checkout pricing/idempotency, order workflow, body/rate limits, outbox dispatch, and hub authorization. Live OAuth, Resend delivery, database migrations, browser auth flows, and SignalR acceptance remain to be run. The earlier documentation audit is in [documentation review](documentation-review.md).
+This is an acceptance plan, not a test-results report. The API suite covers tenant/organization/staff/catalog behavior, verified email and invitation binding, checkout pricing/idempotency, order workflow, body/rate limits, outbox dispatch, and hub authorization. The test-database schema migrations and local email/password signup/invitation path are verified. Live OAuth, real Resend delivery, browser auth flows, and SignalR acceptance remain to be run. The earlier documentation audit is in [documentation review](documentation-review.md).
 
 ## 1. Current scaffold checks
 
@@ -39,7 +39,7 @@ Automated tests cover the API behaviors in the contracts. These scenarios check 
 
 ### Authentication and onboarding
 
-These browser scenarios are acceptance criteria and were not run during this implementation. Configure Better Auth's `auth` schema, apply the reviewed `StaffInvitationRecipientEmail` EF migration to a disposable/test database, register Google and Microsoft callback URLs, and configure a verified Resend sender first.
+The local email/password signup, email verification, organization creation, and invitation acceptance path was exercised against the Neon `test` database on 2026-09-29 with test-only `.invalid` addresses and locally intercepted email delivery. The browser scenarios below, OAuth providers, and real email delivery remain unverified; configure Google and Microsoft callback URLs and a verified Resend sender before running those checks.
 
 | ID | Scenario | Required outcome | Priority |
 | --- | --- | --- | --- |

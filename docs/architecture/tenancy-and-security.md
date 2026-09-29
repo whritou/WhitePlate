@@ -1,6 +1,6 @@
 # Tenant isolation and security boundaries
 
-Status: Better Auth RS256 JWT bearer validation, persisted organization/tenant ownership, owner and restaurant memberships, verified-email organization signup, recipient-bound invitation acceptance, public host resolution, manager catalog management, order authorization/rate limiting, and tenant-scoped SignalR/outbox delivery are wired in source. Google/Microsoft/Resend credentials, both pending schema migrations, and production domain/TLS/proxy/CORS remain deployment work.
+Status: Better Auth RS256 JWT bearer validation, persisted organization/tenant ownership, owner and restaurant memberships, verified-email organization signup, recipient-bound invitation acceptance, public host resolution, manager catalog management, order authorization/rate limiting, and tenant-scoped SignalR/outbox delivery are wired in source. Both schemas are migrated on Neon `test` and the local email/password signup/invitation acceptance path has been verified there. Google/Microsoft/Resend credentials, real provider/browser checks, and production domain/TLS/proxy/CORS/migrations remain deployment work.
 
 ## Implemented foundation
 
@@ -42,7 +42,7 @@ Background jobs must carry a validated tenant context. Elevated cross-tenant mai
 
 ## Authentication and operational decisions
 
-Better Auth issues short-lived RS256 JWTs. The API validates discovery/JWKS from `Authentication:Issuer` and the configured `Authentication:Audience`; production fails closed when either setting is missing. The Next.js server exchanges a valid Better Auth session for API tokens and keeps them server-side. Browser session cookies use same-origin server actions for protected work. Role permissions come from persisted memberships; browser-supplied tenant identity never grants access. Email-bound invitations require a verified JWT email that matches the normalized intended recipient. Google/Microsoft and Resend credentials, the Better Auth auth-schema migration, the EF recipient-email migration, and production TLS/CORS remain deployment requirements. Public checkout enforces a 16 KiB body cap, validation bounds, per-tenant/client rate limits, and 24-hour idempotency.
+Better Auth issues short-lived RS256 JWTs. The API validates discovery/JWKS from `Authentication:Issuer` and the configured `Authentication:Audience`; production fails closed when either setting is missing. The Next.js server exchanges a valid Better Auth session for API tokens and keeps them server-side. Browser session cookies use same-origin server actions for protected work. Role permissions come from persisted memberships; browser-supplied tenant identity never grants access. Email-bound invitations require a verified JWT email that matches the normalized intended recipient. Google/Microsoft and Resend credentials, browser/provider checks, and production TLS/CORS/schema rollout remain deployment requirements. Public checkout enforces a 16 KiB body cap, validation bounds, per-tenant/client rate limits, and 24-hour idempotency.
 
 Keep secrets on the server, avoid logging tokens/customer payloads, and define order/customer retention. Production needs TLS, trusted proxy configuration, and error responses without diagnostic internals. These are requirements to implement when the corresponding services exist, not claims about the scaffold.
 
