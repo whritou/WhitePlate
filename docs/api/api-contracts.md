@@ -41,6 +41,8 @@ All paths are rooted at `/api/v1`. Success responses contain the resource direct
 | `/hubs/orders` | Better Auth JWT authenticated SignalR connection | Join authorized restaurant groups and receive `order.changed` events |
 | `GET /openapi/v1.json`, `GET /swagger` | Anonymous when enabled | OpenAPI 3.1 JSON and interactive Swagger UI |
 
+The accepted product direction is to provide English and French storefront catalog copy. The active `GET /menu` contract is still locale-free and returns the current single-string catalog fields. Locale selection, translated field coverage, persistence, and missing-translation behavior are not yet specified or implemented; see [decision 0003](../architecture/decisions/0003-catalog-localization-and-tenant-domain-policy.md). First-release tenant addressing uses one-label subdomains; custom domains are deferred.
+
 The tenant ID in a protected route selects a resource. Every catalog/order query and mutation checks the authenticated issuer/subject membership for that tenant. Foreign or missing resource IDs return the same `404`. Kitchen staff can read/progress orders but cannot cancel them; owner/manager cancellation is allowed for incomplete orders.
 
 `POST /orders` resolves the restaurant from the request host. For local development, `bistro.localhost:5182` resolves the `bistro` tenant when `Tenancy:BaseDomain=localhost`. Forwarded-host and tenant headers are ignored. No public order lookup route exists; the create response is the receipt.

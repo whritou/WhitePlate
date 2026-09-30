@@ -67,7 +67,7 @@ Empty directories are not preserved by Git unless given a tracked file. Build ou
 
 The Next.js App Router app renders `/en` and `/fr`. `next-intl` resolves the locale and supplies messages; `next-themes` manages the theme. Source folders sit directly under `apps/frontend`, and `@/*` points there. See [frontend architecture](WHITEPLATE_FRONTEND_ARCHITECTURE.md) for the request lifecycle.
 
-Auth BFF route handlers and API server actions are implemented. Axios, TanStack Query, Zustand, and the SignalR client remain unintegrated. Tenant storefront routing, cart store, catalog UI, and restaurant order dashboard are not implemented. The approved API scope has no persisted cart.
+Auth BFF route handlers and API server actions are implemented. TanStack Query and Zustand now provide per-provider query state and tenant-selection primitives, with tenant+locale menu keys; no storefront query consumes them yet. Tenant storefront host-to-API routing, catalog UI, cart store, and restaurant order dashboard are not implemented. The approved API scope has no persisted cart. The first-release host policy is one-label subdomains; custom domains are deferred, while the menu locale contract and translation storage remain open. See [decision 0003](decisions/0003-catalog-localization-and-tenant-domain-policy.md).
 
 ## API boundary
 

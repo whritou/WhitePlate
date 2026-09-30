@@ -17,12 +17,12 @@ Each stage should be implemented in small usable slices. No need to create all a
 
 ## Decision register
 
-D04 is resolved by the architecture. D02/D03/D05-D09 are approved in the full API design; deployment/provider-specific details remain open. The table records those accepted decisions and their implementation status.
+D04 is resolved by the architecture. D02/D03/D05-D09 are approved in the full API design; deployment/provider-specific details remain open. D11 records an accepted catalog translation requirement while its storage, fallback, and API design remain open. The table records accepted decisions and their implementation status.
 
 | ID | Decision | Resolve before | Questions to answer |
 | --- | --- | --- | --- |
 | D01 | Toolchain and checks | Reproducible baseline/CI | Which Node/npm and .NET SDK versions are pinned? Which ESLint/plugin versions work together? How are fonts handled in restricted builds? |
-| D02 | HTTP topology and tenant mapping | First tenant-aware endpoint | Implemented: direct one-label host resolution under a configured base domain, localhost default, no forwarded/tenant-header trust. Open: BFF, production DNS/proxies, custom domains and CORS. |
+| D02 | HTTP topology and tenant mapping | Storefront menu integration | Implemented: direct one-label host resolution under a configured base domain, localhost default, no forwarded/tenant-header trust. Accepted for first release: one-label tenant subdomains only; custom domains deferred. Open: frontend-to-API host mapping/BFF, production DNS/TLS/proxy setup, and CORS. |
 | D03 | Identity and permissions | Staff operations | Implemented: Better Auth email/password, Google/Microsoft OAuth, RS256 API JWTs, verified-email org signup, persisted issuer/subject membership, three staff roles, seven-day hashed email-bound single-use invites, Resend mail, and localized auth UI. Both schemas are migrated and the email/password signup/invitation path is verified on Neon `test`; provider credentials, real email, browser verification, and production rollout remain. |
 | D04 | Business use-case conventions | First business use case | Resolved: plain handlers, explicit validation/mapping, typed Result<T>, centralized Problem Details. Revisit only for a demonstrated need. |
 | D05 | Persistence | Migrations | Implemented mappings use EF Core/Npgsql and composite tenant keys. All seven EF migrations and Better Auth's independent `auth` schema are applied and verified on Neon `test`. Production remains unchanged. |
@@ -31,6 +31,7 @@ D04 is resolved by the architecture. D02/D03/D05-D09 are approved in the full AP
 | D08 | Order access and lifecycle | Confirmation/dashboard | Implemented approved transitions, manager cancellation, required If-Match, 412 stale and 428 missing precondition, and paged staff reads. |
 | D09 | Real-time delivery | Kitchen notifications | Implemented `/hubs/orders`, membership-checked tenant groups, transactional outbox, at-least-once event IDs/versions, retry, and REST recovery. Frontend subscriptions and live Better Auth multi-connection verification remain. |
 | D10 | Deployment | First hosted environment | Host, containers, domain/TLS termination, secret store, health checks, backups, rollback and observability? |
+| D11 | Catalog localization | Storefront menu | Accepted: storefront catalog copy must support `en` and `fr`. Open: translated fields, storage, editing/completeness, missing-translation behavior, locale-aware menu contract, and future order snapshot locale. See [decision 0003](architecture/decisions/0003-catalog-localization-and-tenant-domain-policy.md). |
 
 Do not fabricate product answers such as payment rules or pickup-time limits. Settle the decision when the requested implementation depends on it; continue independent work where possible. Record decisions using the format in the [documentation index](README.md), then update the relevant contract, schema, and acceptance scenarios together.
 

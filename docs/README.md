@@ -1,6 +1,6 @@
 # Documentation index
 
-Reviewed against the working tree on 2026-09-29. WhitePlate contains the first-release restaurant API plus source-wired Better Auth account, organization signup, and staff invitation flows. The auth database and invitation-email migrations and live external-provider setup remain deployment work.
+Reviewed against the working tree on 2026-09-30. WhitePlate contains the first-release restaurant API plus source-wired Better Auth account, organization signup, and staff invitation flows. The auth database and invitation-email migrations and live external-provider setup remain deployment work.
 
 ## Reading order
 
@@ -17,6 +17,7 @@ Reviewed against the working tree on 2026-09-29. WhitePlate contains the first-r
 | [Database design](database/database-schema.md) | Current organization/tenant/catalog/order/idempotency/outbox schema and remaining design notes |
 | [Tenant isolation and security](architecture/tenancy-and-security.md) | Trust boundaries, membership authorization and deployment requirements |
 | [Authentication decision](architecture/decisions/0002-authentication.md) | Better Auth, JWT/API boundary, email binding, and migration ownership |
+| [Catalog localization and tenant domain decision](architecture/decisions/0003-catalog-localization-and-tenant-domain-policy.md) | Accepted en/fr catalog translation requirement and first-release one-label subdomain policy; remaining implementation choices |
 | [Functional test plan](functional-test-plan.md) | Executable smoke checks and future acceptance criteria |
 | [Development roadmap](development-roadmap.md) | Implemented backend scope and unresolved frontend/deployment decisions |
 | [Documentation review](documentation-review.md) | Audit findings, verification evidence, and remaining blockers |

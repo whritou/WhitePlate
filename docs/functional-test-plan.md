@@ -71,7 +71,7 @@ On 2026-09-30, a dedicated verified `local-tester@whiteplate.invalid` account wa
 
 | ID | Scenario | Required outcome | Priority |
 | --- | --- | --- | --- |
-| SF-01 | Load populated/empty menus and unavailable products | Correct grouping/order, empty states, and agreed availability behavior | High |
+| SF-01 | Load populated/empty menus and unavailable products in English and French | Correct grouping/order, translated catalog copy under the approved missing-translation policy, empty states, and agreed availability behavior | High |
 | SF-02 | Add items, reload, switch tenant | No cart is included in the API scope; any future frontend cart remains tenant-scoped | High |
 | SF-03 | Submit valid order through the API/client | `201`, persisted order/items and server total; no payment/cart conversion is included | Critical |
 | SF-04 | Submit an unavailable product | Safe validation/error response, no partial order | High |
