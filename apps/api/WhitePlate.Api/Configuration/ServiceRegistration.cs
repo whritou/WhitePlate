@@ -134,6 +134,7 @@ public static class ServiceRegistration
         });
         services.AddOpenApi(options =>
         {
+            options.AddDocumentTransformer<SameOriginServerDocumentTransformer>();
             options.AddDocumentTransformer<BearerSecuritySchemeDocumentTransformer>();
             options.AddOperationTransformer<AuthenticationRequirementOperationTransformer>();
         });

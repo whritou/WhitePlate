@@ -39,7 +39,11 @@ if (swaggerEnabled)
     app.MapOpenApi();
 }
 
-app.UseHttpsRedirection();
+// Render terminates HTTPS before forwarding requests to this HTTP container.
+if (!app.Configuration.GetValue<bool>("RENDER"))
+{
+    app.UseHttpsRedirection();
+}
 
 app.UseRouting();
 app.UseMiddleware<RequestBodySizeLimitMiddleware>();
@@ -54,6 +58,7 @@ if (swaggerEnabled)
 }
 
 app.MapControllers();
+app.MapMethods("/", ["GET", "HEAD"], () => Results.Ok()).ExcludeFromDescription();
 app.MapHub<KitchenHub>("/hubs/orders").RequireAuthorization();
 
 app.Run();
