@@ -8,6 +8,7 @@ public sealed class ProductOptionGroup
     public Guid TenantId { get; private set; }
     public Guid ProductId { get; private set; }
     public string Name { get; private set; } = null!;
+    public string TranslationsJson { get; private set; } = "{}";
     public int MinimumSelections { get; private set; }
     public int MaximumSelections { get; private set; }
     public int SortOrder { get; private set; }
@@ -43,6 +44,9 @@ public sealed class ProductOptionGroup
         MaximumSelections = maximumSelections;
         SortOrder = sortOrder;
     }
+
+    public void SetTranslation(string? locale, string? name, string? description = null) =>
+        TranslationsJson = CatalogTranslations.Set(TranslationsJson, locale, name, description, 120);
 
     public void Archive() => IsArchived = true;
 }

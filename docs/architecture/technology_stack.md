@@ -8,7 +8,7 @@ Reviewed on 2026-09-29. Package manifests and the frontend lockfile are the sour
 | --- | --- | --- |
 | Web framework | Next.js 16.3.4, React/React DOM 19.2.8 | Frontend manifest, App Router pages |
 | Language | TypeScript, strict mode | `apps/frontend/tsconfig.json` |
-| Localization | next-intl | Plugin, Proxy, request config, en/fr catalogs |
+| Localization | next-intl | App UI uses en/fr; public menu languages are restaurant-configurable |
 | Styling | Tailwind CSS 4, PostCSS, tw-animate-css, shadcn styles | Global stylesheet and PostCSS config |
 | UI primitives | Base UI, class-variance-authority, cn | Button and class-name utilities |
 | Theme | next-themes | Client theme provider |
@@ -35,7 +35,7 @@ The manifest also includes `clsx`, `tailwind-merge`, Lucide, and the shadcn CLI.
 
 ## Configured per deployment
 
-EF Core and PostgreSQL implement organizations, tenants, catalog, order snapshots, idempotency, and outbox persistence. All seven EF migrations are applied to Neon `test`. Better Auth stores users/sessions/rate limits/JWT keys in a separate CLI-managed PostgreSQL `auth` schema, also migrated on `test`. The Better Auth CLI reports an unresolved `rateLimit.lastRequest` type difference (`int8` versus `number`); the local signup/invitation flow succeeds, but reconcile the warning before production. Google/Microsoft OAuth, Resend credentials, production issuer/audience and CORS origins need deployment configuration. MediatR, Compose and GitHub Actions remain unimplemented. No deployment host or CI policy is selected in executable configuration.
+EF Core and PostgreSQL implement organizations, tenants, catalog, order snapshots, idempotency, and outbox persistence. The first seven EF migrations are applied to Neon `test`; the new `CatalogLocalization` migration is not yet applied. Better Auth stores users/sessions/rate limits/JWT keys in a separate CLI-managed PostgreSQL `auth` schema, also migrated on `test`. The Better Auth CLI reports an unresolved `rateLimit.lastRequest` type difference (`int8` versus `number`); the local signup/invitation flow succeeds, but reconcile the warning before production. Google/Microsoft OAuth, Resend credentials, production issuer/audience and CORS origins need deployment configuration. MediatR, Compose and GitHub Actions remain unimplemented. No deployment host or CI policy is selected in executable configuration.
 
 The ASP.NET Core SignalR server, tenant-authenticated hub, and outbox dispatcher are registered and mapped. The frontend SignalR client package is not integrated into an application flow.
 

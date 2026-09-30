@@ -14,6 +14,7 @@ public sealed class ProductOptionGroupConfiguration : IEntityTypeConfiguration<P
         builder.Property(group => group.TenantId).IsRequired();
         builder.Property(group => group.ProductId).IsRequired();
         builder.Property(group => group.Name).IsRequired().HasMaxLength(120);
+        builder.Property(group => group.TranslationsJson).IsRequired();
         builder.Property(group => group.MinimumSelections).IsRequired();
         builder.Property(group => group.MaximumSelections).IsRequired();
         builder.Property(group => group.SortOrder).IsRequired();

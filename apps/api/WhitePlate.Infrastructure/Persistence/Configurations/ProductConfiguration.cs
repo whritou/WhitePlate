@@ -15,6 +15,7 @@ public sealed class ProductConfiguration : IEntityTypeConfiguration<Product>
         builder.Property(product => product.CategoryId).IsRequired();
         builder.Property(product => product.Name).IsRequired().HasMaxLength(Product.MaxNameLength);
         builder.Property(product => product.Description).HasMaxLength(Product.MaxDescriptionLength);
+        builder.Property(product => product.TranslationsJson).IsRequired();
         builder.Property(product => product.BasePrice).HasPrecision(12, 2).IsRequired();
         builder.Property(product => product.TaxRatePercent).HasPrecision(5, 2).IsRequired();
         builder.Property(product => product.SortOrder).IsRequired();

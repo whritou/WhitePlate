@@ -21,6 +21,8 @@ public sealed class TenantConfiguration : IEntityTypeConfiguration<Tenant>
         builder.Property(tenant => tenant.Subdomain).HasConversion(
             subdomain => subdomain.Value, value => TenantSubdomain.Create(value)).IsRequired().HasMaxLength(63);
         builder.Property(tenant => tenant.Currency).IsRequired().HasMaxLength(3);
+        builder.Property(tenant => tenant.DefaultMenuLocale).IsRequired().HasMaxLength(128);
+        builder.Property(tenant => tenant.MenuLocalesJson).IsRequired();
         builder.HasIndex(tenant => tenant.Subdomain).IsUnique().HasDatabaseName(SubdomainIndex);
         builder.Property(tenant => tenant.IsActive).IsRequired();
     }

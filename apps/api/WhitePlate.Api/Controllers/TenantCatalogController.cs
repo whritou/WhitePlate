@@ -20,8 +20,53 @@ public sealed class TenantCatalogController(
     CreateDiscountCommandHandler createDiscount,
     CatalogManagementCommandHandler manageCatalog,
     GetManagementCatalogQueryHandler getManagementCatalog,
+    MenuLanguageSettingsHandler menuLanguageSettings,
     ApiErrorMapper errors) : ControllerBase
 {
+    [HttpGet("menu-languages")]
+    [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+    [ProducesResponseType<MenuLanguageSettingsDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status401Unauthorized, "application/problem+json")]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status404NotFound, "application/problem+json")]
+    public async Task<ActionResult<MenuLanguageSettingsDto>> GetMenuLanguages(Guid tenantId,
+        CancellationToken cancellationToken)
+    {
+        var identity = currentIdentity.Identity;
+        if (identity is null) return Unauthorized();
+        var result = await menuLanguageSettings.GetAsync(tenantId, identity, cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : errors.ToActionResult(errors.Create(HttpContext, result.Error));
+    }
+
+    [HttpPut("menu-languages")]
+    [ProducesResponseType<MenuLanguageSettingsDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status400BadRequest, "application/problem+json")]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status401Unauthorized, "application/problem+json")]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status404NotFound, "application/problem+json")]
+    public async Task<ActionResult<MenuLanguageSettingsDto>> UpdateMenuLanguages(Guid tenantId,
+        UpdateMenuLanguagesRequest request, CancellationToken cancellationToken)
+    {
+        var identity = currentIdentity.Identity;
+        if (identity is null) return Unauthorized();
+        var result = await menuLanguageSettings.UpdateAsync(tenantId, identity, request.Locales,
+            request.DefaultLocale, cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : errors.ToActionResult(errors.Create(HttpContext, result.Error));
+    }
+
+    [HttpPut("catalog/{entityType}/{entityId:guid}/translation")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status400BadRequest, "application/problem+json")]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status401Unauthorized, "application/problem+json")]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status404NotFound, "application/problem+json")]
+    public async Task<IActionResult> UpdateTranslation(Guid tenantId, string entityType, Guid entityId,
+        UpdateCatalogTranslationRequest request, CancellationToken cancellationToken)
+    {
+        var identity = currentIdentity.Identity;
+        if (identity is null) return Unauthorized();
+        var result = await menuLanguageSettings.TranslateAsync(tenantId, entityId, entityType, identity,
+            request.Locale, request.Name, request.Description, cancellationToken);
+        return result.IsSuccess ? NoContent() : errors.ToActionResult(errors.Create(HttpContext, result.Error));
+    }
+
     [HttpGet("catalog")]
     [ProducesResponseType<CatalogManagementDto>(StatusCodes.Status200OK)]
     [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status401Unauthorized, "application/problem+json")]

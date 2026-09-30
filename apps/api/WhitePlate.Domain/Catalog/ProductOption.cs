@@ -8,6 +8,7 @@ public sealed class ProductOption
     public Guid TenantId { get; private set; }
     public Guid GroupId { get; private set; }
     public string Name { get; private set; } = null!;
+    public string TranslationsJson { get; private set; } = "{}";
     public decimal PriceAdjustment { get; private set; }
     public int SortOrder { get; private set; }
     public bool IsArchived { get; private set; }
@@ -40,6 +41,9 @@ public sealed class ProductOption
         PriceAdjustment = priceAdjustment;
         SortOrder = sortOrder;
     }
+
+    public void SetTranslation(string? locale, string? name, string? description = null) =>
+        TranslationsJson = CatalogTranslations.Set(TranslationsJson, locale, name, description, 120);
 
     public void Archive() => IsArchived = true;
 }

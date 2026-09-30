@@ -11,6 +11,7 @@ public sealed class Product
     public Guid CategoryId { get; private set; }
     public string Name { get; private set; } = null!;
     public string? Description { get; private set; }
+    public string TranslationsJson { get; private set; } = "{}";
     public decimal BasePrice { get; private set; }
     public decimal TaxRatePercent { get; private set; }
     public int SortOrder { get; private set; }
@@ -39,6 +40,9 @@ public sealed class Product
     }
 
     public void SetAvailability(bool available) => IsAvailable = available;
+    public void SetTranslation(string? locale, string? name, string? description) =>
+        TranslationsJson = CatalogTranslations.Set(TranslationsJson, locale, name, description,
+            MaxNameLength, MaxDescriptionLength);
     public void Update(string? name, string? description, decimal basePrice, decimal taxRatePercent,
         int sortOrder, bool isAvailable)
     {

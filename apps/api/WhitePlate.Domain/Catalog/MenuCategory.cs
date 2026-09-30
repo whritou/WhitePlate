@@ -8,6 +8,7 @@ public sealed class MenuCategory
     public Guid Id { get; private set; }
     public Guid TenantId { get; private set; }
     public string Name { get; private set; } = null!;
+    public string TranslationsJson { get; private set; } = "{}";
     public int SortOrder { get; private set; }
     public bool IsArchived { get; private set; }
 
@@ -21,6 +22,8 @@ public sealed class MenuCategory
     }
 
     public void Rename(string? name) => Name = NormalizeName(name);
+    public void SetTranslation(string? locale, string? name, string? description = null) =>
+        TranslationsJson = CatalogTranslations.Set(TranslationsJson, locale, name, description, MaxNameLength);
     public void Update(string? name, int sortOrder)
     {
         if (sortOrder < 0) throw new DomainRuleException("invalid_sort_order", "sortOrder", "Sort order cannot be negative.");

@@ -15,9 +15,9 @@ public sealed class MenuController(ICurrentTenant currentTenant, GetMenuQueryHan
     [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
     [ProducesResponseType<MenuDto>(StatusCodes.Status200OK)]
     [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status404NotFound, "application/problem+json")]
-    public async Task<ActionResult<MenuDto>> Get(CancellationToken cancellationToken)
+    public async Task<ActionResult<MenuDto>> Get([FromQuery] string? locale, CancellationToken cancellationToken)
     {
         var tenant = currentTenant.Tenant ?? throw new InvalidOperationException("Tenant resolution is required.");
-        return Ok(await getMenu.HandleAsync(tenant, cancellationToken));
+        return Ok(await getMenu.HandleAsync(tenant, locale, cancellationToken));
     }
 }

@@ -7,3 +7,5 @@ public sealed record UpdateOptionGroupRequest(string Name, int MinimumSelections
     int SortOrder);
 public sealed record UpdateOptionRequest(string Name, decimal PriceAdjustment, int SortOrder);
 public sealed record UpdateDiscountRequest(string Name, string Kind, decimal Value);
+public sealed record UpdateMenuLanguagesRequest(IReadOnlyList<string> Locales, string DefaultLocale);
+public sealed record UpdateCatalogTranslationRequest(string Locale, string Name, string? Description);

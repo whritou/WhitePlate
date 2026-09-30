@@ -31,9 +31,9 @@ public sealed class OrganizationProvisioningRepository(WhitePlateDbContext datab
         if (!await database.OrganizationOwnerMemberships.AsNoTracking().AnyAsync(membership =>
             membership.OrganizationId == organizationId && membership.Issuer == identity.Issuer &&
             membership.Subject == identity.Subject, cancellationToken)) return null;
-        return await database.Tenants.AsNoTracking().Where(tenant => tenant.OrganizationId == organizationId)
-            .OrderBy(tenant => tenant.Name).Select(tenant => new TenantDto(tenant.Id, tenant.OrganizationId,
-                tenant.Name, tenant.Subdomain.Value, tenant.Currency)).ToListAsync(cancellationToken);
+        var restaurants = await database.Tenants.AsNoTracking().Where(tenant => tenant.OrganizationId == organizationId)
+            .OrderBy(tenant => tenant.Name).ToListAsync(cancellationToken);
+        return restaurants.Select(TenantDto.FromDomain).ToArray();
     }
 
     public Task SaveChangesAsync(CancellationToken cancellationToken) => database.SaveChangesAsync(cancellationToken);
