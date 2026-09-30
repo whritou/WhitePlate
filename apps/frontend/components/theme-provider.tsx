@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import { ThemeProvider as NextThemesProvider, useTheme } from "next-themes"
+import { isThemeShortcutKey } from "./theme-hotkey"
 
 function ThemeProvider({
   children,
@@ -50,7 +51,7 @@ function ThemeHotkey() {
         return
       }
 
-      if (event.key.toLowerCase() !== "d") {
+      if (!isThemeShortcutKey(event.key)) {
         return
       }
 
