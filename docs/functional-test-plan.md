@@ -31,7 +31,7 @@ if (-not $spec.paths.'/api/v1/tenants/{tenantId}/catalog') { throw 'Catalog mana
 Invoke-WebRequest http://localhost:5182/swagger -NoProxy | Select-Object -ExpandProperty StatusCode
 ```
 
-The local Neon `test` branch and the OpenAPI/Swagger endpoints were verified on 2026-09-29. The branch currently has no organization/tenant fixture; a valid tenant call returns `404` until an organization and restaurant are provisioned. The xUnit API tests run through an in-memory host and do not detect every local port, external OAuth, or Windows logging issue. Migration seven and Better Auth's `auth` schema are not yet applied.
+The local Neon `test` branch and the OpenAPI/Swagger endpoints were verified on 2026-09-29. All seven EF migrations and Better Auth's `auth` schema are applied there. The branch has test-only signup, organization, and membership records from the local invitation flow; do not treat it as an empty database. The xUnit API tests run through an in-memory host and do not detect every local port, external OAuth, or Windows logging issue.
 
 ## 2. Live integration and frontend acceptance scenarios
 
@@ -40,6 +40,8 @@ Automated tests cover the API behaviors in the contracts. These scenarios check 
 ### Authentication and onboarding
 
 The local email/password signup, email verification, organization creation, and invitation acceptance path was exercised against the Neon `test` database on 2026-09-29 with test-only `.invalid` addresses and locally intercepted email delivery. The browser scenarios below, OAuth providers, and real email delivery remain unverified; configure Google and Microsoft callback URLs and a verified Resend sender before running those checks.
+
+On 2026-09-30, a dedicated verified `local-tester@whiteplate.invalid` account was added using intercepted verification, and a JWT minted with the current signing key passed live `GET /api/v1/me` with HTTP 200. The real frontend sign-in endpoint returned 200 and its session cookie loaded `/en/organization` with HTTP 200 using Webpack dev mode; Turbopack hit the documented Windows process error 5. The account has no organization membership by default. Browser interaction and Swagger UI interaction remain separate acceptance checks.
 
 | ID | Scenario | Required outcome | Priority |
 | --- | --- | --- | --- |
