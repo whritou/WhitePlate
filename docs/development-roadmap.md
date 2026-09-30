@@ -8,7 +8,7 @@ Status: the [full API design](superpowers/specs/2026-09-29-full-api-design.md) a
 | --- | --- | --- |
 | 1. Reproducible baseline | Toolchain versions, lint compatibility, build environment, frontend test scripts and CI | Fresh setup/build/checks documented and repeatable; API tests and root ignore policy are now in place |
 | 2. Tenant and identity foundation | Host resolution, staff permissions, persistence, two-tenant fixtures | Backend organization, membership, tenancy, email-bound invitation, and isolation tests pass; new migration still needs deployment |
-| 3. Read-only storefront | Tenant catalog, API DTOs, locale-aware UI, branding | Backend tenant menu/catalog API is complete; frontend integration and cache behavior remain |
+| 3. Read-only storefront | Tenant catalog, API DTOs, locale-aware UI, branding | Backend tenant menu/catalog API and tenant/locale query-key plus client-state primitives are ready; storefront API integration, tenant host mapping, and cache behavior remain |
 | 4. Checkout | Server pricing, order transaction, retry semantics | Backend checkout, pricing, tax/discount, snapshots and idempotency tests pass; no cart/payment is in scope |
 | 5. Kitchen workflow | Staff order list, lifecycle rules, real-time notifications, recovery | Backend authorization, concurrency, outbox and hub access are implemented; frontend recovery and live Better Auth SignalR test remain |
 | 6. Deployment readiness | Runtime topology, TLS, secrets, migrations, observability, backups/restore | Documented deployment/rollback and successful restore/recovery checks appropriate to the chosen infrastructure |

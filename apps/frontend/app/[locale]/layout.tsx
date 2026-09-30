@@ -3,7 +3,7 @@ import { hasLocale, NextIntlClientProvider } from "next-intl"
 import { getMessages, setRequestLocale } from "next-intl/server"
 import { notFound } from "next/navigation"
 
-import { ThemeProvider } from "@/components/theme-provider"
+import { AppProviders } from "@/components/app-providers"
 import { routing } from "@/i18n/routing"
 import { cn } from "@/lib/utils"
 
@@ -42,12 +42,12 @@ export default async function LocaleLayout({
         fontMono.variable,
         "font-sans",
         inter.variable,
-        robotoHeading.variable,
+        robotoHeading.variable
       )}
     >
       <body>
         <NextIntlClientProvider messages={messages}>
-          <ThemeProvider>{children}</ThemeProvider>
+          <AppProviders>{children}</AppProviders>
         </NextIntlClientProvider>
       </body>
     </html>
