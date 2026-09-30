@@ -6,6 +6,49 @@ import { whitePlateApi } from "@/lib/api"
 type ActionErrorMessage = "unauthorized" | "invalid" | "unavailable"
 type ActionResult = { ok: true } | { ok: false; message: ActionErrorMessage }
 
+export async function updateMenuLanguagesAction(input: {
+  tenantId: string
+  locales: string[]
+  defaultLocale: string
+}): Promise<ActionResult> {
+  const validUuid = /^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i
+  if (!input || typeof input !== "object" || typeof input.tenantId !== "string" ||
+    typeof input.defaultLocale !== "string" || !validUuid.test(input.tenantId) ||
+    !Array.isArray(input.locales) || input.locales.length === 0 ||
+    input.locales.some((locale) => typeof locale !== "string" || locale.length > 255) ||
+    !input.locales.includes(input.defaultLocale)) return { ok: false, message: "invalid" }
+
+  const response = await whitePlateApi.put<void, { locales: string[]; defaultLocale: string }>(
+    `/api/v1/tenants/${input.tenantId}/menu-languages`,
+    { locales: input.locales, defaultLocale: input.defaultLocale },
+  )
+  return response.ok ? { ok: true } : { ok: false, message: toActionMessage(response.error) }
+}
+
+export async function saveCatalogTranslationAction(input: {
+  tenantId: string
+  entityType: "categories" | "products" | "option-groups" | "options"
+  entityId: string
+  locale: string
+  name: string
+  description: string | null
+}): Promise<ActionResult> {
+  const validUuid = /^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i
+  const validTypes = ["categories", "products", "option-groups", "options"]
+  if (!input || typeof input !== "object" || typeof input.tenantId !== "string" ||
+    typeof input.entityId !== "string" || !validUuid.test(input.tenantId) || !validUuid.test(input.entityId) ||
+    !validTypes.includes(input.entityType) || typeof input.locale !== "string" || input.locale.length > 255 ||
+    typeof input.name !== "string" || input.name.trim().length === 0 || input.name.length > 160 ||
+    (input.description !== null && (typeof input.description !== "string" || input.description.length > 1000))) {
+    return { ok: false, message: "invalid" }
+  }
+  const response = await whitePlateApi.put<void, { locale: string; name: string; description: string | null }>(
+    `/api/v1/tenants/${input.tenantId}/catalog/${input.entityType}/${input.entityId}/translation`,
+    { locale: input.locale, name: input.name, description: input.description },
+  )
+  return response.ok ? { ok: true } : { ok: false, message: toActionMessage(response.error) }
+}
+
 export async function createOrganizationAction(formData: FormData): Promise<ActionResult> {
   const name = String(formData.get("name") ?? "").trim()
   if (!name || name.length > 200) return { ok: false, message: "invalid" }

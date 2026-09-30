@@ -1,6 +1,6 @@
 # Functional test plan
 
-This is an acceptance plan, not a test-results report. The API suite covers tenant/organization/staff/catalog behavior, verified email and invitation binding, checkout pricing/idempotency, order workflow, body/rate limits, outbox dispatch, and hub authorization. The test-database schema migrations and local email/password signup/invitation path are verified. Live OAuth, real Resend delivery, browser auth flows, and SignalR acceptance remain to be run. The earlier documentation audit is in [documentation review](documentation-review.md).
+This is an acceptance plan, not a test-results report. The existing API suite covers tenant/organization/staff/catalog CRUD, verified email and invitation binding, checkout pricing/idempotency, order workflow, body/rate limits, outbox dispatch, and hub authorization. The new catalog-localization paths are not behaviorally tested yet, and their migration is not applied. The prior test-database schema migrations and local email/password signup/invitation path are verified. Live OAuth, real Resend delivery, browser auth flows, and SignalR acceptance remain to be run. The earlier documentation audit is in [documentation review](documentation-review.md).
 
 ## 1. Current scaffold checks
 
@@ -31,11 +31,11 @@ if (-not $spec.paths.'/api/v1/tenants/{tenantId}/catalog') { throw 'Catalog mana
 Invoke-WebRequest http://localhost:5182/swagger -NoProxy | Select-Object -ExpandProperty StatusCode
 ```
 
-The local Neon `test` branch and the OpenAPI/Swagger endpoints were verified on 2026-09-29. All seven EF migrations and Better Auth's `auth` schema are applied there. The branch has test-only signup, organization, and membership records from the local invitation flow; do not treat it as an empty database. The xUnit API tests run through an in-memory host and do not detect every local port, external OAuth, or Windows logging issue.
+The local Neon `test` branch and the OpenAPI/Swagger endpoints were verified on 2026-09-29. The first seven EF migrations and Better Auth's `auth` schema are applied there; `CatalogLocalization` is not yet applied. The branch has test-only signup, organization, and membership records from the local invitation flow; do not treat it as an empty database. The xUnit API tests run through an in-memory host and do not detect every local port, external OAuth, or Windows logging issue.
 
 ## 2. Live integration and frontend acceptance scenarios
 
-Automated tests cover the API behaviors in the contracts. These scenarios check the configured Better Auth issuer, live PostgreSQL behavior, real SignalR connections, and frontend flows. Before execution, provision two tenants A/B with distinct staff identities and menus; include an unavailable product, stale order version, and malformed/expired credentials.
+Existing automated tests cover the previously implemented API behaviors in the contracts. The catalog-localization paths have build verification only and require behavioral acceptance after applying `CatalogLocalization`. These scenarios also check the configured Better Auth issuer, live PostgreSQL behavior, real SignalR connections, and frontend flows. Before execution, provision two tenants A/B with distinct staff identities and menus; include an unavailable product, stale order version, and malformed/expired credentials.
 
 ### Authentication and onboarding
 
@@ -64,14 +64,17 @@ On 2026-09-30, a dedicated verified `local-tester@whiteplate.invalid` account wa
 | MT-02 | Staff A lists, reads, updates, and deletes data using B's resource IDs | No B data disclosed or changed; verify database state as well as response | Critical |
 | MT-03 | Spoof tenant headers, mismatch host/token tenant, link a product to B's category | No privilege gain or cross-tenant relationship; both app and database constraints tested | Critical |
 | MT-04 | Change one tenant's theme, then reload both storefronts | Correct branding and isolated cache invalidation | Medium |
-| MT-05 | Browse en/fr for both tenants, switch tenants with a saved cart | Locale and tenant remain independent; cart and cached data do not leak | High |
+| MT-05 | Browse each restaurant's configured menu languages, switch tenant | Menu locale remains independent of the app's `/en` or `/fr` interface locale; restaurant languages do not leak across tenants | High |
 | MT-06 | Exercise raw SQL, background jobs, maintenance, and tenant-context absence | Only explicit authorized scope operates; missing context fails closed | Critical |
 
 ### Storefront and checkout
 
 | ID | Scenario | Required outcome | Priority |
 | --- | --- | --- | --- |
-| SF-01 | Load populated/empty menus and unavailable products | Correct grouping/order, empty states, and agreed availability behavior | High |
+| SF-01 | Load populated/empty menus in several enabled languages, including an untranslated item and unavailable product | Correct grouping/order, translated fields, default-language fallback, unavailable state, empty states, and unsupported locale resolving to the restaurant default | High |
+| SF-10 | Owner/manager edits menu languages and translations; attempt to remove the final language and use a duplicate or invalid tag | At least one enabled language and one included default always remain; translations can be saved only for enabled languages; kitchen staff cannot change settings or translations | High |
+| SF-12 | Change the default while active catalog items lack translations; then translate all active items and retry | The first change is rejected without changing settings; the change succeeds after every active category, product, option group, and option has a translation in the new default language | High |
+| SF-11 | Request storefront on the configured base host, a one-label tenant subdomain, a nested subdomain, and an unrelated host | Only a validated one-label subdomain routes to the matching public menu; raw/forwarded host values do not select another tenant | High |
 | SF-02 | Add items, reload, switch tenant | No cart is included in the API scope; any future frontend cart remains tenant-scoped | High |
 | SF-03 | Submit valid order through the API/client | `201`, persisted order/items and server total; no payment/cart conversion is included | Critical |
 | SF-04 | Submit an unavailable product | Safe validation/error response, no partial order | High |

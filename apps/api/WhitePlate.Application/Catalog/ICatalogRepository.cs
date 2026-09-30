@@ -5,6 +5,14 @@ namespace WhitePlate.Application.Catalog;
 public interface ICatalogRepository
 {
     Task<MenuDto> GetMenuAsync(TenantDto tenant, CancellationToken cancellationToken);
+    Task<MenuDto> GetMenuAsync(TenantDto tenant, string? locale, CancellationToken cancellationToken) =>
+        GetMenuAsync(tenant, cancellationToken);
+    Task<MenuLanguageSettingsDto?> GetMenuLanguageSettingsAsync(Guid tenantId, CancellationToken cancellationToken) =>
+        Task.FromResult<MenuLanguageSettingsDto?>(null);
+    Task<MenuLanguageSettingsDto?> UpdateMenuLanguageSettingsAsync(Guid tenantId, IReadOnlyList<string> locales,
+        string defaultLocale, CancellationToken cancellationToken) => Task.FromResult<MenuLanguageSettingsDto?>(null);
+    Task<bool> SetTranslationAsync(Guid tenantId, string entityType, Guid entityId, string locale, string name,
+        string? description, CancellationToken cancellationToken) => Task.FromResult(false);
     Task<CatalogManagementDto?> GetManagementCatalogAsync(Guid tenantId, CancellationToken cancellationToken);
     Task<bool> CategoryBelongsToTenantAsync(Guid tenantId, Guid categoryId, CancellationToken cancellationToken);
     Task<MenuCategoryDto> AddCategoryAsync(WhitePlate.Domain.Catalog.MenuCategory category, CancellationToken cancellationToken);

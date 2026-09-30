@@ -18,6 +18,7 @@ public sealed class TenantsController(ICurrentTenant currentTenant) : Controller
     public ActionResult<TenantResponse> Get()
     {
         var tenant = currentTenant.Tenant ?? throw new InvalidOperationException("Tenant resolution is required.");
-        return new TenantResponse(tenant.Id, tenant.Name, tenant.Subdomain, tenant.Currency);
+        return new TenantResponse(tenant.Id, tenant.Name, tenant.Subdomain, tenant.Currency,
+            tenant.DefaultMenuLocale, tenant.MenuLocales);
     }
 }

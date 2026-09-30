@@ -99,6 +99,7 @@ public static class ServiceRegistration
         services.AddScoped<CreateDiscountCommandHandler>();
         services.AddScoped<CatalogManagementCommandHandler>();
         services.AddScoped<GetManagementCatalogQueryHandler>();
+        services.AddScoped<MenuLanguageSettingsHandler>();
         services.AddScoped<CreateProductCommandHandler>();
         services.AddScoped<IStaffMembershipRepository, StaffMembershipRepository>();
         services.AddScoped<IStaffDirectoryRepository, StaffDirectoryRepository>();

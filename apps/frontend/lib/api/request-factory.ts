@@ -18,6 +18,7 @@ type RequestOptions = { signal?: AbortSignal }
 type ApiRequestFactoryOptions = {
   baseUrl: string | undefined | (() => string | undefined)
   getToken: () => Promise<string | null>
+  public?: boolean
   fetcher?: typeof fetch
   onDiagnostic?: (diagnostic: ApiDiagnostic) => void
 }
@@ -25,6 +26,7 @@ type ApiRequestFactoryOptions = {
 export function createApiRequestFactory({
   baseUrl,
   getToken,
+  public: isPublic = false,
   fetcher = fetch,
   onDiagnostic,
 }: ApiRequestFactoryOptions) {
@@ -74,19 +76,21 @@ export function createApiRequestFactory({
       return fail(503, "unavailable")
     }
 
-    let token: string | null
-    try {
-      token = await getToken()
-    } catch (error) {
-      diagnostic.causeName = safeCauseName(error)
-      record()
-      return fail(503, "unavailable")
+    let token: string | null = null
+    if (!isPublic) {
+      try {
+        token = await getToken()
+      } catch (error) {
+        diagnostic.causeName = safeCauseName(error)
+        record()
+        return fail(503, "unavailable")
+      }
+      if (!token) return fail(401, "unauthorized")
     }
-    if (!token) return fail(401, "unauthorized")
 
     try {
       const headers = new Headers({ Accept: "application/json" })
-      headers.set("Authorization", `Bearer ${token}`)
+      if (token) headers.set("Authorization", `Bearer ${token}`)
       if (body !== undefined) headers.set("Content-Type", "application/json")
 
       const response = await fetcher(url, {

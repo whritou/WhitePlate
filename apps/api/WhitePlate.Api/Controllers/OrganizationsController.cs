@@ -56,7 +56,8 @@ public sealed class OrganizationsController(
         var restaurants = await organizations.ListRestaurantsOwnedAsync(organizationId, identity, cancellationToken);
         return restaurants is null
             ? errors.ToActionResult(errors.Create(HttpContext, new ApplicationError(ErrorCode.NotFound)))
-            : Ok(restaurants.Select(item => new TenantResponse(item.Id, item.Name, item.Subdomain, item.Currency)).ToArray());
+            : Ok(restaurants.Select(item => new TenantResponse(item.Id, item.Name, item.Subdomain, item.Currency,
+                item.DefaultMenuLocale, item.MenuLocales)).ToArray());
     }
 
     [HttpPatch("{organizationId:guid}")]
@@ -85,7 +86,8 @@ public sealed class OrganizationsController(
         if (!result.IsSuccess) return errors.ToActionResult(errors.Create(HttpContext, result.Error));
         var tenant = result.Value;
         return StatusCode(StatusCodes.Status201Created,
-            new TenantResponse(tenant.Id, tenant.Name, tenant.Subdomain, tenant.Currency));
+            new TenantResponse(tenant.Id, tenant.Name, tenant.Subdomain, tenant.Currency,
+                tenant.DefaultMenuLocale, tenant.MenuLocales));
     }
 
     [HttpPost("{organizationId:guid}/invitations")]

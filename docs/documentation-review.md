@@ -70,6 +70,22 @@ The test database now contains test-only signup and organization/membership reco
 
 The exact runtime prerequisites and migration ownership are documented in the [auth setup](development.md#authentication-configuration), [schema guide](database/database-schema.md), and [authentication decision](architecture/decisions/0002-authentication.md).
 
+## Restaurant menu localization implementation verification — 2026-09-30
+
+The restaurant-configurable locale and translated catalog source was added after the earlier verification. These are compile/build checks only; no API, xUnit, Vitest, or browser behavior tests were run for this change. `CatalogLocalization` is checked in and its SQL script was generated, but it has not been applied to Neon `test` or production.
+
+| Check | Result |
+| --- | --- |
+| `dotnet build apps/api/WhitePlate.Api/WhitePlate.Api.csproj --no-restore -p:BaseOutputPath=.codex-build/bin/` | Passed, zero warnings/errors. A pre-existing API process held the normal output DLLs, so the build used isolated output folders and left that process untouched. |
+| `dotnet ef migrations script 20260929123238_IdempotencyTenantOwnership 20260930160026_CatalogLocalization ... --no-build` | Passed. Generated SQL contains the tenant defaults (`en`, `["en"]`) and empty translation JSON (`{}`); no database was contacted. |
+| Bundled Node executable with `node_modules/typescript/bin/tsc --noEmit` from `apps/frontend` | Passed. The ordinary `npm` command was unavailable on PATH; the bundled pnpm command attempted a network install and aborted because registry access was unavailable, so the installed TypeScript CLI was called directly. |
+| Parse `messages/en.json` and `messages/fr.json` with PowerShell `ConvertFrom-Json` | Passed. |
+| Focused ESLint run for changed frontend files | Failed at the known ESLint 10 / `eslint-plugin-react` mismatch: `contextOrFilename.getFilename is not a function`. |
+| `node node_modules/next/dist/bin/next build` | Failed when Turbopack tried to spawn a Node worker; Windows returned access denied, OS error 5, matching the documented baseline. |
+| API solution tests, frontend unit tests, database migration application, and browser acceptance | Not run. The latest migration and its end-to-end flows remain to be accepted after migration rollout. |
+
+An offline `dotnet restore` attempt for the EF Design package could not read the user NuGet configuration because access was denied. The existing restored assets were sufficient for the isolated API build and migration-script generation. No database was changed.
+
 ## API request and locale refactor verification — 2026-09-29
 
 The authenticated server API client now centralizes GET/POST/PUT/DELETE calls, returns sanitized result codes, and records bounded server diagnostics. Locale is established by the localized root layout; components use next-intl request/client locale context, leaving explicit locale only on the intentional language switcher. See the [frontend architecture](architecture/WHITEPLATE_FRONTEND_ARCHITECTURE.md) for the request and locale lifecycle.

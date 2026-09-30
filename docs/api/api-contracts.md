@@ -1,6 +1,6 @@
 # API contracts
 
-Status: the Better Auth frontend, email/password and social auth routes, server-side API token exchange, organization signup, and email-bound invitations are wired in source. API behavior is covered by its automated suite. Both the Better Auth auth schema and EF invitation-email migration are applied on Neon `test`; email/password signup, organization creation, and invitation acceptance were exercised against that database using locally intercepted email delivery. Provider credentials, production domain/CORS settings, browser OAuth, real email delivery, and production migrations remain deployment/verification work.
+Status: the Better Auth frontend, email/password and social auth routes, server-side API token exchange, organization signup, and email-bound invitations are wired in source. Existing API behavior is covered by its automated suite; the new localization paths have compile verification but still need behavioral acceptance after the migration is applied. The first seven EF migrations and Better Auth auth schema are applied on Neon `test`; `CatalogLocalization` is not. Email/password signup, organization creation, and invitation acceptance were previously exercised there using locally intercepted email delivery. Provider credentials, production domain/CORS settings, browser OAuth, real email delivery, and production migrations remain deployment/verification work.
 
 ## 1. HTTP routes
 
@@ -8,8 +8,8 @@ All paths are rooted at `/api/v1`. Success responses contain the resource direct
 
 | Method and path | Access | Behavior |
 | --- | --- | --- |
-| `GET /tenant` | Public, resolved restaurant host | Return active tenant id, name, and subdomain; invalid/unknown/inactive host receives `404` |
-| `GET /menu` | Public, resolved restaurant host | Return currency and ordered categories with available, non-archived products and options |
+| `GET /tenant` | Public, resolved restaurant host | Return active tenant id, name, subdomain, default menu language, and enabled menu languages; invalid/unknown/inactive host receives `404` |
+| `GET /menu?locale={tag}` | Public, resolved restaurant host | Return the localized menu for an enabled language, or the restaurant default when omitted/unsupported; includes unavailable non-archived products with availability state |
 | `POST /organizations` | Better Auth bearer, verified email | Create an organization and make the caller its first owner |
 | `GET /organizations` | Better Auth bearer, owner | List the caller's organizations |
 | `GET /organizations/{organizationId}/restaurants` | Better Auth bearer, owner | List restaurants owned by the organization |
@@ -20,6 +20,9 @@ All paths are rooted at `/api/v1`. Success responses contain the resource direct
 | `POST /invitations/accept` | Better Auth bearer, verified invitee | Accept only when the JWT verified email matches the invitation email |
 | `GET /me` | Better Auth bearer | Return the current identity and its organization/restaurant memberships |
 | `GET /tenants/{tenantId}/catalog` | Organization owner or restaurant manager | Read tenant catalog entries, including archived entries and discount state |
+| `GET /tenants/{tenantId}/menu-languages` | Organization owner or restaurant manager | Read enabled menu language tags and default language |
+| `PUT /tenants/{tenantId}/menu-languages` | Organization owner or restaurant manager | Replace enabled menu languages and default; requires at least one unique language and a default included in the list. Changing the default requires translations for every active category, product, option group, and option in the new default language |
+| `PUT /tenants/{tenantId}/catalog/{entityType}/{entityId}/translation` | Organization owner or restaurant manager | Save a translated name and optional product description for an enabled locale; supported entity types are categories, products, option-groups, and options |
 | `POST /tenants/{tenantId}/categories` | Organization owner or restaurant manager | Create a category |
 | `PUT /tenants/{tenantId}/categories/{categoryId}` | Organization owner or restaurant manager | Update a category name and sort order |
 | `DELETE /tenants/{tenantId}/categories/{categoryId}` | Organization owner or restaurant manager | Archive the category and its product/option descendants |
@@ -41,6 +44,8 @@ All paths are rooted at `/api/v1`. Success responses contain the resource direct
 | `/hubs/orders` | Better Auth JWT authenticated SignalR connection | Join authorized restaurant groups and receive `order.changed` events |
 | `GET /openapi/v1.json`, `GET /swagger` | Anonymous when enabled | OpenAPI 3.1 JSON and interactive Swagger UI |
 
+The app interface supports `/en` and `/fr`; restaurant menu locales are independent and restaurant-configurable without a fixed count limit. Menu locale is requested with `GET /menu?locale=<tag>`. Names for categories, products, option groups, and options and product descriptions can be translated. Missing item translations fall back to the default language; omitted or unsupported request locales resolve to the default and the response reports the effective locale and available list. To change the default, every active category, product, option group, and option must first have a translation in the new language, so existing base-language text is not silently relabeled. Owners and restaurant managers edit menu languages and translations in the localized organization area. First-release tenant addressing uses one-label subdomains; custom domains are deferred. See [decision 0003](../architecture/decisions/0003-catalog-localization-and-tenant-domain-policy.md).
+
 The tenant ID in a protected route selects a resource. Every catalog/order query and mutation checks the authenticated issuer/subject membership for that tenant. Foreign or missing resource IDs return the same `404`. Kitchen staff can read/progress orders but cannot cancel them; owner/manager cancellation is allowed for incomplete orders.
 
 `POST /orders` resolves the restaurant from the request host. For local development, `bistro.localhost:5182` resolves the `bistro` tenant when `Tenancy:BaseDomain=localhost`. Forwarded-host and tenant headers are ignored. No public order lookup route exists; the create response is the receipt.
@@ -55,7 +60,7 @@ New customers use the localized organization signup flow, which creates the orga
 
 ## 3. Pricing, checkout, and order workflow
 
-The tenant menu includes ordered active categories and available products. Product records have a base price and percentage tax rate. Option groups enforce their minimum/maximum selection counts; selected options add fixed amounts. Prices use decimal arithmetic in EUR, USD, or GBP. The server allocates at most one fixed or percentage discount across lines, computes tax, and rounds line amounts to two decimal places using `AwayFromZero`. No payment, cart, inventory, tax-jurisdiction engine, or stacked promotion is included.
+The tenant menu includes ordered active categories and non-archived products, including items marked unavailable so the storefront can show their state. Checkout still rejects unavailable products. Product records have a base price and percentage tax rate. Option groups enforce their minimum/maximum selection counts; selected options add fixed amounts. Prices use decimal arithmetic in EUR, USD, or GBP. The server allocates at most one fixed or percentage discount across lines, computes tax, and rounds line amounts to two decimal places using `AwayFromZero`. Order snapshots do not record the menu locale yet. No payment, cart, inventory, tax-jurisdiction engine, or stacked promotion is included.
 
 `POST /orders` accepts a customer name, unique product lines, positive quantities, selected option IDs, and an optional discount code. The server derives tenant, names, prices, tax, currency, and totals from its catalog, then stores the order and purchase-time snapshots atomically. Requests are limited to 16 KiB. The fixed-window checkout limit is configured with `CheckoutRateLimit:PermitLimit`, `CheckoutRateLimit:WindowSeconds`, and `CheckoutRateLimit:QueueLimit`; buckets are per tenant and remote client address. `429` uses `rate_limited`.
 

@@ -1,4 +1,5 @@
 using WhitePlate.Domain.Common;
+using System.Text.Json;
 
 namespace WhitePlate.Domain.Tenants;
 
@@ -16,6 +17,8 @@ public sealed class Tenant
     public TenantSubdomain Subdomain { get; private set; } = null!;
     public string Currency { get; private set; } = null!;
     public bool IsActive { get; private set; }
+    public string DefaultMenuLocale { get; private set; } = "en";
+    public string MenuLocalesJson { get; private set; } = "[\"en\"]";
 
     private Tenant() { }
 
@@ -50,4 +53,29 @@ public sealed class Tenant
     }
 
     public void Deactivate() => IsActive = false;
+
+    public IReadOnlyList<string> GetMenuLocales() =>
+        JsonSerializer.Deserialize<string[]>(MenuLocalesJson) ?? [DefaultMenuLocale];
+
+    public bool SupportsMenuLocale(string? locale)
+    {
+        if (!MenuLocale.TryCreate(locale, out var normalized)) return false;
+        return GetMenuLocales().Contains(normalized!.Value, StringComparer.OrdinalIgnoreCase);
+    }
+
+    public void UpdateMenuLocales(IEnumerable<string>? locales, string? defaultLocale)
+    {
+        var values = locales?.Select(MenuLocale.Create).Select(locale => locale.Value).ToArray() ?? [];
+        var normalizedDefault = MenuLocale.Create(defaultLocale).Value;
+        if (values.Length == 0)
+            throw new DomainRuleException("menu_locale_required", "locales", "At least one menu language is required.");
+        if (values.Distinct(StringComparer.OrdinalIgnoreCase).Count() != values.Length)
+            throw new DomainRuleException("duplicate_menu_locale", "locales", "Menu languages must be unique.");
+        if (!values.Contains(normalizedDefault, StringComparer.OrdinalIgnoreCase))
+            throw new DomainRuleException("default_menu_locale_required", "defaultLocale",
+                "The default menu language must be one of the enabled languages.");
+
+        DefaultMenuLocale = normalizedDefault;
+        MenuLocalesJson = JsonSerializer.Serialize(values);
+    }
 }
