@@ -1,6 +1,7 @@
 import { betterAuth } from "better-auth"
 import { nextCookies } from "better-auth/next-js"
 import { jwt } from "better-auth/plugins"
+import { dash } from "@better-auth/infra"
 import { PostgresDialect } from "kysely"
 import { Pool } from "pg"
 import { sendAuthEmail } from "@/lib/email"
@@ -106,6 +107,7 @@ export const auth = betterAuth({
       : {}),
   },
   plugins: [
+    ...(process.env.BETTER_AUTH_API_KEY ? [dash({ apiKey: process.env.BETTER_AUTH_API_KEY })] : []),
     jwt({
       jwks: {
         keyPairConfig: { alg: "RS256", modulusLength: 2048 },

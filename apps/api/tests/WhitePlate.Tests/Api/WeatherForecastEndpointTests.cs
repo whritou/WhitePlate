@@ -100,13 +100,43 @@ public sealed class WeatherForecastEndpointTests
         Assert.Contains("Swagger UI", await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
     }
 
-    private static WebApplicationFactory<Program> CreateFactory(string environment = "Development", bool enableSwagger = false) =>
+    [Fact]
+    public async Task SwaggerUsesSameOriginBehindRenderProxy()
+    {
+        using var factory = CreateFactory("Production", enableSwagger: true, render: true);
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            BaseAddress = new Uri("http://whiteplate.onrender.com"), AllowAutoRedirect = false
+        });
+        using var response = await client.GetAsync("/openapi/v1.json", TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        using var document = JsonDocument.Parse(await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
+        Assert.Equal("/", document.RootElement.GetProperty("servers")[0].GetProperty("url").GetString());
+    }
+
+    [Theory]
+    [InlineData("GET")]
+    [InlineData("HEAD")]
+    public async Task RenderRootProbeReturnsSuccess(string method)
+    {
+        using var factory = CreateFactory("Production", render: true);
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            BaseAddress = new Uri("http://whiteplate.onrender.com"), AllowAutoRedirect = false
+        });
+        using var request = new HttpRequestMessage(new HttpMethod(method), "/");
+        using var response = await client.SendAsync(request, TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+    }
+
+    private static WebApplicationFactory<Program> CreateFactory(string environment = "Development", bool enableSwagger = false, bool render = false) =>
         new WebApplicationFactory<Program>().WithWebHostBuilder(builder =>
         {
             builder.UseSetting("environment", environment);
             builder.UseSetting("Authentication:Issuer", "https://localhost:3000");
             builder.UseSetting("Authentication:Audience", "whiteplate-api");
             builder.UseSetting("Swagger:Enabled", enableSwagger.ToString());
+            builder.UseSetting("RENDER", render.ToString());
             builder.ConfigureLogging(logging => logging.ClearProviders());
         });
 }
