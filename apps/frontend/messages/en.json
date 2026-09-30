@@ -113,6 +113,7 @@
     "translationError": "We couldn’t save this translation. Check the language and text, then try again."
   },
   "Storefront": {
+    "loadingMenu": "Loading restaurant menu…",
     "menuLanguage": "Menu language",
     "changeLanguage": "Change menu language",
     "menuDescription": "Explore the menu and current availability.",

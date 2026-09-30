@@ -1,3 +1,4 @@
+import { Suspense } from "react"
 import { headers } from "next/headers"
 import { getLocale, getTranslations } from "next-intl/server"
 import { Link } from "@/i18n/navigation"
@@ -17,6 +18,15 @@ export async function generateMetadata({ searchParams }: {
 }
 
 export default async function Page({ searchParams }: {
+  searchParams: Promise<{ menuLocale?: string }>
+}) {
+  const storefrontT = await getTranslations("Storefront")
+  return <Suspense fallback={<MenuLoading copy={storefrontT("loadingMenu")} />}>
+    <PageContent searchParams={searchParams} />
+  </Suspense>
+}
+
+async function PageContent({ searchParams }: {
   searchParams: Promise<{ menuLocale?: string }>
 }) {
   const [t, uiLocale, query, requestHeaders] = await Promise.all([
@@ -67,6 +77,27 @@ export default async function Page({ searchParams }: {
       </div>
     </main>
   )
+}
+
+function MenuLoading({ copy }: { copy: string }) {
+  return <main aria-busy="true" className="mx-auto min-h-svh max-w-4xl px-5 py-10 sm:px-8 sm:py-14">
+    <p role="status" className="mb-5 text-sm text-muted-foreground">{copy}</p>
+    <div aria-hidden="true" className="motion-safe:animate-pulse">
+      <header className="flex items-end justify-between gap-5 border-b border-border pb-6">
+        <div className="grid gap-3"><div className="h-3 w-20 rounded bg-muted" /><div className="h-9 w-64 max-w-full rounded bg-muted" /></div>
+        <div className="h-9 w-40 rounded-md bg-muted" />
+      </header>
+      <div className="mt-10 grid gap-10">
+        {[0, 1].map((category) => <section key={category} className="grid gap-5">
+          <div className="h-7 w-48 rounded bg-muted" />
+          {[0, 1, 2].map((product) => <div key={product} className="grid gap-3 border-b border-border pb-5">
+            <div className="h-5 w-56 max-w-full rounded bg-muted" />
+            <div className="h-4 w-80 max-w-full rounded bg-muted" />
+          </div>)}
+        </section>)}
+      </div>
+    </div>
+  </main>
 }
 
 function RestaurantMenu({ menu, uiLocale, copy }: {

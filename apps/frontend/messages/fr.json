@@ -113,6 +113,7 @@
     "translationError": "Impossible d’enregistrer cette traduction. Vérifiez la langue et le texte, puis réessayez."
   },
   "Storefront": {
+    "loadingMenu": "Chargement du menu…",
     "menuLanguage": "Langue du menu",
     "changeLanguage": "Changer la langue du menu",
     "menuDescription": "Consultez le menu et la disponibilité actuelle.",
