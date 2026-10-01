@@ -16,6 +16,7 @@ apps/frontend/
   components/
     app-providers.tsx         # Query, tenant-selection, and theme providers
     auth/                     # Auth and organization/invitation forms
+    storefront/               # Product choices, in-memory cart, checkout and receipt
     query-provider.tsx        # Per-provider TanStack Query client
     tenant-selection-provider.tsx # Request-tree scoped Zustand store
     theme-provider.tsx        # next-themes and keyboard shortcut
@@ -32,6 +33,8 @@ apps/frontend/
   lib/query/                 # Per-instance TanStack Query client factory
   lib/state/                 # Generic vanilla Zustand store factory and tenant selection state
   lib/organization-actions.ts # Organization, invitation, and acceptance actions
+  lib/checkout-actions.ts     # Same-origin guest checkout through the tenant host BFF
+  lib/checkout/               # Cart, immutable retry payload and receipt validation
   lib/utils.ts               # Re-exports cn from the cn package
   public/                    # Placeholder
   proxy.ts
@@ -59,11 +62,21 @@ Auth pages keep session checks and protected API access on the server. `lib/api/
 
 Its `d` shortcut ignores repeated/prevented events, Ctrl/Alt/Meta combinations, events without a string key, and input, textarea, select, or contenteditable targets. Shift is not excluded. `suppressHydrationWarning` is applied on `<html>` to accommodate theme-class changes; it is not a general hydration-error workaround.
 
-The theme currently changes light/dark appearance only. There is no restaurant-specific branding source. The sample button has no checkout or other business action.
+The theme currently changes light/dark appearance only. There is no restaurant-specific branding source. The storefront uses the existing button for cart and checkout actions.
+
+## Guest cart and checkout
+
+The server loads the tenant menu and renders `RestaurantMenu`, a Client Component keyed by the API tenant ID. Its cart has one line per product with editable quantity and option IDs. It uses component state without browser storage or a persisted cart. Reloading, leaving the page, or changing tenant clears cart/receipt state. A menu-language change uses localized router replacement and retains the same tenant's cart; the interface locale stays independent.
+
+`checkoutGuestOrder` requires an HTTP(S) Origin matching the actual request Host. It ignores forwarded-host and tenant headers, extracts the restaurant slug using the same validation as menu reads, and posts only customer name, promo code, product IDs, quantities, and option IDs to the configured server-only public API template. Browser prices, totals, tenant IDs, credentials, and raw Host are not forwarded. It bounds the payload at 16 KiB, uses a 15-second timeout, and validates receipt JSON. No API or database contract changes are introduced.
+
+The browser creates one UUID key and copied, normalized payload per attempt. Unchanged retries reuse both. A definite rejection allows editing and changed content gets a new key. A lost response, timeout, server failure, or malformed receipt leaves the outcome uncertain: editing and language switching are locked, and retry submits the original attempt. The receipt displays server totals, tax, discount, snapshot labels, and the order reference. Starting another order clears it. A synchronous guard prevents rapid double submissions.
+
+Safe errors have English/French messages. The API owns availability, option rules, pricing, tenant ownership, and idempotency. Menu locale is not submitted or persisted; localized snapshots remain the separate D11 decision. Payment, inventory, pickup scheduling, and public receipt lookup remain outside this feature. Browser acceptance uses a local deterministic API fixture; real database acceptance and deployment routing remain open. See [verification evidence](../documentation-review.md#guest-cart-and-checkout-verification--2026-10-01).
 
 ## Styling and UI conventions
 
-`app/globals.css` imports Tailwind, `tw-animate-css`, and shadcn styles, and maps CSS tokens through `@theme inline`. PostCSS uses `@tailwindcss/postcss`. There is no `tailwind.config.ts`; do not copy Tailwind 3 setup instructions into this app.
+`app/globals.css` imports Tailwind, `tw-animate-css`, and shadcn styles, and maps CSS tokens through `@theme inline`. Body and heading fonts use local system stacks; production builds do not fetch Google-hosted font files. PostCSS uses `@tailwindcss/postcss`. There is no `tailwind.config.ts`; do not copy Tailwind 3 setup instructions into this app.
 
 The button uses Base UI, not a Radix component API. `components.json` records the `base-lyra` style and aliases. `lib/utils.ts` re-exports `cn`; the button currently imports it directly from the package. Reuse existing utilities rather than adding another class-merging implementation.
 

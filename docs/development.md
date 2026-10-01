@@ -4,12 +4,14 @@ This guide runs the frontend and .NET API. The frontend now includes Better Auth
 
 ## Prerequisites and layout
 
-- Node.js and npm on PATH. Next.js currently declares Node >=20.9; the repository has no pinned Node/npm policy. Use a supported runtime compatible with all installed tools, not just Next.js's minimum.
-- .NET 10 SDK for the API. Root `global.json` selects Microsoft Testing Platform for `dotnet test`; it does not pin an SDK feature band.
-- Network access on first install/restore. The frontend imports Google fonts during compilation and may need external font access.
+- Node.js `24.19.0` and npm `11.17.0`, pinned by `apps/frontend/.nvmrc` and the frontend package's `engines`/`packageManager` fields. `apps/frontend/.npmrc` enforces the pins.
+- .NET 10 SDK, with `10.0.100` as the minimum feature band and `latestFeature` roll-forward. Root `global.json` also selects Microsoft Testing Platform for `dotnet test`.
+- Network access on first install/restore. Frontend builds use system font stacks and do not fetch fonts from Google.
+
+The frontend `.npmrc` enforces the exact runtime pins and uses legacy peer resolution because the React plugin currently bundled by Next.js declares ESLint support only through v9. The flat config wraps Next's plugin configs with ESLint's `@eslint/compat` utility, and lint runs against ESLint 10.
 - Docker is optional for the API-only container example. API persistence requires PostgreSQL. PostgreSQL/PgAdmin/Compose are not provisioned by the repository.
 
-Check your shell with `node --version`, `npm --version`, and `dotnet --version`. The frontend package is `apps/frontend`; the API host is `apps/api/WhitePlate.Api/WhitePlate.Api.csproj`. Its solution at `apps/api/WhitePlate.slnx` includes Domain, Application, Infrastructure, and backend tests. There is no root npm workspace or runnable root app.
+Check your shell with `node --version`, `npm --version`, and `dotnet --version`. Use the pinned tool versions shown above; `npm ci` rejects a different Node or npm version. The frontend package is `apps/frontend`; the API host is `apps/api/WhitePlate.Api/WhitePlate.Api.csproj`. Its solution at `apps/api/WhitePlate.slnx` includes Domain, Application, Infrastructure, and backend tests. There is no root npm workspace or runnable root app.
 
 ## Install and run
 
@@ -61,7 +63,8 @@ An HTTP-only API run may warn that it cannot determine the HTTPS port. This does
 | `apps/api/WhitePlate.Api/appsettings.json` | Logging, `AllowedHosts: "*"`, and `Tenancy:BaseDomain` (local default `localhost`) |
 | `apps/api/WhitePlate.Api/appsettings.Development.json` | Development logging and local Better Auth issuer/audience |
 | `apps/api/WhitePlate.Api/Properties/launchSettings.json` | Local URLs and Development environment |
-| `global.json` | Selects Microsoft Testing Platform for .NET 10 test runs; does not pin SDK version |
+| `apps/frontend/.nvmrc`, package `engines`, and `packageManager` | Pin Node.js 24.19.0 and npm 11.17.0 |
+| `global.json` | Pins the .NET 10.0.100 feature baseline with latest-feature roll-forward and selects Microsoft Testing Platform |
 
 API persistence needs server-only `ConnectionStrings__WhitePlate`. Set `Tenancy__BaseDomain` to the domain whose immediate subdomains identify tenants. For local storefront routing, set frontend `STOREFRONT_BASE_DOMAIN=localhost` and `PUBLIC_TENANT_API_URL_TEMPLATE=http://{tenant}.localhost:5182`; the base domain must match `Tenancy__BaseDomain`, and the template must use exactly that one tenant label. Production templates must use HTTPS and a wildcard route that reaches the API. These values are server-only and the frontend never forwards an arbitrary Host header. Protected routes require `Authentication__Issuer` (Better Auth base URL) and `Authentication__Audience` (same value as frontend `API_AUDIENCE`); production startup fails when either is absent. Browser CORS origins are supplied through `Cors__AllowedOrigins`. Checkout rate limits use `CheckoutRateLimit:PermitLimit`, `CheckoutRateLimit:WindowSeconds`, and `CheckoutRateLimit:QueueLimit`. Swagger is on by default in Development and can be enabled in a deployment with `Swagger__Enabled=true`. Its OpenAPI server is `/`, so browser calls use the Swagger page's HTTPS origin behind a proxy. On Render (`RENDER=true`), the API leaves HTTP-to-HTTPS redirection to Render's TLS proxy; `GET /` and `HEAD /` return 200 for service probes. For other hosts, configure forwarded headers and HTTPS redirection to match their proxy setup.
 
@@ -139,7 +142,28 @@ dotnet test apps/api/WhitePlate.slnx
 dotnet publish apps/api/WhitePlate.Api/WhitePlate.Api.csproj -c Release
 ```
 
-The xUnit v3 suite uses Microsoft Testing Platform selected in root `global.json` and includes Domain, Application, Infrastructure, project-dependency, and HTTP tests. Use `--no-restore` only when dependencies have already been restored. The frontend Vitest suite currently covers the API request factory. There is no CI workflow. Root `npm test` deliberately exits with the template's “no test specified” error. See [backend architecture](architecture/WHITEPLATE_BACKEND_ARCHITECTURE.md), [functional checks](functional-test-plan.md), and the [earlier review baseline](documentation-review.md).
+The xUnit v3 suite uses Microsoft Testing Platform selected in root `global.json` and includes Domain, Application, Infrastructure, project-dependency, and HTTP tests. Use `--no-restore` only when dependencies have already been restored. The frontend Vitest suite covers API requests, query/state primitives, the theme shortcut, and guest cart/checkout boundaries. GitHub Actions runs frontend install, tests, lint, typecheck, production build, and API tests on pushes and pull requests. Root `npm test` deliberately exits with the template's “no test specified” error. See [backend architecture](architecture/WHITEPLATE_BACKEND_ARCHITECTURE.md), [functional checks](functional-test-plan.md), and [verification evidence](documentation-review.md).
+
+## Guest checkout browser fixture
+
+The storefront uses the existing server-only tenant API template for both menu reads and checkout. No extra environment variables or schema changes are needed for guest cart/checkout. The browser keeps the cart and receipt only in component memory; checkout derives the API target from actual Host and validates same-origin requests. Guests behind the BFF can share the API's per-tenant remote-address rate bucket; a trusted production proxy/edge-rate design remains operational work.
+
+To reproduce browser acceptance without touching PostgreSQL, run these commands from `apps/frontend` in two separate PowerShell terminals. First start the deterministic fixture:
+
+```powershell
+node tests/fixtures/checkout-api.mjs
+```
+
+Then start Next.js with process-local test routing:
+
+```powershell
+$env:STOREFRONT_BASE_DOMAIN = 'localhost'
+$env:PUBLIC_TENANT_API_URL_TEMPLATE = 'http://{tenant}.localhost:5189'
+$env:NODE_OPTIONS = '--require ./tests/fixtures/localhost-dns.cjs'
+node node_modules/next/dist/bin/next dev --webpack --port 3010 --hostname 127.0.0.1
+```
+
+Open `http://bistro.localhost:3010/en` or `/fr`; `harbor.localhost:3010` is a separate tenant fixture. Choose the required bread option, add Soup, edit/remove quantities, and switch menu language. `LUNCH` applies a fixture discount; another nonempty code returns validation failure. Customer name `LOST_RESPONSE` stores one order then drops the first response; retry returns that same receipt. `RATE_LIMIT` rejects the first attempt with 429, and `CONFLICT` returns 409. `http://127.0.0.1:5189/__results` exposes write/replay/conflict counts without request payloads. The fixture only supports these deterministic cases and is not a replacement for real API/database acceptance. Stop both processes and close the test shell afterward. Never load the fixture DNS module or deploy the fixture server in production.
 
 ## Optional API container
 
@@ -160,11 +184,11 @@ The image does not configure HTTPS or provision a certificate. A production depl
 | --- | --- |
 | Root `npm run dev` fails | Run inside `apps/frontend`; root scripts do not orchestrate apps |
 | `dotnet test` reports a VSTest/Microsoft Testing Platform mismatch | Run from the repository root so `global.json` selects Microsoft Testing Platform; keep the test runner and xUnit packages aligned |
-| `npm` is not recognized but `node` works | The shell may expose an isolated Node runtime without npm. Configure a complete Node/npm installation on PATH and reopen the shell |
+| `npm` is not recognized but `node` works | Install the pinned Node.js distribution, which includes npm, or use a version manager that reads `apps/frontend/.nvmrc`; open a new shell after setup |
 | Typecheck mentions missing generated Next types | Run the installed Next type-generation command (`node node_modules/next/dist/bin/next typegen`) from the frontend, then re-run typecheck; do not edit `.next` types |
-| ESLint throws `contextOrFilename.getFilename is not a function` | Baseline failure inside the React plugin with the installed ESLint 10 toolchain; align compatible versions in a separate dependency fix, then rerun lint |
-| Turbopack fails while spawning Node with Windows error 5 | Check runtime executable access and execution policy/environment restrictions. For local development, `npm run dev -- --webpack` bypassed this error on 2026-09-30; this is not proof of a CSS syntax error. |
-| Font download failure | `next/font/google` needs access to its font resources during compilation; check proxy/network configuration or deliberately migrate to local fonts |
+| ESLint throws `contextOrFilename.getFilename is not a function` | Check that the lockfile is installed with `npm ci`; the flat config adapts the legacy React plugin rule context used by Next.js's current config |
+| Turbopack fails while spawning Node with Windows error 5 | The standard development and production scripts use Webpack because the local Windows environment denied Turbopack worker startup. If you opt into Turbopack, check runtime executable access and execution policy; a Webpack success rules out neither every bundler issue nor a Turbopack-specific defect. |
+| Font download failure | Builds use system font stacks and do not request remote font files; check other network-dependent build steps if this persists |
 | `Failed to decrypt private key` | The current `BETTER_AUTH_SECRET` cannot decrypt the selected key in `auth.jwks`; restore the original secret or rotate keys only on a confirmed test database. Do not reset the whole database or disable private-key encryption as a quick fix. |
 | API bearer returns `401` after key rotation | Keep the frontend running so OIDC discovery and JWKS are available; retry after the API refreshes signing keys. Check issuer and audience if it persists. |
 | API HTTPS certificate error | Check the development certificate and selected launch profile; do not disable certificate validation globally |
@@ -174,7 +198,7 @@ The image does not configure HTTPS or provision a certificate. A production depl
 | Browser API requests fail cross-origin | No CORS policy or BFF exists. Decide the integration topology before adding requests |
 | Changing browser language has no effect | Explicit locale path or locale cookie can take precedence |
 
-If an execution environment supplies Node without npm but dependencies already exist, the current scripts can be inspected with equivalent local CLI entry points: `node node_modules/eslint/bin/eslint.js .`, `node node_modules/typescript/bin/tsc --noEmit`, and `node node_modules/next/dist/bin/next build`, all from `apps/frontend`. This does not replace `npm ci` or validate a fresh installation.
+Run frontend commands from `apps/frontend`. GitHub Actions is the clean-install reference for `npm ci` and the full set of frontend/API checks; local package CLI invocations do not replace that workflow.
 
 ## Before submitting changes
 

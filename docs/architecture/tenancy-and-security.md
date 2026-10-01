@@ -8,7 +8,7 @@ Status: Better Auth RS256 JWT bearer validation, persisted organization/tenant o
 
 `X-Tenant-Id`, `X-Tenant-Subdomain`, and `X-Forwarded-Host` do not influence resolution. Changing the actual Host can select another public tenant, which is intentional and grants no private access. No staff authorization is claimed. Tenant creation is a local operator command requiring server/database access; there are no anonymous administration or registry-list routes. Two-tenant HTTP tests verify selection, request-scope separation, inactive tenants and spoofed headers.
 
-Catalog and order rows are tenant-owned and use same-tenant composite foreign keys; idempotency and outbox rows reference their tenant. Reads, writes, archive operations, and relationship assignments explicitly scope the tenant. Role checks use the validated issuer/subject. The latest migrations are applied to the Neon `test` branch; production remains unchanged. Production domain/TLS/proxy configuration and custom domains remain open.
+Catalog and order rows are tenant-owned and use same-tenant composite foreign keys; idempotency and outbox rows reference their tenant. Reads, writes, archive operations, and relationship assignments explicitly scope the tenant. Role checks use the validated issuer/subject. The first seven EF migrations are applied to Neon `test`; the eighth (`CatalogLocalization`) is not. Production remains unchanged. Production domain/TLS/proxy configuration and custom domains remain open.
 
 ## Tenant resolution is not authorization
 
@@ -35,7 +35,7 @@ Background jobs must carry a validated tenant context. Elevated cross-tenant mai
 
 - Include tenant identity in relevant server/client cache keys; include locale where it changes the response. Cache invalidation must have the same scope.
 - Keep personalized staff responses out of shared public caches. A different URL alone is not a complete cache-isolation design.
-- There is no persisted cart in the approved API scope. Any future frontend cart/cache must be namespaced by tenant and revalidate products/prices at checkout.
+- The guest cart uses component memory keyed by tenant ID and clears on reload/navigation. The BFF derives its public API target from validated Host and fixed configuration, never from browser tenant IDs. The API revalidates products/options and prices. The remote-address limiter can group guests behind the same BFF into one tenant bucket; untrusted forwarded addresses are not used to bypass it.
 - Authenticate SignalR connections and resolve allowed groups from current membership on the server. `JoinRestaurant(tenantId)` accepts an ID selector, checks membership, then derives the group name; a client-chosen group name is never permission to subscribe.
 - Do not broadcast order data globally. Revalidate authorization across reconnect/token refresh and resynchronize from an authorized API after missed events.
 - Define durable notification/retry behavior and ensure publishing occurs after the order transaction commits.

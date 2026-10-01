@@ -1,6 +1,6 @@
 # Documentation index
 
-Reviewed against the working tree on 2026-09-30. WhitePlate contains the first-release restaurant API plus source-wired Better Auth account, organization signup, and staff invitation flows. The auth database and invitation-email migrations and live external-provider setup remain deployment work.
+Reviewed against the working tree on 2026-10-01. WhitePlate contains the first-release restaurant API, Better Auth account/organization/team flows, localized tenant menu browsing, and an in-memory guest cart/checkout with a server-priced receipt. Guest checkout has frontend unit and local-fixture browser verification; real database acceptance, the latest catalog-localization migration, and live external-provider/production setup remain separate work.
 
 ## Reading order
 

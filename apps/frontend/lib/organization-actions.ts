@@ -135,7 +135,7 @@ export async function acceptStaffInvitationAction(invitationToken: string): Prom
   return response.ok ? { ok: true } : { ok: false, message: toActionMessage(response.error) }
 }
 
-function toActionMessage(error: "unauthorized" | "forbidden" | "invalid" | "not_found" | "conflict" | "unavailable"): ActionErrorMessage {
+function toActionMessage(error: "unauthorized" | "forbidden" | "invalid" | "not_found" | "conflict" | "rate_limited" | "unavailable"): ActionErrorMessage {
   if (error === "unauthorized") return "unauthorized"
   if (error === "invalid" || error === "not_found" || error === "conflict") return "invalid"
   return "unavailable"

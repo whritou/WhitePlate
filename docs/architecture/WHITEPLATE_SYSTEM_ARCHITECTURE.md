@@ -1,12 +1,15 @@
 # WhitePlate system architecture
 
-Status: email/password and Google/Microsoft auth, localized recovery and verification pages, organization signup, email-bound invitations, server-side API JWT exchange, and backend identity verification are wired in source. The backend tests pass. Better Auth's `auth` schema and the invitation-email EF migration are applied on Neon `test`; email/password signup and invitation acceptance are verified there with locally intercepted email. Live provider/email and browser-flow checks remain open.
+Status: email/password and Google/Microsoft auth, localized recovery and verification pages, organization signup, email-bound invitations, server-side API JWT exchange, and backend identity verification are wired in source. Current backend verification has one pre-existing migration-count assertion failure; see the checkout verification in docs/documentation-review.md. Better Auth's `auth` schema and the invitation-email EF migration are applied on Neon `test`; email/password signup and invitation acceptance are verified there with locally intercepted email. Live provider/email and browser-flow checks remain open.
 
 ## Current runtime
 
 ```mermaid
 flowchart LR
     Browser[Browser] --> Proxy["Next.js proxy.ts: locale negotiation"]
+    Browser --> Storefront["Tenant menu and in-memory guest cart"]
+    Storefront --> GuestCheckout["Public checkout action: validated host and UUID key"]
+    GuestCheckout --> Api
     Proxy --> Page["Localized auth and organization pages"]
     Page --> Auth["Better Auth session cookie"]
     Auth --> BFF["Next.js server actions: short-lived API JWT"]
@@ -67,7 +70,7 @@ Empty directories are not preserved by Git unless given a tracked file. Build ou
 
 The Next.js App Router app renders `/en` and `/fr`. `next-intl` resolves the locale and supplies messages; `next-themes` manages the theme. Source folders sit directly under `apps/frontend`, and `@/*` points there. See [frontend architecture](WHITEPLATE_FRONTEND_ARCHITECTURE.md) for the request lifecycle.
 
-Auth BFF route handlers and API server actions are implemented. Public storefront requests validate a one-label tenant subdomain and use a fixed server-side API URL template; the menu is rendered server-side and accepts any restaurant-enabled locale independently of the app's `/en` and `/fr` interface. Owners/managers configure menu languages and edit category, product, and option translations through the localized organization area. The API persists locale settings/translations and falls back to the default menu language. The `CatalogLocalization` EF migration is checked in but has not been applied to Neon `test` or production. Custom domains, cart store, and restaurant order dashboard remain deferred/unimplemented. The approved API scope has no persisted cart. See [decision 0003](decisions/0003-catalog-localization-and-tenant-domain-policy.md).
+Auth BFF route handlers and API server actions are implemented. Public storefront requests validate a one-label tenant subdomain and use a fixed server-side API URL template; the menu is rendered server-side and accepts any restaurant-enabled locale independently of the app's `/en` and `/fr` interface. Owners/managers configure menu languages and edit category, product, and option translations through the localized organization area. The API persists locale settings/translations and falls back to the default menu language. The `CatalogLocalization` EF migration is checked in but has not been applied to Neon `test` or production. The guest storefront now adds an in-memory cart and same-origin checkout server action, with UUID idempotency keys, uncertain-response retry locking, and a server-priced receipt. The API scope has no persisted cart. Custom domains and the kitchen dashboard remain unimplemented; real database/browser checkout acceptance remains open. See [decision 0003](decisions/0003-catalog-localization-and-tenant-domain-policy.md).
 
 ## API boundary
 
@@ -77,7 +80,7 @@ The separate projects and inward dependency direction are implemented and tested
 
 ## Runtime and deployment
 
-Run the apps independently using the [development guide](../development.md). The root npm package has no orchestration scripts. The API has a multistage Linux Dockerfile with `apps/api` as its build context to include sibling projects. There is no full-stack Compose file, frontend Dockerfile, PostgreSQL instance configuration, reverse proxy, or GitHub Actions workflow.
+Run the apps independently using the [development guide](../development.md). The root npm package has no orchestration scripts. GitHub Actions runs the frontend and API checks separately. The API has a multistage Linux Dockerfile with `apps/api` as its build context to include sibling projects. There is no full-stack Compose file, frontend Dockerfile, PostgreSQL instance configuration, or reverse proxy.
 
 ## Implemented business architecture
 

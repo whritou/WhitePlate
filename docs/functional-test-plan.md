@@ -75,12 +75,13 @@ On 2026-09-30, a dedicated verified `local-tester@whiteplate.invalid` account wa
 | SF-10 | Owner/manager edits menu languages and translations; attempt to remove the final language and use a duplicate or invalid tag | At least one enabled language and one included default always remain; translations can be saved only for enabled languages; kitchen staff cannot change settings or translations | High |
 | SF-12 | Change the default while active catalog items lack translations; then translate all active items and retry | The first change is rejected without changing settings; the change succeeds after every active category, product, option group, and option has a translation in the new default language | High |
 | SF-11 | Request storefront on the configured base host, a one-label tenant subdomain, a nested subdomain, and an unrelated host | Only a validated one-label subdomain routes to the matching public menu; raw/forwarded host values do not select another tenant | High |
-| SF-02 | Add items, reload, switch tenant | No cart is included in the API scope; any future frontend cart remains tenant-scoped | High |
-| SF-03 | Submit valid order through the API/client | `201`, persisted order/items and server total; no payment/cart conversion is included | Critical |
+| SF-02 | Add/configure items, edit quantities, remove, switch menu language, reload, switch tenant | In-memory cart retains one line per product and preserves selections on same-tenant menu-language changes; removal works, reload clears it, and another tenant starts empty | High |
+| SF-03 | Submit valid order through the storefront | Existing API creates the order; frontend displays only validated server receipt/totals/tax/discount and reference. No payment is included. Local fixture browser checks are verified; real database acceptance remains. | Critical |
 | SF-04 | Submit an unavailable product | Safe validation/error response, no partial order | High |
 | SF-05 | Send negative/zero/fractional quantities, duplicate IDs, empty/oversized payloads, or forged prices | Automated API tests cover validation, the 16 KiB body cap, and server-derived prices | Critical |
 | SF-06 | Send foreign-tenant product IDs | No foreign data exposed, no order inserted | Critical |
-| SF-07 | Double-submit or retry after response loss | Automated API test proves the 24-hour key returns one original receipt; no payment is included | Critical |
+| SF-07 | Double-submit or retry after response loss; submit changed content with the same key | Browser guard blocks rapid duplicate calls. Uncertain outcome locks editing and reuses original payload/key; fixture stores one order and replays its receipt. API rejects changed content with `409`. | Critical |
+| SF-13 | Reject choices, invalid promo code, rate limit, and conflict | No raw API error details are displayed; cart stays editable after definite rejection, corrected input uses a new key, and unchanged retries reuse their key | High |
 | SF-08 | Edit product price/name after an order | Historical line snapshots and total remain unchanged | High |
 | SF-09 | Concurrent checkout and availability change | Outcome follows the selected stock/availability policy; no unjustified stock guarantee | High |
 
@@ -95,6 +96,120 @@ On 2026-09-30, a dedicated verified `local-tester@whiteplate.invalid` account wa
 | DB-05 | Request another tenant's SignalR group or reconnect after permissions change | Membership checks reject unauthorized subscription; verify live Better Auth token/group behavior | Critical |
 | DB-06 | Disconnect, miss events, reconnect; duplicate or reorder messages | Authoritative refetch restores state; duplicates do not create duplicate orders | High |
 | DB-07 | Fail notification delivery after database commit | The dispatcher retries; order remains durable and REST recovery stays authoritative | High |
+
+### Run the live OIDC and SignalR check
+
+Run this manually against a local database or the Neon `test` branch only. You need two verified Better Auth accounts, each with membership in only its own test tenant, two active tenants with at least one available product each, and the business plus Better Auth schemas migrated. Use kitchen-staff accounts or separate organizations so neither test identity is an owner with access to both tenants. Keep the API configured with `Tenancy__BaseDomain=localhost`, `Authentication__Issuer=http://localhost:3000`, and `Authentication__Audience=whiteplate-api`. Do not use Production credentials or a Production database.
+
+1. Start the API and frontend in separate terminals using the [development guide](development.md). In PowerShell, confirm OIDC discovery and signing keys return `200`; an unauthenticated `GET http://localhost:5182/api/v1/me` should return `401`.
+2. In `apps/frontend`, mint a short-lived API token for each verified test user. The helper reads the existing `.env.local` values, and process environment variables override them:
+
+   ```powershell
+   $env:WHITEPLATE_DEV_EMAIL = 'staff-a@whiteplate.invalid'
+   $secret = Read-Host 'Client A password' -AsSecureString
+   $env:WHITEPLATE_DEV_PASSWORD = [System.Net.NetworkCredential]::new('', $secret).Password
+   $tokenA = node .\scripts\dev-token.mjs
+   $env:WHITEPLATE_DEV_PASSWORD = $null
+
+   $env:WHITEPLATE_DEV_EMAIL = 'staff-b@whiteplate.invalid'
+   $secret = Read-Host 'Client B password' -AsSecureString
+   $env:WHITEPLATE_DEV_PASSWORD = [System.Net.NetworkCredential]::new('', $secret).Password
+   $tokenB = node .\scripts\dev-token.mjs
+   $env:WHITEPLATE_DEV_PASSWORD = $null
+   ```
+
+   A bearer-authenticated `GET /api/v1/me` should return `200` for both tokens. Tokens expire in 15 minutes. Keep them in the local shell; do not paste them into a browser or share them.
+
+3. Resolve tenant IDs and a product ID from the tenant hosts. The explicit `Host` header keeps the call on localhost while exercising tenant host resolution:
+
+   ```powershell
+   $hostA = 'bistro.localhost:5182'
+   $hostB = 'harbor.localhost:5182'
+   $tenantA = Invoke-RestMethod http://localhost:5182/api/v1/tenant -Headers @{ Host = $hostA }
+   $tenantB = Invoke-RestMethod http://localhost:5182/api/v1/tenant -Headers @{ Host = $hostB }
+   $menuA = Invoke-RestMethod http://localhost:5182/api/v1/menu -Headers @{ Host = $hostA }
+   $productA = $menuA.Categories | ForEach-Object { $_.Products } | Where-Object IsAvailable | Select-Object -First 1
+   ```
+
+   Use a product with no required option selections, or submit its valid option IDs. If these example hosts are not provisioned locally, replace them with your two test tenant subdomains.
+
+4. Export the two tokens and tenant IDs to the local process, then run the Node REPL from `apps/frontend`:
+
+   ```powershell
+   $env:WHITEPLATE_TOKEN_A = $tokenA
+   $env:WHITEPLATE_TOKEN_B = $tokenB
+   $env:WHITEPLATE_TENANT_A = $tenantA.id
+   $env:WHITEPLATE_TENANT_B = $tenantB.id
+   node
+   ```
+
+   In the REPL, start two independent authenticated SignalR clients:
+
+   ```js
+   const { HubConnectionBuilder, LogLevel } = await import('@microsoft/signalr')
+   const connect = (token) => new HubConnectionBuilder()
+     .withUrl('http://localhost:5182/hubs/orders', { accessTokenFactory: () => token })
+     .withAutomaticReconnect()
+     .configureLogging(LogLevel.Warning)
+     .build()
+   const eventsA = [], eventsB = []
+   const a = connect(process.env.WHITEPLATE_TOKEN_A)
+   const b = connect(process.env.WHITEPLATE_TOKEN_B)
+   a.on('order.changed', event => eventsA.push(event))
+   b.on('order.changed', event => eventsB.push(event))
+   await a.start(); await a.invoke('JoinRestaurant', process.env.WHITEPLATE_TENANT_A)
+   await b.start(); await b.invoke('JoinRestaurant', process.env.WHITEPLATE_TENANT_B)
+   ```
+
+   Confirm client A cannot `JoinRestaurant` for tenant B and client B cannot join tenant A; each invocation must reject with a hub error:
+
+   ```js
+   await a.invoke('JoinRestaurant', process.env.WHITEPLATE_TENANT_B)
+   await b.invoke('JoinRestaurant', process.env.WHITEPLATE_TENANT_A)
+   ```
+
+   Keep this REPL open to observe events.
+
+5. From the PowerShell terminal, create an order for tenant A and retry the exact same payload with the same idempotency key:
+
+   ```powershell
+   $body = @{ customerName = 'SignalR smoke'; discountCode = $null; items = @(@{ productId = $productA.Id; quantity = 1; optionIds = @() }) } | ConvertTo-Json -Depth 5
+   $key = [guid]::NewGuid().ToString()
+   $headers = @{ Host = $hostA; 'Idempotency-Key' = $key }
+   $first = Invoke-RestMethod http://localhost:5182/api/v1/orders -Method Post -ContentType 'application/json' -Headers $headers -Body $body
+   $replay = Invoke-RestMethod http://localhost:5182/api/v1/orders -Method Post -ContentType 'application/json' -Headers $headers -Body $body
+   $first.Id; $replay.Id
+   ```
+
+   The IDs should match. In the REPL, client A should receive one `order.changed` event with tenant A's ID and the same order ID; client B should receive none. Compare event IDs to deduplicate at-least-once deliveries.
+
+6. For reconnect recovery, stop client A with `await a.stop()`. Create another tenant A order using a new idempotency key while it is offline. Start client A again, rejoin tenant A, and fetch `GET /api/v1/tenants/{tenantA.id}/orders` with token A. The REST page must contain the missed order. REST is the recovery source; SignalR groups are not automatically restored after a reconnect.
+7. Verify REST isolation by requesting tenant A's order list with token B; expect `403`. Record the two token-authenticated `/me` results, both denied hub joins, event ID/order ID seen by A, no A event seen by B, matching idempotent receipt IDs, and the recovered order ID from REST. Clear the local token/password environment variables and close both SignalR connections when finished.
+
+### Verification attempt — 2026-10-01
+
+Source baseline: `0d2ed19` (`feat/guest-cart-checkout`), with a pre-existing unrelated edit in `apps/frontend/.env.example`. Tool versions: .NET SDK `10.0.401`, Node.js `v24.19.0`. The local API and Next.js issuer were started. The issuer's `/.well-known/openid-configuration` and `/api/auth/jwks` returned `200`; unauthenticated `GET /api/v1/me` returned `401`. A JWT from `node scripts/dev-token.mjs` was minted, but authenticated `GET /api/v1/me` timed out. During that run, the API outbox worker repeatedly logged `NpgsqlException` while connecting to its configured database. Only the one local tester account is configured, so two authorized clients and tenant fixtures were unavailable. No order, membership, or tenant data was written. DB-01, DB-05, and DB-06 remain unverified live; the run did not establish SignalR delivery or reconnect recovery.
+
+Commands and results:
+
+```text
+dotnet test apps/api/WhitePlate.slnx --no-restore
+  Failed: 131 passed, 1 failed. TenantRepositoryTests.PostgreSqlModelAndMigrationProduceExpectedSchema expected 7 migrations; the checked-in source produces 8.
+
+dotnet run --project apps/api/WhitePlate.Api/WhitePlate.Api.csproj --launch-profile http --no-build
+  Started on http://localhost:5182. Existing protected Data Protection keys logged DPAPI decryption errors under this Windows context. The outbox could not connect to PostgreSQL.
+
+node scripts/dev-token.mjs
+  Minted a local Better Auth API JWT; token omitted from this report.
+GET http://localhost:5182/api/v1/me (without token)
+  401
+GET http://localhost:5182/api/v1/me (with the minted token)
+  Client timed out; no successful authenticated API response.
+```
+
+To complete acceptance, restore API connectivity to the configured non-production PostgreSQL test database, provide two verified staff identities with distinct tenant memberships, then run DB-01, DB-05, and DB-06 using two live SignalR connections and record event IDs, REST state before/after reconnect, and membership-denial results. The migration-count assertion reported above was corrected in the follow-up below.
+
+Follow-up on 2026-10-01: updated `TenantRepositoryTests.PostgreSqlModelAndMigrationProduceExpectedSchema` to expect the eight checked-in migrations. The focused test passed, then `dotnet test apps/api/WhitePlate.slnx --no-restore` passed all 132 tests. This clears the assertion failure; live PostgreSQL, two-client SignalR delivery, membership isolation, and reconnect recovery remain pending.
 
 ## 3. Automation strategy
 
