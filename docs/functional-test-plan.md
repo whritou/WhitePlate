@@ -97,6 +97,31 @@ On 2026-09-30, a dedicated verified `local-tester@whiteplate.invalid` account wa
 | DB-06 | Disconnect, miss events, reconnect; duplicate or reorder messages | Authoritative refetch restores state; duplicates do not create duplicate orders | High |
 | DB-07 | Fail notification delivery after database commit | The dispatcher retries; order remains durable and REST recovery stays authoritative | High |
 
+### Verification attempt — 2026-10-01
+
+Source baseline: `0d2ed19` (`feat/guest-cart-checkout`), with a pre-existing unrelated edit in `apps/frontend/.env.example`. Tool versions: .NET SDK `10.0.401`, Node.js `v24.19.0`. The local API and Next.js issuer were started. The issuer's `/.well-known/openid-configuration` and `/api/auth/jwks` returned `200`; unauthenticated `GET /api/v1/me` returned `401`. A JWT from `node scripts/dev-token.mjs` was minted, but authenticated `GET /api/v1/me` timed out. During that run, the API outbox worker repeatedly logged `NpgsqlException` while connecting to its configured database. Only the one local tester account is configured, so two authorized clients and tenant fixtures were unavailable. No order, membership, or tenant data was written. DB-01, DB-05, and DB-06 remain unverified live; the run did not establish SignalR delivery or reconnect recovery.
+
+Commands and results:
+
+```text
+dotnet test apps/api/WhitePlate.slnx --no-restore
+  Failed: 131 passed, 1 failed. TenantRepositoryTests.PostgreSqlModelAndMigrationProduceExpectedSchema expected 7 migrations; the checked-in source produces 8.
+
+dotnet run --project apps/api/WhitePlate.Api/WhitePlate.Api.csproj --launch-profile http --no-build
+  Started on http://localhost:5182. Existing protected Data Protection keys logged DPAPI decryption errors under this Windows context. The outbox could not connect to PostgreSQL.
+
+node scripts/dev-token.mjs
+  Minted a local Better Auth API JWT; token omitted from this report.
+GET http://localhost:5182/api/v1/me (without token)
+  401
+GET http://localhost:5182/api/v1/me (with the minted token)
+  Client timed out; no successful authenticated API response.
+```
+
+To complete acceptance, restore API connectivity to the configured non-production PostgreSQL test database, provide two verified staff identities with distinct tenant memberships, then run DB-01, DB-05, and DB-06 using two live SignalR connections and record event IDs, REST state before/after reconnect, and membership-denial results. The migration-count assertion reported above was corrected in the follow-up below.
+
+Follow-up on 2026-10-01: updated `TenantRepositoryTests.PostgreSqlModelAndMigrationProduceExpectedSchema` to expect the eight checked-in migrations. The focused test passed, then `dotnet test apps/api/WhitePlate.slnx --no-restore` passed all 132 tests. This clears the assertion failure; live PostgreSQL, two-client SignalR delivery, membership isolation, and reconnect recovery remain pending.
+
 ## 3. Automation strategy
 
 Vitest runs the frontend unit suite with `npm run test`; it includes focused checks for the shared API request factory methods, authorization header, safe error mapping, and path boundary. Playwright is installed but has no browser-test configuration. The backend has xUnit v3 tests under `apps/api/tests/WhitePlate.Tests`, organized into `Api`, `Application`, `Architecture`, `Domain`, and `Infrastructure`. The backend suite covers restaurant domain, application, persistence, ownership, and HTTP behavior. Run `dotnet test apps/api/WhitePlate.slnx` from the repository root.
