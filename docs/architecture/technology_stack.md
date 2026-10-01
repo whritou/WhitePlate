@@ -39,6 +39,6 @@ PostgreSQL and Better Auth schemas have separately documented test-branch migrat
 
 ## Toolchain and reproducibility
 
-Node.js 24.19.0 and npm 11.17.0 are pinned by `.nvmrc`, package engines/packageManager, and `.npmrc`. Root `global.json` selects a .NET 10 SDK minimum feature band with roll-forward and Microsoft Testing Platform. There is no root npm workspace: run npm commands in `apps/frontend`, use `npm ci` to respect the lockfile, and use explicit .NET solution/project paths. Dev/build select Webpack due to the recorded Windows Turbopack worker limitation. Next's legacy React ESLint plugin is adapted with `@eslint/compat`.
+Node.js 24.19.0 (`.nvmrc`) and npm 11.17.0 (`packageManager`) are exact local/CI references. Package engines accept `^24.19.0` and `^11.17.0`; `.npmrc` enforces those ranges while allowing Vercel's Node 24/npm 11 minor/patch updates. Root `global.json` selects a .NET 10 SDK minimum feature band with roll-forward and Microsoft Testing Platform. There is no root npm workspace: run npm commands in `apps/frontend`, use `npm ci` to respect the lockfile, and use explicit .NET solution/project paths. Dev/build select Webpack due to the recorded Windows Turbopack worker limitation. Next's legacy React ESLint plugin is adapted with `@eslint/compat`.
 
 See [development commands](../development.md) and [verification findings](../documentation-review.md) for machine-specific install limitations and actual results. The cleanup did not upgrade dependencies or change the lockfile.
