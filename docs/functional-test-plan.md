@@ -188,7 +188,25 @@ Run this manually against a local database or the Neon `test` branch only. You n
 
 ### Verification attempt — 2026-10-01
 
-Source baseline: `0d2ed19` (`feat/guest-cart-checkout`), with a pre-existing unrelated edit in `apps/frontend/.env.example`. Tool versions: .NET SDK `10.0.401`, Node.js `v24.19.0`. The local API and Next.js issuer were started. The issuer's `/.well-known/openid-configuration` and `/api/auth/jwks` returned `200`; unauthenticated `GET /api/v1/me` returned `401`. A JWT from `node scripts/dev-token.mjs` was minted, but authenticated `GET /api/v1/me` timed out. During that run, the API outbox worker repeatedly logged `NpgsqlException` while connecting to its configured database. Only the one local tester account is configured, so two authorized clients and tenant fixtures were unavailable. No order, membership, or tenant data was written. DB-01, DB-05, and DB-06 remain unverified live; the run did not establish SignalR delivery or reconnect recovery.
+Source baseline: `0d2ed19` (`feat/guest-cart-checkout`), with a pre-existing unrelated edit in `apps/frontend/.env.example`. Tool versions: .NET SDK `10.0.401`, Node.js `v24.19.0`. The initial attempt started the local API and Next.js issuer. OIDC discovery and JWKS returned `200`; unauthenticated `GET /api/v1/me` returned `401`. A local JWT was minted, but authenticated `GET /api/v1/me` timed out while the API outbox worker logged database connection errors. This attempt did not establish SignalR delivery or reconnect recovery. See the successful follow-up below.
+
+### Live verification follow-up — 2026-10-01
+
+Re-running the local API and frontend issuer with the required Windows profile access allowed the test database connection and local Better Auth issuer to work. The checks below ran against the configured non-production test database and `http://localhost:3000`; production services and credentials were not used. Two new local Better Auth accounts with `.invalid` email domains were verified using a loopback-only email capture shim, then invited as kitchen staff into separate test restaurants. Their credentials and access tokens were kept out of the report.
+
+| Check | Result |
+| --- | --- |
+| OIDC discovery and JWKS | `200` from `/.well-known/openid-configuration` and `/api/auth/jwks`; two signing keys available. |
+| Independent staff membership | Both authenticated `GET /api/v1/me` calls returned exactly one restaurant, with distinct tenant IDs and `Kitchen` role. |
+| Hub authorization | Both clients joined their own restaurant group; both cross-tenant `JoinRestaurant` attempts were rejected. |
+| Event isolation and delivery | Tenant A received one `order.changed` event for order `2e4aa9bd-4b1e-4f82-8eff-6b4dd2c33284` (event `058c6b1a-c53a-4ff3-9bed-f74543c77406`); tenant B received no event for that order. |
+| Idempotent checkout | Repeating the same request and idempotency key returned the same order ID: `2e4aa9bd-4b1e-4f82-8eff-6b4dd2c33284`. |
+| Reconnect recovery | After client A disconnected, order `c8222353-9da8-467d-bfd1-51b675cd9488` was created. Client A reconnected, rejoined its group, and recovered that order from the authoritative REST list. |
+| REST tenant isolation | Tenant B’s token received `403` when requesting tenant A’s orders; tenant A’s token received `200`. |
+
+The API and frontend issuer were run locally with the development launch profile. The test used `@microsoft/signalr` from the frontend package and `Host: <tenant-subdomain>.localhost` for checkout requests. A loopback-only Resend shim captured local verification links; no email was sent to an external service. Test fixtures were created in the non-production database using the `sig-a-20261001160454` and `sig-b-20261001160454` restaurant subdomains.
+
+This follow-up supersedes the earlier timeout-only result for OIDC, DB-01, DB-05, and DB-06. The run did not verify production issuer configuration, production domains, or production operations.
 
 Commands and results:
 
