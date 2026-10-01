@@ -1,14 +1,14 @@
 # WhitePlate
 
-WhitePlate is an early-stage project for a multi-tenant restaurant click-and-collect platform. The .NET API implements organizations, restaurant tenancy, catalog/pricing, staff authorization, checkout, order workflow, and kitchen notifications. The storefront and kitchen dashboard are not connected to the API, and the service has no production deployment yet.
+WhitePlate is an early-stage multi-tenant restaurant platform. The .NET API implements organizations, restaurant tenancy, catalog/pricing, staff authorization, checkout, order workflow, and kitchen notifications. The frontend connects localized account/team flows, tenant menu browsing, and guest cart/checkout to the API. The kitchen dashboard and production acceptance remain separate work.
 
 ## What runs today
 
 | Area | Implemented | Still planned |
 | --- | --- | --- |
-| Frontend | Next.js App Router starter, English/French routes, light/dark theme, reusable button | Tenant routing, menu, cart, checkout, dashboard, API integration |
+| Frontend | English/French auth/team flows, tenant menu/language settings, in-memory guest cart, checkout BFF, server-priced receipt, light/dark theme | Kitchen dashboard, real provider/email and database/browser checkout acceptance |
 | API | ASP.NET Core .NET 10 Clean Architecture host; organizations/tenants, OIDC membership, catalog/pricing, checkout, order workflow, idempotency, transactional outbox, SignalR, OpenAPI/Swagger, and tests | OIDC provider setup, frontend integration, production deployment |
-| Infrastructure | EF Core/PostgreSQL schema, six migrations on the Neon `test` branch, API Dockerfile | Production database rollout, Compose, frontend container, reverse proxy, CI/CD |
+| Infrastructure | EF Core/PostgreSQL schema, seven EF migrations and Better Auth schema on Neon `test`, API Dockerfile | Eighth EF migration (`CatalogLocalization`), production schema/operations, CI/CD |
 
 The frontend and API run independently. The API uses PostgreSQL; the local Neon `test` branch is connected through .NET User Secrets. The weather sample has been removed. See the development guide for migrations, local provisioning, and the current runtime status.
 

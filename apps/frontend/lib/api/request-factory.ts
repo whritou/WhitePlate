@@ -1,4 +1,11 @@
-export type ApiError = "unauthorized" | "forbidden" | "invalid" | "not_found" | "conflict" | "unavailable"
+export type ApiError =
+  | "unauthorized"
+  | "forbidden"
+  | "invalid"
+  | "not_found"
+  | "conflict"
+  | "rate_limited"
+  | "unavailable"
 
 export type ApiResult<T> =
   | { ok: true; status: number; data: T | null }
@@ -13,7 +20,7 @@ export type ApiDiagnostic = {
   causeName?: string
 }
 
-type RequestOptions = { signal?: AbortSignal }
+type RequestOptions = { signal?: AbortSignal; idempotencyKey?: string }
 
 type ApiRequestFactoryOptions = {
   baseUrl: string | undefined | (() => string | undefined)
@@ -34,10 +41,18 @@ export function createApiRequestFactory({
     method: ApiDiagnostic["method"],
     path: string,
     body?: unknown,
-    options: RequestOptions = {},
+    options: RequestOptions = {}
   ): Promise<ApiResult<T>> {
-    const diagnostic: ApiDiagnostic = { method, path: safeDiagnosticPath(path), status: 503 }
-    const fail = (status: number, error: ApiError): ApiResult<T> => ({ ok: false, status, error })
+    const diagnostic: ApiDiagnostic = {
+      method,
+      path: safeDiagnosticPath(path),
+      status: 503,
+    }
+    const fail = (status: number, error: ApiError): ApiResult<T> => ({
+      ok: false,
+      status,
+      error,
+    })
     const record = () => {
       try {
         onDiagnostic?.(diagnostic)
@@ -61,7 +76,11 @@ export function createApiRequestFactory({
         return fail(503, "unavailable")
       }
       const base = new URL(configuredBaseUrl)
-      if ((base.protocol !== "http:" && base.protocol !== "https:") || base.username || base.password) {
+      if (
+        (base.protocol !== "http:" && base.protocol !== "https:") ||
+        base.username ||
+        base.password
+      ) {
         record()
         return fail(503, "unavailable")
       }
@@ -92,6 +111,8 @@ export function createApiRequestFactory({
       const headers = new Headers({ Accept: "application/json" })
       if (token) headers.set("Authorization", `Bearer ${token}`)
       if (body !== undefined) headers.set("Content-Type", "application/json")
+      if (options.idempotencyKey)
+        headers.set("Idempotency-Key", options.idempotencyKey)
 
       const response = await fetcher(url, {
         method,
@@ -106,17 +127,24 @@ export function createApiRequestFactory({
       if (!response.ok) {
         diagnostic.status = response.status
         diagnostic.code = safeHeader(response.headers.get("x-error-code"))
-        diagnostic.traceId = safeHeader(response.headers.get("x-request-id") ?? response.headers.get("trace-id"))
+        diagnostic.traceId = safeHeader(
+          response.headers.get("x-request-id") ??
+            response.headers.get("trace-id")
+        )
         record()
         return fail(response.status, mapStatus(response.status))
       }
 
-      if (response.status === 204 || response.body === null || !response.headers.get("content-type")?.includes("json")) {
+      if (
+        response.status === 204 ||
+        response.body === null ||
+        !response.headers.get("content-type")?.includes("json")
+      ) {
         return { ok: true, status: response.status, data: null }
       }
 
       try {
-        const data = await response.json() as T
+        const data = (await response.json()) as T
         return { ok: true, status: response.status, data }
       } catch (error) {
         diagnostic.status = 502
@@ -133,10 +161,14 @@ export function createApiRequestFactory({
   }
 
   return {
-    get: <T>(path: string, options?: RequestOptions) => request<T>("GET", path, undefined, options),
-    post: <T, B = unknown>(path: string, body: B, options?: RequestOptions) => request<T>("POST", path, body, options),
-    put: <T, B = unknown>(path: string, body: B, options?: RequestOptions) => request<T>("PUT", path, body, options),
-    delete: <T>(path: string, options?: RequestOptions) => request<T>("DELETE", path, undefined, options),
+    get: <T>(path: string, options?: RequestOptions) =>
+      request<T>("GET", path, undefined, options),
+    post: <T, B = unknown>(path: string, body: B, options?: RequestOptions) =>
+      request<T>("POST", path, body, options),
+    put: <T, B = unknown>(path: string, body: B, options?: RequestOptions) =>
+      request<T>("PUT", path, body, options),
+    delete: <T>(path: string, options?: RequestOptions) =>
+      request<T>("DELETE", path, undefined, options),
   }
 }
 
@@ -146,6 +178,7 @@ function mapStatus(status: number): ApiError {
   if (status === 403) return "forbidden"
   if (status === 404) return "not_found"
   if (status === 409) return "conflict"
+  if (status === 429) return "rate_limited"
   return "unavailable"
 }
 

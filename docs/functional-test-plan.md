@@ -75,12 +75,13 @@ On 2026-09-30, a dedicated verified `local-tester@whiteplate.invalid` account wa
 | SF-10 | Owner/manager edits menu languages and translations; attempt to remove the final language and use a duplicate or invalid tag | At least one enabled language and one included default always remain; translations can be saved only for enabled languages; kitchen staff cannot change settings or translations | High |
 | SF-12 | Change the default while active catalog items lack translations; then translate all active items and retry | The first change is rejected without changing settings; the change succeeds after every active category, product, option group, and option has a translation in the new default language | High |
 | SF-11 | Request storefront on the configured base host, a one-label tenant subdomain, a nested subdomain, and an unrelated host | Only a validated one-label subdomain routes to the matching public menu; raw/forwarded host values do not select another tenant | High |
-| SF-02 | Add items, reload, switch tenant | No cart is included in the API scope; any future frontend cart remains tenant-scoped | High |
-| SF-03 | Submit valid order through the API/client | `201`, persisted order/items and server total; no payment/cart conversion is included | Critical |
+| SF-02 | Add/configure items, edit quantities, remove, switch menu language, reload, switch tenant | In-memory cart retains one line per product and preserves selections on same-tenant menu-language changes; removal works, reload clears it, and another tenant starts empty | High |
+| SF-03 | Submit valid order through the storefront | Existing API creates the order; frontend displays only validated server receipt/totals/tax/discount and reference. No payment is included. Local fixture browser checks are verified; real database acceptance remains. | Critical |
 | SF-04 | Submit an unavailable product | Safe validation/error response, no partial order | High |
 | SF-05 | Send negative/zero/fractional quantities, duplicate IDs, empty/oversized payloads, or forged prices | Automated API tests cover validation, the 16 KiB body cap, and server-derived prices | Critical |
 | SF-06 | Send foreign-tenant product IDs | No foreign data exposed, no order inserted | Critical |
-| SF-07 | Double-submit or retry after response loss | Automated API test proves the 24-hour key returns one original receipt; no payment is included | Critical |
+| SF-07 | Double-submit or retry after response loss; submit changed content with the same key | Browser guard blocks rapid duplicate calls. Uncertain outcome locks editing and reuses original payload/key; fixture stores one order and replays its receipt. API rejects changed content with `409`. | Critical |
+| SF-13 | Reject choices, invalid promo code, rate limit, and conflict | No raw API error details are displayed; cart stays editable after definite rejection, corrected input uses a new key, and unchanged retries reuse their key | High |
 | SF-08 | Edit product price/name after an order | Historical line snapshots and total remain unchanged | High |
 | SF-09 | Concurrent checkout and availability change | Outcome follows the selected stock/availability policy; no unjustified stock guarantee | High |
 

@@ -66,6 +66,10 @@ The tenant menu includes ordered active categories and non-archived products, in
 
 Every checkout requires an `Idempotency-Key`. Keys are tenant-scoped and retained for 24 hours. The same key and normalized request replay the original receipt; the same key with different content returns `409`. The successful create response contains the receipt. Staff lists default to 50 summaries per page, cap at 100, and return an opaque `nextCursor`.
 
+The storefront submits this existing contract through a same-origin Next.js server action. Its in-memory cart supplies `customerName`, nullable `discountCode`, and `items: [{ productId, quantity, optionIds }]`. The action derives the restaurant API host from validated actual Host and the configured template; browser tenant IDs and prices are not submitted. The frontend generates a UUID key, preserves payload/key on uncertain retries, and displays the API receipt's totals, tax, discount, currency, status, snapshot names, and ID. Safe `400`, `404`, `409`, and `429` distinctions are retained; unreadable success responses are uncertain. Menu locale is not recorded; localized snapshots remain an open decision.
+
+The API limiter still uses its observed remote address. Different guests behind the BFF can share the BFF's per-tenant API bucket. Browser address/forwarded headers are not forwarded or trusted to bypass it. A deployment-specific trusted-proxy and edge-rate policy remains separate operational work.
+
 Statuses progress `Pending -> Preparing -> Ready -> Completed`. Repeating the current status is a no-op. Skipped/backward transitions and cancellation of a completed order return `409`; managers may cancel other incomplete orders. Mutations require `If-Match: "<version>"`; missing values return `428`, and stale concurrent writes return `412`. Successful mutations return the updated receipt and a new ETag.
 
 ## 4. SignalR notifications

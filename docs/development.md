@@ -139,7 +139,28 @@ dotnet test apps/api/WhitePlate.slnx
 dotnet publish apps/api/WhitePlate.Api/WhitePlate.Api.csproj -c Release
 ```
 
-The xUnit v3 suite uses Microsoft Testing Platform selected in root `global.json` and includes Domain, Application, Infrastructure, project-dependency, and HTTP tests. Use `--no-restore` only when dependencies have already been restored. The frontend Vitest suite currently covers the API request factory. There is no CI workflow. Root `npm test` deliberately exits with the template's “no test specified” error. See [backend architecture](architecture/WHITEPLATE_BACKEND_ARCHITECTURE.md), [functional checks](functional-test-plan.md), and the [earlier review baseline](documentation-review.md).
+The xUnit v3 suite uses Microsoft Testing Platform selected in root `global.json` and includes Domain, Application, Infrastructure, project-dependency, and HTTP tests. Use `--no-restore` only when dependencies have already been restored. The frontend Vitest suite covers API requests, query/state primitives, the theme shortcut, and guest cart/checkout boundaries. There is no CI workflow. Root `npm test` deliberately exits with the template's “no test specified” error. See [backend architecture](architecture/WHITEPLATE_BACKEND_ARCHITECTURE.md), [functional checks](functional-test-plan.md), and [verification evidence](documentation-review.md).
+
+## Guest checkout browser fixture
+
+The storefront uses the existing server-only tenant API template for both menu reads and checkout. No extra environment variables or schema changes are needed for guest cart/checkout. The browser keeps the cart and receipt only in component memory; checkout derives the API target from actual Host and validates same-origin requests. Guests behind the BFF can share the API's per-tenant remote-address rate bucket; a trusted production proxy/edge-rate design remains operational work.
+
+To reproduce browser acceptance without touching PostgreSQL, run these commands from `apps/frontend` in two separate PowerShell terminals. First start the deterministic fixture:
+
+```powershell
+node tests/fixtures/checkout-api.mjs
+```
+
+Then start Next.js with process-local test routing:
+
+```powershell
+$env:STOREFRONT_BASE_DOMAIN = 'localhost'
+$env:PUBLIC_TENANT_API_URL_TEMPLATE = 'http://{tenant}.localhost:5189'
+$env:NODE_OPTIONS = '--require ./tests/fixtures/localhost-dns.cjs'
+node node_modules/next/dist/bin/next dev --webpack --port 3010 --hostname 127.0.0.1
+```
+
+Open `http://bistro.localhost:3010/en` or `/fr`; `harbor.localhost:3010` is a separate tenant fixture. Choose the required bread option, add Soup, edit/remove quantities, and switch menu language. `LUNCH` applies a fixture discount; another nonempty code returns validation failure. Customer name `LOST_RESPONSE` stores one order then drops the first response; retry returns that same receipt. `RATE_LIMIT` rejects the first attempt with 429, and `CONFLICT` returns 409. `http://127.0.0.1:5189/__results` exposes write/replay/conflict counts without request payloads. The fixture only supports these deterministic cases and is not a replacement for real API/database acceptance. Stop both processes and close the test shell afterward. Never load the fixture DNS module or deploy the fixture server in production.
 
 ## Optional API container
 

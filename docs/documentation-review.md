@@ -99,3 +99,24 @@ The authenticated server API client now centralizes GET/POST/PUT/DELETE calls, r
 | `dotnet test apps/api/WhitePlate.slnx --no-restore -c Release` | Passed: 129 tests, 0 failures |
 
 The shell did not expose `npm` on `PATH`; installed package-local CLIs were run with the bundled Node runtime. Resend provider requests remain direct server-only calls; no browser page or component performs an API fetch. No commit or push was created.
+
+## Guest cart and checkout verification — 2026-10-01
+
+Implemented on `feat/guest-cart-checkout`: tenant-scoped component-memory cart, quantity/option editing and removal, same-origin checkout BFF, UUID idempotency keys, immutable uncertain-response retries, and validated server-priced receipts. Both language catalogs and relevant architecture/contracts/acceptance docs are updated. No API schema, database, provider credentials, payment, or pickup changes were made. The pre-existing `apps/frontend/.env.example` edit was preserved outside this feature.
+
+The shell did not expose npm, so checks used the bundled Node executable and installed package-local CLIs. Tests were written and observed failing for cart updates, unchanged retry keys, input validation, option constraints, idempotency-header forwarding, safe host/origin handling, and removal of client-supplied prices from the outbound payload before the implementation was completed.
+
+| Command/check | Actual result |
+| --- | --- |
+| `node node_modules/vitest/vitest.mjs run` from frontend | Passed: 9 files, 51 tests. Includes cart/selection, BFF origin/host, public order request/receipt, retry/conflict, and rate-limit tests. |
+| `node node_modules/typescript/bin/tsc --noEmit` from frontend | Passed after the final component refactor. |
+| `node node_modules/eslint/bin/eslint.js .` from frontend | Failed at the existing ESLint 10 / React plugin incompatibility: `contextOrFilename.getFilename is not a function`, while loading `react/display-name`. |
+| `node node_modules/next/dist/bin/next build` from frontend | Failed at the existing Turbopack Windows worker-spawn access-denied error 5. |
+| `node node_modules/next/dist/bin/next build --webpack` from frontend | Compilation and production TypeScript completed; page-data collection failed because existing local `BETTER_AUTH_URL` is HTTP and the production auth guard requires HTTPS. Production build is not verified. |
+| `dotnet test apps/api/WhitePlate.slnx --no-restore -c Release` from repository root | 131 passed, 1 failed, 132 total. `TenantRepositoryTests.PostgreSqlModelAndMigrationProduceExpectedSchema` expects 7 migrations but source now has 8. This pre-existing assertion was not changed by frontend checkout. |
+| Chrome + Webpack dev server with local API fixture | Passed: required option validation, product add/quantity/remove, unavailable item, menu-language switching retaining cart, reload clearing cart, a second tenant starting empty, safe invalid-promo/rate-limit/conflict messages, corrected promo success, English/French receipt, and mobile layout without horizontal overflow. |
+| Response lost after fixture order creation | Passed: UI locked edits and preserved the key/payload; retry displayed the original receipt. At that point the fixture had 2 writes for 2 distinct orders and 1 replay. Final fixture totals were 5 writes/5 stored orders, 1 replay, 1 conflict across the full smoke run. |
+| Browser diagnostics | No Next.js error overlay; initial confirmed-receipt error logs were empty. Later navigation produced `MessageNotSentError` and a Chrome-extension `RegisterClientLocalizationsError`; these logs are recorded separately from successful order acceptance. |
+| `git diff --check` | Passed. |
+
+The browser fixture uses no database or email provider and intentionally covers a narrow deterministic API contract. It is not proof of real PostgreSQL persistence, production host routing, or production rate policy. Real API/database browser checkout still needs the previously unapplied `CatalogLocalization` migration and appropriate test data. Menu locale is still absent from order snapshots, as required by the separate unresolved D11 decision. The known lint/toolchain and migration-count test failures remain open. The checkout card belongs in **In review**, not Done, pending this acceptance. Test processes were stopped; no production data was changed.

@@ -1,6 +1,6 @@
 # WhitePlate frontend
 
-Next.js App Router app with localized Better Auth sign-in/sign-up, password recovery, Google/Microsoft OAuth, verified-email organization signup, and staff invitation/team flows. Authenticated API operations run through Next.js server actions and use Better Auth's short-lived JWTs. Restaurant catalog/order screens are not implemented.
+Next.js App Router app with localized Better Auth and organization/team flows, tenant menu browsing, language/translation settings, and guest cart/checkout. Protected API operations use server-side Better Auth JWTs. Guest checkout uses a same-origin public BFF and an in-memory cart; server receipt pricing and retry safety are verified with a local API fixture. The kitchen dashboard remains unimplemented.
 
 Run from this directory:
 
