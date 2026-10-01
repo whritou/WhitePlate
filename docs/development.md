@@ -4,14 +4,14 @@ This guide runs the frontend and .NET API. The frontend includes Better Auth ema
 
 ## Prerequisites and layout
 
-- Node.js `24.19.0` and npm `11.17.0`, pinned by `apps/frontend/.nvmrc` and the frontend package's `engines`/`packageManager` fields. `apps/frontend/.npmrc` enforces the pins.
+- Supported toolchain: Node.js `^24.19.0` and npm `^11.17.0` (Node 24/npm 11 from those minimum versions, excluding new majors). `.nvmrc` pins Node `24.19.0` for local setup and GitHub Actions; `packageManager` records npm `11.17.0` as the reproducible reference.
 - .NET 10 SDK, with `10.0.100` as the minimum feature band and `latestFeature` roll-forward. Root `global.json` also selects Microsoft Testing Platform for `dotnet test`.
 - Network access on first install/restore. Frontend builds use system font stacks and do not fetch fonts from Google.
 
-The frontend `.npmrc` enforces the exact runtime pins and uses legacy peer resolution because the React plugin currently bundled by Next.js declares ESLint support only through v9. The flat config wraps Next's plugin configs with ESLint's `@eslint/compat` utility, and lint runs against ESLint 10.
+The frontend `.npmrc` keeps `engine-strict=true` to enforce the supported ranges and uses legacy peer resolution because the React plugin currently bundled by Next.js declares ESLint support only through v9. Exact engine pins are unsuitable for Vercel, which automatically rolls minor/patch releases forward within the selected Node major. The flat config wraps Next's plugin configs with ESLint's `@eslint/compat` utility, and lint runs against ESLint 10.
 - Docker is optional for the API-only container example. API persistence requires PostgreSQL. PostgreSQL/PgAdmin/Compose are not provisioned by the repository.
 
-Check your shell with `node --version`, `npm --version`, and `dotnet --version`. Use the pinned tool versions shown above; `npm ci` rejects a different Node or npm version. The frontend package is `apps/frontend`; the API host is `apps/api/WhitePlate.Api/WhitePlate.Api.csproj`. Its solution at `apps/api/WhitePlate.slnx` includes Domain, Application, Infrastructure, and backend tests. There is no root npm workspace or runnable root app.
+Check your shell with `node --version`, `npm --version`, and `dotnet --version`. Prefer the local/CI reference versions above; `npm ci` accepts newer compatible Node 24/npm 11 releases and rejects versions outside the supported ranges. The frontend package is `apps/frontend`; the API host is `apps/api/WhitePlate.Api/WhitePlate.Api.csproj`. Its solution at `apps/api/WhitePlate.slnx` includes Domain, Application, Infrastructure, and backend tests. There is no root npm workspace or runnable root app.
 
 ## Install and run
 
@@ -64,7 +64,7 @@ An HTTP-only API run may warn that it cannot determine the HTTPS port. This does
 | `apps/api/WhitePlate.Api/appsettings.json` | Logging, `AllowedHosts: "*"`, and `Tenancy:BaseDomain` (local default `localhost`) |
 | `apps/api/WhitePlate.Api/appsettings.Development.json` | Development logging and local Better Auth issuer/audience |
 | `apps/api/WhitePlate.Api/Properties/launchSettings.json` | Local URLs and Development environment |
-| `apps/frontend/.nvmrc`, package `engines`, and `packageManager` | Pin Node.js 24.19.0 and npm 11.17.0 |
+| `apps/frontend/.nvmrc`, package `engines`, and `packageManager` | Exact local/CI references: Node 24.19.0/npm 11.17.0; supported deployment ranges: `^24.19.0`/`^11.17.0` |
 | `global.json` | Pins the .NET 10.0.100 feature baseline with latest-feature roll-forward and selects Microsoft Testing Platform |
 
 API persistence needs server-only `ConnectionStrings__WhitePlate`. Set `Tenancy__BaseDomain` to the domain whose immediate subdomains identify tenants. For local storefront routing, set frontend `STOREFRONT_BASE_DOMAIN=localhost` and `PUBLIC_TENANT_API_URL_TEMPLATE=http://{tenant}.localhost:5182`; the base domain must match `Tenancy__BaseDomain`, and the template must use exactly that one tenant label. Production templates must use HTTPS and a wildcard route that reaches the API. These values are server-only and the frontend never forwards an arbitrary Host header. If the browser cannot reach the API at `API_BASE_URL`, set the non-secret `PUBLIC_API_BASE_URL` to its public HTTP(S) origin so the dashboard's SignalR connection can reach `/hubs/orders`; allow the frontend origin in API CORS and use HTTPS in production. Protected routes require `Authentication__Issuer` (Better Auth base URL) and `Authentication__Audience` (same value as frontend `API_AUDIENCE`); production startup fails when either is absent. Browser CORS origins are supplied through `Cors__AllowedOrigins`. Checkout rate limits use `CheckoutRateLimit:PermitLimit`, `CheckoutRateLimit:WindowSeconds`, and `CheckoutRateLimit:QueueLimit`. Swagger is on by default in Development and can be enabled in a deployment with `Swagger__Enabled=true`. Its OpenAPI server is `/`, so browser calls use the Swagger page's HTTPS origin behind a proxy. On Render (`RENDER=true`), the API leaves HTTP-to-HTTPS redirection to Render's TLS proxy; `GET /` and `HEAD /` return 200 for service probes. For other hosts, configure forwarded headers and HTTPS redirection to match their proxy setup.
@@ -181,6 +181,8 @@ The build context must be `apps/api` because the Dockerfile copies the API host 
 The image does not configure HTTPS or provision a certificate. A production deployment needs an explicit TLS/reverse-proxy and trusted-forwarding design. There is no full-stack Compose command.
 
 ## Troubleshooting
+
+Vercel selects a Node major and manages its minor/patch releases. Configure the frontend root as `apps/frontend`, use Node **24.x**, and use the checked-in lockfile (`npm ci`) when configuring an install command. The package engine ranges accept Vercel's Node 24.21.0/npm 11.19.0 pair. Keep engine validation enabled; do not work around `EBADENGINE` using `--force` or `engine-strict=false`. When toolchain references change, regenerate the lockfile with npm and verify the supported ranges. See [Vercel Node versions](https://vercel.com/docs/functions/runtimes/node-js/node-js-versions) and [package manager selection](https://vercel.com/docs/package-managers).
 
 | Symptom | What to check |
 | --- | --- |

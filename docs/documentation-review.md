@@ -181,3 +181,24 @@ New request tests were observed failing before implementation, including the pro
 | API tests | Not rerun: no API source, schema or contracts changed. |
 
 Fixture/dev processes were stopped. No dependencies or lockfile changed. The existing `.env.example` edit remains excluded. Live provider delivery, database acceptance and authenticated kitchen acceptance retain their separate task scope.
+
+## Vercel engine compatibility — 2026-10-02
+
+The reported Vercel install failed because `engine-strict=true` enforced exact Node 24.19.0/npm 11.17.0 engines against the platform's Node 24.21.0/npm 11.19.0. On `fix/vercel-engine-compatibility`, package engines now accept `^24.19.0` and `^11.17.0`. Exact local/CI references remain in `.nvmrc` and `packageManager`; strict engine validation remains enabled. npm regenerated the lockfile's root engine metadata only, with no dependency version or integrity changes. Setup and stack documentation now distinguish reference versions from supported ranges.
+
+| Command/check | Actual result |
+| --- | --- |
+| Semver check against the original engines | Failed as expected: the reported Vercel pair was rejected. |
+| npm `npm-install-checks.checkEngine` against updated manifest | Passed: both reference and reported Vercel versions accepted; older Node/npm and Node 25/npm 12 rejected. Manifest and lockfile engine metadata match. |
+| `npm install --package-lock-only --ignore-scripts --offline --no-audit --no-fund` | Failed with `EBADENGINE`: this host's available npm CLI is 11.1.0, below the supported minimum. |
+| `npm pack npm@11.17.0 --pack-destination .tmp --ignore-scripts --silent` | Failed with `ETARGET`: the available registry did not provide that version. No replacement npm was installed. |
+| `npm install --package-lock-only --ignore-scripts --offline --no-audit --no-fund --engine-strict=false` using Node 24.19.0/npm 11.1.0 | Passed with the expected npm engine warning. The override was limited to offline lockfile metadata generation, with no installation or lifecycle scripts; checked-in strict validation remains enabled. This is not clean-install verification. |
+| `node node_modules/vitest/vitest.mjs run` from frontend | Passed: 20 files, 129 tests. |
+| `node node_modules/eslint/bin/eslint.js .` | Passed with no errors or warnings. |
+| `node node_modules/typescript/bin/tsc --noEmit` | Passed, separately from the production build. |
+| `node node_modules/next/dist/bin/next build --webpack` | Passed compilation, production types and all 29 generated pages with inert test-only auth/provider values. Better Auth logged schema validation errors against the deliberately unavailable test database. |
+| `node node_modules/prettier/bin/prettier.cjs --check package.json package-lock.json` | Passed. |
+| `git -c core.safecrlf=false diff --check` | Passed. |
+| API tests | Not rerun: no API code or schema changed. |
+
+Fresh `npm ci` and hosted Vercel deployment are not verified in this follow-up. Rerun the hosted build after merging the fix; keep the toolchain card In review until deployment acceptance succeeds. The pre-existing `.env.example` edit remains excluded. No application source, production data, provider credentials or dependency versions changed.
