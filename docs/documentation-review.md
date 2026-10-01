@@ -136,4 +136,4 @@ Added exact Node.js `24.19.0` / npm `11.17.0` pins, a .NET 10 SDK minimum featur
 | `dotnet test apps/api/WhitePlate.slnx --no-restore --configuration Release` | Passed: 132 tests, 0 failures. |
 | `git diff --check` | Passed. |
 
-The GitHub Actions clean install and checks run on Ubuntu with the pinned Node/npm and .NET SDK toolchain; their result is recorded here after the pushed branch workflow completes. The Windows `@parcel/watcher` failure is recorded separately from CI and does not change the Linux clean-install result.
+The [pushed GitHub Actions run](https://github.com/whritou/WhitePlate/actions/runs/36883112545) completed successfully on 2026-10-01 (52 seconds total). Both `Frontend checks` and `API tests` passed from clean Ubuntu runners with the pinned Node/npm and .NET SDK toolchain; the frontend job ran `npm ci`, all 51 Vitest tests, lint, typecheck, and production build. The Windows `@parcel/watcher` failure remains a local Windows install-hook issue and did not occur in the Linux clean install. ESLint reported the three pre-existing unused-variable warnings listed above.
