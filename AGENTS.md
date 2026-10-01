@@ -37,6 +37,6 @@ Record actual commands and results, including failures or checks that could not 
 
 ## Branch and commit workflow
 
-- For each requested feature or fix, work on a descriptive `codex/<scope>` branch. Reuse the current branch only when it is already the appropriate task branch; otherwise create one from the current project state.
+- For each requested change, use a descriptive Conventional Commit-style branch prefix such as `feat/<scope>`, `fix/<scope>`, `chore/<scope>`, `refactor/<scope>`, or `docs/<scope>`. Do not use `codex/`. Reuse the current branch only when it is already the appropriate task branch; otherwise create one from the current project state.
 - After completing and verifying a feature or fix, commit it using Conventional Commits, such as `feat(api): add order checkout` or `fix(api): enforce tenant ownership`.
 - Push the task branch to `origin` after committing when a remote is configured. Report the branch, commit, push result, and verification results in the handoff.
