@@ -1,9 +1,9 @@
 import { betterAuth } from "better-auth"
-import { nextCookies } from "better-auth/next-js"
-import { jwt } from "better-auth/plugins"
 import { dash } from "@better-auth/infra"
-import { PostgresDialect } from "kysely"
+import { jwt } from "better-auth/plugins"
+import { nextCookies } from "better-auth/next-js"
 import { Pool } from "pg"
+import { PostgresDialect } from "kysely"
 import { sendAuthEmail } from "@/lib/email"
 
 const authUrl = process.env.BETTER_AUTH_URL ?? "http://localhost:3000"
@@ -22,11 +22,20 @@ if (process.env.NODE_ENV === "production") {
     ["RESEND_API_KEY", process.env.RESEND_API_KEY],
     ["RESEND_FROM_EMAIL", process.env.RESEND_FROM_EMAIL],
     ["API_BASE_URL", process.env.API_BASE_URL],
-  ].filter(([, value]) => !value).map(([key]) => key)
-  if (missing.length) throw new Error(`Missing authentication configuration: ${missing.join(", ")}`)
-  if ((process.env.BETTER_AUTH_SECRET?.length ?? 0) < 32) throw new Error("BETTER_AUTH_SECRET must contain at least 32 characters")
-  if (!authUrl.startsWith("https://")) throw new Error("BETTER_AUTH_URL must use HTTPS in production")
-  if (!process.env.API_BASE_URL?.startsWith("https://")) throw new Error("API_BASE_URL must use HTTPS in production")
+  ]
+    .filter(([, value]) => !value)
+    .map(([key]) => key)
+
+  if (missing.length)
+    throw new Error(
+      `Missing authentication configuration: ${missing.join(", ")}`
+    )
+  if ((process.env.BETTER_AUTH_SECRET?.length ?? 0) < 32)
+    throw new Error("BETTER_AUTH_SECRET must contain at least 32 characters")
+  if (!authUrl.startsWith("https://"))
+    throw new Error("BETTER_AUTH_URL must use HTTPS in production")
+  if (!process.env.API_BASE_URL?.startsWith("https://"))
+    throw new Error("API_BASE_URL must use HTTPS in production")
 }
 
 const pool = new Pool({
@@ -39,7 +48,9 @@ export const auth = betterAuth({
   appName: "WhitePlate",
   baseURL: authUrl,
   basePath: "/api/auth",
-  secret: process.env.BETTER_AUTH_SECRET ?? "whiteplate-local-development-secret-change-before-production",
+  secret:
+    process.env.BETTER_AUTH_SECRET ??
+    "whiteplate-local-development-secret-change-before-production",
   trustedOrigins: [authUrl],
   rateLimit: {
     enabled: true,
@@ -107,7 +118,9 @@ export const auth = betterAuth({
       : {}),
   },
   plugins: [
-    ...(process.env.BETTER_AUTH_API_KEY ? [dash({ apiKey: process.env.BETTER_AUTH_API_KEY })] : []),
+    ...(process.env.BETTER_AUTH_API_KEY
+      ? [dash({ apiKey: process.env.BETTER_AUTH_API_KEY })]
+      : []),
     jwt({
       jwks: {
         keyPairConfig: { alg: "RS256", modulusLength: 2048 },
@@ -118,7 +131,10 @@ export const auth = betterAuth({
         issuer: authUrl,
         audience: apiAudience,
         expirationTime: "15m",
-        definePayload: ({ user }) => ({ email: user.email, email_verified: user.emailVerified }),
+        definePayload: ({ user }) => ({
+          email: user.email,
+          email_verified: user.emailVerified,
+        }),
         getSubject: ({ user }) => user.id,
       },
     }),

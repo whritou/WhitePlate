@@ -1,10 +1,5 @@
 import { createStore } from "zustand/vanilla"
-import type { StoreApi } from "zustand/vanilla"
-
-export type StoreInitializer<TInput, TState> = (
-  input: TInput,
-  set: StoreApi<TState>["setState"]
-) => TState
+import type { StoreInitializer } from "@/types/state"
 
 export function createStoreFactory<TInput, TState>(
   initializer: StoreInitializer<TInput, TState>

@@ -4,7 +4,7 @@ Status: organization, tenant, staff membership/invitation, catalog, order snapsh
 
 ## Implemented organization, tenant, catalog and order schema
 
-Current EF model includes `Organizations`, `OrganizationOwnerMemberships`, `RestaurantMemberships`, `StaffInvitations`, `Tenants`, `MenuCategories`, `Products`, `ProductOptionGroups`, `ProductOptions`, `PromotionDiscounts`, `Orders`, `OrderLines`, `OrderLineOptions`, `OrderIdempotencyRecords`, and `OrderOutboxMessages`. Restaurant-owned catalog/order/idempotency/outbox rows carry `TenantId`. Catalog relationships use composite alternate keys and foreign keys so products, groups and options cannot reference another restaurant's parent. Order product and option labels/prices are snapshots and do not cascade with later catalog edits.
+Current EF model includes `Organizations`, `OrganizationOwnerMemberships`, `RestaurantMemberships`, `StaffInvitations`, `Tenants`, `MenuCategories`, `Products`, `ProductOptionGroups`, `ProductOptions`, `PromotionDiscounts`, `Orders`, `OrderLines`, `OrderLineOptions`, `OrderIdempotencyRecords`, and `OrderOutboxMessages`. Restaurant-owned catalog/order/idempotency/outbox rows carry `TenantId`. Catalog relationships use composite alternate keys and foreign keys so products, groups and options cannot reference another restaurant's parent. Order product and option labels/prices are snapshots and do not cascade with later catalog edits. Decision 0004 approves a nullable effective `MenuLocale` snapshot for orders and localized product/option labels for new checkouts; this is not in the current EF model or migration history.
 
 `CatalogLocalization` adds `Tenants.DefaultMenuLocale` and `Tenants.MenuLocalesJson`, plus a `TranslationsJson` text column on categories, products, option groups, and options. Existing rows backfill to English with no extra translations. The tenant locale list is an open-ended JSON array of normalized language tags with a required default; there is no fixed language count. Item translation documents are JSON maps keyed by locale and remain on the tenant-owned item row. Product name/description, category name, option-group name, and option name can be translated. The public menu resolves missing item translations to the tenant default. Restaurant owners/managers edit the locale list and catalog translations through the protected API and localized management page. The migration must be applied before deploying this source; startup migration is not automatic.
 
@@ -83,6 +83,7 @@ erDiagram
         uuid TenantId FK
         string CustomerName
         string Currency
+        string MenuLocale "nullable for legacy orders; approved, not implemented"
         decimal TotalAmount
         string Status
         datetime CreatedAt
@@ -93,7 +94,7 @@ erDiagram
         uuid TenantId FK
         uuid OrderId FK
         uuid ProductId FK
-        string ProductName
+        string ProductName "resolved at checkout; approved behavior"
         decimal UnitPrice
         int Quantity
     }

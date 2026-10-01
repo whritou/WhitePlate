@@ -1,12 +1,12 @@
-export type ApiLocale = "en" | "fr"
-
-type TenantResource = "details" | "menu"
+import type { TenantResource } from "@/types/api"
 
 function normalizeTenantId(tenantId: string): string {
   const normalized = tenantId.trim().toLowerCase()
+
   if (!/^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/.test(normalized)) {
     throw new Error("Invalid tenant identifier")
   }
+
   return normalized
 }
 

@@ -1,48 +1,44 @@
 # Technology stack and implementation status
 
-Reviewed on 2026-09-29. Package manifests and the frontend lockfile are the source of truth for versions; this table describes integration status.
+Reviewed on 2026-10-01 against source and manifests. The package manifest and lockfile remain the source of truth for versions. See [frontend conventions](frontend-conventions.md) for the implemented module boundaries.
 
 ## Active dependencies
 
-| Area | Technology | Evidence / role |
+| Area | Technology | Implemented role |
 | --- | --- | --- |
-| Web framework | Next.js 16.3.4, React/React DOM 19.2.8 | Frontend manifest, App Router pages |
-| Language | TypeScript, strict mode | `apps/frontend/tsconfig.json` |
-| Localization | next-intl | App UI uses en/fr; public menu languages are restaurant-configurable |
-| Styling | Tailwind CSS 4, PostCSS, tw-animate-css, shadcn styles | Global stylesheet and PostCSS config |
-| UI primitives | Base UI, class-variance-authority, cn | Button and class-name utilities |
-| Theme | next-themes | Client theme provider |
-| API | ASP.NET Core, .NET 10 | `apps/api/WhitePlate.Api/WhitePlate.Api.csproj` and controllers |
-| Backend structure | Four .NET projects with inward references | Domain, Application, Infrastructure, API host; restaurant capabilities use these layers |
-| Persistence | EF Core 10.0.12, Npgsql EF provider 10.0.3 | Scoped DbContext, six incremental migrations; current schema applied to Neon `test`; SQLite relational tests |
-| API description | Microsoft.AspNetCore.OpenApi 10.0.12, Swashbuckle.AspNetCore.SwaggerUI 10.2.3 | OpenAPI JSON and Swagger UI enabled in Development or by configuration |
-| Backend tests | xUnit v3, Microsoft Testing Platform, ASP.NET Core MVC Testing | Domain, application, infrastructure, architecture, and API tests in `WhitePlate.Tests` |
-| Container tooling | API Dockerfile, Visual Studio container targets | API-only Linux image scaffold; `apps/api` build context |
-| Frontend tooling | ESLint 10, TypeScript, Prettier | Package scripts; lint currently fails, see review findings |
+| Web framework | Next.js 16.3.4, React 19.2.8 | App Router; server pages, route handlers and mutation actions |
+| Language | Strict TypeScript | Named contracts in `types/`; runtime parsers validate untrusted JSON |
+| Localization | next-intl | en/fr interface, independent restaurant menu language |
+| Styling | Tailwind CSS 4, PostCSS, tw-animate-css, shadcn styles | Theme tokens and local system fonts |
+| UI | shadcn base-lyra, Base UI, class-variance-authority, cn, Lucide | Shared form controls, buttons, cards, feedback and icons |
+| Theme | next-themes | Client theme provider and keyboard shortcut |
+| Server state | TanStack Query | Account/tenant/view-scoped kitchen queries, action mutations and invalidation |
+| Client state | Zustand | Per-provider tenant-selection store; guest cart uses feature-local state |
+| Authentication | Better Auth, pg, Kysely | Server sessions, separate PostgreSQL auth schema, OAuth configuration and API JWTs |
+| Live notifications | @microsoft/signalr | Kitchen connection, group lifecycle, deduplicated hints and REST recovery |
+| Frontend tooling | Vitest, ESLint 10, TypeScript, Prettier | Boundary/regression tests; enforced UI/type/request rules and CI format check |
+| API | ASP.NET Core, .NET 10 | API host composing Domain, Application and Infrastructure |
+| Persistence | EF Core 10, Npgsql | Tenant/catalog/orders/idempotency/outbox persistence and migrations |
+| API description | Microsoft.AspNetCore.OpenApi, Swagger UI | Generated development or explicitly configured OpenAPI |
+| Backend tests | xUnit v3, Microsoft Testing Platform | Domain, application, infrastructure, architecture and HTTP tests |
+| CI | GitHub Actions | Package-local frontend checks and API solution tests |
+| Container tooling | API Dockerfile, Visual Studio container targets | API-only Linux image; no full-stack Compose configuration |
 
-The manifest also includes `clsx`, `tailwind-merge`, Lucide, and the shadcn CLI. Some support UI tooling or transitive utilities; their presence is not a business capability.
+## Installed without a feature integration
 
-## Installed but not integrated into features
+| Dependency | Status |
+| --- | --- |
+| Axios | Installed; current HTTP adapters use fetch and the shared request factory |
+| Playwright | Installed; no checked-in browser-test runner/configuration yet; browser acceptance uses documented fixtures and manual automation |
 
-| Dependency | Intended use | Missing wiring |
-| --- | --- | --- |
-| Axios | HTTP requests | Configured client, base URL, API calls |
-| TanStack Query | Interactive server-state cache | Provider, query keys, queries/mutations |
-| Zustand | Local client state | Store, cart persistence and tenant scoping |
-| @microsoft/signalr | Frontend kitchen notifications | The API hub/outbox is wired; frontend connection, authentication, and subscription lifecycle are not |
-| Vitest | Frontend unit tests | Configuration, files, scripts |
-| Playwright | Browser tests | Configuration, files, browser provisioning, scripts |
+Installed tooling does not imply a new business capability. Do not add a second HTTP or state abstraction merely because its package exists.
 
-## Configured per deployment
+## Deployment verification
 
-EF Core and PostgreSQL implement organizations, tenants, catalog, order snapshots, idempotency, and outbox persistence. The first seven EF migrations are applied to Neon `test`; the new `CatalogLocalization` migration is not yet applied. Better Auth stores users/sessions/rate limits/JWT keys in a separate CLI-managed PostgreSQL `auth` schema, also migrated on `test`. The Better Auth CLI reports an unresolved `rateLimit.lastRequest` type difference (`int8` versus `number`); the local signup/invitation flow succeeds, but reconcile the warning before production. Google/Microsoft OAuth, Resend credentials, production issuer/audience and CORS origins need deployment configuration. MediatR, Compose and GitHub Actions remain unimplemented. No deployment host or CI policy is selected in executable configuration.
-
-The ASP.NET Core SignalR server, tenant-authenticated hub, and outbox dispatcher are registered and mapped. The frontend SignalR client package is not integrated into an application flow.
+PostgreSQL and Better Auth schemas have separately documented test-branch migrations. The new CatalogLocalization migration remains unapplied; refer to [development](../development.md) for current setup rather than inferring rollout from a checked-in migration. Live OAuth and real Resend credentials, production issuer/audience, domain/TLS/CORS, and authenticated browser/SignalR acceptance remain separate work. Source wiring and unit tests do not establish production readiness. MediatR and full-stack Compose are not implemented.
 
 ## Toolchain and reproducibility
 
-Use the .NET 10 SDK and Node with npm; the installed Next.js package declares Node >=20.9. This is its minimum engine requirement, not a repository-wide tested version matrix. Root `global.json` selects Microsoft Testing Platform for `dotnet test` but does not pin an SDK version. There is no Node version file, npm `engines`/`packageManager` policy, or root npm workspace. The initial review environment used Node 24.19.0 and .NET SDK 10.0.401.
+Node.js 24.19.0 and npm 11.17.0 are pinned by `.nvmrc`, package engines/packageManager, and `.npmrc`. Root `global.json` selects a .NET 10 SDK minimum feature band with roll-forward and Microsoft Testing Platform. There is no root npm workspace: run npm commands in `apps/frontend`, use `npm ci` to respect the lockfile, and use explicit .NET solution/project paths. Dev/build select Webpack due to the recorded Windows Turbopack worker limitation. Next's legacy React ESLint plugin is adapted with `@eslint/compat`.
 
-Use `npm ci` in `apps/frontend` to respect the lockfile. The API has explicit NuGet references but no locked-restore policy. Toolchain pinning and reproducible CI are follow-up decisions in the [roadmap](../development-roadmap.md).
-
-See [development commands](../development.md) and [verification findings](../documentation-review.md) for practical limitations.
+See [development commands](../development.md) and [verification findings](../documentation-review.md) for machine-specific install limitations and actual results. The cleanup did not upgrade dependencies or change the lockfile.

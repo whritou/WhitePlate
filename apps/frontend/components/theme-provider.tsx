@@ -1,7 +1,7 @@
 "use client"
 
-import * as React from "react"
 import { ThemeProvider as NextThemesProvider, useTheme } from "next-themes"
+import * as React from "react"
 import { isThemeShortcutKey } from "./theme-hotkey"
 
 function ThemeProvider({
@@ -20,6 +20,7 @@ function ThemeProvider({
       {...props}
     >
       <ThemeHotkey />
+
       {children}
     </NextThemesProvider>
   )

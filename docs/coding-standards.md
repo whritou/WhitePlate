@@ -10,11 +10,13 @@ Generated files are not source. Do not edit `node_modules`, `.next`, `bin`, `obj
 
 ## Frontend
 
+Follow the implemented [frontend conventions](architecture/frontend-conventions.md) for module ownership, dedicated types, thin actions, server services, request adapters and query lifecycle. ESLint and CI enforce the mechanical boundaries; review still needs to assess responsibility, accessibility and authorization.
+
 - Use strict TypeScript and explicit boundary types. Validate data received across network/storage boundaries; TypeScript alone does not validate JSON or guarantee C# interoperability.
 - Default to Server Components. Use Client Components for browser APIs, interaction, or client hooks. Providers can wrap server-rendered children; client components are not restricted to leaf nodes.
 - Use `getTranslations` on the server and the appropriate `next-intl` client APIs for client UI. Add matching keys and interpolation variables to both catalogs.
 - Prefer `@/i18n/navigation` for internal localized links and navigation. Keep locale and tenant identity separate.
-- Reuse `Button`, Base UI accessibility behavior, and the existing `cn` utility. Preserve keyboard focus, semantic controls, and accessible names.
+- Reuse the shadcn controls in `components/ui`, Base UI accessibility behavior, and the existing `cn` utility. Preserve keyboard focus, semantic controls, and accessible names.
 - Tailwind 4 tokens belong in `app/globals.css`; there is no Tailwind config file. Use semantic theme tokens rather than duplicating hard-coded colors.
 - Follow `.prettierrc`: two spaces, double quotes, no semicolons, LF, and Tailwind class sorting. Format touched files rather than reformatting unrelated code.
 
@@ -42,6 +44,6 @@ For future business use cases:
 
 Run checks appropriate to the change and report failures honestly. The xUnit suite covers tenant use cases/host boundaries, verified-email organization/staff authorization, catalog invariants and management, relational persistence, safe errors, checkout HTTP pricing/idempotency/body/rate rules, order concurrency, outbox dispatch, hub authorization and project dependencies. Live OAuth/Resend/browser flows, SignalR connections, and production PostgreSQL concurrency still need broader validation. New behavior needs meaningful invariant, authorization, integration, or browser coverage as described in the [test plan](functional-test-plan.md).
 
-Use test drivem development method to implement new features.
+Use test-driven development for new behavior and bug regressions.
 
 Update commands/configuration in the development guide, endpoint shapes in the API contract, persisted fields in the schema, and current/planned status in the architecture as features land. Keep unfinished decisions visible in the [roadmap](development-roadmap.md).

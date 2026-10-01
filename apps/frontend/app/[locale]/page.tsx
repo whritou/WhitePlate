@@ -1,9 +1,18 @@
-import { Suspense } from "react"
-import { headers } from "next/headers"
-import { getTranslations } from "next-intl/server"
-import { Link } from "@/i18n/navigation"
 import { RestaurantMenu } from "@/components/storefront/restaurant-menu"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Button } from "@/components/ui/button"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import { Link } from "@/i18n/navigation"
 import { getPublicMenu } from "@/lib/api/public-storefront"
+import { getTranslations } from "next-intl/server"
+import { headers } from "next/headers"
+import { Suspense } from "react"
 
 export async function generateMetadata({
   searchParams,
@@ -19,6 +28,7 @@ export async function generateMetadata({
     requestHeaders.get("host"),
     query.menuLocale
   )
+
   return storefront.kind === "menu"
     ? {
         title: storefront.menu.restaurantName,
@@ -35,6 +45,7 @@ export default async function Page({
   searchParams: Promise<{ menuLocale?: string }>
 }) {
   const storefrontT = await getTranslations("Storefront")
+
   return (
     <Suspense fallback={<MenuLoading copy={storefrontT("loadingMenu")} />}>
       <PageContent searchParams={searchParams} />
@@ -56,20 +67,23 @@ async function PageContent({
     requestHeaders.get("host"),
     query.menuLocale
   )
+
   if (storefront.kind === "menu")
     return (
       <RestaurantMenu key={storefront.menu.tenantId} menu={storefront.menu} />
     )
   if (storefront.kind === "unavailable") {
     const storefrontT = await getTranslations("Storefront")
+
     return (
       <main className="mx-auto flex min-h-svh max-w-3xl items-center px-5 py-16">
-        <p
+        <Alert
+          variant="destructive"
           role="alert"
           className="w-full rounded-md border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive"
         >
-          {storefrontT("unavailable")}
-        </p>
+          <AlertDescription>{storefrontT("unavailable")}</AlertDescription>
+        </Alert>
       </main>
     )
   }
@@ -81,33 +95,51 @@ async function PageContent({
           <Link href="/" locale="en" lang="en">
             {t("english")}
           </Link>
+
           <Link href="/" locale="fr" lang="fr">
             {t("french")}
           </Link>
         </nav>
-        <div className="rounded-3xl border border-border bg-card p-8 shadow-sm sm:p-12">
-          <p className="text-sm font-medium text-primary">WhitePlate</p>
-          <h1 className="mt-3 max-w-xl text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
-            {t("title")}
-          </h1>
-          <p className="mt-4 max-w-xl text-base leading-7 text-muted-foreground">
-            {t("description")}
-          </p>
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Link
-              href="/sign-up"
-              className="inline-flex h-11 items-center rounded-lg bg-primary px-5 text-sm font-medium text-primary-foreground hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
-            >
-              {t("getStarted")}
-            </Link>
-            <Link
-              href="/sign-in"
-              className="inline-flex h-11 items-center rounded-lg border border-border bg-background px-5 text-sm font-medium text-foreground hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
-            >
-              {t("signIn")}
-            </Link>
-          </div>
-        </div>
+
+        <Card className="rounded-3xl border border-border bg-card p-8 shadow-sm sm:p-12">
+          <CardHeader className="px-0">
+            <p className="text-sm font-medium text-primary">WhitePlate</p>
+
+            <CardTitle>
+              <h1 className="mt-3 max-w-xl text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
+                {t("title")}
+              </h1>
+            </CardTitle>
+
+            <CardDescription className="mt-4 max-w-xl text-base leading-7 text-muted-foreground">
+              {t("description")}
+            </CardDescription>
+          </CardHeader>
+
+          <CardContent className="px-0">
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Button
+                size="lg"
+                className="h-11 rounded-lg"
+                nativeButton={false}
+                render={<Link href="/sign-up" />}
+              >
+                {t("getStarted")}
+              </Button>
+
+              <Button
+                size="lg"
+                variant="outline"
+                className="h-11 rounded-lg"
+                nativeButton={false}
+                render={<Link href="/sign-in" />}
+              >
+                {t("signIn")}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
         <p className="font-mono text-xs text-muted-foreground">
           {t("themeHint", { key: "d" })}
         </p>
@@ -125,24 +157,30 @@ function MenuLoading({ copy }: { copy: string }) {
       <p role="status" className="mb-5 text-sm text-muted-foreground">
         {copy}
       </p>
+
       <div aria-hidden="true" className="motion-safe:animate-pulse">
         <header className="flex items-end justify-between gap-5 border-b border-border pb-6">
           <div className="grid gap-3">
             <div className="h-3 w-20 rounded bg-muted" />
+
             <div className="h-9 w-64 max-w-full rounded bg-muted" />
           </div>
+
           <div className="h-9 w-40 rounded-md bg-muted" />
         </header>
+
         <div className="mt-10 grid gap-10">
           {[0, 1].map((category) => (
             <section key={category} className="grid gap-5">
               <div className="h-7 w-48 rounded bg-muted" />
+
               {[0, 1, 2].map((product) => (
                 <div
                   key={product}
                   className="grid gap-3 border-b border-border pb-5"
                 >
                   <div className="h-5 w-56 max-w-full rounded bg-muted" />
+
                   <div className="h-4 w-80 max-w-full rounded bg-muted" />
                 </div>
               ))}

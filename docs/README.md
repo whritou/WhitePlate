@@ -1,6 +1,6 @@
 # Documentation index
 
-Reviewed against the working tree on 2026-10-01. WhitePlate contains the first-release restaurant API, Better Auth account/organization/team flows, localized tenant menu browsing, and an in-memory guest cart/checkout with a server-priced receipt. Guest checkout has frontend unit and local-fixture browser verification; real database acceptance, the latest catalog-localization migration, and live external-provider/production setup remain separate work.
+Reviewed against the working tree on 2026-10-01. WhitePlate contains the first-release restaurant API, Better Auth account/organization/team flows, localized tenant menu browsing, an in-memory guest checkout, and a localized staff kitchen order dashboard with SignalR refresh hints and REST recovery. Dashboard and checkout browser acceptance, the latest catalog-localization migration, and live external-provider/production setup remain separate work.
 
 ## Reading order
 
@@ -11,6 +11,7 @@ Reviewed against the working tree on 2026-10-01. WhitePlate contains the first-r
 | [System architecture](architecture/WHITEPLATE_SYSTEM_ARCHITECTURE.md) | Current runtime and proposed system boundaries |
 | [Backend architecture](architecture/WHITEPLATE_BACKEND_ARCHITECTURE.md) | Project references, request paths, and test layout |
 | [Frontend architecture](architecture/WHITEPLATE_FRONTEND_ARCHITECTURE.md) | Routing, localization, rendering, and component map |
+| [Frontend implementation conventions](architecture/frontend-conventions.md) | Enforced UI, type, module, request and query boundaries |
 | [Technology stack](architecture/technology_stack.md) | Wired dependencies versus installed or proposed tools |
 | [Coding standards](coding-standards.md) | Rules for extending this codebase |
 | [API contracts](api/api-contracts.md) | Organization, staff, tenant, catalog, checkout, orders and SignalR routes |
@@ -18,6 +19,7 @@ Reviewed against the working tree on 2026-10-01. WhitePlate contains the first-r
 | [Tenant isolation and security](architecture/tenancy-and-security.md) | Trust boundaries, membership authorization and deployment requirements |
 | [Authentication decision](architecture/decisions/0002-authentication.md) | Better Auth, JWT/API boundary, email binding, and migration ownership |
 | [Catalog localization and tenant domain decision](architecture/decisions/0003-catalog-localization-and-tenant-domain-policy.md) | Restaurant-configurable menu languages and first-release one-label subdomain policy; database rollout remains pending |
+| [Localized order snapshots decision](architecture/decisions/0004-localized-order-snapshots.md) | Approved checkout locale and historical product/option label behavior; implementation remains separate work |
 | [Functional test plan](functional-test-plan.md) | Executable smoke checks and future acceptance criteria |
 | [Development roadmap](development-roadmap.md) | Implemented backend scope and unresolved frontend/deployment decisions |
 | [Documentation review](documentation-review.md) | Audit findings, verification evidence, and remaining blockers |

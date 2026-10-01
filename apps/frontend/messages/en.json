@@ -83,6 +83,8 @@
     "verifyBeforeAccept": "Verify your email address before accepting this invitation.",
     "acceptInvitationAction": "Accept invitation",
     "invitationAccepted": "You’ve joined the team.",
+    "restaurantOrders": "Restaurant orders",
+    "openOrders": "Open orders",
     "restaurantMenuSettings": "Restaurant menu settings",
     "editMenuLanguages": "Edit languages",
     "menuLanguagesTitle": "Menu languages",
@@ -111,6 +113,49 @@
     "savingTranslation": "Saving…",
     "translationSaved": "Translation saved.",
     "translationError": "We couldn’t save this translation. Check the language and text, then try again."
+  },
+  "KitchenOrders": {
+    "title": "Kitchen orders",
+    "description": "Review incoming tickets and update each order as your team prepares it.",
+    "backToOrganizations": "All organizations",
+    "filterLabel": "Filter orders by status",
+    "statuses": {
+      "all": "All orders",
+      "Pending": "Pending",
+      "Preparing": "Preparing",
+      "Ready": "Ready",
+      "Completed": "Completed",
+      "Cancelled": "Cancelled"
+    },
+    "actions": {
+      "Preparing": "Start preparing",
+      "Ready": "Mark ready",
+      "Completed": "Complete order",
+      "Cancelled": "Cancel order"
+    },
+    "errors": {
+      "forbidden": "You don’t have access to this restaurant’s orders.",
+      "invalid": "This order view link or filter is invalid. Check it and try again.",
+      "unavailable": "We couldn’t load the latest orders. Try again in a moment.",
+      "unauthorized": "Your session has expired. Sign in again to continue.",
+      "conflict": "This order changed before your update was saved. The latest order state has been reloaded."
+    },
+    "accessDeniedTitle": "Orders unavailable",
+    "statusSaved": "Order status updated.",
+    "stale": "Showing saved orders. The latest refresh failed.",
+    "retry": "Try again",
+    "emptyTitle": "No orders in this view",
+    "emptyDescription": "New orders and orders with this status will appear here.",
+    "orderReference": "Order {reference}",
+    "lineItem": "{quantity} × {product}",
+    "updating": "Saving…",
+    "loadOlder": "Load older orders",
+    "connection": {
+      "connecting": "Connecting to live updates…",
+      "connected": "Live updates connected",
+      "reconnecting": "Reconnecting to live updates…",
+      "offline": "Live updates unavailable; orders can still be refreshed"
+    }
   },
   "Checkout": {
     "cartTitle": "Your order",

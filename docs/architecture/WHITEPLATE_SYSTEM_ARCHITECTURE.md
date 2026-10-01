@@ -1,6 +1,6 @@
 # WhitePlate system architecture
 
-Status: email/password and Google/Microsoft auth, localized recovery and verification pages, organization signup, email-bound invitations, server-side API JWT exchange, and backend identity verification are wired in source. Current backend verification has one pre-existing migration-count assertion failure; see the checkout verification in docs/documentation-review.md. Better Auth's `auth` schema and the invitation-email EF migration are applied on Neon `test`; email/password signup and invitation acceptance are verified there with locally intercepted email. Live provider/email and browser-flow checks remain open.
+Status: email/password and Google/Microsoft auth, localized recovery and verification pages, organization signup, email-bound invitations, server-side API JWT exchange, backend identity verification, and the staff kitchen dashboard are wired in source. The API solution tests pass after correcting the migration-count assertion; dashboard automated tests are recorded in the functional test plan. Better Auth's `auth` schema and the invitation-email EF migration are applied on Neon `test`; email/password signup and invitation acceptance are verified there with locally intercepted email. Authenticated dashboard browser acceptance, live provider/email, and production operations checks remain open.
 
 ## Current runtime
 
@@ -8,8 +8,13 @@ Status: email/password and Google/Microsoft auth, localized recovery and verific
 flowchart LR
     Browser[Browser] --> Proxy["Next.js proxy.ts: locale negotiation"]
     Browser --> Storefront["Tenant menu and in-memory guest cart"]
+    Browser --> Kitchen["Localized staff order dashboard"]
     Storefront --> GuestCheckout["Public checkout action: validated host and UUID key"]
     GuestCheckout --> Api
+    Kitchen -->|REST reads and status action| Api
+    Kitchen -->|SignalR refresh hints| Api
+    Kitchen --> TokenRoute["Same-origin SignalR token route"]
+    TokenRoute --> Auth
     Proxy --> Page["Localized auth and organization pages"]
     Page --> Auth["Better Auth session cookie"]
     Auth --> BFF["Next.js server actions: short-lived API JWT"]
@@ -68,9 +73,9 @@ Empty directories are not preserved by Git unless given a tracked file. Build ou
 
 ## Frontend boundary
 
-The Next.js App Router app renders `/en` and `/fr`. `next-intl` resolves the locale and supplies messages; `next-themes` manages the theme. Source folders sit directly under `apps/frontend`, and `@/*` points there. See [frontend architecture](WHITEPLATE_FRONTEND_ARCHITECTURE.md) for the request lifecycle.
+The Next.js App Router app renders `/en` and `/fr`. `next-intl` resolves the locale and supplies messages; `next-themes` manages the theme. Source folders sit directly under `apps/frontend`, and `@/*` points there. The localized organization area includes a server-backed kitchen order list and a SignalR client that treats notifications as REST refresh hints. See [frontend architecture](WHITEPLATE_FRONTEND_ARCHITECTURE.md) for the request lifecycle.
 
-Auth BFF route handlers and API server actions are implemented. Public storefront requests validate a one-label tenant subdomain and use a fixed server-side API URL template; the menu is rendered server-side and accepts any restaurant-enabled locale independently of the app's `/en` and `/fr` interface. Owners/managers configure menu languages and edit category, product, and option translations through the localized organization area. The API persists locale settings/translations and falls back to the default menu language. The `CatalogLocalization` EF migration is checked in but has not been applied to Neon `test` or production. The guest storefront now adds an in-memory cart and same-origin checkout server action, with UUID idempotency keys, uncertain-response retry locking, and a server-priced receipt. The API scope has no persisted cart. Custom domains and the kitchen dashboard remain unimplemented; real database/browser checkout acceptance remains open. See [decision 0003](decisions/0003-catalog-localization-and-tenant-domain-policy.md).
+Auth BFF route handlers and API server actions are implemented. Public storefront requests validate a one-label tenant subdomain and use a fixed server-side API URL template; the menu is rendered server-side and accepts any restaurant-enabled locale independently of the app's `/en` and `/fr` interface. Owners/managers configure menu languages and edit category, product, and option translations through the localized organization area. The API persists locale settings/translations and falls back to the default menu language. The `CatalogLocalization` EF migration is checked in but has not been applied to Neon `test` or production. The guest storefront now adds an in-memory cart and same-origin checkout server action, with UUID idempotency keys, uncertain-response retry locking, and a server-priced receipt. The API scope has no persisted cart. The kitchen dashboard uses authorized paged REST reads, saved order labels, conditional status actions, and SignalR refresh hints with REST recovery after reconnect. Custom domains remain deferred; browser acceptance and deployment configuration for the dashboard and checkout remain open. See [decision 0003](decisions/0003-catalog-localization-and-tenant-domain-policy.md).
 
 ## API boundary
 
@@ -84,7 +89,7 @@ Run the apps independently using the [development guide](../development.md). The
 
 ## Implemented business architecture
 
-The product direction is a shared-schema, multi-tenant restaurant service with a Next.js storefront/dashboard, an ASP.NET Core API, PostgreSQL persistence, and SignalR order notifications. Authentication and organization-onboarding frontend integration is wired in source; the catalog/order dashboard and public production deployment remain unimplemented.
+The product direction is a shared-schema, multi-tenant restaurant service with a Next.js storefront/dashboard, an ASP.NET Core API, PostgreSQL persistence, and SignalR order notifications. Authentication, organization onboarding, the storefront, and staff kitchen dashboard are implemented in source; authenticated browser acceptance and public production deployment remain open.
 
 The project boundaries own these business features:
 

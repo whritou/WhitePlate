@@ -1,7 +1,8 @@
 "use server"
 
 import { headers } from "next/headers"
-import { submitGuestOrder, type CheckoutResult } from "./checkout/order-client"
+import { submitGuestOrder } from "@/lib/checkout/order-client"
+import type { CheckoutResult } from "@/types/checkout"
 
 export async function checkoutGuestOrder(
   input: unknown,
@@ -10,8 +11,10 @@ export async function checkoutGuestOrder(
   const requestHeaders = await headers()
   const host = requestHeaders.get("host")
   const origin = requestHeaders.get("origin")
+
   try {
     const originUrl = origin ? new URL(origin) : null
+
     if (
       !originUrl ||
       !["http:", "https:"].includes(originUrl.protocol) ||
@@ -22,6 +25,7 @@ export async function checkoutGuestOrder(
   } catch {
     return { ok: false, error: "forbidden" }
   }
+
   return submitGuestOrder(
     host,
     {

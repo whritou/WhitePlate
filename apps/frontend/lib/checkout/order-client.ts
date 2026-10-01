@@ -1,39 +1,11 @@
-import { createApiRequestFactory, type ApiError } from "../api/request-factory"
+import { createApiRequestFactory } from "../api/request-factory"
 import { getTenantApiBaseUrl, getTenantSlug } from "../api/tenant-routing"
 import { isUuid, prepareCheckout, validateOrderInput } from "./cart"
-
-export type OrderReceipt = {
-  id: string
-  tenantId: string
-  currency: string
-  customerName: string
-  discountCode: string | null
-  subtotal: number
-  discountAmount: number
-  taxAmount: number
-  total: number
-  status: string
-  version: number
-  createdAt: string
-  lines: {
-    productId: string
-    productName: string
-    baseUnitPrice: number
-    taxRatePercent: number
-    quantity: number
-    subtotal: number
-    discountAmount: number
-    taxAmount: number
-    total: number
-    options: { optionId: string; name: string; priceAdjustment: number }[]
-  }[]
-}
-export type CheckoutResult =
-  { ok: true; receipt: OrderReceipt } | { ok: false; error: ApiError }
-export type CheckoutConfiguration = {
-  baseDomain: string | undefined
-  apiTemplate: string | undefined
-}
+import type {
+  OrderReceipt,
+  CheckoutResult,
+  CheckoutConfiguration,
+} from "@/types/checkout"
 
 export async function submitGuestOrder(
   host: string | null,
@@ -43,6 +15,7 @@ export async function submitGuestOrder(
   fetcher: typeof fetch = fetch
 ): Promise<CheckoutResult> {
   const slug = getTenantSlug(host, configuration.baseDomain)
+
   if (!slug) return { ok: false, error: "not_found" }
   if (
     !validateOrderInput(input) ||
@@ -51,15 +24,20 @@ export async function submitGuestOrder(
   ) {
     return { ok: false, error: "invalid" }
   }
+
   const payload = prepareCheckout(input, null, () => key).input
+
   if (new TextEncoder().encode(JSON.stringify(payload)).length > 16 * 1024)
     return { ok: false, error: "invalid" }
+
   const baseUrl = getTenantApiBaseUrl(
     slug,
     configuration.apiTemplate,
     configuration.baseDomain
   )
+
   if (!baseUrl) return { ok: false, error: "unavailable" }
+
   const api = createApiRequestFactory({
     baseUrl,
     public: true,
@@ -70,7 +48,9 @@ export async function submitGuestOrder(
     idempotencyKey: key,
     signal: AbortSignal.timeout(15_000),
   })
+
   if (!result.ok) return { ok: false, error: result.error }
+
   return isOrderReceipt(result.data)
     ? { ok: true, receipt: result.data }
     : { ok: false, error: "unavailable" }
@@ -107,6 +87,7 @@ function isOrderReceipt(value: unknown): value is OrderReceipt {
     value.lines.length > 50
   )
     return false
+
   return value.lines.every(
     (line: unknown) =>
       isRecord(line) &&

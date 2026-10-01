@@ -13,15 +13,69 @@ function makeResponse(
 }
 
 describe("createApiRequestFactory", () => {
+  it("maps an expired If-Match version to a conflict", async () => {
+    const api = createApiRequestFactory({
+      baseUrl: "https://api.example.test",
+      getToken: async () => "server-token",
+      fetcher: async () => makeResponse(null, 412),
+    })
+
+    await expect(
+      api.patch("/api/v1/orders/1/status", { status: "Ready" })
+    ).resolves.toEqual({
+      ok: false,
+      status: 412,
+      error: "conflict",
+    })
+  })
+  it("sends conditional status updates with a quoted If-Match version", async () => {
+    const fetcher = vi.fn<typeof fetch>(async () =>
+      makeResponse({ id: "order-1", status: "Preparing", version: 2 })
+    )
+    const api = createApiRequestFactory({
+      baseUrl: "https://api.example.test",
+      getToken: async () => "server-token",
+      fetcher,
+    })
+
+    const result = await api.patch(
+      "/api/v1/tenants/tenant-1/orders/order-1/status",
+      { status: "Preparing" },
+      { ifMatch: '"1"' }
+    )
+
+    expect(result).toMatchObject({ ok: true, status: 200 })
+    expect(fetcher).toHaveBeenCalledTimes(1)
+
+    const [input, init] = fetcher.mock.calls[0]!
+
+    expect(String(input)).toBe(
+      "https://api.example.test/api/v1/tenants/tenant-1/orders/order-1/status"
+    )
+    expect(init?.method).toBe("PATCH")
+    expect(new Headers(init?.headers).get("Authorization")).toBe(
+      "Bearer server-token"
+    )
+    expect(new Headers(init?.headers).get("If-Match")).toBe('"1"')
+    expect(init?.body).toBe(JSON.stringify({ status: "Preparing" }))
+    expect(init).toMatchObject({
+      cache: "no-store",
+      credentials: "omit",
+      redirect: "error",
+    })
+  })
+
   it("sends checkout idempotency keys and preserves rate-limit failures", async () => {
     const requests: RequestInit[] = []
     const fetcher: typeof fetch = async (_url, init) => {
       requests.push(init!)
+
       return makeResponse(
         { code: "rate_limited", detail: "private upstream text" },
         429
       )
     }
+
     const api = createApiRequestFactory({
       baseUrl: "https://bistro.example.test",
       getToken: async () => null,
@@ -33,15 +87,15 @@ describe("createApiRequestFactory", () => {
       { customerName: "Alice" },
       { idempotencyKey: "order-key-123456" }
     )
+
     expect(new Headers(requests[0]?.headers).get("Idempotency-Key")).toBe(
       "order-key-123456"
     )
     expect(result).toEqual({ ok: false, status: 429, error: "rate_limited" })
   })
   it("supports GET, POST, PUT, and DELETE with a server token and safe defaults", async () => {
-    const fetcher = vi.fn(
-      async (_input: RequestInfo | URL, _init?: RequestInit) =>
-        makeResponse({ id: "item" })
+    const fetcher = vi.fn<typeof fetch>(async () =>
+      makeResponse({ id: "item" })
     )
     const api = createApiRequestFactory({
       baseUrl: "https://api.example.test/",
@@ -66,6 +120,7 @@ describe("createApiRequestFactory", () => {
         redirect: "error",
       })
     }
+
     expect(fetcher.mock.calls.map(([, init]) => init?.method)).toEqual([
       "GET",
       "POST",
