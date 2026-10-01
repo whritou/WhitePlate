@@ -120,3 +120,20 @@ The shell did not expose npm, so checks used the bundled Node executable and ins
 | `git diff --check` | Passed. |
 
 The browser fixture uses no database or email provider and intentionally covers a narrow deterministic API contract. It is not proof of real PostgreSQL persistence, production host routing, or production rate policy. Real API/database browser checkout still needs the previously unapplied `CatalogLocalization` migration and appropriate test data. Menu locale is still absent from order snapshots, as required by the separate unresolved D11 decision. The known lint/toolchain and migration-count test failures remain open. The checkout card belongs in **In review**, not Done, pending this acceptance. Test processes were stopped; no production data was changed.
+
+## Frontend toolchain baseline — 2026-10-01
+
+Added exact Node.js `24.19.0` / npm `11.17.0` pins, a .NET 10 SDK minimum feature band, a supported ESLint 10 adapter for the legacy React plugin bundled by Next.js 16.3.4, local system font stacks, and a GitHub Actions workflow. The frontend dev/build scripts select Webpack because this Windows environment previously denied Turbopack worker startup. The repeatable OIDC/SignalR procedure is in the [functional test plan](functional-test-plan.md#run-the-live-oidc-and-signalr-check).
+
+| Command/check | Actual result |
+| --- | --- |
+| Standard `npm ci --no-audit --no-fund` using Node.js 24.19.0/npm 11.17.0 on this Windows host | Failed in the existing `@parcel/watcher@2.6.0` install hook with `MODULE_NOT_FOUND` (`node-gyp` source build); this is a machine-specific lifecycle failure. |
+| `npm ci --no-audit --no-fund --ignore-scripts --engine-strict=false` | Installed 753 packages. The available `npm` launcher used Node.js 20.18.3, so engine strictness was explicitly bypassed for this local diagnostic only; subsequent checks invoked package CLIs using Node.js 24.19.0 directly. |
+| `node node_modules/eslint/bin/eslint.js .` from frontend | Passed with 0 errors and 3 pre-existing unused-variable warnings (`organization-forms.tsx`, `request-factory.test.ts`). The former React plugin crash is fixed by `@eslint/compat`. |
+| `node node_modules/vitest/vitest.mjs run` from frontend | Passed: 9 files, 51 tests. |
+| `node node_modules/typescript/bin/tsc --noEmit` from frontend | Passed after the production build generated `.next/types`. |
+| `node node_modules/next/dist/bin/next build --webpack` with test-only auth environment values | Passed production build. Better Auth logged expected schema-validation connection errors because no database was supplied to this isolated build; no application database was changed. |
+| `dotnet test apps/api/WhitePlate.slnx --no-restore --configuration Release` | Passed: 132 tests, 0 failures. |
+| `git diff --check` | Passed. |
+
+The GitHub Actions clean install and checks run on Ubuntu with the pinned Node/npm and .NET SDK toolchain; their result is recorded here after the pushed branch workflow completes. The Windows `@parcel/watcher` failure is recorded separately from CI and does not change the Linux clean-install result.

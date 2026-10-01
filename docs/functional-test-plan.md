@@ -97,6 +97,95 @@ On 2026-09-30, a dedicated verified `local-tester@whiteplate.invalid` account wa
 | DB-06 | Disconnect, miss events, reconnect; duplicate or reorder messages | Authoritative refetch restores state; duplicates do not create duplicate orders | High |
 | DB-07 | Fail notification delivery after database commit | The dispatcher retries; order remains durable and REST recovery stays authoritative | High |
 
+### Run the live OIDC and SignalR check
+
+Run this manually against a local database or the Neon `test` branch only. You need two verified Better Auth accounts, each with membership in only its own test tenant, two active tenants with at least one available product each, and the business plus Better Auth schemas migrated. Use kitchen-staff accounts or separate organizations so neither test identity is an owner with access to both tenants. Keep the API configured with `Tenancy__BaseDomain=localhost`, `Authentication__Issuer=http://localhost:3000`, and `Authentication__Audience=whiteplate-api`. Do not use Production credentials or a Production database.
+
+1. Start the API and frontend in separate terminals using the [development guide](development.md). In PowerShell, confirm OIDC discovery and signing keys return `200`; an unauthenticated `GET http://localhost:5182/api/v1/me` should return `401`.
+2. In `apps/frontend`, mint a short-lived API token for each verified test user. The helper reads the existing `.env.local` values, and process environment variables override them:
+
+   ```powershell
+   $env:WHITEPLATE_DEV_EMAIL = 'staff-a@whiteplate.invalid'
+   $secret = Read-Host 'Client A password' -AsSecureString
+   $env:WHITEPLATE_DEV_PASSWORD = [System.Net.NetworkCredential]::new('', $secret).Password
+   $tokenA = node .\scripts\dev-token.mjs
+   $env:WHITEPLATE_DEV_PASSWORD = $null
+
+   $env:WHITEPLATE_DEV_EMAIL = 'staff-b@whiteplate.invalid'
+   $secret = Read-Host 'Client B password' -AsSecureString
+   $env:WHITEPLATE_DEV_PASSWORD = [System.Net.NetworkCredential]::new('', $secret).Password
+   $tokenB = node .\scripts\dev-token.mjs
+   $env:WHITEPLATE_DEV_PASSWORD = $null
+   ```
+
+   A bearer-authenticated `GET /api/v1/me` should return `200` for both tokens. Tokens expire in 15 minutes. Keep them in the local shell; do not paste them into a browser or share them.
+
+3. Resolve tenant IDs and a product ID from the tenant hosts. The explicit `Host` header keeps the call on localhost while exercising tenant host resolution:
+
+   ```powershell
+   $hostA = 'bistro.localhost:5182'
+   $hostB = 'harbor.localhost:5182'
+   $tenantA = Invoke-RestMethod http://localhost:5182/api/v1/tenant -Headers @{ Host = $hostA }
+   $tenantB = Invoke-RestMethod http://localhost:5182/api/v1/tenant -Headers @{ Host = $hostB }
+   $menuA = Invoke-RestMethod http://localhost:5182/api/v1/menu -Headers @{ Host = $hostA }
+   $productA = $menuA.Categories | ForEach-Object { $_.Products } | Where-Object IsAvailable | Select-Object -First 1
+   ```
+
+   Use a product with no required option selections, or submit its valid option IDs. If these example hosts are not provisioned locally, replace them with your two test tenant subdomains.
+
+4. Export the two tokens and tenant IDs to the local process, then run the Node REPL from `apps/frontend`:
+
+   ```powershell
+   $env:WHITEPLATE_TOKEN_A = $tokenA
+   $env:WHITEPLATE_TOKEN_B = $tokenB
+   $env:WHITEPLATE_TENANT_A = $tenantA.id
+   $env:WHITEPLATE_TENANT_B = $tenantB.id
+   node
+   ```
+
+   In the REPL, start two independent authenticated SignalR clients:
+
+   ```js
+   const { HubConnectionBuilder, LogLevel } = await import('@microsoft/signalr')
+   const connect = (token) => new HubConnectionBuilder()
+     .withUrl('http://localhost:5182/hubs/orders', { accessTokenFactory: () => token })
+     .withAutomaticReconnect()
+     .configureLogging(LogLevel.Warning)
+     .build()
+   const eventsA = [], eventsB = []
+   const a = connect(process.env.WHITEPLATE_TOKEN_A)
+   const b = connect(process.env.WHITEPLATE_TOKEN_B)
+   a.on('order.changed', event => eventsA.push(event))
+   b.on('order.changed', event => eventsB.push(event))
+   await a.start(); await a.invoke('JoinRestaurant', process.env.WHITEPLATE_TENANT_A)
+   await b.start(); await b.invoke('JoinRestaurant', process.env.WHITEPLATE_TENANT_B)
+   ```
+
+   Confirm client A cannot `JoinRestaurant` for tenant B and client B cannot join tenant A; each invocation must reject with a hub error:
+
+   ```js
+   await a.invoke('JoinRestaurant', process.env.WHITEPLATE_TENANT_B)
+   await b.invoke('JoinRestaurant', process.env.WHITEPLATE_TENANT_A)
+   ```
+
+   Keep this REPL open to observe events.
+
+5. From the PowerShell terminal, create an order for tenant A and retry the exact same payload with the same idempotency key:
+
+   ```powershell
+   $body = @{ customerName = 'SignalR smoke'; discountCode = $null; items = @(@{ productId = $productA.Id; quantity = 1; optionIds = @() }) } | ConvertTo-Json -Depth 5
+   $key = [guid]::NewGuid().ToString()
+   $headers = @{ Host = $hostA; 'Idempotency-Key' = $key }
+   $first = Invoke-RestMethod http://localhost:5182/api/v1/orders -Method Post -ContentType 'application/json' -Headers $headers -Body $body
+   $replay = Invoke-RestMethod http://localhost:5182/api/v1/orders -Method Post -ContentType 'application/json' -Headers $headers -Body $body
+   $first.Id; $replay.Id
+   ```
+
+   The IDs should match. In the REPL, client A should receive one `order.changed` event with tenant A's ID and the same order ID; client B should receive none. Compare event IDs to deduplicate at-least-once deliveries.
+
+6. For reconnect recovery, stop client A with `await a.stop()`. Create another tenant A order using a new idempotency key while it is offline. Start client A again, rejoin tenant A, and fetch `GET /api/v1/tenants/{tenantA.id}/orders` with token A. The REST page must contain the missed order. REST is the recovery source; SignalR groups are not automatically restored after a reconnect.
+7. Verify REST isolation by requesting tenant A's order list with token B; expect `403`. Record the two token-authenticated `/me` results, both denied hub joins, event ID/order ID seen by A, no A event seen by B, matching idempotent receipt IDs, and the recovered order ID from REST. Clear the local token/password environment variables and close both SignalR connections when finished.
+
 ### Verification attempt — 2026-10-01
 
 Source baseline: `0d2ed19` (`feat/guest-cart-checkout`), with a pre-existing unrelated edit in `apps/frontend/.env.example`. Tool versions: .NET SDK `10.0.401`, Node.js `v24.19.0`. The local API and Next.js issuer were started. The issuer's `/.well-known/openid-configuration` and `/api/auth/jwks` returned `200`; unauthenticated `GET /api/v1/me` returned `401`. A JWT from `node scripts/dev-token.mjs` was minted, but authenticated `GET /api/v1/me` timed out. During that run, the API outbox worker repeatedly logged `NpgsqlException` while connecting to its configured database. Only the one local tester account is configured, so two authorized clients and tenant fixtures were unavailable. No order, membership, or tenant data was written. DB-01, DB-05, and DB-06 remain unverified live; the run did not establish SignalR delivery or reconnect recovery.

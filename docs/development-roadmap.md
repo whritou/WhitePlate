@@ -6,7 +6,7 @@ Status: the [full API design](superpowers/specs/2026-09-29-full-api-design.md) a
 
 | Stage | Scope | Evidence needed to call it complete |
 | --- | --- | --- |
-| 1. Reproducible baseline | Toolchain versions, lint compatibility, build environment, frontend test scripts and CI | Fresh setup/build/checks documented and repeatable; API tests and root ignore policy are now in place |
+| 1. Reproducible baseline | Toolchain versions, lint compatibility, build environment, frontend test scripts and CI | Node/npm and .NET SDK are pinned; ESLint 10 compatibility and no-network font stack are configured; frontend and API checks run in GitHub Actions. Clean install and full checks are recorded in [verification evidence](documentation-review.md). |
 | 2. Tenant and identity foundation | Host resolution, staff permissions, persistence, two-tenant fixtures | Backend organization, membership, tenancy, email-bound invitation, and isolation tests pass; new migration still needs deployment |
 | 3. Read-only storefront | Tenant catalog, API DTOs, locale-aware UI, branding | Server-rendered subdomain menu, restaurant-configurable menu languages, translations, fallback, and availability state are implemented in source; browser acceptance, deployment host routing, and the unapplied `CatalogLocalization` migration remain |
 | 4. Checkout | Guest cart, server pricing, order transaction, retry semantics | In-memory tenant cart and same-origin checkout BFF are implemented; frontend tests and local-fixture browser receipt/retry checks pass. Real database/browser acceptance remains. No persisted cart or payment is in scope. |
@@ -21,7 +21,7 @@ D04 is resolved by the architecture. D02/D03/D05-D09 are approved in the full AP
 
 | ID | Decision | Resolve before | Questions to answer |
 | --- | --- | --- | --- |
-| D01 | Toolchain and checks | Reproducible baseline/CI | Which Node/npm and .NET SDK versions are pinned? Which ESLint/plugin versions work together? How are fonts handled in restricted builds? |
+| D01 | Resolved 2026-10-01 | Node.js 24.19.0 and npm 11.17.0 are exact pins; .NET uses SDK 10.0.100 as its minimum feature band with `latestFeature` roll-forward. ESLint remains on supported v10 and a focused flat-config adapter restores `context.getFilename()` for the React plugin bundled by Next.js 16.3.4. System font stacks remove network font fetches. GitHub Actions covers clean frontend install, Vitest, lint, typecheck, production build, and .NET solution tests. |
 | D02 | HTTP topology and tenant mapping | Storefront menu integration | Implemented in source: frontend validates the one-label tenant host and uses a fixed server-side API URL template; API resolves that subdomain under its configured base domain. No forwarded/tenant-header trust. Custom domains are deferred. Open: production DNS/TLS/proxy setup and CORS. |
 | D03 | Identity and permissions | Staff operations | Implemented: Better Auth email/password, Google/Microsoft OAuth, RS256 API JWTs, verified-email org signup, persisted issuer/subject membership, three staff roles, seven-day hashed email-bound single-use invites, Resend mail, and localized auth UI. Both schemas are migrated and the email/password signup/invitation path is verified on Neon `test`; provider credentials, real email, browser verification, and production rollout remain. |
 | D04 | Business use-case conventions | First business use case | Resolved: plain handlers, explicit validation/mapping, typed Result<T>, centralized Problem Details. Revisit only for a demonstrated need. |

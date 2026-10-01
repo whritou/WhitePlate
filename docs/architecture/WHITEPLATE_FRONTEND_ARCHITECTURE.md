@@ -76,7 +76,7 @@ Safe errors have English/French messages. The API owns availability, option rule
 
 ## Styling and UI conventions
 
-`app/globals.css` imports Tailwind, `tw-animate-css`, and shadcn styles, and maps CSS tokens through `@theme inline`. PostCSS uses `@tailwindcss/postcss`. There is no `tailwind.config.ts`; do not copy Tailwind 3 setup instructions into this app.
+`app/globals.css` imports Tailwind, `tw-animate-css`, and shadcn styles, and maps CSS tokens through `@theme inline`. Body and heading fonts use local system stacks; production builds do not fetch Google-hosted font files. PostCSS uses `@tailwindcss/postcss`. There is no `tailwind.config.ts`; do not copy Tailwind 3 setup instructions into this app.
 
 The button uses Base UI, not a Radix component API. `components.json` records the `base-lyra` style and aliases. `lib/utils.ts` re-exports `cn`; the button currently imports it directly from the package. Reuse existing utilities rather than adding another class-merging implementation.
 

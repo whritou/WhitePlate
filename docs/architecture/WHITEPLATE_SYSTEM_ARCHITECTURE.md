@@ -80,7 +80,7 @@ The separate projects and inward dependency direction are implemented and tested
 
 ## Runtime and deployment
 
-Run the apps independently using the [development guide](../development.md). The root npm package has no orchestration scripts. The API has a multistage Linux Dockerfile with `apps/api` as its build context to include sibling projects. There is no full-stack Compose file, frontend Dockerfile, PostgreSQL instance configuration, reverse proxy, or GitHub Actions workflow.
+Run the apps independently using the [development guide](../development.md). The root npm package has no orchestration scripts. GitHub Actions runs the frontend and API checks separately. The API has a multistage Linux Dockerfile with `apps/api` as its build context to include sibling projects. There is no full-stack Compose file, frontend Dockerfile, PostgreSQL instance configuration, or reverse proxy.
 
 ## Implemented business architecture
 

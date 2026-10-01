@@ -1,4 +1,3 @@
-import { Geist_Mono, Inter, Roboto } from "next/font/google"
 import { hasLocale, NextIntlClientProvider } from "next-intl"
 import { getMessages, setRequestLocale } from "next-intl/server"
 import { notFound } from "next/navigation"
@@ -8,10 +7,6 @@ import { routing } from "@/i18n/routing"
 import { cn } from "@/lib/utils"
 
 import "../globals.css"
-
-const robotoHeading = Roboto({ subsets: ["latin"], variable: "--font-heading" })
-const inter = Inter({ subsets: ["latin"], variable: "--font-sans" })
-const fontMono = Geist_Mono({ subsets: ["latin"], variable: "--font-mono" })
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }))
@@ -37,13 +32,7 @@ export default async function LocaleLayout({
     <html
       lang={locale}
       suppressHydrationWarning
-      className={cn(
-        "antialiased",
-        fontMono.variable,
-        "font-sans",
-        inter.variable,
-        robotoHeading.variable
-      )}
+      className={cn("antialiased", "font-sans")}
     >
       <body>
         <NextIntlClientProvider messages={messages}>

@@ -1,4 +1,6 @@
 // Process-local DNS for browser acceptance fixtures; never load in deployment.
+// Node's --require preloader contract requires this CommonJS module.
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const dns = require("node:dns")
 const lookup = dns.lookup
 dns.lookup = function (hostname, options, callback) {
