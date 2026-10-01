@@ -66,6 +66,7 @@ export async function sendAuthEmail(
     html: `<main style="font-family:Arial,sans-serif;max-width:560px;margin:40px auto;color:#24231f"><h1>${copy.title}</h1><p><a href="${safeUrl}" style="display:inline-block;padding:12px 18px;background:#a94b25;color:#fff;text-decoration:none">${copy.action}</a></p><p>${copy.ignore}</p></main>`,
     text: `${copy.title}\n\n${url}\n\n${copy.ignore}`,
   })
+
   if (!delivered) throw new Error("Email delivery failed")
 }
 
@@ -79,8 +80,10 @@ export async function sendInvitationEmail({
   locale,
 }: InvitationEmail): Promise<boolean> {
   let url: URL
+
   try {
     const base = new URL(process.env.BETTER_AUTH_URL ?? "http://localhost:3000")
+
     if (
       !["http:", "https:"].includes(base.protocol) ||
       base.username ||
@@ -92,6 +95,7 @@ export async function sendInvitationEmail({
   } catch {
     return false
   }
+
   const copy =
     locale === "fr"
       ? {
@@ -106,6 +110,7 @@ export async function sendInvitationEmail({
           action: "Accept invitation",
           text: "This link expires in seven days.",
         }
+
   return deliverEmail({
     to,
     subject: copy.subject,

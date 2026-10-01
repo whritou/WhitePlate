@@ -20,6 +20,7 @@ export function parseMenuLanguages(input: unknown): MenuLanguagesInput | null {
     !input.locales.includes(input.defaultLocale)
   )
     return null
+
   return {
     tenantId: input.tenantId,
     locales: [...input.locales],
@@ -31,6 +32,7 @@ export function parseCatalogTranslation(
   input: unknown
 ): CatalogTranslationInput | null {
   const validTypes = ["categories", "products", "option-groups", "options"]
+
   if (
     !isRecord(input) ||
     !isUuid(input.tenantId) ||
@@ -48,6 +50,7 @@ export function parseCatalogTranslation(
         input.description.length > 1000))
   )
     return null
+
   return {
     tenantId: input.tenantId,
     entityType: input.entityType as CatalogTranslationInput["entityType"],
@@ -60,7 +63,9 @@ export function parseCatalogTranslation(
 
 export function parseOrganizationName(form: unknown): string | null {
   if (!(form instanceof FormData)) return null
+
   const name = form.get("name")
+
   return typeof name === "string" && name.trim() && name.trim().length <= 200
     ? name.trim()
     : null
@@ -70,11 +75,13 @@ export function parseStaffInvitation(
   form: unknown
 ): StaffInvitationInput | null {
   if (!(form instanceof FormData)) return null
+
   const organizationId = form.get("organizationId")
   const tenantId = form.get("tenantId") || null
   const rawEmail = form.get("email")
   const role = form.get("role")
   const email = typeof rawEmail === "string" ? rawEmail.trim() : ""
+
   if (
     !isUuid(organizationId) ||
     (tenantId !== null && !isUuid(tenantId)) ||
@@ -87,6 +94,7 @@ export function parseStaffInvitation(
     (role === "OrganizationOwner" ? tenantId !== null : tenantId === null)
   )
     return null
+
   return {
     organizationId,
     tenantId,

@@ -12,9 +12,10 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 Read [frontend architecture](../../docs/architecture/WHITEPLATE_FRONTEND_ARCHITECTURE.md) and [implementation conventions](../../docs/architecture/frontend-conventions.md) before edits. The latter defines the implemented module ownership and request/query lifecycle.
 
-- Reuse `components/ui` shadcn Base UI controls; inspect their APIs rather than assuming Radix props. Keep semantic HTML for layout.
+- Reuse `components/ui` shadcn Base UI controls and surfaces, including Card/Header/Title/Description/Content/Footer, Alert/Description and Badge. Inspect their APIs rather than assuming Radix props. Keep accessible semantic headings and lists inside those components.
 - Export named types/interfaces from `types/<area>.ts` and import them with `import type`.
 - Keep actions in `actions/` as validated mutation adapters. Use server-only `services/` for feature operations, shared HTTP adapters for requests, and pure runtime parsers for untrusted values.
+- All application HTTP uses `lib/api/json-request-client.ts` for JSON serialization, headers, safe errors and request policy. Browser BFF calls use `browserRequest(path, { signal })`; API adapters use `createApiRequestFactory` for origin/path validation and server token acquisition. Do not repeat fetch options at call sites.
 - Use TanStack Query for interactive server state; keep keys scoped to account, tenant, locale and view. Keep transient cart/form state local. A browser tenant selector is never authorization.
-- Keep files focused and formatted. ESLint enforces shared controls, type placement, request boundaries and a 350-line application-file limit.
+- Keep files focused and formatted. Separate logical statements and JSX blocks with blank lines. ESLint enforces spacing, shared controls, type placement, request boundaries, a 350-line application-file limit and an 80-line function limit in lib/actions/services (excluding blank lines/comments; tests exempt).
 - Run tests, lint, typecheck, `format:check` and build as appropriate. Preserve both translation catalogs and record checks that could not run.

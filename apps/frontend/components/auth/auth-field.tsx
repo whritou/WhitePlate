@@ -24,12 +24,14 @@ export function AuthField({
       htmlFor={id}
     >
       {label}
+
       <span className="relative">
         {icon && (
           <span className="pointer-events-none absolute inset-y-0 start-3 flex items-center text-muted-foreground">
             {icon}
           </span>
         )}
+
         <Input
           id={id}
           name={id}

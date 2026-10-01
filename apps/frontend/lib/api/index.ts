@@ -9,10 +9,13 @@ async function getApiToken() {
   const trustedOrigin = new URL(
     process.env.BETTER_AUTH_URL ?? "http://localhost:3000"
   ).origin
+
   if (origin && origin !== trustedOrigin) return null
 
   const session = await auth.api.getSession({ headers: requestHeaders })
+
   if (!session?.user.emailVerified) return null
+
   return (await auth.api.getToken({ headers: requestHeaders })).token
 }
 

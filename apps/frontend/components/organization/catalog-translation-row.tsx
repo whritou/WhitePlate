@@ -1,13 +1,14 @@
 "use client"
 
-import { useState } from "react"
-import { useTranslations } from "next-intl"
+import { saveCatalogTranslationAction } from "@/actions/organization"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { saveCatalogTranslationAction } from "@/actions/organization"
 import { Textarea } from "@/components/ui/textarea"
 import type { TranslationRow } from "@/types/catalog"
+import { useTranslations } from "next-intl"
+import { useState } from "react"
 
 export function CatalogTranslationRow({
   tenantId,
@@ -33,6 +34,7 @@ export function CatalogTranslationRow({
 
   async function save() {
     setState("pending")
+
     const result = await saveCatalogTranslationAction({
       tenantId,
       entityType: row.type,
@@ -41,19 +43,21 @@ export function CatalogTranslationRow({
       name,
       description: row.type === "products" ? description : null,
     }).catch(() => ({ ok: false as const }))
+
     setState(result.ok ? "success" : "error")
   }
 
   return (
     <div className="grid gap-3">
       <div className="flex flex-wrap items-center gap-2">
-        <span className="rounded-sm bg-muted px-2 py-0.5 text-xs text-muted-foreground">
-          {label}
-        </span>
+        <Badge variant="secondary">{label}</Badge>
+
         <h3 className="font-medium">{row.name}</h3>
       </div>
+
       <Label className="grid gap-1.5 text-sm font-medium">
         {t("translatedName")}
+
         <Input
           disabled={state === "pending"}
           value={name}
@@ -66,9 +70,11 @@ export function CatalogTranslationRow({
           className="h-9 rounded-md border border-input bg-background px-3 text-sm font-normal outline-none focus-visible:ring-2 focus-visible:ring-ring/30"
         />
       </Label>
+
       {row.type === "products" && (
         <Label className="grid gap-1.5 text-sm font-medium">
           {t("translatedDescription")}
+
           <Textarea
             disabled={state === "pending"}
             value={description}
@@ -82,6 +88,7 @@ export function CatalogTranslationRow({
           />
         </Label>
       )}
+
       <div className="flex flex-wrap items-center gap-3">
         <Button
           type="button"
@@ -92,11 +99,13 @@ export function CatalogTranslationRow({
         >
           {state === "pending" ? t("savingTranslation") : t("saveTranslation")}
         </Button>
+
         {state === "success" && (
           <p role="status" className="text-sm text-foreground">
             {t("translationSaved")}
           </p>
         )}
+
         {state === "error" && (
           <p role="alert" className="text-sm text-destructive">
             {t("translationError")}

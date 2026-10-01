@@ -12,12 +12,14 @@ import type {
 
 function actionResult(response: ApiResult<unknown>): ActionResult {
   if (response.ok) return { ok: true }
+
   const message =
     response.error === "unauthorized"
       ? "unauthorized"
       : ["invalid", "not_found", "conflict"].includes(response.error)
         ? "invalid"
         : "unavailable"
+
   return { ok: false, message }
 }
 
@@ -75,7 +77,9 @@ export async function sendStaffInvitation({
     `/api/v1/organizations/${organizationId}/invitations`,
     { tenantId, email, role }
   )
+
   if (!response.ok) return actionResult(response)
+
   const invitation = response.data
   const id =
     isRecord(invitation) && isUuid(invitation.id) ? invitation.id : null
@@ -87,12 +91,15 @@ export async function sendStaffInvitation({
     id && token
       ? await sendInvitationEmail({ to: email, token, locale })
       : false
+
   if (!delivered) {
     if (id)
       await whitePlateApi.delete(
         `/api/v1/organizations/${organizationId}/invitations/${id}`
       )
+
     return { ok: false, message: "unavailable" }
   }
+
   return { ok: true }
 }

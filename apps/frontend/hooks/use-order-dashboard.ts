@@ -44,6 +44,7 @@ export function useOrderDashboard(props: OrderDashboardProps) {
   const mutation = useMutation({
     mutationFn: async (input: UpdateOrderStatusInput) => {
       const result = await updateOrderStatusAction(input)
+
       if (!result.ok) throw new OrderRequestError(result.error)
     },
     retry: false,
@@ -54,6 +55,7 @@ export function useOrderDashboard(props: OrderDashboardProps) {
     onError: async (error) => {
       const code =
         error instanceof OrderRequestError ? error.code : "unavailable"
+
       setMessage(`errors.${code}`)
       if (code === "conflict" || code === "forbidden") await refresh()
       if (code === "unauthorized") {
@@ -104,6 +106,7 @@ export function useOrderDashboard(props: OrderDashboardProps) {
     loadError === "invalid" || (error && error !== "unavailable")
       ? null
       : (query.data ?? null)
+
   return {
     page: currentPage,
     loadError:

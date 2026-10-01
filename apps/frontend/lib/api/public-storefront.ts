@@ -12,6 +12,7 @@ export async function getPublicMenu(
     hostHeader,
     process.env.STOREFRONT_BASE_DOMAIN
   )
+
   if (!tenantSlug) return { kind: "not-tenant" }
 
   const baseUrl = getTenantApiBaseUrl(
@@ -19,6 +20,7 @@ export async function getPublicMenu(
     process.env.PUBLIC_TENANT_API_URL_TEMPLATE,
     process.env.STOREFRONT_BASE_DOMAIN
   )
+
   if (!baseUrl) return { kind: "unavailable" }
 
   const api = createApiRequestFactory({
@@ -31,5 +33,6 @@ export async function getPublicMenu(
     : ""
   const response = await api.get<unknown>(`/api/v1/menu${localeQuery}`)
   const menu = response.ok ? parseStorefrontMenu(response.data) : null
+
   return menu ? { kind: "menu", tenantSlug, menu } : { kind: "unavailable" }
 }

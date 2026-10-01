@@ -25,6 +25,7 @@ if (process.env.NODE_ENV === "production") {
   ]
     .filter(([, value]) => !value)
     .map(([key]) => key)
+
   if (missing.length)
     throw new Error(
       `Missing authentication configuration: ${missing.join(", ")}`

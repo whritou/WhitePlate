@@ -22,6 +22,7 @@ describe("guest cart", () => {
       total: 0,
       items: [{ ...input.items[0], price: 0 }],
     }
+
     expect(prepareCheckout(forged, null, () => "key").input).toEqual({
       customerName: "Alice",
       discountCode: "LUNCH",
@@ -39,6 +40,7 @@ describe("guest cart", () => {
         },
       ],
     }
+
     expect(validProductSelection(product, [optionId])).toBe(true)
     expect(validProductSelection(product, [])).toBe(false)
     expect(validProductSelection(product, [optionId, productId])).toBe(false)
@@ -49,6 +51,7 @@ describe("guest cart", () => {
   })
   it("keeps one editable line per product as required by checkout", () => {
     const cart = updateCart([], { productId, quantity: 1, optionIds: [] })
+
     expect(
       updateCart(cart, { productId, quantity: 3, optionIds: [optionId] })
     ).toEqual([{ productId, quantity: 3, optionIds: [optionId] }])
@@ -56,6 +59,7 @@ describe("guest cart", () => {
 
   it("removes a product when its quantity is zero without changing other lines", () => {
     const other = { productId: optionId, quantity: 1, optionIds: [] }
+
     expect(
       updateCart([input.items[0], other], {
         productId,
@@ -72,6 +76,7 @@ describe("guest cart", () => {
       first,
       () => "wrong-key"
     )
+
     expect(retry.key).toBe("first-key")
     expect(retry.input).toEqual({
       ...input,
@@ -82,6 +87,7 @@ describe("guest cart", () => {
 
   it("starts a new attempt after the order content changes", () => {
     const first = prepareCheckout(input, null, () => "first-key")
+
     expect(
       prepareCheckout(
         { ...input, items: [{ productId, quantity: 3, optionIds: [] }] },
@@ -94,6 +100,7 @@ describe("guest cart", () => {
   it("copies the attempt so later cart edits cannot change an uncertain order", () => {
     const editable = structuredClone(input)
     const first = prepareCheckout(editable, null, () => "first-key")
+
     editable.items[0].quantity = 9
     expect(first.input.items[0].quantity).toBe(2)
   })

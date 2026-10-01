@@ -46,7 +46,9 @@ describe("createApiRequestFactory", () => {
 
     expect(result).toMatchObject({ ok: true, status: 200 })
     expect(fetcher).toHaveBeenCalledTimes(1)
+
     const [input, init] = fetcher.mock.calls[0]!
+
     expect(String(input)).toBe(
       "https://api.example.test/api/v1/tenants/tenant-1/orders/order-1/status"
     )
@@ -67,11 +69,13 @@ describe("createApiRequestFactory", () => {
     const requests: RequestInit[] = []
     const fetcher: typeof fetch = async (_url, init) => {
       requests.push(init!)
+
       return makeResponse(
         { code: "rate_limited", detail: "private upstream text" },
         429
       )
     }
+
     const api = createApiRequestFactory({
       baseUrl: "https://bistro.example.test",
       getToken: async () => null,
@@ -83,6 +87,7 @@ describe("createApiRequestFactory", () => {
       { customerName: "Alice" },
       { idempotencyKey: "order-key-123456" }
     )
+
     expect(new Headers(requests[0]?.headers).get("Idempotency-Key")).toBe(
       "order-key-123456"
     )
@@ -115,6 +120,7 @@ describe("createApiRequestFactory", () => {
         redirect: "error",
       })
     }
+
     expect(fetcher.mock.calls.map(([, init]) => init?.method)).toEqual([
       "GET",
       "POST",

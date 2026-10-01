@@ -8,6 +8,39 @@ const eslintConfig = defineConfig([
   ...fixupConfigRules([...nextVitals, ...nextTs]),
   {
     files: ["**/*.{ts,tsx}"],
+    ignores: ["**/*.test.ts", "lib/api/json-request-client.ts"],
+    plugins: { whiteplate: frontendBoundaries },
+    rules: { "whiteplate/shared-requests": "error" },
+  },
+  {
+    files: ["**/*.{ts,tsx}"],
+    rules: {
+      "padding-line-between-statements": [
+        "error",
+        { blankLine: "always", prev: "*", next: ["const", "let", "var"] },
+        { blankLine: "always", prev: ["const", "let", "var"], next: "*" },
+        {
+          blankLine: "any",
+          prev: ["const", "let", "var"],
+          next: ["const", "let", "var"],
+        },
+        { blankLine: "always", prev: "block-like", next: "*" },
+        { blankLine: "always", prev: "*", next: "return" },
+      ],
+    },
+  },
+  {
+    files: ["lib/**/*.ts", "actions/**/*.ts", "services/**/*.ts"],
+    ignores: ["**/*.test.ts"],
+    rules: {
+      "max-lines-per-function": [
+        "error",
+        { max: 80, skipBlankLines: true, skipComments: true },
+      ],
+    },
+  },
+  {
+    files: ["**/*.{ts,tsx}"],
     ignores: ["types/**", "**/*.test.ts", "next-env.d.ts"],
     rules: {
       "no-restricted-syntax": [
@@ -28,7 +61,10 @@ const eslintConfig = defineConfig([
     files: ["components/**/*.tsx", "app/**/*.tsx"],
     ignores: ["components/ui/**"],
     plugins: { whiteplate: frontendBoundaries },
-    rules: { "whiteplate/shared-controls": "error" },
+    rules: {
+      "whiteplate/shared-controls": "error",
+      "whiteplate/jsx-block-spacing": "error",
+    },
   },
   {
     files: [

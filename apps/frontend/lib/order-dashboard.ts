@@ -37,11 +37,14 @@ export function parseOrderPage(value: unknown): OrderPage | null {
     return null
 
   const items: OrderSummary[] = []
+
   for (const candidate of value.items) {
     const order = parseOrderSummary(candidate)
+
     if (!order) return null
     items.push(order)
   }
+
   return { items, nextCursor: value.nextCursor }
 }
 
@@ -49,6 +52,7 @@ export function parseOrderStatusFilter(
   value: unknown
 ): { ok: true; status: OrderStatus | null } | { ok: false } {
   if (value === undefined || value === "all") return { ok: true, status: null }
+
   return isOrderStatus(value) ? { ok: true, status: value } : { ok: false }
 }
 
@@ -57,6 +61,7 @@ export function parseOrderCursor(
 ): { ok: true; cursor: string | null } | { ok: false } {
   if (value === undefined) return { ok: true, cursor: null }
   if (!isValidOrderCursor(value, false)) return { ok: false }
+
   return { ok: true, cursor: value }
 }
 
@@ -64,7 +69,9 @@ export function parseRestaurantMemberships(
   value: unknown
 ): RestaurantMembership[] | null {
   if (!isRecord(value) || !Array.isArray(value.restaurants)) return null
+
   const restaurants: RestaurantMembership[] = []
+
   for (const candidate of value.restaurants) {
     if (
       !isRecord(candidate) ||
@@ -79,6 +86,7 @@ export function parseRestaurantMemberships(
       role: candidate.role,
     })
   }
+
   return restaurants
 }
 
@@ -93,6 +101,7 @@ export function resolveOrderHubUrl(
   if (!configuredApiUrl) return null
   try {
     const url = new URL(configuredApiUrl)
+
     if (
       (url.protocol !== "https:" && url.protocol !== "http:") ||
       url.username ||
@@ -103,6 +112,7 @@ export function resolveOrderHubUrl(
     url.pathname = "/hubs/orders"
     url.search = ""
     url.hash = ""
+
     return url.toString()
   } catch {
     return null
@@ -115,6 +125,7 @@ export function getAvailableOrderTransitions(
 ): UpdateableOrderStatus[] {
   const result: UpdateableOrderStatus[] = []
   const next = nextStatus[status]
+
   if (next) result.push(next)
   if (
     (role === "OrganizationOwner" || role === "Manager") &&
@@ -122,6 +133,7 @@ export function getAvailableOrderTransitions(
     status !== "Cancelled"
   )
     result.push("Cancelled")
+
   return result
 }
 
@@ -139,14 +151,17 @@ export class OrderEventTracker {
   observeOrders(orders: Array<Pick<OrderSummary, "id" | "version">>): void {
     for (const order of orders) {
       const current = this.versions.get(order.id)
+
       if (current === undefined || order.version > current)
         this.versions.set(order.id, order.version)
     }
+
     this.trim(this.versions, 512)
   }
 
   shouldRefresh(value: unknown): boolean {
     const event = parseKitchenOrderEvent(value)
+
     if (
       !event ||
       event.tenantId !== this.tenantId ||
@@ -158,16 +173,19 @@ export class OrderEventTracker {
     this.trim(this.eventIds, 512)
 
     const currentVersion = this.versions.get(event.orderId)
+
     if (currentVersion !== undefined && event.version <= currentVersion)
       return false
     this.versions.set(event.orderId, event.version)
     this.trim(this.versions, 512)
+
     return true
   }
 
   private trim<T>(values: Set<T> | Map<T, unknown>, limit: number): void {
     while (values.size > limit) {
       const oldest = values.keys().next().value as T | undefined
+
       if (oldest === undefined) return
       values.delete(oldest)
     }
@@ -201,6 +219,7 @@ function parseOrderSummary(value: unknown): OrderSummary | null {
     return null
 
   const lines: OrderSummaryLine[] = []
+
   for (const candidate of value.lines) {
     if (
       !isRecord(candidate) ||
@@ -214,6 +233,7 @@ function parseOrderSummary(value: unknown): OrderSummary | null {
       return null
 
     const options: OrderSummaryOption[] = []
+
     for (const option of candidate.options) {
       if (
         !isRecord(option) ||
@@ -223,6 +243,7 @@ function parseOrderSummary(value: unknown): OrderSummary | null {
         return null
       options.push({ optionId: option.optionId, name: option.name })
     }
+
     lines.push({
       productId: candidate.productId,
       productName: candidate.productName,
@@ -282,6 +303,7 @@ function isValidOrderCursor(
   allowNull: boolean
 ): value is string | null {
   if (allowNull && value === null) return true
+
   return (
     typeof value === "string" &&
     value.length > 0 &&

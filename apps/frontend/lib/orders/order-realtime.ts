@@ -9,6 +9,7 @@ import { getSignalRToken } from "@/lib/api/order-browser"
 
 export function createOrderRefreshCoalescer(onRefresh: () => void) {
   let timer: ReturnType<typeof setTimeout> | null = null
+
   return {
     schedule() {
       if (timer !== null) return
@@ -48,7 +49,9 @@ export function attachOrderRealtime(
 
   const scheduleRestart = () => {
     if (disposed || retryTimer !== null) return
+
     const delay = Math.min(1000 * 2 ** retryAttempt, 30_000)
+
     retryAttempt += 1
     retryTimer = window.setTimeout(() => {
       retryTimer = null
@@ -59,6 +62,7 @@ export function attachOrderRealtime(
   const onOrderChanged = (event: unknown) => {
     if (tracker.shouldRefresh(event)) callbacks.onRefresh()
   }
+
   const onReconnecting = () => callbacks.onStatus("reconnecting")
   const onReconnected = async () => {
     if (disposed) return
@@ -73,6 +77,7 @@ export function attachOrderRealtime(
       await connection.stop().catch(() => undefined)
     }
   }
+
   const onClose = () => {
     if (disposed) return
     callbacks.onStatus("offline")
@@ -86,13 +91,17 @@ export function attachOrderRealtime(
       await connection.start()
       if (disposed) {
         await connection.stop()
+
         return
       }
+
       await connection.invoke("JoinRestaurant", tenantId)
       if (disposed) {
         await connection.stop()
+
         return
       }
+
       retryAttempt = 0
       callbacks.onStatus("connected")
       callbacks.onRefresh()

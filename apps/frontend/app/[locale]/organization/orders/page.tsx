@@ -1,18 +1,19 @@
-import { getLocale, getTranslations } from "next-intl/server"
-import { headers } from "next/headers"
-import { redirect } from "next/navigation"
+import { OrderDashboard } from "@/components/orders/order-dashboard"
+import { Card } from "@/components/ui/card"
+import { Link } from "@/i18n/navigation"
 import { auth } from "@/lib/auth"
-import { getOrderPage, getRestaurantMemberships } from "@/services/orders"
 import {
   isValidTenantId,
   parseOrderCursor,
   parseOrderStatusFilter,
   resolveOrderHubUrl,
 } from "@/lib/order-dashboard"
-import { Link } from "@/i18n/navigation"
-import { OrderDashboard } from "@/components/orders/order-dashboard"
-import type { OrderPage } from "@/types/orders"
+import { getOrderPage, getRestaurantMemberships } from "@/services/orders"
 import type { SearchParams } from "@/types/navigation"
+import type { OrderPage } from "@/types/orders"
+import { getLocale, getTranslations } from "next-intl/server"
+import { headers } from "next/headers"
+import { redirect } from "next/navigation"
 
 export const dynamic = "force-dynamic"
 
@@ -24,26 +25,32 @@ export default async function KitchenOrdersPage({
   const locale = await getLocale()
   const t = await getTranslations("KitchenOrders")
   const session = await auth.api.getSession({ headers: await headers() })
+
   if (!session) redirect(`/${locale}/sign-in`)
   if (!session.user.emailVerified) redirect(`/${locale}/verify-email`)
 
   const params = await searchParams
   const tenantId = singleValue(params.tenantId)
+
   if (!isValidTenantId(tenantId)) redirect(`/${locale}/organization`)
 
   const currentUser = await getRestaurantMemberships()
+
   if (!currentUser.ok) {
     if (currentUser.status === 401) redirect(`/${locale}/sign-in`)
+
     return <PageMessage title={t("title")} message={t("errors.unavailable")} />
   }
 
   const memberships = currentUser.data
+
   if (!memberships)
     return <PageMessage title={t("title")} message={t("errors.unavailable")} />
 
   const membership = memberships.find(
     (item) => item.id.toLowerCase() === tenantId.toLowerCase()
   )
+
   if (!membership)
     return (
       <PageMessage
@@ -69,6 +76,7 @@ export default async function KitchenOrdersPage({
       statusResult.status,
       cursorResult.cursor
     )
+
     if (!response.ok) {
       if (response.status === 401) redirect(`/${locale}/sign-in`)
       if (response.status === 403 || response.status === 404)
@@ -115,20 +123,23 @@ async function PageMessage({
   message: string
 }) {
   const t = await getTranslations("KitchenOrders")
+
   return (
     <main className="mx-auto min-h-[70vh] max-w-5xl px-5 py-12 sm:py-16">
-      <section className="rounded-2xl border border-border bg-card p-6">
+      <Card className="rounded-2xl border border-border bg-card p-6">
         <h1 className="text-2xl font-semibold">{title}</h1>
+
         <p role="alert" className="mt-3 text-sm text-destructive">
           {message}
         </p>
+
         <Link
           href="/organization"
           className="mt-5 inline-flex min-h-10 items-center text-sm font-medium text-primary underline-offset-4 hover:underline"
         >
           {t("backToOrganizations")}
         </Link>
-      </section>
+      </Card>
     </main>
   )
 }
@@ -138,5 +149,6 @@ function singleValue(
   rejectArray = false
 ): unknown {
   if (Array.isArray(value)) return rejectArray ? null : undefined
+
   return value
 }

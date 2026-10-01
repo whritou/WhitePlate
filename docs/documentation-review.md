@@ -159,3 +159,25 @@ This host does not expose npm on PATH; the package-local CLIs ran with Node.js 2
 | API tests | Not rerun: this change does not modify API source or schema. Kitchen BFF authorization and contracts are covered by frontend route tests. |
 
 Live authenticated kitchen browser acceptance (two tenants/accounts, role revocation, conflicts and reconnect), real checkout persistence, OAuth/Resend and production routing remain on their existing separate cards. The cleanup does not claim that those acceptance tasks are complete. Semantic JSX layout remains valid; shadcn is used for shared controls and UI surfaces, not as a replacement for TypeScript or every HTML element.
+
+## Frontend request and UI follow-up — 2026-10-01
+
+Continued [issue #7](https://github.com/whritou/WhitePlate/issues/7) on `codex/frontend-architecture-cleanup` following user review of factory size, repeated fetch options, incomplete shadcn composition and missing blank lines. `createApiRequestFactory` now composes methods in a short function; URL/auth preparation, shared JSON transport, request options and response/diagnostic handling have separate responsibilities. Kitchen and SignalR browser requests use `browserRequest`, and email delivery shares the transport without parsing its unused provider acknowledgement. Existing checkout uses that transport through the public API factory. The only application raw fetch invocation is in `json-request-client.ts`.
+
+Cards now use shared headers, semantic titles, descriptions, content and footers across auth, invitations, organization, checkout/receipt and order tickets. Button-shaped links use the installed Base UI Button render API with `nativeButton={false}`; plain text links remain links. Alerts use AlertDescription and default language/translation indicators use Badge. Card row direction and outer padding were checked against the installed primitive defaults. ESLint now enforces statement/JSX blank lines, shared transport calls and an 80-line non-UI function limit, alongside the existing type-placement and file-size rules. [Conventions](architecture/frontend-conventions.md) and frontend AGENTS describe these requirements.
+
+New request tests were observed failing before implementation, including the provider acknowledgement regression found during review. Intermediate type/lint checks exposed duplicate declarations/imports and a JSX rule conflict with Prettier's inline spaces; these were corrected before final verification. A temporary import-organizing helper initially failed on Windows path normalization, then completed and was removed. Final checks use Node.js 24.19.0 and package-local CLIs; elevated source formatting explicitly selected that runtime because the elevated shell's plain node resolved to Node 20.
+
+| Command/check | Actual result |
+| --- | --- |
+| `node node_modules/vitest/vitest.mjs run` | Passed: 20 files, 129 tests. New cases cover reusable request defaults, body/headers, cancellation, safe errors/diagnostics, browser path restrictions and acknowledgement-only responses. |
+| `node node_modules/eslint/bin/eslint.js .` | Passed with no errors or warnings. |
+| `node node_modules/typescript/bin/tsc --noEmit` | Passed separately from the build; final production build also passed TypeScript. |
+| `node node_modules/prettier/bin/prettier.cjs --check '**/*.{ts,tsx}' eslint.config.mjs eslint-rules/*.mjs` | Passed. |
+| `node node_modules/next/dist/bin/next build --webpack` | Passed compilation, production types and route generation with inert test-only auth/provider values. Expected Better Auth schema diagnostics came from the intentionally unavailable local test database. |
+| Chrome with the checkout API fixture and Webpack dev on port 3100 | Passed option/cart interactions, lost-response edit lock, retry returning the original receipt, receipt reset, menu-language switching, home Button-to-Link navigation, sign-in rendering and password visibility toggle. Card bottom padding measured 20px, with no horizontal overflow or error overlay. |
+| Browser diagnostics | The storefront recorded the existing LastPass `data-lastpass-icon-root` hydration mismatch. The home-to-sign-in navigation check recorded no console errors/warnings. Full-page screenshot capture timed out; the native screenshot API succeeded and the card layout was inspected. Extension-free hydration and authenticated kitchen pages remain unverified. |
+| `git -c core.safecrlf=false diff --check` | Passed. |
+| API tests | Not rerun: no API source, schema or contracts changed. |
+
+Fixture/dev processes were stopped. No dependencies or lockfile changed. The existing `.env.example` edit remains excluded. Live provider delivery, database acceptance and authenticated kitchen acceptance retain their separate task scope.

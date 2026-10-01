@@ -20,6 +20,7 @@ function ThemeProvider({
       {...props}
     >
       <ThemeHotkey />
+
       {children}
     </NextThemesProvider>
   )

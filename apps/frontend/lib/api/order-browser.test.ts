@@ -11,6 +11,7 @@ it("requests a fresh SignalR token through the protected same-origin POST adapte
   const fetch = vi
     .fn()
     .mockResolvedValue(Response.json({ accessToken: "test-token" }))
+
   vi.stubGlobal("fetch", fetch)
   expect(await getSignalRToken()).toBe("test-token")
   expect(fetch).toHaveBeenCalledWith(
@@ -41,8 +42,11 @@ it("uses the same-origin BFF without a token and forwards cancellation", async (
       data: { items: [], nextCursor: null },
     })
   )
+
   vi.stubGlobal("fetch", fetch)
+
   const signal = new AbortController().signal
+
   expect(await fetchOrderPage("tenant", "Ready", "older", signal)).toEqual({
     items: [],
     nextCursor: null,
@@ -56,9 +60,11 @@ it("uses the same-origin BFF without a token and forwards cancellation", async (
       redirect: "error",
     })
   )
-  expect(fetch.mock.calls[0]![1].headers).toEqual({
-    Accept: "application/json",
-  })
+
+  const headers = new Headers(fetch.mock.calls[0]![1].headers)
+
+  expect(headers.get("Accept")).toBe("application/json")
+  expect(headers.get("Authorization")).toBeNull()
 })
 
 it.each([

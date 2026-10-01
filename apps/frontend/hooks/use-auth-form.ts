@@ -24,9 +24,11 @@ export function useAuthForm({ mode, inviteToken, resetToken }: AuthFormProps) {
     setError("")
     setSuccess("")
     setPending(true)
+
     const form = new FormData(event.currentTarget)
     const email = String(form.get("email") ?? "")
     const password = String(form.get("password") ?? "")
+
     try {
       if (mode === "signUp") {
         const result = await authClient.signUp.email({
@@ -35,6 +37,7 @@ export function useAuthForm({ mode, inviteToken, resetToken }: AuthFormProps) {
           password,
           callbackURL: inviteToken ? callbackPath : `/${locale}/verify-email`,
         })
+
         if (result.error) throw result.error
         setSuccess(t("verificationSent"))
       } else if (mode === "signIn") {
@@ -43,6 +46,7 @@ export function useAuthForm({ mode, inviteToken, resetToken }: AuthFormProps) {
           password,
           callbackURL: callbackPath,
         })
+
         if (result.error) throw result.error
         window.location.assign(callbackPath)
       } else if (mode === "forgot") {
@@ -50,16 +54,19 @@ export function useAuthForm({ mode, inviteToken, resetToken }: AuthFormProps) {
           email,
           redirectTo: `${window.location.origin}/${locale}/reset-password`,
         })
+
         if (result.error) throw result.error
         setSuccess(t("resetRequested"))
       } else if (mode === "reset") {
         if (!resetToken) throw new Error("missing_token")
         if (password !== String(form.get("confirmPassword") ?? ""))
           throw new Error("password_mismatch")
+
         const result = await authClient.resetPassword({
           newPassword: password,
           token: resetToken,
         })
+
         if (result.error) throw result.error
         setSuccess(t("passwordUpdated"))
       }
@@ -79,6 +86,7 @@ export function useAuthForm({ mode, inviteToken, resetToken }: AuthFormProps) {
         provider,
         callbackURL: `${window.location.origin}${callbackPath}`,
       })
+
       if (result.error) throw result.error
     } catch {
       setError(t("providerError"))

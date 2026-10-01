@@ -1,14 +1,14 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
-import { useTranslations } from "next-intl"
+import { OrderEventTracker } from "@/lib/order-dashboard"
 import {
   attachOrderRealtime,
   createOrderHubConnection,
   createOrderRefreshCoalescer,
 } from "@/lib/orders/order-realtime"
-import { OrderEventTracker } from "@/lib/order-dashboard"
 import type { OrderRealtimeProps, OrderRealtimeStatus } from "@/types/orders"
+import { useTranslations } from "next-intl"
+import { useEffect, useMemo, useState } from "react"
 
 export function OrderRealtimeConnection({
   tenantId,
@@ -26,9 +26,11 @@ export function OrderRealtimeConnection({
 
   useEffect(() => {
     if (!hubUrl) return
+
     const refresh = createOrderRefreshCoalescer(() => void onRefresh())
     let stop: (() => Promise<void>) | null = null
     let disposed = false
+
     void Promise.resolve().then(() => {
       if (disposed) return
       try {
@@ -45,6 +47,7 @@ export function OrderRealtimeConnection({
         if (!disposed) setStatus("offline")
       }
     })
+
     return () => {
       disposed = true
       refresh.cancel()
@@ -53,6 +56,7 @@ export function OrderRealtimeConnection({
   }, [hubUrl, onRefresh, tenantId, tracker])
 
   const visibleStatus = hubUrl ? status : "offline"
+
   return (
     <p
       role="status"
@@ -63,6 +67,7 @@ export function OrderRealtimeConnection({
         aria-hidden="true"
         className={`size-2 rounded-full ${visibleStatus === "connected" ? "bg-primary" : "bg-muted-foreground/50"}`}
       />
+
       {t(`connection.${visibleStatus}`)}
     </p>
   )

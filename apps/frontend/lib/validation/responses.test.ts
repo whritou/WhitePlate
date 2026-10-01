@@ -7,6 +7,7 @@ import {
 } from "./responses"
 
 const id = "11111111-1111-4111-8111-111111111111"
+
 it("validates public menu JSON before interactive rendering", () => {
   const menu = {
     tenantId: id,
@@ -17,6 +18,7 @@ it("validates public menu JSON before interactive rendering", () => {
     availableLocales: ["en", "fr"],
     categories: [],
   }
+
   expect(parseStorefrontMenu(menu)).toEqual(menu)
   expect(parseStorefrontMenu({ ...menu, categories: [{}] })).toBeNull()
   expect(parseStorefrontMenu({ ...menu, locale: "de" })).toBeNull()
@@ -55,6 +57,7 @@ it("rejects incomplete catalog collections and malformed translation dictionarie
     optionGroups: [],
     options: [],
   }
+
   expect(parseCatalog(catalog)).toEqual(catalog)
   expect(parseCatalog({ ...catalog, products: null })).toBeNull()
   expect(

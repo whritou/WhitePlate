@@ -43,8 +43,10 @@ afterEach(() => vi.useRealTimers())
 
 it("coalesces bursts of order events into one REST refresh", () => {
   vi.useFakeTimers()
+
   const refresh = vi.fn()
   const coalescer = createOrderRefreshCoalescer(refresh)
+
   coalescer.schedule()
   coalescer.schedule()
   coalescer.schedule()
@@ -88,6 +90,7 @@ it("joins the selected restaurant, refreshes on new events, and recovers after r
     version: 1,
     occurredAt: "2026-10-01T18:00:00Z",
   }
+
   connection.emit("order.changed", event)
   connection.emit("order.changed", event)
   connection.emit("order.changed", { ...event, tenantId: "tenant-b" })

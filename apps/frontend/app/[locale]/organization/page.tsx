@@ -1,18 +1,29 @@
-import { Alert } from "@/components/ui/alert"
+import { Button } from "@/components/ui/button"
+
+import { SignOutButton } from "@/components/auth/sign-out-button"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import {
+  Card,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import { Link } from "@/i18n/navigation"
+import { auth } from "@/lib/auth"
+import { getRestaurantMemberships } from "@/services/orders"
+import { getOrganizations } from "@/services/organization-queries"
 import { getLocale, getTranslations } from "next-intl/server"
 import { headers } from "next/headers"
 import { redirect } from "next/navigation"
-import { auth } from "@/lib/auth"
-import { Link } from "@/i18n/navigation"
-import { SignOutButton } from "@/components/auth/sign-out-button"
-import { getOrganizations } from "@/services/organization-queries"
-import { getRestaurantMemberships } from "@/services/orders"
 
 export default async function OrganizationPage() {
   const locale = await getLocale()
   const session = await auth.api.getSession({ headers: await headers() })
+
   if (!session) redirect(`/${locale}/sign-in`)
   if (!session.user.emailVerified) redirect(`/${locale}/verify-email`)
+
   const t = await getTranslations("Auth")
   const [organizationsResponse, currentUserResponse] = await Promise.all([
     getOrganizations(),
@@ -35,104 +46,134 @@ export default async function OrganizationPage() {
       <header className="mb-8 flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="mb-2 text-sm font-medium text-primary">WhitePlate</p>
+
           <h1 className="text-3xl font-semibold tracking-tight">
             {t("organizationsHeading")}
           </h1>
         </div>
+
         <div className="flex items-center gap-3">
           <SignOutButton />
-          <Link
-            href="/organization/sign-up"
-            className="inline-flex h-10 items-center rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground"
+
+          <Button
+            size="lg"
+            className="h-10 rounded-lg"
+            nativeButton={false}
+            render={<Link href="/organization/sign-up" />}
           >
             {t("newOrganizationAction")}
-          </Link>
+          </Button>
         </div>
       </header>
+
       {restaurants.length > 0 && (
         <section className="mb-8 grid gap-3">
           <h2 className="text-base font-semibold">{t("restaurantOrders")}</h2>
+
           <ul className="grid gap-2 sm:grid-cols-2">
             {restaurants.map((restaurant) => (
-              <li
-                key={restaurant.id}
-                className="flex items-center justify-between gap-3 rounded-lg border border-border bg-card px-4 py-3"
-              >
-                <span className="truncate text-sm font-medium">
-                  {restaurant.name}
-                </span>
-                <Link
-                  href={`/organization/orders?tenantId=${restaurant.id}`}
-                  className="shrink-0 text-sm font-medium text-primary underline-offset-4 hover:underline"
-                >
-                  {t("openOrders")}
-                </Link>
+              <li key={restaurant.id}>
+                <Card className="flex flex-row items-center justify-between gap-3 rounded-lg border border-border bg-card px-4 py-3">
+                  <span className="truncate text-sm font-medium">
+                    {restaurant.name}
+                  </span>
+
+                  <Link
+                    href={`/organization/orders?tenantId=${restaurant.id}`}
+                    className="shrink-0 text-sm font-medium text-primary underline-offset-4 hover:underline"
+                  >
+                    {t("openOrders")}
+                  </Link>
+                </Card>
               </li>
             ))}
           </ul>
         </section>
       )}
+
       {manageableRestaurants.length > 0 && (
         <section className="mb-8 grid gap-3">
           <h2 className="text-base font-semibold">
             {t("restaurantMenuSettings")}
           </h2>
+
           <ul className="grid gap-2 sm:grid-cols-2">
             {manageableRestaurants.map((restaurant) => (
-              <li
-                key={restaurant.id}
-                className="flex items-center justify-between gap-3 rounded-lg border border-border bg-card px-4 py-3"
-              >
-                <span className="truncate text-sm font-medium">
-                  {restaurant.name}
-                </span>
-                <Link
-                  href={`/organization/restaurant-languages?tenantId=${restaurant.id}`}
-                  className="shrink-0 text-sm font-medium text-primary underline-offset-4 hover:underline"
-                >
-                  {t("editMenuLanguages")}
-                </Link>
+              <li key={restaurant.id}>
+                <Card className="flex flex-row items-center justify-between gap-3 rounded-lg border border-border bg-card px-4 py-3">
+                  <span className="truncate text-sm font-medium">
+                    {restaurant.name}
+                  </span>
+
+                  <Link
+                    href={`/organization/restaurant-languages?tenantId=${restaurant.id}`}
+                    className="shrink-0 text-sm font-medium text-primary underline-offset-4 hover:underline"
+                  >
+                    {t("editMenuLanguages")}
+                  </Link>
+                </Card>
               </li>
             ))}
           </ul>
         </section>
       )}
+
       {organizations === null ? (
         <Alert
           variant="destructive"
           role="alert"
           className="rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive"
         >
-          {t("serviceError")}
+          <AlertDescription>{t("serviceError")}</AlertDescription>
         </Alert>
       ) : organizations.length === 0 &&
         restaurants.length > 0 ? null : organizations.length === 0 ? (
-        <section className="rounded-2xl border border-dashed border-border bg-card px-6 py-12 text-center">
-          <h2 className="text-xl font-semibold">{t("noOrganizationsTitle")}</h2>
-          <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-muted-foreground">
-            {t("noOrganizationsDescription")}
-          </p>
-          <Link
-            href="/organization/sign-up"
-            className="mt-6 inline-flex h-10 items-center rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground"
-          >
-            {t("createOrganizationAction")}
-          </Link>
-        </section>
+        <Card className="rounded-2xl border border-dashed border-border bg-card px-6 py-12 text-center has-data-[slot=card-footer]:pb-12">
+          <CardHeader className="px-0">
+            <CardTitle>
+              <h2 className="text-xl font-semibold">
+                {t("noOrganizationsTitle")}
+              </h2>
+            </CardTitle>
+
+            <CardDescription className="mx-auto mt-2 max-w-md text-sm leading-6">
+              {t("noOrganizationsDescription")}
+            </CardDescription>
+          </CardHeader>
+
+          <CardFooter className="justify-center border-0 p-0">
+            <Button
+              size="lg"
+              className="mt-6 h-10 rounded-lg"
+              nativeButton={false}
+              render={<Link href="/organization/sign-up" />}
+            >
+              {t("createOrganizationAction")}
+            </Button>
+          </CardFooter>
+        </Card>
       ) : (
         <ul className="grid gap-4 sm:grid-cols-2">
           {organizations.map((organization) => (
-            <li
-              key={organization.id}
-              className="rounded-2xl border border-border bg-card p-6"
-            >
-              <h2 className="text-lg font-semibold">{organization.name}</h2>
-              <Link
-                href={`/organization/team?organizationId=${organization.id}`}
-                className="mt-5 inline-flex items-center gap-2 text-sm font-medium text-primary underline-offset-4 hover:underline"
-              >
-                {t("manageTeamAction")}
-              </Link>
+            <li key={organization.id}>
+              <Card className="gap-0 rounded-2xl border border-border p-6 has-data-[slot=card-footer]:pb-6">
+                <CardHeader className="px-0">
+                  <CardTitle>
+                    <h2 className="text-lg font-semibold">
+                      {organization.name}
+                    </h2>
+                  </CardTitle>
+                </CardHeader>
+
+                <CardFooter className="border-0 p-0">
+                  <Link
+                    href={`/organization/team?organizationId=${organization.id}`}
+                    className="mt-5 inline-flex items-center gap-2 text-sm font-medium text-primary underline-offset-4 hover:underline"
+                  >
+                    {t("manageTeamAction")}
+                  </Link>
+                </CardFooter>
+              </Card>
             </li>
           ))}
         </ul>

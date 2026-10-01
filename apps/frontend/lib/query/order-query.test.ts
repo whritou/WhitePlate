@@ -6,6 +6,7 @@ it("isolates order pages by account, tenant, locale, status, and cursor", () => 
   const client = createQueryClient()
   const scope = { userId: "alice", tenantId: "bistro", locale: "en" }
   const first = orderQueryKeys.page(scope, null, null)
+
   client.setQueryData(first, { items: ["private order"], nextCursor: null })
 
   for (const key of [
@@ -17,6 +18,7 @@ it("isolates order pages by account, tenant, locale, status, and cursor", () => 
   ]) {
     expect(client.getQueryData(key)).toBeUndefined()
   }
+
   client.clear()
 })
 
@@ -39,6 +41,7 @@ it("invalidates every page for only the selected account and tenant", async () =
     null,
     null
   )
+
   for (const key of [current, older, otherTenant, otherAccount]) {
     client.setQueryData(key, { items: [], nextCursor: null })
   }

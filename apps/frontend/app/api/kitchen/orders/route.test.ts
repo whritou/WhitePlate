@@ -8,6 +8,7 @@ vi.mock("@/services/orders", () => ({
 }))
 
 const tenantId = "11111111-1111-4111-8111-111111111111"
+
 beforeEach(() => vi.resetAllMocks())
 
 it.each([
@@ -19,6 +20,7 @@ it.each([
   const response = await GET(
     new Request(`http://localhost/api/kitchen/orders?${query}`)
   )
+
   expect(response.status).toBe(400)
   expect(getRestaurantMemberships).not.toHaveBeenCalled()
   expect(getOrderPage).not.toHaveBeenCalled()
@@ -30,9 +32,11 @@ it("requires authentication on the read endpoint", async () => {
     status: 401,
     error: "unauthorized",
   })
+
   const response = await GET(
     new Request(`http://localhost/api/kitchen/orders?tenantId=${tenantId}`)
   )
+
   expect(response.status).toBe(401)
   expect(getOrderPage).not.toHaveBeenCalled()
 })
@@ -43,9 +47,11 @@ it("never reads orders when the selector is outside the user's memberships", asy
     status: 200,
     data: [],
   })
+
   const response = await GET(
     new Request(`http://localhost/api/kitchen/orders?tenantId=${tenantId}`)
   )
+
   expect(response.status).toBe(403)
   expect(getOrderPage).not.toHaveBeenCalled()
 })
@@ -61,10 +67,12 @@ it("returns validated pages without caching authenticated responses", async () =
     status: 200,
     data: { items: [], nextCursor: null },
   })
+
   const request = new Request(
     `http://localhost/api/kitchen/orders?tenantId=${tenantId}&status=Ready&cursor=older`
   )
   const response = await GET(request)
+
   expect(getOrderPage).toHaveBeenCalledWith(
     tenantId,
     "Ready",

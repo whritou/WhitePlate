@@ -6,6 +6,7 @@ export default async function ResetPasswordPage({
   searchParams: Promise<{ token?: string; error?: string }>
 }) {
   const query = await searchParams
+
   return (
     <AuthForm
       mode="reset"

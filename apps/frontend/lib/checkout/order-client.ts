@@ -15,6 +15,7 @@ export async function submitGuestOrder(
   fetcher: typeof fetch = fetch
 ): Promise<CheckoutResult> {
   const slug = getTenantSlug(host, configuration.baseDomain)
+
   if (!slug) return { ok: false, error: "not_found" }
   if (
     !validateOrderInput(input) ||
@@ -23,15 +24,20 @@ export async function submitGuestOrder(
   ) {
     return { ok: false, error: "invalid" }
   }
+
   const payload = prepareCheckout(input, null, () => key).input
+
   if (new TextEncoder().encode(JSON.stringify(payload)).length > 16 * 1024)
     return { ok: false, error: "invalid" }
+
   const baseUrl = getTenantApiBaseUrl(
     slug,
     configuration.apiTemplate,
     configuration.baseDomain
   )
+
   if (!baseUrl) return { ok: false, error: "unavailable" }
+
   const api = createApiRequestFactory({
     baseUrl,
     public: true,
@@ -42,7 +48,9 @@ export async function submitGuestOrder(
     idempotencyKey: key,
     signal: AbortSignal.timeout(15_000),
   })
+
   if (!result.ok) return { ok: false, error: result.error }
+
   return isOrderReceipt(result.data)
     ? { ok: true, receipt: result.data }
     : { ok: false, error: "unavailable" }
@@ -79,6 +87,7 @@ function isOrderReceipt(value: unknown): value is OrderReceipt {
     value.lines.length > 50
   )
     return false
+
   return value.lines.every(
     (line: unknown) =>
       isRecord(line) &&

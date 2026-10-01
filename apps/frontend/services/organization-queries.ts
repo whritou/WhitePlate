@@ -14,8 +14,11 @@ async function readResource<T>(
   parse: (data: unknown) => T | null
 ): Promise<ApiResult<T>> {
   const response = await whitePlateApi.get<unknown>(path)
+
   if (!response.ok) return response
+
   const data = parse(response.data)
+
   return data === null
     ? { ok: false, status: 502, error: "unavailable" }
     : { ok: true, status: 200, data }

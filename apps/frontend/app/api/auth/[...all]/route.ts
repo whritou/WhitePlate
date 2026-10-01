@@ -9,6 +9,7 @@ async function handle(
 ) {
   if (new URL(request.url).pathname === "/api/auth/token")
     return new Response(null, { status: 404 })
+
   return handler(request)
 }
 

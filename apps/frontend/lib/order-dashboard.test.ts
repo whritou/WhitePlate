@@ -17,15 +17,20 @@ it("bounds the event tracker after more than 512 different orders", () => {
     key: unknown
   ) {
     if (typeof key !== "string") throw new Error("Invalid order eviction key")
+
     return originalDelete.call(this, key)
   })
+
   try {
     const orders = Array.from({ length: 513 }, (_, index) => ({
       id: `${String(index).padStart(8, "0")}-1111-4111-8111-111111111111`,
       version: 2,
     }))
+
     expect(() => new OrderEventTracker("tenant-a", orders)).not.toThrow()
+
     const tracker = new OrderEventTracker("tenant-a", orders)
+
     expect(
       tracker.shouldRefresh({
         eventId: "44444444-4444-4444-8444-444444444444",

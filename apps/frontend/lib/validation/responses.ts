@@ -24,6 +24,7 @@ export function parseOrganizations(value: unknown): Organization[] | null {
     )
   )
     return null
+
   return value.map((item) => ({ id: item.id, name: item.name }))
 }
 
@@ -40,6 +41,7 @@ export function parseRestaurants(value: unknown): Restaurant[] | null {
     )
   )
     return null
+
   return value.map((item) => ({
     id: item.id,
     name: item.name,
@@ -104,6 +106,7 @@ export function parseCatalog(value: unknown): CatalogTranslationData | null {
     )
   )
     return null
+
   return {
     categories: value.categories,
     products: value.products,
@@ -171,6 +174,7 @@ export function parseStorefrontMenu(value: unknown): StorefrontMenu | null {
     )
   )
     return null
+
   return {
     tenantId: value.tenantId,
     restaurantName: value.restaurantName,

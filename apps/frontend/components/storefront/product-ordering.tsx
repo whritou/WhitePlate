@@ -1,15 +1,15 @@
 "use client"
 
-import { useLocale, useTranslations } from "next-intl"
-import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
-import { cn } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { validProductSelection } from "@/lib/checkout/cart"
+import { cn } from "@/lib/utils"
 import type { CartItem } from "@/types/checkout"
 import type { Product } from "@/types/storefront"
+import { useLocale, useTranslations } from "next-intl"
+import { useState } from "react"
 
 const inputClass =
   "h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -33,6 +33,7 @@ export function ProductOrdering({
   const [quantity, setQuantity] = useState(1)
   const [selectionError, setSelectionError] = useState(false)
   const chosen = item?.optionIds ?? optionIds
+
   return (
     <form
       lang={locale}
@@ -41,8 +42,10 @@ export function ProductOrdering({
         event.preventDefault()
         if (!validProductSelection(product, chosen)) {
           setSelectionError(true)
+
           return
         }
+
         onSave({
           productId: product.id,
           quantity: item?.quantity ?? quantity,
@@ -63,6 +66,7 @@ export function ProductOrdering({
                 })}
               </span>
             </legend>
+
             {group.options.map((option) => (
               <Label
                 key={option.id}
@@ -78,13 +82,16 @@ export function ProductOrdering({
                       const next = checked
                         ? [...chosen, option.id]
                         : chosen.filter((id) => id !== option.id)
+
                       setSelectionError(false)
                       if (item) onSave({ ...item, optionIds: next })
                       else setOptionIds(next)
                     }}
                   />
+
                   {option.name}
                 </span>
+
                 <span className="tabular-nums">
                   {option.priceAdjustment
                     ? `+${price.format(option.priceAdjustment)}`
@@ -94,11 +101,13 @@ export function ProductOrdering({
             ))}
           </fieldset>
         ))}
+
         {selectionError && (
           <p role="alert" className="text-sm text-destructive">
             {t("invalidOptions")}
           </p>
         )}
+
         {item ? (
           <p role="status" className="text-xs text-muted-foreground">
             {t("inCart", { count: item.quantity })}
@@ -107,6 +116,7 @@ export function ProductOrdering({
           <div className="flex items-end gap-3">
             <Label className="grid gap-1 text-xs font-medium">
               {t("quantity")}
+
               <Input
                 type="number"
                 min={1}
@@ -118,6 +128,7 @@ export function ProductOrdering({
                 onChange={(event) => setQuantity(Number(event.target.value))}
               />
             </Label>
+
             <Button type="submit" size="lg" disabled={locked}>
               {t("addProduct", { product: product.name })}
             </Button>

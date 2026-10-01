@@ -37,3 +37,32 @@ export type ApiRequestFactoryOptions = {
 export type ApiLocale = "en" | "fr"
 
 export type TenantResource = "details" | "menu"
+
+export type JsonRequestOptions = RequestOptions & {
+  method?: ApiDiagnostic["method"]
+  body?: unknown
+  bearerToken?: string
+  responseType?: "json" | "none"
+}
+
+export type JsonRequestClientOptions = {
+  credentials?: "omit" | "same-origin"
+  fetcher?: typeof fetch
+  onDiagnostic?: (diagnostic: ApiDiagnostic) => void
+}
+
+export type BrowserRequestOptions = Omit<JsonRequestOptions, "bearerToken">
+
+export type ApiFailure = Extract<ApiResult<never>, { ok: false }>
+
+export type ApiTargetResult = { ok: true; url: URL } | ApiFailure
+
+export type PreparedApiRequest =
+  { ok: true; url: URL; bearerToken?: string } | ApiFailure
+
+export type JsonRequestClient = {
+  request: <T = unknown>(
+    target: string | URL,
+    options?: JsonRequestOptions
+  ) => Promise<ApiResult<T>>
+}

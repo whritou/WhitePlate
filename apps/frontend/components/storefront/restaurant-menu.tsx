@@ -1,13 +1,13 @@
 "use client"
 
-import { useLocale, useTranslations } from "next-intl"
-import { CheckoutPanel } from "./checkout-panel"
 import { Label } from "@/components/ui/label"
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
-import { ProductOrdering } from "./product-ordering"
 import { useGuestCheckout } from "@/hooks/use-guest-checkout"
 import { useRouter } from "@/i18n/navigation"
 import type { StorefrontMenu } from "@/types/storefront"
+import { useLocale, useTranslations } from "next-intl"
+import { CheckoutPanel } from "./checkout-panel"
+import { ProductOrdering } from "./product-ordering"
 
 export function RestaurantMenu({ menu }: { menu: StorefrontMenu }) {
   const t = useTranslations("Storefront")
@@ -27,10 +27,12 @@ export function RestaurantMenu({ menu }: { menu: StorefrontMenu }) {
       <header className="flex flex-wrap items-end justify-between gap-5 border-b border-border pb-6">
         <div>
           <p className="text-sm font-medium text-primary">WhitePlate</p>
+
           <h1 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">
             {menu.restaurantName}
           </h1>
         </div>
+
         <div className="grid gap-1.5">
           <Label
             htmlFor="menu-language"
@@ -38,6 +40,7 @@ export function RestaurantMenu({ menu }: { menu: StorefrontMenu }) {
           >
             {t("menuLanguage")}
           </Label>
+
           <NativeSelect
             id="menu-language"
             value={menu.locale}
@@ -66,9 +69,11 @@ export function RestaurantMenu({ menu }: { menu: StorefrontMenu }) {
           </NativeSelect>
         </div>
       </header>
+
       <p className="mt-5 text-sm text-muted-foreground">
         {t("menuDescription")}
       </p>
+
       <div className="mt-9 grid items-start gap-10 lg:grid-cols-[minmax(0,1fr)_22rem]">
         <div className="grid gap-10" lang={menu.locale}>
           {menu.categories.length === 0 && (
@@ -76,6 +81,7 @@ export function RestaurantMenu({ menu }: { menu: StorefrontMenu }) {
               {t("emptyMenu")}
             </p>
           )}
+
           {menu.categories.map((category) => (
             <section
               key={category.id}
@@ -87,32 +93,38 @@ export function RestaurantMenu({ menu }: { menu: StorefrontMenu }) {
               >
                 {category.name}
               </h2>
+
               {category.products.length === 0 && (
                 <p className="pt-4 text-sm text-muted-foreground">
                   {t("emptyCategory")}
                 </p>
               )}
+
               <ul className="divide-y divide-border">
                 {category.products.map((product) => (
                   <li key={product.id} className="py-5">
                     <div className="flex items-start justify-between gap-5">
                       <div className="min-w-0">
                         <h3 className="font-medium">{product.name}</h3>
+
                         {product.description && (
                           <p className="mt-1 text-sm leading-6 text-muted-foreground">
                             {product.description}
                           </p>
                         )}
+
                         {!product.isAvailable && (
                           <p className="mt-2 text-sm text-muted-foreground">
                             {t("unavailableProduct")}
                           </p>
                         )}
                       </div>
+
                       <span className="shrink-0 text-sm font-medium tabular-nums">
                         {price.format(product.basePrice)}
                       </span>
                     </div>
+
                     {product.isAvailable && (
                       <ProductOrdering
                         key={`${product.id}-${orderRound}`}
@@ -131,6 +143,7 @@ export function RestaurantMenu({ menu }: { menu: StorefrontMenu }) {
             </section>
           ))}
         </div>
+
         <CheckoutPanel checkoutState={checkoutState} />
       </div>
     </main>

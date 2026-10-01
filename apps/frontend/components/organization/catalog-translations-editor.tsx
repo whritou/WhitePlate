@@ -1,11 +1,11 @@
 "use client"
 
-import { useLocale, useTranslations } from "next-intl"
-import { useState } from "react"
 import { CatalogTranslationRow } from "@/components/organization/catalog-translation-row"
 import { Label } from "@/components/ui/label"
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
-import type { TranslationRow, CatalogTranslationData } from "@/types/catalog"
+import type { CatalogTranslationData, TranslationRow } from "@/types/catalog"
+import { useLocale, useTranslations } from "next-intl"
+import { useState } from "react"
 
 export function CatalogTranslationsEditor({
   tenantId,
@@ -55,15 +55,18 @@ export function CatalogTranslationsEditor({
           <h2 className="text-xl font-semibold tracking-tight">
             {t("menuTranslationsTitle")}
           </h2>
+
           <p className="mt-1 max-w-xl text-sm leading-6 text-muted-foreground">
             {t("menuTranslationsDescription")}
           </p>
         </div>
+
         <Label
           className="grid gap-1.5 text-xs font-medium text-muted-foreground"
           htmlFor="translation-locale"
         >
           {t("editLanguage")}
+
           <NativeSelect
             id="translation-locale"
             value={locale}
@@ -79,6 +82,7 @@ export function CatalogTranslationsEditor({
           </NativeSelect>
         </Label>
       </div>
+
       {rows.length === 0 ? (
         <p className="mt-5 rounded-md border border-dashed border-border p-4 text-sm text-muted-foreground">
           {t("noCatalogTranslations")}
@@ -88,6 +92,7 @@ export function CatalogTranslationsEditor({
           {rows.map((row) => {
             const text =
               row.translations[locale] ?? row.translations[defaultLocale]
+
             return (
               <li
                 key={`${locale}-${row.type}-${row.id}`}

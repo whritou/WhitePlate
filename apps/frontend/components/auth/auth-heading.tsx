@@ -1,5 +1,7 @@
 "use client"
 
+import { CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+
 export function AuthHeading({
   title,
   description,
@@ -8,14 +10,16 @@ export function AuthHeading({
   description: string
 }) {
   return (
-    <header className="mb-7">
+    <CardHeader className="mb-7 px-0">
       <p className="mb-2 text-sm font-medium text-primary">WhitePlate</p>
-      <h1 className="text-3xl font-semibold tracking-tight text-foreground">
-        {title}
-      </h1>
-      <p className="mt-2 text-sm leading-6 text-muted-foreground">
+
+      <CardTitle className="text-3xl font-semibold tracking-tight text-foreground">
+        <h1>{title}</h1>
+      </CardTitle>
+
+      <CardDescription className="mt-2 text-sm leading-6">
         {description}
-      </p>
-    </header>
+      </CardDescription>
+    </CardHeader>
   )
 }

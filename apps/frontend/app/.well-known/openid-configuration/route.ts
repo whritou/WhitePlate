@@ -4,6 +4,7 @@ export const dynamic = "force-dynamic"
 
 export function GET() {
   const issuer = process.env.BETTER_AUTH_URL ?? "http://localhost:3000"
+
   return NextResponse.json(
     {
       issuer,

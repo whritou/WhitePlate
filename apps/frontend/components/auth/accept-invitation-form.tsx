@@ -1,12 +1,12 @@
 "use client"
 
-import { ArrowRight, LoaderCircle } from "lucide-react"
-import { useState } from "react"
-import { useTranslations } from "next-intl"
 import { acceptStaffInvitationAction } from "@/actions/organization"
 import { Button } from "@/components/ui/button"
-import { ResultMessage } from "./result-message"
 import type { ActionState } from "@/types/organization"
+import { ArrowRight, LoaderCircle } from "lucide-react"
+import { useTranslations } from "next-intl"
+import { useState } from "react"
+import { ResultMessage } from "./result-message"
 
 export function AcceptInvitationForm({ token }: { token: string }) {
   const t = useTranslations("Auth")
@@ -14,10 +14,12 @@ export function AcceptInvitationForm({ token }: { token: string }) {
 
   async function accept() {
     setState({ status: "pending" })
+
     const result = await acceptStaffInvitationAction(token).catch(() => ({
       ok: false as const,
       message: "unavailable" as const,
     }))
+
     if (result.ok) {
       setState({ status: "success" })
     } else setState({ status: "error", error: result.message })
@@ -37,6 +39,7 @@ export function AcceptInvitationForm({ token }: { token: string }) {
                 : t("serviceError")
         }
       />
+
       <Button
         type="button"
         onClick={() => void accept()}
@@ -48,6 +51,7 @@ export function AcceptInvitationForm({ token }: { token: string }) {
         ) : (
           <>
             {t("acceptInvitationAction")}
+
             <ArrowRight className="size-4" />
           </>
         )}

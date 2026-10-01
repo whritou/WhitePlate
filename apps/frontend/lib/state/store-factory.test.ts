@@ -4,6 +4,7 @@ import { createStoreFactory } from "./store-factory"
 describe("createStoreFactory", () => {
   it("creates independent stores from caller-provided initial state", () => {
     type CounterState = { count: number; increment: () => void }
+
     const createCounterStore = createStoreFactory<number, CounterState>(
       (initialCount, set) => ({
         count: initialCount,
@@ -13,6 +14,7 @@ describe("createStoreFactory", () => {
 
     const first = createCounterStore(2)
     const second = createCounterStore(8)
+
     first.getState().increment()
 
     expect(first.getState().count).toBe(3)

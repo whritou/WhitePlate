@@ -15,6 +15,7 @@ export async function GET(request: Request) {
       status: statusCode,
       headers: { "Cache-Control": "private, no-store", Vary: "Cookie" },
     })
+
   if (
     !isValidTenantId(tenantId) ||
     !status.ok ||
@@ -27,6 +28,7 @@ export async function GET(request: Request) {
   }
 
   const memberships = await getRestaurantMemberships()
+
   if (!memberships.ok)
     return respond({ ok: false, error: memberships.error }, memberships.status)
   if (
@@ -43,5 +45,6 @@ export async function GET(request: Request) {
     cursor.cursor,
     request.signal
   )
+
   return respond(response, response.status)
 }

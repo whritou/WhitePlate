@@ -26,6 +26,7 @@ export function useGuestCheckout(menu: StorefrontMenu) {
   const uncertain = error === "unavailable"
   const locked = submitting || uncertain || changingLanguage || receipt !== null
   const products = menu.categories.flatMap((category) => category.products)
+
   function changeCart(item: CartItem) {
     setCart((current) => updateCart(current, item))
     setError(null)
@@ -34,11 +35,13 @@ export function useGuestCheckout(menu: StorefrontMenu) {
   async function checkout(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     if (inFlight.current) return
+
     const input = {
       customerName,
       discountCode: discountCode || null,
       items: cart,
     }
+
     if (
       !uncertain &&
       (!validateOrderInput(input) ||
@@ -46,22 +49,27 @@ export function useGuestCheckout(menu: StorefrontMenu) {
           const product = products.find(
             (candidate) => candidate.id === item.productId
           )
+
           return !product || !validProductSelection(product, item.optionIds)
         }))
     ) {
       setError("invalid")
+
       return
     }
+
     const next =
       uncertain && attempt.current
         ? attempt.current
         : prepareCheckout(input, attempt.current, () => crypto.randomUUID())
+
     attempt.current = next
     inFlight.current = true
     setSubmitting(true)
     setError(null)
     try {
       const result = await checkoutGuestOrder(next.input, next.key)
+
       if (result.ok && result.receipt.tenantId === menu.tenantId) {
         setReceipt(result.receipt)
         setCart([])
@@ -84,10 +92,12 @@ export function useGuestCheckout(menu: StorefrontMenu) {
     setDiscountCode("")
     setOrderRound((round) => round + 1)
   }
+
   function changeCustomerName(value: string) {
     setCustomerName(value)
     setError(null)
   }
+
   function changeDiscountCode(value: string) {
     setDiscountCode(value)
     setError(null)

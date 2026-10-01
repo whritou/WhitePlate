@@ -1,15 +1,15 @@
 "use client"
 
+import { createOrganizationAction } from "@/actions/organization"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { useRouter } from "@/i18n/navigation"
+import type { ActionState } from "@/types/organization"
 import { ArrowRight, LoaderCircle } from "lucide-react"
 import { useLocale, useTranslations } from "next-intl"
 import { useState, type FormEvent } from "react"
-import { Button } from "@/components/ui/button"
-import { createOrganizationAction } from "@/actions/organization"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { ResultMessage } from "./result-message"
-import { useRouter } from "@/i18n/navigation"
-import type { ActionState } from "@/types/organization"
 
 export function OrganizationForm() {
   const t = useTranslations("Auth")
@@ -20,9 +20,11 @@ export function OrganizationForm() {
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setState({ status: "pending" })
+
     const result = await createOrganizationAction(
       new FormData(event.currentTarget)
     ).catch(() => ({ ok: false as const, message: "unavailable" as const }))
+
     if (result.ok) {
       setState({ status: "success" })
       router.push("/organization")
@@ -36,6 +38,7 @@ export function OrganizationForm() {
         htmlFor="organization-name"
       >
         {t("organizationName")}
+
         <Input
           id="organization-name"
           name="name"
@@ -45,7 +48,9 @@ export function OrganizationForm() {
           className="h-11 rounded-lg border border-input bg-background px-3 outline-none focus-visible:ring-2 focus-visible:ring-ring/30"
         />
       </Label>
+
       <input type="hidden" name="locale" value={locale} />
+
       <ResultMessage
         state={state}
         message={
@@ -58,6 +63,7 @@ export function OrganizationForm() {
                 : t("serviceError")
         }
       />
+
       <Button
         type="submit"
         disabled={state.status === "pending"}
@@ -68,6 +74,7 @@ export function OrganizationForm() {
         ) : (
           <>
             {t("createOrganizationAction")}
+
             <ArrowRight className="size-4" />
           </>
         )}

@@ -6,6 +6,7 @@ export default async function SignUpPage({
   searchParams: Promise<{ invite?: string }>
 }) {
   const query = await searchParams
+
   return (
     <AuthForm
       mode="signUp"

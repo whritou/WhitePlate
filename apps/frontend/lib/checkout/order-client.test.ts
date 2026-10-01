@@ -47,8 +47,10 @@ describe("public guest checkout", () => {
     const requests: { url: string; init?: RequestInit }[] = []
     const fetcher: typeof fetch = async (url, init) => {
       requests.push({ url: String(url), init })
+
       return Response.json(receipt, { status: 201 })
     }
+
     expect(
       await submitGuestOrder(
         "bistro.localhost:3000",
@@ -80,8 +82,10 @@ describe("public guest checkout", () => {
     let calls = 0
     const fetcher: typeof fetch = async () => {
       calls++
+
       return Response.json(receipt)
     }
+
     expect(
       await submitGuestOrder(
         host,
@@ -103,9 +107,11 @@ describe("public guest checkout", () => {
       "checkout-key-123456",
       async () => {
         calls++
+
         return Response.json(receipt)
       }
     )
+
     expect(result).toEqual({ ok: false, error: "unavailable" })
     expect(calls).toBe(0)
   })
@@ -116,14 +122,17 @@ describe("public guest checkout", () => {
       const key = new Headers(init?.headers).get("Idempotency-Key")!
       const body = String(init?.body)
       const previous = stored.get(key)
+
       if (previous && previous.body !== body)
         return Response.json(
           { detail: "secret upstream detail" },
           { status: 409 }
         )
       if (!previous) stored.set(key, { body, receipt })
+
       return Response.json(stored.get(key)!.receipt, { status: 201 })
     }
+
     const first = await submitGuestOrder(
       "bistro.localhost",
       config,
@@ -131,6 +140,7 @@ describe("public guest checkout", () => {
       "checkout-key-123456",
       fetcher
     )
+
     expect(first).toEqual({ ok: true, receipt })
     expect(
       await submitGuestOrder(
@@ -186,8 +196,10 @@ describe("public guest checkout", () => {
     let calls = 0
     const fetcher: typeof fetch = async () => {
       calls++
+
       return Response.json(receipt)
     }
+
     expect(
       await submitGuestOrder(
         "bistro.localhost",

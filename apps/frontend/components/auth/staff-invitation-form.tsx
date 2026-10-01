@@ -1,15 +1,15 @@
 "use client"
 
-import { ArrowRight, LoaderCircle } from "lucide-react"
-import { useLocale, useTranslations } from "next-intl"
-import { useState, type FormEvent } from "react"
+import { sendStaffInvitationAction } from "@/actions/organization"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
-import { ResultMessage } from "./result-message"
-import { sendStaffInvitationAction } from "@/actions/organization"
 import type { ActionState } from "@/types/organization"
+import { ArrowRight, LoaderCircle } from "lucide-react"
+import { useLocale, useTranslations } from "next-intl"
+import { useState, type FormEvent } from "react"
+import { ResultMessage } from "./result-message"
 
 export function StaffInvitationForm({
   organizationId,
@@ -29,9 +29,11 @@ export function StaffInvitationForm({
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setState({ status: "pending" })
+
     const result = await sendStaffInvitationAction(
       new FormData(event.currentTarget)
     ).catch(() => ({ ok: false as const, message: "unavailable" as const }))
+
     setState(
       result.ok
         ? { status: "success" }
@@ -42,9 +44,12 @@ export function StaffInvitationForm({
   return (
     <form onSubmit={submit} className="grid gap-5">
       <input type="hidden" name="organizationId" value={organizationId} />
+
       <input type="hidden" name="locale" value={locale} />
+
       <Label className="grid gap-2 text-sm font-medium" htmlFor="invite-email">
         {t("email")}
+
         <Input
           id="invite-email"
           name="email"
@@ -56,8 +61,10 @@ export function StaffInvitationForm({
           className="h-11 rounded-lg border border-input bg-background px-3 outline-none focus-visible:ring-2 focus-visible:ring-ring/30"
         />
       </Label>
+
       <Label className="grid gap-2 text-sm font-medium" htmlFor="invite-role">
         {t("staffRole")}
+
         <NativeSelect
           id="invite-role"
           name="role"
@@ -72,6 +79,7 @@ export function StaffInvitationForm({
               <NativeSelectOption value="KitchenStaff">
                 {t("kitchenStaff")}
               </NativeSelectOption>
+
               <NativeSelectOption value="RestaurantManager">
                 {t("restaurantManager")}
               </NativeSelectOption>
@@ -83,6 +91,7 @@ export function StaffInvitationForm({
           )}
         </NativeSelect>
       </Label>
+
       {restaurants.length > 0 && (
         <Label
           className="grid gap-2 text-sm font-medium"
@@ -90,6 +99,7 @@ export function StaffInvitationForm({
           htmlFor="invite-restaurant"
         >
           {t("restaurant")}
+
           <NativeSelect
             id="invite-restaurant"
             name="tenantId"
@@ -97,6 +107,7 @@ export function StaffInvitationForm({
             value={tenantId}
             onChange={(event) => {
               const nextTenantId = event.target.value
+
               setTenantId(nextTenantId)
               setRole(nextTenantId ? "KitchenStaff" : "OrganizationOwner")
             }}
@@ -106,17 +117,20 @@ export function StaffInvitationForm({
             <NativeSelectOption value="">
               {t("organizationScope")}
             </NativeSelectOption>
+
             {restaurants.map((restaurant) => (
               <NativeSelectOption key={restaurant.id} value={restaurant.id}>
                 {restaurant.name}
               </NativeSelectOption>
             ))}
           </NativeSelect>
+
           <span className="text-xs font-normal text-muted-foreground">
             {t("restaurantScopeHint")}
           </span>
         </Label>
       )}
+
       <ResultMessage
         state={state}
         message={
@@ -129,6 +143,7 @@ export function StaffInvitationForm({
                 : t("serviceError")
         }
       />
+
       <Button
         type="submit"
         disabled={state.status === "pending"}
@@ -139,6 +154,7 @@ export function StaffInvitationForm({
         ) : (
           <>
             {t("sendInvitationAction")}
+
             <ArrowRight className="size-4" />
           </>
         )}

@@ -17,8 +17,11 @@ export async function getRestaurantMemberships(): Promise<
   ApiResult<RestaurantMembership[]>
 > {
   const response = await whitePlateApi.get<unknown>("/api/v1/me")
+
   if (!response.ok) return response
+
   const data = parseRestaurantMemberships(response.data)
+
   return data
     ? { ok: true, status: 200, data }
     : { ok: false, status: 502, error: "unavailable" }
@@ -31,6 +34,7 @@ export async function getOrderPage(
   signal?: AbortSignal
 ): Promise<ApiResult<OrderPage>> {
   const query = new URLSearchParams({ pageSize: "50" })
+
   if (status) query.set("status", status)
   if (cursor) query.set("cursor", cursor)
 
@@ -38,8 +42,11 @@ export async function getOrderPage(
     `/api/v1/tenants/${tenantId}/orders?${query}`,
     { signal }
   )
+
   if (!response.ok) return response
+
   const data = parseOrderPage(response.data)
+
   return data
     ? { ok: true, status: 200, data }
     : { ok: false, status: 502, error: "unavailable" }
@@ -54,6 +61,7 @@ export async function updateOrderStatus(
     { status },
     { ifMatch: `"${version}"` }
   )
+
   if (response.ok) return { ok: true }
   if (response.status === 401) return { ok: false, error: "unauthorized" }
   if (response.status === 403) return { ok: false, error: "forbidden" }
@@ -61,5 +69,6 @@ export async function updateOrderStatus(
     return { ok: false, error: "invalid" }
   if (response.status === 409 || response.status === 412)
     return { ok: false, error: "conflict" }
+
   return { ok: false, error: "unavailable" }
 }

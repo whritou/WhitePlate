@@ -1,14 +1,15 @@
 "use client"
 
-import { useLocale, useTranslations } from "next-intl"
-import { useState, type FormEvent } from "react"
+import { updateMenuLanguagesAction } from "@/actions/organization"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { updateMenuLanguagesAction } from "@/actions/organization"
 import { useRouter } from "@/i18n/navigation"
 import type { FormState } from "@/types/catalog"
+import { useLocale, useTranslations } from "next-intl"
+import { useState, type FormEvent } from "react"
 
 export function MenuLanguageSettingsForm({
   tenantId,
@@ -29,6 +30,7 @@ export function MenuLanguageSettingsForm({
 
   function addLocale() {
     const locale = newLocale.trim()
+
     if (
       !locale ||
       locales.some((value) => value.toLowerCase() === locale.toLowerCase())
@@ -41,7 +43,9 @@ export function MenuLanguageSettingsForm({
 
   function removeLocale(locale: string) {
     if (locales.length <= 1) return
+
     const next = locales.filter((value) => value !== locale)
+
     setLocales(next)
     if (defaultLocale === locale) setDefaultLocale(next[0]!)
   }
@@ -49,11 +53,13 @@ export function MenuLanguageSettingsForm({
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setState("pending")
+
     const result = await updateMenuLanguagesAction({
       tenantId,
       locales,
       defaultLocale,
     }).catch(() => ({ ok: false as const }))
+
     if (result.ok) {
       setState("success")
       router.refresh()
@@ -64,6 +70,7 @@ export function MenuLanguageSettingsForm({
     <form onSubmit={(event) => void submit(event)} className="grid gap-6">
       <div className="grid gap-3">
         <h2 className="text-base font-semibold">{t("menuLanguagesEnabled")}</h2>
+
         <RadioGroup
           aria-label={t("defaultMenuLanguage")}
           disabled={state === "pending"}
@@ -83,18 +90,22 @@ export function MenuLanguageSettingsForm({
                   value={locale}
                   aria-label={languageName(locale, uiLocale)}
                 />
+
                 <span>
                   <span className="font-medium">
                     {languageName(locale, uiLocale)}
                   </span>
+
                   <span className="ml-2 text-muted-foreground">{locale}</span>
                 </span>
+
                 {defaultLocale === locale && (
-                  <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
+                  <Badge variant="secondary" className="rounded-full">
                     {t("defaultMenuLanguage")}
-                  </span>
+                  </Badge>
                 )}
               </Label>
+
               <Button
                 type="button"
                 variant="ghost"
@@ -108,6 +119,7 @@ export function MenuLanguageSettingsForm({
             </li>
           ))}
         </RadioGroup>
+
         <p className="text-sm text-muted-foreground">
           {t("menuLanguagesHint")}
         </p>
@@ -119,6 +131,7 @@ export function MenuLanguageSettingsForm({
           htmlFor="new-menu-locale"
         >
           {t("addMenuLanguage")}
+
           <Input
             id="new-menu-locale"
             disabled={state === "pending"}
@@ -137,6 +150,7 @@ export function MenuLanguageSettingsForm({
             className="h-10 rounded-md border border-input bg-background px-3 text-sm font-normal outline-none focus-visible:ring-2 focus-visible:ring-ring/30"
           />
         </Label>
+
         <Button
           type="button"
           variant="outline"
@@ -152,11 +166,13 @@ export function MenuLanguageSettingsForm({
           {t("menuLanguagesSaved")}
         </p>
       )}
+
       {state === "error" && (
         <p role="alert" className="text-sm text-destructive">
           {t("menuLanguagesError")}
         </p>
       )}
+
       <Button type="submit" disabled={state === "pending"} className="w-fit">
         {state === "pending"
           ? t("savingMenuLanguages")
@@ -169,6 +185,7 @@ export function MenuLanguageSettingsForm({
 function languageName(locale: string, uiLocale: string) {
   try {
     const displayNames = new Intl.DisplayNames([uiLocale], { type: "language" })
+
     return displayNames.of(locale) ?? locale
   } catch {
     return locale

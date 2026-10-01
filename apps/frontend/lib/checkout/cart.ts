@@ -15,17 +15,20 @@ export function validProductSelection(
     new Set(optionIds).size !== optionIds.length
   )
     return false
+
   const knownOptions = new Set(
     product.optionGroups.flatMap((group) =>
       group.options.map((option) => option.id)
     )
   )
+
   return (
     optionIds.every((id) => knownOptions.has(id)) &&
     product.optionGroups.every((group) => {
       const count = group.options.filter((option) =>
         optionIds.includes(option.id)
       ).length
+
       return (
         count >= group.minimumSelections && count <= group.maximumSelections
       )
@@ -35,6 +38,7 @@ export function validProductSelection(
 
 export function updateCart(items: CartItem[], item: CartItem): CartItem[] {
   const others = items.filter((line) => line.productId !== item.productId)
+
   return item.quantity === 0
     ? others
     : [...others, { ...item, optionIds: [...item.optionIds] }]
@@ -56,6 +60,7 @@ export function prepareCheckout(
       }))
       .sort((a, b) => a.productId.localeCompare(b.productId)),
   }
+
   return previous &&
     JSON.stringify(previous.input) === JSON.stringify(normalized)
     ? previous
@@ -64,7 +69,9 @@ export function prepareCheckout(
 
 export function validateOrderInput(input: unknown): input is OrderInput {
   if (!input || typeof input !== "object") return false
+
   const value = input as Record<string, unknown>
+
   if (
     typeof value.customerName !== "string" ||
     !value.customerName.trim() ||
@@ -77,10 +84,14 @@ export function validateOrderInput(input: unknown): input is OrderInput {
     value.items.length > 50
   )
     return false
+
   const productIds = new Set<string>()
+
   return value.items.every((item: unknown) => {
     if (!item || typeof item !== "object") return false
+
     const line = item as Record<string, unknown>
+
     if (
       !isUuid(line.productId) ||
       productIds.has(line.productId) ||
@@ -94,6 +105,7 @@ export function validateOrderInput(input: unknown): input is OrderInput {
     )
       return false
     productIds.add(line.productId)
+
     return true
   })
 }
