@@ -1,9 +1,5 @@
 import { createStoreFactory } from "./store-factory"
-
-export type TenantSelectionState = {
-  tenantId: string | null
-  selectTenant: (tenantId: string | null) => void
-}
+import type { TenantSelectionState } from "@/types/state"
 
 export const createTenantSelectionStore = createStoreFactory<
   string | null,

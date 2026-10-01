@@ -1,13 +1,16 @@
 "use client"
 
-import { useState } from "react"
 import { useLocale, useTranslations } from "next-intl"
-import { cn } from "@/lib/utils"
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import type { StorefrontMenu } from "@/lib/api/public-storefront"
-import { validProductSelection, type CartItem } from "@/lib/checkout/cart"
+import { Checkbox } from "@/components/ui/checkbox"
+import { cn } from "@/lib/utils"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { validProductSelection } from "@/lib/checkout/cart"
+import type { CartItem } from "@/types/checkout"
+import type { Product } from "@/types/storefront"
 
-type Product = StorefrontMenu["categories"][number]["products"][number]
 const inputClass =
   "h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
 
@@ -61,17 +64,18 @@ export function ProductOrdering({
               </span>
             </legend>
             {group.options.map((option) => (
-              <label
+              <Label
                 key={option.id}
                 className="flex items-center justify-between gap-3 text-sm"
               >
                 <span className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
+                  <Checkbox
+                    aria-label={option.name}
+                    disabled={locked}
                     className="size-4 accent-primary"
                     checked={chosen.includes(option.id)}
-                    onChange={(event) => {
-                      const next = event.target.checked
+                    onCheckedChange={(checked) => {
+                      const next = checked
                         ? [...chosen, option.id]
                         : chosen.filter((id) => id !== option.id)
                       setSelectionError(false)
@@ -86,7 +90,7 @@ export function ProductOrdering({
                     ? `+${price.format(option.priceAdjustment)}`
                     : ""}
                 </span>
-              </label>
+              </Label>
             ))}
           </fieldset>
         ))}
@@ -101,9 +105,9 @@ export function ProductOrdering({
           </p>
         ) : (
           <div className="flex items-end gap-3">
-            <label className="grid gap-1 text-xs font-medium">
+            <Label className="grid gap-1 text-xs font-medium">
               {t("quantity")}
-              <input
+              <Input
                 type="number"
                 min={1}
                 max={99}
@@ -113,7 +117,7 @@ export function ProductOrdering({
                 className={cn(inputClass, "w-20")}
                 onChange={(event) => setQuantity(Number(event.target.value))}
               />
-            </label>
+            </Label>
             <Button type="submit" size="lg" disabled={locked}>
               {t("addProduct", { product: product.name })}
             </Button>

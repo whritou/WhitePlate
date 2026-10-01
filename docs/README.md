@@ -11,6 +11,7 @@ Reviewed against the working tree on 2026-10-01. WhitePlate contains the first-r
 | [System architecture](architecture/WHITEPLATE_SYSTEM_ARCHITECTURE.md) | Current runtime and proposed system boundaries |
 | [Backend architecture](architecture/WHITEPLATE_BACKEND_ARCHITECTURE.md) | Project references, request paths, and test layout |
 | [Frontend architecture](architecture/WHITEPLATE_FRONTEND_ARCHITECTURE.md) | Routing, localization, rendering, and component map |
+| [Frontend implementation conventions](architecture/frontend-conventions.md) | Enforced UI, type, module, request and query boundaries |
 | [Technology stack](architecture/technology_stack.md) | Wired dependencies versus installed or proposed tools |
 | [Coding standards](coding-standards.md) | Rules for extending this codebase |
 | [API contracts](api/api-contracts.md) | Organization, staff, tenant, catalog, checkout, orders and SignalR routes |

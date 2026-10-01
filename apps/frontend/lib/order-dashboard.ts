@@ -1,3 +1,13 @@
+import type {
+  OrderStatus,
+  UpdateableOrderStatus,
+  OrderSummaryOption,
+  OrderSummaryLine,
+  OrderSummary,
+  OrderPage,
+  RestaurantMembership,
+} from "@/types/orders"
+
 export const ORDER_STATUSES = [
   "Pending",
   "Preparing",
@@ -5,33 +15,6 @@ export const ORDER_STATUSES = [
   "Completed",
   "Cancelled",
 ] as const
-
-export type OrderStatus = (typeof ORDER_STATUSES)[number]
-export type UpdateableOrderStatus = Exclude<OrderStatus, "Pending">
-
-export type OrderSummaryOption = { optionId: string; name: string }
-export type OrderSummaryLine = {
-  productId: string
-  productName: string
-  quantity: number
-  options: OrderSummaryOption[]
-}
-export type OrderSummary = {
-  id: string
-  customerName: string
-  currency: string
-  total: number
-  status: OrderStatus
-  version: number
-  createdAt: string
-  lines: OrderSummaryLine[]
-}
-export type OrderPage = { items: OrderSummary[]; nextCursor: string | null }
-export type RestaurantMembership = {
-  id: string
-  name: string
-  role: "OrganizationOwner" | "Manager" | "Kitchen"
-}
 
 const validUuid = /^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i
 const nextStatus: Partial<Record<OrderStatus, UpdateableOrderStatus>> = {
@@ -46,8 +29,12 @@ const eventTypes = new Set([
 ])
 
 export function parseOrderPage(value: unknown): OrderPage | null {
-  if (!isRecord(value) || !Array.isArray(value.items) ||
-    !isValidOrderCursor(value.nextCursor, true)) return null
+  if (
+    !isRecord(value) ||
+    !Array.isArray(value.items) ||
+    !isValidOrderCursor(value.nextCursor, true)
+  )
+    return null
 
   const items: OrderSummary[] = []
   for (const candidate of value.items) {
@@ -73,13 +60,24 @@ export function parseOrderCursor(
   return { ok: true, cursor: value }
 }
 
-export function parseRestaurantMemberships(value: unknown): RestaurantMembership[] | null {
+export function parseRestaurantMemberships(
+  value: unknown
+): RestaurantMembership[] | null {
   if (!isRecord(value) || !Array.isArray(value.restaurants)) return null
   const restaurants: RestaurantMembership[] = []
   for (const candidate of value.restaurants) {
-    if (!isRecord(candidate) || !isUuid(candidate.id) || typeof candidate.name !== "string" ||
-      !isRestaurantRole(candidate.role)) return null
-    restaurants.push({ id: candidate.id, name: candidate.name, role: candidate.role })
+    if (
+      !isRecord(candidate) ||
+      !isUuid(candidate.id) ||
+      typeof candidate.name !== "string" ||
+      !isRestaurantRole(candidate.role)
+    )
+      return null
+    restaurants.push({
+      id: candidate.id,
+      name: candidate.name,
+      role: candidate.role,
+    })
   }
   return restaurants
 }
@@ -95,8 +93,13 @@ export function resolveOrderHubUrl(
   if (!configuredApiUrl) return null
   try {
     const url = new URL(configuredApiUrl)
-    if ((url.protocol !== "https:" && url.protocol !== "http:") || url.username || url.password ||
-      (production && url.protocol !== "https:")) return null
+    if (
+      (url.protocol !== "https:" && url.protocol !== "http:") ||
+      url.username ||
+      url.password ||
+      (production && url.protocol !== "https:")
+    )
+      return null
     url.pathname = "/hubs/orders"
     url.search = ""
     url.hash = ""
@@ -113,8 +116,12 @@ export function getAvailableOrderTransitions(
   const result: UpdateableOrderStatus[] = []
   const next = nextStatus[status]
   if (next) result.push(next)
-  if ((role === "OrganizationOwner" || role === "Manager") &&
-    status !== "Completed" && status !== "Cancelled") result.push("Cancelled")
+  if (
+    (role === "OrganizationOwner" || role === "Manager") &&
+    status !== "Completed" &&
+    status !== "Cancelled"
+  )
+    result.push("Cancelled")
   return result
 }
 
@@ -140,14 +147,19 @@ export class OrderEventTracker {
 
   shouldRefresh(value: unknown): boolean {
     const event = parseKitchenOrderEvent(value)
-    if (!event || event.tenantId !== this.tenantId || this.eventIds.has(event.eventId))
+    if (
+      !event ||
+      event.tenantId !== this.tenantId ||
+      this.eventIds.has(event.eventId)
+    )
       return false
 
     this.eventIds.add(event.eventId)
     this.trim(this.eventIds, 512)
 
     const currentVersion = this.versions.get(event.orderId)
-    if (currentVersion !== undefined && event.version <= currentVersion) return false
+    if (currentVersion !== undefined && event.version <= currentVersion)
+      return false
     this.versions.set(event.orderId, event.version)
     this.trim(this.versions, 512)
     return true
@@ -155,7 +167,7 @@ export class OrderEventTracker {
 
   private trim<T>(values: Set<T> | Map<T, unknown>, limit: number): void {
     while (values.size > limit) {
-      const oldest = values.values().next().value as T | undefined
+      const oldest = values.keys().next().value as T | undefined
       if (oldest === undefined) return
       values.delete(oldest)
     }
@@ -163,28 +175,51 @@ export class OrderEventTracker {
 }
 
 export function isOrderStatus(value: unknown): value is OrderStatus {
-  return typeof value === "string" && ORDER_STATUSES.includes(value as OrderStatus)
+  return (
+    typeof value === "string" && ORDER_STATUSES.includes(value as OrderStatus)
+  )
 }
 
 function parseOrderSummary(value: unknown): OrderSummary | null {
-  if (!isRecord(value) || !isUuid(value.id) || typeof value.customerName !== "string" ||
-    typeof value.currency !== "string" || !/^[A-Z]{3}$/.test(value.currency) ||
-    typeof value.total !== "number" || !Number.isFinite(value.total) || value.total < 0 ||
-    !isOrderStatus(value.status) || typeof value.version !== "number" ||
-    !Number.isSafeInteger(value.version) || value.version < 1 ||
-    typeof value.createdAt !== "string" || Number.isNaN(Date.parse(value.createdAt)) ||
-    !Array.isArray(value.lines)) return null
+  if (
+    !isRecord(value) ||
+    !isUuid(value.id) ||
+    typeof value.customerName !== "string" ||
+    typeof value.currency !== "string" ||
+    !/^[A-Z]{3}$/.test(value.currency) ||
+    typeof value.total !== "number" ||
+    !Number.isFinite(value.total) ||
+    value.total < 0 ||
+    !isOrderStatus(value.status) ||
+    typeof value.version !== "number" ||
+    !Number.isSafeInteger(value.version) ||
+    value.version < 1 ||
+    typeof value.createdAt !== "string" ||
+    Number.isNaN(Date.parse(value.createdAt)) ||
+    !Array.isArray(value.lines)
+  )
+    return null
 
   const lines: OrderSummaryLine[] = []
   for (const candidate of value.lines) {
-    if (!isRecord(candidate) || !isUuid(candidate.productId) ||
-      typeof candidate.productName !== "string" || typeof candidate.quantity !== "number" ||
-      !Number.isSafeInteger(candidate.quantity) || candidate.quantity < 1 ||
-      !Array.isArray(candidate.options)) return null
+    if (
+      !isRecord(candidate) ||
+      !isUuid(candidate.productId) ||
+      typeof candidate.productName !== "string" ||
+      typeof candidate.quantity !== "number" ||
+      !Number.isSafeInteger(candidate.quantity) ||
+      candidate.quantity < 1 ||
+      !Array.isArray(candidate.options)
+    )
+      return null
 
     const options: OrderSummaryOption[] = []
     for (const option of candidate.options) {
-      if (!isRecord(option) || !isUuid(option.optionId) || typeof option.name !== "string")
+      if (
+        !isRecord(option) ||
+        !isUuid(option.optionId) ||
+        typeof option.name !== "string"
+      )
         return null
       options.push({ optionId: option.optionId, name: option.name })
     }
@@ -214,11 +249,21 @@ function parseKitchenOrderEvent(value: unknown): {
   orderId: string
   version: number
 } | null {
-  if (!isRecord(value) || !isUuid(value.eventId) || typeof value.tenantId !== "string" ||
-    !isUuid(value.orderId) || typeof value.eventType !== "string" || !eventTypes.has(value.eventType) ||
-    !isOrderStatus(value.status) || typeof value.version !== "number" ||
-    !Number.isSafeInteger(value.version) || value.version < 1 ||
-    typeof value.occurredAt !== "string" || Number.isNaN(Date.parse(value.occurredAt))) return null
+  if (
+    !isRecord(value) ||
+    !isUuid(value.eventId) ||
+    typeof value.tenantId !== "string" ||
+    !isUuid(value.orderId) ||
+    typeof value.eventType !== "string" ||
+    !eventTypes.has(value.eventType) ||
+    !isOrderStatus(value.status) ||
+    typeof value.version !== "number" ||
+    !Number.isSafeInteger(value.version) ||
+    value.version < 1 ||
+    typeof value.occurredAt !== "string" ||
+    Number.isNaN(Date.parse(value.occurredAt))
+  )
+    return null
 
   return {
     eventId: value.eventId,
@@ -232,14 +277,25 @@ function isUuid(value: unknown): value is string {
   return typeof value === "string" && validUuid.test(value)
 }
 
-function isValidOrderCursor(value: unknown, allowNull: boolean): value is string | null {
+function isValidOrderCursor(
+  value: unknown,
+  allowNull: boolean
+): value is string | null {
   if (allowNull && value === null) return true
-  return typeof value === "string" && value.length > 0 && value.length <= 128 &&
+  return (
+    typeof value === "string" &&
+    value.length > 0 &&
+    value.length <= 128 &&
     /^[A-Za-z0-9_-]+$/.test(value)
+  )
 }
 
-function isRestaurantRole(value: unknown): value is RestaurantMembership["role"] {
-  return value === "OrganizationOwner" || value === "Manager" || value === "Kitchen"
+function isRestaurantRole(
+  value: unknown
+): value is RestaurantMembership["role"] {
+  return (
+    value === "OrganizationOwner" || value === "Manager" || value === "Kitchen"
+  )
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

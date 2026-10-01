@@ -1,7 +1,8 @@
 import { afterEach, expect, it, vi } from "vitest"
+import { updateOrderStatusAction } from "@/actions/orders"
 import { whitePlateApi } from "@/lib/api"
-import { updateOrderStatusAction } from "./order-actions"
 
+vi.mock("server-only", () => ({}))
 vi.mock("@/lib/api", () => ({ whitePlateApi: { patch: vi.fn() } }))
 
 afterEach(() => vi.clearAllMocks())
@@ -22,13 +23,16 @@ it.each([
   { ...input, version: 1.5 },
   { ...input, status: "Pending" },
   { ...input, status: "Cancelled\r\nAuthorization: attacker" },
-])("rejects malformed status input before calling the API: %o", async (value) => {
-  await expect(updateOrderStatusAction(value)).resolves.toEqual({
-    ok: false,
-    error: "invalid",
-  })
-  expect(whitePlateApi.patch).not.toHaveBeenCalled()
-})
+])(
+  "rejects malformed status input before calling the API: %o",
+  async (value) => {
+    await expect(updateOrderStatusAction(value)).resolves.toEqual({
+      ok: false,
+      error: "invalid",
+    })
+    expect(whitePlateApi.patch).not.toHaveBeenCalled()
+  }
+)
 
 it("sends a status update with the version as If-Match", async () => {
   vi.mocked(whitePlateApi.patch).mockResolvedValue({
@@ -52,15 +56,18 @@ it.each([
   [409, "conflict"],
   [412, "conflict"],
   [503, "unavailable"],
-] as const)("returns a safe message for API status %i", async (status, error) => {
-  vi.mocked(whitePlateApi.patch).mockResolvedValue({
-    ok: false,
-    status,
-    error: status === 409 ? "conflict" : "unavailable",
-  })
+] as const)(
+  "returns a safe message for API status %i",
+  async (status, error) => {
+    vi.mocked(whitePlateApi.patch).mockResolvedValue({
+      ok: false,
+      status,
+      error: status === 409 ? "conflict" : "unavailable",
+    })
 
-  await expect(updateOrderStatusAction(input)).resolves.toEqual({
-    ok: false,
-    error,
-  })
-})
+    await expect(updateOrderStatusAction(input)).resolves.toEqual({
+      ok: false,
+      error,
+    })
+  }
+)

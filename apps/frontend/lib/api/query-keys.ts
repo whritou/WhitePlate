@@ -1,6 +1,4 @@
-export type ApiLocale = "en" | "fr"
-
-type TenantResource = "details" | "menu"
+import type { TenantResource } from "@/types/api"
 
 function normalizeTenantId(tenantId: string): string {
   const normalized = tenantId.trim().toLowerCase()

@@ -1,7 +1,10 @@
 import { afterEach, expect, it, vi } from "vitest"
 import { HubConnectionState, type HubConnection } from "@microsoft/signalr"
-import { OrderEventTracker } from "../../../../lib/order-dashboard"
-import { attachOrderRealtime, createOrderRefreshCoalescer } from "./order-realtime"
+import {
+  attachOrderRealtime,
+  createOrderRefreshCoalescer,
+} from "@/lib/orders/order-realtime"
+import { OrderEventTracker } from "@/lib/order-dashboard"
 
 class FakeConnection {
   state = HubConnectionState.Disconnected
@@ -69,7 +72,11 @@ it("joins the selected restaurant, refreshes on new events, and recovers after r
   )
 
   await new Promise((resolve) => setTimeout(resolve, 0))
-  expect(connection.invoke).toHaveBeenNthCalledWith(1, "JoinRestaurant", "tenant-a")
+  expect(connection.invoke).toHaveBeenNthCalledWith(
+    1,
+    "JoinRestaurant",
+    "tenant-a"
+  )
   expect(onRefresh).toHaveBeenCalledTimes(1)
 
   const event = {
@@ -87,11 +94,18 @@ it("joins the selected restaurant, refreshes on new events, and recovers after r
   expect(onRefresh).toHaveBeenCalledTimes(2)
 
   await connection.reconnected?.()
-  expect(connection.invoke).toHaveBeenNthCalledWith(2, "JoinRestaurant", "tenant-a")
+  expect(connection.invoke).toHaveBeenNthCalledWith(
+    2,
+    "JoinRestaurant",
+    "tenant-a"
+  )
   expect(onRefresh).toHaveBeenCalledTimes(3)
   expect(onStatus).toHaveBeenCalledWith("connected")
 
   await stop()
-  expect(connection.off).toHaveBeenCalledWith("order.changed", expect.any(Function))
+  expect(connection.off).toHaveBeenCalledWith(
+    "order.changed",
+    expect.any(Function)
+  )
   expect(connection.stop).toHaveBeenCalledTimes(1)
 })

@@ -131,10 +131,11 @@ From `apps/frontend`:
 npm run lint
 npm run test
 npm run typecheck
+npm run format:check
 npm run build
 ```
 
-After a successful build, `npm run start` serves the production frontend. Lint is a separate command; a build is not proof that lint or behavioral tests passed. `npm run format` writes all matching TS/TSX files. For a focused formatting change, invoke the installed Prettier on the touched files instead.
+After a successful build, `npm run start` serves the production frontend. Lint is a separate command; a build is not proof that lint or behavioral tests passed. `npm run format:check` is read-only and required by CI; `npm run format` rewrites TS/TSX source. Do not run standalone typecheck concurrently with a Next build, which regenerates `.next/types`. Follow [frontend implementation conventions](architecture/frontend-conventions.md) for UI, types, actions, services and query boundaries.
 
 From the repository root:
 

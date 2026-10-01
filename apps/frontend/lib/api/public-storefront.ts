@@ -1,40 +1,8 @@
 import "server-only"
+import { createApiRequestFactory } from "./request-factory"
 import { getTenantSlug, getTenantApiBaseUrl } from "./tenant-routing"
-
-import { createApiRequestFactory, type ApiResult } from "./request-factory"
-
-export type StorefrontMenu = {
-  tenantId: string
-  restaurantName: string
-  currency: string
-  locale: string
-  defaultLocale: string
-  availableLocales: string[]
-  categories: {
-    id: string
-    name: string
-    sortOrder: number
-    products: {
-      id: string
-      name: string
-      description: string | null
-      basePrice: number
-      isAvailable: boolean
-      optionGroups: {
-        id: string
-        name: string
-        minimumSelections: number
-        maximumSelections: number
-        options: { id: string; name: string; priceAdjustment: number }[]
-      }[]
-    }[]
-  }[]
-}
-
-export type PublicMenuResult =
-  | { kind: "not-tenant" }
-  | { kind: "unavailable" }
-  | { kind: "menu"; tenantSlug: string; menu: StorefrontMenu }
+import { parseStorefrontMenu } from "@/lib/validation/responses"
+import type { PublicMenuResult } from "@/types/storefront"
 
 export async function getPublicMenu(
   hostHeader: string | null,
@@ -61,10 +29,7 @@ export async function getPublicMenu(
   const localeQuery = requestedLocale
     ? `?locale=${encodeURIComponent(requestedLocale)}`
     : ""
-  const response: ApiResult<StorefrontMenu> = await api.get(
-    `/api/v1/menu${localeQuery}`
-  )
-  return response.ok && response.data
-    ? { kind: "menu", tenantSlug, menu: response.data }
-    : { kind: "unavailable" }
+  const response = await api.get<unknown>(`/api/v1/menu${localeQuery}`)
+  const menu = response.ok ? parseStorefrontMenu(response.data) : null
+  return menu ? { kind: "menu", tenantSlug, menu } : { kind: "unavailable" }
 }

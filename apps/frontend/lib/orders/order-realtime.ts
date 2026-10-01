@@ -3,9 +3,9 @@ import {
   LogLevel,
   type HubConnection,
 } from "@microsoft/signalr"
-import type { OrderEventTracker } from "../../../../lib/order-dashboard"
-
-export type OrderRealtimeStatus = "connecting" | "connected" | "reconnecting" | "offline"
+import type { OrderEventTracker } from "@/lib/order-dashboard"
+import type { OrderRealtimeStatus } from "@/types/orders"
+import { getSignalRToken } from "@/lib/api/order-browser"
 
 export function createOrderRefreshCoalescer(onRefresh: () => void) {
   let timer: ReturnType<typeof setTimeout> | null = null
@@ -116,24 +116,4 @@ export function attachOrderRealtime(
     connection.off("order.changed", onOrderChanged)
     await connection.stop()
   }
-}
-
-async function getSignalRToken(): Promise<string> {
-  const response = await fetch("/api/kitchen/signalr-token", {
-    method: "POST",
-    headers: { Accept: "application/json" },
-    cache: "no-store",
-    credentials: "same-origin",
-    redirect: "error",
-  })
-  if (!response.ok) throw new Error("SignalR authentication is unavailable.")
-
-  const value: unknown = await response.json()
-  if (!isRecord(value) || typeof value.accessToken !== "string" || !value.accessToken)
-    throw new Error("SignalR authentication is unavailable.")
-  return value.accessToken
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value)
 }

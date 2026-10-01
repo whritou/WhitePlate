@@ -1,12 +1,10 @@
-import { hasLocale, NextIntlClientProvider } from "next-intl"
 import { getMessages, setRequestLocale } from "next-intl/server"
+import { hasLocale, NextIntlClientProvider } from "next-intl"
 import { notFound } from "next/navigation"
-
-import { AppProviders } from "@/components/app-providers"
-import { routing } from "@/i18n/routing"
-import { cn } from "@/lib/utils"
-
 import "../globals.css"
+import { AppProviders } from "@/components/app-providers"
+import { cn } from "@/lib/utils"
+import { routing } from "@/i18n/routing"
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }))

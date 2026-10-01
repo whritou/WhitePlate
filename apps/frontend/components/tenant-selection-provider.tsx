@@ -4,7 +4,7 @@ import { createContext, useContext, useState } from "react"
 import { useStore } from "zustand"
 import type { StoreApi } from "zustand/vanilla"
 import { createTenantSelectionStore } from "@/lib/state/tenant-selection-store"
-import type { TenantSelectionState } from "@/lib/state/tenant-selection-store"
+import type { TenantSelectionState } from "@/types/state"
 
 const TenantSelectionContext =
   createContext<StoreApi<TenantSelectionState> | null>(null)

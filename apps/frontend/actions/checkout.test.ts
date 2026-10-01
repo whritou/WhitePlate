@@ -1,6 +1,6 @@
 import { afterEach, expect, it, vi } from "vitest"
 import { headers } from "next/headers"
-import { checkoutGuestOrder } from "./checkout-actions"
+import { checkoutGuestOrder } from "@/actions/checkout"
 
 vi.mock("next/headers", () => ({ headers: vi.fn() }))
 afterEach(() => {

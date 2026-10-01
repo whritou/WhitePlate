@@ -1,39 +1,11 @@
-import { createApiRequestFactory, type ApiError } from "../api/request-factory"
+import { createApiRequestFactory } from "../api/request-factory"
 import { getTenantApiBaseUrl, getTenantSlug } from "../api/tenant-routing"
 import { isUuid, prepareCheckout, validateOrderInput } from "./cart"
-
-export type OrderReceipt = {
-  id: string
-  tenantId: string
-  currency: string
-  customerName: string
-  discountCode: string | null
-  subtotal: number
-  discountAmount: number
-  taxAmount: number
-  total: number
-  status: string
-  version: number
-  createdAt: string
-  lines: {
-    productId: string
-    productName: string
-    baseUnitPrice: number
-    taxRatePercent: number
-    quantity: number
-    subtotal: number
-    discountAmount: number
-    taxAmount: number
-    total: number
-    options: { optionId: string; name: string; priceAdjustment: number }[]
-  }[]
-}
-export type CheckoutResult =
-  { ok: true; receipt: OrderReceipt } | { ok: false; error: ApiError }
-export type CheckoutConfiguration = {
-  baseDomain: string | undefined
-  apiTemplate: string | undefined
-}
+import type {
+  OrderReceipt,
+  CheckoutResult,
+  CheckoutConfiguration,
+} from "@/types/checkout"
 
 export async function submitGuestOrder(
   host: string | null,

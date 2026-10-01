@@ -13,8 +13,23 @@ function makeResponse(
 }
 
 describe("createApiRequestFactory", () => {
+  it("maps an expired If-Match version to a conflict", async () => {
+    const api = createApiRequestFactory({
+      baseUrl: "https://api.example.test",
+      getToken: async () => "server-token",
+      fetcher: async () => makeResponse(null, 412),
+    })
+
+    await expect(
+      api.patch("/api/v1/orders/1/status", { status: "Ready" })
+    ).resolves.toEqual({
+      ok: false,
+      status: 412,
+      error: "conflict",
+    })
+  })
   it("sends conditional status updates with a quoted If-Match version", async () => {
-    const fetcher = vi.fn(async (_input: RequestInfo | URL, _init?: RequestInit) =>
+    const fetcher = vi.fn<typeof fetch>(async () =>
       makeResponse({ id: "order-1", status: "Preparing", version: 2 })
     )
     const api = createApiRequestFactory({
@@ -36,7 +51,9 @@ describe("createApiRequestFactory", () => {
       "https://api.example.test/api/v1/tenants/tenant-1/orders/order-1/status"
     )
     expect(init?.method).toBe("PATCH")
-    expect(new Headers(init?.headers).get("Authorization")).toBe("Bearer server-token")
+    expect(new Headers(init?.headers).get("Authorization")).toBe(
+      "Bearer server-token"
+    )
     expect(new Headers(init?.headers).get("If-Match")).toBe('"1"')
     expect(init?.body).toBe(JSON.stringify({ status: "Preparing" }))
     expect(init).toMatchObject({
@@ -72,9 +89,8 @@ describe("createApiRequestFactory", () => {
     expect(result).toEqual({ ok: false, status: 429, error: "rate_limited" })
   })
   it("supports GET, POST, PUT, and DELETE with a server token and safe defaults", async () => {
-    const fetcher = vi.fn(
-      async (_input: RequestInfo | URL, _init?: RequestInit) =>
-        makeResponse({ id: "item" })
+    const fetcher = vi.fn<typeof fetch>(async () =>
+      makeResponse({ id: "item" })
     )
     const api = createApiRequestFactory({
       baseUrl: "https://api.example.test/",

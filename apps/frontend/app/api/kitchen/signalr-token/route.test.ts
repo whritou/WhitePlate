@@ -46,16 +46,20 @@ it.each([null, { user: { emailVerified: false } }])(
 
 it("returns a short-lived API token without cache or cross-origin access", async () => {
   vi.stubEnv("BETTER_AUTH_URL", "http://localhost:3000")
-  vi.mocked(auth.api.getSession).mockResolvedValue(
-    { user: { emailVerified: true } } as never
-  )
-  vi.mocked(auth.api.getToken).mockResolvedValue({ token: "short-lived-api-token" } as never)
+  vi.mocked(auth.api.getSession).mockResolvedValue({
+    user: { emailVerified: true },
+  } as never)
+  vi.mocked(auth.api.getToken).mockResolvedValue({
+    token: "short-lived-api-token",
+  } as never)
 
   const response = await POST(makeRequest("http://localhost:3000"))
 
   expect(response.status).toBe(200)
   expect(response.headers.get("cache-control")).toBe("no-store")
   expect(response.headers.get("access-control-allow-origin")).toBeNull()
-  await expect(response.json()).resolves.toEqual({ accessToken: "short-lived-api-token" })
+  await expect(response.json()).resolves.toEqual({
+    accessToken: "short-lived-api-token",
+  })
   expect(auth.api.getToken).toHaveBeenCalledTimes(1)
 })

@@ -1,7 +1,8 @@
 "use server"
 
 import { headers } from "next/headers"
-import { submitGuestOrder, type CheckoutResult } from "./checkout/order-client"
+import { submitGuestOrder } from "@/lib/checkout/order-client"
+import type { CheckoutResult } from "@/types/checkout"
 
 export async function checkoutGuestOrder(
   input: unknown,

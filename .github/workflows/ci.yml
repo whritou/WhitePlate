@@ -49,6 +49,10 @@ jobs:
         working-directory: apps/frontend
         run: npm run typecheck
 
+      - name: Check frontend formatting
+        working-directory: apps/frontend
+        run: npm run format:check
+
       - name: Build frontend
         working-directory: apps/frontend
         env:

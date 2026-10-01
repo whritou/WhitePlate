@@ -4,14 +4,14 @@ Status: localized Better Auth flows, server-only API BFF, organization signup, a
 
 ## Stack and source map
 
-Next.js 16.3.4, React 19.2.8, strict TypeScript, Tailwind CSS 4, `next-intl`, and `next-themes` are wired into the application. Base UI and `class-variance-authority` implement the existing button. Exact dependencies are recorded in the package manifest and lockfile.
+Next.js 16.3.4, React 19.2.8, strict TypeScript, Tailwind CSS 4, `next-intl`, and `next-themes` are wired into the application. shadcn Base UI components implement shared controls, cards and feedback. TanStack Query manages kitchen order reads and mutations. The [implementation conventions](frontend-conventions.md) define module ownership and enforced boundaries. Exact dependencies are recorded in the package manifest and lockfile.
 
 ```text
 apps/frontend/
   app/
     [locale]/                 # Auth, organization, invitation, and localized pages
-      organization/orders/    # Server-backed staff tickets and SignalR client
-    api/kitchen/               # Same-origin short-lived SignalR token route
+      organization/orders/    # Server page and initial validated tickets
+    api/kitchen/               # Same-origin order reads and SignalR token route
     api/auth/[...all]/        # Better Auth handlers; browser token endpoint blocked
     .well-known/              # API JWT issuer metadata
     globals.css               # Tailwind imports and theme tokens
@@ -22,8 +22,12 @@ apps/frontend/
     query-provider.tsx        # Per-provider TanStack Query client
     tenant-selection-provider.tsx # Request-tree scoped Zustand store
     theme-provider.tsx        # next-themes and keyboard shortcut
-    ui/button.tsx             # Base UI button and style variants
-  hooks/                     # Placeholder
+    orders/                   # Query-backed dashboard, tickets and connection UI
+    ui/                       # shadcn Base UI controls, cards and feedback
+  hooks/                      # Auth, checkout and order query lifecycle
+  actions/                    # Validated organization, order and checkout mutations
+  services/                   # Server-only feature reads and operations
+  types/                      # Exported named contracts and props
   i18n/
     routing.ts               # en/fr; default en
     request.ts               # Request locale and message loading
@@ -34,8 +38,8 @@ apps/frontend/
   lib/api/                   # Safe API request factory and authenticated server client
   lib/query/                 # Per-instance TanStack Query client factory
   lib/state/                 # Generic vanilla Zustand store factory and tenant selection state
-  lib/organization-actions.ts # Organization, invitation, and acceptance actions
-  lib/checkout-actions.ts     # Same-origin guest checkout through the tenant host BFF
+  lib/validation/            # Runtime input and response parsers
+  lib/orders/                # SignalR lifecycle and navigation helpers
   lib/checkout/               # Cart, immutable retry payload and receipt validation
   lib/utils.ts               # Re-exports cn from the cn package
   public/                    # Placeholder
@@ -60,9 +64,9 @@ No `src/` folder exists. The TypeScript alias `@/*` resolves to the frontend roo
 
 ## Rendering and theme
 
-Auth pages keep session checks and protected API access on the server. `lib/api/` provides the shared GET/POST/PUT/PATCH/DELETE request factory, maps failures to safe result codes, and logs only bounded diagnostic metadata. Its authenticated server-only client validates the request origin, requires a verified Better Auth session, obtains a short-lived API JWT, and sends it to `API_BASE_URL`; API calls use `no-store`. Token requests through `/api/auth/token` are blocked from browser HTTP access. A separate same-origin `POST /api/kitchen/signalr-token` route checks a verified session and exact `Origin` before returning a short-lived JWT with no-store headers to the SignalR token factory. The token stays in memory and carries no tenant grant. A separate server-only public menu client sends no credentials and constructs its target from `PUBLIC_TENANT_API_URL_TEMPLATE` after validating the incoming Host against `STOREFRONT_BASE_DOMAIN`; it extracts exactly one tenant label and does not forward raw Host or forwarded-host headers. Restaurant menu language is selected with `menuLocale` independently of the `/en` or `/fr` interface locale. Owners and managers use `/[locale]/organization/restaurant-languages` to configure enabled languages and edit catalog translations. `AppProviders` still provides isolated TanStack Query and tenant-selection Zustand primitives; the server-rendered storefront does not consume those client caches. Custom domains remain deferred, and the API still resolves tenant hosts and authorizes all protected operations by membership. Resend delivery remains a separate server-only provider request. `ThemeProvider` is a Client Component using the `dark` class and the system theme by default.
+Auth pages keep session checks and protected API access on the server. `lib/api/` provides the shared GET/POST/PUT/PATCH/DELETE request factory, maps failures to safe result codes, and logs only bounded diagnostic metadata. Its authenticated server-only client validates the request origin, requires a verified Better Auth session, obtains a short-lived API JWT, and sends it to `API_BASE_URL`; API calls use `no-store`. Token requests through `/api/auth/token` are blocked from browser HTTP access. A separate same-origin `POST /api/kitchen/signalr-token` route checks a verified session and exact `Origin` before returning a short-lived JWT with no-store headers to the SignalR token factory. The token stays in memory and carries no tenant grant. A separate server-only public menu client sends no credentials and constructs its target from `PUBLIC_TENANT_API_URL_TEMPLATE` after validating the incoming Host against `STOREFRONT_BASE_DOMAIN`; it extracts exactly one tenant label and does not forward raw Host or forwarded-host headers. Restaurant menu language is selected with `menuLocale` independently of the `/en` or `/fr` interface locale. Owners and managers use `/[locale]/organization/restaurant-languages` to configure enabled languages and edit catalog translations. `AppProviders` provides an isolated TanStack Query client used by kitchen orders and a tenant-selection Zustand store; the server-rendered storefront does not consume those client caches. Custom domains remain deferred, and the API still resolves tenant hosts and authorizes all protected operations by membership. Resend delivery remains a separate server-only provider request. `ThemeProvider` is a Client Component using the `dark` class and the system theme by default.
 
-The staff kitchen page first reads the verified user's `/api/v1/me` restaurant memberships on the server. A tenant ID in the page URL is only a selector; a missing membership prevents an order read, and the API independently enforces membership for both order reads and status changes. The paged REST response is authoritative and includes saved product/option labels. The client uses SignalR events only as refresh hints, filters and deduplicates by tenant/event/version, and rejoins the selected restaurant before a REST reload after reconnect. `PUBLIC_API_BASE_URL` supplies the browser-reachable hub origin if it differs from `API_BASE_URL`; deployment must allow the frontend origin for SignalR and provide HTTPS in production.
+The staff kitchen page first reads the verified user's `/api/v1/me` restaurant memberships on the server. A tenant ID in the page URL is only a selector; a missing membership prevents an order read, and the API independently enforces membership for both order reads and status changes. The paged REST response is authoritative and includes saved product/option labels. The client uses SignalR events only as refresh hints, filters and deduplicates by tenant/event/version, and rejoins the selected restaurant before scoped query invalidation after reconnect. `use-order-dashboard.ts` seeds TanStack Query with the initial server page, reads the authenticated same-origin `/api/kitchen/orders` BFF, polls every 30 seconds, and invalidates account/tenant pages after action-backed status mutations. Authorization failures hide tickets; unavailable reads can show a stale warning. Keys isolate account, tenant, locale, status and cursor. `PUBLIC_API_BASE_URL` supplies the browser-reachable hub origin if it differs from `API_BASE_URL`; deployment must allow the frontend origin for SignalR and provide HTTPS in production.
 
 Its `d` shortcut ignores repeated/prevented events, Ctrl/Alt/Meta combinations, events without a string key, and input, textarea, select, or contenteditable targets. Shift is not excluded. `suppressHydrationWarning` is applied on `<html>` to accommodate theme-class changes; it is not a general hydration-error workaround.
 
@@ -82,14 +86,14 @@ Safe errors have English/French messages. The API owns availability, option rule
 
 `app/globals.css` imports Tailwind, `tw-animate-css`, and shadcn styles, and maps CSS tokens through `@theme inline`. Body and heading fonts use local system stacks; production builds do not fetch Google-hosted font files. PostCSS uses `@tailwindcss/postcss`. There is no `tailwind.config.ts`; do not copy Tailwind 3 setup instructions into this app.
 
-The button uses Base UI, not a Radix component API. `components.json` records the `base-lyra` style and aliases. `lib/utils.ts` re-exports `cn`; the button currently imports it directly from the package. Reuse existing utilities rather than adding another class-merging implementation.
+Shared controls use Base UI. `components.json` records the `base-lyra` style and aliases. UI modules use `@/lib/utils`, which re-exports `cn`. Inspect each component API before composing it; see [implementation conventions](frontend-conventions.md).
 
 ## Extending the frontend
 
 - Add new pages beneath `app/[locale]/` unless the feature deliberately needs a nonlocalized route.
 - Add the same message keys and interpolation variables to both catalogs. Use localized navigation helpers for internal app links.
 - Keep Better Auth secrets, provider credentials, Resend key, and API bearer tokens on the server. Use Client Components for interactive forms and call server actions for organization, invitation, and other protected API work.
-- TanStack Query and Zustand providers/factories remain available for future tenant-aware client features; the public menu is server-rendered. SignalR is integrated for the staff kitchen order page; Axios is not part of that flow.
-- For future tenant features, include tenant and locale in relevant cache keys and isolate cart persistence by tenant. Do not share authenticated data across tenants.
+- TanStack Query manages kitchen order reads and mutations; Zustand supplies a per-provider tenant selector. The public menu is server-rendered and checkout uses ephemeral local state. SignalR is integrated for the staff kitchen order page; Axios is not part of that flow.
+- For future tenant features, include account, tenant, locale and view in authenticated cache keys and isolate cart persistence by tenant. Do not share authenticated data across tenants.
 
 Read `apps/frontend/AGENTS.md` and the relevant installed guide under `node_modules/next/dist/docs/` before Next.js code changes. See [coding standards](../coding-standards.md), [test plan](../functional-test-plan.md), and [system architecture](WHITEPLATE_SYSTEM_ARCHITECTURE.md).

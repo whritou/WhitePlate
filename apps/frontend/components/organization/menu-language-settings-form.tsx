@@ -1,14 +1,20 @@
 "use client"
 
-import { useState, type FormEvent } from "react"
-import { useRouter } from "@/i18n/navigation"
 import { useLocale, useTranslations } from "next-intl"
+import { useState, type FormEvent } from "react"
 import { Button } from "@/components/ui/button"
-import { updateMenuLanguagesAction } from "@/lib/organization-actions"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { updateMenuLanguagesAction } from "@/actions/organization"
+import { useRouter } from "@/i18n/navigation"
+import type { FormState } from "@/types/catalog"
 
-type FormState = "idle" | "pending" | "success" | "error"
-
-export function MenuLanguageSettingsForm({ tenantId, locales: initialLocales, defaultLocale: initialDefaultLocale }: {
+export function MenuLanguageSettingsForm({
+  tenantId,
+  locales: initialLocales,
+  defaultLocale: initialDefaultLocale,
+}: {
   tenantId: string
   locales: string[]
   defaultLocale: string
@@ -23,7 +29,11 @@ export function MenuLanguageSettingsForm({ tenantId, locales: initialLocales, de
 
   function addLocale() {
     const locale = newLocale.trim()
-    if (!locale || locales.some((value) => value.toLowerCase() === locale.toLowerCase())) return
+    if (
+      !locale ||
+      locales.some((value) => value.toLowerCase() === locale.toLowerCase())
+    )
+      return
     setLocales((current) => [...current, locale])
     setNewLocale("")
     if (locales.length === 0) setDefaultLocale(locale)
@@ -39,49 +49,121 @@ export function MenuLanguageSettingsForm({ tenantId, locales: initialLocales, de
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setState("pending")
-    const result = await updateMenuLanguagesAction({ tenantId, locales, defaultLocale })
+    const result = await updateMenuLanguagesAction({
+      tenantId,
+      locales,
+      defaultLocale,
+    }).catch(() => ({ ok: false as const }))
     if (result.ok) {
       setState("success")
       router.refresh()
     } else setState("error")
   }
 
-  return <form onSubmit={(event) => void submit(event)} className="grid gap-6">
-    <div className="grid gap-3">
-      <h2 className="text-base font-semibold">{t("menuLanguagesEnabled")}</h2>
-      <ul className="divide-y divide-border rounded-lg border border-border">
-        {locales.map((locale) => <li key={locale} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
-          <label className="flex min-w-0 items-center gap-3 text-sm">
-            <input type="radio" name="default-locale" value={locale} checked={defaultLocale === locale}
-              onChange={() => setDefaultLocale(locale)} className="size-4 accent-primary" />
-            <span><span className="font-medium">{languageName(locale, uiLocale)}</span><span className="ml-2 text-muted-foreground">{locale}</span></span>
-            {defaultLocale === locale && <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">{t("defaultMenuLanguage")}</span>}
-          </label>
-          <Button type="button" variant="ghost" size="sm" disabled={locales.length <= 1}
-            onClick={() => removeLocale(locale)} aria-label={`${t("removeMenuLanguage")} ${locale}`}>
-            {t("removeMenuLanguage")}
-          </Button>
-        </li>)}
-      </ul>
-      <p className="text-sm text-muted-foreground">{t("menuLanguagesHint")}</p>
-    </div>
+  return (
+    <form onSubmit={(event) => void submit(event)} className="grid gap-6">
+      <div className="grid gap-3">
+        <h2 className="text-base font-semibold">{t("menuLanguagesEnabled")}</h2>
+        <RadioGroup
+          aria-label={t("defaultMenuLanguage")}
+          disabled={state === "pending"}
+          name="default-locale"
+          value={defaultLocale}
+          onValueChange={(value) => setDefaultLocale(String(value))}
+          render={<ul />}
+          className="divide-y divide-border rounded-lg border border-border"
+        >
+          {locales.map((locale) => (
+            <li
+              key={locale}
+              className="flex flex-wrap items-center justify-between gap-3 px-4 py-3"
+            >
+              <Label className="flex min-w-0 items-center gap-3 text-sm">
+                <RadioGroupItem
+                  value={locale}
+                  aria-label={languageName(locale, uiLocale)}
+                />
+                <span>
+                  <span className="font-medium">
+                    {languageName(locale, uiLocale)}
+                  </span>
+                  <span className="ml-2 text-muted-foreground">{locale}</span>
+                </span>
+                {defaultLocale === locale && (
+                  <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
+                    {t("defaultMenuLanguage")}
+                  </span>
+                )}
+              </Label>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                disabled={state === "pending" || locales.length <= 1}
+                onClick={() => removeLocale(locale)}
+                aria-label={`${t("removeMenuLanguage")} ${locale}`}
+              >
+                {t("removeMenuLanguage")}
+              </Button>
+            </li>
+          ))}
+        </RadioGroup>
+        <p className="text-sm text-muted-foreground">
+          {t("menuLanguagesHint")}
+        </p>
+      </div>
 
-    <div className="grid gap-2 sm:grid-cols-[1fr_auto] sm:items-end">
-      <label className="grid gap-2 text-sm font-medium" htmlFor="new-menu-locale">{t("addMenuLanguage")}
-        <input id="new-menu-locale" value={newLocale} onChange={(event) => setNewLocale(event.target.value)}
-          onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); addLocale() } }}
-          placeholder="fr-CA" autoCapitalize="off" autoCorrect="off" spellCheck={false}
-          className="h-10 rounded-md border border-input bg-background px-3 text-sm font-normal outline-none focus-visible:ring-2 focus-visible:ring-ring/30" />
-      </label>
-      <Button type="button" variant="outline" onClick={addLocale}>{t("addLanguageAction")}</Button>
-    </div>
+      <div className="grid gap-2 sm:grid-cols-[1fr_auto] sm:items-end">
+        <Label
+          className="grid gap-2 text-sm font-medium"
+          htmlFor="new-menu-locale"
+        >
+          {t("addMenuLanguage")}
+          <Input
+            id="new-menu-locale"
+            disabled={state === "pending"}
+            value={newLocale}
+            onChange={(event) => setNewLocale(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") {
+                event.preventDefault()
+                addLocale()
+              }
+            }}
+            placeholder="fr-CA"
+            autoCapitalize="off"
+            autoCorrect="off"
+            spellCheck={false}
+            className="h-10 rounded-md border border-input bg-background px-3 text-sm font-normal outline-none focus-visible:ring-2 focus-visible:ring-ring/30"
+          />
+        </Label>
+        <Button
+          type="button"
+          variant="outline"
+          disabled={state === "pending"}
+          onClick={addLocale}
+        >
+          {t("addLanguageAction")}
+        </Button>
+      </div>
 
-    {state === "success" && <p role="status" className="text-sm text-foreground">{t("menuLanguagesSaved")}</p>}
-    {state === "error" && <p role="alert" className="text-sm text-destructive">{t("menuLanguagesError")}</p>}
-    <Button type="submit" disabled={state === "pending"} className="w-fit">
-      {state === "pending" ? t("savingMenuLanguages") : t("saveMenuLanguages")}
-    </Button>
-  </form>
+      {state === "success" && (
+        <p role="status" className="text-sm text-foreground">
+          {t("menuLanguagesSaved")}
+        </p>
+      )}
+      {state === "error" && (
+        <p role="alert" className="text-sm text-destructive">
+          {t("menuLanguagesError")}
+        </p>
+      )}
+      <Button type="submit" disabled={state === "pending"} className="w-fit">
+        {state === "pending"
+          ? t("savingMenuLanguages")
+          : t("saveMenuLanguages")}
+      </Button>
+    </form>
+  )
 }
 
 function languageName(locale: string, uiLocale: string) {

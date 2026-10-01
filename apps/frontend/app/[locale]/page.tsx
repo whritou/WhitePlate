@@ -1,9 +1,11 @@
-import { Suspense } from "react"
-import { headers } from "next/headers"
+import { Alert } from "@/components/ui/alert"
+import { Card } from "@/components/ui/card"
 import { getTranslations } from "next-intl/server"
+import { headers } from "next/headers"
+import { Suspense } from "react"
+import { getPublicMenu } from "@/lib/api/public-storefront"
 import { Link } from "@/i18n/navigation"
 import { RestaurantMenu } from "@/components/storefront/restaurant-menu"
-import { getPublicMenu } from "@/lib/api/public-storefront"
 
 export async function generateMetadata({
   searchParams,
@@ -64,12 +66,13 @@ async function PageContent({
     const storefrontT = await getTranslations("Storefront")
     return (
       <main className="mx-auto flex min-h-svh max-w-3xl items-center px-5 py-16">
-        <p
+        <Alert
+          variant="destructive"
           role="alert"
           className="w-full rounded-md border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive"
         >
           {storefrontT("unavailable")}
-        </p>
+        </Alert>
       </main>
     )
   }
@@ -85,7 +88,7 @@ async function PageContent({
             {t("french")}
           </Link>
         </nav>
-        <div className="rounded-3xl border border-border bg-card p-8 shadow-sm sm:p-12">
+        <Card className="rounded-3xl border border-border bg-card p-8 shadow-sm sm:p-12">
           <p className="text-sm font-medium text-primary">WhitePlate</p>
           <h1 className="mt-3 max-w-xl text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
             {t("title")}
@@ -107,7 +110,7 @@ async function PageContent({
               {t("signIn")}
             </Link>
           </div>
-        </div>
+        </Card>
         <p className="font-mono text-xs text-muted-foreground">
           {t("themeHint", { key: "d" })}
         </p>

@@ -1,34 +1,10 @@
-export type ApiError =
-  | "unauthorized"
-  | "forbidden"
-  | "invalid"
-  | "not_found"
-  | "conflict"
-  | "rate_limited"
-  | "unavailable"
-
-export type ApiResult<T> =
-  | { ok: true; status: number; data: T | null }
-  | { ok: false; status: number; error: ApiError }
-
-export type ApiDiagnostic = {
-  method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE"
-  path: string
-  status: number
-  code?: string
-  traceId?: string
-  causeName?: string
-}
-
-type RequestOptions = { signal?: AbortSignal; idempotencyKey?: string; ifMatch?: string }
-
-type ApiRequestFactoryOptions = {
-  baseUrl: string | undefined | (() => string | undefined)
-  getToken: () => Promise<string | null>
-  public?: boolean
-  fetcher?: typeof fetch
-  onDiagnostic?: (diagnostic: ApiDiagnostic) => void
-}
+import type {
+  ApiError,
+  ApiResult,
+  ApiDiagnostic,
+  RequestOptions,
+  ApiRequestFactoryOptions,
+} from "@/types/api"
 
 export function createApiRequestFactory({
   baseUrl,
@@ -180,7 +156,7 @@ function mapStatus(status: number): ApiError {
   if (status === 401) return "unauthorized"
   if (status === 403) return "forbidden"
   if (status === 404) return "not_found"
-  if (status === 409) return "conflict"
+  if (status === 409 || status === 412) return "conflict"
   if (status === 429) return "rate_limited"
   return "unavailable"
 }

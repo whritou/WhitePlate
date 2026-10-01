@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest"
-import { submitGuestOrder, type OrderReceipt } from "./order-client"
+import { submitGuestOrder } from "./order-client"
+import type { OrderReceipt } from "@/types/checkout"
 
 const productId = "11111111-1111-4111-8111-111111111111"
 const tenantId = "22222222-2222-4222-8222-222222222222"

@@ -76,6 +76,14 @@ Statuses progress `Pending -> Preparing -> Ready -> Completed`. Repeating the cu
 
 ## 4. SignalR notifications
 
+### Frontend kitchen read BFF
+
+`GET /api/kitchen/orders?tenantId=<uuid>&status=<optional-status>&cursor=<optional-cursor>` is a frontend same-origin read adapter for TanStack Query. It validates selectors (including duplicate query parameters), requires the current verified session through the server API client, reads the user's memberships, and rejects a foreign restaurant before requesting its order page. The API independently authorizes the read. The browser supplies no API bearer token.
+
+Success returns `{ ok: true, status: 200, data: { items: [...], nextCursor: null | string } }` using the existing validated order summaries. Failure returns a safe `error` code with an appropriate HTTP status, including 400 for invalid selectors, 401 for no verified session, 403 for no membership and 5xx for unavailable data. All responses use `Cache-Control: private, no-store` and `Vary: Cookie`. Client keys include account, tenant, locale, status and cursor; status mutations still use a validated Server Action and the API `If-Match` contract. SignalR hints invalidate the account/tenant query prefix. This adapter introduces no database or API schema change.
+
+### API hub
+
 The hub is `/hubs/orders`; bearer tokens supplied by SignalR's `access_token` query parameter are read only on this path. Call `JoinRestaurant(tenantId)` to request a membership-checked subscription. The server derives the group name and checks the current owner/manager/kitchen membership before joining; clients cannot submit a group name. `LeaveRestaurant(tenantId)` removes the current connection from that group.
 
 The dispatcher publishes `order.changed` with `eventId`, `tenantId`, `orderId`, `eventType`, current `status`, `version`, and UTC `occurredAt`. Order creation/status changes and outbox rows commit in one transaction. The dispatcher retries failed deliveries with bounded exponential delay; delivery is at least once, so clients should deduplicate by event ID and use the authorized paginated REST list after reconnect. REST/database state remains authoritative.

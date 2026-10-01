@@ -14,7 +14,7 @@ Start services using the [development guide](development.md). Use fresh browser 
 | CUR-04 | Press `d` outside editable controls | Theme toggles; reload preserves the explicit selection through next-themes |
 | CUR-05 | Press Ctrl/Alt/Meta+D, hold D for repeats, or type in auth inputs/selects | Theme shortcut does not trigger while typing or for modified/repeated key presses |
 | CUR-06 | Navigate language, sign-in, signup, and auth-form controls with the keyboard | Focus is visible and controls have accessible names; localized routes resolve correctly |
-| CUR-07 | Run frontend tests, lint, typecheck, and build separately | Each exits successfully; record tool/runtime failures separately rather than calling the whole set passed |
+| CUR-07 | Run frontend tests, lint, typecheck, format:check, and build separately | Each exits successfully; record tool/runtime failures separately rather than calling the whole set passed |
 | CUR-08 | Run the API solution tests and request `/WeatherForecast` | API tests pass; the removed sample route returns `404` |
 | CUR-09 | Fetch `/openapi/v1.json` and `/swagger` in Development | OpenAPI JSON documents current API routes, omits `/WeatherForecast`, and Swagger UI returns `200` |
 | CUR-10 | Start API with Production environment and no Development launch profile, then request OpenAPI | `404`; use an explicit test port and the intended HTTP/HTTPS configuration |

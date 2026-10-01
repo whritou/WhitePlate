@@ -137,3 +137,25 @@ Added exact Node.js `24.19.0` / npm `11.17.0` pins, a .NET 10 SDK minimum featur
 | `git diff --check` | Passed. |
 
 The [pushed GitHub Actions run](https://github.com/whritou/WhitePlate/actions/runs/36883112545) completed successfully on 2026-10-01 (52 seconds total). Both `Frontend checks` and `API tests` passed from clean Ubuntu runners with the pinned Node/npm and .NET SDK toolchain; the frontend job ran `npm ci`, all 51 Vitest tests, lint, typecheck, and production build. The Windows `@parcel/watcher` failure remains a local Windows install-hook issue and did not occur in the Linux clean install. ESLint reported the three pre-existing unused-variable warnings listed above.
+
+## Frontend architecture cleanup — 2026-10-01
+
+Tracked in [issue #7](https://github.com/whritou/WhitePlate/issues/7), on `codex/frontend-architecture-cleanup`, starting from the staff dashboard implementation. The audit found mixed UI/request/validation responsibilities, local named contracts, raw form controls, unused feature-level Query integration and outdated architecture/stack prose. The cleanup adds shadcn Base UI controls, exported `types/`, validated thin `actions/`, server-only feature `services/`, parsed JSON boundaries and an account/tenant/view-scoped TanStack Query kitchen lifecycle. Components now separate auth framing/fields/state, organization forms, catalog rows, checkout state/presentation and order tickets/connections. ESLint enforces those mechanical boundaries; CI adds read-only formatting verification. See [canonical conventions](architecture/frontend-conventions.md).
+
+Two behavior regressions were exposed with failing tests before their fixes: HTTP 412 was mapped to unavailable instead of conflict, and order-event cache eviction deleted a Map value instead of its key, preventing the over-limit loop from terminating. Both now pass regression coverage. New tests cover untrusted action/response data, foreign-tenant BFF selectors, safe no-store browser requests, SignalR token parsing and scoped query invalidation.
+
+This host does not expose npm on PATH; the package-local CLIs ran with Node.js 24.19.0. No dependency versions or lockfile changed. The pre-existing `.env.example` edit remains outside this change. No API project, database schema, production data or provider credentials were changed.
+
+| Command/check | Actual result |
+| --- | --- |
+| `node node_modules/vitest/vitest.mjs run` from frontend | Passed: 18 files, 120 tests; baseline was 13 files, 86 tests. |
+| `node node_modules/eslint/bin/eslint.js .` | Passed, no warnings or errors. The previously recorded React-plugin crash and unused-variable warnings are not waived. |
+| `node node_modules/typescript/bin/tsc --noEmit` | Passed when run without a concurrent build. An earlier concurrent run failed with missing `.next/types` files as Next regenerated them; the subsequent standalone run passed. |
+| `node node_modules/prettier/bin/prettier.cjs --check '**/*.{ts,tsx}'` | Passed for all matched frontend source. |
+| `node node_modules/next/dist/bin/next build --webpack` | Passed for final source, including compilation, production types and route generation. Used inert CI auth/provider values and a nonexistent local test database; Better Auth logged expected schema-connection diagnostics. This is build verification, not live auth/database verification. |
+| Chrome with `node tests/fixtures/checkout-api.mjs` and Webpack dev on port 3100 | Passed: shared select/checkbox/input/button interaction, option selection and cart addition, lost-response edit lock and retry to a validated original receipt, receipt reset, menu-language switch, French interface rendering, sign-in form and password visibility toggle. Fixture and dev processes were stopped. |
+| Browser diagnostics | Chrome's LastPass extension inserted `data-lastpass-icon-root` markup before hydration and caused a hydration warning on storefront/auth forms. No suppression or extension settings were changed. The in-app browser timed out, so the working Chrome session was used. Extension-free hydration remains an unverified browser check. |
+| `git diff --check` | Passed. |
+| API tests | Not rerun: this change does not modify API source or schema. Kitchen BFF authorization and contracts are covered by frontend route tests. |
+
+Live authenticated kitchen browser acceptance (two tenants/accounts, role revocation, conflicts and reconnect), real checkout persistence, OAuth/Resend and production routing remain on their existing separate cards. The cleanup does not claim that those acceptance tasks are complete. Semantic JSX layout remains valid; shadcn is used for shared controls and UI surfaces, not as a replacement for TypeScript or every HTML element.

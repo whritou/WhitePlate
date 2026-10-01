@@ -1,23 +1,20 @@
+import { getLocale, getTranslations } from "next-intl/server"
 import { headers } from "next/headers"
 import { redirect } from "next/navigation"
-import { getLocale, getTranslations } from "next-intl/server"
-import { Link } from "@/i18n/navigation"
 import { auth } from "@/lib/auth"
-import { whitePlateApi } from "@/lib/api"
+import { getOrderPage, getRestaurantMemberships } from "@/services/orders"
 import {
   isValidTenantId,
   parseOrderCursor,
-  parseOrderPage,
   parseOrderStatusFilter,
-  parseRestaurantMemberships,
   resolveOrderHubUrl,
-  type OrderPage,
 } from "@/lib/order-dashboard"
-import { OrderDashboard } from "./order-dashboard"
+import { Link } from "@/i18n/navigation"
+import { OrderDashboard } from "@/components/orders/order-dashboard"
+import type { OrderPage } from "@/types/orders"
+import type { SearchParams } from "@/types/navigation"
 
 export const dynamic = "force-dynamic"
-
-type SearchParams = Record<string, string | string[] | undefined>
 
 export default async function KitchenOrdersPage({
   searchParams,
@@ -34,41 +31,56 @@ export default async function KitchenOrdersPage({
   const tenantId = singleValue(params.tenantId)
   if (!isValidTenantId(tenantId)) redirect(`/${locale}/organization`)
 
-  const currentUser = await whitePlateApi.get<unknown>("/api/v1/me")
+  const currentUser = await getRestaurantMemberships()
   if (!currentUser.ok) {
     if (currentUser.status === 401) redirect(`/${locale}/sign-in`)
     return <PageMessage title={t("title")} message={t("errors.unavailable")} />
   }
 
-  const memberships = parseRestaurantMemberships(currentUser.data)
+  const memberships = currentUser.data
   if (!memberships)
     return <PageMessage title={t("title")} message={t("errors.unavailable")} />
 
-  const membership = memberships.find((item) => item.id.toLowerCase() === tenantId.toLowerCase())
+  const membership = memberships.find(
+    (item) => item.id.toLowerCase() === tenantId.toLowerCase()
+  )
   if (!membership)
-    return <PageMessage title={t("accessDeniedTitle")} message={t("errors.forbidden")} />
+    return (
+      <PageMessage
+        title={t("accessDeniedTitle")}
+        message={t("errors.forbidden")}
+      />
+    )
 
-  const statusResult = parseOrderStatusFilter(singleValue(params.status, params.status !== undefined))
-  const cursorResult = parseOrderCursor(singleValue(params.cursor, params.cursor !== undefined))
+  const statusResult = parseOrderStatusFilter(
+    singleValue(params.status, params.status !== undefined)
+  )
+  const cursorResult = parseOrderCursor(
+    singleValue(params.cursor, params.cursor !== undefined)
+  )
   let page: OrderPage | null = null
   let loadError: "forbidden" | "invalid" | "unavailable" | null = null
 
   if (!statusResult.ok || !cursorResult.ok) {
     loadError = "invalid"
   } else {
-    const query = new URLSearchParams({ pageSize: "50" })
-    if (statusResult.status) query.set("status", statusResult.status)
-    if (cursorResult.cursor) query.set("cursor", cursorResult.cursor)
-    const response = await whitePlateApi.get<unknown>(
-      `/api/v1/tenants/${tenantId}/orders?${query.toString()}`
+    const response = await getOrderPage(
+      tenantId,
+      statusResult.status,
+      cursorResult.cursor
     )
     if (!response.ok) {
       if (response.status === 401) redirect(`/${locale}/sign-in`)
       if (response.status === 403 || response.status === 404)
-        return <PageMessage title={t("accessDeniedTitle")} message={t("errors.forbidden")} />
+        return (
+          <PageMessage
+            title={t("accessDeniedTitle")}
+            message={t("errors.forbidden")}
+          />
+        )
       loadError = response.error === "invalid" ? "invalid" : "unavailable"
     } else {
-      page = parseOrderPage(response.data)
+      page = response.data
       if (!page) loadError = "unavailable"
     }
   }
@@ -76,7 +88,8 @@ export default async function KitchenOrdersPage({
   return (
     <main className="mx-auto min-h-[70vh] max-w-5xl px-5 py-12 sm:py-16">
       <OrderDashboard
-        key={`${membership.id}:${locale}`}
+        key={`${session.user.id}:${membership.id}:${locale}`}
+        userId={session.user.id}
         tenantId={membership.id}
         tenantName={membership.name}
         role={membership.role}
@@ -94,14 +107,25 @@ export default async function KitchenOrdersPage({
   )
 }
 
-async function PageMessage({ title, message }: { title: string; message: string }) {
+async function PageMessage({
+  title,
+  message,
+}: {
+  title: string
+  message: string
+}) {
   const t = await getTranslations("KitchenOrders")
   return (
     <main className="mx-auto min-h-[70vh] max-w-5xl px-5 py-12 sm:py-16">
       <section className="rounded-2xl border border-border bg-card p-6">
         <h1 className="text-2xl font-semibold">{title}</h1>
-        <p role="alert" className="mt-3 text-sm text-destructive">{message}</p>
-        <Link href="/organization" className="mt-5 inline-flex min-h-10 items-center text-sm font-medium text-primary underline-offset-4 hover:underline">
+        <p role="alert" className="mt-3 text-sm text-destructive">
+          {message}
+        </p>
+        <Link
+          href="/organization"
+          className="mt-5 inline-flex min-h-10 items-center text-sm font-medium text-primary underline-offset-4 hover:underline"
+        >
           {t("backToOrganizations")}
         </Link>
       </section>
@@ -109,7 +133,10 @@ async function PageMessage({ title, message }: { title: string; message: string 
   )
 }
 
-function singleValue(value: string | string[] | undefined, rejectArray = false): unknown {
+function singleValue(
+  value: string | string[] | undefined,
+  rejectArray = false
+): unknown {
   if (Array.isArray(value)) return rejectArray ? null : undefined
   return value
 }

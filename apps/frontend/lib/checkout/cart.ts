@@ -1,22 +1,9 @@
-export type CartItem = {
-  productId: string
-  quantity: number
-  optionIds: string[]
-}
-export type OrderInput = {
-  customerName: string
-  discountCode: string | null
-  items: CartItem[]
-}
-export type CheckoutAttempt = { key: string; input: OrderInput }
-type SelectableProduct = {
-  isAvailable: boolean
-  optionGroups: {
-    minimumSelections: number
-    maximumSelections: number
-    options: { id: string }[]
-  }[]
-}
+import type {
+  CartItem,
+  OrderInput,
+  CheckoutAttempt,
+  SelectableProduct,
+} from "@/types/checkout"
 
 export function validProductSelection(
   product: SelectableProduct,

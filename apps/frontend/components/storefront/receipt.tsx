@@ -1,7 +1,7 @@
 "use client"
 
 import { useLocale, useTranslations } from "next-intl"
-import type { OrderReceipt } from "@/lib/checkout/order-client"
+import type { OrderReceipt } from "@/types/checkout"
 
 export function Receipt({ receipt }: { receipt: OrderReceipt }) {
   const t = useTranslations("Checkout")
