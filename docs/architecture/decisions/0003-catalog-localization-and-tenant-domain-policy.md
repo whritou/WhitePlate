@@ -23,7 +23,7 @@ Tenant languages/defaults and catalog translations are persisted by EF Core; the
 ## Consequences and remaining work
 
 - Migration rollout and browser acceptance for subdomain routing and multi-language editing remain deployment/runtime checks.
-- Restaurant/order snapshots still use the existing checkout text and do not record the menu locale. Localized order snapshots remain a separate checkout change.
+- Checkout snapshots now have an approved behavior in [decision 0004](0004-localized-order-snapshots.md). That follow-up is not yet implemented or migrated; the existing runtime still does not record menu locale.
 - Custom domains, tenant-specific branding, cart, and payment remain out of this slice.
 - Product language values are not authorization. Every management query and write remains scoped by tenant ID and membership.
 

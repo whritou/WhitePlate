@@ -17,7 +17,7 @@ Each stage should be implemented in small usable slices. No need to create all a
 
 ## Decision register
 
-D04 is resolved by the architecture. D02/D03/D05-D09 are approved in the full API design; deployment/provider-specific details remain open. D11 is resolved by [decision 0003](architecture/decisions/0003-catalog-localization-and-tenant-domain-policy.md). The table records accepted decisions and their implementation status.
+D04 is resolved by the architecture. D02/D03/D05-D09 are approved in the full API design; deployment/provider-specific details remain open. D11 is resolved by [decisions 0003](architecture/decisions/0003-catalog-localization-and-tenant-domain-policy.md) and [0004](architecture/decisions/0004-localized-order-snapshots.md). The table records accepted decisions and their implementation status.
 
 | ID | Decision | Resolve before | Questions to answer |
 | --- | --- | --- | --- |
@@ -31,7 +31,7 @@ D04 is resolved by the architecture. D02/D03/D05-D09 are approved in the full AP
 | D08 | Order access and lifecycle | Confirmation/dashboard | Implemented approved transitions, manager cancellation, required If-Match, 412 stale and 428 missing precondition, and paged staff reads. |
 | D09 | Real-time delivery | Kitchen notifications | Implemented `/hubs/orders`, membership-checked tenant groups, transactional outbox, at-least-once event IDs/versions, retry, and REST recovery. Frontend subscriptions and live Better Auth multi-connection verification remain. |
 | D10 | Deployment | First hosted environment | Host, containers, domain/TLS termination, secret store, health checks, backups, rollback and observability? |
-| D11 | Catalog localization | Storefront menu | Resolved: restaurants configure any number of menu languages (minimum one) and a default; category/product/option names and product descriptions support translations, missing item text falls back to the default, and menu locale is independent of app `/en`/`/fr`. Storefront and manager UI/API are implemented in source. Open: locale in checkout/order snapshots and migration rollout. See [decision 0003](architecture/decisions/0003-catalog-localization-and-tenant-domain-policy.md). |
+| D11 | Catalog localization | Storefront menu and checkout | Resolved: restaurants configure any number of menu languages (minimum one) and a default; category/product/option names and product descriptions support translations, missing item text falls back to the default, menu locale is independent of app `/en`/`/fr`, and orders preserve their effective menu locale plus resolved product/option labels. Storefront and manager UI/API are implemented; localized order snapshots are approved but not implemented. `CatalogLocalization` is checked in but not applied to Neon `test` or production; the future order-snapshot migration awaits implementation. See [decisions 0003](architecture/decisions/0003-catalog-localization-and-tenant-domain-policy.md) and [0004](architecture/decisions/0004-localized-order-snapshots.md). |
 
 Do not fabricate product answers such as payment rules or pickup-time limits. Settle the decision when the requested implementation depends on it; continue independent work where possible. Record decisions using the format in the [documentation index](README.md), then update the relevant contract, schema, and acceptance scenarios together.
 

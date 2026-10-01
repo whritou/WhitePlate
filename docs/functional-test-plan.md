@@ -84,6 +84,8 @@ On 2026-09-30, a dedicated verified `local-tester@whiteplate.invalid` account wa
 | SF-13 | Reject choices, invalid promo code, rate limit, and conflict | No raw API error details are displayed; cart stays editable after definite rejection, corrected input uses a new key, and unchanged retries reuse their key | High |
 | SF-08 | Edit product price/name after an order | Historical line snapshots and total remain unchanged | High |
 | SF-09 | Concurrent checkout and availability change | Outcome follows the selected stock/availability policy; no unjustified stock guarantee | High |
+| SF-14 | Check out in a non-default menu locale, an enabled locale with missing item translations, and an omitted/unsupported locale | New receipt records the effective locale and exactly the localized or default-fallback product/option labels used at checkout; changing catalog translations later does not change historical receipt or staff detail; omitted/unsupported locale resolves to the tenant default | High |
+| SF-15 | Replay checkout with the same key and same locale, then reuse it with a different effective locale | Same request replays the same localized receipt; changed effective locale returns `409`; existing pre-migration orders keep their labels and expose unknown `menuLocale` as `null` | High |
 
 ### Kitchen and authorization
 

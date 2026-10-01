@@ -18,6 +18,7 @@ Reviewed against the working tree on 2026-10-01. WhitePlate contains the first-r
 | [Tenant isolation and security](architecture/tenancy-and-security.md) | Trust boundaries, membership authorization and deployment requirements |
 | [Authentication decision](architecture/decisions/0002-authentication.md) | Better Auth, JWT/API boundary, email binding, and migration ownership |
 | [Catalog localization and tenant domain decision](architecture/decisions/0003-catalog-localization-and-tenant-domain-policy.md) | Restaurant-configurable menu languages and first-release one-label subdomain policy; database rollout remains pending |
+| [Localized order snapshots decision](architecture/decisions/0004-localized-order-snapshots.md) | Approved checkout locale and historical product/option label behavior; implementation remains separate work |
 | [Functional test plan](functional-test-plan.md) | Executable smoke checks and future acceptance criteria |
 | [Development roadmap](development-roadmap.md) | Implemented backend scope and unresolved frontend/deployment decisions |
 | [Documentation review](documentation-review.md) | Audit findings, verification evidence, and remaining blockers |
