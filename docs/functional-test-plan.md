@@ -200,11 +200,12 @@ Re-running the local API and frontend issuer with the required Windows profile a
 | Independent staff membership | Both authenticated `GET /api/v1/me` calls returned exactly one restaurant, with distinct tenant IDs and `Kitchen` role. |
 | Hub authorization | Both clients joined their own restaurant group; both cross-tenant `JoinRestaurant` attempts were rejected. |
 | Event isolation and delivery | Tenant A received one `order.changed` event for order `2e4aa9bd-4b1e-4f82-8eff-6b4dd2c33284` (event `058c6b1a-c53a-4ff3-9bed-f74543c77406`); tenant B received no event for that order. |
+| Status event | An authorized transition to `Preparing` returned `200` with version `2`; the subscribed client received `order.created` (event `6be1570f-ef6f-424c-bef9-8392a56ab2e8`) and `order.status_changed` (event `4a5a89dd-d363-4757-bc8b-1220bc00a98d`) for order `d162a7a8-8b33-4094-a70c-0ebf3b4e28d6`. |
 | Idempotent checkout | Repeating the same request and idempotency key returned the same order ID: `2e4aa9bd-4b1e-4f82-8eff-6b4dd2c33284`. |
 | Reconnect recovery | After client A disconnected, order `c8222353-9da8-467d-bfd1-51b675cd9488` was created. Client A reconnected, rejoined its group, and recovered that order from the authoritative REST list. |
 | REST tenant isolation | Tenant B’s token received `403` when requesting tenant A’s orders; tenant A’s token received `200`. |
 
-The API and frontend issuer were run locally with the development launch profile. The test used `@microsoft/signalr` from the frontend package and `Host: <tenant-subdomain>.localhost` for checkout requests. A loopback-only Resend shim captured local verification links; no email was sent to an external service. Test fixtures were created in the non-production database using the `sig-a-20261001160454` and `sig-b-20261001160454` restaurant subdomains.
+The API and frontend issuer were run locally with the development launch profile. The test used `@microsoft/signalr` from the frontend package and `Host: <tenant-subdomain>.localhost` for checkout requests. The replay returned the same order and emitted no second event. A loopback-only Resend shim captured local verification links; no email was sent to an external service. Test fixtures were created in the non-production database using the `sig-a-20261001160454` and `sig-b-20261001160454` restaurant subdomains.
 
 This follow-up supersedes the earlier timeout-only result for OIDC, DB-01, DB-05, and DB-06. The run did not verify production issuer configuration, production domains, or production operations.
 
