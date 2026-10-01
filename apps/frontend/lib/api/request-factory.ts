@@ -12,7 +12,7 @@ export type ApiResult<T> =
   | { ok: false; status: number; error: ApiError }
 
 export type ApiDiagnostic = {
-  method: "GET" | "POST" | "PUT" | "DELETE"
+  method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE"
   path: string
   status: number
   code?: string
@@ -20,7 +20,7 @@ export type ApiDiagnostic = {
   causeName?: string
 }
 
-type RequestOptions = { signal?: AbortSignal; idempotencyKey?: string }
+type RequestOptions = { signal?: AbortSignal; idempotencyKey?: string; ifMatch?: string }
 
 type ApiRequestFactoryOptions = {
   baseUrl: string | undefined | (() => string | undefined)
@@ -113,6 +113,7 @@ export function createApiRequestFactory({
       if (body !== undefined) headers.set("Content-Type", "application/json")
       if (options.idempotencyKey)
         headers.set("Idempotency-Key", options.idempotencyKey)
+      if (options.ifMatch) headers.set("If-Match", options.ifMatch)
 
       const response = await fetcher(url, {
         method,
@@ -167,6 +168,8 @@ export function createApiRequestFactory({
       request<T>("POST", path, body, options),
     put: <T, B = unknown>(path: string, body: B, options?: RequestOptions) =>
       request<T>("PUT", path, body, options),
+    patch: <T, B = unknown>(path: string, body: B, options?: RequestOptions) =>
+      request<T>("PATCH", path, body, options),
     delete: <T>(path: string, options?: RequestOptions) =>
       request<T>("DELETE", path, undefined, options),
   }

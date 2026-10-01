@@ -83,6 +83,8 @@
     "verifyBeforeAccept": "Confirmez votre adresse e-mail avant d’accepter cette invitation.",
     "acceptInvitationAction": "Accepter l’invitation",
     "invitationAccepted": "Vous avez rejoint l’équipe.",
+    "restaurantOrders": "Commandes des restaurants",
+    "openOrders": "Voir les commandes",
     "restaurantMenuSettings": "Paramètres du menu",
     "editMenuLanguages": "Modifier les langues",
     "menuLanguagesTitle": "Langues du menu",
@@ -111,6 +113,49 @@
     "savingTranslation": "Enregistrement…",
     "translationSaved": "Traduction enregistrée.",
     "translationError": "Impossible d’enregistrer cette traduction. Vérifiez la langue et le texte, puis réessayez."
+  },
+  "KitchenOrders": {
+    "title": "Commandes en cuisine",
+    "description": "Consultez les tickets reçus et mettez à jour leur état au fil de la préparation.",
+    "backToOrganizations": "Toutes les organisations",
+    "filterLabel": "Filtrer les commandes par état",
+    "statuses": {
+      "all": "Toutes les commandes",
+      "Pending": "En attente",
+      "Preparing": "En préparation",
+      "Ready": "Prête",
+      "Completed": "Terminée",
+      "Cancelled": "Annulée"
+    },
+    "actions": {
+      "Preparing": "Commencer la préparation",
+      "Ready": "Marquer comme prête",
+      "Completed": "Terminer la commande",
+      "Cancelled": "Annuler la commande"
+    },
+    "errors": {
+      "forbidden": "Vous n’avez pas accès aux commandes de ce restaurant.",
+      "invalid": "Le lien ou le filtre des commandes est invalide. Vérifiez-le et réessayez.",
+      "unavailable": "Impossible de charger les dernières commandes. Réessayez dans un instant.",
+      "unauthorized": "Votre session a expiré. Reconnectez-vous pour continuer.",
+      "conflict": "Cette commande a changé avant l’enregistrement. Son état actuel a été rechargé."
+    },
+    "accessDeniedTitle": "Commandes indisponibles",
+    "statusSaved": "L’état de la commande a été modifié.",
+    "stale": "Les commandes enregistrées sont affichées. L’actualisation a échoué.",
+    "retry": "Réessayer",
+    "emptyTitle": "Aucune commande dans cette vue",
+    "emptyDescription": "Les nouvelles commandes et celles ayant cet état apparaîtront ici.",
+    "orderReference": "Commande {reference}",
+    "lineItem": "{quantity} × {product}",
+    "updating": "Enregistrement…",
+    "loadOlder": "Charger les commandes plus anciennes",
+    "connection": {
+      "connecting": "Connexion aux mises à jour en direct…",
+      "connected": "Mises à jour en direct connectées",
+      "reconnecting": "Reconnexion aux mises à jour en direct…",
+      "offline": "Mises à jour en direct indisponibles ; vous pouvez actualiser les commandes"
+    }
   },
   "Checkout": {
     "cartTitle": "Votre commande",

@@ -13,6 +13,39 @@ function makeResponse(
 }
 
 describe("createApiRequestFactory", () => {
+  it("sends conditional status updates with a quoted If-Match version", async () => {
+    const fetcher = vi.fn(async (_input: RequestInfo | URL, _init?: RequestInit) =>
+      makeResponse({ id: "order-1", status: "Preparing", version: 2 })
+    )
+    const api = createApiRequestFactory({
+      baseUrl: "https://api.example.test",
+      getToken: async () => "server-token",
+      fetcher,
+    })
+
+    const result = await api.patch(
+      "/api/v1/tenants/tenant-1/orders/order-1/status",
+      { status: "Preparing" },
+      { ifMatch: '"1"' }
+    )
+
+    expect(result).toMatchObject({ ok: true, status: 200 })
+    expect(fetcher).toHaveBeenCalledTimes(1)
+    const [input, init] = fetcher.mock.calls[0]!
+    expect(String(input)).toBe(
+      "https://api.example.test/api/v1/tenants/tenant-1/orders/order-1/status"
+    )
+    expect(init?.method).toBe("PATCH")
+    expect(new Headers(init?.headers).get("Authorization")).toBe("Bearer server-token")
+    expect(new Headers(init?.headers).get("If-Match")).toBe('"1"')
+    expect(init?.body).toBe(JSON.stringify({ status: "Preparing" }))
+    expect(init).toMatchObject({
+      cache: "no-store",
+      credentials: "omit",
+      redirect: "error",
+    })
+  })
+
   it("sends checkout idempotency keys and preserves rate-limit failures", async () => {
     const requests: RequestInit[] = []
     const fetcher: typeof fetch = async (_url, init) => {

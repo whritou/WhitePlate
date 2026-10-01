@@ -1,6 +1,6 @@
 # Staff kitchen order dashboard design
 
-Status: Approved in conversation; awaiting review of this written spec. This is a proposed design, not implemented behavior.
+Status: Approved in conversation on 2026-10-01. Source implementation and verification are tracked by the companion implementation plan; browser acceptance and production configuration remain open.
 
 ## Intent
 
@@ -66,6 +66,6 @@ The browser may obtain a short-lived API JWT only through an authenticated, same
 6. English and French cover all new visible states and errors. Existing orders continue to display their saved labels without inferred menu locale.
 7. The kanban card records completed checks and remaining live or production verification before it moves to Done.
 
-## Open review detail
+## Implementation detail
 
-The initial page can be rendered as a status-filtered ticket list; any desktop column grouping should be settled during implementation planning. The production API hub URL and SignalR CORS behavior must be confirmed against deployment configuration before live browser verification.
+The initial page is implemented as a status-filtered ticket list with cursor pagination; drag-and-drop is out of scope. The production API hub URL and SignalR CORS behavior must be confirmed against deployment configuration before browser verification against a hosted environment.

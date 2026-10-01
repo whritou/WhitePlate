@@ -373,7 +373,7 @@ public sealed class OrdersEndpointTests
     }
 
     [Fact]
-    public async Task StaffOrderListUsesOpaqueStableCursorAndExcludesReceiptLines()
+    public async Task StaffOrderListIncludesTicketSnapshotsAndUsesOpaqueStableCursor()
     {
         using var factory = new OrdersFactory();
         var seeded = await factory.SeedAsync();
@@ -405,7 +405,7 @@ public sealed class OrdersEndpointTests
         Assert.Equal(HttpStatusCode.OK, firstPage.StatusCode);
         using var firstJson = JsonDocument.Parse(await firstPage.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
         var firstItem = Assert.Single(firstJson.RootElement.GetProperty("items").EnumerateArray());
-        Assert.False(firstItem.TryGetProperty("lines", out _));
+        AssertTicketSnapshot(firstItem);
         var firstPageId = firstItem.GetProperty("id").GetGuid();
         Assert.Contains(firstPageId, new[] { firstCreated, secondCreated });
         var cursor = firstJson.RootElement.GetProperty("nextCursor").GetString();
@@ -417,10 +417,22 @@ public sealed class OrdersEndpointTests
         Assert.Equal(HttpStatusCode.OK, secondPage.StatusCode);
         using var secondJson = JsonDocument.Parse(await secondPage.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
         var secondItem = Assert.Single(secondJson.RootElement.GetProperty("items").EnumerateArray());
+        AssertTicketSnapshot(secondItem);
         var secondPageId = secondItem.GetProperty("id").GetGuid();
         Assert.NotEqual(firstPageId, secondPageId);
         Assert.Contains(secondPageId, new[] { firstCreated, secondCreated });
         Assert.Null(secondJson.RootElement.GetProperty("nextCursor").GetString());
+
+        void AssertTicketSnapshot(JsonElement order)
+        {
+            var line = Assert.Single(order.GetProperty("lines").EnumerateArray());
+            Assert.Equal(seeded.ProductId, line.GetProperty("productId").GetGuid());
+            Assert.Equal("Soup", line.GetProperty("productName").GetString());
+            Assert.Equal(1, line.GetProperty("quantity").GetInt32());
+            var option = Assert.Single(line.GetProperty("options").EnumerateArray());
+            Assert.Equal(seeded.OptionId, option.GetProperty("optionId").GetGuid());
+            Assert.Equal("Large", option.GetProperty("name").GetString());
+        }
     }
 
     [Fact]

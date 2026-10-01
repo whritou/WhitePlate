@@ -1,6 +1,6 @@
 # Functional test plan
 
-This is an acceptance plan, not a test-results report. The existing API suite covers tenant/organization/staff/catalog CRUD, verified email and invitation binding, checkout pricing/idempotency, order workflow, body/rate limits, outbox dispatch, and hub authorization. The new catalog-localization paths are not behaviorally tested yet, and their migration is not applied. The prior test-database schema migrations and local email/password signup/invitation path are verified. Live OAuth, real Resend delivery, browser auth flows, and SignalR acceptance remain to be run. The earlier documentation audit is in [documentation review](documentation-review.md).
+This is an acceptance plan with dated verification notes below. The API suite covers tenant/organization/staff/catalog CRUD, verified email and invitation binding, checkout pricing/idempotency, order workflow, body/rate limits, outbox dispatch, and hub authorization. Dashboard API contracts and frontend unit behavior are automated; authenticated browser acceptance and production SignalR configuration remain open. The new catalog-localization paths are not behaviorally tested yet, and their migration is not applied. The prior test-database schema migrations and local email/password signup/invitation path are verified. Live OAuth, real Resend delivery, and broader browser auth flows remain open. The earlier documentation audit is in [documentation review](documentation-review.md).
 
 ## 1. Current scaffold checks
 
@@ -91,13 +91,25 @@ On 2026-09-30, a dedicated verified `local-tester@whiteplate.invalid` account wa
 
 | ID | Scenario | Required outcome | Priority |
 | --- | --- | --- | --- |
-| DB-01 | Commit a new order while A/B dashboards are connected | Outbox write is transactional; a live multi-connection check should verify only authorized A staff receive A's order | Critical |
+| DB-01 | Commit a new order while A/B dashboard clients are connected | Outbox write is transactional; live non-production verification confirmed only tenant A's authorized connection received A's event | Critical |
 | DB-02 | Advance status, repeat same status, attempt skipped/backward transition | Agreed lifecycle enforced; repeat is no-op success; invalid transition proposed `409` | High |
-| DB-03 | Make a status update under latency, rejection, and stale version | If optimistic UI is used, rollback/refetch on failure; stale write never silently overwrites newer state | High |
+| DB-03 | Make a status update under latency, rejection, and stale version | UI does not advance optimistically; stale `409`/`412` shows a localized conflict and reloads the authoritative REST state | High |
 | DB-04 | Call protected endpoints with missing/expired token, wrong role, or foreign-tenant ID | `401`, `403`, or non-disclosing `404` as specified; UI login redirect tested separately | Critical |
-| DB-05 | Request another tenant's SignalR group or reconnect after permissions change | Membership checks reject unauthorized subscription; verify live Better Auth token/group behavior | Critical |
-| DB-06 | Disconnect, miss events, reconnect; duplicate or reorder messages | Authoritative refetch restores state; duplicates do not create duplicate orders | High |
+| DB-05 | Request another tenant's SignalR group or reconnect after permissions change | API membership checks reject unauthorized subscription; live non-production verification rejected both cross-tenant joins | Critical |
+| DB-06 | Disconnect, miss events, reconnect; duplicate or reorder messages | Rejoin and authoritative refetch restore state; frontend unit tests cover deduplication and stale versions; live non-production REST recovery passed | High |
 | DB-07 | Fail notification delivery after database commit | The dispatcher retries; order remains durable and REST recovery stays authoritative | High |
+
+### Staff dashboard browser acceptance
+
+These cases exercise the Next.js page and its same-origin token route as a signed-in user. They are separate from the existing direct API/SignalR acceptance above.
+
+| ID | Scenario | Required outcome | Priority |
+| --- | --- | --- | --- |
+| UI-ORD-01 | Open a restaurant listed by `/api/v1/me`, then forge a different `tenantId` in the URL | The server only fetches orders for a listed membership; an unauthorized or unknown tenant shows no order data | Critical |
+| UI-ORD-02 | View tickets, apply a status filter, and load an older page in English and French | Saved product/option labels and quantities render without catalog lookup; links retain tenant/status context; copy and accessible labels use the selected app locale | High |
+| UI-ORD-03 | Advance orders as kitchen staff, manager, and owner; submit a stale version | Only allowed controls appear; each update uses `If-Match`; no optimistic status change appears; stale state is reloaded with a translated conflict message | Critical |
+| UI-ORD-04 | Request the SignalR token route while signed out, unverified, with absent/wrong Origin, and with a verified same-origin session | Failures do not expose a token; success is POST-only, same-origin, verified-session-only, and `Cache-Control: no-store` | Critical |
+| UI-ORD-05 | Receive same-tenant, foreign-tenant, duplicate, stale, and burst order events; interrupt and restore the hub | Only new events for the selected tenant trigger a coalesced REST refresh; reconnect rejoins that tenant and reloads REST state; loaded tickets remain visible while offline | High |
 
 ### Run the live OIDC and SignalR check
 
@@ -230,7 +242,21 @@ GET http://localhost:5182/api/v1/me (with the minted token)
 
 To complete acceptance, restore API connectivity to the configured non-production PostgreSQL test database, provide two verified staff identities with distinct tenant memberships, then run DB-01, DB-05, and DB-06 using two live SignalR connections and record event IDs, REST state before/after reconnect, and membership-denial results. The migration-count assertion reported above was corrected in the follow-up below.
 
-Follow-up on 2026-10-01: updated `TenantRepositoryTests.PostgreSqlModelAndMigrationProduceExpectedSchema` to expect the eight checked-in migrations. The focused test passed, then `dotnet test apps/api/WhitePlate.slnx --no-restore` passed all 132 tests. This clears the assertion failure; live PostgreSQL, two-client SignalR delivery, membership isolation, and reconnect recovery remain pending.
+Follow-up on 2026-10-01: updated `TenantRepositoryTests.PostgreSqlModelAndMigrationProduceExpectedSchema` to expect the eight checked-in migrations. The focused test passed, then `dotnet test apps/api/WhitePlate.slnx --no-restore` passed all 132 tests. A later live non-production run also verified two-client SignalR delivery, membership isolation, and reconnect recovery as recorded above; production configuration remains open.
+
+### Staff dashboard implementation verification — 2026-10-01
+
+The approved dashboard design and implementation plan are implemented in source. Commands ran from `apps/frontend` unless a repository-root path is shown. `npm` is not available on this shell's PATH, so the checked-in package-local executables were used directly.
+
+| Command | Result |
+| --- | --- |
+| `node_modules/.bin/vitest.cmd run` | Passed: 13 files, 86 tests. Includes API request factory, order-action, token-route, dashboard parsing, event filtering/versioning/coalescing, reconnect join, and refresh tests. |
+| `node_modules/.bin/tsc.cmd --noEmit` | Passed. |
+| `node_modules/.bin/eslint.cmd .` | Passed with zero errors and five existing warnings in `components/auth/organization-forms.tsx` and `lib/api/request-factory.test.ts`; no warnings in the new dashboard files. |
+| `node_modules/.bin/next.cmd build --webpack` | Passed, including TypeScript, page-data collection, and route generation. It ran from a temporary same-drive source copy because the existing development server on port 3000 held the shared `.next` manifest. The copy excluded local environment files except a hard link to the existing non-production `.env`; production auth/provider values were local placeholders. Better Auth validated its local database schema during build. The temporary copy was removed afterward. |
+| `dotnet test apps/api/WhitePlate.slnx` | Passed: 132 tests, 0 failures. |
+
+The API integration tests now assert saved product/option snapshot data across cursor pages. Frontend tests exercise the token route's session/origin/cache rules, conditional status updates, tenant/event validation, deduplication, reconnect rejoin, coalescing, and REST refresh callbacks. The direct live non-production OIDC/SignalR run above verifies group authorization and REST recovery; this turn did not run the authenticated Next.js dashboard in a browser. Complete UI-role/navigation acceptance in UI-ORD-01–05, then configure and verify the browser-reachable production hub URL, CORS, and TLS under the separate hosting/operations task. Keep the kanban card In progress until those acceptance checks are recorded.
 
 ## 3. Automation strategy
 

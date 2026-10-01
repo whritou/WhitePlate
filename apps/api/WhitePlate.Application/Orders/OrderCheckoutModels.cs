@@ -23,8 +23,11 @@ public sealed record OrderLineReceiptDto(Guid ProductId, string ProductName, dec
 public sealed record OrderReceiptDto(Guid Id, Guid TenantId, string Currency, string CustomerName,
     string? DiscountCode, decimal Subtotal, decimal DiscountAmount, decimal TaxAmount, decimal Total,
     string Status, int Version, DateTimeOffset CreatedAt, IReadOnlyList<OrderLineReceiptDto> Lines);
+public sealed record OrderSummaryOptionDto(Guid OptionId, string Name);
+public sealed record OrderSummaryLineDto(Guid ProductId, string ProductName, int Quantity,
+    IReadOnlyList<OrderSummaryOptionDto> Options);
 public sealed record OrderSummaryDto(Guid Id, string CustomerName, string Currency, decimal Total,
-    OrderStatus Status, int Version, DateTimeOffset CreatedAt);
+    OrderStatus Status, int Version, DateTimeOffset CreatedAt, IReadOnlyList<OrderSummaryLineDto> Lines);
 public sealed record OrderPageDto(IReadOnlyList<OrderSummaryDto> Items, string? NextCursor);
 public sealed record OrderPageData(IReadOnlyList<OrderSummaryDto> Items, OrderPageCursor? NextCursor);
 public sealed record OrderPageCursor(long CreatedAtTicks, Guid Id);
