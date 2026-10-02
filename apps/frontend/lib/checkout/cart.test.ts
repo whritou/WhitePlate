@@ -11,6 +11,7 @@ const optionId = "22222222-2222-4222-8222-222222222222"
 const input = {
   customerName: " Alice ",
   discountCode: " lunch ",
+  menuLocale: "en",
   items: [{ productId, quantity: 2, optionIds: [optionId] }],
 }
 
@@ -26,6 +27,7 @@ describe("guest cart", () => {
     expect(prepareCheckout(forged, null, () => "key").input).toEqual({
       customerName: "Alice",
       discountCode: "LUNCH",
+      menuLocale: "en",
       items: [{ productId, quantity: 2, optionIds: [optionId] }],
     })
   })
@@ -95,6 +97,34 @@ describe("guest cart", () => {
         () => "next-key"
       ).key
     ).toBe("next-key")
+  })
+
+  it("includes the selected menu locale in a checkout attempt", () => {
+    expect(
+      prepareCheckout({ ...input, menuLocale: "fr" }, null, () => "locale-key")
+        .input
+    ).toEqual({
+      customerName: "Alice",
+      discountCode: "LUNCH",
+      menuLocale: "fr",
+      items: [{ productId, quantity: 2, optionIds: [optionId] }],
+    })
+  })
+
+  it("starts a new attempt when the selected menu locale changes", () => {
+    const first = prepareCheckout(
+      { ...input, menuLocale: "fr" },
+      null,
+      () => "french-key"
+    )
+
+    expect(
+      prepareCheckout(
+        { ...input, menuLocale: "en" },
+        first,
+        () => "english-key"
+      ).key
+    ).toBe("english-key")
   })
 
   it("copies the attempt so later cart edits cannot change an uncertain order", () => {

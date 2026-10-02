@@ -52,6 +52,7 @@ export function prepareCheckout(
   const normalized = {
     customerName: input.customerName.trim(),
     discountCode: input.discountCode?.trim().toUpperCase() || null,
+    menuLocale: input.menuLocale,
     items: input.items
       .map((item) => ({
         productId: item.productId,
@@ -79,6 +80,8 @@ export function validateOrderInput(input: unknown): input is OrderInput {
     (value.discountCode !== null &&
       (typeof value.discountCode !== "string" ||
         value.discountCode.length > 64)) ||
+    typeof value.menuLocale !== "string" ||
+    value.menuLocale.length > 128 ||
     !Array.isArray(value.items) ||
     value.items.length < 1 ||
     value.items.length > 50

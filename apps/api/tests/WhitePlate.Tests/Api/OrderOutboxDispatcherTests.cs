@@ -83,7 +83,11 @@ public sealed class OrderOutboxDispatcherTests
     {
         public Task<int> DeleteExpiredIdempotencyRecordsAsync(DateTimeOffset now, CancellationToken cancellationToken) => Task.FromResult(0);
         public Task<IdempotencyResult> FindIdempotentOrderAsync(Guid tenantId, string keyHash, string requestHash, DateTimeOffset now, CancellationToken cancellationToken) => throw new NotSupportedException();
-        public Task<CheckoutCatalogDto> GetCheckoutCatalogAsync(Guid tenantId, IReadOnlyCollection<Guid> productIds, string? discountCode, CancellationToken cancellationToken) => throw new NotSupportedException();
+        public Task<CheckoutLocaleDto?> ResolveCheckoutLocaleAsync(Guid tenantId, string? requestedLocale,
+            CancellationToken cancellationToken) => throw new NotSupportedException();
+        public Task<CheckoutCatalogDto> GetCheckoutCatalogAsync(Guid tenantId, string locale, string defaultLocale,
+            IReadOnlyCollection<Guid> productIds, string? discountCode, CancellationToken cancellationToken) =>
+            throw new NotSupportedException();
         public Task<IdempotencyResult> CreateOrderAsync(Order order, OrderReceiptDto receipt, string keyHash, string requestHash, DateTimeOffset now, CancellationToken cancellationToken) => throw new NotSupportedException();
         public Task<OrderPageData> ListAsync(Guid tenantId, OrderStatus? status, OrderPageCursor? cursor, int pageSize, CancellationToken cancellationToken) => throw new NotSupportedException();
         public Task<Result<OrderReceiptDto>> TransitionAsync(Guid tenantId, Guid orderId, int expectedVersion, OrderStatus status, DateTimeOffset now, CancellationToken cancellationToken) => throw new NotSupportedException();

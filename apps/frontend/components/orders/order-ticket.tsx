@@ -33,7 +33,7 @@ export function OrderTicket({
   const transitions = getAvailableOrderTransitions(role, order.status)
 
   return (
-    <article>
+    <article lang={order.menuLocale ?? undefined}>
       <Card className="rounded-2xl text-sm">
         <CardHeader className="flex flex-wrap items-start justify-between gap-4">
           <div>

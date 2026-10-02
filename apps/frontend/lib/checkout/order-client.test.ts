@@ -7,6 +7,7 @@ const tenantId = "22222222-2222-4222-8222-222222222222"
 const input = {
   customerName: "Alice",
   discountCode: null,
+  menuLocale: "fr",
   items: [{ productId, quantity: 2, optionIds: [] }],
 }
 const config = {
@@ -18,6 +19,7 @@ const receipt: OrderReceipt = {
   tenantId,
   currency: "EUR",
   customerName: "Alice",
+  menuLocale: "fr",
   discountCode: null,
   subtotal: 20,
   discountAmount: 0,

@@ -71,6 +71,7 @@ function isOrderReceipt(value: unknown): value is OrderReceipt {
     !isUuid(value.tenantId) ||
     !["EUR", "USD", "GBP"].includes(String(value.currency)) ||
     typeof value.customerName !== "string" ||
+    (value.menuLocale !== null && typeof value.menuLocale !== "string") ||
     (value.discountCode !== null && typeof value.discountCode !== "string") ||
     !["Pending", "Preparing", "Ready", "Completed", "Cancelled"].includes(
       String(value.status)

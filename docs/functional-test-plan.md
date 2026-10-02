@@ -1,6 +1,6 @@
 # Functional test plan
 
-This is an acceptance plan with dated verification notes below. The API suite covers tenant/organization/staff/catalog CRUD, verified email and invitation binding, checkout pricing/idempotency, order workflow, body/rate limits, outbox dispatch, and hub authorization. Dashboard API contracts and frontend unit behavior are automated; authenticated browser acceptance and production SignalR configuration remain open. The new catalog-localization paths are not behaviorally tested yet, and their migration is not applied. The prior test-database schema migrations and local email/password signup/invitation path are verified. Live OAuth, real Resend delivery, and broader browser auth flows remain open. The earlier documentation audit is in [documentation review](documentation-review.md).
+This is an acceptance plan with dated verification notes below. The API suite covers tenant/organization/staff/catalog CRUD, verified email and invitation binding, checkout pricing/idempotency, order workflow, body/rate limits, outbox dispatch, and hub authorization. Dashboard API contracts and frontend unit behavior are automated; authenticated browser acceptance and production SignalR configuration remain open. Catalog-localization and localized-order migrations are applied on Neon `test`; automated tests cover locale fallback, immutable localized snapshots, and locale-aware idempotency. Public catalog/checkout browser acceptance against the test database remains open. The prior test-database schema migrations and local email/password signup/invitation path are verified. Live OAuth, real Resend delivery, and broader browser auth flows remain open. The earlier documentation audit is in [documentation review](documentation-review.md).
 
 ## 1. Current scaffold checks
 
@@ -31,11 +31,11 @@ if (-not $spec.paths.'/api/v1/tenants/{tenantId}/catalog') { throw 'Catalog mana
 Invoke-WebRequest http://localhost:5182/swagger -NoProxy | Select-Object -ExpandProperty StatusCode
 ```
 
-The local Neon `test` branch and the OpenAPI/Swagger endpoints were verified on 2026-09-29. The first seven EF migrations and Better Auth's `auth` schema are applied there; `CatalogLocalization` is not yet applied. The branch has test-only signup, organization, and membership records from the local invitation flow; do not treat it as an empty database. The xUnit API tests run through an in-memory host and do not detect every local port, external OAuth, or Windows logging issue.
+The local Neon `test` branch and the OpenAPI/Swagger endpoints were verified on 2026-09-29. The EF `CatalogLocalization` and `LocalizedOrderSnapshots` migrations are now applied there. The branch has test-only signup, organization, and membership records from the local invitation flow; do not treat it as an empty database. The xUnit API tests use a relational test provider and do not detect every local port, external OAuth, or Windows logging issue.
 
 ## 2. Live integration and frontend acceptance scenarios
 
-Existing automated tests cover the previously implemented API behaviors in the contracts. The catalog-localization paths have build verification only and require behavioral acceptance after applying `CatalogLocalization`. These scenarios also check the configured Better Auth issuer, live PostgreSQL behavior, real SignalR connections, and frontend flows. Before execution, provision two tenants A/B with distinct staff identities and menus; include an unavailable product, stale order version, and malformed/expired credentials.
+Automated tests cover catalog locale resolution, translation fallback, checkout label snapshots, idempotency and persisted staff label reads. Live Neon/browser acceptance remains for these scenarios and also checks the configured Better Auth issuer, real SignalR connections, and frontend flows. Use two tenants A/B with distinct staff identities and menus; include an unavailable product, stale order version, and malformed/expired credentials.
 
 ### Authentication and onboarding
 
@@ -255,6 +255,21 @@ The approved dashboard design and implementation plan are implemented in source.
 | `node_modules/.bin/eslint.cmd .` | Passed with zero errors and five existing warnings in `components/auth/organization-forms.tsx` and `lib/api/request-factory.test.ts`; no warnings in the new dashboard files. |
 | `node_modules/.bin/next.cmd build --webpack` | Passed, including TypeScript, page-data collection, and route generation. It ran from a temporary same-drive source copy because the existing development server on port 3000 held the shared `.next` manifest. The copy excluded local environment files except a hard link to the existing non-production `.env`; production auth/provider values were local placeholders. Better Auth validated its local database schema during build. The temporary copy was removed afterward. |
 | `dotnet test apps/api/WhitePlate.slnx` | Passed: 132 tests, 0 failures. |
+
+## Localized order snapshots — 2026-10-02
+
+`LocalizedOrderSnapshots` adds nullable `Orders.MenuLocale`; checkout resolves the effective tenant locale before idempotency comparison and saves translated product/option labels into the order snapshots. Legacy orders retain a null locale. The migration is applied on Neon `test`; production remains untouched. Automated tests cover supported and fallback locales, snapshot stability after catalog edits, and same-key retries/conflicts across effective locales. Public catalog/checkout behavior against the database and authenticated kitchen browser acceptance remain open.
+
+| Command/check | Actual result |
+| --- | --- |
+| `dotnet test apps/api/WhitePlate.slnx --no-restore --configuration Release` | Passed: 133 tests, 0 failures. |
+| `node node_modules/vitest/vitest.mjs run` from `apps/frontend` | Passed: 20 files, 132 tests. |
+| `node node_modules/eslint/bin/eslint.js .` from `apps/frontend` | Passed with no errors or warnings. |
+| `node node_modules/typescript/bin/tsc --noEmit` from `apps/frontend` | Passed. |
+| `node node_modules/prettier/bin/prettier.cjs --check '**/*.{ts,tsx}'` from `apps/frontend` | Passed. |
+| `node node_modules/next/dist/bin/next build` with inert HTTPS `.invalid` auth/API URLs and an unavailable local database | Passed compilation, TypeScript, and all 29 route/page generations. Better Auth emitted expected schema-validation errors because the build database was intentionally unavailable. |
+| Neon `test` migration | `LocalizedOrderSnapshots` applied successfully after reviewing the generated nullable-column migration. |
+| Authenticated browser and live checkout acceptance | Not completed; the test database credential must be rotated before further live database checks. |
 
 The API integration tests now assert saved product/option snapshot data across cursor pages. Frontend tests exercise the token route's session/origin/cache rules, conditional status updates, tenant/event validation, deduplication, reconnect rejoin, coalescing, and REST refresh callbacks. The direct live non-production OIDC/SignalR run above verifies group authorization and REST recovery; this turn did not run the authenticated Next.js dashboard in a browser. Complete UI-role/navigation acceptance in UI-ORD-01–05, then configure and verify the browser-reachable production hub URL, CORS, and TLS under the separate hosting/operations task. Keep the kanban card In progress until those acceptance checks are recorded.
 

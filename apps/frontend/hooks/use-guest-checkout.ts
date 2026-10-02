@@ -39,6 +39,7 @@ export function useGuestCheckout(menu: StorefrontMenu) {
     const input = {
       customerName,
       discountCode: discountCode || null,
+      menuLocale: menu.locale,
       items: cart,
     }
 

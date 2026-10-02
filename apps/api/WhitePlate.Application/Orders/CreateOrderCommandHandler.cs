@@ -23,8 +23,12 @@ public sealed class CreateOrderCommandHandler(IOrderRepository orders, TimeProvi
             return Validation("Idempotency-Key", "required", "A valid Idempotency-Key header is required.");
 
         var key = command.IdempotencyKey!.Trim();
+        var locale = await orders.ResolveCheckoutLocaleAsync(command.TenantId, command.MenuLocale,
+            cancellationToken);
+        if (locale is null) return Result<OrderReceiptDto>.Failure(new ApplicationError(ErrorCode.NotFound));
+
         var keyHash = Hash(key);
-        var requestHash = Hash(CreateFingerprint(command));
+        var requestHash = Hash(CreateFingerprint(command, locale.Locale));
         var now = timeProvider.GetUtcNow();
         var existing = await orders.FindIdempotentOrderAsync(command.TenantId, keyHash, requestHash, now,
             cancellationToken);
@@ -43,7 +47,7 @@ public sealed class CreateOrderCommandHandler(IOrderRepository orders, TimeProvi
         var normalizedCode = string.IsNullOrWhiteSpace(command.DiscountCode)
             ? null
             : command.DiscountCode.Trim().ToUpperInvariant();
-        var catalog = await orders.GetCheckoutCatalogAsync(command.TenantId,
+        var catalog = await orders.GetCheckoutCatalogAsync(command.TenantId, locale.Locale, locale.DefaultLocale,
             command.Items.Select(item => item.ProductId).ToArray(), normalizedCode, cancellationToken);
         if (catalog.Products.Count != command.Items.Count)
             return Result<OrderReceiptDto>.Failure(new ApplicationError(ErrorCode.NotFound));
@@ -92,7 +96,7 @@ public sealed class CreateOrderCommandHandler(IOrderRepository orders, TimeProvi
                 _ => 0m
             };
             var order = Order.Create(command.TenantId, catalog.Currency, command.CustomerName, snapshots,
-                normalizedCode, discountAmount, now);
+                normalizedCode, discountAmount, now, catalog.Locale);
             var receipt = order.ToReceipt();
             var result = await orders.CreateOrderAsync(order, receipt, keyHash, requestHash, now,
                 cancellationToken);
@@ -113,11 +117,12 @@ public sealed class CreateOrderCommandHandler(IOrderRepository orders, TimeProvi
         !string.IsNullOrWhiteSpace(value) && value.Trim().Length <= 128 &&
         value.Trim().All(character => character is >= '!' and <= '~');
 
-    private static string CreateFingerprint(CreateOrderCommand command)
+    private static string CreateFingerprint(CreateOrderCommand command, string effectiveLocale)
     {
         var canonical = new
         {
             customerName = command.CustomerName?.Trim(),
+            menuLocale = effectiveLocale,
             discountCode = string.IsNullOrWhiteSpace(command.DiscountCode)
                 ? null
                 : command.DiscountCode.Trim().ToUpperInvariant(),

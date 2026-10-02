@@ -35,7 +35,7 @@ Installed tooling does not imply a new business capability. Do not add a second 
 
 ## Deployment verification
 
-PostgreSQL and Better Auth schemas have separately documented test-branch migrations. The new CatalogLocalization migration remains unapplied; refer to [development](../development.md) for current setup rather than inferring rollout from a checked-in migration. Live OAuth and real Resend credentials, production issuer/audience, domain/TLS/CORS, and authenticated browser/SignalR acceptance remain separate work. Source wiring and unit tests do not establish production readiness. MediatR and full-stack Compose are not implemented.
+PostgreSQL and Better Auth schemas have separately documented test-branch migrations. Catalog and localized-order migrations are applied on Neon `test`; refer to [development](../development.md) for setup rather than inferring rollout elsewhere. Live OAuth and real Resend credentials, production issuer/audience, domain/TLS/CORS, and authenticated browser/SignalR acceptance remain separate work. Source wiring and unit tests do not establish production readiness. MediatR and full-stack Compose are not implemented.
 
 ## Toolchain and reproducibility
 

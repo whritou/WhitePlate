@@ -16,6 +16,7 @@ export type OrderSummary = {
   id: string
   customerName: string
   currency: string
+  menuLocale: string | null
   total: number
   status: OrderStatus
   version: number
