@@ -1,6 +1,7 @@
 "use client"
 
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -36,7 +37,11 @@ export function OrderDashboard(props: OrderDashboardProps) {
     <section aria-labelledby="kitchen-orders-title" className="grid gap-5">
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <p className="mb-1 text-sm font-medium text-primary">{tenantName}</p>
+          <div className="mb-1 flex flex-wrap items-center gap-2">
+            <p className="text-sm font-medium text-primary">{tenantName}</p>
+
+            <Badge variant="outline">{t(`roles.${role}`)}</Badge>
+          </div>
 
           <h1
             id="kitchen-orders-title"
@@ -69,23 +74,25 @@ export function OrderDashboard(props: OrderDashboardProps) {
         onRefresh={refresh}
       />
 
-      <nav aria-label={t("filterLabel")} className="flex flex-wrap gap-2">
-        {[null, ...ORDER_STATUSES].map((status) => (
-          <Button
-            key={status ?? "all"}
-            variant={selectedStatus === status ? "default" : "outline"}
-            size="lg"
-            render={
-              <Link
-                href={buildOrdersHref(tenantId, status, null)}
-                aria-current={selectedStatus === status ? "page" : undefined}
-              />
-            }
-          >
-            {status === null ? t("statuses.all") : t(`statuses.${status}`)}
-          </Button>
-        ))}
-      </nav>
+      {loadError !== "forbidden" && (
+        <nav aria-label={t("filterLabel")} className="flex flex-wrap gap-2">
+          {[null, ...ORDER_STATUSES].map((status) => (
+            <Button
+              key={status ?? "all"}
+              variant={selectedStatus === status ? "default" : "outline"}
+              size="lg"
+              render={
+                <Link
+                  href={buildOrdersHref(tenantId, status, null)}
+                  aria-current={selectedStatus === status ? "page" : undefined}
+                />
+              }
+            >
+              {status === null ? t("statuses.all") : t(`statuses.${status}`)}
+            </Button>
+          ))}
+        </nav>
+      )}
 
       {loadError && (
         <Alert variant="destructive" role={isStale ? "status" : "alert"}>

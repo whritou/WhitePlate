@@ -133,6 +133,12 @@
       "Completed": "Complete order",
       "Cancelled": "Cancel order"
     },
+    "roles": {
+      "OrganizationOwner": "Owner",
+      "Manager": "Manager",
+      "Kitchen": "Kitchen staff"
+    },
+    "actionForOrder": "{action} — order {reference}",
     "errors": {
       "forbidden": "You don’t have access to this restaurant’s orders.",
       "invalid": "This order view link or filter is invalid. Check it and try again.",

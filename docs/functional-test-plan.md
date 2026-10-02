@@ -111,6 +111,9 @@ These cases exercise the Next.js page and its same-origin token route as a signe
 | UI-ORD-03 | Advance orders as kitchen staff, manager, and owner; submit a stale version | Only allowed controls appear; each update uses `If-Match`; no optimistic status change appears; stale state is reloaded with a translated conflict message | Critical |
 | UI-ORD-04 | Request the SignalR token route while signed out, unverified, with absent/wrong Origin, and with a verified same-origin session | Failures do not expose a token; success is POST-only, same-origin, verified-session-only, and `Cache-Control: no-store` | Critical |
 | UI-ORD-05 | Receive same-tenant, foreign-tenant, duplicate, stale, and burst order events; interrupt and restore the hub | Only new events for the selected tenant trigger a coalesced REST refresh; reconnect rejoins that tenant and reloads REST state; loaded tickets remain visible while offline | High |
+| UI-ORD-06 | Render the dashboard for each staff role, then revoke membership while a ticket page is cached | The current role is visible, each transition action has an order-specific accessible name, and a forbidden response removes cached tickets and status filters | High |
+
+On 2026-10-02, frontend unit coverage for UI-ORD-06 passed for the kitchen-role label/action name and forbidden-access ticket/filter removal. This verifies component behavior only; the manager/owner browser matrix and hosted membership-revocation flow remain open.
 
 ### Run the live OIDC and SignalR check
 
