@@ -1,4 +1,5 @@
 using WhitePlate.Domain.Common;
+using WhitePlate.Domain.Tenants;
 
 namespace WhitePlate.Domain.Orders;
 
@@ -8,6 +9,7 @@ public sealed class Order
     public Guid TenantId { get; private set; }
     public string Currency { get; private set; } = null!;
     public string CustomerName { get; private set; } = null!;
+    public string? MenuLocale { get; private set; }
     public string? DiscountCode { get; private set; }
     public decimal Subtotal { get; private set; }
     public decimal DiscountAmount { get; private set; }
@@ -21,7 +23,8 @@ public sealed class Order
     private Order() { }
 
     public static Order Create(Guid tenantId, string? currency, string? customerName,
-        IReadOnlyList<OrderLineSnapshot>? lines, string? discountCode, decimal discountAmount, DateTimeOffset createdAt)
+        IReadOnlyList<OrderLineSnapshot>? lines, string? discountCode, decimal discountAmount,
+        DateTimeOffset createdAt, string? menuLocale = null)
     {
         var normalizedCurrency = currency?.ToUpperInvariant();
         var normalizedName = customerName?.Trim();
@@ -51,9 +54,11 @@ public sealed class Order
             line.SetCalculatedAmounts(allocation);
             remainingDiscount -= allocation;
         }
+        var normalizedMenuLocale = menuLocale is null ? null : WhitePlate.Domain.Tenants.MenuLocale.Create(menuLocale).Value;
         return new Order
         {
             Id = Guid.NewGuid(), TenantId = tenantId, Currency = normalizedCurrency, CustomerName = normalizedName,
+            MenuLocale = normalizedMenuLocale,
             DiscountCode = string.IsNullOrWhiteSpace(discountCode) ? null : discountCode.Trim().ToUpperInvariant(),
             Subtotal = subtotal, DiscountAmount = discountAmount, TaxAmount = orderLines.Sum(line => line.TaxAmount),
             Total = orderLines.Sum(line => line.Total), Status = OrderStatus.Pending, Version = 1,

@@ -53,6 +53,7 @@ const page = {
       id: "22222222-2222-4222-8222-222222222222",
       customerName: "Ada",
       currency: "EUR",
+      menuLocale: "fr",
       total: 19.25,
       status: "Pending",
       version: 1,
@@ -77,6 +78,15 @@ const page = {
 
 it("parses server order snapshots and paged cursors", () => {
   expect(parseOrderPage(page)).toEqual(page)
+})
+
+it("maps legacy order snapshots without a locale to an unknown locale", () => {
+  expect(
+    parseOrderPage({
+      ...page,
+      items: [{ ...page.items[0], menuLocale: null }],
+    })?.items[0]?.menuLocale
+  ).toBeNull()
 })
 
 it("rejects malformed order snapshots at the API boundary", () => {

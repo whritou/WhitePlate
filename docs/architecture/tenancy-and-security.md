@@ -8,7 +8,7 @@ Status: Better Auth RS256 JWT bearer validation, persisted organization/tenant o
 
 `X-Tenant-Id`, `X-Tenant-Subdomain`, and `X-Forwarded-Host` do not influence resolution. Changing the actual Host can select another public tenant, which is intentional and grants no private access. No staff authorization is claimed. Tenant creation is a local operator command requiring server/database access; there are no anonymous administration or registry-list routes. Two-tenant HTTP tests verify selection, request-scope separation, inactive tenants and spoofed headers.
 
-Catalog and order rows are tenant-owned and use same-tenant composite foreign keys; idempotency and outbox rows reference their tenant. Reads, writes, archive operations, and relationship assignments explicitly scope the tenant. Role checks use the validated issuer/subject. The first seven EF migrations are applied to Neon `test`; the eighth (`CatalogLocalization`) is not. Production remains unchanged. Production domain/TLS/proxy configuration and custom domains remain open.
+Catalog and order rows are tenant-owned and use same-tenant composite foreign keys; idempotency and outbox rows reference their tenant. Reads, writes, archive operations, and relationship assignments explicitly scope the tenant. Role checks use the validated issuer/subject. `CatalogLocalization` and `LocalizedOrderSnapshots` are applied to Neon `test`. Production migration and domain/TLS/proxy configuration remain open; custom domains are deferred.
 
 ## Tenant resolution is not authorization
 

@@ -9,6 +9,7 @@ export type CartItem = {
 export type OrderInput = {
   customerName: string
   discountCode: string | null
+  menuLocale: string
   items: CartItem[]
 }
 
@@ -28,6 +29,7 @@ export type OrderReceipt = {
   tenantId: string
   currency: string
   customerName: string
+  menuLocale: string | null
   discountCode: string | null
   subtotal: number
   discountAmount: number

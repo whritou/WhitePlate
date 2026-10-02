@@ -17,7 +17,10 @@ export function Receipt({ receipt }: { receipt: OrderReceipt }) {
   })
 
   return (
-    <section aria-labelledby="cart-heading">
+    <section
+      aria-labelledby="cart-heading"
+      lang={receipt.menuLocale ?? undefined}
+    >
       <CardHeader className="px-0">
         <CardTitle>
           <h2 id="cart-heading" className="text-xl font-semibold" role="status">

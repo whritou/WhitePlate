@@ -14,6 +14,7 @@ public sealed class OrderConfiguration : IEntityTypeConfiguration<Order>
         builder.Property(order => order.TenantId).IsRequired();
         builder.Property(order => order.Currency).HasMaxLength(3).IsRequired();
         builder.Property(order => order.CustomerName).HasMaxLength(160).IsRequired();
+        builder.Property(order => order.MenuLocale).HasMaxLength(128);
         builder.Property(order => order.DiscountCode).HasMaxLength(32);
         builder.Property(order => order.Subtotal).HasPrecision(12, 2);
         builder.Property(order => order.DiscountAmount).HasPrecision(12, 2);

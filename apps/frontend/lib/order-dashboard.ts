@@ -205,6 +205,9 @@ function parseOrderSummary(value: unknown): OrderSummary | null {
     typeof value.customerName !== "string" ||
     typeof value.currency !== "string" ||
     !/^[A-Z]{3}$/.test(value.currency) ||
+    (value.menuLocale !== null &&
+      value.menuLocale !== undefined &&
+      typeof value.menuLocale !== "string") ||
     typeof value.total !== "number" ||
     !Number.isFinite(value.total) ||
     value.total < 0 ||
@@ -256,6 +259,7 @@ function parseOrderSummary(value: unknown): OrderSummary | null {
     id: value.id,
     customerName: value.customerName,
     currency: value.currency,
+    menuLocale: typeof value.menuLocale === "string" ? value.menuLocale : null,
     total: value.total,
     status: value.status,
     version: value.version,

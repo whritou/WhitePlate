@@ -21,17 +21,33 @@ public sealed class OrderRepository(WhitePlateDbContext database) : IOrderReposi
         return ResolveExisting(existing, requestHash, now);
     }
 
+    public async Task<CheckoutLocaleDto?> ResolveCheckoutLocaleAsync(Guid tenantId, string? requestedLocale,
+        CancellationToken cancellationToken)
+    {
+        var tenant = await database.Tenants.AsNoTracking()
+            .SingleOrDefaultAsync(item => item.Id == tenantId && item.IsActive, cancellationToken);
+        if (tenant is null) return null;
+
+        var locale = tenant.SupportsMenuLocale(requestedLocale) ?
+            WhitePlate.Domain.Tenants.MenuLocale.Create(requestedLocale).Value : tenant.DefaultMenuLocale;
+        return new CheckoutLocaleDto(locale, tenant.DefaultMenuLocale);
+    }
+
     public async Task<CheckoutCatalogDto> GetCheckoutCatalogAsync(Guid tenantId,
-        IReadOnlyCollection<Guid> productIds, string? discountCode, CancellationToken cancellationToken)
+        string locale, string defaultLocale, IReadOnlyCollection<Guid> productIds, string? discountCode,
+        CancellationToken cancellationToken)
     {
         var currency = await database.Tenants.AsNoTracking().Where(tenant => tenant.Id == tenantId && tenant.IsActive)
             .Select(tenant => tenant.Currency).SingleOrDefaultAsync(cancellationToken);
-        if (currency is null) return new CheckoutCatalogDto(string.Empty, [], null);
+        if (currency is null) return new CheckoutCatalogDto(string.Empty, locale, [], null);
 
         var products = await database.Products.AsNoTracking().Where(product => product.TenantId == tenantId &&
                 productIds.Contains(product.Id) && product.IsAvailable && !product.IsArchived)
             .OrderBy(product => product.Id)
-            .Select(product => new { product.Id, product.Name, product.BasePrice, product.TaxRatePercent })
+            .Select(product => new
+            {
+                product.Id, product.Name, product.TranslationsJson, product.BasePrice, product.TaxRatePercent
+            })
             .ToListAsync(cancellationToken);
         var ids = products.Select(product => product.Id).ToArray();
         var groups = await database.ProductOptionGroups.AsNoTracking().Where(group => group.TenantId == tenantId &&
@@ -43,20 +59,27 @@ public sealed class OrderRepository(WhitePlateDbContext database) : IOrderReposi
         var options = await database.ProductOptions.AsNoTracking().Where(option => option.TenantId == tenantId &&
                 groupIds.Contains(option.GroupId) && !option.IsArchived)
             .OrderBy(option => option.SortOrder).ThenBy(option => option.Id)
-            .Select(option => new { option.Id, option.GroupId, option.Name, option.PriceAdjustment })
+            .Select(option => new
+            {
+                option.Id, option.GroupId, option.Name, option.TranslationsJson, option.PriceAdjustment
+            })
             .ToListAsync(cancellationToken);
-        var checkoutProducts = products.Select(product => new CheckoutProductDto(product.Id, product.Name,
+        var checkoutProducts = products.Select(product => new CheckoutProductDto(product.Id,
+            WhitePlate.Domain.Catalog.CatalogTranslations.Get(product.TranslationsJson, locale, defaultLocale,
+                product.Name).Name,
             product.BasePrice, product.TaxRatePercent, groups.Where(group => group.ProductId == product.Id)
                 .Select(group => new CheckoutOptionGroupDto(group.Id, group.MinimumSelections,
                     group.MaximumSelections, options.Where(option => option.GroupId == group.Id)
-                        .Select(option => new CheckoutOptionDto(option.Id, option.Name, option.PriceAdjustment)).ToArray()))
+                        .Select(option => new CheckoutOptionDto(option.Id,
+                            WhitePlate.Domain.Catalog.CatalogTranslations.Get(option.TranslationsJson, locale,
+                                defaultLocale, option.Name).Name, option.PriceAdjustment)).ToArray()))
                 .ToArray())).ToArray();
 
         var discount = string.IsNullOrWhiteSpace(discountCode) ? null : await database.PromotionDiscounts.AsNoTracking()
             .Where(item => item.TenantId == tenantId && item.Code == discountCode && item.IsActive)
             .Select(item => new CheckoutDiscountDto(item.Code, item.Kind, item.Value))
             .SingleOrDefaultAsync(cancellationToken);
-        return new CheckoutCatalogDto(currency, checkoutProducts, discount);
+        return new CheckoutCatalogDto(currency, locale, checkoutProducts, discount);
     }
 
     public async Task<IdempotencyResult> CreateOrderAsync(WhitePlate.Domain.Orders.Order order,
@@ -106,8 +129,8 @@ public sealed class OrderRepository(WhitePlateDbContext database) : IOrderReposi
         var rows = await query.OrderByDescending(order => order.CreatedAtTicks).ThenByDescending(order => order.Id)
             .Take(pageSize + 1).Select(order => new
             {
-                Item = new OrderSummaryDto(order.Id, order.CustomerName, order.Currency, order.Total,
-                    order.Status, order.Version, order.CreatedAt,
+                Item = new OrderSummaryDto(order.Id, order.CustomerName, order.Currency, order.MenuLocale, order.Total,
+                    order.Status.ToString(), order.Version, order.CreatedAt,
                     order.Lines.Select(line => new OrderSummaryLineDto(line.ProductId, line.ProductName,
                         line.Quantity, line.Options.Select(option => new OrderSummaryOptionDto(option.OptionId,
                             option.Name)).ToArray())).ToArray()),

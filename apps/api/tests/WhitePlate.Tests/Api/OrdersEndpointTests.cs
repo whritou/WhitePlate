@@ -89,6 +89,77 @@ public sealed class OrdersEndpointTests
     }
 
     [Fact]
+    public async Task LocalizedCheckoutKeepsHistoricalLabelsAndIncludesEffectiveLocaleInIdempotency()
+    {
+        using var factory = new OrdersFactory();
+        var seeded = await factory.SeedAsync();
+        await using (var scope = factory.Services.CreateAsyncScope())
+        {
+            var database = scope.ServiceProvider.GetRequiredService<WhitePlateDbContext>();
+            var tenant = await database.Tenants.SingleAsync(item => item.Id == seeded.TenantId,
+                TestContext.Current.CancellationToken);
+            tenant.UpdateMenuLocales(["en", "fr"], "en");
+            (await database.Products.SingleAsync(item => item.Id == seeded.ProductId,
+                TestContext.Current.CancellationToken)).SetTranslation("fr", "Soupe", null);
+            (await database.ProductOptions.SingleAsync(item => item.Id == seeded.OptionId,
+                TestContext.Current.CancellationToken)).SetTranslation("fr", "Grande", null);
+            await database.SaveChangesAsync(TestContext.Current.CancellationToken);
+        }
+
+        using var client = factory.CreateClient();
+        client.DefaultRequestHeaders.Add("Idempotency-Key", "localized-checkout-0001");
+        var payload = new
+        {
+            customerName = "Ada",
+            menuLocale = "fr",
+            items = new[] { new { productId = seeded.ProductId, quantity = 1, optionIds = new[] { seeded.OptionId } } }
+        };
+
+        using var first = await client.PostAsJsonAsync("https://bistro.example.test/api/v1/orders", payload,
+            TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.Created, first.StatusCode);
+        using var firstJson = JsonDocument.Parse(await first.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
+        var receipt = firstJson.RootElement;
+        var orderId = receipt.GetProperty("id").GetGuid();
+        Assert.Equal("fr", receipt.GetProperty("menuLocale").GetString());
+        Assert.Equal("Soupe", receipt.GetProperty("lines")[0].GetProperty("productName").GetString());
+        Assert.Equal("Grande", receipt.GetProperty("lines")[0].GetProperty("options")[0].GetProperty("name").GetString());
+
+        await using (var scope = factory.Services.CreateAsyncScope())
+        {
+            var database = scope.ServiceProvider.GetRequiredService<WhitePlateDbContext>();
+            (await database.Products.SingleAsync(item => item.Id == seeded.ProductId,
+                TestContext.Current.CancellationToken)).SetTranslation("fr", "Potage", null);
+            (await database.ProductOptions.SingleAsync(item => item.Id == seeded.OptionId,
+                TestContext.Current.CancellationToken)).SetTranslation("fr", "Maxi", null);
+            await database.SaveChangesAsync(TestContext.Current.CancellationToken);
+        }
+
+        using var retry = await client.PostAsJsonAsync("https://bistro.example.test/api/v1/orders", payload,
+            TestContext.Current.CancellationToken);
+        using var retryJson = JsonDocument.Parse(await retry.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
+        Assert.Equal(orderId, retryJson.RootElement.GetProperty("id").GetGuid());
+        Assert.Equal("Soupe", retryJson.RootElement.GetProperty("lines")[0].GetProperty("productName").GetString());
+
+        using var fallbackConflict = await client.PostAsJsonAsync("https://bistro.example.test/api/v1/orders", new
+        {
+            customerName = "Ada",
+            menuLocale = "es",
+            items = payload.items
+        }, TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.Conflict, fallbackConflict.StatusCode);
+
+        using var scopeRead = factory.Services.CreateScope();
+        var readDatabase = scopeRead.ServiceProvider.GetRequiredService<WhitePlateDbContext>();
+        var storedOrder = await readDatabase.Orders.Include(item => item.Lines)
+            .ThenInclude(item => item.Options).SingleAsync(TestContext.Current.CancellationToken);
+        Assert.Equal("fr", storedOrder.MenuLocale);
+        Assert.Equal("Soupe", storedOrder.Lines.Single().ProductName);
+        Assert.Equal("Grande", storedOrder.Lines.Single().Options.Single().Name);
+        Assert.Equal(1, await readDatabase.Orders.CountAsync(TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
     public async Task PublicCheckoutRequiresAnIdempotencyKey()
     {
         using var factory = new OrdersFactory();
@@ -406,6 +477,7 @@ public sealed class OrdersEndpointTests
         using var firstJson = JsonDocument.Parse(await firstPage.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
         var firstItem = Assert.Single(firstJson.RootElement.GetProperty("items").EnumerateArray());
         AssertTicketSnapshot(firstItem);
+        Assert.Equal("Pending", firstItem.GetProperty("status").GetString());
         var firstPageId = firstItem.GetProperty("id").GetGuid();
         Assert.Contains(firstPageId, new[] { firstCreated, secondCreated });
         var cursor = firstJson.RootElement.GetProperty("nextCursor").GetString();

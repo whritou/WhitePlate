@@ -39,7 +39,8 @@ public sealed class OrdersController(ICurrentTenant currentTenant, ICurrentIdent
             return errors.ToActionResult(errors.FromStatus(HttpContext, StatusCodes.Status429TooManyRequests));
         var items = request.Items?.Select(item => new CreateOrderItem(item.ProductId, item.Quantity, item.OptionIds))
             .ToArray();
-        var command = new CreateOrderCommand(tenant.Id, request.CustomerName, request.DiscountCode, items,
+        var command = new CreateOrderCommand(tenant.Id, request.CustomerName, request.DiscountCode,
+            request.MenuLocale, items,
             Request.Headers["Idempotency-Key"].FirstOrDefault());
         var result = await createOrder.HandleAsync(command, cancellationToken);
         if (!result.IsSuccess)

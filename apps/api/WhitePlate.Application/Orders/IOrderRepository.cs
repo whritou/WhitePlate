@@ -8,8 +8,11 @@ public interface IOrderRepository
     Task<IdempotencyResult> FindIdempotentOrderAsync(Guid tenantId, string keyHash, string requestHash,
         DateTimeOffset now, CancellationToken cancellationToken);
 
-    Task<CheckoutCatalogDto> GetCheckoutCatalogAsync(Guid tenantId, IReadOnlyCollection<Guid> productIds,
-        string? discountCode, CancellationToken cancellationToken);
+    Task<CheckoutLocaleDto?> ResolveCheckoutLocaleAsync(Guid tenantId, string? requestedLocale,
+        CancellationToken cancellationToken);
+
+    Task<CheckoutCatalogDto> GetCheckoutCatalogAsync(Guid tenantId, string locale, string defaultLocale,
+        IReadOnlyCollection<Guid> productIds, string? discountCode, CancellationToken cancellationToken);
 
     Task<IdempotencyResult> CreateOrderAsync(Order order, OrderReceiptDto receipt, string keyHash,
         string requestHash, DateTimeOffset now, CancellationToken cancellationToken);
