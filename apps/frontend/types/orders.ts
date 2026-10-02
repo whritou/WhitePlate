@@ -26,10 +26,12 @@ export type OrderSummary = {
 
 export type OrderPage = { items: OrderSummary[]; nextCursor: string | null }
 
+export type RestaurantRole = "OrganizationOwner" | "Manager" | "Kitchen"
+
 export type RestaurantMembership = {
   id: string
   name: string
-  role: "OrganizationOwner" | "Manager" | "Kitchen"
+  role: RestaurantRole
 }
 
 export type OrderActionError =
@@ -44,7 +46,7 @@ export type OrderDashboardProps = {
   userId: string
   tenantId: string
   tenantName: string
-  role: string
+  role: RestaurantRole
   locale: string
   selectedStatus: OrderStatus | null
   cursor: string | null
@@ -70,7 +72,7 @@ export type UpdateOrderStatusInput = {
 
 export type OrderTicketProps = {
   order: OrderSummary
-  role: string
+  role: RestaurantRole
   locale: string
   pending: UpdateOrderStatusInput | null
   onUpdate: (input: Omit<UpdateOrderStatusInput, "tenantId">) => Promise<void>

@@ -86,6 +86,10 @@ export function OrderTicket({
                 key={status}
                 type="button"
                 size="lg"
+                aria-label={t("actionForOrder", {
+                  action: t(`actions.${status}`),
+                  reference: order.id.slice(0, 8),
+                })}
                 disabled={pending !== null}
                 onClick={() =>
                   void onUpdate({

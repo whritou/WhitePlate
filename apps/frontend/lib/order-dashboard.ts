@@ -6,6 +6,7 @@ import type {
   OrderSummary,
   OrderPage,
   RestaurantMembership,
+  RestaurantRole,
 } from "@/types/orders"
 
 export const ORDER_STATUSES = [
@@ -120,7 +121,7 @@ export function resolveOrderHubUrl(
 }
 
 export function getAvailableOrderTransitions(
-  role: string,
+  role: RestaurantRole,
   status: OrderStatus
 ): UpdateableOrderStatus[] {
   const result: UpdateableOrderStatus[] = []
@@ -316,9 +317,7 @@ function isValidOrderCursor(
   )
 }
 
-function isRestaurantRole(
-  value: unknown
-): value is RestaurantMembership["role"] {
+function isRestaurantRole(value: unknown): value is RestaurantRole {
   return (
     value === "OrganizationOwner" || value === "Manager" || value === "Kitchen"
   )

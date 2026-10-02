@@ -133,6 +133,12 @@
       "Completed": "Terminer la commande",
       "Cancelled": "Annuler la commande"
     },
+    "roles": {
+      "OrganizationOwner": "Propriétaire",
+      "Manager": "Responsable",
+      "Kitchen": "Équipe de cuisine"
+    },
+    "actionForOrder": "{action} — commande {reference}",
     "errors": {
       "forbidden": "Vous n’avez pas accès aux commandes de ce restaurant.",
       "invalid": "Le lien ou le filtre des commandes est invalide. Vérifiez-le et réessayez.",
