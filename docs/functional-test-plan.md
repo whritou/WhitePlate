@@ -1,6 +1,6 @@
 # Functional test plan
 
-This is an acceptance plan with dated verification notes below. The API suite covers tenant/organization/staff/catalog CRUD, verified email and invitation binding, checkout pricing/idempotency, order workflow, body/rate limits, outbox dispatch, and hub authorization. Dashboard API contracts and frontend unit behavior are automated; authenticated browser acceptance and production SignalR configuration remain open. Catalog-localization and localized-order migrations are applied on Neon `test`; automated tests cover locale fallback, immutable localized snapshots, and locale-aware idempotency. Public catalog/checkout browser acceptance against the test database remains open. The prior test-database schema migrations and local email/password signup/invitation path are verified. Live OAuth, real Resend delivery, and broader browser auth flows remain open. The earlier documentation audit is in [documentation review](documentation-review.md).
+This is an acceptance plan with dated verification notes below. The API suite covers tenant/organization/staff/catalog CRUD, verified email and invitation binding, checkout pricing/idempotency, order workflow, body/rate limits, outbox dispatch, and hub authorization. Dashboard API contracts and frontend unit behavior are automated. Localization, real-database checkout, and owner kitchen workflow have browser acceptance on Neon `test`; staff-role matrix and production SignalR configuration remain open. Catalog-localization and localized-order migrations are applied on Neon `test`; production remains untouched. The prior test-database schema migrations and local email/password signup/invitation path are verified. Live OAuth, real Resend delivery, and broader browser auth flows remain open. The earlier documentation audit is in [documentation review](documentation-review.md).
 
 ## 1. Current scaffold checks
 
@@ -258,7 +258,7 @@ The approved dashboard design and implementation plan are implemented in source.
 
 ## Localized order snapshots — 2026-10-02
 
-`LocalizedOrderSnapshots` adds nullable `Orders.MenuLocale`; checkout resolves the effective tenant locale before idempotency comparison and saves translated product/option labels into the order snapshots. Legacy orders retain a null locale. The migration is applied on Neon `test`; production remains untouched. Automated tests cover supported and fallback locales, snapshot stability after catalog edits, and same-key retries/conflicts across effective locales. Public catalog/checkout behavior against the database and authenticated kitchen browser acceptance remain open.
+`LocalizedOrderSnapshots` adds nullable `Orders.MenuLocale`; checkout resolves the effective tenant locale before idempotency comparison and saves translated product/option labels into the order snapshots. Legacy orders retain a null locale. The migration is applied on Neon `test`; production remains untouched. Automated tests cover supported and fallback locales, snapshot stability after catalog edits, and same-key retries/conflicts across effective locales. Browser acceptance on Neon `test` verified language configuration and fallback, a French menu, a persisted French checkout receipt, and owner kitchen status transitions with live refresh. Production deployment and kitchen-role acceptance remain open.
 
 | Command/check | Actual result |
 | --- | --- |
@@ -269,9 +269,25 @@ The approved dashboard design and implementation plan are implemented in source.
 | `node node_modules/prettier/bin/prettier.cjs --check '**/*.{ts,tsx}'` from `apps/frontend` | Passed. |
 | `node node_modules/next/dist/bin/next build` with inert HTTPS `.invalid` auth/API URLs and an unavailable local database | Passed compilation, TypeScript, and all 29 route/page generations. Better Auth emitted expected schema-validation errors because the build database was intentionally unavailable. |
 | Neon `test` migration | `LocalizedOrderSnapshots` applied successfully after reviewing the generated nullable-column migration. |
-| Authenticated browser and live checkout acceptance | Not completed; the test database credential must be rotated before further live database checks. |
+| Authenticated browser and live checkout acceptance (2026-10-02) | Passed against Neon `test`; details follow below. |
 
-The API integration tests now assert saved product/option snapshot data across cursor pages. Frontend tests exercise the token route's session/origin/cache rules, conditional status updates, tenant/event validation, deduplication, reconnect rejoin, coalescing, and REST refresh callbacks. The direct live non-production OIDC/SignalR run above verifies group authorization and REST recovery; this turn did not run the authenticated Next.js dashboard in a browser. Complete UI-role/navigation acceptance in UI-ORD-01–05, then configure and verify the browser-reachable production hub URL, CORS, and TLS under the separate hosting/operations task. Keep the kanban card In progress until those acceptance checks are recorded.
+The API integration tests assert saved product/option snapshot data across cursor pages. Frontend tests exercise the token route's session/origin/cache rules, conditional status updates, tenant/event validation, deduplication, reconnect rejoin, coalescing, and REST refresh callbacks. The authenticated browser run below covers the owner dashboard. Complete the separate kitchen-staff/manager role matrix and verify the browser-reachable production hub URL, CORS, and TLS under the hosting/operations task.
+
+## Neon localization, checkout, and kitchen acceptance — 2026-10-02
+
+All live mutations below used only the Neon `test` branch and seeded test tenants. The tenant's French translations and enabled-language settings were added to the test fixture and left available for repeat acceptance. No production data was changed.
+
+| Scenario | Actual result |
+| --- | --- |
+| Catalog language settings and default | Enabling French succeeded. Switching the default while translated item text was incomplete was rejected with the expected validation message. After category and product translations were added, the switch succeeded; the default was restored to English. |
+| Public locale and fallback | The API returned French translations for `fr`, English base text for `en`, and English default fallback for unsupported `es`. The tenant storefront rendered the French category, product, and description; `menuLocale=es` used the effective English locale. |
+| Localized checkout and persistence | A French browser checkout produced a receipt with “Plat de test” and 7.50 EUR. The authenticated staff list returned the same order with `menuLocale=fr` and the French product snapshot. |
+| Checkout idempotency | Replaying the same key and effective locale returned the original receipt. Reusing that key with a different effective locale returned `409`. A second test-only order was created to check this path. |
+| Authenticated kitchen workflow | The local dashboard listed the Neon test orders, rendered the French ticket label, connected to SignalR after allowing `http://localhost:3000` through the local API's process-only CORS setting, and refreshed after Preparing → Ready status actions. |
+| Tenant access boundary | Opening the kitchen route with a fabricated tenant ID rendered the access-denied state and no order details. Both seeded tenants belong to the owner used for this browser run; this is not the separate-role isolation scenario. |
+| Production public endpoints | Render Swagger is available; unauthenticated `GET /api/v1/me` returned `401`. Production OpenAPI still describes `OrderStatus` as an integer, which identifies the currently deployed contract predating the source fix that serializes staff-list status names. Production deployment/hub behavior remains unverified. |
+
+The dashboard check used an owner account. Kitchen-staff and manager permission combinations, role revocation during an active session, and the production SignalR origin/TLS path remain outstanding. The test checkout rows remain in the non-production Neon test database for audit; do not treat that database as an empty fixture.
 
 ## 3. Automation strategy
 

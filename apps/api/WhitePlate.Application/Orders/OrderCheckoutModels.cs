@@ -28,7 +28,7 @@ public sealed record OrderSummaryOptionDto(Guid OptionId, string Name);
 public sealed record OrderSummaryLineDto(Guid ProductId, string ProductName, int Quantity,
     IReadOnlyList<OrderSummaryOptionDto> Options);
 public sealed record OrderSummaryDto(Guid Id, string CustomerName, string Currency, string? MenuLocale, decimal Total,
-    OrderStatus Status, int Version, DateTimeOffset CreatedAt, IReadOnlyList<OrderSummaryLineDto> Lines);
+    string Status, int Version, DateTimeOffset CreatedAt, IReadOnlyList<OrderSummaryLineDto> Lines);
 public sealed record OrderPageDto(IReadOnlyList<OrderSummaryDto> Items, string? NextCursor);
 public sealed record OrderPageData(IReadOnlyList<OrderSummaryDto> Items, OrderPageCursor? NextCursor);
 public sealed record OrderPageCursor(long CreatedAtTicks, Guid Id);

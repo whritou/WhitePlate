@@ -130,7 +130,7 @@ public sealed class OrderRepository(WhitePlateDbContext database) : IOrderReposi
             .Take(pageSize + 1).Select(order => new
             {
                 Item = new OrderSummaryDto(order.Id, order.CustomerName, order.Currency, order.MenuLocale, order.Total,
-                    order.Status, order.Version, order.CreatedAt,
+                    order.Status.ToString(), order.Version, order.CreatedAt,
                     order.Lines.Select(line => new OrderSummaryLineDto(line.ProductId, line.ProductName,
                         line.Quantity, line.Options.Select(option => new OrderSummaryOptionDto(option.OptionId,
                             option.Name)).ToArray())).ToArray()),

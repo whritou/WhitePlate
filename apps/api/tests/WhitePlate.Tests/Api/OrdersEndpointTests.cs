@@ -477,6 +477,7 @@ public sealed class OrdersEndpointTests
         using var firstJson = JsonDocument.Parse(await firstPage.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
         var firstItem = Assert.Single(firstJson.RootElement.GetProperty("items").EnumerateArray());
         AssertTicketSnapshot(firstItem);
+        Assert.Equal("Pending", firstItem.GetProperty("status").GetString());
         var firstPageId = firstItem.GetProperty("id").GetGuid();
         Assert.Contains(firstPageId, new[] { firstCreated, secondCreated });
         var cursor = firstJson.RootElement.GetProperty("nextCursor").GetString();
