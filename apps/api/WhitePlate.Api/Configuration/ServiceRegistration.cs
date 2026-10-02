@@ -80,6 +80,8 @@ public static class ServiceRegistration
         services.AddScoped<ICurrentTenant>(provider => provider.GetRequiredService<CurrentTenant>());
         services.AddDbContext<WhitePlateDbContext>(options =>
             options.UseNpgsql(configuration.GetConnectionString("WhitePlate")));
+        services.AddHealthChecks().AddCheck<DatabaseReadinessHealthCheck>(
+            "database", timeout: TimeSpan.FromSeconds(3));
         services.AddScoped<ITenantRepository, TenantRepository>();
         services.AddScoped<ICatalogRepository, CatalogRepository>();
         services.AddScoped<IOrderRepository, OrderRepository>();
