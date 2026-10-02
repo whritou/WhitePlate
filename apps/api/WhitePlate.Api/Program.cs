@@ -2,6 +2,7 @@ using WhitePlate.Api.Configuration;
 using WhitePlate.Api.Errors;
 using WhitePlate.Api.Tenancy;
 using WhitePlate.Api.Realtime;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 
 var provisionTenant = args.Contains("--provision-tenant", StringComparer.Ordinal);
 var provisionOrganization = args.Contains("--provision-organization", StringComparer.Ordinal);
@@ -59,6 +60,17 @@ if (swaggerEnabled)
 
 app.MapControllers();
 app.MapMethods("/", ["GET", "HEAD"], () => Results.Ok()).ExcludeFromDescription();
+app.MapGet("/health/live", () => Results.Text("Healthy", "text/plain"))
+    .AllowAnonymous()
+    .ExcludeFromDescription();
+app.MapHealthChecks("/health/ready", new HealthCheckOptions
+{
+    ResponseWriter = async (context, report) =>
+    {
+        context.Response.ContentType = "text/plain";
+        await context.Response.WriteAsync(report.Status.ToString(), context.RequestAborted);
+    }
+}).AllowAnonymous().ExcludeFromDescription();
 app.MapHub<KitchenHub>("/hubs/orders").RequireAuthorization();
 
 app.Run();

@@ -20,6 +20,7 @@ Start services using the [development guide](development.md). Use fresh browser 
 | CUR-10 | Start API with Production environment and no Development launch profile, then request OpenAPI | `404`; use an explicit test port and the intended HTTP/HTTPS configuration |
 | CUR-11 | Request `/api/v1/menu` on a configured tenant host | `200` for an active provisioned tenant; unknown tenant host returns `404` |
 | CUR-12 | Run the API against the Neon `test` branch and request `/api/v1/tenant` on an unknown subdomain | Database resolution completes and returns the expected `404`; production remains untouched |
+| CUR-13 | Request `/health/live` and `/health/ready` with the API database reachable, then repeat readiness with the database unavailable | Liveness remains `200`; readiness returns `200` when connected and `503` when disconnected, with no provider details in the response |
 
 PowerShell 7 API smoke check, while the HTTP profile is running:
 
