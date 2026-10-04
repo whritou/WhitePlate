@@ -112,7 +112,9 @@
     "saveTranslation": "Save translation",
     "savingTranslation": "Saving…",
     "translationSaved": "Translation saved.",
-    "translationError": "We couldn’t save this translation. Check the language and text, then try again."
+    "translationError": "We couldn’t save this translation. Check the language and text, then try again.",
+    "createRestaurantAction": "Create restaurant",
+    "editCatalog": "Edit catalog"
   },
   "KitchenOrders": {
     "title": "Kitchen orders",
@@ -215,5 +217,64 @@
     "emptyCategory": "No items in this section yet.",
     "unavailableProduct": "Currently unavailable",
     "unavailable": "This restaurant menu is temporarily unavailable. Please try again shortly."
+  },
+  "Restaurants": {
+    "title": "Create a restaurant",
+    "description": "Add a restaurant to {organization}.",
+    "back": "All organizations",
+    "name": "Restaurant name",
+    "subdomain": "Restaurant subdomain",
+    "subdomainHint": "Use letters, digits and internal hyphens. The subdomain must be unique; www, api, admin and app are reserved. Public access depends on your configured restaurant domain.",
+    "currency": "Currency",
+    "create": "Create restaurant",
+    "saving": "Creating…",
+    "created": "Restaurant created.",
+    "errors": {
+      "invalid": "Check the name, subdomain and currency.",
+      "conflict": "That subdomain is already taken. Choose another one.",
+      "unauthorized": "Sign in with a verified email to continue.",
+      "forbidden": "You do not have owner access to this organization.",
+      "unavailable": "We could not create the restaurant. Try again in a moment."
+    }
+  },
+  "Catalog": {
+    "title": "Manage catalog",
+    "intro": "Set your categories, products, prices and availability.",
+    "back": "Back to organizations",
+    "newCategory": "New category",
+    "newProduct": "New product",
+    "editCategory": "Edit category {name}",
+    "editProduct": "Edit product {name}",
+    "name": "Name",
+    "description": "Description",
+    "category": "Category",
+    "sortOrder": "Display order",
+    "price": "Base price ({currency})",
+    "tax": "Tax rate (%)",
+    "taxValue": "Tax {value}%",
+    "availability": "Availability",
+    "available": "Available",
+    "unavailable": "Unavailable",
+    "saving": "Saving…",
+    "save": "Save changes",
+    "createCategory": "Create category",
+    "createProduct": "Create product",
+    "saved": "Changes saved.",
+    "archive": "Archive",
+    "archiveName": "Archive {name}",
+    "archived": "Archived",
+    "confirmArchive": "Confirm archive",
+    "cancel": "Cancel",
+    "confirmCategoryArchive": "Archive {name} and all its products and options? They will leave the public menu. Existing orders keep their history.",
+    "confirmProductArchive": "Archive {name} and its options? It will leave the public menu. Existing orders keep their history.",
+    "categoryRequired": "Create a category before adding products.",
+    "empty": "No categories yet.",
+    "errors": {
+      "invalid": "Check the fields and try again.",
+      "unauthorized": "Sign in again to manage this catalog.",
+      "forbidden": "You do not have permission to manage this restaurant.",
+      "conflict": "The catalog changed. Refresh and try again.",
+      "unavailable": "The catalog service is unavailable. Try again."
+    }
   }
 }

@@ -14,6 +14,7 @@
     "start": "next start",
     "lint": "eslint .",
     "test": "vitest run",
+    "test:browser": "playwright test",
     "auth:generate": "auth generate --config ./lib/auth.ts",
     "auth:migrate": "auth migrate --config ./lib/auth.ts",
     "auth:dev-token": "node ./scripts/dev-token.mjs",

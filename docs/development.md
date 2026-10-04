@@ -146,6 +146,10 @@ dotnet publish apps/api/WhitePlate.Api/WhitePlate.Api.csproj -c Release
 
 The xUnit v3 suite uses Microsoft Testing Platform selected in root `global.json` and includes Domain, Application, Infrastructure, project-dependency, and HTTP tests. Use `--no-restore` only when dependencies have already been restored. The frontend Vitest suite covers API requests, query/state primitives, the theme shortcut, and guest cart/checkout boundaries. GitHub Actions runs frontend install, tests, lint, typecheck, production build, and API tests on pushes and pull requests. Root `npm test` deliberately exits with the template's “no test specified” error. See [backend architecture](architecture/WHITEPLATE_BACKEND_ARCHITECTURE.md), [functional checks](functional-test-plan.md), and [verification evidence](documentation-review.md).
 
+## Restaurant browser acceptance
+
+The restaurant creation browser test uses the existing verified `.invalid` local account and the documented Neon `test` database. Start the API HTTP profile and the frontend on port 3000 with process-local `API_BASE_URL=http://localhost:5182` and `PUBLIC_API_BASE_URL=http://localhost:5182`. Run `node node_modules/@playwright/test/cli.js test tests/browser/restaurant-creation.spec.ts --reporter=line` from `apps/frontend`. Playwright uses installed Chrome in headless mode; it loads the existing local environment without printing passwords or tokens and rejects a non-localhost browser target. The test signs in, creates a named acceptance organization/restaurant, verifies GBP and normalized subdomain submission, and checks French duplicate-subdomain feedback. Test-only data is retained for subsequent catalog/dashboard acceptance. Non-secret fixture IDs go in ignored `.acceptance/restaurant.json`; traces, screenshots and video are disabled so credentials are not captured. Do not run this test against production.
+
 ## Guest checkout browser fixture
 
 The storefront uses the existing server-only tenant API template for both menu reads and checkout. No extra environment variables or schema changes are needed for guest cart/checkout. The browser keeps the cart and receipt only in component memory; checkout derives the API target from actual Host and validates same-origin requests. Guests behind the BFF can share the API's per-tenant remote-address rate bucket; a trusted production proxy/edge-rate design remains operational work.
@@ -181,6 +185,18 @@ The build context must be `apps/api` because the Dockerfile copies the API host 
 The image does not configure HTTPS or provision a certificate. A production deployment needs an explicit TLS/reverse-proxy and trusted-forwarding design. There is no full-stack Compose command.
 
 ## Troubleshooting
+
+### Catalog browser acceptance
+
+After the restaurant creation browser test has saved `.acceptance/restaurant.json`, run `node node_modules/playwright/cli.js test catalog-management.spec.ts` from `apps/frontend` with the same local frontend/API. It creates named categories and products in that test restaurant, persists price/tax/order/availability edits, checks French feedback and archive cancellation/confirmation, then reloads archived history. The fixture rows remain on Neon `test`; only rows created by that test are archived. The dashboard acceptance suite uses separate active fixtures. No option-group or discount editor is implemented in this slice.
+
+### Staff dashboard browser acceptance
+
+Set the local API's process-only `Cors__AllowedOrigins__0=http://localhost:3000` before starting it. Explicitly set `$env:WHITEPLATE_ACCEPTANCE_DATABASE='neon-test'` after confirming `DATABASE_URL` selects the documented test branch. From `apps/frontend`, `node node_modules/playwright/cli.js test` runs three dependent projects in order: restaurant creation, catalog editing, then staff acceptance. A focused run with `--no-deps` uses the existing ignored fixture instead; otherwise Playwright runs prerequisite projects first.
+
+The staff helper creates verified `.invalid` users directly in the test auth schema with random in-memory passwords, signs in through the real auth endpoint, and grants manager/kitchen memberships through email-bound API invitations. No email is sent. It provisions another test restaurant for foreign-membership isolation and uses real checkout/status APIs. Cleanup removes only its generated identities' restaurant memberships and auth sessions; test users, organizations, restaurants, catalog and orders remain for audit. Interrupting the process can bypass cleanup, so inspect those test identity IDs before another run. Traces, videos and automatic screenshots stay disabled.
+
+The test exercises role controls and actual owner/manager/kitchen transitions, conditional stale-version rejection/reload, manager catalog creation, kitchen catalog denial, two-tenant read/write denial, English/French copy, and membership revocation during an open dashboard. Revocation is detected by REST polling within 30 seconds and removes tickets/filters; this is not immediate server-side SignalR group eviction. The manager's hub is deliberately disconnected during the stale-version scenario. Outbox dispatch, reconnect delivery and hosted origin/TLS validation need their separate acceptance run.
 
 Vercel selects a Node major and manages its minor/patch releases. Configure the frontend root as `apps/frontend`, use Node **24.x**, and use the checked-in lockfile (`npm ci`) when configuring an install command. The package engine ranges accept Vercel's Node 24.21.0/npm 11.19.0 pair. Keep engine validation enabled; do not work around `EBADENGINE` using `--force` or `engine-strict=false`. When toolchain references change, regenerate the lockfile with npm and verify the supported ranges. See [Vercel Node versions](https://vercel.com/docs/functions/runtimes/node-js/node-js-versions) and [package manager selection](https://vercel.com/docs/package-managers).
 

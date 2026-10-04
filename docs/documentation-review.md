@@ -202,3 +202,51 @@ The reported Vercel install failed because `engine-strict=true` enforced exact N
 | API tests | Not rerun: no API code or schema changed. |
 
 Fresh `npm ci` and hosted Vercel deployment are not verified in this follow-up. Rerun the hosted build after merging the fix; keep the toolchain card In review until deployment acceptance succeeds. The pre-existing `.env.example` edit remains excluded. No application source, production data, provider credentials or dependency versions changed.
+
+## Staff acceptance and final verification — 2026-10-04
+
+Added a repeatable real-database browser suite for distinct owner/manager/kitchen identities and a foreign tenant member. Playwright project dependencies run restaurant creation, catalog editing and staff acceptance in order. The latest combined run passed all three scenarios in 2.3 minutes, including owner completion with French feedback. The staff-only run passed in 52.5 seconds before that added completion assertion. Random test credentials stay in memory; cleanup removes only generated staff memberships/sessions. No backend contract, migration, production or dependency changes.
+
+| Command/check | Actual result |
+| --- | --- |
+| `$env:WHITEPLATE_ACCEPTANCE_DATABASE='neon-test'; node node_modules/playwright/cli.js test` | Passed: 3 browser tests against localhost and Neon `test`, with real auth, invitation acceptance, checkout, conditional mutations, catalog edits and revocation polling. |
+| `node node_modules/vitest/vitest.mjs run` | Passed: 24 files, 197 tests. |
+| `node node_modules/eslint/bin/eslint.js .` | Passed without errors/warnings. |
+| `node node_modules/typescript/bin/tsc --noEmit` | Passed after removing duplicate configuration/type properties introduced during editing. |
+| `node node_modules/prettier/bin/prettier.cjs --check '**/*.{ts,tsx}'` | Passed. |
+| `node node_modules/next/dist/bin/next build --webpack` | Passed compilation, TypeScript and 33 page generations with inert build settings. Expected Better Auth unavailable-database diagnostics and nonfatal restricted Webpack cache warnings were recorded. |
+| `dotnet test apps/api/WhitePlate.slnx --no-restore --configuration Release` | Passed: 136 tests, zero failures/skips. Initial restricted run failed MSB3491 because build-cache writes were denied; normal-permission rerun passed. |
+
+Early staff runs corrected expected accessible names and narrowed a French status selector that also matched the filter. The passing suite checks the actual localized controls and persistent state. A manager hub disconnect deliberately preserves the stale snapshot; REST polling is authoritative for revocation and hides tickets/filters within the 30-second interval. The API logged `Kitchen outbox polling failed (InvalidOperationException)` during runtime acceptance. Event publication/reconnect recovery, immediate hub group eviction on membership removal and hosted URL/CORS/TLS remain unverified and are recorded on the existing SignalR/operations kanban work. REST success does not establish event delivery. Test-only data remains on Neon `test`; production was untouched. Both agent-started local servers were stopped after acceptance.
+
+## Category and product management — 2026-10-04
+
+Implemented localized owner/manager catalog editing against the existing API, with validated management DTOs and mutation inputs, safe authorization errors, duplicate-submit guards, server refresh and explicit archive confirmation. Option-group and discount editors remain deferred. No schema or production changes.
+
+| Command/check | Actual result |
+| --- | --- |
+| `node node_modules/vitest/vitest.mjs run` | Passed: 24 files, 197 tests. New mutation tests first failed against stubs (11 failures); management response acceptance first failed against a null parser. Both then passed after implementation. |
+| `node node_modules/eslint/bin/eslint.js .` | Passed without errors/warnings. |
+| `node node_modules/typescript/bin/tsc --noEmit` | Passed. |
+| `node node_modules/prettier/bin/prettier.cjs --check '**/*.{ts,tsx}'` | Passed. Restricted-shell formatting initially encountered EPERM; normal-permission formatting succeeded. |
+| `node node_modules/next/dist/bin/next build --webpack` | Passed compilation, TypeScript and 33 page generations using inert build auth/API URLs and unavailable local database. Expected Better Auth schema diagnostics and nonfatal restricted-shell Webpack cache EPERM warnings were recorded. |
+| `node node_modules/playwright/cli.js test catalog-management.spec.ts` | Passed (44 seconds) against localhost and Neon `test`: category/product CRUD, GBP values, persisted availability after reload, French UI, archive cancellation/confirmation and read-only retained history. |
+
+Staff-role and foreign-account catalog checks continue in the next acceptance task. Test-created rows are retained on Neon `test`; archived rows are restricted to this test's own category/product.
+
+## Owner restaurant creation — 2026-10-04
+
+Tracked in issue #13 on `feat/restaurant-management-and-staff-acceptance`. Added an owner-only English/French restaurant form, validated server action and authenticated service, organization/team navigation, normalized subdomain and EUR/USD/GBP input, and localized conflict/permission errors. The existing API owns authorization and persistence; no API/schema/dependency changes were needed.
+
+Commands ran from `apps/frontend` with Node 24.19.0; npm is absent from this shell.
+
+| Command | Actual result |
+| --- | --- |
+| `node node_modules/vitest/vitest.mjs run` | Passed: 22 files, 155 tests; includes 21 creation-boundary cases. Success/error tests failed against the initial stub before implementation. |
+| `node node_modules/eslint/bin/eslint.js .` | Passed after correcting statement/JSX spacing. |
+| `node node_modules/typescript/bin/tsc --noEmit` | Passed after correcting the table-driven test input type. |
+| `node node_modules/prettier/bin/prettier.cjs --check '**/*.{ts,tsx}'` | Passed from the package. Source formatting needed normal permissions for sandbox-denied files; an accidental root invocation could not resolve the package-local plugin. |
+| `node node_modules/next/dist/bin/next build --webpack` | Passed compilation, TypeScript and 31 route/page generations with process-local inert production settings. Better Auth emitted expected schema diagnostics against the unavailable build database; restricted cache writes warned but did not fail the build. |
+| `node node_modules/@playwright/test/cli.js test tests/browser/restaurant-creation.spec.ts --reporter=line` | Passed (19.6 seconds): verified local account, real test-database GBP restaurant creation, uppercase subdomain, team navigation, French duplicate-subdomain feedback and unlocked fields. |
+
+Initial browser runs exposed exact-label/duplicate-element selector issues and a cold-route assertion timeout. The currency control now has an explicit accessible name and tests scope selectors to the relevant form/restaurant. One later run hit a transient Better Auth database connection termination; the final rerun passed without bypassing authorization. Sandbox-denied Next cache writes required a normal-permission dev server. Initial API restore could not access a NuGet lock; the API started using restored assets with `--no-restore`, and `/health/ready` returned 200. Test-only acceptance organizations/restaurants remain on Neon `test`; non-secret fixture IDs are in ignored `.acceptance/restaurant.json`. No production data or credentials changed.

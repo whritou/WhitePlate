@@ -111,6 +111,13 @@ export default async function OrganizationPage() {
                   >
                     {t("editMenuLanguages")}
                   </Link>
+
+                  <Link
+                    href={`/organization/catalog?tenantId=${restaurant.id}`}
+                    className="shrink-0 text-sm font-medium text-primary hover:underline"
+                  >
+                    {t("editCatalog")}
+                  </Link>
                 </Card>
               </li>
             ))}
@@ -171,6 +178,13 @@ export default async function OrganizationPage() {
                     className="mt-5 inline-flex items-center gap-2 text-sm font-medium text-primary underline-offset-4 hover:underline"
                   >
                     {t("manageTeamAction")}
+                  </Link>
+
+                  <Link
+                    href={`/organization/restaurants/new?organizationId=${organization.id}`}
+                    className="mt-5 text-sm font-medium text-primary underline-offset-4 hover:underline"
+                  >
+                    {t("createRestaurantAction")}
                   </Link>
                 </CardFooter>
               </Card>
