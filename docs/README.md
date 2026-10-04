@@ -1,6 +1,6 @@
 # Documentation index
 
-Reviewed against the working tree on 2026-10-04. WhitePlate contains the first-release restaurant API, Better Auth account/organization/team flows, owner restaurant creation, owner/manager category and product management, localized tenant menu browsing, an in-memory guest checkout, and a localized staff kitchen order dashboard with SignalR refresh hints and REST recovery. Localization migrations, catalog editing, checkout and owner kitchen acceptance are verified on Neon `test`. Staff-role acceptance and production operations remain separately tracked; the kanban also records user-reported production OAuth/onboarding verification.
+Reviewed against the working tree on 2026-10-04. WhitePlate contains the first-release restaurant API, Better Auth account/organization/team flows, owner restaurant creation, owner/manager category and product management, localized tenant menu browsing, an in-memory guest checkout, and a localized staff kitchen order dashboard with SignalR refresh hints and REST recovery. Localization migrations, catalog editing, checkout, the owner/manager/kitchen role matrix, cross-tenant denial and dashboard revocation recovery are verified on Neon `test`. Event delivery, production hub configuration and operations remain separately tracked; the local API logged an outbox polling error during acceptance. The kanban also records user-reported production OAuth/onboarding verification.
 
 ## Reading order
 

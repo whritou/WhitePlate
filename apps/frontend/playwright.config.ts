@@ -13,6 +13,19 @@ export default defineConfig({
   workers: 1,
   timeout: 120_000,
   expect: { timeout: 20_000 },
+  projects: [
+    { name: "restaurant", testMatch: "restaurant-creation.spec.ts" },
+    {
+      name: "catalog",
+      testMatch: "catalog-management.spec.ts",
+      dependencies: ["restaurant"],
+    },
+    {
+      name: "staff",
+      testMatch: "staff-dashboard.spec.ts",
+      dependencies: ["catalog"],
+    },
+  ],
   use: {
     baseURL,
     channel: "chrome",
