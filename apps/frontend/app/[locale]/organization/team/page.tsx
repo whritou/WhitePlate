@@ -1,4 +1,5 @@
 import { StaffInvitationForm } from "@/components/auth/staff-invitation-form"
+import { Button } from "@/components/ui/button"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import {
   Card,
@@ -85,6 +86,18 @@ export default async function OrganizationTeamPage({
         </CardHeader>
 
         <CardContent className="px-0">
+          <Button
+            className="mt-6"
+            nativeButton={false}
+            render={
+              <Link
+                href={`/organization/restaurants/new?organizationId=${organization.id}`}
+              />
+            }
+          >
+            {t("createRestaurantAction")}
+          </Button>
+
           {restaurants && restaurants.length > 0 && (
             <section className="mt-8 grid gap-3">
               <h2 className="text-base font-semibold">

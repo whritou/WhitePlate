@@ -202,3 +202,20 @@ The reported Vercel install failed because `engine-strict=true` enforced exact N
 | API tests | Not rerun: no API code or schema changed. |
 
 Fresh `npm ci` and hosted Vercel deployment are not verified in this follow-up. Rerun the hosted build after merging the fix; keep the toolchain card In review until deployment acceptance succeeds. The pre-existing `.env.example` edit remains excluded. No application source, production data, provider credentials or dependency versions changed.
+
+## Owner restaurant creation — 2026-10-04
+
+Tracked in issue #13 on `feat/restaurant-management-and-staff-acceptance`. Added an owner-only English/French restaurant form, validated server action and authenticated service, organization/team navigation, normalized subdomain and EUR/USD/GBP input, and localized conflict/permission errors. The existing API owns authorization and persistence; no API/schema/dependency changes were needed.
+
+Commands ran from `apps/frontend` with Node 24.19.0; npm is absent from this shell.
+
+| Command | Actual result |
+| --- | --- |
+| `node node_modules/vitest/vitest.mjs run` | Passed: 22 files, 155 tests; includes 21 creation-boundary cases. Success/error tests failed against the initial stub before implementation. |
+| `node node_modules/eslint/bin/eslint.js .` | Passed after correcting statement/JSX spacing. |
+| `node node_modules/typescript/bin/tsc --noEmit` | Passed after correcting the table-driven test input type. |
+| `node node_modules/prettier/bin/prettier.cjs --check '**/*.{ts,tsx}'` | Passed from the package. Source formatting needed normal permissions for sandbox-denied files; an accidental root invocation could not resolve the package-local plugin. |
+| `node node_modules/next/dist/bin/next build --webpack` | Passed compilation, TypeScript and 31 route/page generations with process-local inert production settings. Better Auth emitted expected schema diagnostics against the unavailable build database; restricted cache writes warned but did not fail the build. |
+| `node node_modules/@playwright/test/cli.js test tests/browser/restaurant-creation.spec.ts --reporter=line` | Passed (19.6 seconds): verified local account, real test-database GBP restaurant creation, uppercase subdomain, team navigation, French duplicate-subdomain feedback and unlocked fields. |
+
+Initial browser runs exposed exact-label/duplicate-element selector issues and a cold-route assertion timeout. The currency control now has an explicit accessible name and tests scope selectors to the relevant form/restaurant. One later run hit a transient Better Auth database connection termination; the final rerun passed without bypassing authorization. Sandbox-denied Next cache writes required a normal-permission dev server. Initial API restore could not access a NuGet lock; the API started using restored assets with `--no-restore`, and `/health/ready` returned 200. Test-only acceptance organizations/restaurants remain on Neon `test`; non-secret fixture IDs are in ignored `.acceptance/restaurant.json`. No production data or credentials changed.

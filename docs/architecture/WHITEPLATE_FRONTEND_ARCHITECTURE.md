@@ -72,6 +72,10 @@ Its `d` shortcut ignores repeated/prevented events, Ctrl/Alt/Meta combinations, 
 
 The theme currently changes light/dark appearance only. There is no restaurant-specific branding source. The storefront uses the existing button for cart and checkout actions.
 
+## Restaurant creation
+
+Organization owners open `/[locale]/organization/restaurants/new?organizationId=...` from their organization or team page. The server reads the verified session and owned organizations before rendering the form. The action validates and normalizes the name, one-label subdomain and EUR/USD/GBP currency, then delegates to the server-only restaurant service and authenticated API client. The API independently checks ownership; a browser organization ID never grants access. Reserved labels fail validation, taken labels produce a localized conflict, and inaccessible organizations receive a safe denial. The created restaurant appears in the team view and the current user's restaurant navigation after server refresh. Domain/DNS setup remains separate: creation does not configure a public domain.
+
 ## Guest cart and checkout
 
 The server loads the tenant menu and renders `RestaurantMenu`, a Client Component keyed by the API tenant ID. Its cart has one line per product with editable quantity and option IDs. It uses component state without browser storage or a persisted cart. Reloading, leaving the page, or changing tenant clears cart/receipt state. A menu-language change uses localized router replacement and retains the same tenant's cart; the interface locale stays independent.

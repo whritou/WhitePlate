@@ -172,6 +172,13 @@ export default async function OrganizationPage() {
                   >
                     {t("manageTeamAction")}
                   </Link>
+
+                  <Link
+                    href={`/organization/restaurants/new?organizationId=${organization.id}`}
+                    className="mt-5 text-sm font-medium text-primary underline-offset-4 hover:underline"
+                  >
+                    {t("createRestaurantAction")}
+                  </Link>
                 </CardFooter>
               </Card>
             </li>
