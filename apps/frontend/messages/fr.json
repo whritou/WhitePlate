@@ -113,7 +113,8 @@
     "savingTranslation": "Enregistrement…",
     "translationSaved": "Traduction enregistrée.",
     "translationError": "Impossible d’enregistrer cette traduction. Vérifiez la langue et le texte, puis réessayez.",
-    "createRestaurantAction": "Créer le restaurant"
+    "createRestaurantAction": "Créer le restaurant",
+    "editCatalog": "Modifier le catalogue"
   },
   "KitchenOrders": {
     "title": "Commandes en cuisine",
@@ -234,6 +235,46 @@
       "unauthorized": "Connectez-vous avec une adresse e-mail vérifiée pour continuer.",
       "forbidden": "Vous devez être propriétaire de cette organisation.",
       "unavailable": "Impossible de créer le restaurant. Réessayez dans un instant."
+    }
+  },
+  "Catalog": {
+    "title": "Gérer le catalogue",
+    "intro": "Définissez vos catégories, produits, prix et disponibilités.",
+    "back": "Retour aux organisations",
+    "newCategory": "Nouvelle catégorie",
+    "newProduct": "Nouveau produit",
+    "editCategory": "Modifier la catégorie {name}",
+    "editProduct": "Modifier le produit {name}",
+    "name": "Nom",
+    "description": "Description",
+    "category": "Catégorie",
+    "sortOrder": "Ordre d’affichage",
+    "price": "Prix de base ({currency})",
+    "tax": "Taux de taxe (%)",
+    "taxValue": "Taxe {value} %",
+    "availability": "Disponibilité",
+    "available": "Disponible",
+    "unavailable": "Indisponible",
+    "saving": "Enregistrement…",
+    "save": "Enregistrer les modifications",
+    "createCategory": "Créer la catégorie",
+    "createProduct": "Créer le produit",
+    "saved": "Modifications enregistrées.",
+    "archive": "Archiver",
+    "archiveName": "Archiver {name}",
+    "archived": "Archivé",
+    "confirmArchive": "Confirmer l’archivage",
+    "cancel": "Annuler",
+    "confirmCategoryArchive": "Archiver {name} et tous ses produits et options ? Ils quitteront le menu public. Les commandes existantes conservent leur historique.",
+    "confirmProductArchive": "Archiver {name} et ses options ? Il quittera le menu public. Les commandes existantes conservent leur historique.",
+    "categoryRequired": "Créez une catégorie avant d’ajouter des produits.",
+    "empty": "Aucune catégorie pour le moment.",
+    "errors": {
+      "invalid": "Vérifiez les champs et réessayez.",
+      "unauthorized": "Reconnectez-vous pour gérer ce catalogue.",
+      "forbidden": "Vous n’avez pas l’autorisation de gérer ce restaurant.",
+      "conflict": "Le catalogue a changé. Actualisez et réessayez.",
+      "unavailable": "Le service de catalogue est indisponible. Réessayez."
     }
   }
 }

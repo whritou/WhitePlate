@@ -120,6 +120,13 @@ export default async function OrganizationTeamPage({
                     >
                       {t("editMenuLanguages")}
                     </Link>
+
+                    <Link
+                      href={`/organization/catalog?tenantId=${restaurant.id}`}
+                      className="shrink-0 text-sm font-medium text-primary hover:underline"
+                    >
+                      {t("editCatalog")}
+                    </Link>
                   </li>
                 ))}
               </ul>

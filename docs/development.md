@@ -186,6 +186,10 @@ The image does not configure HTTPS or provision a certificate. A production depl
 
 ## Troubleshooting
 
+### Catalog browser acceptance
+
+After the restaurant creation browser test has saved `.acceptance/restaurant.json`, run `node node_modules/playwright/cli.js test catalog-management.spec.ts` from `apps/frontend` with the same local frontend/API. It creates named categories and products in that test restaurant, persists price/tax/order/availability edits, checks French feedback and archive cancellation/confirmation, then reloads archived history. The fixture rows remain on Neon `test`; only rows created by that test are archived. The dashboard acceptance suite uses separate active fixtures. No option-group or discount editor is implemented in this slice.
+
 Vercel selects a Node major and manages its minor/patch releases. Configure the frontend root as `apps/frontend`, use Node **24.x**, and use the checked-in lockfile (`npm ci`) when configuring an install command. The package engine ranges accept Vercel's Node 24.21.0/npm 11.19.0 pair. Keep engine validation enabled; do not work around `EBADENGINE` using `--force` or `engine-strict=false`. When toolchain references change, regenerate the lockfile with npm and verify the supported ranges. See [Vercel Node versions](https://vercel.com/docs/functions/runtimes/node-js/node-js-versions) and [package manager selection](https://vercel.com/docs/package-managers).
 
 | Symptom | What to check |

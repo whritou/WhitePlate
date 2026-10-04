@@ -203,6 +203,21 @@ The reported Vercel install failed because `engine-strict=true` enforced exact N
 
 Fresh `npm ci` and hosted Vercel deployment are not verified in this follow-up. Rerun the hosted build after merging the fix; keep the toolchain card In review until deployment acceptance succeeds. The pre-existing `.env.example` edit remains excluded. No application source, production data, provider credentials or dependency versions changed.
 
+## Category and product management — 2026-10-04
+
+Implemented localized owner/manager catalog editing against the existing API, with validated management DTOs and mutation inputs, safe authorization errors, duplicate-submit guards, server refresh and explicit archive confirmation. Option-group and discount editors remain deferred. No schema or production changes.
+
+| Command/check | Actual result |
+| --- | --- |
+| `node node_modules/vitest/vitest.mjs run` | Passed: 24 files, 197 tests. New mutation tests first failed against stubs (11 failures); management response acceptance first failed against a null parser. Both then passed after implementation. |
+| `node node_modules/eslint/bin/eslint.js .` | Passed without errors/warnings. |
+| `node node_modules/typescript/bin/tsc --noEmit` | Passed. |
+| `node node_modules/prettier/bin/prettier.cjs --check '**/*.{ts,tsx}'` | Passed. Restricted-shell formatting initially encountered EPERM; normal-permission formatting succeeded. |
+| `node node_modules/next/dist/bin/next build --webpack` | Passed compilation, TypeScript and 33 page generations using inert build auth/API URLs and unavailable local database. Expected Better Auth schema diagnostics and nonfatal restricted-shell Webpack cache EPERM warnings were recorded. |
+| `node node_modules/playwright/cli.js test catalog-management.spec.ts` | Passed (44 seconds) against localhost and Neon `test`: category/product CRUD, GBP values, persisted availability after reload, French UI, archive cancellation/confirmation and read-only retained history. |
+
+Staff-role and foreign-account catalog checks continue in the next acceptance task. Test-created rows are retained on Neon `test`; archived rows are restricted to this test's own category/product.
+
 ## Owner restaurant creation — 2026-10-04
 
 Tracked in issue #13 on `feat/restaurant-management-and-staff-acceptance`. Added an owner-only English/French restaurant form, validated server action and authenticated service, organization/team navigation, normalized subdomain and EUR/USD/GBP input, and localized conflict/permission errors. The existing API owns authorization and persistence; no API/schema/dependency changes were needed.
