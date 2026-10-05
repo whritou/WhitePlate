@@ -8,6 +8,7 @@ Reviewed against the working tree on 2026-10-04. WhitePlate contains the first-r
 | --- | --- |
 | [Repository README](../readme.md) | Product intent and quickest path to running the scaffolds |
 | [Development guide](development.md) | Setup, configuration, Neon connection, Swagger, commands, and troubleshooting |
+| [Coolify/Vercel runbook](deployment/coolify.md) | Empty PostgreSQL bootstrap, separate runtime connections, verified TLS, deployment and rollback gates |
 | [System architecture](architecture/WHITEPLATE_SYSTEM_ARCHITECTURE.md) | Current runtime and proposed system boundaries |
 | [Backend architecture](architecture/WHITEPLATE_BACKEND_ARCHITECTURE.md) | Project references, request paths, and test layout |
 | [Frontend architecture](architecture/WHITEPLATE_FRONTEND_ARCHITECTURE.md) | Routing, localization, rendering, and component map |
@@ -20,6 +21,7 @@ Reviewed against the working tree on 2026-10-04. WhitePlate contains the first-r
 | [Authentication decision](architecture/decisions/0002-authentication.md) | Better Auth, JWT/API boundary, email binding, and migration ownership |
 | [Catalog localization and tenant domain decision](architecture/decisions/0003-catalog-localization-and-tenant-domain-policy.md) | Restaurant-configurable menu languages and first-release one-label subdomain policy; database rollout remains pending |
 | [Localized order snapshots decision](architecture/decisions/0004-localized-order-snapshots.md) | Implemented checkout locale and historical product/option label behavior; production rollout remains separate work |
+| [Coolify hosting decision](architecture/decisions/0005-coolify-hosting.md) | One hosted development stack, empty new database, existing Neon retained; dev stack deferred |
 | [Functional test plan](functional-test-plan.md) | Executable smoke checks and future acceptance criteria |
 | [Development roadmap](development-roadmap.md) | Implemented backend scope and unresolved frontend/deployment decisions |
 | [Documentation review](documentation-review.md) | Audit findings, verification evidence, and remaining blockers |

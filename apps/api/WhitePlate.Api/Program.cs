@@ -40,8 +40,10 @@ if (swaggerEnabled)
     app.MapOpenApi();
 }
 
-// Render terminates HTTPS before forwarding requests to this HTTP container.
-if (!app.Configuration.GetValue<bool>("RENDER"))
+// TLS proxies (including Coolify) can own HTTPS redirects. Retain Render's legacy default.
+var httpsRedirectionEnabled = app.Configuration.GetValue<bool?>("HttpsRedirection:Enabled")
+    ?? !app.Configuration.GetValue<bool>("RENDER");
+if (httpsRedirectionEnabled)
 {
     app.UseHttpsRedirection();
 }

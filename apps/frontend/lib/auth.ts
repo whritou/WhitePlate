@@ -5,6 +5,7 @@ import { nextCookies } from "better-auth/next-js"
 import { Pool } from "pg"
 import { PostgresDialect } from "kysely"
 import { sendAuthEmail } from "@/lib/email"
+import { createAuthDatabaseConfig } from "@/lib/auth-database"
 
 const authUrl = process.env.BETTER_AUTH_URL ?? "http://localhost:3000"
 const apiAudience = process.env.API_AUDIENCE ?? "whiteplate-api"
@@ -38,11 +39,12 @@ if (process.env.NODE_ENV === "production") {
     throw new Error("API_BASE_URL must use HTTPS in production")
 }
 
-const pool = new Pool({
-  connectionString: databaseUrl ?? "postgres://localhost/whiteplate",
-  max: 10,
-  idleTimeoutMillis: 30_000,
-})
+const pool = new Pool(
+  createAuthDatabaseConfig(
+    databaseUrl ?? "postgres://localhost/whiteplate",
+    process.env.DATABASE_SSL_CA
+  )
+)
 
 export const auth = betterAuth({
   appName: "WhitePlate",

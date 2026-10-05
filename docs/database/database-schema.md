@@ -1,5 +1,9 @@
 # Database schema and tenant model
 
+Hosting update — 2026-10-05: the new Coolify `whiteplate` database is initialized from empty-target business/auth SQL. Queries confirmed all 9 EF history entries, 16 public tables and 6 auth tables, with zero users/organizations/restaurants/orders. This includes both localization migrations. Existing Neon data remains unchanged. Runtime role provisioning, API/Vercel cutover and hosted acceptance are still pending; see the [Coolify runbook](../deployment/coolify.md).
+
+Hosting update — 2026-10-05: the new Coolify `whiteplate` database is initialized from empty-target business/auth SQL. Queries confirmed all 9 EF history entries, 16 public tables and 6 auth tables, with zero users/organizations/restaurants/orders. This includes both localization migrations. Existing Neon data remains unchanged. Runtime role provisioning, API/Vercel cutover and hosted acceptance are still pending; see the [Coolify runbook](../deployment/coolify.md).
+
 Status: organization, tenant, staff membership/invitation, catalog localization, localized order snapshots, idempotency, and outbox mappings are implemented in EF Core/PostgreSQL. The `CatalogLocalization` and `LocalizedOrderSnapshots` migrations are checked in; test and production rollout are separate acceptance work.
 
 ## Implemented organization, tenant, catalog and order schema
