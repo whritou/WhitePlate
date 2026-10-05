@@ -15,6 +15,7 @@ public sealed class OrderOutboxDispatcher(IServiceScopeFactory scopeFactory, Tim
         while (!stoppingToken.IsCancellationRequested)
         {
             var foundWork = false;
+            var operation = "resolve_services";
             try
             {
                 await using var scope = scopeFactory.CreateAsyncScope();
@@ -24,9 +25,11 @@ public sealed class OrderOutboxDispatcher(IServiceScopeFactory scopeFactory, Tim
                 var now = timeProvider.GetUtcNow();
                 if (nextIdempotencyCleanup is null || now >= nextIdempotencyCleanup)
                 {
+                    operation = "idempotency_cleanup";
                     await orders.DeleteExpiredIdempotencyRecordsAsync(now, stoppingToken);
                     nextIdempotencyCleanup = now.AddMinutes(1);
                 }
+                operation = "claim_batch";
                 var batch = await store.ClaimBatchAsync(now, now.AddMinutes(1), 50, stoppingToken);
                 foundWork = batch.Count > 0;
                 foreach (var pending in batch)
@@ -45,6 +48,7 @@ public sealed class OrderOutboxDispatcher(IServiceScopeFactory scopeFactory, Tim
                     catch (Exception exception)
                     {
                         var delaySeconds = Math.Min(300, 1 << Math.Min(pending.Attempts, 8));
+                        operation = "schedule_retry";
                         await store.ScheduleRetryAsync(pending.Id, timeProvider.GetUtcNow().AddSeconds(delaySeconds),
                             stoppingToken);
                         logger.LogWarning("Kitchen event {EventId} delivery failed ({ExceptionType}); retry scheduled.",
@@ -58,7 +62,8 @@ public sealed class OrderOutboxDispatcher(IServiceScopeFactory scopeFactory, Tim
             }
             catch (Exception exception)
             {
-                logger.LogError("Kitchen outbox polling failed ({ExceptionType}).", exception.GetType().Name);
+                logger.LogError("Kitchen outbox polling failed during {Operation} ({ExceptionType}).",
+                    operation, exception.GetType().Name);
             }
 
             if (!foundWork)

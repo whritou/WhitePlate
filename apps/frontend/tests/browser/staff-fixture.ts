@@ -195,6 +195,7 @@ export async function staffFixture(browser: Browser): Promise<StaffFixture> {
       foreign,
       productId: (await product.json()).id,
       otherTenantId,
+      otherTenantSlug: `isolation-${stamp}`,
       cleanup,
     }
   } catch (error) {
