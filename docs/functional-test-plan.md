@@ -303,6 +303,12 @@ The dashboard check used an owner account. Kitchen-staff and manager permission 
 
 ## 3. Automation strategy
 
+### Coolify cutover gates — 2026-10-05
+
+The user selected an empty new Coolify database with one hosted main stack. Bootstrap queries confirmed 9 EF migrations, both business/auth schemas and no accounts/business rows. PostgreSQL is running/healthy with SSL enabled. API HTTPS domain/redirect, port 8080, exact frontend CORS, issuer/audience and database-readiness check are configured; application credentials/deployment and Vercel cutover remain pending. The regression suites pass (144 API / 204 frontend), but do not establish hosted behavior.
+
+Before marking migration #17 Done, verify the runtime roles can access only their respective schemas, a Vercel-side TLS connection validates the Coolify CA and hostname, API `/health/live` and `/health/ready` return 200 over public HTTPS, HTTP redirects, foreign browser origins are denied, OIDC/JWKS and real login work against the empty auth schema, and organization/restaurant creation plus cross-account denial work through the new API. Redeploy Vercel after changing only Production variables. Preserve Neon/local/Preview data. Use the [runbook](deployment/coolify.md); keep actual hosted SignalR/token-expiration acceptance on its existing card. Public tenant storefront checks await separate wildcard DNS/TLS.
+
 ### Staff role and revocation acceptance — 2026-10-04
 
 `tests/browser/staff-dashboard.spec.ts` exercises distinct owner, manager, kitchen and foreign identities against the local API/frontend and Neon `test`. Invitations bind each staff identity to a restaurant; the foreign identity belongs to another real tenant. Checks cover displayed roles, permitted controls, kitchen Preparing, manager Ready/cancellation, owner completion with French feedback, 412 stale-version rejection and UI reload, manager catalog creation, kitchen catalog denial, foreign read/write denial, and active membership revocation. REST polling removes private tickets and cached filters after denial, and a reload remains denied. Only test identities' memberships/sessions are removed at cleanup. The pre-existing test data remains intact.

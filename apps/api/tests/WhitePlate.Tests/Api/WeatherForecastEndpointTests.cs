@@ -129,6 +129,26 @@ public sealed class WeatherForecastEndpointTests
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
     }
 
+    [Theory]
+    [InlineData(false, HttpStatusCode.OK)]
+    [InlineData(true, HttpStatusCode.TemporaryRedirect)]
+    public async Task HttpsRedirectionCanBeDelegatedToTheHostingProxy(bool enabled, HttpStatusCode expected)
+    {
+        using var factory = CreateFactory("Production").WithWebHostBuilder(builder =>
+        {
+            builder.UseSetting("HttpsRedirection:Enabled", enabled.ToString());
+            builder.UseSetting("HTTPS_PORT", "443");
+        });
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            BaseAddress = new Uri("http://api.example.test"), AllowAutoRedirect = false
+        });
+
+        using var response = await client.GetAsync("/health/live", TestContext.Current.CancellationToken);
+
+        Assert.Equal(expected, response.StatusCode);
+    }
+
     private static WebApplicationFactory<Program> CreateFactory(string environment = "Development", bool enableSwagger = false, bool render = false) =>
         new WebApplicationFactory<Program>().WithWebHostBuilder(builder =>
         {

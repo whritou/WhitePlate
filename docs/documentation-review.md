@@ -1,5 +1,26 @@
 # Documentation review baseline — 2026-09-28
 
+## Coolify PostgreSQL migration preparation — 2026-10-05
+
+Issue #17, branch `chore/coolify-postgresql-hosting`: the user approved one hosted development stack, empty Coolify business/auth schemas and retaining Vercel. Neon/local/Preview settings are preserved; a second dev stack is deferred. Added explicit proxy-owned HTTPS redirection, server-only PostgreSQL CA verification with rejection of conflicting URL SSL settings, a curl-capable API image, settings examples and a deployment/rollback runbook. Replaced the concrete local-test password in `.env.example` with a placeholder; real local credentials remain outside source.
+
+| Check | Actual result |
+| --- | --- |
+| API regression red/green | The delegated-redirection test first returned a redirect instead of 200, then passed with the configuration change; the targeted file passed 11 tests. |
+| `dotnet test apps/api/WhitePlate.slnx --no-restore --configuration Release` | Passed 144 tests. The initial restricted build failed writing generated obj state; normal-permission rerun passed. |
+| Auth database TLS red/green | Seven tests failed against an unimplemented helper, then passed, including actual `pg.Client` configuration and all five SSL URL conflicts. |
+| `node node_modules/vitest/vitest.mjs run` | Initially passed 25 files / 204 tests; the public-IP TLS regression follow-up passed 25 files / 205 tests. |
+| `node node_modules/eslint/bin/eslint.js .` | Passed. |
+| `node node_modules/typescript/bin/tsc --noEmit` | Passed. |
+| `node node_modules/prettier/bin/prettier.cjs --check '**/*.{ts,tsx}'` | Passed across the frontend. |
+| `node node_modules/next/dist/bin/next build --webpack` | Passed compilation, TypeScript and 33 page generations with process-only inert auth/API settings and an unavailable localhost database. Expected Better Auth schema diagnostics and nonfatal restricted Webpack cache EPERM warnings. |
+| Coolify bootstrap query | Database `whiteplate`, 9 EF migrations, 16 public tables, 6 auth tables; zero auth users, organizations, restaurants and orders. PostgreSQL running/healthy, SSL on. |
+| External TLS and access rules | Public `204.168.231.15:5433` accepted PostgreSQL SSL negotiation with TLS 1.3, trusted CA and IP identity verification. Public administrator TLS and auth-role plaintext connections were rejected with PostgreSQL code 28000. The proxy appears as `10.0.1.11`, so source-subnet rules cannot exclusively separate external/internal application roles. |
+| Runtime-role bootstrap | Applied to the new database. Both SCRAM verifiers are present (boolean inspection only; no hash or secret printed), and the operator activated LOGIN for both accounts. Schema and all-table privilege inspection confirmed own-schema read/write and cross-schema denial. HBA parsed without errors and reloaded successfully. |
+| Public-IP regression red/green | An external `pg` probe first failed with `ERR_TLS_CERT_ALTNAME_INVALID` for `localhost` despite the IP SAN. The new regression failed against the existing helper, then passed with Node's standard identity check bound to the configured URL host; a mismatched IP remains rejected. Typecheck initially caught an incorrect test-only type assertion; corrected and passed. |
+
+Commands used the installed package CLIs because npm is absent from this shell. Temporary generated schema SQL is not committed. Public exposure was explicitly approved and activated. The operator entered both role passwords in Coolify; boolean inspection confirmed password verifiers without reading their values, then the operator enabled LOGIN. API connection string and Vercel auth-role DATABASE_URL are staged for human secret entry. API deployment, authenticated database checks, Vercel redeployment and hosted auth/API flows remain pending. Docker is unavailable locally, so the image build and live curl probe await Coolify deployment. No successful hosted migration, backup restore or SignalR acceptance is claimed.
+
 Scope: all repository-authored Markdown, manifests/configuration, and application source present before the Clean Architecture change. Generated/vendor documentation was used only for framework verification. There were no commits and the existing application/docs were untracked when reviewed, so this is a historical working-tree baseline, not a commit-tagged release audit. The [backend architecture](architecture/WHITEPLATE_BACKEND_ARCHITECTURE.md) and [development guide](development.md) describe the current API solution.
 
 ## Documentation issues corrected

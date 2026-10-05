@@ -29,6 +29,8 @@ On a fresh checkout, copy `.env.example` to `.env.local` and configure the Postg
 
 For this checkout's Neon test branch, `.env.local` contains an ignored `WHITEPLATE_DEV_EMAIL` and `WHITEPLATE_DEV_PASSWORD` for the verified `local-tester@whiteplate.invalid` account. With the frontend running, run `npm run auth:dev-token`, copy its JWT, and paste it into Swagger's **Authorize** Bearer field. The .NET API has no password-login route; Better Auth handles sign-in. The test account has no organization membership until one is created through the app.
 
+The hosted main stack is being moved to Coolify PostgreSQL and API while the frontend stays on Vercel. `DATABASE_SSL_CA` supplies a server-only CA PEM for certificate/hostname verification; omit SSL query parameters from `DATABASE_URL` when using it. `PUBLIC_API_BASE_URL` is the browser-reachable SignalR origin, never a database credential. Keep Preview and local Neon settings separate. See the [deployment runbook](../../docs/deployment/coolify.md) for migration status and exact settings.
+
 Auth URLs: `/[locale]/sign-in`, `/sign-up`, `/forgot-password`, `/reset-password`, `/verify-email`, `/organization/sign-up`, `/organization`, `/organization/team`, and `/invitations/accept`. Better Auth handlers are at `/api/auth/*`.
 
 Read [frontend agent instructions](AGENTS.md) before changing Next.js code. See the [frontend architecture](../../docs/architecture/WHITEPLATE_FRONTEND_ARCHITECTURE.md), [development guide](../../docs/development.md), and [review findings](../../docs/documentation-review.md).
