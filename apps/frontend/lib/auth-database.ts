@@ -1,4 +1,5 @@
 import type { PoolConfig } from "pg"
+import { checkServerIdentity } from "node:tls"
 
 export function createAuthDatabaseConfig(
   databaseUrl: string,
@@ -28,6 +29,9 @@ export function createAuthDatabaseConfig(
   config.ssl = {
     ca: certificateAuthority.replace(/\\n/g, "\n"),
     rejectUnauthorized: true,
+    // pg omits SNI for IP endpoints; Node otherwise verifies "localhost".
+    checkServerIdentity: (_hostname, certificate) =>
+      checkServerIdentity(url.hostname.replace(/^\[|\]$/g, ""), certificate),
   }
 
   return config

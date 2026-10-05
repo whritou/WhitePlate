@@ -1,8 +1,35 @@
 import { describe, expect, it } from "vitest"
 import { Client } from "pg"
+import {
+  checkServerIdentity,
+  type ConnectionOptions,
+  type PeerCertificate,
+} from "node:tls"
 import { createAuthDatabaseConfig } from "@/lib/auth-database"
 
 describe("auth database TLS", () => {
+  it("verifies the configured IP when pg supplies localhost as the TLS hostname", () => {
+    const client = new Client(
+      createAuthDatabaseConfig(
+        "postgres://user:password@204.168.231.15:5433/whiteplate",
+        "certificate"
+      )
+    )
+    const ssl = client.ssl as unknown as ConnectionOptions
+    const verify = ssl.checkServerIdentity ?? checkServerIdentity
+
+    expect(
+      verify("localhost", {
+        subjectaltname: "IP Address:204.168.231.15",
+      } as PeerCertificate)
+    ).toBeUndefined()
+    expect(
+      verify("localhost", {
+        subjectaltname: "IP Address:204.168.231.16",
+      } as PeerCertificate)?.message
+    ).toContain("Hostname/IP does not match")
+  })
+
   it("preserves existing connection URL configuration without a custom CA", () => {
     const config = createAuthDatabaseConfig(
       "postgres://user:password@database.example.test/whiteplate?sslmode=require"
@@ -22,7 +49,7 @@ describe("auth database TLS", () => {
       )
     )
 
-    expect(client.ssl).toEqual({
+    expect(client.ssl).toMatchObject({
       ca: "-----BEGIN CERTIFICATE-----\nexample\n-----END CERTIFICATE-----",
       rejectUnauthorized: true,
     })
