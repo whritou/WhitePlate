@@ -56,7 +56,28 @@ psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" \
   -c '\password whiteplate_api' -c '\password whiteplate_auth'
 ```
 
-After successful password entry, verify that both roles have SCRAM credentials without printing their hashes, then enable LOGIN. Authenticated own-schema and cross-schema checks remain a cutover requirement; privilege inspection alone is not a successful application connection.
+After successful password entry, verify that both roles have SCRAM credentials without printing their hashes, then enable LOGIN:
+
+```sql
+DO $$
+BEGIN
+    IF EXISTS (
+        SELECT 1 FROM pg_roles
+        WHERE rolname IN ('whiteplate_api', 'whiteplate_auth')
+        GROUP BY true HAVING count(*) <> 2
+    ) OR EXISTS (
+        SELECT 1 FROM pg_authid
+        WHERE rolname IN ('whiteplate_api', 'whiteplate_auth')
+          AND rolpassword IS NULL
+    ) THEN
+        RAISE EXCEPTION 'Set passwords for both runtime roles before enabling login';
+    END IF;
+END $$;
+ALTER ROLE whiteplate_api LOGIN;
+ALTER ROLE whiteplate_auth LOGIN;
+```
+
+Apply through an operator-local `psql` session. Authenticated own-schema and cross-schema checks remain a cutover requirement; privilege inspection alone is not a successful application connection.
 
 The existing volume's `/var/lib/postgresql/18/docker/pg_hba.conf` was backed up beside the original file with suffix `.before-whiteplate-access`. The following rules were prepended and reloaded successfully (the original broad rules follow the terminal reject and are unreachable):
 
