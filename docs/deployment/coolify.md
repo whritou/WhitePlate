@@ -2,16 +2,16 @@
 
 This is the runbook for the user-approved, single hosted development stack ([decision 0005](../architecture/decisions/0005-coolify-hosting.md)). Runtime credentials belong in Coolify/Vercel settings, never this file, client code or `NEXT_PUBLIC_*` variables. The migration is tracked in [issue #17](https://github.com/whritou/WhitePlate/issues/17).
 
-## Current verified state — 2026-10-05
+## Current verified state — 2026-10-06
 
 | Component | Evidence and remaining work |
 | --- | --- |
 | PostgreSQL | Coolify resource `whiteplate-postgresql-main` (`0uwdtjpwtqrokjcpnwe7wtfq`), `postgres:18-alpine`, database `whiteplate`, Docker network `coolify`. Running/healthy with a persistent volume and SSL enabled. User-approved public TCP proxy on `204.168.231.15:5433` is active. |
 | Schemas | Reviewed empty-target EF SQL plus SQL from the installed Better Auth configuration initialized the new volume. Queries confirmed 9 EF migrations, 16 `public` tables, 6 `auth` tables and zero users/organizations/restaurants/orders. No Neon data was imported or changed. |
-| Database TLS | External PostgreSQL SSL negotiation passed with TLS 1.3, trusted Coolify CA and IP identity verification. Certificate expires 2027-10-05. Vercel's authenticated connection still awaits credentials. |
-| Database access | Runtime-role SQL applied; operator set both passwords and activated LOGIN (`true` for each, as confirmed in terminal output). Schema/table privilege queries confirm own-schema access and cross-schema denial. Authenticated TLS connections with each runtime role are still pending. Reloaded HBA rules reject plaintext and administrator TCP connections; both refusals were also verified through the public proxy. |
-| API | Existing resource `wqyrztj6uyuwlveq75qrl68t` still needs database credentials and deployment of the task branch changes. Port 8080, HTTPS domain/redirect, issuer/audience, exact CORS and readiness probe are configured. Last running container was restarting; no successful hosted API/auth acceptance is claimed. |
-| Frontend | Existing Vercel `white-plate`, GitHub `main`, `https://white-plate.vercel.app`. Production variables and deployment are not switched until the new API/database connection passes. Existing Preview configuration is retained. |
+| Database TLS | External PostgreSQL SSL negotiation passed with TLS 1.3, trusted Coolify CA and IP identity verification. Certificate expires 2027-10-05. The API's readiness probe now verifies its database connection; the Better Auth role's connection from Vercel remains unverified. |
+| Database access | Runtime-role SQL is applied; both least-privilege roles have LOGIN enabled. Schema/table privilege queries confirm own-schema access and cross-schema denial. HBA rules require TLS/SCRAM, allow the API's observed IPv4 and IPv6 Coolify subnets, and reject other TCP connections. Plaintext and administrator TCP refusals were verified through the public proxy. |
+| API | Existing resource `wqyrztj6uyuwlveq75qrl68t` is deployed from `main` at `e13860e`. Coolify reports Running; the latest container is healthy and can read the mounted CA. `GET /health/ready` returned `Healthy` over HTTPS with normal certificate verification from the VPS. An independent browser/Vercel check is still pending. |
+| Frontend | Existing Vercel `white-plate`, GitHub `main`, `https://white-plate.vercel.app`. Production database/API variables are saved, but Vercel has not yet been redeployed against the new connection. Existing Preview configuration is retained. |
 
 ## PostgreSQL initialization and credentials
 
@@ -79,17 +79,18 @@ ALTER ROLE whiteplate_auth LOGIN;
 
 Apply through an operator-local `psql` session. Authenticated own-schema and cross-schema checks remain a cutover requirement; privilege inspection alone is not a successful application connection.
 
-The existing volume's `/var/lib/postgresql/18/docker/pg_hba.conf` was backed up beside the original file with suffix `.before-whiteplate-access`. The following rules were prepended and reloaded successfully (the original broad rules follow the terminal reject and are unreachable):
+The existing volume's `/var/lib/postgresql/18/docker/pg_hba.conf` was backed up beside the original file with suffix `.before-whiteplate-access`. Before adding the API's observed IPv6 source, a second backup was made as `pg_hba.conf.before-api-ipv6-20261006-0059`. The following rules are active and were reloaded successfully (the original broad rules follow the terminal reject and are unreachable):
 
 ```text
 local all postgres trust
 local all all scram-sha-256
 hostssl whiteplate whiteplate_api 10.0.1.0/24 scram-sha-256
+hostssl whiteplate whiteplate_api fde4:75c5:b9d4::/64 scram-sha-256
 hostssl whiteplate whiteplate_auth all scram-sha-256
 host all all all reject
 ```
 
-The API subnet reflects the inspected current Docker route and must be reviewed if networking changes. Coolify's public TCP proxy appears to PostgreSQL as `10.0.1.11`, so the subnet rule does **not** guarantee API-role exclusion from the public endpoint. Both roles require SCRAM and TLS and have separate bounded permissions. The PostgreSQL administrator is limited to the local operator socket. Review HBA persistence after volume recreation or PostgreSQL upgrades; retain operator access for migrations and backups.
+The current Coolify network is `10.0.1.0/24` over IPv4 and `fde4:75c5:b9d4::/64` over IPv6. PostgreSQL logs identified the API source as `fde4:75c5:b9d4::10`; without the IPv6 rule, `pg_hba.conf` rejected the API even though its IPv4 rule existed. Reinspect both address families if the Docker network changes. Coolify's public TCP proxy appears to PostgreSQL as `10.0.1.11`, so the subnet rules do **not** guarantee API-role exclusion from the public endpoint. Both roles require SCRAM and TLS and have separate bounded permissions. The PostgreSQL administrator is limited to the local operator socket. Review HBA persistence after volume recreation or PostgreSQL upgrades; retain operator access for migrations and backups.
 
 ## API settings
 
@@ -101,7 +102,7 @@ Use the existing assigned hostname:
 https://wqyrztj6uyuwlveq75qrl68t.204.168.231.15.sslip.io
 ```
 
-Enable HTTP-to-HTTPS redirect and check DNS. Do not bypass a certificate warning: verify issuance before connecting Vercel.
+Enable HTTP-to-HTTPS redirect and check DNS. Coolify warns that HTTPS certificates for the temporary `sslip.io` hostname can be affected by Let's Encrypt rate limits. Use a domain you control for stable external access. Never bypass a certificate warning; verify issuance from the actual client environment before connecting Vercel.
 
 | Runtime variable | Value |
 | --- | --- |
@@ -120,9 +121,9 @@ Example shape, with placeholders only:
 Host=0uwdtjpwtqrokjcpnwe7wtfq;Port=5432;Database=whiteplate;Username=<api-role>;Password=<secret>;SSL Mode=VerifyFull;Root Certificate=/etc/ssl/certs/coolify-ca.crt
 ```
 
-Copy Coolify's internal connection details into this Npgsql format. A `postgres://...` URI is for the Node client and must not be pasted into the API's Npgsql connection-string setting. Mount the public CA file read-only from `/data/coolify/ssl/coolify-ca.crt` to `/etc/ssl/certs/coolify-ca.crt`; do not mount the CA private key. The API's Custom Docker options now contain `--mount type=bind,source=/data/coolify/ssl/coolify-ca.crt,target=/etc/ssl/certs/coolify-ca.crt,readonly`; verify the resulting mount after deployment. Keep database credentials runtime-only, out of Docker build arguments and Preview.
+Copy Coolify's internal connection details into this Npgsql format. A `postgres://...` URI is for the Node client and must not be pasted into the API's Npgsql connection-string setting. Add a **Host File Mount** under Persistent Storage with source `/data/coolify/ssl/coolify-ca.crt` and destination `/etc/ssl/certs/coolify-ca.crt`. Keep the source readable by the API's non-root user (the deployed source file is mode `0644`) and do not mount the CA private key. Do not put `--mount` in Custom Docker options: Coolify only applies its documented allow-listed Docker options. The deployed container was checked and the public CA file was readable. Keep database credentials runtime-only, out of Docker build arguments and Preview. See [Coolify file mounts](https://coolify.io/docs/core/persistent-storage/storage-mounts/file-mounts) and [supported custom Docker options](https://coolify.io/docs/applications/builds/custom-docker-options).
 
-Configure a Coolify HTTP healthcheck: GET `http://localhost:8080/health/ready`, expected 200. Readiness checks database connectivity; it does not prove schemas, role privileges, OAuth or business flows work. `/health/live` is dependency-free. Verify both endpoints through the public HTTPS origin after deploying the reviewed changes. Avoid blanket forwarded-header trust; the actual request Host still controls tenant resolution. Forwarded client-IP handling and limits need a separate trusted-proxy decision if required.
+Configure a Coolify HTTP healthcheck: GET `http://localhost:8080/health/ready`, expected 200. Readiness checks database connectivity; it does not prove schemas, role privileges, OAuth or business flows work. `/health/live` is dependency-free. On 2026-10-06, the main deployment passed the readiness probe and `GET /health/ready` returned `Healthy` over HTTPS when requested from the VPS with normal TLS verification; `GET /` returned HTTP 200. The browser verification tool could not open the temporary hostname (`ERR_BLOCKED_BY_CLIENT`), so independently recheck from Vercel or a user's browser before switching live traffic. Avoid blanket forwarded-header trust; the actual request Host still controls tenant resolution. Forwarded client-IP handling and limits need a separate trusted-proxy decision if required.
 
 ## Vercel Production settings
 
@@ -139,7 +140,7 @@ The frontend stays in `apps/frontend`, Node 24.x, using the lockfile. Switch onl
 
 `DATABASE_SSL_CA` makes the installed `pg` client verify the certificate against the hostname or IP in `DATABASE_URL`. The helper explicitly binds Node's standard identity check to that host: `pg` omits SNI for IP endpoints and would otherwise verify `localhost`. Conflicting URL SSL parameters fail early because node-postgres would otherwise overwrite the CA configuration. Never set `rejectUnauthorized=false` or weaken global TLS validation.
 
-Vercel cannot resolve a Coolify Docker-only hostname. The user explicitly approved exposing the VPS IP on port 5433, forwarded to the database's 5432 by Coolify. External TLS and rejection of plaintext/administrator connections passed. Runtime LOGIN is active; authenticated role connections are still pending. `API_BASE_URL`, `PUBLIC_API_BASE_URL`, and the public CA `DATABASE_SSL_CA` are saved for Production without redeploying. Save the auth-role `DATABASE_URL` after entering its password, then verify connectivity before redeployment. Do not assume a host firewall protects a Docker-published port. If fixed Vercel egress addresses/private connectivity are available, restrict the ingress accordingly. Otherwise the approved password/TLS endpoint remains Internet-reachable and must be monitored.
+Vercel cannot resolve a Coolify Docker-only hostname. The user explicitly approved exposing the VPS IP on port 5433, forwarded to the database's 5432 by Coolify. External TLS and rejection of plaintext/administrator connections passed. Runtime LOGIN is active, and the API role's database connectivity is confirmed by the healthy API readiness probe. Production `API_BASE_URL`, `PUBLIC_API_BASE_URL`, `DATABASE_SSL_CA`, and the auth-role `DATABASE_URL` have been saved; Vercel has not yet been redeployed. Verify the Better Auth role's authenticated TLS connection from Vercel before redeployment. Do not assume a host firewall protects a Docker-published port. If fixed Vercel egress addresses/private connectivity are available, restrict the ingress accordingly. Otherwise the approved password/TLS endpoint remains Internet-reachable and must be monitored.
 
 Redeploy Vercel after settings change; existing deployments retain their previous variables. Verify discovery/JWKS, signup/sign-in and protected `/api/v1/me`, then organization/restaurant creation and a second-account denial. Old browser sessions refer to the discarded auth database and may require signing out. Hosted SignalR delivery, actual token expiry and reconnect remain on the existing SignalR card. Public storefront acceptance still needs matching tenant wildcard DNS/TLS; do not invent tenant domains under the shared Vercel domain.
 
