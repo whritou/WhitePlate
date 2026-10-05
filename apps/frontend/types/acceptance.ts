@@ -27,6 +27,7 @@ export type StaffFixture = {
   foreign: AcceptanceActor
   productId: string
   otherTenantId: string
+  otherTenantSlug: string
   cleanup: () => Promise<void>
 }
 export type ActorOptions = {

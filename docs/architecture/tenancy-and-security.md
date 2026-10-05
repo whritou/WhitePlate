@@ -37,6 +37,8 @@ Background jobs must carry a validated tenant context. Elevated cross-tenant mai
 - Keep personalized staff responses out of shared public caches. A different URL alone is not a complete cache-isolation design.
 - The guest cart uses component memory keyed by tenant ID and clears on reload/navigation. The BFF derives its public API target from validated Host and fixed configuration, never from browser tenant IDs. The API revalidates products/options and prices. The remote-address limiter can group guests behind the same BFF into one tenant bucket; untrusted forwarded addresses are not used to bypass it.
 - Authenticate SignalR connections and resolve allowed groups from current membership on the server. `JoinRestaurant(tenantId)` accepts an ID selector, checks membership, then derives the group name; a client-chosen group name is never permission to subscribe.
+- Recheck persisted owner/manager/kitchen access before each connection receives an event. Remove revoked subscriptions and groups; database authorization failures must trigger outbox retry rather than bypass authorization. Leave/disconnect invalidates captured recipients. The in-memory registry assumes one API instance; horizontal scaling needs shared subscription and publication coordination.
+- Close authenticated hub connections at token expiration, acquire a fresh token on reconnect, then reauthorize the restaurant and recover authorized REST state. Already queued events cannot be recalled after a revocation.
 - Do not broadcast order data globally. Revalidate authorization across reconnect/token refresh and resynchronize from an authorized API after missed events.
 - Define durable notification/retry behavior and ensure publishing occurs after the order transaction commits.
 

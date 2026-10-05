@@ -71,7 +71,8 @@ app.MapHealthChecks("/health/ready", new HealthCheckOptions
         await context.Response.WriteAsync(report.Status.ToString(), context.RequestAborted);
     }
 }).AllowAnonymous().ExcludeFromDescription();
-app.MapHub<KitchenHub>("/hubs/orders").RequireAuthorization();
+app.MapHub<KitchenHub>("/hubs/orders", options => options.CloseOnAuthenticationExpiration = true)
+    .RequireAuthorization();
 
 app.Run();
 

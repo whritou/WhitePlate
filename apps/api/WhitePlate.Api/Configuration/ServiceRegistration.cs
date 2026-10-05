@@ -89,6 +89,7 @@ public static class ServiceRegistration
         services.AddScoped<ListOrdersQueryHandler>();
         services.AddScoped<UpdateOrderStatusCommandHandler>();
         services.AddScoped<KitchenSubscriptionAccess>();
+        services.AddSingleton<KitchenSubscriptions>();
         services.AddScoped<IOutboxStore, OutboxStore>();
         services.AddScoped<IOrderEventPublisher, SignalRKitchenEventPublisher>();
         services.AddSignalR();

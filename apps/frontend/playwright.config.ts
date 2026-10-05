@@ -25,6 +25,11 @@ export default defineConfig({
       testMatch: "staff-dashboard.spec.ts",
       dependencies: ["catalog"],
     },
+    {
+      name: "realtime",
+      testMatch: "order-realtime.spec.ts",
+      dependencies: ["catalog"],
+    },
   ],
   use: {
     baseURL,
