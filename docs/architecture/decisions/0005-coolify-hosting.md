@@ -17,7 +17,7 @@ Do not create a `dev` branch, second backend, second database or second frontend
 - Coolify owns public HTTPS and HTTP-to-HTTPS redirects. `HttpsRedirection__Enabled=false` delegates redirects to that proxy; it does not authorize public HTTP access. Do not trust arbitrary forwarded host/client-IP headers. Exact frontend CORS remains required for the browser SignalR connection.
 - EF and Better Auth migrations remain explicit operator actions, never application startup actions. First-start SQL only initializes an empty PostgreSQL volume; it is not a repeatable rollout mechanism for an existing volume.
 - The shared hosted API origin supports authenticated organization flows. Public tenant storefront DNS/TLS requires a separate matching wildcard domain and remains open; `white-plate.vercel.app` is not that wildcard.
-- The API, auth database and Vercel deployment work together for readiness, Better Auth user lookup, JWKS storage, hosted signup/email verification, organization listing, and an authenticated protected `GET /api/v1/me` call over verified TLS. Keep the migration card open until restaurant creation and second-account denial are verified; backups, restore drills, monitoring and hosted SignalR acceptance remain tracked work.
+- The API, auth database and Vercel deployment work together for readiness, Better Auth user lookup, JWKS storage, hosted signup/email verification, organization listing, an authenticated protected `GET /api/v1/me` call, restaurant creation, and owner access to the new restaurant's kitchen page over verified TLS. Keep the migration card open until second-account denial is verified; backups, restore drills, monitoring and hosted SignalR acceptance remain tracked work.
 
 ## Alternatives
 
