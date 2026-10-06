@@ -12,7 +12,7 @@ public sealed class RevokeStaffInvitationTests
     public async Task HidesInvitationsTheCallerCannotRevoke()
     {
         var repository = new InvitationRepositoryStub();
-        var handler = new RevokeStaffInvitationCommandHandler(repository);
+        var handler = new RevokeStaffInvitationCommandHandler(repository, TimeProvider.System);
         var identity = ExternalIdentity.Create("https://identity.example.test/", "owner");
 
         var result = await handler.HandleAsync(Guid.NewGuid(), Guid.NewGuid(), identity,
@@ -28,7 +28,8 @@ public sealed class RevokeStaffInvitationTests
         public Task<bool> TenantBelongsToOrganizationAsync(Guid organizationId, Guid tenantId, CancellationToken cancellationToken) => Task.FromResult(false);
         public Task AddAsync(StaffInvitation invitation, CancellationToken cancellationToken) => Task.CompletedTask;
         public Task<bool> AcceptAsync(string tokenHash, ExternalIdentity identity, DateTimeOffset now, CancellationToken cancellationToken) => Task.FromResult(false);
-        public Task<bool> RevokeAsync(Guid organizationId, Guid invitationId, ExternalIdentity identity, CancellationToken cancellationToken)
+        public Task<bool> RevokeAsync(Guid organizationId, Guid invitationId, ExternalIdentity identity,
+            DateTimeOffset now, CancellationToken cancellationToken)
         {
             Calls++;
             return Task.FromResult(false);

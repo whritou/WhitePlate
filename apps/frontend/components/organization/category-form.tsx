@@ -64,6 +64,7 @@ export function CategoryForm({ tenantId, category }: CategoryFormProps) {
 
       <ResultMessage
         state={state}
+        hideSuccess
         message={
           state.status === "success"
             ? t("saved")

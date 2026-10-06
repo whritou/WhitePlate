@@ -140,6 +140,21 @@ The shell did not expose npm, so checks used the bundled Node executable and ins
 | Browser diagnostics | No Next.js error overlay; initial confirmed-receipt error logs were empty. Later navigation produced `MessageNotSentError` and a Chrome-extension `RegisterClientLocalizationsError`; these logs are recorded separately from successful order acceptance. |
 | `git diff --check` | Passed. |
 
+## Organization team roster and invitation management — 2026-10-06
+
+Added owner-authorized API reads for organization owners, restaurant staff, and invitation status. Responses expose only role, optional verified email, organization/restaurant scope, expiry, and `Pending`/`Accepted`/`Revoked`/`Expired` status; issuer/subject values and invitation tokens/hashes remain private. Pending-only revocation is checked in the domain and API repository. The localized team page now shows separate roster and invitation cards, empty/error states, a shadcn confirmation dialog, success toast, and a content-matched team skeleton. No database schema or migration changed.
+
+| Check | Actual result |
+| --- | --- |
+| `dotnet test apps/api/WhitePlate.slnx --no-restore` | Passed: 148 tests. |
+| `node node_modules/vitest/vitest.mjs run` from `apps/frontend` | Passed: 43 files, 342 tests. |
+| `node node_modules/eslint/bin/eslint.js .` from `apps/frontend` | Passed. |
+| `node node_modules/typescript/bin/tsc --noEmit` from `apps/frontend` | Passed. |
+| `node node_modules/prettier/bin/prettier.cjs --check` on changed frontend TypeScript/TSX | Passed with `--end-of-line auto`. |
+| `node node_modules/next/dist/bin/next build --webpack` from `apps/frontend` | Passed compilation, TypeScript, and generation of all 37 pages using process-only inert auth/database placeholders. Better Auth logged schema connection diagnostics against the unavailable placeholder database; Webpack emitted nonfatal cache-write EPERM warnings. |
+| `git diff --check` | Passed; Git reported only expected CRLF conversion warnings. |
+| Authenticated browser flow against a database-backed environment | Not run. Owner isolation, safe response fields, invitation states, and pending-only revocation are covered by SQLite-backed API tests; interactive confirmation/keyboard behavior still needs browser acceptance. No external database was used. |
+
 The browser fixture uses no database or email provider and intentionally covers a narrow deterministic API contract. It is not proof of real PostgreSQL persistence, production host routing, or production rate policy. Real API/database browser checkout still needs the previously unapplied `CatalogLocalization` migration and appropriate test data. Menu locale is still absent from order snapshots, as required by the separate unresolved D11 decision. The known lint/toolchain and migration-count test failures remain open. The checkout card belongs in **In review**, not Done, pending this acceptance. Test processes were stopped; no production data was changed.
 
 ## Frontend toolchain baseline — 2026-10-01
@@ -317,3 +332,31 @@ Aligned current status summaries with the implementation and dated acceptance re
 | Compare browser commands against `apps/frontend/package.json`, `apps/frontend/playwright.config.ts`, and `apps/frontend/tests/browser` | Passed by source inspection; script name, test paths, project dependencies, and worker configuration agree. |
 | Search active status/setup documents for the identified obsolete counts, proposed editor status, missing menu/BFF claims, stale CLI paths, and open staff-matrix claims | Passed; no stale claims remain in the active documents checked. Dated history remains intact. |
 | Frontend/API suites or guarded database acceptance | Not run; this change only updates documentation, and the database-backed browser suite was not authorized for this documentation task. |
+
+## Organization workspace shell and page-specific loading UI — 2026-10-06
+
+Added a responsive, role-aware organization shell with a desktop sidebar and mobile navigation sheet, verified organization/restaurant context, locale switching, theme control, and sign-out. Protected organization routes now share the shell while keeping page-level ownership checks intact. Loading fallbacks are selected at each route and shaped for overview, team, restaurant creation, catalog, menu languages, settings, kitchen orders, and the separate organization sign-up form. The correction avoids showing the overview skeleton while nested pages load. English and French labels and focused route/skeleton assertions were added. Authenticated browser behavior still needs runtime verification; the database-backed browser suite was not run because its configured Neon test environment is outside this task's scope.
+
+| Check | Actual result |
+| --- | --- |
+| `node node_modules/vitest/vitest.mjs run` from `apps/frontend` | Passed: 39 files, 331 tests. |
+| `node node_modules/eslint/bin/eslint.js .` from `apps/frontend` | Passed. `npm` is absent from this PowerShell session's PATH, so the installed local CLI was used. |
+| `node node_modules/typescript/bin/tsc --noEmit` from `apps/frontend` | Passed. |
+| `node node_modules/prettier/bin/prettier.cjs --check` on changed frontend source/config/docs | Passed for the targeted files; the pre-existing, moved catalog page was excluded because it already fails the repository's formatting baseline. |
+| `node node_modules/next/dist/bin/next build --webpack` from `apps/frontend` | Passed compilation, TypeScript, and generation of all 35 pages. Process-only inert HTTPS/auth/database placeholders satisfied production checks. Better Auth logged schema-connection diagnostics against the unavailable placeholder database; Webpack cache writes also emitted nonfatal EPERM warnings. |
+| `git diff --check` | Passed; Git printed only line-ending conversion warnings for existing CRLF-configured paths. |
+| Authenticated browser/responsive keyboard acceptance | Not run; it needs the app's database-backed auth/test setup. No Neon test database was used. |
+
+## Accessible workspace mutation toasts — 2026-10-06
+
+Mounted a shared Base UI toast provider for successful workspace mutations in catalog, translation, menu-language, organization, restaurant, invitation, and kitchen-order flows. English and French labels are available; failures remain persistent inline alerts. The toast viewport announces politely without moving focus and supports keyboard dismissal after users tab into the notification. A development-only, guarded route is used solely by the local browser test. No API, database, authentication, or production configuration changed.
+
+| Check | Actual result |
+| --- | --- |
+| `node node_modules/vitest/vitest.mjs run` from `apps/frontend` | Passed: 42 files, 338 tests. |
+| `node node_modules/eslint/bin/eslint.js .` from `apps/frontend` | Passed. |
+| `node node_modules/typescript/bin/tsc --noEmit` from `apps/frontend` | Passed. |
+| `node node_modules/@playwright/test/cli.js test --project workspace-toasts --reporter=line --timeout=30000` from `apps/frontend` | Passed: the local test announced the success message, retained focus on the mutation control, and dismissed the toast by keyboard. The `agent-browser` executable was unavailable, so the installed Playwright runner and the in-app browser were used for verification. |
+| `node node_modules/next/dist/bin/next build --webpack` from `apps/frontend` | Passed compilation, TypeScript, and generation of all 37 pages using a process-only placeholder secret and a localhost database port that is not listening. The first attempt used a too-short placeholder and stopped at Better Auth configuration validation; the corrected rerun completed. Better Auth logged schema-connection diagnostics against the unavailable placeholder database, and Webpack emitted nonfatal cache-write EPERM warnings. |
+| `node node_modules/prettier/bin/prettier.cjs --check` across the frontend | The repository-wide check still reports its pre-existing formatting baseline. All modified TypeScript/TSX files pass separately with `--end-of-line=auto`, because two touched files are checked out with Windows CRLF line endings. |
+| `git diff --check` | Passed. |

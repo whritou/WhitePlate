@@ -9,5 +9,5 @@ public interface IStaffInvitationRepository
     Task<bool> AcceptAsync(string tokenHash, ExternalIdentity identity, DateTimeOffset now,
         CancellationToken cancellationToken);
     Task<bool> RevokeAsync(Guid organizationId, Guid invitationId, ExternalIdentity identity,
-        CancellationToken cancellationToken);
+        DateTimeOffset now, CancellationToken cancellationToken);
 }

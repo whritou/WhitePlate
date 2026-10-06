@@ -12,6 +12,9 @@ vi.mock("@/lib/auth", () => ({ auth: { api: { getSession } } }))
 vi.mock("@/actions/organization", () => ({
   renameOrganizationAction: vi.fn(),
 }))
+vi.mock("@/components/ui/toast", () => ({
+  useWorkspaceToast: () => ({ success: vi.fn() }),
+}))
 
 vi.mock("@/services/organization-queries", () => ({
   getOrganizations,

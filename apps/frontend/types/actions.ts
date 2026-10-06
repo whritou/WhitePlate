@@ -24,3 +24,8 @@ export type StaffInvitationInput = {
   role: StaffRole
   locale: "en" | "fr"
 }
+
+export type RevokeStaffInvitationInput = {
+  organizationId: string
+  invitationId: string
+}

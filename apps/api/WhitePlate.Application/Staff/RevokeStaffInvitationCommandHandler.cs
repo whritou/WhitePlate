@@ -4,14 +4,15 @@ using WhitePlate.Domain.Identity;
 
 namespace WhitePlate.Application.Staff;
 
-public sealed class RevokeStaffInvitationCommandHandler(IStaffInvitationRepository invitations)
+public sealed class RevokeStaffInvitationCommandHandler(IStaffInvitationRepository invitations, TimeProvider timeProvider)
 {
     public async Task<Result<bool>> HandleAsync(Guid organizationId, Guid invitationId, ExternalIdentity identity,
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(identity);
         cancellationToken.ThrowIfCancellationRequested();
-        return await invitations.RevokeAsync(organizationId, invitationId, identity, cancellationToken)
+        return await invitations.RevokeAsync(organizationId, invitationId, identity,
+            timeProvider.GetUtcNow(), cancellationToken)
             ? Result<bool>.Success(true)
             : Result<bool>.Failure(new ApplicationError(ErrorCode.NotFound));
     }

@@ -18,6 +18,10 @@ vi.mock("@/i18n/navigation", () => ({
   useRouter: () => ({ refresh: vi.fn() }),
 }))
 
+vi.mock("@/components/ui/toast", () => ({
+  useWorkspaceToast: () => ({ success: vi.fn() }),
+}))
+
 vi.mock("next-intl", () => ({
   useLocale: () => "en",
   useTranslations:

@@ -9,6 +9,7 @@ import {
   acceptStaffInvitationAction,
 } from "./organization"
 import { whitePlateApi } from "@/lib/api"
+import * as organizationActions from "./organization"
 
 vi.mock("server-only", () => ({}))
 vi.mock("@/lib/api", () => ({
@@ -23,6 +24,33 @@ vi.mock("@/lib/email", () => ({ sendInvitationEmail: vi.fn() }))
 afterEach(() => vi.resetAllMocks())
 
 const id = "11111111-1111-4111-8111-111111111111"
+
+it("revokes only a well-formed organization invitation through the API", async () => {
+  const revoke = (
+    organizationActions as unknown as Record<
+      string,
+      (input: unknown) => Promise<unknown>
+    >
+  ).revokeStaffInvitationAction
+
+  vi.mocked(whitePlateApi.delete).mockResolvedValue({
+    ok: true,
+    status: 204,
+    data: undefined,
+  })
+
+  expect(await revoke({ organizationId: id, invitationId: id })).toEqual({
+    ok: true,
+  })
+  expect(whitePlateApi.delete).toHaveBeenCalledWith(
+    `/api/v1/organizations/${id}/invitations/${id}`
+  )
+  expect(await revoke({ organizationId: "../me", invitationId: id })).toEqual({
+    ok: false,
+    message: "invalid",
+  })
+  expect(whitePlateApi.delete).toHaveBeenCalledTimes(1)
+})
 
 it.each([
   null,

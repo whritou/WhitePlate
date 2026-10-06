@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
+import { useWorkspaceToast } from "@/components/ui/toast"
 import { useRouter } from "@/i18n/navigation"
 import type { ActionState } from "@/types/organization"
 import type { RestaurantFormProps } from "@/types/restaurant"
@@ -14,6 +15,7 @@ import { useRef, useState, useTransition, type FormEvent } from "react"
 
 export function RestaurantForm({ organizationId }: RestaurantFormProps) {
   const t = useTranslations("Restaurants")
+  const toast = useWorkspaceToast()
   const router = useRouter()
   const submitting = useRef(false)
   const [pending, startTransition] = useTransition()
@@ -38,6 +40,7 @@ export function RestaurantForm({ organizationId }: RestaurantFormProps) {
           return
         }
 
+        toast.success(t("created"))
         setState({ status: "success" })
         router.push(`/organization/team?organizationId=${organizationId}`)
         router.refresh()
@@ -101,6 +104,7 @@ export function RestaurantForm({ organizationId }: RestaurantFormProps) {
 
       <ResultMessage
         state={state}
+        hideSuccess
         message={
           state.status === "success"
             ? t("created")

@@ -3,6 +3,7 @@
 import { saveCatalogTranslationAction } from "@/actions/organization"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { useWorkspaceToast } from "@/components/ui/toast"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
@@ -26,6 +27,7 @@ export function CatalogTranslationRow({
   label: string
 }) {
   const t = useTranslations("Auth")
+  const toast = useWorkspaceToast()
   const [name, setName] = useState(initialName)
   const [description, setDescription] = useState(initialDescription ?? "")
   const [state, setState] = useState<"idle" | "pending" | "success" | "error">(
@@ -44,7 +46,10 @@ export function CatalogTranslationRow({
       description: row.type === "products" ? description : null,
     }).catch(() => ({ ok: false as const }))
 
-    setState(result.ok ? "success" : "error")
+    if (result.ok) {
+      toast.success(t("translationSaved"))
+      setState("idle")
+    } else setState("error")
   }
 
   return (
@@ -99,12 +104,6 @@ export function CatalogTranslationRow({
         >
           {state === "pending" ? t("savingTranslation") : t("saveTranslation")}
         </Button>
-
-        {state === "success" && (
-          <p role="status" className="text-sm text-foreground">
-            {t("translationSaved")}
-          </p>
-        )}
 
         {state === "error" && (
           <p role="alert" className="text-sm text-destructive">

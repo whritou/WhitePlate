@@ -28,7 +28,8 @@ export function DeactivateDiscountButton({
   const { pending, state, submit } = useCatalogForm(
     deactivateDiscountAction,
     false,
-    () => setConfirming(false)
+    () => setConfirming(false),
+    t("discountDeactivated")
   )
   const submitting = pending || state.status === "pending"
 
@@ -98,6 +99,7 @@ export function DeactivateDiscountButton({
 
             <ResultMessage
               state={state}
+              hideSuccess
               message={
                 state.status === "success"
                   ? t("discountDeactivated")

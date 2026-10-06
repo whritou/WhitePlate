@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useRouter } from "@/i18n/navigation"
+import { useWorkspaceToast } from "@/components/ui/toast"
 import type { ActionState } from "@/types/organization"
 import { useTranslations } from "next-intl"
 import { useRef, useState, useTransition, type FormEvent } from "react"
@@ -18,6 +19,7 @@ export function OrganizationSettingsForm({
   organizationName: string
 }) {
   const t = useTranslations("OrganizationSettings")
+  const toast = useWorkspaceToast()
   const router = useRouter()
   const submitting = useRef(false)
   const [pending, startTransition] = useTransition()
@@ -44,6 +46,7 @@ export function OrganizationSettingsForm({
         }
 
         setName(String(form.get("name") ?? "").trim())
+        toast.success(t("updated"))
         setState({ status: "success" })
         router.refresh()
       } catch {
@@ -80,7 +83,7 @@ export function OrganizationSettingsForm({
         <Button type="submit">{pending ? t("saving") : t("save")}</Button>
       </fieldset>
 
-      <ResultMessage state={state} message={message} />
+      <ResultMessage state={state} message={message} hideSuccess />
     </form>
   )
 }

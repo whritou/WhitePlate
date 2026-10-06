@@ -1,4 +1,5 @@
 import { expect, it } from "vitest"
+import * as responses from "./responses"
 import {
   parseStorefrontMenu,
   parseOrganizations,
@@ -31,6 +32,74 @@ it("rejects malformed organization IDs rather than using them in API paths", () 
   ])
   expect(parseOrganizations([{ id: "../orders", name: "Group" }])).toBeNull()
   expect(parseOrganizations([null])).toBeNull()
+})
+
+it("validates and minimizes organization team and invitation responses", () => {
+  const parse = responses as unknown as Record<
+    string,
+    ((value: unknown) => unknown) | undefined
+  >
+  const members = [
+    {
+      role: "OrganizationOwner",
+      email: "owner@example.test",
+      tenantId: null,
+      tenantName: null,
+      subject: "must-not-pass-through",
+    },
+    {
+      role: "KitchenStaff",
+      email: "chef@example.test",
+      tenantId: id,
+      tenantName: "Bistro",
+    },
+  ]
+  const invitations = [
+    {
+      id,
+      role: "KitchenStaff",
+      email: "chef@example.test",
+      tenantId: id,
+      tenantName: "Bistro",
+      expiresAt: "2026-10-13T12:00:00Z",
+      status: "Pending",
+      tokenHash: "must-not-pass-through",
+    },
+  ]
+
+  expect(parse.parseOrganizationMembers?.(members)).toEqual([
+    {
+      role: "OrganizationOwner",
+      email: "owner@example.test",
+      tenantId: null,
+      tenantName: null,
+    },
+    {
+      role: "KitchenStaff",
+      email: "chef@example.test",
+      tenantId: id,
+      tenantName: "Bistro",
+    },
+  ])
+  expect(
+    parse.parseOrganizationMembers?.([{ ...members[0], role: "Admin" }])
+  ).toBeNull()
+  expect(parse.parseOrganizationInvitations?.(invitations)).toEqual([
+    {
+      id,
+      role: "KitchenStaff",
+      email: "chef@example.test",
+      tenantId: id,
+      tenantName: "Bistro",
+      expiresAt: "2026-10-13T12:00:00Z",
+      status: "Pending",
+    },
+  ])
+  expect(
+    parse.parseOrganizationInvitations?.([
+      { ...invitations[0], status: "StillPending" },
+    ])
+  ).toBeNull()
 })
 
 it("requires menu language responses to have an enabled default", () => {

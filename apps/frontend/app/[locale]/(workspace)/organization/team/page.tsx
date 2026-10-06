@@ -12,8 +12,11 @@ import { Link } from "@/i18n/navigation"
 import { auth } from "@/lib/auth"
 import {
   getOrganizationRestaurants,
+  getOrganizationInvitations,
+  getOrganizationMembers,
   getOrganizations,
 } from "@/services/organization-queries"
+import { OrganizationTeamDirectory } from "@/components/organization/organization-team-directory"
 import { getLocale, getTranslations } from "next-intl/server"
 import { headers } from "next/headers"
 import { redirect } from "next/navigation"
@@ -53,11 +56,21 @@ export default async function OrganizationTeamPage({
 
   if (!organization) redirect(`/${locale}/organization/sign-up`)
 
-  const restaurantsResponse = await getOrganizationRestaurants(organization.id)
+  const [restaurantsResponse, membersResponse, invitationsResponse] =
+    await Promise.all([
+      getOrganizationRestaurants(organization.id),
+      getOrganizationMembers(organization.id),
+      getOrganizationInvitations(organization.id),
+    ])
   const restaurants =
     restaurantsResponse.ok && Array.isArray(restaurantsResponse.data)
       ? restaurantsResponse.data
       : null
+  const teamDirectory = await OrganizationTeamDirectory({
+    organizationId: organization.id,
+    members: membersResponse.ok ? membersResponse.data : null,
+    invitations: invitationsResponse.ok ? invitationsResponse.data : null,
+  })
 
   return (
     <main className="mx-auto min-h-[70vh] max-w-3xl px-5 py-12 sm:py-16">
@@ -133,7 +146,17 @@ export default async function OrganizationTeamPage({
             </section>
           )}
 
-          <div className="mt-8">
+          <div className="mt-8">{teamDirectory}</div>
+
+          <section className="mt-8 grid gap-2">
+            <h2 className="text-base font-semibold">{t("teamInviteTitle")}</h2>
+
+            <p className="text-sm text-muted-foreground">
+              {t("teamInviteDescription")}
+            </p>
+          </section>
+
+          <div className="mt-4">
             {restaurants === null ? (
               <Alert
                 variant="destructive"

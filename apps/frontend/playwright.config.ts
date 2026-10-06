@@ -14,6 +14,7 @@ export default defineConfig({
   timeout: 120_000,
   expect: { timeout: 20_000 },
   projects: [
+    { name: "workspace-toasts", testMatch: "workspace-toast.spec.ts" },
     { name: "restaurant", testMatch: "restaurant-creation.spec.ts" },
     {
       name: "catalog",

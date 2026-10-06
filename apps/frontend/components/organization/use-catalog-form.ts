@@ -1,7 +1,9 @@
 "use client"
 
 import { useRef, useState, useTransition } from "react"
+import { useTranslations } from "next-intl"
 import { useRouter } from "@/i18n/navigation"
+import { useWorkspaceToast } from "@/components/ui/toast"
 import type { ActionState } from "@/types/organization"
 import type {
   CatalogFormAction,
@@ -11,9 +13,12 @@ import type {
 export function useCatalogForm(
   action: CatalogFormAction,
   resetOnSuccess = false,
-  onSuccess?: () => void
+  onSuccess?: () => void,
+  successMessage?: string
 ) {
   const router = useRouter()
+  const t = useTranslations("Catalog")
+  const toast = useWorkspaceToast()
   const submitting = useRef(false)
   const [pending, startTransition] = useTransition()
   const [state, setState] = useState<ActionState>({ status: "idle" })
@@ -40,6 +45,7 @@ export function useCatalogForm(
         if (resetOnSuccess) element.reset()
 
         setState({ status: "success" })
+        toast.success(successMessage ?? t("saved"))
         onSuccess?.()
         router.refresh()
       } catch {

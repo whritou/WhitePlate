@@ -5,7 +5,9 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { fetchOrderPage, OrderRequestError } from "@/lib/api/order-browser"
 import { orderQueryKeys } from "@/lib/query/order-query"
 import { updateOrderStatusAction } from "@/actions/orders"
+import { useWorkspaceToast } from "@/components/ui/toast"
 import { useRouter } from "@/i18n/navigation"
+import { useTranslations } from "next-intl"
 import type {
   OrderDashboardProps,
   UpdateOrderStatusInput,
@@ -17,6 +19,8 @@ export function useOrderDashboard(props: OrderDashboardProps) {
   const scope = { userId, tenantId, locale }
   const client = useQueryClient()
   const router = useRouter()
+  const t = useTranslations("KitchenOrders")
+  const toast = useWorkspaceToast()
   const inFlight = useRef(false)
   const [message, setMessage] = useState<string | null>(null)
   const query = useQuery({
@@ -49,7 +53,7 @@ export function useOrderDashboard(props: OrderDashboardProps) {
     },
     retry: false,
     onSuccess: async () => {
-      setMessage("statusSaved")
+      toast.success(t("statusSaved"))
       await refresh()
     },
     onError: async (error) => {

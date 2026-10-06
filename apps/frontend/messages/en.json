@@ -67,8 +67,42 @@
     "manageTeamAction": "Manage team",
     "organizationSettingsAction": "Organization settings",
     "backToOrganizations": "All organizations",
-    "teamTitle": "Invite your staff",
-    "teamDescription": "Choose the email address and access level for this invitation. The recipient must verify the same address before joining.",
+    "teamTitle": "Team and invitations",
+    "teamDescription": "Review your organization’s members, manage invitations, and add verified teammates.",
+    "teamRosterTitle": "Team roster",
+    "teamRosterDescription": "People with access to this organization and its restaurants.",
+    "teamRosterEmpty": "No team members are available yet.",
+    "teamMemberEmailUnavailable": "Email unavailable",
+    "teamInvitationsTitle": "Invitations",
+    "teamInvitationsDescription": "Review pending, accepted, revoked, and expired invitations.",
+    "teamInvitationsEmpty": "There are no invitations for this organization yet.",
+    "teamInviteTitle": "Invite a teammate",
+    "teamInviteDescription": "Invited people must verify the same email address before they can join.",
+    "teamRoles": {
+      "OrganizationOwner": "Organization owner",
+      "RestaurantManager": "Restaurant manager",
+      "KitchenStaff": "Kitchen staff"
+    },
+    "invitationStatus": {
+      "Pending": "Pending",
+      "Accepted": "Accepted",
+      "Revoked": "Revoked",
+      "Expired": "Expired"
+    },
+    "invitationExpiresOn": "Expires {date}",
+    "revokeInvitationAction": "Revoke",
+    "revokeInvitationFor": "Revoke invitation for {email}",
+    "revokeInvitationTitle": "Revoke this invitation?",
+    "revokeInvitationDescription": "The invitation for {email} will no longer work.",
+    "confirmRevokeInvitation": "Revoke invitation",
+    "revokingInvitation": "Revoking…",
+    "invitationRevoked": "Invitation revoked.",
+    "teamErrors": {
+      "unauthorized": "Sign in again before changing this invitation.",
+      "invalid": "This invitation can no longer be revoked. Refresh the page and try again.",
+      "unavailable": "We couldn’t revoke this invitation. Try again in a moment."
+    },
+    "cancel": "Cancel",
     "staffRole": "Team role",
     "kitchenStaff": "Kitchen staff",
     "restaurantManager": "Restaurant manager",
@@ -134,8 +168,43 @@
       "unauthorized": "Your session has expired. Sign in again to continue."
     }
   },
+  "Workspace": {
+    "workspace": "Workspace",
+    "overview": "Overview",
+    "team": "Team",
+    "settings": "Settings",
+    "createRestaurant": "Create restaurant",
+    "orders": "Orders",
+    "catalog": "Catalog",
+    "menuLanguages": "Menu languages",
+    "navigationLabel": "Workspace navigation",
+    "openNavigation": "Open navigation",
+    "closeNavigation": "Close navigation",
+    "navigationTitle": "Workspace navigation",
+    "toggleTheme": "Toggle theme",
+    "skipToContent": "Skip to content",
+    "language": "Language",
+    "switchToEnglish": "Switch to English",
+    "switchToFrench": "Switch to French"
+  },
+  "WorkspaceToast": {
+    "notifications": "Workspace notifications",
+    "dismiss": "Dismiss notification"
+  },
+  "WorkspaceToastTest": {
+    "title": "Workspace toast test harness",
+    "showSuccess": "Show success toast",
+    "successMessage": "Changes saved."
+  },
   "WorkspaceLoading": {
-    "workspace": "Loading organization workspace…"
+    "workspace": "Loading organization workspace…",
+    "organizationSignUp": "Loading organization setup…",
+    "team": "Loading organization team…",
+    "restaurant": "Loading new restaurant form…",
+    "catalog": "Loading restaurant catalog…",
+    "menuLanguages": "Loading menu language settings…",
+    "settings": "Loading organization settings…",
+    "orders": "Loading kitchen orders…"
   },
   "KitchenOrders": {
     "title": "Kitchen orders",

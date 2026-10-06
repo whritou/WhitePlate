@@ -56,7 +56,7 @@ public sealed class StaffInvitationRepository(WhitePlateDbContext database) : IS
     }
 
     public async Task<bool> RevokeAsync(Guid organizationId, Guid invitationId, ExternalIdentity identity,
-        CancellationToken cancellationToken)
+        DateTimeOffset now, CancellationToken cancellationToken)
     {
         var isOwner = await database.OrganizationOwnerMemberships.AsNoTracking().AnyAsync(member =>
             member.OrganizationId == organizationId && member.Issuer == identity.Issuer &&
@@ -64,8 +64,7 @@ public sealed class StaffInvitationRepository(WhitePlateDbContext database) : IS
         if (!isOwner) return false;
         var invitation = await database.StaffInvitations.SingleOrDefaultAsync(item =>
             item.OrganizationId == organizationId && item.Id == invitationId, cancellationToken);
-        if (invitation is null) return false;
-        invitation.Revoke();
+        if (invitation is null || !invitation.TryRevoke(now)) return false;
         await database.SaveChangesAsync(cancellationToken);
         return true;
     }

@@ -7,11 +7,18 @@ import type { ActionState } from "@/types/organization"
 export function ResultMessage({
   state,
   message,
+  hideSuccess = false,
 }: {
   state: ActionState
   message: string
+  hideSuccess?: boolean
 }) {
-  if (state.status === "idle" || state.status === "pending") return null
+  if (
+    state.status === "idle" ||
+    state.status === "pending" ||
+    (hideSuccess && state.status === "success")
+  )
+    return null
 
   return (
     <Alert
