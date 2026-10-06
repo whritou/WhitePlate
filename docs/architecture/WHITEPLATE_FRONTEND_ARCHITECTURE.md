@@ -1,6 +1,6 @@
 # WhitePlate frontend architecture
 
-Status: localized Better Auth flows, server-only API BFF, organization signup, and email-bound staff invitation UI are wired in source. The Better Auth schema is migrated on Neon `test`, and email/password signup plus invitation acceptance were verified there with locally intercepted email. OAuth/real email credentials and production schema setup remain; see [authentication setup](../development.md#authentication-configuration). Commands are in the [package README](../../apps/frontend/README.md) and [development guide](../development.md).
+Status: localized Better Auth flows, server-only API BFF, organization signup, email-bound staff invitation UI, and owner/manager catalog and discount management are wired in source. The Better Auth schema is migrated on Neon `test` and Coolify Production; email/password signup plus invitation acceptance were verified on Neon with locally intercepted email. Hosted email/password signup, organization, restaurant creation and owner access are verified through Vercel and Coolify. Configured OAuth/real email delivery, hosted SignalR URL/CORS/TLS and expiry, public tenant DNS/TLS, Preview isolation and operational readiness remain open; see [authentication setup](../development.md#authentication-configuration). Commands are in the [package README](../../apps/frontend/README.md) and [development guide](../development.md).
 
 ## Stack and source map
 

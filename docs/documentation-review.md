@@ -305,3 +305,15 @@ Added localized owner/manager option-group and option forms to the existing cata
 | `node node_modules/@playwright/test/cli.js test tests/browser/catalog-management.spec.ts --reporter=line` | Not run. The expanded browser scenario writes acceptance organizations/catalog records and depends on its prerequisite browser flow; `WHITEPLATE_ACCEPTANCE_DATABASE=neon-test` was not explicitly enabled, so the test database could not be authorized. |
 
 The browser acceptance scenario now covers group/option create, edit, reload persistence, French archive cancellation/confirmation, descendant archive, and read-only archived history. Live browser/database acceptance remains open on the kanban card. No hosted denial-route checks, production writes, or credentials were used.
+
+## Roadmap and setup documentation alignment — 2026-10-06
+
+Aligned current status summaries with the implementation and dated acceptance records. The roadmap no longer reports obsolete test totals or an open staff-role matrix. Current guidance distinguishes completed Neon `test` role, tenant-isolation, checkout-snapshot, revocation, outbox and reconnect acceptance from hosted SignalR, tenant DNS/TLS, token-expiration, OAuth/email-provider and operational work. Catalog, option-group, option and discount editors are described as implemented; guarded discount-browser and checkout-redemption/receipt-history acceptance remain separate scenarios. Historical dated entries retain their original results and include a follow-up where later acceptance closed an earlier item. Browser commands now use the package's `test:browser` script, configured `tests/browser` paths, and documented project dependencies. Troubleshooting describes the active menu routes, tenant host resolution, server-side BFF and SignalR CORS requirements.
+
+| Check | Result |
+| --- | --- |
+| `git diff --check` | Passed with no whitespace errors. |
+| Relative Markdown file-link scan over the 10 changed documentation files | Passed; every relative target exists. |
+| Compare browser commands against `apps/frontend/package.json`, `apps/frontend/playwright.config.ts`, and `apps/frontend/tests/browser` | Passed by source inspection; script name, test paths, project dependencies, and worker configuration agree. |
+| Search active status/setup documents for the identified obsolete counts, proposed editor status, missing menu/BFF claims, stale CLI paths, and open staff-matrix claims | Passed; no stale claims remain in the active documents checked. Dated history remains intact. |
+| Frontend/API suites or guarded database acceptance | Not run; this change only updates documentation, and the database-backed browser suite was not authorized for this documentation task. |
