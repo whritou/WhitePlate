@@ -148,7 +148,9 @@ it("renders the organization roster and invitation status beside the invitation 
   expect(html).toContain("revoked@example.test")
   expect(html).toContain("expired@example.test")
   expect(html).toContain("invitationStatus.Pending")
-  expect(html).toContain("aria-label=\"revokeInvitationFor:pending@example.test\"")
+  expect(html).toContain(
+    'aria-label="revokeInvitationFor:pending@example.test"'
+  )
   expect(html).toContain("revokeInvitationAction")
   expect(html.match(/revokeInvitationAction/g)).toHaveLength(1)
   expect(html).toContain("Invitation form")
