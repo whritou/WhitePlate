@@ -7,6 +7,8 @@ import type {
   CategoryInput,
   CatalogResult,
   ManagedCatalog,
+  OptionGroupInput,
+  OptionInput,
   ProductInput,
 } from "@/types/catalog-management"
 
@@ -74,6 +76,45 @@ export async function saveProduct(input: ProductInput): Promise<CatalogResult> {
   const response = id
     ? await whitePlateApi.put(`${path}/${id}`, { ...fields, isAvailable })
     : await whitePlateApi.post(path, { categoryId, ...fields })
+
+  return mutationResult(response)
+}
+
+export async function saveOptionGroup({
+  tenantId,
+  id,
+  productId,
+  name,
+  minimumSelections,
+  maximumSelections,
+  sortOrder,
+}: OptionGroupInput): Promise<CatalogResult> {
+  const fields = { name, minimumSelections, maximumSelections, sortOrder }
+  const response = id
+    ? await whitePlateApi.put(
+        `/api/v1/tenants/${tenantId}/option-groups/${id}`,
+        fields
+      )
+    : await whitePlateApi.post(
+        `/api/v1/tenants/${tenantId}/products/${productId}/option-groups`,
+        fields
+      )
+
+  return mutationResult(response)
+}
+
+export async function saveOption(input: OptionInput): Promise<CatalogResult> {
+  const { tenantId, id, groupId, name, priceAdjustment, sortOrder } = input
+  const fields = { name, priceAdjustment, sortOrder }
+  const response = id
+    ? await whitePlateApi.put(
+        `/api/v1/tenants/${tenantId}/options/${id}`,
+        fields
+      )
+    : await whitePlateApi.post(
+        `/api/v1/tenants/${tenantId}/option-groups/${groupId}/options`,
+        fields
+      )
 
   return mutationResult(response)
 }

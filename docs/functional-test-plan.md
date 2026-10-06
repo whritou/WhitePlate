@@ -98,7 +98,7 @@ Operator-reported follow-up on 2026-10-06: opening the protected restaurant rout
 
 ### Category and product management
 
-`tests/browser/catalog-management.spec.ts` verifies owner category/product creation, GBP price and availability persistence after reload, category ordering, French UI, archive cancellation and confirmation, and read-only archived history. Input/action tests reject malformed IDs, files, browser authorization fields, unsupported archive targets, excessive lengths, invalid decimals, tax and ordering. Response tests reject foreign tenant data and malformed management DTO fields. Kitchen/foreign-account authorization is covered in the separate staff acceptance suite. Option-group and discount editors remain proposed work.
+`tests/browser/catalog-management.spec.ts` covers owner category/product and option-group/option creation and editing, GBP amounts and selection bounds persisting after reload, French archive cancellation and confirmation, descendant archival, and read-only archived history. Run it only with the explicitly guarded non-production acceptance database and the local API/frontend configured as described in the browser test setup. Input/action tests reject malformed IDs, files, browser authorization fields, unsupported archive targets, excessive lengths, invalid decimals, tax, selection bounds and ordering. Response tests reject foreign tenant data and malformed management DTO fields. The API remains responsible for owner/manager authorization and cross-tenant isolation; kitchen/foreign-account authorization is covered in the separate staff acceptance suite. Discount-code editing remains proposed work.
 
 ### Owner restaurant creation
 

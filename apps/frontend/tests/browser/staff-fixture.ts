@@ -3,6 +3,7 @@ import { randomBytes, randomUUID } from "node:crypto"
 import { readFile } from "node:fs/promises"
 import { hashPassword } from "better-auth/crypto"
 import { Client } from "pg"
+import { requireAcceptanceDatabase } from "./acceptance-environment"
 import type { Browser, BrowserContext } from "@playwright/test"
 import type {
   AcceptanceActor,
@@ -65,14 +66,7 @@ async function actor({
 }
 
 export async function staffFixture(browser: Browser): Promise<StaffFixture> {
-  if (
-    process.env.WHITEPLATE_ACCEPTANCE_DATABASE !== "neon-test" ||
-    !process.env.DATABASE_URL ||
-    process.env.NODE_ENV === "production"
-  )
-    throw new Error(
-      "Explicitly select WHITEPLATE_ACCEPTANCE_DATABASE=neon-test for test-only fixture mutations"
-    )
+  requireAcceptanceDatabase()
 
   const email = process.env.WHITEPLATE_DEV_EMAIL
   const password = process.env.WHITEPLATE_DEV_PASSWORD

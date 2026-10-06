@@ -1,10 +1,13 @@
 import { expect, test } from "@playwright/test"
 import { readFile } from "node:fs/promises"
+import { requireAcceptanceDatabase } from "./acceptance-environment"
 
 test("owner creates, edits and archives catalog items with localized feedback", async ({
   page,
   context,
 }) => {
+  requireAcceptanceDatabase()
+
   const email = process.env.WHITEPLATE_DEV_EMAIL
   const password = process.env.WHITEPLATE_DEV_PASSWORD
 
@@ -65,6 +68,95 @@ test("owner creates, edits and archives catalog items with localized feedback", 
   await expect(
     edit.getByLabel("Base price (GBP)", { exact: true })
   ).toHaveValue("8.25")
+
+  const groupName = `Size ${stamp}`
+  const editedGroupName = `Portion ${stamp}`
+  const group = page.getByRole("form", {
+    name: `New option group for ${productName}`,
+    exact: true,
+  })
+
+  await group.getByLabel("Name", { exact: true }).fill(groupName)
+  await group.getByLabel("Minimum selections", { exact: true }).fill("0")
+  await group.getByLabel("Maximum selections", { exact: true }).fill("2")
+  await group.getByLabel("Display order", { exact: true }).fill("1")
+  await group
+    .getByRole("button", { name: "Create option group", exact: true })
+    .click()
+
+  const editGroup = page.getByRole("form", {
+    name: `Edit option group ${groupName}`,
+    exact: true,
+  })
+
+  await expect(editGroup).toBeVisible()
+  await editGroup.getByLabel("Name", { exact: true }).fill(editedGroupName)
+  await editGroup.getByLabel("Minimum selections", { exact: true }).fill("1")
+  await editGroup.getByLabel("Maximum selections", { exact: true }).fill("2")
+  await editGroup.getByLabel("Display order", { exact: true }).fill("0")
+  await editGroup
+    .getByRole("button", { name: "Save changes", exact: true })
+    .click()
+
+  const editedGroup = page.getByRole("form", {
+    name: `Edit option group ${editedGroupName}`,
+    exact: true,
+  })
+
+  const optionName = `Large ${stamp}`
+  const option = page.getByRole("form", {
+    name: `New option for ${editedGroupName}`,
+    exact: true,
+  })
+
+  await option.getByLabel("Name", { exact: true }).fill(optionName)
+  await option
+    .getByLabel("Price adjustment (GBP)", { exact: true })
+    .fill("1.25")
+  await option.getByLabel("Display order", { exact: true }).fill("2")
+  await option
+    .getByRole("button", { name: "Create option", exact: true })
+    .click()
+
+  const editOption = page.getByRole("form", {
+    name: `Edit option ${optionName}`,
+    exact: true,
+  })
+
+  await expect(editOption).toBeVisible()
+  await editOption
+    .getByLabel("Price adjustment (GBP)", { exact: true })
+    .fill("1.75")
+  await editOption.getByLabel("Display order", { exact: true }).fill("3")
+  await editOption
+    .getByRole("button", { name: "Save changes", exact: true })
+    .click()
+
+  const secondOptionName = `Small ${stamp}`
+  const secondOption = page.getByRole("form", {
+    name: `New option for ${editedGroupName}`,
+    exact: true,
+  })
+
+  await secondOption.getByLabel("Name", { exact: true }).fill(secondOptionName)
+  await secondOption
+    .getByLabel("Price adjustment (GBP)", { exact: true })
+    .fill("0")
+  await secondOption.getByLabel("Display order", { exact: true }).fill("0")
+  await secondOption
+    .getByRole("button", { name: "Create option", exact: true })
+    .click()
+
+  await page.reload()
+  await expect(
+    editedGroup.getByLabel("Minimum selections", { exact: true })
+  ).toHaveValue("1")
+  await expect(
+    editedGroup.getByLabel("Maximum selections", { exact: true })
+  ).toHaveValue("2")
+  await expect(
+    editOption.getByLabel("Price adjustment (GBP)", { exact: true })
+  ).toHaveValue("1.75")
   await page.reload()
   await expect(edit.getByLabel("Availability", { exact: true })).toHaveValue(
     "false"
@@ -89,6 +181,47 @@ test("owner creates, edits and archives catalog items with localized feedback", 
   await expect(
     page.getByRole("heading", { name: "Gérer le catalogue", exact: true })
   ).toBeVisible()
+  await page
+    .getByRole("button", { name: `Archiver ${optionName}`, exact: true })
+    .click()
+  await page.getByRole("button", { name: "Annuler", exact: true }).click()
+  await expect(
+    page.getByRole("form", {
+      name: `Modifier l’option ${optionName}`,
+      exact: true,
+    })
+  ).toBeVisible()
+  await page
+    .getByRole("button", { name: `Archiver ${optionName}`, exact: true })
+    .click()
+  await page
+    .getByRole("button", { name: "Confirmer l’archivage", exact: true })
+    .click()
+  await expect(
+    page.getByRole("form", {
+      name: `Modifier l’option ${optionName}`,
+      exact: true,
+    })
+  ).toHaveCount(0)
+  await page
+    .getByRole("button", { name: `Archiver ${editedGroupName}`, exact: true })
+    .click()
+  await page.getByRole("button", { name: "Annuler", exact: true }).click()
+  await expect(editedGroup).toBeVisible()
+  await page
+    .getByRole("button", { name: `Archiver ${editedGroupName}`, exact: true })
+    .click()
+  await page
+    .getByRole("button", { name: "Confirmer l’archivage", exact: true })
+    .click()
+  await expect(editedGroup).toHaveCount(0)
+  await expect(
+    page.getByRole("form", {
+      name: `Modifier l’option ${secondOptionName}`,
+      exact: true,
+    })
+  ).toHaveCount(0)
+
   await page
     .getByRole("button", { name: `Archiver ${productName}`, exact: true })
     .click()

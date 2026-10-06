@@ -290,3 +290,18 @@ On `fix/kitchen-outbox-delivery` from main `bd8030e`, a real four-client accepta
 The live suite used localhost and the existing Neon `test` database with its explicit acceptance guard. It checked delivery for owner/manager/kitchen, events and denied joins in both tenant directions, exact local CORS, persisted dispatch, same-event duplicate suppression, real retry scheduling after a malformed test-only payload and recovery after restoring it, fresh token acquisition on explicit reconnect/rejoin, REST recovery of an offline order and no subsequent hints to revoked kitchen access. Existing staff acceptance still verified REST/cache removal. An early duplicate project declaration and malformed-payload lookup were corrected; another pre-fix run timed out awaiting a status hint without a polling exception. The initial sandbox API build and formatting writes were denied; normal-permission reruns succeeded. Both agent-started servers were stopped after acceptance. No production data, credentials or schema changed.
 
 The user selected Coolify for hosted checks. Read-only inspection showed a restarting API on main `bd8030e` with an HTTP application link and startup error `Production requires an HTTPS Authentication:Issuer and Authentication:Audience.` Hosted checks await working issuer/audience and HTTPS routing, then deployment of this fix, exact frontend CORS, browser-reachable hub URL and actual token-expiration/renewal/reconnect. See the dated [test plan](functional-test-plan.md#live-outbox-and-revoked-connection-acceptance--2026-10-05); the SignalR card stays In review rather than Done.
+
+## Catalog option-group and option management — 2026-10-06
+
+Added localized owner/manager option-group and option forms to the existing catalog page. The UI sends only validated API fields, displays option prices in the restaurant currency, keeps archived descendants read-only, and uses the existing shadcn Base UI form controls, cards, badges, and action feedback. The API remains responsible for tenant ownership and authorization; no API, schema, or production changes were made. Discount-code editing remains proposed work.
+
+| Command/check | Actual result |
+| --- | --- |
+| `node node_modules/vitest/vitest.mjs run` | Passed: 27 files, 239 frontend tests. Includes parser, mutation-payload, and option-editor rendering coverage. |
+| `node node_modules/eslint/bin/eslint.js .` | Passed. |
+| `node node_modules/typescript/bin/tsc --noEmit` | Passed. |
+| `node node_modules/prettier/bin/prettier.cjs --check "**/*.{ts,tsx}"` | Passed. |
+| `node node_modules/next/dist/bin/next build --webpack` | Passed compilation, TypeScript, and generation of all 33 pages with process-only HTTPS placeholders for the local auth/API origins. The build still reported sandbox-denied `.next` cache writes and the installed PostgreSQL driver's upcoming `sslmode` compatibility warning. The initial build without HTTPS placeholders stopped on local HTTP settings. |
+| `node node_modules/@playwright/test/cli.js test tests/browser/catalog-management.spec.ts --reporter=line` | Not run. The expanded browser scenario writes acceptance organizations/catalog records and depends on its prerequisite browser flow; `WHITEPLATE_ACCEPTANCE_DATABASE=neon-test` was not explicitly enabled, so the test database could not be authorized. |
+
+The browser acceptance scenario now covers group/option create, edit, reload persistence, French archive cancellation/confirmation, descendant archive, and read-only archived history. Live browser/database acceptance remains open on the kanban card. No hosted denial-route checks, production writes, or credentials were used.
