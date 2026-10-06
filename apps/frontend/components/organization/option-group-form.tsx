@@ -116,6 +116,7 @@ export function OptionGroupForm({
 
       <ResultMessage
         state={state}
+        hideSuccess
         message={
           state.status === "success"
             ? t("saved")

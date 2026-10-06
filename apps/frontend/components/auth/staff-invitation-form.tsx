@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
+import { useWorkspaceToast } from "@/components/ui/toast"
 import type { ActionState } from "@/types/organization"
 import { ArrowRight, LoaderCircle } from "lucide-react"
 import { useLocale, useTranslations } from "next-intl"
@@ -19,6 +20,7 @@ export function StaffInvitationForm({
   restaurants: { id: string; name: string }[]
 }) {
   const t = useTranslations("Auth")
+  const toast = useWorkspaceToast()
   const locale = useLocale()
   const [tenantId, setTenantId] = useState(restaurants[0]?.id ?? "")
   const [role, setRole] = useState<
@@ -34,11 +36,10 @@ export function StaffInvitationForm({
       new FormData(event.currentTarget)
     ).catch(() => ({ ok: false as const, message: "unavailable" as const }))
 
-    setState(
-      result.ok
-        ? { status: "success" }
-        : { status: "error", error: result.message }
-    )
+    if (result.ok) {
+      toast.success(t("invitationSent"))
+      setState({ status: "idle" })
+    } else setState({ status: "error", error: result.message })
   }
 
   return (
@@ -133,6 +134,7 @@ export function StaffInvitationForm({
 
       <ResultMessage
         state={state}
+        hideSuccess
         message={
           state.status === "success"
             ? t("invitationSent")

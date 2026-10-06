@@ -331,3 +331,17 @@ Added a responsive, role-aware organization shell with a desktop sidebar and mob
 | `node node_modules/next/dist/bin/next build --webpack` from `apps/frontend` | Passed compilation, TypeScript, and generation of all 35 pages. Process-only inert HTTPS/auth/database placeholders satisfied production checks. Better Auth logged schema-connection diagnostics against the unavailable placeholder database; Webpack cache writes also emitted nonfatal EPERM warnings. |
 | `git diff --check` | Passed; Git printed only line-ending conversion warnings for existing CRLF-configured paths. |
 | Authenticated browser/responsive keyboard acceptance | Not run; it needs the app's database-backed auth/test setup. No Neon test database was used. |
+
+## Accessible workspace mutation toasts — 2026-10-06
+
+Mounted a shared Base UI toast provider for successful workspace mutations in catalog, translation, menu-language, organization, restaurant, invitation, and kitchen-order flows. English and French labels are available; failures remain persistent inline alerts. The toast viewport announces politely without moving focus and supports keyboard dismissal after users tab into the notification. A development-only, guarded route is used solely by the local browser test. No API, database, authentication, or production configuration changed.
+
+| Check | Actual result |
+| --- | --- |
+| `node node_modules/vitest/vitest.mjs run` from `apps/frontend` | Passed: 42 files, 338 tests. |
+| `node node_modules/eslint/bin/eslint.js .` from `apps/frontend` | Passed. |
+| `node node_modules/typescript/bin/tsc --noEmit` from `apps/frontend` | Passed. |
+| `node node_modules/@playwright/test/cli.js test --project workspace-toasts --reporter=line --timeout=30000` from `apps/frontend` | Passed: the local test announced the success message, retained focus on the mutation control, and dismissed the toast by keyboard. The `agent-browser` executable was unavailable, so the installed Playwright runner and the in-app browser were used for verification. |
+| `node node_modules/next/dist/bin/next build --webpack` from `apps/frontend` | Passed compilation, TypeScript, and generation of all 37 pages using a process-only placeholder secret and a localhost database port that is not listening. The first attempt used a too-short placeholder and stopped at Better Auth configuration validation; the corrected rerun completed. Better Auth logged schema-connection diagnostics against the unavailable placeholder database, and Webpack emitted nonfatal cache-write EPERM warnings. |
+| `node node_modules/prettier/bin/prettier.cjs --check` across the frontend | The repository-wide check still reports its pre-existing formatting baseline. All modified TypeScript/TSX files pass separately with `--end-of-line=auto`, because two touched files are checked out with Windows CRLF line endings. |
+| `git diff --check` | Passed. |

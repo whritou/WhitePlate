@@ -39,7 +39,8 @@ export function ArchiveCatalogButton({
   const { pending, state, submit } = useCatalogForm(
     archiveCatalogItemAction,
     false,
-    () => setConfirming(false)
+    () => setConfirming(false),
+    t("archived")
   )
   const submitting = pending || state.status === "pending"
 
@@ -111,6 +112,7 @@ export function ArchiveCatalogButton({
 
             <ResultMessage
               state={state}
+              hideSuccess
               message={
                 state.status === "success"
                   ? t("archived")

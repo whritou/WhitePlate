@@ -153,6 +153,10 @@
     "switchToEnglish": "Switch to English",
     "switchToFrench": "Switch to French"
   },
+  "WorkspaceToast": {
+    "notifications": "Workspace notifications",
+    "dismiss": "Dismiss notification"
+  },
   "WorkspaceLoading": {
     "workspace": "Loading organization workspace…",
     "organizationSignUp": "Loading organization setup…",

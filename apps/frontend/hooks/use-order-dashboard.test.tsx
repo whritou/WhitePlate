@@ -5,24 +5,34 @@ import { OrderRequestError } from "@/lib/api/order-browser"
 import type { OrderDashboardProps, OrderPage } from "@/types/orders"
 import { useOrderDashboard } from "./use-order-dashboard"
 
-const { queryState, client, mutation } = vi.hoisted(() => ({
-  queryState: { value: {} as Record<string, unknown> },
-  client: {
-    invalidateQueries: vi.fn(),
-    removeQueries: vi.fn(),
-    clear: vi.fn(),
-  },
-  mutation: {
-    isPending: false,
-    variables: null,
-    mutateAsync: vi.fn(),
-  },
-}))
+const { queryState, client, mutation, mutationOptions, successToast } =
+  vi.hoisted(() => ({
+    queryState: { value: {} as Record<string, unknown> },
+    client: {
+      invalidateQueries: vi.fn(),
+      removeQueries: vi.fn(),
+      clear: vi.fn(),
+    },
+    mutation: {
+      isPending: false,
+      variables: null,
+      mutateAsync: vi.fn(),
+    },
+    mutationOptions: {
+      value: {} as { onSuccess?: () => Promise<void> },
+    },
+
+    successToast: vi.fn(),
+  }))
 
 vi.mock("@tanstack/react-query", () => ({
   useQuery: vi.fn(() => queryState.value),
   useQueryClient: () => client,
-  useMutation: () => mutation,
+  useMutation: (options: { onSuccess?: () => Promise<void> }) => {
+    mutationOptions.value = options
+
+    return mutation
+  },
 }))
 
 vi.mock("@/lib/api/order-browser", () => ({
@@ -35,6 +45,12 @@ vi.mock("@/lib/api/order-browser", () => ({
 }))
 
 vi.mock("@/actions/orders", () => ({ updateOrderStatusAction: vi.fn() }))
+vi.mock("@/components/ui/toast", () => ({
+  useWorkspaceToast: () => ({ success: successToast }),
+}))
+vi.mock("next-intl", () => ({
+  useTranslations: () => (key: string) => key,
+}))
 vi.mock("@/i18n/navigation", () => ({
   useRouter: () => ({ push: vi.fn(), refresh: vi.fn() }),
 }))
@@ -155,4 +171,12 @@ it("keeps a saved order page and marks it stale after a failed refresh", () => {
   expect(html).toContain('data-stale="true"')
   expect(html).toContain('data-error="unavailable"')
   expect(html).toContain('data-order-count="1"')
+})
+
+it("announces successful status changes with the shared toast manager", async () => {
+  renderToStaticMarkup(createElement(Probe, { dashboardProps: props }))
+
+  await mutationOptions.value.onSuccess?.()
+
+  expect(successToast).toHaveBeenCalledWith("statusSaved")
 })

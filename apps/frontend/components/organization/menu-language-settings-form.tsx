@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { useWorkspaceToast } from "@/components/ui/toast"
 import { useRouter } from "@/i18n/navigation"
 import type { FormState } from "@/types/catalog"
 import { useLocale, useTranslations } from "next-intl"
@@ -21,6 +22,7 @@ export function MenuLanguageSettingsForm({
   defaultLocale: string
 }) {
   const t = useTranslations("Auth")
+  const toast = useWorkspaceToast()
   const uiLocale = useLocale()
   const router = useRouter()
   const [locales, setLocales] = useState(initialLocales)
@@ -61,7 +63,8 @@ export function MenuLanguageSettingsForm({
     }).catch(() => ({ ok: false as const }))
 
     if (result.ok) {
-      setState("success")
+      toast.success(t("menuLanguagesSaved"))
+      setState("idle")
       router.refresh()
     } else setState("error")
   }
@@ -160,12 +163,6 @@ export function MenuLanguageSettingsForm({
           {t("addLanguageAction")}
         </Button>
       </div>
-
-      {state === "success" && (
-        <p role="status" className="text-sm text-foreground">
-          {t("menuLanguagesSaved")}
-        </p>
-      )}
 
       {state === "error" && (
         <p role="alert" className="text-sm text-destructive">

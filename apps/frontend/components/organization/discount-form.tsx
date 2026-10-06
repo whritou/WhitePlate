@@ -32,8 +32,7 @@ export function DiscountForm({
 
   let feedback = t("saving")
 
-  if (state.status === "success") feedback = t("saved")
-  else if (state.status === "error" && !discount && state.error === "conflict")
+  if (state.status === "error" && !discount && state.error === "conflict")
     feedback = t("duplicateDiscountCode")
   else if (state.status === "error")
     feedback = t(`errors.${state.error ?? "unavailable"}`)
@@ -134,7 +133,7 @@ export function DiscountForm({
         </Button>
       </fieldset>
 
-      <ResultMessage state={state} message={feedback} />
+      <ResultMessage state={state} message={feedback} hideSuccess />
     </form>
   )
 }

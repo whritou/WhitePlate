@@ -95,6 +95,10 @@ Organization owners open `/[locale]/organization/restaurants/new?organizationId=
 
 Organization owners open `/[locale]/organization/settings?organizationId=...` from the organization overview. The page obtains the current owner organization list through the authenticated server-side API client and renders a rename form only when the selected ID appears in that list. The server action validates the organization ID and a trimmed 1–200-character name before calling the existing `PATCH /api/v1/organizations/{organizationId}` API. The API independently enforces ownership; the URL ID selects the organization but grants no access. English and French pending, success, unavailable, validation, and access-denied copy is provided.
 
+## Workspace mutation feedback
+
+`AppProviders` mounts one shared `WorkspaceToastProvider` built on Base UI Toast and the shadcn button. Successful catalog, translation, menu-language, organization, restaurant, invitation, and kitchen-order mutations announce localized feedback through a polite notification region; failures remain inline alerts so they persist for correction. The viewport does not steal focus, and keyboard users can reach the toast and its localized dismiss control. Success copy contains no server error details or private data.
+
 ## Workspace loading and refresh states
 
 Each organization route has a localized App Router fallback shaped for that page: the overview reserves restaurant-order, menu-setting, and organization groups; team shows the invitation and restaurant areas; restaurant creation and organization signup show their forms; catalog and menu-language pages reserve their editors; settings shows its rename form; and orders show status filters and ticket cards. The overview fallback lives under the `(overview)` route group so it cannot cover its sibling pages. Every fallback uses the shared shadcn-compatible `Skeleton`, exposes one polite localized status and `aria-busy`, hides decorative shapes from assistive technology, and stops pulsing under reduced-motion preferences. Page-level API failures and empty results continue to render their distinct alert or empty state after loading resolves.

@@ -136,7 +136,7 @@ export function OrderDashboard(props: OrderDashboardProps) {
         )}
 
         {message && (
-          <Alert role="status" aria-live="polite">
+          <Alert variant="destructive" role="alert">
             <AlertDescription>{t(message)}</AlertDescription>
           </Alert>
         )}

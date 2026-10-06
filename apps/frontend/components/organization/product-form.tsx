@@ -161,6 +161,7 @@ export function ProductForm({
 
       <ResultMessage
         state={state}
+        hideSuccess
         message={
           state.status === "success"
             ? t("saved")

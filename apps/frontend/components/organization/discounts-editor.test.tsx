@@ -16,6 +16,10 @@ vi.mock("@/i18n/navigation", () => ({
   useRouter: () => ({ refresh: vi.fn() }),
 }))
 
+vi.mock("@/components/ui/toast", () => ({
+  useWorkspaceToast: () => ({ success: vi.fn() }),
+}))
+
 vi.mock("next-intl", () => ({
   useLocale: () => "en",
   useTranslations: () => (key: string, values?: Record<string, string>) => {
@@ -65,6 +69,7 @@ const fixedDiscount: CatalogDiscount = {
   value: 5.5,
   isActive: true,
 }
+
 const inactiveDiscount: CatalogDiscount = {
   id: "22222222-2222-4222-8222-222222222222",
   code: "WELCOME15",
