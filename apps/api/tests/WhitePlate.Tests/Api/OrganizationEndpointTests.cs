@@ -192,6 +192,148 @@ public sealed class OrganizationEndpointTests
     }
 
     [Fact]
+    public async Task OrganizationOwnerCanReadTeamMembersAndRedactedInvitationStatuses()
+    {
+        using var factory = new OrganizationFactory();
+        var (organizationId, ownerIdentity) = await factory.SeedOwnerAsync();
+        using var client = factory.CreateClient();
+        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", ownerIdentity.Subject);
+
+        using var restaurantResponse = await client.PostAsJsonAsync($"/api/v1/organizations/{organizationId}/restaurants",
+            new { name = "Bistro", subdomain = "bistro", currency = "EUR" }, TestContext.Current.CancellationToken);
+        var restaurant = await restaurantResponse.Content.ReadFromJsonAsync<WhitePlate.Api.Contracts.TenantResponse>(TestContext.Current.CancellationToken);
+
+        async Task<(Guid Id, string Token)> CreateInvitation(string email)
+        {
+            using var response = await client.PostAsJsonAsync($"/api/v1/organizations/{organizationId}/invitations",
+                new { tenantId = restaurant!.Id, email, role = "KitchenStaff" }, TestContext.Current.CancellationToken);
+            Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+            using var json = JsonDocument.Parse(await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
+            return (json.RootElement.GetProperty("id").GetGuid(), json.RootElement.GetProperty("token").GetString()!);
+        }
+
+        var pending = await CreateInvitation("pending@example.test");
+        var accepted = await CreateInvitation("accepted@example.test");
+        var revoked = await CreateInvitation("revoked@example.test");
+
+        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", "accepted");
+        using var acceptedResponse = await client.PostAsJsonAsync("/api/v1/invitations/accept",
+            new { token = accepted.Token }, TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.NoContent, acceptedResponse.StatusCode);
+
+        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", ownerIdentity.Subject);
+        using var revokeResponse = await client.DeleteAsync(
+            $"/api/v1/organizations/{organizationId}/invitations/{revoked.Id}", TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.NoContent, revokeResponse.StatusCode);
+
+        var now = DateTimeOffset.UtcNow;
+        var expired = StaffInvitation.Create(organizationId, null, InvitationRole.OrganizationOwner,
+            "expired@example.test", new string('f', 64), now.AddDays(1), now);
+        using (var scope = factory.Services.CreateScope())
+        {
+            var database = scope.ServiceProvider.GetRequiredService<WhitePlateDbContext>();
+            database.StaffInvitations.Add(expired);
+            await database.SaveChangesAsync(TestContext.Current.CancellationToken);
+            database.Entry(expired).Property(invitation => invitation.ExpiresAt).CurrentValue = now.AddMinutes(-1);
+            await database.SaveChangesAsync(TestContext.Current.CancellationToken);
+        }
+
+        using var membersResponse = await client.GetAsync(
+            $"/api/v1/organizations/{organizationId}/members", TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.OK, membersResponse.StatusCode);
+        using var membersJson = JsonDocument.Parse(await membersResponse.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
+        var members = membersJson.RootElement.EnumerateArray().ToArray();
+        Assert.Contains(members, member => member.GetProperty("role").GetString() == "OrganizationOwner" &&
+            member.GetProperty("email").GetString() == "owner@example.test");
+        Assert.Contains(members, member => member.GetProperty("role").GetString() == "KitchenStaff" &&
+            member.GetProperty("email").GetString() == "accepted@example.test" &&
+            member.GetProperty("tenantName").GetString() == "Bistro");
+        Assert.DoesNotContain("issuer", membersJson.RootElement.GetRawText(), StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("subject", membersJson.RootElement.GetRawText(), StringComparison.OrdinalIgnoreCase);
+
+        using var invitationsResponse = await client.GetAsync(
+            $"/api/v1/organizations/{organizationId}/invitations", TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.OK, invitationsResponse.StatusCode);
+        var invitationsBody = await invitationsResponse.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
+        using var invitationsJson = JsonDocument.Parse(invitationsBody);
+        var invitations = invitationsJson.RootElement.EnumerateArray().ToArray();
+        Assert.Equal("Pending", invitations.Single(item => item.GetProperty("id").GetGuid() == pending.Id)
+            .GetProperty("status").GetString());
+        Assert.Equal("Accepted", invitations.Single(item => item.GetProperty("id").GetGuid() == accepted.Id)
+            .GetProperty("status").GetString());
+        Assert.Equal("Revoked", invitations.Single(item => item.GetProperty("id").GetGuid() == revoked.Id)
+            .GetProperty("status").GetString());
+        Assert.Equal("Expired", invitations.Single(item => item.GetProperty("id").GetGuid() == expired.Id)
+            .GetProperty("status").GetString());
+        Assert.DoesNotContain("token", invitationsBody, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("tokenHash", invitationsBody, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public async Task OrganizationTeamReadsHideOrganizationsOwnedByAnotherIdentity()
+    {
+        using var factory = new OrganizationFactory();
+        var (organizationId, _) = await factory.SeedOwnerAsync();
+        var (_, otherIdentity) = await factory.SeedOwnerAsync("other-owner");
+        using var client = factory.CreateClient();
+        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", otherIdentity.Subject);
+
+        using var membersResponse = await client.GetAsync(
+            $"/api/v1/organizations/{organizationId}/members", TestContext.Current.CancellationToken);
+        using var invitationsResponse = await client.GetAsync(
+            $"/api/v1/organizations/{organizationId}/invitations", TestContext.Current.CancellationToken);
+
+        Assert.Equal(HttpStatusCode.NotFound, membersResponse.StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, invitationsResponse.StatusCode);
+    }
+
+    [Fact]
+    public async Task OrganizationOwnerCannotRevokeAcceptedOrExpiredInvitations()
+    {
+        using var factory = new OrganizationFactory();
+        var (organizationId, ownerIdentity) = await factory.SeedOwnerAsync();
+        using var client = factory.CreateClient();
+        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", ownerIdentity.Subject);
+
+        using var acceptedInvitationResponse = await client.PostAsJsonAsync(
+            $"/api/v1/organizations/{organizationId}/invitations",
+            new { tenantId = (Guid?)null, email = "accepted@example.test", role = "OrganizationOwner" },
+            TestContext.Current.CancellationToken);
+        using var acceptedInvitationJson = JsonDocument.Parse(
+            await acceptedInvitationResponse.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
+        var acceptedInvitationId = acceptedInvitationJson.RootElement.GetProperty("id").GetGuid();
+        var acceptedToken = acceptedInvitationJson.RootElement.GetProperty("token").GetString();
+
+        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", "accepted");
+        using var acceptResponse = await client.PostAsJsonAsync("/api/v1/invitations/accept",
+            new { token = acceptedToken }, TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.NoContent, acceptResponse.StatusCode);
+
+        var now = DateTimeOffset.UtcNow;
+        var expiredInvitation = StaffInvitation.Create(organizationId, null, InvitationRole.OrganizationOwner,
+            "expired@example.test", new string('e', 64), now.AddDays(1), now);
+        using (var scope = factory.Services.CreateScope())
+        {
+            var database = scope.ServiceProvider.GetRequiredService<WhitePlateDbContext>();
+            database.StaffInvitations.Add(expiredInvitation);
+            await database.SaveChangesAsync(TestContext.Current.CancellationToken);
+            database.Entry(expiredInvitation).Property(invitation => invitation.ExpiresAt).CurrentValue = now.AddMinutes(-1);
+            await database.SaveChangesAsync(TestContext.Current.CancellationToken);
+        }
+
+        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", ownerIdentity.Subject);
+        using var acceptedRevokeResponse = await client.DeleteAsync(
+            $"/api/v1/organizations/{organizationId}/invitations/{acceptedInvitationId}",
+            TestContext.Current.CancellationToken);
+        using var expiredRevokeResponse = await client.DeleteAsync(
+            $"/api/v1/organizations/{organizationId}/invitations/{expiredInvitation.Id}",
+            TestContext.Current.CancellationToken);
+
+        Assert.Equal(HttpStatusCode.NotFound, acceptedRevokeResponse.StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, expiredRevokeResponse.StatusCode);
+    }
+
+    [Fact]
     public async Task RestaurantManagerCanCreateCategoryAndProductButKitchenRoleCannot()
     {
         using var factory = new OrganizationFactory();
@@ -313,13 +455,13 @@ public sealed class OrganizationEndpointTests
             });
         }
 
-        public async Task<(Guid OrganizationId, ExternalIdentity Identity)> SeedOwnerAsync()
+        public async Task<(Guid OrganizationId, ExternalIdentity Identity)> SeedOwnerAsync(string subject = "owner")
         {
             using var scope = Services.CreateScope();
             var database = scope.ServiceProvider.GetRequiredService<WhitePlateDbContext>();
             await database.Database.EnsureCreatedAsync(TestContext.Current.CancellationToken);
             var organization = Organization.Create("Test Organization");
-            var identity = ExternalIdentity.Create("https://identity.example.test/", "owner");
+            var identity = ExternalIdentity.Create("https://identity.example.test/", subject);
             database.Organizations.Add(organization);
             database.OrganizationOwnerMemberships.Add(OrganizationOwnerMembership.Create(organization.Id, identity));
             await database.SaveChangesAsync(TestContext.Current.CancellationToken);

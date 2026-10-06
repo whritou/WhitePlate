@@ -17,7 +17,7 @@ vi.mock("next-intl/server", () => ({ getTranslations }))
 const routeLoaders = [
   ["overview", OrganizationLoading, "overview-organizations"],
   ["organizationSignUp", OrganizationSignUpLoading, "organization-signup-card"],
-  ["team", TeamLoading, "team-invitation"],
+  ["team", TeamLoading, "team-invitation-form"],
   ["restaurant", NewRestaurantLoading, "restaurant-fields"],
   ["catalog", CatalogLoading, "catalog-list"],
   ["menuLanguages", MenuLanguagesLoading, "languages-translations"],
@@ -30,6 +30,14 @@ beforeEach(() => {
   getTranslations.mockImplementation(
     async () => (key: string) => `Loading ${key}`
   )
+})
+
+it("reserves separate team roster and invitation sections in its loading layout", async () => {
+  const loading = await TeamLoading()
+  const html = renderToStaticMarkup(createElement(() => loading))
+
+  expect(html).toContain('data-skeleton-region="team-roster"')
+  expect(html).toContain('data-skeleton-region="team-invitations"')
 })
 
 it.each(routeLoaders)(

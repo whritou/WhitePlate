@@ -6,7 +6,14 @@ import type {
   MenuLanguageSettings,
   LocalizedText,
 } from "@/types/catalog"
-import type { Organization, Restaurant } from "@/types/organization"
+import type {
+  Organization,
+  OrganizationInvitationStatus,
+  OrganizationTeamInvitation,
+  OrganizationTeamMember,
+  OrganizationTeamRole,
+  Restaurant,
+} from "@/types/organization"
 
 const isAmount = (value: unknown): value is number =>
   typeof value === "number" && Number.isFinite(value) && value >= 0
@@ -48,6 +55,90 @@ export function parseRestaurants(value: unknown): Restaurant[] | null {
     subdomain: item.subdomain,
     currency: item.currency,
   }))
+}
+
+const organizationTeamRoles: OrganizationTeamRole[] = [
+  "OrganizationOwner",
+  "RestaurantManager",
+  "KitchenStaff",
+]
+
+function isOrganizationTeamMember(
+  value: unknown
+): value is OrganizationTeamMember {
+  if (
+    !isRecord(value) ||
+    !organizationTeamRoles.includes(value.role as OrganizationTeamRole) ||
+    !(value.email === null || typeof value.email === "string")
+  )
+    return false
+
+  const organizationOwner = value.role === "OrganizationOwner"
+
+  return organizationOwner
+    ? value.tenantId === null && value.tenantName === null
+    : isUuid(value.tenantId) && typeof value.tenantName === "string"
+}
+
+export function parseOrganizationMembers(
+  value: unknown
+): OrganizationTeamMember[] | null {
+  if (!Array.isArray(value) || !value.every(isOrganizationTeamMember))
+    return null
+
+  return value.map(({ role, email, tenantId, tenantName }) => ({
+    role,
+    email,
+    tenantId,
+    tenantName,
+  }))
+}
+
+const invitationStatuses: OrganizationInvitationStatus[] = [
+  "Pending",
+  "Accepted",
+  "Revoked",
+  "Expired",
+]
+
+function isOrganizationTeamInvitation(
+  value: unknown
+): value is OrganizationTeamInvitation {
+  if (
+    !isRecord(value) ||
+    !isUuid(value.id) ||
+    !organizationTeamRoles.includes(value.role as OrganizationTeamRole) ||
+    typeof value.email !== "string" ||
+    !invitationStatuses.includes(
+      value.status as OrganizationInvitationStatus
+    ) ||
+    typeof value.expiresAt !== "string" ||
+    !Number.isFinite(Date.parse(value.expiresAt))
+  )
+    return false
+
+  return value.role === "OrganizationOwner"
+    ? value.tenantId === null && value.tenantName === null
+    : isUuid(value.tenantId) && typeof value.tenantName === "string"
+}
+
+export function parseOrganizationInvitations(
+  value: unknown
+): OrganizationTeamInvitation[] | null {
+  if (!Array.isArray(value) || !value.every(isOrganizationTeamInvitation))
+    return null
+
+  return value.map(
+    ({ id, role, email, tenantId, tenantName, expiresAt, status }) => ({
+      id,
+      role,
+      email,
+      tenantId,
+      tenantName,
+      expiresAt,
+      status,
+    })
+  )
 }
 
 export function parseMenuLanguageSettings(

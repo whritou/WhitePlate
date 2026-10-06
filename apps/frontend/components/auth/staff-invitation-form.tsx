@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
 import { useWorkspaceToast } from "@/components/ui/toast"
+import { useRouter } from "@/i18n/navigation"
 import type { ActionState } from "@/types/organization"
 import { ArrowRight, LoaderCircle } from "lucide-react"
 import { useLocale, useTranslations } from "next-intl"
@@ -21,6 +22,7 @@ export function StaffInvitationForm({
 }) {
   const t = useTranslations("Auth")
   const toast = useWorkspaceToast()
+  const router = useRouter()
   const locale = useLocale()
   const [tenantId, setTenantId] = useState(restaurants[0]?.id ?? "")
   const [role, setRole] = useState<
@@ -38,6 +40,7 @@ export function StaffInvitationForm({
 
     if (result.ok) {
       toast.success(t("invitationSent"))
+      router.refresh()
       setState({ status: "idle" })
     } else setState({ status: "error", error: result.message })
   }

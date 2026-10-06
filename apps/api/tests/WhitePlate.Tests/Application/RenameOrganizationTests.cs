@@ -43,6 +43,12 @@ public sealed class RenameOrganizationTests
             Task.FromResult(organization?.Id == organizationId ? organization : null);
         public Task<IReadOnlyList<TenantDto>?> ListRestaurantsOwnedAsync(Guid organizationId, ExternalIdentity identity, CancellationToken cancellationToken) =>
             Task.FromResult<IReadOnlyList<TenantDto>?>([]);
+        public Task<IReadOnlyList<OrganizationMemberDto>?> ListMembersOwnedAsync(Guid organizationId,
+            ExternalIdentity identity, CancellationToken cancellationToken) =>
+            Task.FromResult<IReadOnlyList<OrganizationMemberDto>?>([]);
+        public Task<IReadOnlyList<OrganizationInvitationSummaryDto>?> ListInvitationsOwnedAsync(Guid organizationId,
+            ExternalIdentity identity, DateTimeOffset now, CancellationToken cancellationToken) =>
+            Task.FromResult<IReadOnlyList<OrganizationInvitationSummaryDto>?>([]);
         public Task SaveChangesAsync(CancellationToken cancellationToken)
         {
             Saves++;

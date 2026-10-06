@@ -24,13 +24,32 @@ public sealed class StaffInvitationTests
         var now = DateTimeOffset.Parse("2026-09-29T10:00:00Z");
         var revoked = StaffInvitation.Create(Guid.NewGuid(), null, InvitationRole.OrganizationOwner,
             "owner@example.test", new string('a', 64), now.AddDays(7), now);
-        revoked.Revoke();
+        Assert.True(revoked.TryRevoke(now));
         var expired = StaffInvitation.Create(Guid.NewGuid(), Guid.NewGuid(), InvitationRole.RestaurantManager,
             "manager@example.test", new string('b', 64), now.AddDays(1), now);
         var identity = ExternalIdentity.Create("https://identity.example.test/", "manager-1", "manager@example.test", true);
 
         Assert.False(revoked.TryAccept(identity, now));
         Assert.False(expired.TryAccept(identity, now.AddDays(1)));
+    }
+
+    [Fact]
+    public void RevokeIsAllowedOnlyWhileAnInvitationIsPending()
+    {
+        var now = DateTimeOffset.Parse("2026-09-29T10:00:00Z");
+        var pending = StaffInvitation.Create(Guid.NewGuid(), null, InvitationRole.OrganizationOwner,
+            "owner@example.test", new string('a', 64), now.AddDays(1), now);
+        var expired = StaffInvitation.Create(Guid.NewGuid(), null, InvitationRole.OrganizationOwner,
+            "expired@example.test", new string('b', 64), now.AddDays(1), now);
+        var accepted = StaffInvitation.Create(Guid.NewGuid(), null, InvitationRole.OrganizationOwner,
+            "accepted@example.test", new string('c', 64), now.AddDays(1), now);
+        Assert.True(accepted.TryAccept(ExternalIdentity.Create("https://identity.example.test/", "accepted",
+            "accepted@example.test", true), now));
+
+        Assert.True(pending.TryRevoke(now));
+        Assert.False(pending.TryRevoke(now));
+        Assert.False(expired.TryRevoke(now.AddDays(1)));
+        Assert.False(accepted.TryRevoke(now));
     }
 
     [Fact]

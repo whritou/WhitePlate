@@ -8,6 +8,7 @@ import type {
   CatalogTranslationInput,
   MenuLanguagesInput,
   OrganizationRenameInput,
+  RevokeStaffInvitationInput,
   StaffInvitationInput,
 } from "@/types/actions"
 
@@ -75,6 +76,17 @@ export async function acceptStaffInvitation(
 ): Promise<ActionResult> {
   return actionResult(
     await whitePlateApi.post("/api/v1/invitations/accept", { token })
+  )
+}
+
+export async function revokeStaffInvitation({
+  organizationId,
+  invitationId,
+}: RevokeStaffInvitationInput): Promise<ActionResult> {
+  return actionResult(
+    await whitePlateApi.delete(
+      `/api/v1/organizations/${organizationId}/invitations/${invitationId}`
+    )
   )
 }
 

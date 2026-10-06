@@ -140,6 +140,21 @@ The shell did not expose npm, so checks used the bundled Node executable and ins
 | Browser diagnostics | No Next.js error overlay; initial confirmed-receipt error logs were empty. Later navigation produced `MessageNotSentError` and a Chrome-extension `RegisterClientLocalizationsError`; these logs are recorded separately from successful order acceptance. |
 | `git diff --check` | Passed. |
 
+## Organization team roster and invitation management — 2026-10-06
+
+Added owner-authorized API reads for organization owners, restaurant staff, and invitation status. Responses expose only role, optional verified email, organization/restaurant scope, expiry, and `Pending`/`Accepted`/`Revoked`/`Expired` status; issuer/subject values and invitation tokens/hashes remain private. Pending-only revocation is checked in the domain and API repository. The localized team page now shows separate roster and invitation cards, empty/error states, a shadcn confirmation dialog, success toast, and a content-matched team skeleton. No database schema or migration changed.
+
+| Check | Actual result |
+| --- | --- |
+| `dotnet test apps/api/WhitePlate.slnx --no-restore` | Passed: 148 tests. |
+| `node node_modules/vitest/vitest.mjs run` from `apps/frontend` | Passed: 43 files, 342 tests. |
+| `node node_modules/eslint/bin/eslint.js .` from `apps/frontend` | Passed. |
+| `node node_modules/typescript/bin/tsc --noEmit` from `apps/frontend` | Passed. |
+| `node node_modules/prettier/bin/prettier.cjs --check` on changed frontend TypeScript/TSX | Passed with `--end-of-line auto`. |
+| `node node_modules/next/dist/bin/next build --webpack` from `apps/frontend` | Passed compilation, TypeScript, and generation of all 37 pages using process-only inert auth/database placeholders. Better Auth logged schema connection diagnostics against the unavailable placeholder database; Webpack emitted nonfatal cache-write EPERM warnings. |
+| `git diff --check` | Passed; Git reported only expected CRLF conversion warnings. |
+| Authenticated browser flow against a database-backed environment | Not run. Owner isolation, safe response fields, invitation states, and pending-only revocation are covered by SQLite-backed API tests; interactive confirmation/keyboard behavior still needs browser acceptance. No external database was used. |
+
 The browser fixture uses no database or email provider and intentionally covers a narrow deterministic API contract. It is not proof of real PostgreSQL persistence, production host routing, or production rate policy. Real API/database browser checkout still needs the previously unapplied `CatalogLocalization` migration and appropriate test data. Menu locale is still absent from order snapshots, as required by the separate unresolved D11 decision. The known lint/toolchain and migration-count test failures remain open. The checkout card belongs in **In review**, not Done, pending this acceptance. Test processes were stopped; no production data was changed.
 
 ## Frontend toolchain baseline — 2026-10-01

@@ -5,6 +5,8 @@ import {
   parseCatalog,
   parseMenuLanguageSettings,
   parseOrganizations,
+  parseOrganizationInvitations,
+  parseOrganizationMembers,
   parseRestaurants,
 } from "@/lib/validation/responses"
 import type { ApiResult } from "@/types/api"
@@ -32,6 +34,20 @@ export async function getOrganizationRestaurants(organizationId: string) {
   return readResource(
     `/api/v1/organizations/${organizationId}/restaurants`,
     parseRestaurants
+  )
+}
+
+export async function getOrganizationMembers(organizationId: string) {
+  return readResource(
+    `/api/v1/organizations/${organizationId}/members`,
+    parseOrganizationMembers
+  )
+}
+
+export async function getOrganizationInvitations(organizationId: string) {
+  return readResource(
+    `/api/v1/organizations/${organizationId}/invitations`,
+    parseOrganizationInvitations
   )
 }
 

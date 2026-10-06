@@ -64,6 +64,7 @@ Operator-reported follow-up on 2026-10-06: opening the protected restaurant rout
 | AUTH-08 | Cause Resend invitation delivery to fail | Server revokes the just-created invite, returns a safe retryable error, and does not expose raw API tokens |
 | AUTH-09 | Inspect browser requests and call `/api/auth/token` directly | No API bearer token appears in client-visible responses; token endpoint returns 404 to browser HTTP |
 | AUTH-10 | Exercise auth routes at narrow/mobile and keyboard-only sizes in English/French | Labels, focus, loading/error/success states, and localized links remain usable |
+| AUTH-11 | Open the organization team page as an owner; inspect roster and invitation states, then revoke pending, accepted, expired, and foreign invitations | Member rows omit OIDC keys, invitation reads omit token material, statuses are localized, only pending invitations show revoke, and non-pending/foreign resources share the API's safe `404` |
 
 ### Tenant boundaries
 

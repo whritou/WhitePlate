@@ -1,6 +1,6 @@
 "use server"
 
-import { isInvitationToken } from "@/lib/validation/common"
+import { isInvitationToken, isRecord, isUuid } from "@/lib/validation/common"
 import {
   parseMenuLanguages,
   parseCatalogTranslation,
@@ -14,6 +14,7 @@ import {
   createOrganization,
   renameOrganization,
   sendStaffInvitation,
+  revokeStaffInvitation,
   acceptStaffInvitation,
 } from "@/services/organization"
 import type { ActionResult } from "@/types/organization"
@@ -58,6 +59,22 @@ export async function sendStaffInvitationAction(
   const value = parseStaffInvitation(form)
 
   return value ? sendStaffInvitation(value) : { ok: false, message: "invalid" }
+}
+
+export async function revokeStaffInvitationAction(
+  input: unknown
+): Promise<ActionResult> {
+  if (
+    !isRecord(input) ||
+    !isUuid(input.organizationId) ||
+    !isUuid(input.invitationId)
+  )
+    return { ok: false, message: "invalid" }
+
+  return revokeStaffInvitation({
+    organizationId: input.organizationId,
+    invitationId: input.invitationId,
+  })
 }
 
 export async function acceptStaffInvitationAction(

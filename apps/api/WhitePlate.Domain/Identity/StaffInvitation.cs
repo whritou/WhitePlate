@@ -64,5 +64,11 @@ public sealed class StaffInvitation
         return true;
     }
 
-    public void Revoke() => IsRevoked = true;
+    public bool TryRevoke(DateTimeOffset now)
+    {
+        if (IsRevoked || AcceptedSubject is not null || now >= ExpiresAt) return false;
+
+        IsRevoked = true;
+        return true;
+    }
 }

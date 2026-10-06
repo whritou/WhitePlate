@@ -5,7 +5,14 @@ import { WorkspacePageSkeleton } from "./workspace-page-skeletons"
 
 const expectedRegions = {
   organizationSignUp: ["organization-signup-card"],
-  team: ["team-header", "team-actions", "team-restaurants", "team-invitation"],
+  team: [
+    "team-header",
+    "team-actions",
+    "team-restaurants",
+    "team-roster",
+    "team-invitations",
+    "team-invitation-form",
+  ],
   restaurant: ["restaurant-header", "restaurant-fields", "restaurant-submit"],
   catalog: [
     "catalog-header",

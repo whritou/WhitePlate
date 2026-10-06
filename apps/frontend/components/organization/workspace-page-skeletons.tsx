@@ -149,7 +149,15 @@ function TeamSkeleton() {
         </div>
       </Region>
 
-      <Region name="team-invitation">
+      <Region name="team-roster">
+        <CardSkeleton className="min-h-48" lines={3} />
+      </Region>
+
+      <Region name="team-invitations">
+        <CardSkeleton className="min-h-48" lines={3} />
+      </Region>
+
+      <Region name="team-invitation-form">
         <CardSkeleton className="min-h-72" lines={4} />
       </Region>
     </>

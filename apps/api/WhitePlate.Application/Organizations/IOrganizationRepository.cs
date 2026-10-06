@@ -10,5 +10,9 @@ public interface IOrganizationRepository
     Task<Organization?> FindOwnedAsync(Guid organizationId, ExternalIdentity identity, CancellationToken cancellationToken);
     Task<IReadOnlyList<TenantDto>?> ListRestaurantsOwnedAsync(Guid organizationId, ExternalIdentity identity,
         CancellationToken cancellationToken);
+    Task<IReadOnlyList<OrganizationMemberDto>?> ListMembersOwnedAsync(Guid organizationId, ExternalIdentity identity,
+        CancellationToken cancellationToken);
+    Task<IReadOnlyList<OrganizationInvitationSummaryDto>?> ListInvitationsOwnedAsync(Guid organizationId,
+        ExternalIdentity identity, DateTimeOffset now, CancellationToken cancellationToken);
     Task SaveChangesAsync(CancellationToken cancellationToken);
 }

@@ -80,6 +80,6 @@ public sealed class StaffInvitationUseCaseTests
             CancellationToken cancellationToken) => Task.FromResult(false);
 
         public Task<bool> RevokeAsync(Guid organizationId, Guid invitationId, ExternalIdentity identity,
-            CancellationToken cancellationToken) => Task.FromResult(false);
+            DateTimeOffset now, CancellationToken cancellationToken) => Task.FromResult(false);
     }
 }

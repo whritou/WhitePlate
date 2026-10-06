@@ -22,7 +22,8 @@ public sealed class OrganizationsController(
     RevokeStaffInvitationCommandHandler revokeInvitation,
     IOrganizationRepository organizations,
     RenameOrganizationCommandHandler renameOrganization,
-    ApiErrorMapper errors) : ControllerBase
+    ApiErrorMapper errors,
+    TimeProvider timeProvider) : ControllerBase
 {
     [HttpPost]
     [ProducesResponseType<OrganizationDto>(StatusCodes.Status201Created)]
@@ -58,6 +59,39 @@ public sealed class OrganizationsController(
             ? errors.ToActionResult(errors.Create(HttpContext, new ApplicationError(ErrorCode.NotFound)))
             : Ok(restaurants.Select(item => new TenantResponse(item.Id, item.Name, item.Subdomain, item.Currency,
                 item.DefaultMenuLocale, item.MenuLocales)).ToArray());
+    }
+
+    [HttpGet("{organizationId:guid}/members")]
+    [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+    [ProducesResponseType<OrganizationMemberDto[]>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status401Unauthorized, "application/problem+json")]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status404NotFound, "application/problem+json")]
+    public async Task<ActionResult<IReadOnlyList<OrganizationMemberDto>>> ListMembers(Guid organizationId,
+        CancellationToken cancellationToken)
+    {
+        var identity = currentIdentity.Identity;
+        if (identity is null) return Unauthorized();
+        var members = await organizations.ListMembersOwnedAsync(organizationId, identity, cancellationToken);
+        return members is null
+            ? errors.ToActionResult(errors.Create(HttpContext, new ApplicationError(ErrorCode.NotFound)))
+            : Ok(members);
+    }
+
+    [HttpGet("{organizationId:guid}/invitations")]
+    [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+    [ProducesResponseType<OrganizationInvitationSummaryDto[]>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status401Unauthorized, "application/problem+json")]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status404NotFound, "application/problem+json")]
+    public async Task<ActionResult<IReadOnlyList<OrganizationInvitationSummaryDto>>> ListInvitations(Guid organizationId,
+        CancellationToken cancellationToken)
+    {
+        var identity = currentIdentity.Identity;
+        if (identity is null) return Unauthorized();
+        var invitations = await organizations.ListInvitationsOwnedAsync(organizationId, identity,
+            timeProvider.GetUtcNow(), cancellationToken);
+        return invitations is null
+            ? errors.ToActionResult(errors.Create(HttpContext, new ApplicationError(ErrorCode.NotFound)))
+            : Ok(invitations);
     }
 
     [HttpPatch("{organizationId:guid}")]
