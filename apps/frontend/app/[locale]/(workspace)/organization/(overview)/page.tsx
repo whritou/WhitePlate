@@ -42,12 +42,12 @@ export default async function OrganizationPage() {
   )
 
   return (
-    <main className="mx-auto min-h-[70vh] max-w-4xl px-5 py-12 sm:py-16">
+    <main className="mx-auto min-h-[70vh] max-w-7xl p-4 sm:p-6 lg:p-8">
       <header className="mb-8 flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="mb-2 text-sm font-medium text-primary">WhitePlate</p>
 
-          <h1 className="text-3xl font-semibold tracking-tight">
+          <h1 className="text-2xl font-semibold tracking-tight sm:text-[2rem]">
             {t("organizationsHeading")}
           </h1>
         </div>
@@ -57,7 +57,7 @@ export default async function OrganizationPage() {
 
           <Button
             size="lg"
-            className="h-10 rounded-lg"
+
             nativeButton={false}
             render={<Link href="/organization/sign-up" />}
           >
@@ -73,7 +73,7 @@ export default async function OrganizationPage() {
           <ul className="grid gap-2 sm:grid-cols-2">
             {restaurants.map((restaurant) => (
               <li key={restaurant.id}>
-                <Card className="flex flex-row items-center justify-between gap-3 rounded-lg border border-border bg-card px-4 py-3">
+                <Card className="flex flex-row flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-card px-4 py-3">
                   <span className="truncate text-sm font-medium">
                     {restaurant.name}
                   </span>
@@ -100,7 +100,7 @@ export default async function OrganizationPage() {
           <ul className="grid gap-2 sm:grid-cols-2">
             {manageableRestaurants.map((restaurant) => (
               <li key={restaurant.id}>
-                <Card className="flex flex-row items-center justify-between gap-3 rounded-lg border border-border bg-card px-4 py-3">
+                <Card className="flex flex-row flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-card px-4 py-3">
                   <span className="truncate text-sm font-medium">
                     {restaurant.name}
                   </span>
@@ -126,16 +126,12 @@ export default async function OrganizationPage() {
       )}
 
       {organizations === null ? (
-        <Alert
-          variant="destructive"
-          role="alert"
-          className="rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive"
-        >
+        <Alert variant="destructive" role="alert">
           <AlertDescription>{t("serviceError")}</AlertDescription>
         </Alert>
       ) : organizations.length === 0 &&
         restaurants.length > 0 ? null : organizations.length === 0 ? (
-        <Card className="rounded-2xl border border-dashed border-border bg-card px-6 py-12 text-center has-data-[slot=card-footer]:pb-12">
+        <Card className="rounded-lg border border-dashed border-border bg-card px-6 py-12 text-center has-data-[slot=card-footer]:pb-12">
           <CardHeader className="px-0">
             <CardTitle>
               <h2 className="text-xl font-semibold">
@@ -151,7 +147,7 @@ export default async function OrganizationPage() {
           <CardFooter className="justify-center border-0 p-0">
             <Button
               size="lg"
-              className="mt-6 h-10 rounded-lg"
+              className="mt-6"
               nativeButton={false}
               render={<Link href="/organization/sign-up" />}
             >
@@ -163,7 +159,7 @@ export default async function OrganizationPage() {
         <ul className="grid gap-4 sm:grid-cols-2">
           {organizations.map((organization) => (
             <li key={organization.id}>
-              <Card className="gap-0 rounded-2xl border border-border p-6 has-data-[slot=card-footer]:pb-6">
+              <Card className="gap-0 rounded-lg border border-border p-6 has-data-[slot=card-footer]:pb-6">
                 <CardHeader className="px-0">
                   <CardTitle>
                     <h2 className="text-lg font-semibold">

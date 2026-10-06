@@ -23,12 +23,12 @@ export function RestaurantMenu({ menu }: { menu: StorefrontMenu }) {
   const names = new Intl.DisplayNames([locale], { type: "language" })
 
   return (
-    <main className="mx-auto min-h-svh max-w-6xl px-5 py-10 sm:px-8 sm:py-14">
+    <main className="mx-auto min-h-svh max-w-6xl px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
       <header className="flex flex-wrap items-end justify-between gap-5 border-b border-border pb-6">
         <div>
           <p className="text-sm font-medium text-primary">WhitePlate</p>
 
-          <h1 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">
+          <h1 className="mt-2 text-[2rem] font-semibold tracking-tight sm:text-[2.5rem]">
             {menu.restaurantName}
           </h1>
         </div>
@@ -36,7 +36,7 @@ export function RestaurantMenu({ menu }: { menu: StorefrontMenu }) {
         <div className="grid gap-1.5">
           <Label
             htmlFor="menu-language"
-            className="text-xs font-medium text-muted-foreground"
+            className="font-medium text-muted-foreground"
           >
             {t("menuLanguage")}
           </Label>
@@ -74,7 +74,7 @@ export function RestaurantMenu({ menu }: { menu: StorefrontMenu }) {
         {t("menuDescription")}
       </p>
 
-      <div className="mt-9 grid items-start gap-10 lg:grid-cols-[minmax(0,1fr)_22rem]">
+      <div className="mt-8 grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_22rem]">
         <div className="grid gap-10" lang={menu.locale}>
           {menu.categories.length === 0 && (
             <p className="rounded-md border border-dashed border-border p-6 text-sm text-muted-foreground">
@@ -120,7 +120,7 @@ export function RestaurantMenu({ menu }: { menu: StorefrontMenu }) {
                         )}
                       </div>
 
-                      <span className="shrink-0 text-sm font-medium tabular-nums">
+                      <span className="shrink-0 text-base font-semibold tabular-nums">
                         {price.format(product.basePrice)}
                       </span>
                     </div>

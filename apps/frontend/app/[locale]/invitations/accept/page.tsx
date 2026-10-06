@@ -26,12 +26,12 @@ export default async function AcceptInvitationPage({
 
   return (
     <main className="mx-auto grid min-h-[70vh] max-w-2xl content-center px-5 py-12">
-      <Card className="rounded-2xl border border-border bg-card p-6 shadow-sm sm:p-10">
+      <Card className="rounded-lg border border-border bg-card p-6 sm:p-10">
         <CardHeader className="px-0">
           <p className="mb-2 text-sm font-medium text-primary">WhitePlate</p>
 
           <CardTitle>
-            <h1 className="text-3xl font-semibold tracking-tight">
+            <h1 className="text-2xl font-semibold tracking-tight sm:text-[2rem]">
               {t("invitationTitle")}
             </h1>
           </CardTitle>
@@ -52,7 +52,7 @@ export default async function AcceptInvitationPage({
             <div className="mt-7 flex flex-wrap gap-3">
               <Button
                 size="lg"
-                className="h-10 rounded-lg"
+
                 render={
                   <Link href={`/sign-in?invite=${encodeURIComponent(token)}`} />
                 }
@@ -63,7 +63,7 @@ export default async function AcceptInvitationPage({
               <Button
                 size="lg"
                 variant="outline"
-                className="h-10 rounded-lg"
+
                 render={
                   <Link href={`/sign-up?invite=${encodeURIComponent(token)}`} />
                 }

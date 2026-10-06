@@ -36,7 +36,7 @@ export default async function NewRestaurantPage({
     : null
 
   return (
-    <main className="mx-auto min-h-[70vh] max-w-2xl px-5 py-12">
+    <main className="mx-auto min-h-[70vh] max-w-2xl p-4 sm:p-6 lg:p-8">
       <Link
         href="/organization"
         className="text-sm text-primary underline-offset-4 hover:underline"

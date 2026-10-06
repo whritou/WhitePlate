@@ -51,7 +51,7 @@ export function StaffInvitationForm({
 
       <input type="hidden" name="locale" value={locale} />
 
-      <Label className="grid gap-2 text-sm font-medium" htmlFor="invite-email">
+      <Label className="grid gap-2 font-medium" htmlFor="invite-email">
         {t("email")}
 
         <Input
@@ -62,11 +62,11 @@ export function StaffInvitationForm({
           required
           maxLength={254}
           autoComplete="email"
-          className="h-11 rounded-lg border border-input bg-background px-3 outline-none focus-visible:ring-2 focus-visible:ring-ring/30"
+          className="px-3"
         />
       </Label>
 
-      <Label className="grid gap-2 text-sm font-medium" htmlFor="invite-role">
+      <Label className="grid gap-2 font-medium" htmlFor="invite-role">
         {t("staffRole")}
 
         <NativeSelect
@@ -76,7 +76,7 @@ export function StaffInvitationForm({
           value={role}
           onChange={(event) => setRole(event.target.value as typeof role)}
           className="w-full"
-          selectClassName="h-11 rounded-lg border border-input bg-background px-3 outline-none focus-visible:ring-2 focus-visible:ring-ring/30"
+          selectClassName="px-3"
         >
           {tenantId ? (
             <>
@@ -98,7 +98,7 @@ export function StaffInvitationForm({
 
       {restaurants.length > 0 && (
         <Label
-          className="grid gap-2 text-sm font-medium"
+          className="grid gap-2 font-medium"
 
           htmlFor="invite-restaurant"
         >
@@ -116,7 +116,7 @@ export function StaffInvitationForm({
               setRole(nextTenantId ? "KitchenStaff" : "OrganizationOwner")
             }}
             className="w-full"
-            selectClassName="h-11 rounded-lg border border-input bg-background px-3 outline-none focus-visible:ring-2 focus-visible:ring-ring/30"
+            selectClassName="px-3"
           >
             <NativeSelectOption value="">
               {t("organizationScope")}
@@ -129,7 +129,7 @@ export function StaffInvitationForm({
             ))}
           </NativeSelect>
 
-          <span className="text-xs font-normal text-muted-foreground">
+          <span className="text-sm font-normal text-muted-foreground">
             {t("restaurantScopeHint")}
           </span>
         </Label>
@@ -149,11 +149,7 @@ export function StaffInvitationForm({
         }
       />
 
-      <Button
-        type="submit"
-        disabled={state.status === "pending"}
-        className="h-11 rounded-lg"
-      >
+      <Button type="submit" disabled={state.status === "pending"}>
         {state.status === "pending" ? (
           <LoaderCircle className="size-4 animate-spin" />
         ) : (

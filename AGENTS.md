@@ -16,6 +16,7 @@
 
 ## Implementation rules
 
+- Before any UI change, read and follow the canonical [WhitePlate design system](docs/design-system/README.md) and its [tokens](docs/design-system/tokens.json). Apply its visual, component, responsive, state, localization and accessibility rules to the requested scope. Existing styling is not the target design. Keep runtime adoption separate from the documented reference; record temporary deviations and verification in the handoff. Update the reference with any intentional global design decision rather than silently introducing a competing style.
 - Separate implemented behavior, proposed design, and unresolved decisions. Do not implement a whole roadmap merely because a task references it.
 - Follow [coding standards](docs/coding-standards.md). Keep changes focused on the requested feature and avoid speculative abstractions or dependency upgrades.
 - Keep user-visible frontend copy in both translation catalogs. Keep secrets and server credentials out of client code and `NEXT_PUBLIC_*` variables.

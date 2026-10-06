@@ -77,11 +77,7 @@ async function PageContent({
 
     return (
       <main className="mx-auto flex min-h-svh max-w-3xl items-center px-5 py-16">
-        <Alert
-          variant="destructive"
-          role="alert"
-          className="w-full rounded-md border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive"
-        >
+        <Alert variant="destructive" role="alert" className="w-full">
           <AlertDescription>{storefrontT("unavailable")}</AlertDescription>
         </Alert>
       </main>
@@ -101,7 +97,7 @@ async function PageContent({
           </Link>
         </nav>
 
-        <Card className="rounded-3xl border border-border bg-card p-8 shadow-sm sm:p-12">
+        <Card className="p-6 sm:p-10">
           <CardHeader className="px-0">
             <p className="text-sm font-medium text-primary">WhitePlate</p>
 
@@ -120,7 +116,7 @@ async function PageContent({
             <div className="mt-8 flex flex-wrap gap-3">
               <Button
                 size="lg"
-                className="h-11 rounded-lg"
+
                 nativeButton={false}
                 render={<Link href="/sign-up" />}
               >
@@ -130,7 +126,7 @@ async function PageContent({
               <Button
                 size="lg"
                 variant="outline"
-                className="h-11 rounded-lg"
+
                 nativeButton={false}
                 render={<Link href="/sign-in" />}
               >
@@ -140,7 +136,7 @@ async function PageContent({
           </CardContent>
         </Card>
 
-        <p className="font-mono text-xs text-muted-foreground">
+        <p className="text-sm text-muted-foreground">
           {t("themeHint", { key: "d" })}
         </p>
       </div>

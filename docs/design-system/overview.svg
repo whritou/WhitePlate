@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="1020" viewBox="0 0 1280 1020" role="img" aria-labelledby="title desc">
+<title id="title">WhitePlate — Porcelaine, encre et sauge</title>
+<desc id="desc">Planche de conception : palettes et exemples statiques de catalogue, formulaire et ticket cuisine dans les thèmes clair et sombre. Planche statique, distincte des captures du frontend.</desc>
+<rect x="0" y="0" width="640" height="1020" rx="0" fill="#FAFAF9"/>
+<text x="32" y="54" fill="#172B3A" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="24" font-weight="600">WhitePlate</text>
+<text x="32" y="86" fill="#172B3A" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="32" font-weight="600">Porcelaine, encre et sauge</text>
+<text x="32" y="116" fill="#625B54" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="14" font-weight="400">Référence de design · Thème clair</text>
+<rect x="32" y="146" width="96" height="48" rx="8" fill="#FFFFFF" stroke="#D6D3D1" stroke-width="1"/>
+<text x="32" y="219" fill="#172B3A" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="14" font-weight="600">Porcelaine</text>
+<text x="32" y="239" fill="#625B54" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="12" font-weight="400">#FFFFFF</text>
+<rect x="148" y="146" width="96" height="48" rx="8" fill="#244D73"/>
+<text x="148" y="219" fill="#172B3A" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="14" font-weight="600">Encre</text>
+<text x="148" y="239" fill="#625B54" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="12" font-weight="400">#244D73</text>
+<rect x="264" y="146" width="96" height="48" rx="8" fill="#1D694B"/>
+<text x="264" y="219" fill="#172B3A" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="14" font-weight="600">Prête</text>
+<text x="264" y="239" fill="#625B54" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="12" font-weight="400">#1D694B</text>
+<rect x="380" y="146" width="96" height="48" rx="8" fill="#855000"/>
+<text x="380" y="219" fill="#172B3A" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="14" font-weight="600">Attente</text>
+<text x="380" y="239" fill="#625B54" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="12" font-weight="400">#855000</text>
+<rect x="496" y="146" width="96" height="48" rx="8" fill="#B42335"/>
+<text x="496" y="219" fill="#172B3A" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="14" font-weight="600">Erreur</text>
+<text x="496" y="239" fill="#625B54" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="12" font-weight="400">#B42335</text>
+<text x="32" y="294" fill="#172B3A" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="20" font-weight="600">Gestion · Catalogue</text>
+<rect x="32" y="316" width="576" height="152" rx="12" fill="#FFFFFF" stroke="#D6D3D1" stroke-width="1"/>
+<rect x="48" y="332" width="136" height="40" rx="8" fill="#E5EFF7"/>
+<text x="64" y="358" fill="#244D73" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="16" font-weight="600">Catalogue</text>
+<text x="204" y="359" fill="#172B3A" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="18" font-weight="600">Bistro du Port</text>
+<text x="52" y="405" fill="#172B3A" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="16" font-weight="600">Sandwich poulet</text>
+<text x="483" y="405" fill="#172B3A" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="16" font-weight="600">9,50 €</text>
+<text x="52" y="435" fill="#625B54" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="14" font-weight="400">Disponible · Pain au choix</text>
+<text x="32" y="515" fill="#172B3A" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="20" font-weight="600">Formulaire · Focus et action</text>
+<text x="32" y="546" fill="#172B3A" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="16" font-weight="600">Nom du produit</text>
+<rect x="30" y="558" width="580" height="52" rx="10" fill="#FAFAF9" stroke="#275F8C" stroke-width="2"/>
+<rect x="34" y="562" width="572" height="44" rx="8" fill="#FFFFFF" stroke="#847A71" stroke-width="1"/>
+<text x="48" y="591" fill="#172B3A" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="16" font-weight="400">Soupe de saison</text>
+<text x="32" y="637" fill="#625B54" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="14" font-weight="400">Le nom sera visible dans le menu.</text>
+<rect x="32" y="655" width="260" height="48" rx="8" fill="#244D73"/>
+<text x="48" y="685" fill="#FFFFFF" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="16" font-weight="600">Enregistrer les modifications</text>
+<text x="32" y="750" fill="#172B3A" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="20" font-weight="600">Cuisine · Une action évidente</text>
+<rect x="32" y="772" width="576" height="180" rx="12" fill="#FFFFFF" stroke="#D6D3D1" stroke-width="1"/>
+<text x="52" y="805" fill="#172B3A" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="18" font-weight="600">Commande A82F</text>
+<rect x="384" y="785" width="204" height="32" rx="16" fill="#E5EFF7"/>
+<text x="400" y="806" fill="#244D73" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="14" font-weight="600">En préparation</text>
+<text x="52" y="835" fill="#625B54" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="14" font-weight="400">Camille · 12:42</text>
+<text x="52" y="865" fill="#172B3A" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="18" font-weight="600">2 × Sandwich poulet</text>
+<text x="384" y="865" fill="#172B3A" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="16" font-weight="600">Total : 23,00 €</text>
+<rect x="52" y="885" width="240" height="48" rx="8" fill="#244D73"/>
+<text x="68" y="915" fill="#FFFFFF" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="16" font-weight="600">Marquer comme prête</text>
+<text x="32" y="990" fill="#625B54" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="14" font-weight="400">v1.1 · Planche statique · Référence du frontend</text>
+<rect x="640" y="0" width="640" height="1020" rx="0" fill="#1C1917"/>
+<text x="672" y="54" fill="#FAFAF9" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="24" font-weight="600">WhitePlate</text>
+<text x="672" y="86" fill="#FAFAF9" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="32" font-weight="600">Porcelaine, encre et sauge</text>
+<text x="672" y="116" fill="#C2B9AF" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="14" font-weight="400">Référence de design · Thème sombre</text>
+<rect x="672" y="146" width="96" height="48" rx="8" fill="#292524" stroke="#534A43" stroke-width="1"/>
+<text x="672" y="219" fill="#FAFAF9" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="14" font-weight="600">Porcelaine</text>
+<text x="672" y="239" fill="#C2B9AF" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="12" font-weight="400">#292524</text>
+<rect x="788" y="146" width="96" height="48" rx="8" fill="#B8D1AD"/>
+<text x="788" y="219" fill="#FAFAF9" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="14" font-weight="600">Sauge</text>
+<text x="788" y="239" fill="#C2B9AF" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="12" font-weight="400">#B8D1AD</text>
+<rect x="904" y="146" width="96" height="48" rx="8" fill="#9DE1BD"/>
+<text x="904" y="219" fill="#FAFAF9" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="14" font-weight="600">Prête</text>
+<text x="904" y="239" fill="#C2B9AF" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="12" font-weight="400">#9DE1BD</text>
+<rect x="1020" y="146" width="96" height="48" rx="8" fill="#F4D18B"/>
+<text x="1020" y="219" fill="#FAFAF9" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="14" font-weight="600">Attente</text>
+<text x="1020" y="239" fill="#C2B9AF" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="12" font-weight="400">#F4D18B</text>
+<rect x="1136" y="146" width="96" height="48" rx="8" fill="#FFB4B8"/>
+<text x="1136" y="219" fill="#FAFAF9" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="14" font-weight="600">Erreur</text>
+<text x="1136" y="239" fill="#C2B9AF" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="12" font-weight="400">#FFB4B8</text>
+<text x="672" y="294" fill="#FAFAF9" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="20" font-weight="600">Gestion · Catalogue</text>
+<rect x="672" y="316" width="576" height="152" rx="12" fill="#292524" stroke="#534A43" stroke-width="1"/>
+<rect x="688" y="332" width="136" height="40" rx="8" fill="#263527"/>
+<text x="704" y="358" fill="#B8D1AD" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="16" font-weight="600">Catalogue</text>
+<text x="844" y="359" fill="#FAFAF9" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="18" font-weight="600">Bistro du Port</text>
+<text x="692" y="405" fill="#FAFAF9" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="16" font-weight="600">Sandwich poulet</text>
+<text x="1123" y="405" fill="#FAFAF9" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="16" font-weight="600">9,50 €</text>
+<text x="692" y="435" fill="#C2B9AF" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="14" font-weight="400">Disponible · Pain au choix</text>
+<text x="672" y="515" fill="#FAFAF9" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="20" font-weight="600">Formulaire · Focus et action</text>
+<text x="672" y="546" fill="#FAFAF9" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="16" font-weight="600">Nom du produit</text>
+<rect x="670" y="558" width="580" height="52" rx="10" fill="#1C1917" stroke="#B8D1AD" stroke-width="2"/>
+<rect x="674" y="562" width="572" height="44" rx="8" fill="#292524" stroke="#A89F96" stroke-width="1"/>
+<text x="688" y="591" fill="#FAFAF9" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="16" font-weight="400">Soupe de saison</text>
+<text x="672" y="637" fill="#C2B9AF" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="14" font-weight="400">Le nom sera visible dans le menu.</text>
+<rect x="672" y="655" width="260" height="48" rx="8" fill="#B8D1AD"/>
+<text x="688" y="685" fill="#172316" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="16" font-weight="600">Enregistrer les modifications</text>
+<text x="672" y="750" fill="#FAFAF9" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="20" font-weight="600">Cuisine · Une action évidente</text>
+<rect x="672" y="772" width="576" height="180" rx="12" fill="#292524" stroke="#534A43" stroke-width="1"/>
+<text x="692" y="805" fill="#FAFAF9" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="18" font-weight="600">Commande A82F</text>
+<rect x="1024" y="785" width="204" height="32" rx="16" fill="#3A3025"/>
+<text x="1040" y="806" fill="#D9C4A8" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="14" font-weight="600">En préparation</text>
+<text x="692" y="835" fill="#C2B9AF" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="14" font-weight="400">Camille · 12:42</text>
+<text x="692" y="865" fill="#FAFAF9" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="18" font-weight="600">2 × Sandwich poulet</text>
+<text x="1024" y="865" fill="#FAFAF9" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="16" font-weight="600">Total : 23,00 €</text>
+<rect x="692" y="885" width="240" height="48" rx="8" fill="#B8D1AD"/>
+<text x="708" y="915" fill="#172316" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="16" font-weight="600">Marquer comme prête</text>
+<text x="672" y="990" fill="#C2B9AF" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="14" font-weight="400">v1.1 · Planche statique · Référence du frontend</text>
+</svg>

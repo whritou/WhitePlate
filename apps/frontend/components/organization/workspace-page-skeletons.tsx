@@ -43,7 +43,7 @@ function CardSkeleton({
 }) {
   return (
     <div
-      className={`grid gap-4 rounded-xl border border-border bg-card p-5 ${className}`}
+      className={`grid gap-4 rounded-lg border border-border bg-card p-5 ${className}`}
     >
       <Skeleton className="h-5 w-2/5" />
 
@@ -87,7 +87,7 @@ export function WorkspacePageSkeleton({
       <main
         aria-busy="true"
         data-skeleton-page={page}
-        className="mx-auto min-h-[70vh] max-w-5xl px-5 py-12 sm:py-16"
+        className="mx-auto min-h-[70vh] max-w-5xl p-4 sm:p-6 lg:p-8"
       >
         <div aria-hidden="true" className="grid gap-6">
           {renderPageSkeleton(page)}
@@ -175,7 +175,7 @@ function RestaurantSkeleton() {
 
       <Region
         name="restaurant-fields"
-        className="grid gap-5 rounded-xl border border-border bg-card p-6"
+        className="grid gap-5 rounded-lg border border-border bg-card p-6"
       >
         {Array.from({ length: 3 }, (_, index) => (
           <div key={index} className="grid gap-2">

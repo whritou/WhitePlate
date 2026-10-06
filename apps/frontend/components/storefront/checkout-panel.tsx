@@ -41,7 +41,7 @@ export function CheckoutPanel({ checkoutState }: CheckoutPanelProps) {
 
   return (
     <aside aria-labelledby="cart-heading" className="lg:sticky lg:top-6">
-      <Card className="gap-0 rounded-lg border border-border p-5 text-sm has-data-[slot=card-footer]:pb-5">
+      <Card className="gap-0 p-6 text-base has-data-[slot=card-footer]:pb-6">
         {receipt ? (
           <>
             <Receipt receipt={receipt} />
@@ -102,7 +102,7 @@ export function CheckoutPanel({ checkoutState }: CheckoutPanelProps) {
                         )}
 
                         <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
-                          <Label className="flex items-center gap-2 text-sm">
+                          <Label className="flex items-center gap-2">
                             {c("quantity")}
 
                             <Input
@@ -116,7 +116,7 @@ export function CheckoutPanel({ checkoutState }: CheckoutPanelProps) {
                                 product:
                                   product?.name ?? t("unavailableProduct"),
                               })}
-                              className={"h-10 w-16 rounded-md"}
+                              className="w-20"
                               onChange={(event) => {
                                 const value = Number(event.target.value)
 
@@ -148,7 +148,7 @@ export function CheckoutPanel({ checkoutState }: CheckoutPanelProps) {
                 </ul>
               )}
 
-              <p className="mt-4 text-xs leading-5 text-muted-foreground">
+              <p className="mt-4 text-sm leading-5 text-muted-foreground">
                 {c("priceNote")}
               </p>
 
@@ -162,7 +162,7 @@ export function CheckoutPanel({ checkoutState }: CheckoutPanelProps) {
                   className="grid gap-4"
                 >
                   <Label
-                    className="grid gap-1.5 text-sm font-medium"
+                    className="grid gap-1.5 font-medium"
                     htmlFor="customer-name"
                   >
                     {c("customerName")}
@@ -173,7 +173,7 @@ export function CheckoutPanel({ checkoutState }: CheckoutPanelProps) {
                       autoComplete="name"
                       maxLength={200}
                       required
-                      className="h-10 rounded-md"
+
                       value={customerName}
                       onChange={(event) =>
                         changeCustomerName(event.target.value)
@@ -182,7 +182,7 @@ export function CheckoutPanel({ checkoutState }: CheckoutPanelProps) {
                   </Label>
 
                   <Label
-                    className="grid gap-1.5 text-sm font-medium"
+                    className="grid gap-1.5 font-medium"
                     htmlFor="discount-code"
                   >
                     {c("discountCode")}
@@ -191,7 +191,7 @@ export function CheckoutPanel({ checkoutState }: CheckoutPanelProps) {
                       id="discount-code"
                       name="discountCode"
                       maxLength={64}
-                      className="h-10 rounded-md"
+
                       value={discountCode}
                       onChange={(event) =>
                         changeDiscountCode(event.target.value)
@@ -201,11 +201,7 @@ export function CheckoutPanel({ checkoutState }: CheckoutPanelProps) {
                 </fieldset>
 
                 {error && (
-                  <Alert
-                    variant="destructive"
-                    role="alert"
-                    className="rounded-md border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive"
-                  >
+                  <Alert variant="destructive" role="alert">
                     <AlertDescription>{c(`errors.${error}`)}</AlertDescription>
                   </Alert>
                 )}
@@ -232,7 +228,7 @@ export function CheckoutPanel({ checkoutState }: CheckoutPanelProps) {
             </CardContent>
 
             <CardFooter className="border-0 p-0">
-              <p className="mt-4 text-xs leading-5 text-muted-foreground">
+              <p className="mt-4 text-sm leading-5 text-muted-foreground">
                 {c("visitOnly")}
               </p>
             </CardFooter>

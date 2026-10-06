@@ -40,6 +40,7 @@ The API solution includes its tests. From the repository root, run `dotnet test 
 ## Working in this repository
 
 - [Documentation index](docs/README.md): reading order and source-of-truth rules.
+- [Design system](docs/design-system/README.md): required reference for future UI changes, visual overview, light/dark tokens and adoption checklist; applied to shared primitives and current screens.
 - [Development guide](docs/development.md): commands, configuration, ports, and common failures.
 - [Coolify/Vercel runbook](docs/deployment/coolify.md): migration status, runtime settings, TLS and rollback.
 - [System architecture](docs/architecture/WHITEPLATE_SYSTEM_ARCHITECTURE.md): implemented boundaries and intended direction.

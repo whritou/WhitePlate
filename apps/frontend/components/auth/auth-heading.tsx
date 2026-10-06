@@ -13,7 +13,7 @@ export function AuthHeading({
     <CardHeader className="mb-7 px-0">
       <p className="mb-2 text-sm font-medium text-primary">WhitePlate</p>
 
-      <CardTitle className="text-3xl font-semibold tracking-tight text-foreground">
+      <CardTitle className="text-2xl font-semibold tracking-tight text-foreground sm:text-[2rem]">
         <h1>{title}</h1>
       </CardTitle>
 

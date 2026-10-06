@@ -2,7 +2,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 
 export function WorkspaceLoadingSkeleton({ label }: { label: string }) {
   return (
-    <div className="mx-auto max-w-5xl px-5 py-12 sm:py-16">
+    <div className="mx-auto max-w-5xl p-4 sm:p-6 lg:p-8">
       <p role="status" aria-live="polite" className="sr-only">
         {label}
       </p>
@@ -77,7 +77,7 @@ export function WorkspaceLoadingSkeleton({ label }: { label: string }) {
               {Array.from({ length: 4 }, (_, index) => (
                 <div
                   key={index}
-                  className="grid min-h-36 content-between gap-5 rounded-2xl border border-border bg-card p-6"
+                  className="grid min-h-36 content-between gap-5 rounded-lg border border-border bg-card p-6"
                 >
                   <div className="grid gap-3">
                     <Skeleton className="h-5 w-2/5" />

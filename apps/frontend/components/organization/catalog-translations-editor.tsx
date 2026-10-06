@@ -62,7 +62,7 @@ export function CatalogTranslationsEditor({
         </div>
 
         <Label
-          className="grid gap-1.5 text-xs font-medium text-muted-foreground"
+          className="grid gap-1.5 font-medium text-muted-foreground"
           htmlFor="translation-locale"
         >
           {t("editLanguage")}
@@ -72,7 +72,7 @@ export function CatalogTranslationsEditor({
             value={locale}
             onChange={(event) => setLocale(event.target.value)}
             className="w-full"
-            selectClassName="h-9 min-w-44 rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring/30"
+            selectClassName="min-w-44 px-3 text-foreground"
           >
             {locales.map((value) => (
               <NativeSelectOption key={value} value={value}>

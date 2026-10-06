@@ -44,7 +44,7 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
 
   if (!catalog || !restaurant) {
     return (
-      <main className="mx-auto max-w-4xl px-5 py-12">
+      <main className="mx-auto max-w-7xl p-4 sm:p-6 lg:p-8">
         <Alert variant="destructive" role="alert">
           <AlertDescription>
             {t(
@@ -61,7 +61,7 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
   )
 
   return (
-    <main className="mx-auto max-w-4xl px-5 py-12">
+    <main className="mx-auto max-w-7xl p-4 sm:p-6 lg:p-8">
       <Link
         href="/organization"
         className="text-sm text-primary hover:underline"
@@ -74,7 +74,9 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
           {restaurant.name} · {catalog.currency}
         </p>
 
-        <h1 className="mt-2 text-3xl font-semibold">{t("title")}</h1>
+        <h1 className="mt-2 text-2xl font-semibold sm:text-[2rem]">
+          {t("title")}
+        </h1>
 
         <p className="mt-2 text-muted-foreground">{t("intro")}</p>
       </header>

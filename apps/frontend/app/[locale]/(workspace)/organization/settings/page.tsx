@@ -67,7 +67,7 @@ export default async function OrganizationSettingsPage({
   }
 
   return (
-    <main className="mx-auto min-h-[70vh] max-w-3xl px-5 py-12 sm:py-16">
+    <main className="mx-auto min-h-[70vh] max-w-3xl p-4 sm:p-6 lg:p-8">
       <Link
         href="/organization"
         className="text-sm font-medium text-primary underline-offset-4 hover:underline"
@@ -75,7 +75,7 @@ export default async function OrganizationSettingsPage({
         {t("backToOrganizations")}
       </Link>
 
-      <Card className="mt-6 rounded-2xl border border-border bg-card p-6 shadow-sm sm:p-10">
+      <Card className="mt-6 rounded-lg border border-border bg-card p-6 sm:p-10">
         <CardHeader className="px-0">
           <CardTitle>
             <h1 className="text-2xl font-semibold tracking-tight">
@@ -108,8 +108,8 @@ function OrganizationMessage({
   message: string
 }) {
   return (
-    <main className="mx-auto min-h-[70vh] max-w-3xl px-5 py-12 sm:py-16">
-      <Card className="rounded-2xl border border-border bg-card p-6">
+    <main className="mx-auto min-h-[70vh] max-w-3xl p-4 sm:p-6 lg:p-8">
+      <Card className="rounded-lg border border-border bg-card p-6">
         <h1 className="text-2xl font-semibold">{title}</h1>
 
         <Alert variant="destructive" role="alert" className="mt-4">

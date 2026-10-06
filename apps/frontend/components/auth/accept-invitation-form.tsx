@@ -44,7 +44,6 @@ export function AcceptInvitationForm({ token }: { token: string }) {
         type="button"
         onClick={() => void accept()}
         disabled={state.status === "pending"}
-        className="h-11 rounded-lg"
       >
         {state.status === "pending" ? (
           <LoaderCircle className="size-4 animate-spin" />

@@ -14,7 +14,7 @@ export function PasswordField({ mode }: { mode: AuthMode }) {
 
   return (
     <div className="grid gap-2">
-      <Label className="text-sm font-medium text-foreground" htmlFor="password">
+      <Label className="font-medium text-foreground" htmlFor="password">
         {mode === "reset" ? t("newPassword") : t("password")}
       </Label>
 
@@ -32,7 +32,7 @@ export function PasswordField({ mode }: { mode: AuthMode }) {
           minLength={8}
           maxLength={128}
           required
-          className="h-11 w-full rounded-lg border border-input bg-background px-10 text-sm transition outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30"
+          className="w-full ps-10 pe-12"
         />
 
         <Button
@@ -40,7 +40,7 @@ export function PasswordField({ mode }: { mode: AuthMode }) {
           variant="ghost"
           size="icon"
           aria-label={showPassword ? t("hidePassword") : t("showPassword")}
-          className="absolute end-2 top-1/2 -translate-y-1/2 text-muted-foreground"
+          className="absolute end-0 top-1/2 -translate-y-1/2 text-muted-foreground"
           onClick={() => setShowPassword(!showPassword)}
         >
           {showPassword ? (

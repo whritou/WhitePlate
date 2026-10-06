@@ -11,8 +11,7 @@ import type { Product } from "@/types/storefront"
 import { useLocale, useTranslations } from "next-intl"
 import { useState } from "react"
 
-const inputClass =
-  "h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+const inputClass = "w-full"
 
 export function ProductOrdering({
   product,
@@ -57,7 +56,7 @@ export function ProductOrdering({
       <fieldset disabled={locked} className="grid gap-4">
         {product.optionGroups.map((group) => (
           <fieldset key={group.id} className="grid gap-2">
-            <legend className="mb-2 text-sm font-medium">
+            <legend className="mb-2 text-base font-medium">
               {group.name}{" "}
               <span className="font-normal text-muted-foreground">
                 {t("selectionRule", {
@@ -70,13 +69,13 @@ export function ProductOrdering({
             {group.options.map((option) => (
               <Label
                 key={option.id}
-                className="flex items-center justify-between gap-3 text-sm"
+                className="flex items-center justify-between gap-3"
               >
                 <span className="flex items-center gap-2">
                   <Checkbox
                     aria-label={option.name}
                     disabled={locked}
-                    className="size-4 accent-primary"
+
                     checked={chosen.includes(option.id)}
                     onCheckedChange={(checked) => {
                       const next = checked
@@ -109,12 +108,12 @@ export function ProductOrdering({
         )}
 
         {item ? (
-          <p role="status" className="text-xs text-muted-foreground">
+          <p role="status" className="text-sm text-muted-foreground">
             {t("inCart", { count: item.quantity })}
           </p>
         ) : (
-          <div className="flex items-end gap-3">
-            <Label className="grid gap-1 text-xs font-medium">
+          <div className="flex flex-wrap items-end gap-3">
+            <Label className="grid gap-1 font-medium">
               {t("quantity")}
 
               <Input

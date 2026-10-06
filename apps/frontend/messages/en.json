@@ -412,5 +412,15 @@
       "conflict": "The catalog changed. Refresh and try again.",
       "unavailable": "The catalog service is unavailable. Try again."
     }
+  },
+  "DesignSystemTest": {
+    "title": "WhitePlate design system",
+    "restaurant": "Bistro du Port",
+    "controls": "Controls and feedback",
+    "orders": "Kitchen tickets",
+    "action": "Save changes",
+    "badge": "Status",
+    "disabled": "Unavailable field",
+    "longLabel": "Save the changes to the seasonal chicken sandwich and all its options"
   }
 }

@@ -68,7 +68,7 @@ export function AuthForm({
         </>
       }
     >
-      <Card className="gap-0 rounded-2xl p-6 text-sm sm:p-8">
+      <Card className="gap-0 rounded-lg p-6 text-sm sm:p-8">
         <AuthHeading title={heading[0]} description={heading[1]} />
 
         <CardContent className="px-0">
@@ -80,7 +80,7 @@ export function AuthForm({
                     type="button"
                     variant="outline"
                     disabled={pending}
-                    className="h-11 w-full rounded-lg text-sm"
+                    className="w-full"
                     onClick={() => void signInSocial("google")}
                   >
                     {t("continueGoogle")}
@@ -92,7 +92,7 @@ export function AuthForm({
                     type="button"
                     variant="outline"
                     disabled={pending}
-                    className="h-11 w-full rounded-lg text-sm"
+                    className="w-full"
                     onClick={() => void signInSocial("microsoft")}
                   >
                     {t("continueMicrosoft")}
@@ -103,7 +103,7 @@ export function AuthForm({
 
           {(mode === "signIn" || mode === "signUp") &&
             (googleEnabled || microsoftEnabled) && (
-              <div className="my-5 flex items-center gap-3 text-xs text-muted-foreground">
+              <div className="my-5 flex items-center gap-3 text-sm text-muted-foreground">
                 <Separator className="flex-1" />
 
                 {t("orEmail")}
@@ -114,11 +114,7 @@ export function AuthForm({
 
           {mode === "reset" && resetInvalid ? (
             <div className="grid gap-4">
-              <Alert
-                variant="destructive"
-                role="alert"
-                className="rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive"
-              >
+              <Alert variant="destructive" role="alert">
                 <AlertDescription>{t("resetInvalid")}</AlertDescription>
               </Alert>
 
@@ -170,29 +166,18 @@ export function AuthForm({
               )}
 
               {error && (
-                <Alert
-                  variant="destructive"
-                  role="alert"
-                  className="rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive"
-                >
+                <Alert variant="destructive" role="alert">
                   <AlertDescription>{error}</AlertDescription>
                 </Alert>
               )}
 
               {success && (
-                <Alert
-                  role="status"
-                  className="rounded-lg border border-primary/20 bg-primary/5 px-3 py-2 text-sm text-foreground"
-                >
+                <Alert variant="success" role="status">
                   <AlertDescription>{success}</AlertDescription>
                 </Alert>
               )}
 
-              <Button
-                type="submit"
-                disabled={pending}
-                className="mt-1 h-11 w-full rounded-lg text-sm"
-              >
+              <Button type="submit" disabled={pending} className="mt-1 w-full">
                 {pending ? (
                   <LoaderCircle
                     className="size-4 animate-spin"

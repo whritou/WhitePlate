@@ -95,7 +95,7 @@ export function WorkspaceShell({
         </aside>
 
         <div className="flex min-w-0 flex-1 flex-col">
-          <header className="sticky top-0 z-30 flex min-h-16 items-center gap-3 border-b border-border bg-background/95 px-4 backdrop-blur sm:px-6">
+          <header className="sticky top-0 z-30 flex min-h-16 flex-wrap items-center gap-2 border-b border-border bg-background px-3 py-2 sm:px-6">
             <div className="md:hidden">
               <Sheet
                 open={mobileNavigationOpen}
@@ -117,7 +117,7 @@ export function WorkspaceShell({
                   side="left"
                   className="w-[min(20rem,calc(100vw-2.5rem))]"
                 >
-                  <SheetHeader className="relative pr-10">
+                  <SheetHeader className="relative pr-12">
                     <SheetTitle>{t("navigationTitle")}</SheetTitle>
 
                     <SheetDescription className="truncate">
@@ -126,7 +126,7 @@ export function WorkspaceShell({
 
                     <SheetClose
                       aria-label={t("closeNavigation")}
-                      className="absolute top-0 right-0 inline-flex size-9 items-center justify-center rounded-lg text-muted-foreground outline-none hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+                      className="absolute top-0 right-0 inline-flex size-11 items-center justify-center rounded-md text-foreground hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
                     >
                       <X aria-hidden="true" className="size-4" />
                     </SheetClose>
@@ -144,7 +144,7 @@ export function WorkspaceShell({
             </div>
 
             <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-medium">{contextName}</p>
+              <p className="text-sm font-medium">{contextName}</p>
             </div>
 
             <LocaleLinks currentHref={currentHref} locale={locale} />
@@ -157,11 +157,9 @@ export function WorkspaceShell({
               aria-label={t("toggleTheme")}
               onClick={toggleTheme}
             >
-              {resolvedTheme === "dark" ? (
-                <Sun aria-hidden="true" />
-              ) : (
-                <Moon aria-hidden="true" />
-              )}
+              <Sun aria-hidden="true" className="hidden dark:block" />
+
+              <Moon aria-hidden="true" className="dark:hidden" />
             </Button>
 
             <SignOutButton />
@@ -196,7 +194,7 @@ function WorkspaceNavigation({
     >
       {sections.map((section) => (
         <section key={section.id} className="mb-5 last:mb-0">
-          <h2 className="mb-2 truncate px-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+          <h2 className="mb-2 px-3 text-sm font-semibold text-muted-foreground">
             {section.label}
           </h2>
 
@@ -214,7 +212,7 @@ function WorkspaceNavigation({
                     href={link.href}
                     aria-current={active ? "page" : undefined}
                     onClick={onNavigate}
-                    className={`flex min-h-10 items-center rounded-lg px-3 text-sm transition-colors outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring ${active ? "bg-muted font-medium text-foreground" : "text-muted-foreground"}`}
+                    className={`flex min-h-11 items-center rounded-md px-3 py-2 text-sm transition-colors hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring ${active ? "bg-accent font-semibold text-accent-foreground" : "text-muted-foreground"}`}
                   >
                     {link.label}
                   </Link>
@@ -238,13 +236,13 @@ function LocaleLinks({
   const t = useTranslations("Workspace")
 
   return (
-    <nav aria-label={t("language")} className="flex items-center gap-2 text-sm">
+    <nav aria-label={t("language")} className="flex items-center text-sm">
       <Link
         href={currentHref}
         locale="en"
         aria-current={locale === "en" ? "page" : undefined}
         aria-label={t("switchToEnglish")}
-        className="rounded-sm px-1 py-2 text-muted-foreground outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+        className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground aria-[current=page]:bg-accent aria-[current=page]:font-semibold aria-[current=page]:text-accent-foreground"
       >
         EN
       </Link>
@@ -254,7 +252,7 @@ function LocaleLinks({
         locale="fr"
         aria-current={locale === "fr" ? "page" : undefined}
         aria-label={t("switchToFrench")}
-        className="rounded-sm px-1 py-2 text-muted-foreground outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+        className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground aria-[current=page]:bg-accent aria-[current=page]:font-semibold aria-[current=page]:text-accent-foreground"
       >
         FR
       </Link>

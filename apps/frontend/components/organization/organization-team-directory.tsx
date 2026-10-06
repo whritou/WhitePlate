@@ -21,9 +21,9 @@ function roleLabel(role: OrganizationTeamRole, t: (key: string) => string) {
 
 function statusVariant(status: OrganizationInvitationStatus) {
   return status === "Pending"
-    ? "outline"
+    ? "warning"
     : status === "Accepted"
-      ? "secondary"
+      ? "success"
       : "destructive"
 }
 
@@ -36,7 +36,7 @@ export async function OrganizationTeamDirectory({
 
   return (
     <div className="grid gap-5 lg:grid-cols-2">
-      <Card className="rounded-xl border border-border bg-card shadow-sm">
+      <Card className="rounded-lg border border-border bg-card">
         <CardHeader>
           <CardTitle>
             <h2 className="text-lg font-semibold">{t("teamRosterTitle")}</h2>
@@ -66,7 +66,7 @@ export async function OrganizationTeamDirectory({
                       {member.email ?? t("teamMemberEmailUnavailable")}
                     </p>
 
-                    <p className="mt-1 text-xs text-muted-foreground">
+                    <p className="mt-1 text-sm text-muted-foreground">
                       {member.tenantName ?? t("organizationScope")}
                     </p>
                   </div>
@@ -79,7 +79,7 @@ export async function OrganizationTeamDirectory({
         </CardContent>
       </Card>
 
-      <Card className="rounded-xl border border-border bg-card shadow-sm">
+      <Card className="rounded-lg border border-border bg-card">
         <CardHeader>
           <CardTitle>
             <h2 className="text-lg font-semibold">
@@ -112,7 +112,7 @@ export async function OrganizationTeamDirectory({
                         {invitation.email}
                       </p>
 
-                      <p className="mt-1 text-xs text-muted-foreground">
+                      <p className="mt-1 text-sm text-muted-foreground">
                         {roleLabel(invitation.role, t)} ·{" "}
                         {invitation.tenantName ?? t("organizationScope")}
                       </p>
@@ -124,7 +124,7 @@ export async function OrganizationTeamDirectory({
                   </div>
 
                   <div className="flex flex-wrap items-center justify-between gap-3">
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-sm text-muted-foreground">
                       {t("invitationExpiresOn", {
                         date: new Intl.DateTimeFormat(locale, {
                           dateStyle: "medium",
