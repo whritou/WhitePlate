@@ -134,6 +134,9 @@
       "unauthorized": "Your session has expired. Sign in again to continue."
     }
   },
+  "WorkspaceLoading": {
+    "workspace": "Loading organization workspace…"
+  },
   "KitchenOrders": {
     "title": "Kitchen orders",
     "description": "Review incoming tickets and update each order as your team prepares it.",
@@ -168,6 +171,8 @@
     },
     "accessDeniedTitle": "Orders unavailable",
     "statusSaved": "Order status updated.",
+    "loadingOrders": "Loading orders…",
+    "refreshingOrders": "Checking for updated orders…",
     "stale": "Showing saved orders. The latest refresh failed.",
     "retry": "Try again",
     "emptyTitle": "No orders in this view",

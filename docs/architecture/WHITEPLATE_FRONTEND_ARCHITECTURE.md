@@ -84,6 +84,12 @@ Organization owners open `/[locale]/organization/restaurants/new?organizationId=
 
 Organization owners open `/[locale]/organization/settings?organizationId=...` from the organization overview. The page obtains the current owner organization list through the authenticated server-side API client and renders a rename form only when the selected ID appears in that list. The server action validates the organization ID and a trimmed 1–200-character name before calling the existing `PATCH /api/v1/organizations/{organizationId}` API. The API independently enforces ownership; the URL ID selects the organization but grants no access. English and French pending, success, unavailable, validation, and access-denied copy is provided.
 
+## Workspace loading and refresh states
+
+`/[locale]/organization/loading.tsx` provides a localized App Router fallback for organization overview, team, restaurant creation, catalog, menu-language settings, organization settings, and kitchen orders. It uses the shared shadcn-compatible `Skeleton` primitive, reserves the workspace/card layout, exposes one polite localized status, hides decorative shapes from assistive technology, and stops pulsing under reduced-motion preferences. Page-level API failures and empty results continue to render their distinct alert or empty state after loading resolves.
+
+Kitchen orders distinguish an initial browser query from a background refresh. The initial query announces loading and shows ticket-shaped skeletons while no order data exists. A background query announces that it is checking for updates while keeping the last order page on screen; if refresh fails, the existing stale-data warning remains beside the saved orders.
+
 ## Guest cart and checkout
 
 The server loads the tenant menu and renders `RestaurantMenu`, a Client Component keyed by the API tenant ID. Its cart has one line per product with editable quantity and option IDs. It uses component state without browser storage or a persisted cart. Reloading, leaving the page, or changing tenant clears cart/receipt state. A menu-language change uses localized router replacement and retains the same tenant's cart; the interface locale stays independent.

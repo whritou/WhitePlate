@@ -134,6 +134,9 @@
       "unauthorized": "Votre session a expiré. Reconnectez-vous pour continuer."
     }
   },
+  "WorkspaceLoading": {
+    "workspace": "Chargement de l’espace de travail…"
+  },
   "KitchenOrders": {
     "title": "Commandes en cuisine",
     "description": "Consultez les tickets reçus et mettez à jour leur état au fil de la préparation.",
@@ -168,6 +171,8 @@
     },
     "accessDeniedTitle": "Commandes indisponibles",
     "statusSaved": "L’état de la commande a été modifié.",
+    "loadingOrders": "Chargement des commandes…",
+    "refreshingOrders": "Recherche des nouvelles commandes…",
     "stale": "Les commandes enregistrées sont affichées. L’actualisation a échoué.",
     "retry": "Réessayer",
     "emptyTitle": "Aucune commande dans cette vue",

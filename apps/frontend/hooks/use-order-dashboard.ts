@@ -102,6 +102,8 @@ export function useOrderDashboard(props: OrderDashboardProps) {
 
   const unavailable =
     error === "unavailable" || (!query.data && loadError === "unavailable")
+  const isInitialLoading =
+    query.isPending && !query.data && loadError !== "invalid"
   const currentPage =
     loadError === "invalid" || (error && error !== "unavailable")
       ? null
@@ -109,14 +111,17 @@ export function useOrderDashboard(props: OrderDashboardProps) {
 
   return {
     page: currentPage,
-    loadError:
-      error ??
-      (loadError === "invalid"
-        ? "invalid"
-        : unavailable
-          ? "unavailable"
-          : null),
+    loadError: isInitialLoading
+      ? null
+      : (error ??
+        (loadError === "invalid"
+          ? "invalid"
+          : unavailable
+            ? "unavailable"
+            : null)),
     isStale: unavailable && currentPage !== null,
+    isInitialLoading,
+    isFetching: query.isFetching,
     pending: mutation.isPending ? mutation.variables : null,
     message,
     refresh,
