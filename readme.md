@@ -1,14 +1,14 @@
 # WhitePlate
 
-WhitePlate is an early-stage multi-tenant restaurant platform. The .NET API implements organizations, restaurant tenancy, catalog/pricing, staff authorization, checkout, order workflow, and kitchen notifications. The frontend connects localized account/team flows, tenant menu browsing, and guest cart/checkout to the API. The kitchen dashboard is implemented; hosted acceptance remains separate work.
+WhitePlate is an early-stage multi-tenant restaurant platform. The .NET API implements organizations, restaurant tenancy, catalog/pricing, staff authorization, checkout, order workflow, and kitchen notifications. The frontend connects localized account/team flows, tenant menu browsing, and guest cart/checkout to the API. Vercel Production, the Coolify API/PostgreSQL connection, one hosted account and organization, and owner access to a newly created restaurant have passed initial acceptance; broader hosted isolation and operations checks remain.
 
 ## What runs today
 
 | Area | Implemented | Still planned |
 | --- | --- | --- |
-| Frontend | English/French auth/team flows, tenant menu/language settings, in-memory guest cart, checkout BFF, server-priced receipt, light/dark theme | Hosted acceptance and remaining catalog editors |
-| API | ASP.NET Core .NET 10 Clean Architecture host; organizations/tenants, OIDC membership, catalog/pricing, checkout, order workflow, idempotency, transactional outbox, SignalR, OpenAPI/Swagger, and tests | Coolify cutover and hosted acceptance |
-| Infrastructure | Nine EF migrations, Better Auth schema on Neon `test` and empty Coolify PostgreSQL, API Dockerfile | Coolify/Vercel connection cutover, backups/restore and hosted operations |
+| Frontend | English/French auth/team flows, tenant menu/language settings, in-memory guest cart, checkout BFF, server-priced receipt, light/dark theme; hosted account, organization, restaurant creation and owner access verified | Remaining catalog editors, tenant wildcard DNS/TLS and broader hosted acceptance |
+| API | ASP.NET Core .NET 10 Clean Architecture host; organizations/tenants, OIDC membership, catalog/pricing, checkout, order workflow, idempotency, transactional outbox, SignalR, OpenAPI/Swagger, tests; Coolify deployment and authenticated access verified | Hosted access-denial behavior is operator-reported; operational acceptance remains |
+| Infrastructure | Nine EF migrations, Better Auth schema on Neon `test` and initialized Coolify PostgreSQL, API Dockerfile; Vercel/Coolify connection cutover verified | Backups/restore and hosted operations |
 
 The frontend and API run independently. The API uses PostgreSQL; the local Neon `test` branch is connected through .NET User Secrets. The weather sample has been removed. See the development guide for migrations, local provisioning, and the current runtime status.
 
