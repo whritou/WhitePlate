@@ -191,6 +191,11 @@
     "notifications": "Notifications de l’espace de travail",
     "dismiss": "Fermer la notification"
   },
+  "WorkspaceToastTest": {
+    "title": "Test des notifications de l’espace de travail",
+    "showSuccess": "Afficher la notification de succès",
+    "successMessage": "Modifications enregistrées."
+  },
   "WorkspaceLoading": {
     "workspace": "Chargement de l’espace de travail…",
     "organizationSignUp": "Chargement de la configuration de l’organisation…",

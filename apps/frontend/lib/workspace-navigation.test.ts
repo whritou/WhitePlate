@@ -138,18 +138,66 @@ describe("resolveWorkspaceContext", () => {
 
 describe("isWorkspaceLinkActive", () => {
   it("matches the overview exactly and nested workspace routes by path", () => {
-    expect(isWorkspaceLinkActive("/organization", "/organization")).toBe(true)
-    expect(isWorkspaceLinkActive("/organization", "/organization/team")).toBe(
-      false
-    )
+    const noSelection = new URLSearchParams()
+
+    expect(
+      isWorkspaceLinkActive("/organization", "/organization", noSelection)
+    ).toBe(true)
+    expect(
+      isWorkspaceLinkActive("/organization", "/organization/team", noSelection)
+    ).toBe(false)
     expect(
       isWorkspaceLinkActive(
         `/organization/catalog?tenantId=${ownerRestaurantId}`,
-        "/organization/catalog"
+        "/organization/catalog",
+        new URLSearchParams(`tenantId=${ownerRestaurantId}`)
       )
     ).toBe(true)
     expect(
-      isWorkspaceLinkActive("/organization/catalog", "/organization/catalogue")
+      isWorkspaceLinkActive(
+        "/organization/catalog",
+        "/organization/catalogue",
+        noSelection
+      )
     ).toBe(false)
+  })
+
+  it("matches only the selected organization or restaurant context", () => {
+    const secondOrganizationId = "55555555-5555-4555-8555-555555555555"
+    const selectedRestaurant = new URLSearchParams(
+      `tenantId=${kitchenRestaurantId}`
+    )
+    const selectedOrganization = new URLSearchParams(
+      `organizationId=${secondOrganizationId}`
+    )
+
+    expect(
+      isWorkspaceLinkActive(
+        `/organization/orders?tenantId=${ownerRestaurantId}`,
+        "/organization/orders",
+        selectedRestaurant
+      )
+    ).toBe(false)
+    expect(
+      isWorkspaceLinkActive(
+        `/organization/orders?tenantId=${kitchenRestaurantId}`,
+        "/organization/orders",
+        selectedRestaurant
+      )
+    ).toBe(true)
+    expect(
+      isWorkspaceLinkActive(
+        `/organization/team?organizationId=${organizationId}`,
+        "/organization/team",
+        selectedOrganization
+      )
+    ).toBe(false)
+    expect(
+      isWorkspaceLinkActive(
+        `/organization/team?organizationId=${secondOrganizationId}`,
+        "/organization/team",
+        selectedOrganization
+      )
+    ).toBe(true)
   })
 })

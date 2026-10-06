@@ -110,10 +110,43 @@ export function resolveWorkspaceContext(
   return null
 }
 
-export function isWorkspaceLinkActive(href: string, pathname: string) {
-  const path = href.split("?", 1)[0]
+export function isWorkspaceLinkActive(
+  href: string,
+  pathname: string,
+  searchParams: URLSearchParams
+) {
+  const [path, query = ""] = href.split("?", 2)
 
   if (path === "/organization") return pathname === path
 
-  return pathname === path || pathname.startsWith(`${path}/`)
+  const pathMatches = pathname === path || pathname.startsWith(`${path}/`)
+
+  if (!pathMatches) return false
+
+  const linkParams = new URLSearchParams(query)
+  const linkTenantIds = linkParams.getAll("tenantId")
+  const linkOrganizationIds = linkParams.getAll("organizationId")
+
+  if (linkTenantIds.length === 1 && linkOrganizationIds.length === 0) {
+    const currentTenantIds = searchParams.getAll("tenantId")
+
+    return (
+      currentTenantIds.length === 1 &&
+      searchParams.getAll("organizationId").length === 0 &&
+      currentTenantIds[0].toLowerCase() === linkTenantIds[0].toLowerCase()
+    )
+  }
+
+  if (linkOrganizationIds.length === 1 && linkTenantIds.length === 0) {
+    const currentOrganizationIds = searchParams.getAll("organizationId")
+
+    return (
+      currentOrganizationIds.length === 1 &&
+      searchParams.getAll("tenantId").length === 0 &&
+      currentOrganizationIds[0].toLowerCase() ===
+        linkOrganizationIds[0].toLowerCase()
+    )
+  }
+
+  return linkTenantIds.length === 0 && linkOrganizationIds.length === 0
 }

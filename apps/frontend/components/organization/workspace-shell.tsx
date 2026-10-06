@@ -42,13 +42,14 @@ export function WorkspaceShell({
   const sections = buildWorkspaceNavigation(organizations, restaurants, (key) =>
     t(key)
   )
+  const currentSearchParams = new URLSearchParams(searchParams.toString())
   const context = resolveWorkspaceContext(
-    new URLSearchParams(searchParams.toString()),
+    currentSearchParams,
     organizations,
     restaurants
   )
   const contextName = context?.name ?? t("workspace")
-  const localeSearchParams = new URLSearchParams(searchParams.toString())
+  const localeSearchParams = new URLSearchParams(currentSearchParams)
 
   if (!context) {
     localeSearchParams.delete("organizationId")
@@ -88,6 +89,7 @@ export function WorkspaceShell({
           <WorkspaceNavigation
             sections={sections}
             pathname={pathname}
+            searchParams={currentSearchParams}
             label={t("navigationLabel")}
           />
         </aside>
@@ -133,6 +135,7 @@ export function WorkspaceShell({
                   <WorkspaceNavigation
                     sections={sections}
                     pathname={pathname}
+                    searchParams={currentSearchParams}
                     label={t("navigationLabel")}
                     onNavigate={() => setMobileNavigationOpen(false)}
                   />
@@ -176,11 +179,13 @@ export function WorkspaceShell({
 function WorkspaceNavigation({
   sections,
   pathname,
+  searchParams,
   label,
   onNavigate,
 }: {
   sections: WorkspaceNavigationSection[]
   pathname: string
+  searchParams: URLSearchParams
   label: string
   onNavigate?: () => void
 }) {
@@ -197,7 +202,11 @@ function WorkspaceNavigation({
 
           <ul className="grid gap-1">
             {section.links.map((link) => {
-              const active = isWorkspaceLinkActive(link.href, pathname)
+              const active = isWorkspaceLinkActive(
+                link.href,
+                pathname,
+                searchParams
+              )
 
               return (
                 <li key={link.href}>

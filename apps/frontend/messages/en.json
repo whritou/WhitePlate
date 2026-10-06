@@ -191,6 +191,11 @@
     "notifications": "Workspace notifications",
     "dismiss": "Dismiss notification"
   },
+  "WorkspaceToastTest": {
+    "title": "Workspace toast test harness",
+    "showSuccess": "Show success toast",
+    "successMessage": "Changes saved."
+  },
   "WorkspaceLoading": {
     "workspace": "Loading organization workspace…",
     "organizationSignUp": "Loading organization setup…",
