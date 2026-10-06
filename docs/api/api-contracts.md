@@ -1,6 +1,6 @@
 # API contracts
 
-Status: the Better Auth frontend, email/password and social auth routes, server-side API token exchange, organization signup, and email-bound invitations are wired in source. Localized checkout snapshots and catalog language paths are covered by API tests. The catalog and order locale migrations are applied on Neon `test`; browser acceptance remains. Email/password signup, organization creation, and invitation acceptance were previously exercised there using locally intercepted email delivery. Provider credentials, production domain/CORS settings, browser OAuth, real email delivery, and production migrations remain deployment/verification work.
+Status: the Better Auth frontend, email/password and social auth routes, server-side API token exchange, organization signup, and email-bound invitations are wired in source. Localized checkout snapshots and catalog language paths are covered by API tests. Catalog and order locale migrations are applied on Neon `test` and Coolify Production. Local email/password signup, organization creation, and invitation acceptance were verified using locally intercepted email delivery. Production Vercel-to-Coolify Better Auth user lookup and JWKS over TLS are verified; real-account signup, email verification, JWT use against protected API routes, browser OAuth, real email delivery, and tenant-flow acceptance remain open.
 
 ## 1. HTTP routes
 

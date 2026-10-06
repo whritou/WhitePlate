@@ -18,7 +18,7 @@ The storefront interface supports English (`en`) and French (`fr`), while each r
 
 ## Implementation status
 
-Tenant languages/defaults and catalog translations are persisted by EF Core; the `CatalogLocalization` migration adds the required columns and backfills existing tenants to English with empty translation documents. It is applied to Neon `test`; production rollout remains separate. API routes enforce owner/manager access to language settings and translation writes. The public storefront resolves configured subdomains, renders the menu, exposes available languages, and marks unavailable products.
+Tenant languages/defaults and catalog translations are persisted by EF Core; the `CatalogLocalization` migration adds the required columns and backfills existing tenants to English with empty translation documents. It is applied to Neon `test` and Coolify Production; hosted tenant storefront and checkout acceptance remain separate. API routes enforce owner/manager access to language settings and translation writes. The public storefront resolves configured subdomains, renders the menu, exposes available languages, and marks unavailable products.
 
 ## Consequences and remaining work
 
