@@ -1,6 +1,6 @@
 # WhitePlate frontend architecture
 
-Status: localized Better Auth flows, server-only API BFF, organization signup, email-bound staff invitation UI, and owner/manager catalog and discount management are wired in source. The Better Auth schema is migrated on Neon `test` and Coolify Production; email/password signup plus invitation acceptance were verified on Neon with locally intercepted email. Hosted email/password signup, organization, restaurant creation and owner access are verified through Vercel and Coolify. Configured OAuth/real email delivery, hosted SignalR URL/CORS/TLS and expiry, public tenant DNS/TLS, Preview isolation and operational readiness remain open; see [authentication setup](../development.md#authentication-configuration). Commands are in the [package README](../../apps/frontend/README.md) and [development guide](../development.md).
+Status: localized Better Auth flows, server-only API BFF, organization signup and rename settings, email-bound staff invitation UI, and owner/manager catalog and discount management are wired in source. The Better Auth schema is migrated on Neon `test` and Coolify Production; email/password signup plus invitation acceptance were verified on Neon with locally intercepted email. Hosted email/password signup, organization, restaurant creation and owner access are verified through Vercel and Coolify. Configured OAuth/real email delivery, hosted SignalR URL/CORS/TLS and expiry, public tenant DNS/TLS, Preview isolation and operational readiness remain open; see [authentication setup](../development.md#authentication-configuration). Commands are in the [package README](../../apps/frontend/README.md) and [development guide](../development.md).
 
 ## Stack and source map
 
@@ -9,7 +9,7 @@ Next.js 16.3.4, React 19.2.8, strict TypeScript, Tailwind CSS 4, `next-intl`, an
 ```text
 apps/frontend/
   app/
-    [locale]/                 # Auth, organization, invitation, and localized pages
+    [locale]/                 # Auth, organization, invitation, settings, and localized pages
       organization/orders/    # Server page and initial validated tickets
     api/kitchen/               # Same-origin order reads and SignalR token route
     api/auth/[...all]/        # Better Auth handlers; browser token endpoint blocked
@@ -79,6 +79,10 @@ Owners and managers open `/[locale]/organization/catalog?tenantId=...` from rest
 ## Restaurant creation
 
 Organization owners open `/[locale]/organization/restaurants/new?organizationId=...` from their organization or team page. The server reads the verified session and owned organizations before rendering the form. The action validates and normalizes the name, one-label subdomain and EUR/USD/GBP currency, then delegates to the server-only restaurant service and authenticated API client. The API independently checks ownership; a browser organization ID never grants access. Reserved labels fail validation, taken labels produce a localized conflict, and inaccessible organizations receive a safe denial. The created restaurant appears in the team view and the current user's restaurant navigation after server refresh. Domain/DNS setup remains separate: creation does not configure a public domain.
+
+## Organization settings
+
+Organization owners open `/[locale]/organization/settings?organizationId=...` from the organization overview. The page obtains the current owner organization list through the authenticated server-side API client and renders a rename form only when the selected ID appears in that list. The server action validates the organization ID and a trimmed 1–200-character name before calling the existing `PATCH /api/v1/organizations/{organizationId}` API. The API independently enforces ownership; the URL ID selects the organization but grants no access. English and French pending, success, unavailable, validation, and access-denied copy is provided.
 
 ## Guest cart and checkout
 

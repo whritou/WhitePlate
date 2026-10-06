@@ -4,6 +4,7 @@ import {
   updateMenuLanguagesAction,
   saveCatalogTranslationAction,
   createOrganizationAction,
+  renameOrganizationAction,
   sendStaffInvitationAction,
   acceptStaffInvitationAction,
 } from "./organization"
@@ -11,7 +12,12 @@ import { whitePlateApi } from "@/lib/api"
 
 vi.mock("server-only", () => ({}))
 vi.mock("@/lib/api", () => ({
-  whitePlateApi: { post: vi.fn(), put: vi.fn(), delete: vi.fn() },
+  whitePlateApi: {
+    post: vi.fn(),
+    put: vi.fn(),
+    patch: vi.fn(),
+    delete: vi.fn(),
+  },
 }))
 vi.mock("@/lib/email", () => ({ sendInvitationEmail: vi.fn() }))
 afterEach(() => vi.resetAllMocks())
@@ -58,6 +64,37 @@ it("rejects file form fields and oversized non-product translation names", async
   ).toEqual({ ok: false, message: "invalid" })
   expect(whitePlateApi.post).not.toHaveBeenCalled()
   expect(whitePlateApi.put).not.toHaveBeenCalled()
+})
+
+it("renames only the selected organization with a normalized name", async () => {
+  const form = new FormData()
+
+  form.set("organizationId", id)
+  form.set("name", "  White Plate Group  ")
+  vi.mocked(whitePlateApi.patch).mockResolvedValue({
+    ok: true,
+    status: 200,
+    data: { id, name: "White Plate Group" },
+  })
+
+  expect(await renameOrganizationAction(form)).toEqual({ ok: true })
+  expect(whitePlateApi.patch).toHaveBeenCalledWith(
+    `/api/v1/organizations/${id}`,
+    { name: "White Plate Group" }
+  )
+})
+
+it("rejects malformed organization rename input before making an API request", async () => {
+  const form = new FormData()
+
+  form.set("organizationId", "not-a-uuid")
+  form.set("name", "New name")
+
+  expect(await renameOrganizationAction(form)).toEqual({
+    ok: false,
+    message: "invalid",
+  })
+  expect(whitePlateApi.patch).not.toHaveBeenCalled()
 })
 
 it("revokes a persisted invitation if delivery fails", async () => {

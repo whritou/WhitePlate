@@ -65,6 +65,7 @@
     "noOrganizationsTitle": "Start with an organization",
     "noOrganizationsDescription": "Create one to manage restaurant access and invite your team.",
     "manageTeamAction": "Manage team",
+    "organizationSettingsAction": "Organization settings",
     "backToOrganizations": "All organizations",
     "teamTitle": "Invite your staff",
     "teamDescription": "Choose the email address and access level for this invitation. The recipient must verify the same address before joining.",
@@ -115,6 +116,23 @@
     "translationError": "We couldn’t save this translation. Check the language and text, then try again.",
     "createRestaurantAction": "Create restaurant",
     "editCatalog": "Edit catalog"
+  },
+  "OrganizationSettings": {
+    "title": "Organization settings",
+    "description": "Update the name your team sees across WhitePlate.",
+    "name": "Organization name",
+    "save": "Save organization name",
+    "saving": "Saving…",
+    "updated": "Organization name updated.",
+    "backToOrganizations": "All organizations",
+    "notFoundTitle": "Organization unavailable",
+    "notFound": "This organization is unavailable to your account.",
+    "serviceError": "We couldn’t load this organization. Try again in a moment.",
+    "errors": {
+      "invalid": "We couldn’t update this organization. Check the name and confirm you have owner access.",
+      "unavailable": "We couldn’t save your changes. Try again in a moment.",
+      "unauthorized": "Your session has expired. Sign in again to continue."
+    }
   },
   "KitchenOrders": {
     "title": "Kitchen orders",

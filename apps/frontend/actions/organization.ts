@@ -5,12 +5,14 @@ import {
   parseMenuLanguages,
   parseCatalogTranslation,
   parseOrganizationName,
+  parseOrganizationRename,
   parseStaffInvitation,
 } from "@/lib/validation/organization"
 import {
   updateMenuLanguages,
   saveCatalogTranslation,
   createOrganization,
+  renameOrganization,
   sendStaffInvitation,
   acceptStaffInvitation,
 } from "@/services/organization"
@@ -40,6 +42,14 @@ export async function createOrganizationAction(
   const name = parseOrganizationName(form)
 
   return name ? createOrganization(name) : { ok: false, message: "invalid" }
+}
+
+export async function renameOrganizationAction(
+  form: unknown
+): Promise<ActionResult> {
+  const value = parseOrganizationRename(form)
+
+  return value ? renameOrganization(value) : { ok: false, message: "invalid" }
 }
 
 export async function sendStaffInvitationAction(

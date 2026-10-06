@@ -65,6 +65,7 @@
     "noOrganizationsTitle": "Commencez par une organisation",
     "noOrganizationsDescription": "Créez-en une pour gérer les accès de vos restaurants et inviter votre équipe.",
     "manageTeamAction": "Gérer l’équipe",
+    "organizationSettingsAction": "Paramètres de l’organisation",
     "backToOrganizations": "Toutes les organisations",
     "teamTitle": "Invitez votre équipe",
     "teamDescription": "Choisissez l’adresse e-mail et le niveau d’accès. La personne devra confirmer cette même adresse pour rejoindre l’équipe.",
@@ -115,6 +116,23 @@
     "translationError": "Impossible d’enregistrer cette traduction. Vérifiez la langue et le texte, puis réessayez.",
     "createRestaurantAction": "Créer le restaurant",
     "editCatalog": "Modifier le catalogue"
+  },
+  "OrganizationSettings": {
+    "title": "Paramètres de l’organisation",
+    "description": "Modifiez le nom de votre équipe dans WhitePlate.",
+    "name": "Nom de l’organisation",
+    "save": "Enregistrer le nom",
+    "saving": "Enregistrement…",
+    "updated": "Le nom de l’organisation a été modifié.",
+    "backToOrganizations": "Toutes les organisations",
+    "notFoundTitle": "Organisation indisponible",
+    "notFound": "Cette organisation n’est pas accessible avec votre compte.",
+    "serviceError": "Impossible de charger cette organisation. Réessayez dans un instant.",
+    "errors": {
+      "invalid": "Impossible de modifier l’organisation. Vérifiez le nom et vos droits de propriétaire.",
+      "unavailable": "Impossible d’enregistrer les modifications. Réessayez dans un instant.",
+      "unauthorized": "Votre session a expiré. Reconnectez-vous pour continuer."
+    }
   },
   "KitchenOrders": {
     "title": "Commandes en cuisine",

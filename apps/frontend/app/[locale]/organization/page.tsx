@@ -181,6 +181,13 @@ export default async function OrganizationPage() {
                   </Link>
 
                   <Link
+                    href={`/organization/settings?organizationId=${organization.id}`}
+                    className="mt-5 text-sm font-medium text-primary underline-offset-4 hover:underline"
+                  >
+                    {t("organizationSettingsAction")}
+                  </Link>
+
+                  <Link
                     href={`/organization/restaurants/new?organizationId=${organization.id}`}
                     className="mt-5 text-sm font-medium text-primary underline-offset-4 hover:underline"
                   >
