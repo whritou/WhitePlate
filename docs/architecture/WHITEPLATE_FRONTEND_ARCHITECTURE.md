@@ -1,6 +1,6 @@
 # WhitePlate frontend architecture
 
-Status: localized Better Auth flows, server-only API BFF, organization signup and rename settings, email-bound staff invitation UI, and owner/manager catalog and discount management are wired in source. The Better Auth schema is migrated on Neon `test` and Coolify Production; email/password signup plus invitation acceptance were verified on Neon with locally intercepted email. Hosted email/password signup, organization, restaurant creation and owner access are verified through Vercel and Coolify. Configured OAuth/real email delivery, hosted SignalR URL/CORS/TLS and expiry, public tenant DNS/TLS, Preview isolation and operational readiness remain open; see [authentication setup](../development.md#authentication-configuration). Commands are in the [package README](../../apps/frontend/README.md) and [development guide](../development.md).
+Status: localized Better Auth flows, server-only API BFF, responsive organization workspace shell, content-matched route loading skeletons, organization signup and rename settings, email-bound staff invitation UI, and owner/manager catalog and discount management are wired in source. The Better Auth schema is migrated on Neon `test` and Coolify Production; email/password signup plus invitation acceptance were verified on Neon with locally intercepted email. Hosted email/password signup, organization, restaurant creation and owner access are verified through Vercel and Coolify. Configured OAuth/real email delivery, hosted SignalR URL/CORS/TLS and expiry, public tenant DNS/TLS, Preview isolation and operational readiness remain open; see [authentication setup](../development.md#authentication-configuration). Commands are in the [package README](../../apps/frontend/README.md) and [development guide](../development.md).
 
 ## Stack and source map
 
@@ -10,7 +10,13 @@ Next.js 16.3.4, React 19.2.8, strict TypeScript, Tailwind CSS 4, `next-intl`, an
 apps/frontend/
   app/
     [locale]/                 # Auth, organization, invitation, settings, and localized pages
-      organization/orders/    # Server page and initial validated tickets
+      (workspace)/organization/ # Verified-session shell and role-scoped navigation
+        (overview)/           # Organization and restaurant overview
+        team/                 # Organization team and invitation workflow
+        catalog/              # Restaurant catalog management
+        restaurant-languages/ # Menu language and translation management
+        orders/               # Server page and initial validated tickets
+      organization/sign-up/   # Organization setup outside the workspace shell
     api/kitchen/               # Same-origin order reads and SignalR token route
     api/auth/[...all]/        # Better Auth handlers; browser token endpoint blocked
     .well-known/              # API JWT issuer metadata
@@ -23,6 +29,7 @@ apps/frontend/
     tenant-selection-provider.tsx # Request-tree scoped Zustand store
     theme-provider.tsx        # next-themes and keyboard shortcut
     orders/                   # Query-backed dashboard, tickets and connection UI
+    organization/             # Workspace shell and page-specific loading layouts
     ui/                       # shadcn Base UI controls, cards and feedback
   hooks/                      # Auth, checkout and order query lifecycle
   actions/                    # Validated organization, order and checkout mutations
@@ -72,6 +79,10 @@ Its `d` shortcut ignores repeated/prevented events, Ctrl/Alt/Meta combinations, 
 
 The theme currently changes light/dark appearance only. There is no restaurant-specific branding source. The storefront uses the existing button for cart and checkout actions.
 
+## Organization workspace shell
+
+`/[locale]/(workspace)/organization/layout.tsx` requires a signed-in, verified Better Auth session and reads the user's organizations and restaurant memberships through the existing server-only services. It passes only those display records to `WorkspaceShell`. The client shell shows role-appropriate links in a desktop sidebar and a mobile shadcn-compatible Sheet built on Base UI Dialog. The Sheet contains its own scrolling and uses Base UI's focus containment, Escape dismissal, and focus restoration. Locale links retain the current route and query only when organization or tenant selectors match those verified records; an unknown selector is removed from the locale-switch URL. Pages and API handlers still enforce access independently; layout navigation data is not an authorization grant. Organization signup stays outside this shell.
+
 ## Catalog management
 
 Owners and managers open `/[locale]/organization/catalog?tenantId=...` from restaurant settings. The server checks the verified account's current membership before loading the catalog; the API independently authorizes every read and mutation. A dedicated response parser validates the requested tenant, currency, category and option-group relationships, discount records, selection bounds, amounts, tax, sort order, availability and archive state. Server actions accept validated form fields only, with API DTO-specific create/update payloads. Categories, products, option groups and options support creation and editing; archive dialogs explain descendant effects and preserve order history. Archived items remain visible for management history without edit forms, including when a parent is archived. New products are initially available, and existing products can toggle availability. Option prices use the restaurant's currency and display order; selection bounds follow the API's 0–20 rules. Prices use the restaurant's existing currency; two-decimal amounts, 0–100% tax, field lengths and database precision are checked before requests. Discount codes support fixed-amount and percentage creation, mutable name/type/value edits with immutable codes, localized duplicate feedback, and explicit one-way deactivation; inactive codes remain read-only history. Destructive archive and discount deactivation use localized shadcn AlertDialogs. Escape and Cancel return focus to the trigger; pending mutations prevent duplicate submission and dismissal, safe failures leave the dialog open, and success closes it before refreshing the catalog. The translation editor supports group and option labels. The guarded discount-management browser flow covers owner creation, editing, cancellation and deactivation; real-database checkout redemption and receipt-history acceptance remain to be run.
@@ -86,7 +97,7 @@ Organization owners open `/[locale]/organization/settings?organizationId=...` fr
 
 ## Workspace loading and refresh states
 
-`/[locale]/organization/loading.tsx` provides a localized App Router fallback for organization overview, team, restaurant creation, catalog, menu-language settings, organization settings, and kitchen orders. It uses the shared shadcn-compatible `Skeleton` primitive, reserves the workspace/card layout, exposes one polite localized status, hides decorative shapes from assistive technology, and stops pulsing under reduced-motion preferences. Page-level API failures and empty results continue to render their distinct alert or empty state after loading resolves.
+Each organization route has a localized App Router fallback shaped for that page: the overview reserves restaurant-order, menu-setting, and organization groups; team shows the invitation and restaurant areas; restaurant creation and organization signup show their forms; catalog and menu-language pages reserve their editors; settings shows its rename form; and orders show status filters and ticket cards. The overview fallback lives under the `(overview)` route group so it cannot cover its sibling pages. Every fallback uses the shared shadcn-compatible `Skeleton`, exposes one polite localized status and `aria-busy`, hides decorative shapes from assistive technology, and stops pulsing under reduced-motion preferences. Page-level API failures and empty results continue to render their distinct alert or empty state after loading resolves.
 
 Kitchen orders distinguish an initial browser query from a background refresh. The initial query announces loading and shows ticket-shaped skeletons while no order data exists. A background query announces that it is checking for updates while keeping the last order page on screen; if refresh fails, the existing stale-data warning remains beside the saved orders.
 

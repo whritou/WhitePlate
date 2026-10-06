@@ -1,0 +1,254 @@
+"use client"
+
+import { Menu, Moon, Sun, X } from "lucide-react"
+import { useLocale, useTranslations } from "next-intl"
+import { useTheme } from "next-themes"
+import { useSearchParams } from "next/navigation"
+import { useState } from "react"
+import { SignOutButton } from "@/components/auth/sign-out-button"
+import { Button } from "@/components/ui/button"
+import { Separator } from "@/components/ui/separator"
+import {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet"
+import { Link, usePathname } from "@/i18n/navigation"
+import {
+  buildWorkspaceNavigation,
+  isWorkspaceLinkActive,
+  resolveWorkspaceContext,
+} from "@/lib/workspace-navigation"
+import type {
+  WorkspaceNavigationSection,
+  WorkspaceShellProps,
+} from "@/types/workspace-navigation"
+
+export function WorkspaceShell({
+  organizations,
+  restaurants,
+  children,
+}: WorkspaceShellProps) {
+  const t = useTranslations("Workspace")
+  const locale = useLocale()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+  const { resolvedTheme, setTheme } = useTheme()
+  const [mobileNavigationOpen, setMobileNavigationOpen] = useState(false)
+  const sections = buildWorkspaceNavigation(organizations, restaurants, (key) =>
+    t(key)
+  )
+  const context = resolveWorkspaceContext(
+    new URLSearchParams(searchParams.toString()),
+    organizations,
+    restaurants
+  )
+  const contextName = context?.name ?? t("workspace")
+  const localeSearchParams = new URLSearchParams(searchParams.toString())
+
+  if (!context) {
+    localeSearchParams.delete("organizationId")
+    localeSearchParams.delete("tenantId")
+  }
+
+  const query = localeSearchParams.toString()
+  const currentHref = `${pathname}${query ? `?${query}` : ""}`
+
+  function toggleTheme() {
+    setTheme(resolvedTheme === "dark" ? "light" : "dark")
+  }
+
+  return (
+    <div className="min-h-screen bg-background text-foreground">
+      <Link
+        href="#workspace-content"
+        className="sr-only z-[60] rounded-md bg-background p-3 text-sm font-medium text-foreground focus:not-sr-only focus:fixed focus:top-4 focus:left-4"
+      >
+        {t("skipToContent")}
+      </Link>
+
+      <div className="flex min-h-screen">
+        <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r border-border bg-card md:flex">
+          <div className="px-5 py-6">
+            <Link href="/organization" className="text-lg font-semibold">
+              WhitePlate
+            </Link>
+
+            <p className="mt-1 truncate text-sm text-muted-foreground">
+              {contextName}
+            </p>
+          </div>
+
+          <Separator />
+
+          <WorkspaceNavigation
+            sections={sections}
+            pathname={pathname}
+            label={t("navigationLabel")}
+          />
+        </aside>
+
+        <div className="flex min-w-0 flex-1 flex-col">
+          <header className="sticky top-0 z-30 flex min-h-16 items-center gap-3 border-b border-border bg-background/95 px-4 backdrop-blur sm:px-6">
+            <div className="md:hidden">
+              <Sheet
+                open={mobileNavigationOpen}
+                onOpenChange={setMobileNavigationOpen}
+              >
+                <SheetTrigger
+                  render={
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      aria-label={t("openNavigation")}
+                    />
+                  }
+                >
+                  <Menu aria-hidden="true" />
+                </SheetTrigger>
+
+                <SheetContent
+                  side="left"
+                  className="w-[min(20rem,calc(100vw-2.5rem))]"
+                >
+                  <SheetHeader className="relative pr-10">
+                    <SheetTitle>{t("navigationTitle")}</SheetTitle>
+
+                    <SheetDescription className="truncate">
+                      {contextName}
+                    </SheetDescription>
+
+                    <SheetClose
+                      aria-label={t("closeNavigation")}
+                      className="absolute top-0 right-0 inline-flex size-9 items-center justify-center rounded-lg text-muted-foreground outline-none hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+                    >
+                      <X aria-hidden="true" className="size-4" />
+                    </SheetClose>
+                  </SheetHeader>
+
+                  <WorkspaceNavigation
+                    sections={sections}
+                    pathname={pathname}
+                    label={t("navigationLabel")}
+                    onNavigate={() => setMobileNavigationOpen(false)}
+                  />
+                </SheetContent>
+              </Sheet>
+            </div>
+
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-medium">{contextName}</p>
+            </div>
+
+            <LocaleLinks currentHref={currentHref} locale={locale} />
+
+            <Separator orientation="vertical" className="hidden h-6 sm:block" />
+
+            <Button
+              variant="outline"
+              size="icon"
+              aria-label={t("toggleTheme")}
+              onClick={toggleTheme}
+            >
+              {resolvedTheme === "dark" ? (
+                <Sun aria-hidden="true" />
+              ) : (
+                <Moon aria-hidden="true" />
+              )}
+            </Button>
+
+            <SignOutButton />
+          </header>
+
+          <div id="workspace-content" tabIndex={-1} className="min-w-0 flex-1">
+            {children}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function WorkspaceNavigation({
+  sections,
+  pathname,
+  label,
+  onNavigate,
+}: {
+  sections: WorkspaceNavigationSection[]
+  pathname: string
+  label: string
+  onNavigate?: () => void
+}) {
+  return (
+    <nav
+      aria-label={label}
+      className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-3"
+    >
+      {sections.map((section) => (
+        <section key={section.id} className="mb-5 last:mb-0">
+          <h2 className="mb-2 truncate px-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+            {section.label}
+          </h2>
+
+          <ul className="grid gap-1">
+            {section.links.map((link) => {
+              const active = isWorkspaceLinkActive(link.href, pathname)
+
+              return (
+                <li key={link.href}>
+                  <Link
+                    href={link.href}
+                    aria-current={active ? "page" : undefined}
+                    onClick={onNavigate}
+                    className={`flex min-h-10 items-center rounded-lg px-3 text-sm transition-colors outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring ${active ? "bg-muted font-medium text-foreground" : "text-muted-foreground"}`}
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              )
+            })}
+          </ul>
+        </section>
+      ))}
+    </nav>
+  )
+}
+
+function LocaleLinks({
+  currentHref,
+  locale,
+}: {
+  currentHref: string
+  locale: string
+}) {
+  const t = useTranslations("Workspace")
+
+  return (
+    <nav aria-label={t("language")} className="flex items-center gap-2 text-sm">
+      <Link
+        href={currentHref}
+        locale="en"
+        aria-current={locale === "en" ? "page" : undefined}
+        aria-label={t("switchToEnglish")}
+        className="rounded-sm px-1 py-2 text-muted-foreground outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+      >
+        EN
+      </Link>
+
+      <Link
+        href={currentHref}
+        locale="fr"
+        aria-current={locale === "fr" ? "page" : undefined}
+        aria-label={t("switchToFrench")}
+        className="rounded-sm px-1 py-2 text-muted-foreground outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+      >
+        FR
+      </Link>
+    </nav>
+  )
+}

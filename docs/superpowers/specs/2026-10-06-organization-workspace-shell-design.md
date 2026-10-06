@@ -2,7 +2,7 @@
 
 **Date:** 2026-10-06
 
-**Status:** Awaiting user review
+**Status:** Implemented; authenticated browser verification pending
 
 **Kanban card:** Add a responsive sidebar and app bar to the organization workspace
 
@@ -14,7 +14,7 @@ The existing authorization boundary remains authoritative: the server derives or
 
 ## Approaches considered
 
-1. **Add a shared route-group layout (recommended).** Move the authenticated organization routes beneath `app/[locale]/(workspace)/organization/` and put the shared shell in `(workspace)/layout.tsx`. Next route groups do not appear in URLs, so existing links and public routes retain their paths. Keep organization sign-up outside the group. This provides one place for role-aware navigation and the responsive frame.
+1. **Add a shared route-group layout (recommended).** Move the authenticated organization routes beneath `app/[locale]/(workspace)/organization/` and put the shared shell in `(workspace)/organization/layout.tsx`. Next route groups do not appear in URLs, so existing links and public routes retain their paths. Keep organization sign-up outside the group. This provides one place for role-aware navigation and the responsive frame.
 2. **Wrap each existing page individually.** This avoids moving route files but repeats shell composition and makes future workspace routes easy to omit. Responsive state and navigation behavior would be harder to keep consistent.
 
 The route-group layout is recommended because this change intentionally establishes a shared boundary across several existing workspace pages while keeping the public sign-up flow separate.
@@ -25,6 +25,7 @@ The route-group layout is recommended because this change intentionally establis
 
 - Add the `(workspace)` route group under the locale segment. Move the organization overview, team, restaurant creation, catalog, menu-language, settings, orders, and organization loading UI into its `organization` route tree without changing their public URL paths.
 - Keep `/[locale]/organization/sign-up` outside the workspace group, along with authentication and public storefront routes.
+- Give the overview and each workspace page its own loading boundary. Reserve page-shaped content in each fallback; do not place an overview-shaped fallback at the organization parent where it can mask nested routes. Keep a matching form fallback for organization sign-up outside the shell.
 - The server layout requires a signed-in, verified session, matching the current protected-workspace behavior. It reads the signed-in user's owned organizations and restaurant memberships through the existing server-only services and passes only display/navigation data to the shell.
 - Preserve page-level and API-level ownership and membership checks. Layout data is for navigation only and is not reused as an authorization grant.
 - Treat a requested `organizationId` or `tenantId` as selected context only when it matches an organization or restaurant returned for the verified user. Unknown IDs produce a neutral workspace context; they do not reveal resource data.
@@ -52,8 +53,8 @@ The route-group layout is recommended because this change intentionally establis
 ## Verification
 
 - Unit-test role-aware navigation, selected-context validation, query preservation, and active-route matching.
-- Component-test localized navigation, semantic active state, visible focus, account/theme controls, and mobile menu dismissal by Escape and navigation.
-- Add browser coverage for desktop and mobile layout at the established responsive breakpoints, including focus return and contained scrolling in the mobile Sheet.
+- Component-test localized navigation, semantic active state, visible focus, account/theme controls, and role-filtered links. Verify each route selects its page-shaped loading fallback in both language catalogs.
+- Verify the mobile Sheet's Escape dismissal, focus containment/restoration, and contained scrolling using the installed Base UI Dialog behavior and browser coverage when an isolated authenticated browser environment is available.
 - Run the frontend tests, lint, typecheck, format check, and production build as appropriate. Record exact results in the documentation review.
 - Review the route move for unchanged URLs and confirm sign-up, auth, and storefront routes do not render the workspace shell.
 
@@ -68,3 +69,10 @@ This design covers only the workspace sidebar and app bar card. Accessible mutat
 - Read the installed Next.js layout and route-group documentation before moving routes.
 - Inspect the installed Base UI Dialog/Sheet APIs and the existing theme/sign-out controls before composing the shell.
 - Verify all currently supported restaurant roles against the existing page and API access checks before finalizing link visibility.
+
+## Implementation notes
+
+- The workspace layout reads the verified account's current organization and restaurant records only to render navigation. Page and API authorization remain independent.
+- `WorkspaceShell` uses the existing shadcn Base UI Button and Separator controls plus a local Sheet composition over Base UI Dialog.
+- Every overview, team, restaurant creation, catalog, menu-language, organization settings, kitchen orders, and organization sign-up route now has its own localized loading layout. The overview fallback is isolated under an invisible route group.
+- Vitest covers role links, selected context, locale query preservation, responsive layout markers, shell controls, and route-to-skeleton mappings. Full browser keyboard and focus-return verification remains an environment-dependent follow-up; the Sheet delegates those behaviors to Base UI Dialog.

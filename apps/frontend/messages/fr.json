@@ -134,8 +134,34 @@
       "unauthorized": "Votre session a expiré. Reconnectez-vous pour continuer."
     }
   },
+  "Workspace": {
+    "workspace": "Espace de travail",
+    "overview": "Vue d’ensemble",
+    "team": "Équipe",
+    "settings": "Paramètres",
+    "createRestaurant": "Créer un restaurant",
+    "orders": "Commandes",
+    "catalog": "Catalogue",
+    "menuLanguages": "Langues du menu",
+    "navigationLabel": "Navigation de l’espace de travail",
+    "openNavigation": "Ouvrir la navigation",
+    "closeNavigation": "Fermer la navigation",
+    "navigationTitle": "Navigation de l’espace de travail",
+    "toggleTheme": "Changer de thème",
+    "skipToContent": "Aller au contenu",
+    "language": "Langue",
+    "switchToEnglish": "Passer en anglais",
+    "switchToFrench": "Passer en français"
+  },
   "WorkspaceLoading": {
-    "workspace": "Chargement de l’espace de travail…"
+    "workspace": "Chargement de l’espace de travail…",
+    "organizationSignUp": "Chargement de la configuration de l’organisation…",
+    "team": "Chargement de l’équipe de l’organisation…",
+    "restaurant": "Chargement du formulaire de création du restaurant…",
+    "catalog": "Chargement du catalogue du restaurant…",
+    "menuLanguages": "Chargement des langues du menu…",
+    "settings": "Chargement des paramètres de l’organisation…",
+    "orders": "Chargement des commandes en cuisine…"
   },
   "KitchenOrders": {
     "title": "Commandes en cuisine",

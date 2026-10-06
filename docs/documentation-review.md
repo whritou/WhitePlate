@@ -317,3 +317,17 @@ Aligned current status summaries with the implementation and dated acceptance re
 | Compare browser commands against `apps/frontend/package.json`, `apps/frontend/playwright.config.ts`, and `apps/frontend/tests/browser` | Passed by source inspection; script name, test paths, project dependencies, and worker configuration agree. |
 | Search active status/setup documents for the identified obsolete counts, proposed editor status, missing menu/BFF claims, stale CLI paths, and open staff-matrix claims | Passed; no stale claims remain in the active documents checked. Dated history remains intact. |
 | Frontend/API suites or guarded database acceptance | Not run; this change only updates documentation, and the database-backed browser suite was not authorized for this documentation task. |
+
+## Organization workspace shell and page-specific loading UI — 2026-10-06
+
+Added a responsive, role-aware organization shell with a desktop sidebar and mobile navigation sheet, verified organization/restaurant context, locale switching, theme control, and sign-out. Protected organization routes now share the shell while keeping page-level ownership checks intact. Loading fallbacks are selected at each route and shaped for overview, team, restaurant creation, catalog, menu languages, settings, kitchen orders, and the separate organization sign-up form. The correction avoids showing the overview skeleton while nested pages load. English and French labels and focused route/skeleton assertions were added. Authenticated browser behavior still needs runtime verification; the database-backed browser suite was not run because its configured Neon test environment is outside this task's scope.
+
+| Check | Actual result |
+| --- | --- |
+| `node node_modules/vitest/vitest.mjs run` from `apps/frontend` | Passed: 39 files, 331 tests. |
+| `node node_modules/eslint/bin/eslint.js .` from `apps/frontend` | Passed. `npm` is absent from this PowerShell session's PATH, so the installed local CLI was used. |
+| `node node_modules/typescript/bin/tsc --noEmit` from `apps/frontend` | Passed. |
+| `node node_modules/prettier/bin/prettier.cjs --check` on changed frontend source/config/docs | Passed for the targeted files; the pre-existing, moved catalog page was excluded because it already fails the repository's formatting baseline. |
+| `node node_modules/next/dist/bin/next build --webpack` from `apps/frontend` | Passed compilation, TypeScript, and generation of all 35 pages. Process-only inert HTTPS/auth/database placeholders satisfied production checks. Better Auth logged schema-connection diagnostics against the unavailable placeholder database; Webpack cache writes also emitted nonfatal EPERM warnings. |
+| `git diff --check` | Passed; Git printed only line-ending conversion warnings for existing CRLF-configured paths. |
+| Authenticated browser/responsive keyboard acceptance | Not run; it needs the app's database-backed auth/test setup. No Neon test database was used. |

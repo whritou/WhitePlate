@@ -134,8 +134,34 @@
       "unauthorized": "Your session has expired. Sign in again to continue."
     }
   },
+  "Workspace": {
+    "workspace": "Workspace",
+    "overview": "Overview",
+    "team": "Team",
+    "settings": "Settings",
+    "createRestaurant": "Create restaurant",
+    "orders": "Orders",
+    "catalog": "Catalog",
+    "menuLanguages": "Menu languages",
+    "navigationLabel": "Workspace navigation",
+    "openNavigation": "Open navigation",
+    "closeNavigation": "Close navigation",
+    "navigationTitle": "Workspace navigation",
+    "toggleTheme": "Toggle theme",
+    "skipToContent": "Skip to content",
+    "language": "Language",
+    "switchToEnglish": "Switch to English",
+    "switchToFrench": "Switch to French"
+  },
   "WorkspaceLoading": {
-    "workspace": "Loading organization workspace…"
+    "workspace": "Loading organization workspace…",
+    "organizationSignUp": "Loading organization setup…",
+    "team": "Loading organization team…",
+    "restaurant": "Loading new restaurant form…",
+    "catalog": "Loading restaurant catalog…",
+    "menuLanguages": "Loading menu language settings…",
+    "settings": "Loading organization settings…",
+    "orders": "Loading kitchen orders…"
   },
   "KitchenOrders": {
     "title": "Kitchen orders",
