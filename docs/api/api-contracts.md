@@ -1,6 +1,6 @@
 # API contracts
 
-Status: the Better Auth frontend, email/password and social auth routes, server-side API token exchange, organization signup, and email-bound invitations are wired in source. Localized checkout snapshots and catalog language paths are covered by API tests. Catalog and order locale migrations are applied on Neon `test` and Coolify Production. Local email/password signup, organization creation, and invitation acceptance were verified using locally intercepted email delivery. Production Vercel-to-Coolify Better Auth user lookup and JWKS over TLS are verified; real-account signup, email verification, JWT use against protected API routes, browser OAuth, real email delivery, and tenant-flow acceptance remain open.
+Status: the Better Auth frontend, email/password and social auth routes, server-side API token exchange, organization signup, and email-bound invitations are wired in source. Localized checkout snapshots and catalog language paths are covered by API tests. Catalog and order locale migrations are applied on Neon `test` and Coolify Production. Local email/password signup, organization creation, and invitation acceptance were verified using locally intercepted email delivery. Vercel Production has also completed one hosted email/password signup and verification, organization creation/listing, and an authenticated protected API request against Coolify over verified TLS. Hosted restaurant creation, second-account denial, browser OAuth, invitation acceptance, and broader real email delivery remain open.
 
 ## 1. HTTP routes
 
