@@ -1,10 +1,16 @@
 import { expect, it } from "vitest"
-import { parseOptionGroupInput, parseOptionInput } from "./catalog-input"
+import {
+  parseDiscountInput,
+  parseDiscountReferenceInput,
+  parseOptionGroupInput,
+  parseOptionInput,
+} from "./catalog-input"
 
 const tenantId = "11111111-1111-4111-8111-111111111111"
 const productId = "22222222-2222-4222-8222-222222222222"
 const groupId = "33333333-3333-4333-8333-333333333333"
 const optionId = "44444444-4444-4444-8444-444444444444"
+const discountId = "55555555-5555-4555-8555-555555555555"
 
 function form(fields: Record<string, string>) {
   const input = new FormData()
@@ -75,6 +81,85 @@ it.each([
   ).toBeNull()
 })
 
+it("normalizes new discount codes and preserves only supported create fields", () => {
+  expect(
+    parseDiscountInput(
+      form({
+        tenantId,
+        code: " lunch-10 ",
+        name: " Lunch offer ",
+        kind: "FixedAmount",
+        value: "5.25",
+        role: "OrganizationOwner",
+        isActive: "false",
+      })
+    )
+  ).toEqual({
+    tenantId,
+    id: null,
+    code: "LUNCH-10",
+    name: "Lunch offer",
+    kind: "FixedAmount",
+    value: 5.25,
+  })
+})
+
+it("drops browser-supplied discount codes on update because codes are immutable", () => {
+  expect(
+    parseDiscountInput(
+      form({
+        tenantId,
+        id: discountId,
+        code: "REPLACEMENT",
+        name: "Welcome",
+        kind: "Percentage",
+        value: "15",
+      })
+    )
+  ).toEqual({
+    tenantId,
+    id: discountId,
+    code: null,
+    name: "Welcome",
+    kind: "Percentage",
+    value: 15,
+  })
+})
+
+const invalidDiscountFields: Array<Record<string, string>> = [
+  { tenantId: "not-a-uuid" },
+  { id: "not-a-uuid" },
+  { code: " " },
+  { code: "HAS SPACE" },
+  { code: "ÉTÉ" },
+  { code: "x".repeat(33) },
+  { name: " " },
+  { name: "x".repeat(121) },
+  { kind: "Unknown" },
+  { value: "0" },
+  { value: "1.001" },
+  { value: "10000000000" },
+  { kind: "Percentage", value: "100.01" },
+]
+
+it.each(invalidDiscountFields)(
+  "rejects invalid discount fields before any API request: %o",
+  (fields) => {
+    expect(
+      parseDiscountInput(
+        form({
+          tenantId,
+          code: "LUNCH10",
+          name: "Lunch",
+          kind: "FixedAmount",
+          value: "10.00",
+          ...fields,
+        })
+      )
+    ).toBeNull()
+  }
+)
+
 it("parses option create and update fields with a two-decimal fixed price adjustment", () => {
   expect(
     parseOptionInput(
@@ -130,3 +215,20 @@ it.each([
     )
   ).toBeNull()
 })
+
+it("parses only the tenant and discount ID for deactivation", () => {
+  expect(
+    parseDiscountReferenceInput(
+      form({ tenantId, id: discountId, isActive: "true", role: "Manager" })
+    )
+  ).toEqual({ tenantId, id: discountId })
+})
+
+it.each([{ tenantId: "../foreign" }, { id: "invalid" }])(
+  "rejects malformed discount references before deactivation: %o",
+  (fields) => {
+    expect(
+      parseDiscountReferenceInput(form({ tenantId, id: discountId, ...fields }))
+    ).toBeNull()
+  }
+)

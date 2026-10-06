@@ -3,6 +3,8 @@
 import {
   parseArchiveInput,
   parseCategoryInput,
+  parseDiscountInput,
+  parseDiscountReferenceInput,
   parseOptionGroupInput,
   parseOptionInput,
   parseProductInput,
@@ -10,6 +12,8 @@ import {
 import {
   archiveCatalogItem,
   saveCategory,
+  deactivateDiscount,
+  saveDiscount,
   saveOption,
   saveOptionGroup,
   saveProduct,
@@ -44,6 +48,22 @@ export async function saveOptionAction(input: unknown): Promise<CatalogResult> {
   const parsed = parseOptionInput(input)
 
   return parsed ? saveOption(parsed) : { ok: false, error: "invalid" }
+}
+
+export async function saveDiscountAction(
+  input: unknown
+): Promise<CatalogResult> {
+  const parsed = parseDiscountInput(input)
+
+  return parsed ? saveDiscount(parsed) : { ok: false, error: "invalid" }
+}
+
+export async function deactivateDiscountAction(
+  input: unknown
+): Promise<CatalogResult> {
+  const parsed = parseDiscountReferenceInput(input)
+
+  return parsed ? deactivateDiscount(parsed) : { ok: false, error: "invalid" }
 }
 
 export async function archiveCatalogItemAction(

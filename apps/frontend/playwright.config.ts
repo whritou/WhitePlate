@@ -17,7 +17,7 @@ export default defineConfig({
     { name: "restaurant", testMatch: "restaurant-creation.spec.ts" },
     {
       name: "catalog",
-      testMatch: "catalog-management.spec.ts",
+      testMatch: ["catalog-management.spec.ts", "discount-management.spec.ts"],
       dependencies: ["restaurant"],
     },
     {

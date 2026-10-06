@@ -25,6 +25,22 @@ const option = {
   isArchived: false,
   translations: {},
 }
+const fixedDiscount = {
+  id: "66666666-6666-4666-8666-666666666666",
+  code: "LUNCH10",
+  name: "Lunch discount",
+  kind: "FixedAmount",
+  value: 10,
+  isActive: true,
+}
+const percentageDiscount = {
+  id: "77777777-7777-4777-8777-777777777777",
+  code: "WELCOME15",
+  name: "Welcome",
+  kind: "Percentage",
+  value: 15,
+  isActive: false,
+}
 const catalog = {
   tenantId,
   currency: "GBP",
@@ -64,8 +80,57 @@ it("accepts the actual management contract and preserves price, tax, order and c
     products: catalog.products,
     optionGroups: [],
     options: [],
+    discounts: [],
   })
 })
+
+it("validates and preserves active and inactive discount records from the tenant catalog", () => {
+  expect(
+    parseManagedCatalog(
+      { ...catalog, discounts: [fixedDiscount, percentageDiscount] },
+      tenantId
+    )?.discounts
+  ).toEqual([fixedDiscount, percentageDiscount])
+})
+
+it.each([
+  { ...fixedDiscount, id: "bad" },
+  { ...fixedDiscount, code: "lowercase" },
+  { ...fixedDiscount, code: "BAD CODE" },
+  { ...fixedDiscount, code: "X".repeat(33) },
+  { ...fixedDiscount, name: " " },
+  { ...fixedDiscount, kind: "Unrecognized" },
+  { ...fixedDiscount, value: 0 },
+  { ...fixedDiscount, value: 1.001 },
+  { ...percentageDiscount, value: 100.01 },
+  { ...fixedDiscount, value: 10000000000 },
+  { ...fixedDiscount, isActive: "true" },
+])(
+  "rejects malformed discount records instead of trusting catalog JSON: %o",
+  (discount) => {
+    expect(
+      parseManagedCatalog({ ...catalog, discounts: [discount] }, tenantId)
+    ).toBeNull()
+  }
+)
+
+it("rejects catalog responses without the required discount collection", () => {
+  const withoutDiscounts = Object.fromEntries(
+    Object.entries(catalog).filter(([key]) => key !== "discounts")
+  )
+
+  expect(parseManagedCatalog(withoutDiscounts, tenantId)).toBeNull()
+})
+
+it.each([
+  [fixedDiscount, { ...percentageDiscount, id: fixedDiscount.id }],
+  [fixedDiscount, { ...percentageDiscount, code: fixedDiscount.code }],
+])(
+  "rejects duplicate discount identities or codes in one catalog",
+  (...discounts) => {
+    expect(parseManagedCatalog({ ...catalog, discounts }, tenantId)).toBeNull()
+  }
+)
 
 it("parses option groups and options only when their parent relationships belong to the tenant catalog", () => {
   const managed = { ...catalog, optionGroups: [optionGroup], options: [option] }
@@ -77,6 +142,7 @@ it("parses option groups and options only when their parent relationships belong
     products: catalog.products,
     optionGroups: [optionGroup],
     options: [option],
+    discounts: [],
   })
 })
 

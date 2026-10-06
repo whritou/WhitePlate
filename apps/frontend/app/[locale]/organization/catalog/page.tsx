@@ -10,6 +10,7 @@ import { CategoryForm } from "@/components/organization/category-form"
 import { ProductForm } from "@/components/organization/product-form"
 import { ArchiveCatalogButton } from "@/components/organization/archive-catalog-button"
 import { OptionGroupsEditor } from "@/components/organization/option-groups-editor"
+import { DiscountsEditor } from "@/components/organization/discounts-editor"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -106,6 +107,12 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
             />
           </CardContent>
         </Card>
+
+        <DiscountsEditor
+          tenantId={catalog.tenantId}
+          currency={catalog.currency}
+          discounts={catalog.discounts}
+        />
 
         {categories.length === 0 && (
           <p className="text-muted-foreground">{t("empty")}</p>

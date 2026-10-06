@@ -20,6 +20,14 @@ export type CatalogOption = CatalogTranslationData["options"][number] & {
   priceAdjustment: number
   sortOrder: number
 }
+export type CatalogDiscount = {
+  id: string
+  code: string
+  name: string
+  kind: "FixedAmount" | "Percentage"
+  value: number
+  isActive: boolean
+}
 export type ManagedCatalog = {
   tenantId: string
   currency: string
@@ -27,6 +35,7 @@ export type ManagedCatalog = {
   products: CatalogProduct[]
   optionGroups: CatalogOptionGroup[]
   options: CatalogOption[]
+  discounts: CatalogDiscount[]
 }
 export type CatalogResult =
   | { ok: true }
@@ -65,6 +74,15 @@ export type OptionInput = {
   priceAdjustment: number
   sortOrder: number
 }
+export type DiscountInput = {
+  tenantId: string
+  id: string | null
+  code: string | null
+  name: string
+  kind: CatalogDiscount["kind"]
+  value: number
+}
+export type DiscountReferenceInput = { tenantId: string; id: string }
 export type CatalogEntityType =
   "categories" | "products" | "option-groups" | "options"
 export type ArchiveInput = {
@@ -100,6 +118,16 @@ export type OptionGroupsEditorProps = {
   optionGroups: CatalogOptionGroup[]
   options: CatalogOption[]
   parentArchived: boolean
+}
+export type DiscountFormProps = {
+  tenantId: string
+  currency: string
+  discount?: CatalogDiscount
+}
+export type DiscountsEditorProps = {
+  tenantId: string
+  currency: string
+  discounts: CatalogDiscount[]
 }
 export type ArchiveButtonProps = ArchiveInput & { name: string }
 export type CatalogSubmit = (event: FormEvent<HTMLFormElement>) => void

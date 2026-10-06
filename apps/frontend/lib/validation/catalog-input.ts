@@ -2,6 +2,8 @@ import { isUuid } from "./common"
 import type {
   ArchiveInput,
   CategoryInput,
+  DiscountInput,
+  DiscountReferenceInput,
   OptionGroupInput,
   OptionInput,
   ProductInput,
@@ -144,6 +146,53 @@ export function parseOptionInput(input: unknown): OptionInput | null {
     return null
 
   return { tenantId, id, groupId, name, priceAdjustment, sortOrder }
+}
+
+export function parseDiscountInput(input: unknown): DiscountInput | null {
+  if (!(input instanceof FormData)) return null
+
+  const tenantId = input.get("tenantId")
+  const id = input.get("id")
+  const rawCode = input.get("code")
+  const rawName = input.get("name")
+  const rawKind = input.get("kind")
+  const kind =
+    rawKind === "FixedAmount" || rawKind === "Percentage" ? rawKind : null
+  const maximum = kind === "Percentage" ? 100 : 9999999999.99
+  const value = decimal(input.get("value"), maximum)
+  const name = typeof rawName === "string" ? rawName.trim() : ""
+  const code =
+    id !== null
+      ? null
+      : typeof rawCode === "string" &&
+          /^[A-Za-z0-9-]{1,32}$/.test(rawCode.trim())
+        ? rawCode.trim().toUpperCase()
+        : null
+
+  if (
+    !isUuid(tenantId) ||
+    (id !== null && !isUuid(id)) ||
+    (!id && !code) ||
+    !name ||
+    name.length > 120 ||
+    !kind ||
+    value === null ||
+    value <= 0
+  )
+    return null
+
+  return { tenantId, id, code, name, kind, value }
+}
+
+export function parseDiscountReferenceInput(
+  input: unknown
+): DiscountReferenceInput | null {
+  if (!(input instanceof FormData)) return null
+
+  const tenantId = input.get("tenantId")
+  const id = input.get("id")
+
+  return isUuid(tenantId) && isUuid(id) ? { tenantId, id } : null
 }
 
 function integer(
