@@ -1,5 +1,6 @@
 import type { ReactNode } from "react"
 import { Skeleton } from "@/components/ui/skeleton"
+import { OrderKanbanSkeleton } from "@/components/orders/order-kanban-skeleton"
 import type {
   WorkspaceLoadingPage,
   WorkspacePageSkeletonProps,
@@ -271,17 +272,13 @@ function OrdersSkeleton() {
       </Region>
 
       <Region name="orders-filters" className="flex flex-wrap gap-2">
-        {Array.from({ length: 5 }, (_, index) => (
-          <Skeleton key={index} className="h-10 w-28 rounded-lg" />
+        {Array.from({ length: 6 }, (_, index) => (
+          <Skeleton key={index} className="h-12 w-28 rounded-md" />
         ))}
       </Region>
 
-      <Region name="orders-list" className="grid gap-3">
-        <CardSkeleton className="min-h-36" lines={2} />
-
-        <CardSkeleton className="min-h-36" lines={2} />
-
-        <CardSkeleton className="min-h-36" lines={2} />
+      <Region name="orders-list" className="grid gap-4">
+        <OrderKanbanSkeleton />
       </Region>
     </>
   )

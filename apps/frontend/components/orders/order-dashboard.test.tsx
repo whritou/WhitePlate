@@ -225,6 +225,25 @@ it("shows the signed-in restaurant role and names each order action accessibly",
   expect(html).toContain('aria-label="Start preparing order 22222222"')
 })
 
+it("groups orders into named status lanes and exposes the filters as tabs", () => {
+  const html = renderToStaticMarkup(createElement(OrderDashboard, props))
+
+  expect(html).toContain('role="tablist"')
+  expect(html).toContain('role="tab"')
+  expect(html).toContain('aria-selected="true"')
+  for (const status of [
+    "Pending",
+    "Preparing",
+    "Ready",
+    "Completed",
+    "Cancelled",
+  ]) {
+    expect(html).toContain(`data-order-lane="${status}"`)
+  }
+
+  expect(html).toContain('data-order-id="22222222-2222-4222-8222-222222222222"')
+})
+
 it("hides cached order filters and tickets after restaurant access is revoked", () => {
   useDashboard.mockReturnValue({
     page: null,

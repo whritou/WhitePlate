@@ -76,6 +76,27 @@ export type OrderTicketProps = {
   locale: string
   pending: UpdateOrderStatusInput | null
   onUpdate: (input: Omit<UpdateOrderStatusInput, "tenantId">) => Promise<void>
+  dragHandle?: import("react").ReactNode
+  headingLevel?: "h2" | "h3"
+}
+
+export type OrderKanbanProps = {
+  orders: OrderSummary[]
+  role: RestaurantRole
+  locale: string
+  pending: UpdateOrderStatusInput | null
+  onUpdate: OrderTicketProps["onUpdate"]
+}
+
+export type OrderDragState = {
+  order: OrderSummary
+  pointerId: number
+  startX: number
+  startY: number
+  x: number
+  y: number
+  active: boolean
+  destination: string | null
 }
 
 export type OrderRealtimeProps = {

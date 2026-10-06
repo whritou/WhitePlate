@@ -1,5 +1,25 @@
 # Documentation review baseline — 2026-09-28
 
+## Orders kanban — 2026-10-06
+
+Branch `feat/orders-kanban`, [issue #30](https://github.com/whritou/WhitePlate/issues/30): replaces the staff ticket grid with five status lanes and shadcn-compatible Base UI status tabs, inspired by the requested [kanban reference](https://shadcnuikit.com/blocks/application-ui/kanban-board). Mouse/touch handles and existing next-step buttons call the same versioned mutation; stale, skipped, pending and role-disallowed drops are rejected. Saved order snapshots, REST authority, tenant/account query isolation, filter/cursor navigation, error feedback and SignalR refresh behavior remain in place. Counts describe the loaded page. Kitchen controls meet 48px targets, lanes wrap without page overflow, and keyboard focus returns to a moved ticket. Initial and route skeletons match the lanes; both translation catalogs are updated. The canonical kitchen design now records this approved layout and behavior.
+
+| Check from `apps/frontend` unless noted | Actual result |
+| --- | --- |
+| `npm run test` | Passed: 45 files, 350 tests, including drop validation and dashboard tabs/lane rendering. |
+| `npm run lint` | Passed. An initial run found two browser-test spacing errors and four unused imports; corrected before the passing run. |
+| `npm run typecheck` | Passed. |
+| `npm run format:check` | Passed across frontend TypeScript/TSX. |
+| `WHITEPLATE_ACCEPTANCE_URL=http://localhost:3010 npm run test:browser -- --project=orders-kanban --project=design-system --reporter=line --timeout=30000` | Passed: 17 tests (nine kanban, eight design/sign-in), four opt-in storefront cases skipped. Includes mouse/touch, allowed/invalid drops, rejected saves, pending guards, Escape, terminal actions, keyboard tabs/focus, both locales/themes and widths 320–1440px. Existing design fixture rendered button/badge contrast minima: 5.66:1 light, 6.75:1 dark. |
+| `node node_modules/next/dist/bin/next build --webpack` | Passed compilation, TypeScript and generation of all 41 pages with process-only inert HTTPS/auth/provider placeholders and an unavailable loopback database. Initial sandboxed attempt failed with a Webpack cache-write EPERM; permitted rerun passed. Better Auth logged schema-connection diagnostics for the intentionally unavailable database. |
+| Production server on temporary localhost port 3011, GET `/en/orders-kanban-test` and `/fr/orders-kanban-test` | Both returned 404. Temporary server stopped; existing development server retained. |
+| `py -3 docs/design-system/verify.py` from root | Passed: 114 contrast pairs, 10 local document link scans and palette/table parity. |
+| `git diff --check` from root | Passed; only CRLF conversion notices. |
+
+`npm` is absent from the session PATH; npm scripts were invoked through the installed npm 11.17.0 CLI using Node 24.19.0. The first focused tests failed before the resolver/fixture existed. Browser failures identified an overly broad alert assertion (matching Next's route announcer), offscreen target handling in the test, and lost keyboard focus; the final tests target the actual conflict copy, scroll the intended lane and verify focus restoration.
+
+Registry certificate validation prevented installing dnd-kit or retrieving the shadcn tabs template. No dependency or lockfile change and no TLS bypass were introduced: drag state uses native Pointer Events; the shared tabs wrapper uses installed Base UI and WhitePlate tokens, consistent with the repository's shadcn component convention. No temporary visual deviation remains in this scope. The fixture mutates fixed in-memory orders only; the database-backed staff suite and hosted acceptance were not repeated. Its selectors were updated from filter links to tabs for a future guarded run. No API/schema, authentication or deployment changes were made.
+
 ## Design system runtime adoption — 2026-10-06
 
 Branch `feat/design-system-adoption`, kanban card **Adopt WhitePlate design tokens and shared UI primitives**: applied the canonical theme and shared component contracts to auth, organization/catalog/team/settings, kitchen orders and storefront/checkout. After inspecting the first rendering, the user requested neutral light surfaces, stone dark surfaces and a sage dark accent. [Design system v1.1.0](design-system/README.md), tokens, static overview and runtime CSS now agree. Light primary buttons retain blue; dark primary buttons use sage with dark text. Shared controls use minimum 44px targets, large actions 48px, opaque focus and readable disabled states. Cards/overlays, semantic badges/alerts, navigation, wrapping labels and kitchen grid use the same rules. Removed local control paint/sizing overrides and ordinary card shadows.

@@ -1,41 +1,22 @@
 "use client"
 
-import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import { Skeleton } from "@/components/ui/skeleton"
 import { useOrderDashboard } from "@/hooks/use-order-dashboard"
 import { Link, useRouter } from "@/i18n/navigation"
-import { ORDER_STATUSES } from "@/lib/order-dashboard"
+import { OrderStatusTabs } from "./order-status-tabs"
+import { OrderDashboardContent } from "./order-dashboard-content"
 import { buildOrdersHref } from "@/lib/orders/navigation"
 import type { OrderDashboardProps } from "@/types/orders"
 import { useTranslations } from "next-intl"
 import { OrderRealtimeConnection } from "./order-realtime-connection"
-import { OrderTicket } from "./order-ticket"
 
 export function OrderDashboard(props: OrderDashboardProps) {
-  const { tenantId, tenantName, role, locale, selectedStatus, hubUrl } = props
+  const { tenantId, tenantName, role, selectedStatus, hubUrl } = props
   const t = useTranslations("KitchenOrders")
   const router = useRouter()
-  const {
-    page,
-    loadError,
-    isStale,
-    isInitialLoading,
-    isFetching,
-    pending,
-    message,
-    refresh,
-    retry,
-    updateStatus,
-  } = useOrderDashboard(props)
+  const dashboard = useOrderDashboard(props)
+  const { page, loadError, isInitialLoading, isFetching, refresh, pending } =
+    dashboard
 
   return (
     <div className="grid gap-5">
@@ -96,143 +77,20 @@ export function OrderDashboard(props: OrderDashboardProps) {
         aria-busy={isInitialLoading}
         className="grid gap-5"
       >
-        {loadError !== "forbidden" && (
-          <nav aria-label={t("filterLabel")} className="flex flex-wrap gap-2">
-            {[null, ...ORDER_STATUSES].map((status) => (
-              <Button
-                key={status ?? "all"}
-                variant={selectedStatus === status ? "default" : "outline"}
-                size="lg"
-                render={
-                  <Link
-                    href={buildOrdersHref(tenantId, status, null)}
-                    aria-current={
-                      selectedStatus === status ? "page" : undefined
-                    }
-                  />
-                }
-              >
-                {status === null ? t("statuses.all") : t(`statuses.${status}`)}
-              </Button>
-            ))}
-          </nav>
-        )}
-
-        {loadError && (
-          <Alert
-            variant={isStale ? "warning" : "destructive"}
-            role={isStale ? "status" : "alert"}
-          >
-            <AlertDescription>
-              {isStale ? t("stale") : t(`errors.${loadError}`)}
-
-              <Button
-                variant="link"
-                onClick={() =>
-                  loadError === "invalid" ? router.refresh() : void retry()
-                }
-              >
-                {t("retry")}
-              </Button>
-            </AlertDescription>
-          </Alert>
-        )}
-
-        {message && (
-          <Alert variant="destructive" role="alert">
-            <AlertDescription>{t(message)}</AlertDescription>
-          </Alert>
-        )}
-
-        {isInitialLoading ? (
-          <OrderLoadingSkeleton />
-        ) : page?.items.length === 0 ? (
-          <Card className="rounded-lg border border-dashed px-6 py-12 text-center">
-            <CardHeader className="px-0">
-              <CardTitle className="text-xl font-semibold">
-                <h2>{t("emptyTitle")}</h2>
-              </CardTitle>
-
-              <CardDescription className="text-sm">
-                {t("emptyDescription")}
-              </CardDescription>
-            </CardHeader>
-          </Card>
+        {loadError === "forbidden" || loadError === "unauthorized" ? (
+          <OrderDashboardContent props={props} dashboard={dashboard} />
         ) : (
-          page && (
-            <>
-              <ol className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,18rem),1fr))] gap-4">
-                {page.items.map((order) => (
-                  <li key={order.id}>
-                    <OrderTicket
-                      order={order}
-                      role={role}
-                      locale={locale}
-                      pending={pending}
-                      onUpdate={updateStatus}
-                    />
-                  </li>
-                ))}
-              </ol>
-
-              {page.nextCursor && (
-                <div className="flex justify-center">
-                  <Button
-                    variant="outline"
-                    size="lg"
-                    render={
-                      <Link
-                        href={buildOrdersHref(
-                          tenantId,
-                          selectedStatus,
-                          page.nextCursor
-                        )}
-                      />
-                    }
-                  >
-                    {t("loadOlder")}
-                  </Button>
-                </div>
-              )}
-            </>
-          )
+          <OrderStatusTabs
+            selectedStatus={selectedStatus}
+            disabled={pending !== null}
+            onStatusChange={(status) =>
+              router.push(buildOrdersHref(tenantId, status, null))
+            }
+          >
+            <OrderDashboardContent props={props} dashboard={dashboard} />
+          </OrderStatusTabs>
         )}
       </section>
     </div>
-  )
-}
-
-function OrderLoadingSkeleton() {
-  return (
-    <ol
-      aria-hidden="true"
-      className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,18rem),1fr))] gap-4"
-    >
-      {Array.from({ length: 3 }, (_, index) => (
-        <li key={index}>
-          <Card className="rounded-lg px-4 py-5">
-            <CardHeader className="flex flex-row items-center justify-between gap-4 px-0">
-              <div className="grid w-full max-w-sm gap-3">
-                <div className="flex gap-2">
-                  <Skeleton className="h-5 w-32" />
-
-                  <Skeleton className="h-5 w-20 rounded-full" />
-                </div>
-
-                <Skeleton className="h-4 w-40" />
-              </div>
-
-              <Skeleton className="h-5 w-20" />
-            </CardHeader>
-
-            <CardContent className="grid gap-3 px-0">
-              <Skeleton className="h-px w-full" />
-
-              <Skeleton className="h-4 w-2/3" />
-            </CardContent>
-          </Card>
-        </li>
-      ))}
-    </ol>
   )
 }
