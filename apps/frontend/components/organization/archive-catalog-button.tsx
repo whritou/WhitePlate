@@ -6,7 +6,17 @@ import { archiveCatalogItemAction } from "@/actions/catalog"
 import { ResultMessage } from "@/components/auth/result-message"
 import { Button } from "@/components/ui/button"
 import { useCatalogForm } from "./use-catalog-form"
-import type { ArchiveButtonProps } from "@/types/catalog-management"
+import type {
+  ArchiveButtonProps,
+  CatalogEntityType,
+} from "@/types/catalog-management"
+
+const confirmationMessages: Record<CatalogEntityType, string> = {
+  categories: "confirmCategoryArchive",
+  products: "confirmProductArchive",
+  "option-groups": "confirmOptionGroupArchive",
+  options: "confirmOptionArchive",
+}
 
 export function ArchiveCatalogButton({
   tenantId,
@@ -42,14 +52,7 @@ export function ArchiveCatalogButton({
 
       <input type="hidden" name="entityType" value={entityType} />
 
-      <p className="text-sm">
-        {t(
-          entityType === "categories"
-            ? "confirmCategoryArchive"
-            : "confirmProductArchive",
-          { name }
-        )}
-      </p>
+      <p className="text-sm">{t(confirmationMessages[entityType], { name })}</p>
 
       <fieldset disabled={pending} className="flex gap-3">
         <Button type="submit" variant="destructive">

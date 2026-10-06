@@ -9,6 +9,7 @@ import { Link } from "@/i18n/navigation"
 import { CategoryForm } from "@/components/organization/category-form"
 import { ProductForm } from "@/components/organization/product-form"
 import { ArchiveCatalogButton } from "@/components/organization/archive-catalog-button"
+import { OptionGroupsEditor } from "@/components/organization/option-groups-editor"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -197,6 +198,20 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
                                 />
                               </CardContent>
                             )}
+
+                            <CardContent>
+                              <OptionGroupsEditor
+                                tenantId={catalog.tenantId}
+                                currency={catalog.currency}
+                                productId={product.id}
+                                productName={product.name}
+                                optionGroups={catalog.optionGroups}
+                                options={catalog.options}
+                                parentArchived={
+                                  product.isArchived || category.isArchived
+                                }
+                              />
+                            </CardContent>
                           </Card>
                         </li>
                       ))}

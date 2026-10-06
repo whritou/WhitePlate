@@ -1,10 +1,13 @@
 import { expect, test } from "@playwright/test"
 import { mkdir, writeFile } from "node:fs/promises"
+import { requireAcceptanceDatabase } from "./acceptance-environment"
 
 test("owner creates a restaurant and receives a localized duplicate-subdomain error", async ({
   page,
   context,
 }) => {
+  requireAcceptanceDatabase()
+
   const email = process.env.WHITEPLATE_DEV_EMAIL
   const password = process.env.WHITEPLATE_DEV_PASSWORD
 

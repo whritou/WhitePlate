@@ -3,6 +3,8 @@ import { whitePlateApi } from "@/lib/api"
 import {
   archiveCatalogItemAction,
   saveCategoryAction,
+  saveOptionAction,
+  saveOptionGroupAction,
   saveProductAction,
 } from "./catalog"
 
@@ -14,6 +16,8 @@ vi.mock("@/lib/api", () => ({
 const tenantId = "11111111-1111-4111-8111-111111111111"
 const categoryId = "22222222-2222-4222-8222-222222222222"
 const productId = "33333333-3333-4333-8333-333333333333"
+const optionGroupId = "44444444-4444-4444-8444-444444444444"
+const optionId = "55555555-5555-4555-8555-555555555555"
 
 function form(fields: Record<string, string>) {
   const input = new FormData()
@@ -124,6 +128,104 @@ it("updates product availability without attempting to move categories", async (
   )
 })
 
+it("creates option groups with only the supported API request fields", async () => {
+  vi.mocked(whitePlateApi.post).mockResolvedValue({
+    ok: true,
+    status: 201,
+    data: {},
+  })
+  expect(
+    await saveOptionGroupAction(
+      form({
+        tenantId,
+        productId,
+        name: " Size ",
+        minimumSelections: "0",
+        maximumSelections: "2",
+        sortOrder: "1",
+        role: "OrganizationOwner",
+      })
+    )
+  ).toEqual({ ok: true })
+  expect(whitePlateApi.post).toHaveBeenCalledWith(
+    `/api/v1/tenants/${tenantId}/products/${productId}/option-groups`,
+    { name: "Size", minimumSelections: 0, maximumSelections: 2, sortOrder: 1 }
+  )
+})
+
+it("updates option groups without sending resource identity in the body", async () => {
+  vi.mocked(whitePlateApi.put).mockResolvedValue({
+    ok: true,
+    status: 200,
+    data: {},
+  })
+  expect(
+    await saveOptionGroupAction(
+      form({
+        tenantId,
+        id: optionGroupId,
+        productId,
+        name: "Meal",
+        minimumSelections: "1",
+        maximumSelections: "1",
+        sortOrder: "0",
+      })
+    )
+  ).toEqual({ ok: true })
+  expect(whitePlateApi.put).toHaveBeenCalledWith(
+    `/api/v1/tenants/${tenantId}/option-groups/${optionGroupId}`,
+    { name: "Meal", minimumSelections: 1, maximumSelections: 1, sortOrder: 0 }
+  )
+})
+
+it("creates fixed-price options with only the supported API request fields", async () => {
+  vi.mocked(whitePlateApi.post).mockResolvedValue({
+    ok: true,
+    status: 201,
+    data: {},
+  })
+  expect(
+    await saveOptionAction(
+      form({
+        tenantId,
+        groupId: optionGroupId,
+        name: " Large ",
+        priceAdjustment: "1.25",
+        sortOrder: "2",
+        currency: "GBP",
+      })
+    )
+  ).toEqual({ ok: true })
+  expect(whitePlateApi.post).toHaveBeenCalledWith(
+    `/api/v1/tenants/${tenantId}/option-groups/${optionGroupId}/options`,
+    { name: "Large", priceAdjustment: 1.25, sortOrder: 2 }
+  )
+})
+
+it("updates options using only the API's mutable fields", async () => {
+  vi.mocked(whitePlateApi.put).mockResolvedValue({
+    ok: true,
+    status: 200,
+    data: {},
+  })
+  expect(
+    await saveOptionAction(
+      form({
+        tenantId,
+        id: optionId,
+        groupId: optionGroupId,
+        name: "Extra",
+        priceAdjustment: "0",
+        sortOrder: "0",
+      })
+    )
+  ).toEqual({ ok: true })
+  expect(whitePlateApi.put).toHaveBeenCalledWith(
+    `/api/v1/tenants/${tenantId}/options/${optionId}`,
+    { name: "Extra", priceAdjustment: 0, sortOrder: 0 }
+  )
+})
+
 it.each([
   { tenantId: "../foreign" },
   { categoryId: "bad" },
@@ -169,7 +271,7 @@ it("rejects file fields and unsupported archive entities", async () => {
   expect(whitePlateApi.delete).not.toHaveBeenCalled()
 })
 
-it.each(["categories", "products"])(
+it.each(["categories", "products", "option-groups", "options"] as const)(
   "archives only a validated %s resource in its tenant",
   async (entityType) => {
     vi.mocked(whitePlateApi.delete).mockResolvedValue({

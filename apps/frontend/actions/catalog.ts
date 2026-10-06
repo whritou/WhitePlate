@@ -3,11 +3,15 @@
 import {
   parseArchiveInput,
   parseCategoryInput,
+  parseOptionGroupInput,
+  parseOptionInput,
   parseProductInput,
 } from "@/lib/validation/catalog-input"
 import {
   archiveCatalogItem,
   saveCategory,
+  saveOption,
+  saveOptionGroup,
   saveProduct,
 } from "@/services/catalog-management"
 import type { CatalogResult } from "@/types/catalog-management"
@@ -26,6 +30,20 @@ export async function saveProductAction(
   const parsed = parseProductInput(input)
 
   return parsed ? saveProduct(parsed) : { ok: false, error: "invalid" }
+}
+
+export async function saveOptionGroupAction(
+  input: unknown
+): Promise<CatalogResult> {
+  const parsed = parseOptionGroupInput(input)
+
+  return parsed ? saveOptionGroup(parsed) : { ok: false, error: "invalid" }
+}
+
+export async function saveOptionAction(input: unknown): Promise<CatalogResult> {
+  const parsed = parseOptionInput(input)
+
+  return parsed ? saveOption(parsed) : { ok: false, error: "invalid" }
 }
 
 export async function archiveCatalogItemAction(
