@@ -1,7 +1,9 @@
 # Organization Workspace Shell Design
 
-**Date:** 2026-10-06  
-**Status:** Awaiting user review  
+**Date:** 2026-10-06
+
+**Status:** Awaiting user review
+
 **Kanban card:** Add a responsive sidebar and app bar to the organization workspace
 
 ## Context and outcome
