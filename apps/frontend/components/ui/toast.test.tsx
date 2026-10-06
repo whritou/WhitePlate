@@ -4,7 +4,7 @@ import { expect, it, vi } from "vitest"
 import { Toast } from "@base-ui/react/toast"
 import english from "@/messages/en.json"
 import french from "@/messages/fr.json"
-import { WorkspaceToastList } from "./toast"
+import { WorkspaceToastList, WorkspaceToastViewport } from "./toast"
 
 vi.mock("next-intl", () => ({
   useTranslations: () => (key: string) =>
@@ -37,6 +37,17 @@ it("renders successful notices in a polite, labelled region with a named dismiss
   expect(markup).toContain('aria-label="Dismiss notification"')
   expect(markup).toContain("Dismiss notification")
   expect(markup).toContain('type="button"')
+})
+
+it("keeps the mobile notification region label visually hidden", () => {
+  const markup = renderToStaticMarkup(
+    createElement(Toast.Provider, null, createElement(WorkspaceToastViewport))
+  )
+
+  expect(markup).toContain('aria-labelledby="workspace-toast-label"')
+  expect(markup).toContain(
+    '<span class="sr-only" id="workspace-toast-label">Workspace notifications</span>'
+  )
 })
 
 it("provides matching translated notification and dismiss labels", () => {
