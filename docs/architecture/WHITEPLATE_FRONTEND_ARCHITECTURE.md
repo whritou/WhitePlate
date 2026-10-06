@@ -119,6 +119,8 @@ Safe errors have English/French messages. The API owns availability, option rule
 
 ## Styling and UI conventions
 
+The canonical [design system](../design-system/README.md) defines the target Porcelaine et encre identity for future UI changes, with structured light/dark tokens, component contracts, screen recipes and a static reference overview. Root and frontend AGENTS require reading and following it. The current runtime still uses its existing orange/stone palette, Arial font stack and base-lyra dimensions; the design reference is not imported by the application. Runtime adoption is separate UI work and must keep the reference, shared primitives and CSS aligned.
+
 `app/globals.css` imports Tailwind, `tw-animate-css`, and shadcn styles, and maps CSS tokens through `@theme inline`. Body and heading fonts use local system stacks; production builds do not fetch Google-hosted font files. PostCSS uses `@tailwindcss/postcss`. There is no `tailwind.config.ts`; do not copy Tailwind 3 setup instructions into this app.
 
 Shared controls use Base UI. `components.json` records the `base-lyra` style and aliases. UI modules use `@/lib/utils`, which re-exports `cn`. Inspect each component API before composing it; see [implementation conventions](frontend-conventions.md).

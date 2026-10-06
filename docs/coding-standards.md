@@ -10,6 +10,8 @@ Generated files are not source. Do not edit `node_modules`, `.next`, `bin`, `obj
 
 ## Frontend
 
+For every UI change, follow the [design system](design-system/README.md), including its semantic tokens, component states, accessibility and delivery checklist. It defines the target appearance; the existing CSS has not yet adopted the new palette and dimensions. Introduce changes within the requested UI scope and document deviations rather than adding a competing local style.
+
 Follow the implemented [frontend conventions](architecture/frontend-conventions.md) for module ownership, dedicated types, thin actions, server services, request adapters and query lifecycle. ESLint and CI enforce the mechanical boundaries; review still needs to assess responsibility, accessibility and authorization.
 
 - Use strict TypeScript and explicit boundary types. Validate data received across network/storage boundaries; TypeScript alone does not validate JSON or guarantee C# interoperability.

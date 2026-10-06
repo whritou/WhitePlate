@@ -125,6 +125,8 @@ For later schema changes, run `dotnet ef migrations add NAME --project apps/api/
 
 ## Validation commands
 
+Every UI task must first read and follow the [design system](design-system/README.md) and its delivery checklist. For changes to the reference itself, run `py -3 docs/design-system/verify.py` from the repository root to check defined contrast pairs, palette-table parity and local file links. `--render` also regenerates its static SVG overview from tokens. This documentation tooling does not validate rendered application accessibility or migrate runtime CSS.
+
 From `apps/frontend`:
 
 ```sh

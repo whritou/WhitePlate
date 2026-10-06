@@ -1,5 +1,19 @@
 # Documentation review baseline — 2026-09-28
 
+## WhitePlate design system reference — 2026-10-06
+
+Issue [#28](https://github.com/whritou/WhitePlate/issues/28), branch `docs/whiteplate-design-system`: added the canonical [Porcelaine et encre design system](design-system/README.md), structured light/dark tokens, a generated static SVG reference and a standard-library Python verifier. Root/frontend AGENTS and the documentation entry points now require the reference for every UI change. The design covers management, kitchen orders, public menu/checkout, product-specific recovery states, localization and limits for future tenant branding. It explicitly distinguishes the target from the current orange/stone CSS, Arial stack and Base UI dimensions. No production UI, package, API or database changed. Adoption in runtime CSS/primitives and rendered browser accessibility remain future UI work.
+
+| Check | Actual result |
+| --- | --- |
+| `py -3 docs/design-system/verify.py` from the repository root | Passed: 114 defined color-pair checks in light/dark, 10 documentation file-link scans and Markdown/JSON palette parity. Lowest normal-text pair: light muted-foreground on secondary, 5.15:1. Lowest contour/focus pair: light input on secondary, 3.12:1. |
+| `py -3 docs/design-system/verify.py --render` | Passed; regenerated `overview.svg` from canonical tokens. |
+| In-memory Python verifier probes (`py -3 -B -`) | Passed known black/white 21:1 and white/white 1:1 ratios; an injected primary label matching its background correctly failed validation. Source tokens remained unchanged. |
+| Button/badge text-on-fill contrast review after user feedback | Added a measured table for all specified button fills/hover and five order-status badges. Primary labels are 8.81:1 light / 8.84:1 dark; status badges range from 5.31:1 to 9.13:1. Disabled labels retain contrast; translucent runtime styles must be replaced during adoption. The expanded verifier also checks semantic text on page/card/popover and alert-body text on tinted surfaces. |
+| Static overview viewed at `http://127.0.0.1:8765/overview.svg` with full-page browser capture | Inspected both themes: palette, catalogue selection, focused field, primary action and kitchen ticket labels fit their surfaces. This is a design reference, not production UI acceptance. |
+| `git diff --check` | Passed; only Git line-ending conversion warnings for existing Windows-checkout files. |
+| Frontend lint/typecheck/format/build/tests and API suite | Not run: application source/configuration, dependencies and runtime behavior are unchanged. These checks remain required as appropriate for subsequent UI adoption; the existing formatting baseline is not waived. |
+
 ## Coolify PostgreSQL migration preparation — 2026-10-05
 
 Issue #17, branch `chore/coolify-postgresql-hosting`: the user approved one hosted development stack, empty Coolify business/auth schemas and retaining Vercel. Neon/local/Preview settings are preserved; a second dev stack is deferred. Added explicit proxy-owned HTTPS redirection, server-only PostgreSQL CA verification with rejection of conflicting URL SSL settings, a curl-capable API image, settings examples and a deployment/rollback runbook. Replaced the concrete local-test password in `.env.example` with a placeholder; real local credentials remain outside source.
