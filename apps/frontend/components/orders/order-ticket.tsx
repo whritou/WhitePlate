@@ -1,6 +1,13 @@
 "use client"
 
-import { Clock, CookingPot, Check, CheckCheck, X } from "lucide-react"
+import {
+  ArrowRight,
+  Clock,
+  CookingPot,
+  Check,
+  CheckCheck,
+  X,
+} from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -32,6 +39,8 @@ export function OrderTicket({
   locale,
   pending,
   onUpdate,
+  dragHandle,
+  headingLevel: Heading = "h2",
 }: OrderTicketProps) {
   const t = useTranslations("KitchenOrders")
   const total = new Intl.NumberFormat(locale, {
@@ -46,15 +55,20 @@ export function OrderTicket({
   const { variant, Icon } = statusPresentation[order.status]
 
   return (
-    <article lang={order.menuLocale ?? undefined}>
+    <article
+      data-order-id={order.id}
+      tabIndex={-1}
+      className="rounded-lg outline-none focus-visible:outline-2 focus-visible:outline-ring"
+      lang={order.menuLocale ?? undefined}
+    >
       <Card>
         <CardHeader className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <div className="flex flex-wrap items-center gap-2">
               <CardTitle className="text-lg font-semibold">
-                <h2>
+                <Heading>
                   {t("orderReference", { reference: order.id.slice(0, 8) })}
-                </h2>
+                </Heading>
               </CardTitle>
 
               <Badge variant={variant}>
@@ -71,6 +85,8 @@ export function OrderTicket({
           </div>
 
           <p className="font-semibold tabular-nums">{total}</p>
+
+          {dragHandle}
         </CardHeader>
 
         <CardContent>
@@ -120,6 +136,8 @@ export function OrderTicket({
                 {pending?.orderId === order.id && pending.status === status
                   ? t("updating")
                   : t(`actions.${status}`)}
+
+                {status !== "Cancelled" && <ArrowRight aria-hidden="true" />}
               </Button>
             ))}
           </CardFooter>

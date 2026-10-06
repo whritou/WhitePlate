@@ -46,7 +46,7 @@ apps/frontend/
   lib/query/                 # Per-instance TanStack Query client factory
   lib/state/                 # Generic vanilla Zustand store factory and tenant selection state
   lib/validation/            # Runtime input and response parsers
-  lib/orders/                # SignalR lifecycle and navigation helpers
+  lib/orders/                # SignalR, navigation and validated kanban drops
   lib/checkout/               # Cart, immutable retry payload and receipt validation
   lib/utils.ts               # Re-exports cn from the cn package
   public/                    # Placeholder
@@ -103,9 +103,9 @@ The team route loads organization members and invitation summaries through serve
 
 ## Workspace loading and refresh states
 
-Each organization route has a localized App Router fallback shaped for that page: the overview reserves restaurant-order, menu-setting, and organization groups; team reserves roster, invitation status, invite-form, and restaurant areas; restaurant creation and organization signup show their forms; catalog and menu-language pages reserve their editors; settings shows its rename form; and orders show status filters and ticket cards. The overview fallback lives under the `(overview)` route group so it cannot cover its sibling pages. Every fallback uses the shared shadcn-compatible `Skeleton`, exposes one polite localized status and `aria-busy`, hides decorative shapes from assistive technology, and stops pulsing under reduced-motion preferences. Page-level API failures and empty results continue to render their distinct alert or empty state after loading resolves.
+Each organization route has a localized App Router fallback shaped for that page: the overview reserves restaurant-order, menu-setting, and organization groups; team reserves roster, invitation status, invite-form, and restaurant areas; restaurant creation and organization signup show their forms; catalog and menu-language pages reserve their editors; settings shows its rename form; and orders show status tabs and five kanban columns. The overview fallback lives under the `(overview)` route group so it cannot cover its sibling pages. Every fallback uses the shared shadcn-compatible `Skeleton`, exposes one polite localized status and `aria-busy`, hides decorative shapes from assistive technology, and stops pulsing under reduced-motion preferences. Page-level API failures and empty results continue to render their distinct alert or empty state after loading resolves.
 
-Kitchen orders distinguish an initial browser query from a background refresh. The initial query announces loading and shows ticket-shaped skeletons while no order data exists. A background query announces that it is checking for updates while keeping the last order page on screen; if refresh fails, the existing stale-data warning remains beside the saved orders.
+Kitchen orders distinguish an initial browser query from a background refresh. The initial query announces loading and shows lane-shaped kanban skeletons while no order data exists. A background query announces that it is checking for updates while keeping the last order page on screen; if refresh fails, the existing stale-data warning remains beside the saved orders.
 
 ## Guest cart and checkout
 
@@ -126,6 +126,8 @@ The canonical [design system](../design-system/README.md) defines the target Por
 Shared controls use Base UI. `components.json` records the `base-lyra` style and aliases. UI modules use `@/lib/utils`, which re-exports `cn`. Inspect each component API before composing it; see [implementation conventions](frontend-conventions.md).
 
 ## Extending the frontend
+
+Kitchen orders render a five-lane kanban through `OrderKanban`, with shadcn-compatible Base UI `Tabs` for status filters. Both initial query and route skeletons reserve the five columns. `use-order-drag` owns only pointer/drag state; `lib/orders/kanban.ts` rejects pending, stale and role-disallowed drops before forwarding the existing versioned mutation. Next-step buttons use the same mutation. Tickets stay in their saved lane until authoritative data refreshes. The board groups the current REST page, preserves server filter/cursor navigation, and labels its counts as loaded-page counts. Narrow screens stack the lanes; pointer handles support mouse/touch, Escape cancels, and action buttons provide the keyboard alternative with focus restoration after moving a ticket. The development-only kanban test route uses fixed data and no database access.
 
 - Add new pages beneath `app/[locale]/` unless the feature deliberately needs a nonlocalized route.
 - Add the same message keys and interpolation variables to both catalogs. Use localized navigation helpers for internal app links.

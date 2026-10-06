@@ -255,7 +255,15 @@
       "connected": "Live updates connected",
       "reconnecting": "Reconnecting to live updates…",
       "offline": "Live updates unavailable; orders can still be refreshed"
-    }
+    },
+    "boardHelp": "Drag an order by its handle to the next stage, or use its action button. Counts show orders on this page.",
+    "loadedCount": "{count, plural, one {# loaded order} other {# loaded orders}}",
+    "emptyLane": "No orders in this stage",
+    "dragOrder": "Drag order {reference}",
+    "dragInstructions": "Drag to an allowed stage. Press Escape to cancel. Use the next-step button to move an order with the keyboard.",
+    "draggingOrder": "Moving order {reference}. {destination}",
+    "invalidDrop": "Choose an allowed stage",
+    "testRejectUpdates": "Reject updates"
   },
   "Checkout": {
     "cartTitle": "Your order",

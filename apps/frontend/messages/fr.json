@@ -255,7 +255,15 @@
       "connected": "Mises à jour en direct connectées",
       "reconnecting": "Reconnexion aux mises à jour en direct…",
       "offline": "Mises à jour en direct indisponibles ; vous pouvez actualiser les commandes"
-    }
+    },
+    "boardHelp": "Glissez une commande par sa poignée vers l’étape suivante, ou utilisez son bouton d’action. Les compteurs concernent cette page.",
+    "loadedCount": "{count, plural, one {# commande chargée} other {# commandes chargées}}",
+    "emptyLane": "Aucune commande à cette étape",
+    "dragOrder": "Déplacer la commande {reference}",
+    "dragInstructions": "Glissez vers une étape autorisée. Appuyez sur Échap pour annuler. Utilisez le bouton de l’étape suivante pour déplacer une commande au clavier.",
+    "draggingOrder": "Déplacement de la commande {reference}. {destination}",
+    "invalidDrop": "Choisissez une étape autorisée",
+    "testRejectUpdates": "Refuser les mises à jour"
   },
   "Checkout": {
     "cartTitle": "Votre commande",

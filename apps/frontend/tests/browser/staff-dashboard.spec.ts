@@ -270,7 +270,7 @@ test("staff roles, stale versions, revocation and tenant boundaries on the live 
       `/en/organization/orders?tenantId=${tenantId}&status=Preparing`
     )
     await kitchenPage
-      .getByRole("link", { name: "All orders", exact: true })
+      .getByRole("tab", { name: "All orders", exact: true })
       .click()
     await expect(
       kitchenPage.getByRole("heading", {
@@ -289,7 +289,7 @@ test("staff roles, stale versions, revocation and tenant boundaries on the live 
     ).toBeVisible({ timeout: 45_000 })
     await expect(kitchenPage.locator("article")).toHaveCount(0)
     await expect(
-      kitchenPage.getByRole("navigation", {
+      kitchenPage.getByRole("tablist", {
         name: "Filter orders by status",
         exact: true,
       })
