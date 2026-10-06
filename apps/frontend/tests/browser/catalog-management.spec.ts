@@ -181,10 +181,26 @@ test("owner creates, edits and archives catalog items with localized feedback", 
   await expect(
     page.getByRole("heading", { name: "Gérer le catalogue", exact: true })
   ).toBeVisible()
-  await page
-    .getByRole("button", { name: `Archiver ${optionName}`, exact: true })
-    .click()
-  await page.getByRole("button", { name: "Annuler", exact: true }).click()
+
+  const archiveOption = page.getByRole("button", {
+    name: `Archiver ${optionName}`,
+    exact: true,
+  })
+
+  await archiveOption.click()
+
+  const optionDialog = page.getByRole("alertdialog")
+
+  await expect(optionDialog).toBeVisible()
+  await expect(optionDialog).toContainText(
+    `Archiver ${optionName} ? Cette option ne sera plus proposée dans les nouvelles commandes.`
+  )
+  await expect(
+    optionDialog.getByRole("button", { name: "Annuler", exact: true })
+  ).toBeFocused()
+  await page.keyboard.press("Escape")
+  await expect(optionDialog).toBeHidden()
+  await expect(archiveOption).toBeFocused()
   await expect(
     page.getByRole("form", {
       name: `Modifier l’option ${optionName}`,
@@ -203,14 +219,62 @@ test("owner creates, edits and archives catalog items with localized feedback", 
       exact: true,
     })
   ).toHaveCount(0)
-  await page
-    .getByRole("button", { name: `Archiver ${editedGroupName}`, exact: true })
+
+  const secondOptionArchive = page.getByRole("button", {
+    name: `Archiver ${secondOptionName}`,
+    exact: true,
+  })
+
+  let failNextCatalogMutation = true
+
+  await page.route("**/organization/catalog*", async (route) => {
+    if (
+      failNextCatalogMutation &&
+      route.request().method() === "POST" &&
+      route.request().headers()["next-action"]
+    ) {
+      failNextCatalogMutation = false
+      await route.abort("failed")
+
+      return
+    }
+
+    await route.continue()
+  })
+  await secondOptionArchive.click()
+
+  const failureDialog = page.getByRole("alertdialog")
+
+  await failureDialog
+    .getByRole("button", { name: "Confirmer l’archivage", exact: true })
     .click()
-  await page.getByRole("button", { name: "Annuler", exact: true }).click()
+  await expect(failureDialog.getByRole("alert")).toContainText("indisponible")
+  await expect(failureDialog).toBeVisible()
+  await page.unroute("**/organization/catalog*")
+  await failureDialog
+    .getByRole("button", { name: "Annuler", exact: true })
+    .click()
+  await expect(failureDialog).toBeHidden()
+
+  const archiveGroup = page.getByRole("button", {
+    name: `Archiver ${editedGroupName}`,
+    exact: true,
+  })
+
+  await archiveGroup.click()
+
+  const groupDialog = page.getByRole("alertdialog")
+
+  await expect(groupDialog).toContainText(
+    `Archiver ${editedGroupName} et ses options ? Elles ne seront plus proposées dans les nouvelles commandes.`
+  )
+  await groupDialog
+    .getByRole("button", { name: "Annuler", exact: true })
+    .click()
+  await expect(groupDialog).toBeHidden()
+  await expect(archiveGroup).toBeFocused()
   await expect(editedGroup).toBeVisible()
-  await page
-    .getByRole("button", { name: `Archiver ${editedGroupName}`, exact: true })
-    .click()
+  await archiveGroup.click()
   await page
     .getByRole("button", { name: "Confirmer l’archivage", exact: true })
     .click()
@@ -222,19 +286,30 @@ test("owner creates, edits and archives catalog items with localized feedback", 
     })
   ).toHaveCount(0)
 
-  await page
-    .getByRole("button", { name: `Archiver ${productName}`, exact: true })
+  const archiveProduct = page.getByRole("button", {
+    name: `Archiver ${productName}`,
+    exact: true,
+  })
+
+  await archiveProduct.click()
+
+  const productDialog = page.getByRole("alertdialog")
+
+  await expect(productDialog).toContainText(
+    `Archiver ${productName} et ses options ? Il quittera le menu public.`
+  )
+  await productDialog
+    .getByRole("button", { name: "Annuler", exact: true })
     .click()
-  await page.getByRole("button", { name: "Annuler", exact: true }).click()
+  await expect(productDialog).toBeHidden()
+  await expect(archiveProduct).toBeFocused()
   await expect(
     page.getByRole("form", {
       name: `Modifier le produit ${productName}`,
       exact: true,
     })
   ).toBeVisible()
-  await page
-    .getByRole("button", { name: `Archiver ${productName}`, exact: true })
-    .click()
+  await archiveProduct.click()
   await page
     .getByRole("button", { name: "Confirmer l’archivage", exact: true })
     .click()
@@ -247,6 +322,9 @@ test("owner creates, edits and archives catalog items with localized feedback", 
   await page
     .getByRole("button", { name: `Archiver ${categoryName}`, exact: true })
     .click()
+  await expect(page.getByRole("alertdialog")).toContainText(
+    `Archiver ${categoryName} et tous ses produits et options ?`
+  )
   await page
     .getByRole("button", { name: "Confirmer l’archivage", exact: true })
     .click()

@@ -55,18 +55,68 @@ test("owner manages fixed and percentage discount codes", async ({
     `Lunch edited ${stamp}`
   )
 
-  await fixed
-    .getByRole("button", { name: `Deactivate discount ${fixedCode}` })
-    .click()
-  await fixed.getByRole("button", { name: "Cancel", exact: true }).click()
+  const deactivateFixed = fixed.getByRole("button", {
+    name: `Deactivate discount ${fixedCode}`,
+  })
+
+  await deactivateFixed.click()
+
+  const fixedDialog = page.getByRole("alertdialog")
+
+  await expect(fixedDialog).toContainText(
+    `Stop accepting ${fixedCode} at checkout? Existing order history will be kept.`
+  )
+  await expect(
+    fixedDialog.getByRole("button", { name: "Cancel", exact: true })
+  ).toBeFocused()
+  await page.keyboard.press("Escape")
+  await expect(fixedDialog).toBeHidden()
+  await expect(deactivateFixed).toBeFocused()
   await expect(editFixed).toBeVisible()
-  await fixed
-    .getByRole("button", { name: `Deactivate discount ${fixedCode}` })
-    .click()
-  await fixed
+
+  let releaseMutation = () => {}
+
+  let signalMutationStarted = () => {}
+
+  const mutationStarted = new Promise<void>((resolve) => {
+    signalMutationStarted = resolve
+  })
+  const mutationReleased = new Promise<void>((resolve) => {
+    releaseMutation = resolve
+  })
+
+  await page.route("**/organization/catalog*", async (route) => {
+    if (
+      route.request().method() === "POST" &&
+      route.request().headers()["next-action"]
+    ) {
+      signalMutationStarted()
+      await mutationReleased
+    }
+
+    await route.continue()
+  })
+  await deactivateFixed.click()
+  await fixedDialog
     .getByRole("button", { name: "Confirm deactivation", exact: true })
     .click()
+  await mutationStarted
+  await expect(
+    fixedDialog.getByRole("button", {
+      name: "Confirm deactivation",
+      exact: true,
+    })
+  ).toBeDisabled()
+  await expect(
+    fixedDialog.getByRole("button", { name: "Cancel", exact: true })
+  ).toBeDisabled()
+  await page.keyboard.press("Escape")
+  await expect(fixedDialog).toBeVisible()
+  releaseMutation()
   await expect(editFixed).toHaveCount(0)
+  await expect(fixedDialog).toBeHidden()
+  await expect(deactivateFixed).toBeFocused()
+  await page.unroute("**/organization/catalog*")
 
   await create.getByLabel("Discount code").fill(percentCode)
   await create.getByLabel("Name", { exact: true }).fill(`Welcome ${stamp}`)
@@ -86,10 +136,37 @@ test("owner manages fixed and percentage discount codes", async ({
   await percentage
     .getByRole("button", { name: `Deactivate discount ${percentCode}` })
     .click()
-  await percentage
+
+  const percentageDialog = page.getByRole("alertdialog")
+  let failNextCatalogMutation = true
+
+  await page.route("**/organization/catalog*", async (route) => {
+    if (
+      failNextCatalogMutation &&
+      route.request().method() === "POST" &&
+      route.request().headers()["next-action"]
+    ) {
+      failNextCatalogMutation = false
+      await route.abort("failed")
+
+      return
+    }
+
+    await route.continue()
+  })
+  await percentageDialog
     .getByRole("button", { name: "Confirm deactivation", exact: true })
     .click()
-  await expect(editPercentage).toHaveCount(0)
+  await expect(percentageDialog.getByRole("alert")).toContainText(
+    "service is unavailable"
+  )
+  await expect(percentageDialog).toBeVisible()
+  await page.unroute("**/organization/catalog*")
+  await percentageDialog
+    .getByRole("button", { name: "Cancel", exact: true })
+    .click()
+  await expect(percentageDialog).toBeHidden()
+  await expect(editPercentage).toBeVisible()
 
   await page.goto(`/fr/organization/catalog?tenantId=${fixture.tenantId}`)
 
