@@ -1,8 +1,8 @@
 # WhitePlate — Design system
 
-Version **1.0.0**, 6 octobre 2026. Direction : **Porcelaine et encre**.
+Version **1.1.0**, 6 octobre 2026. Direction : **Porcelaine, encre et sauge**.
 
-Ce document est la référence normative pour toute création ou modification d’interface WhitePlate. Il définit la cible visuelle et les règles de conception ; les écrans existants ne sont pas encore migrés. Cette livraison documente le système, ses tokens et son protocole d’adoption. Elle ne change ni CSS de production, ni composants, ni logique métier.
+Ce document est la référence normative pour toute création ou modification d’interface WhitePlate. La palette clair/sombre, les polices système, les rayons et les primitives partagées sont appliqués au frontend dans `feat/design-system-adoption`. Les écrans d’authentification, de gestion, de cuisine et de commande utilisent ces styles. Les règles de comportement décrivent aussi les exigences à conserver lors des futures évolutions ; cette adoption visuelle ne modifie pas l’autorisation, les transitions de commande ni le retry checkout.
 
 [Aperçu visuel](overview.svg) · [Tokens structurés](tokens.json) · [Vérificateur et générateur de l’aperçu](verify.py) · [Architecture frontend](../architecture/WHITEPLATE_FRONTEND_ARCHITECTURE.md) · [Conventions d’implémentation](../architecture/frontend-conventions.md) · [Tâche GitHub #28](https://github.com/whritou/WhitePlate/issues/28)
 
@@ -10,7 +10,7 @@ Ce document est la référence normative pour toute création ou modification d�
 
 WhitePlate aide des restaurateurs à gérer leurs établissements, leur carte et leur équipe, accompagne la cuisine pendant le service et permet aux clients de commander à emporter. Le système doit rendre une commande, son état et l’action suivante compréhensibles rapidement, sur téléphone comme sur écran de cuisine.
 
-La direction évoque une assiette blanche, l’encre bleue d’une carte et une fiche de service structurée. La personnalité vient du blanc, du bleu et de la hiérarchie des informations. Le vert signale une commande prête ; l’ambre attire l’attention ; le rouge reste réservé aux erreurs et aux actions destructrices.
+La direction évoque une assiette blanche, l’encre d’une carte et une fiche de service structurée. Le thème clair associe un blanc cassé neutre à des boutons bleus. Le thème sombre associe des gris très foncés de type stone à un accent vert sauge, choisi par l’utilisateur ; les fonds ne sont plus bleutés. Les statuts gardent des fonds et libellés dédiés : vert menthe pour Prête, ambre pour l’attente, sable pour la préparation en sombre, rouge pour les erreurs et annulations. L’accent de navigation sauge ne remplace pas ces statuts.
 
 1. **Le contexte avant l’action.** Montrer l’établissement ou l’organisation concernés, puis le titre, puis les actions disponibles.
 2. **Lisible pendant le service.** Quantités, libellés, références et actions priment sur les effets visuels. Les textes essentiels restent visibles.
@@ -21,17 +21,17 @@ La direction évoque une assiette blanche, l’encre bleue d’une carte et une 
 
 ### Choix et alternatives
 
-Une évolution de l’orange actuel aurait limité la migration, mais conservé une proximité entre marque et alerte. Une direction gastronomique à sérifs et textures aurait favorisé la vitrine au détriment des formulaires et de la cuisine. Porcelaine et encre apporte une identité commune aux trois usages, sans imiter une carte de restaurant dans chaque écran de gestion.
+Une évolution de l’orange actuel aurait limité la migration, mais conservé une proximité entre marque et alerte. Une direction gastronomique à sérifs et textures aurait favorisé la vitrine au détriment des formulaires et de la cuisine. Porcelaine, encre et sauge apporte une identité commune aux trois usages, sans imiter une carte de restaurant dans chaque écran de gestion. Après revue du rendu, l’utilisateur a demandé des fonds plus neutres et choisi le vert sauge pour l’accent sombre ; la version 1.1 conserve les boutons bleus du clair et adopte cette correction.
 
 Les skills `brainstorming`, `frontend-design` et `ui-ux-pro-max` ont guidé le cadrage, la critique visuelle et les règles d’interaction. Les deux recherches locales « restaurant operations dashboard » et « restaurant management » ont renvoyé une structure de landing page et une paire de polices de menu : ces éléments ne conviennent pas à l’espace métier et ne sont pas repris. Les recommandations vérifiées sur la hiérarchie fonctionnelle et les erreurs de formulaire ont alimenté ce document. La palette finale est un choix spécifique à WhitePlate.
 
 ## 2. État constaté et portée
 
-Audit des sources au 6 octobre 2026, sur la branche issue de `fix/workspace-mobile-toast-label` :
+Audit initial avant migration au 6 octobre 2026, sur la branche issue de `fix/workspace-mobile-toast-label` (trace historique) :
 
-| Élément | Implémentation actuelle | Cible du système |
+| Élément | Avant migration | Cible du système |
 | --- | --- | --- |
-| Couleurs | Primaire orange, gris stone en OKLCH dans `app/globals.css` | Encre bleue, surfaces froides, états dédiés ; tokens ci-dessous |
+| Couleurs | Primaire orange, gris stone en OKLCH dans `app/globals.css` | Boutons bleus en clair, stone/sauge en sombre, surfaces neutres et états dédiés |
 | Typographie | Arial pour corps et titres, aucune police téléchargée | Stack système commençant par Segoe UI, tailles et rôles explicites |
 | Boutons | Base UI `base-lyra`, rectangulaires, hauteur 24–36 px selon taille | Rayons 8 px, cible interactive 44 px, 48 px en cuisine/checkout |
 | Surfaces | Card carrée ; arrondis ajoutés localement, dont tickets `rounded-2xl` | Contrôles 8 px, cartes 12 px, overlays 16 px |
@@ -40,7 +40,11 @@ Audit des sources au 6 octobre 2026, sur la branche issue de `fix/workspace-mobi
 | Cuisine | Liste/grille de tickets, filtre d’état, REST + hints SignalR | Tickets structurés ; aucune obligation d’ajouter un kanban ou du drag-and-drop |
 | Marque restaurant | Aucun thème par restaurant branché à l’exécution | Limites de personnalisation définies pour une future feature séparée |
 
-Les valeurs JSON sont une **référence de conception**, pas un thème chargé par le frontend. Les dimensions et variantes décrites ici sont des objectifs ; ne pas présumer qu’une prop ou une classe les implémente déjà. La source reste l’autorité sur le comportement en place. Ce document est l’autorité sur le design à adopter.
+Les valeurs JSON sont la **référence canonique**, recopiée dans `app/globals.css` et exposée par `@theme inline`. Le frontend n’importe pas le JSON côté client. Le test `app/design-tokens.test.ts`, exécuté par Vitest et la CI, bloque toute divergence de couleurs clair/sombre ou des quatre rayons communs. La source reste l’autorité sur le comportement en place ; ce document définit le design.
+
+L’adoption harmonise boutons/champs de 44 px minimum (48 px pour les grandes actions), focus opaque de 2 px avec décalage de 2 px, cartes de 12 px, overlays de 16 px, badges de 14 px, variantes sémantiques et labels désactivés sans baisse d’opacité. Les surcharges locales de contrôles sont retirées. La cuisine affiche une grille fluide, les cinq statuts avec icône et texte, et une variante destructrice pour Annuler. La sidebar utilise la casse phrase et une sélection bleue ; l’appbar opaque peut revenir à la ligne sur petit écran.
+
+Le parcours public et la connexion sont vérifiés dans le navigateur ; les composants de gestion/cuisine le sont dans une fixture locale sans accès aux données. L’acceptance authentifiée contre la base et la vérification du déploiement hébergé ne sont pas répétées par cette migration. Voir les résultats et limites dans [les preuves de vérification](../documentation-review.md).
 
 ## 3. Couleurs et tokens
 
@@ -48,24 +52,24 @@ Les valeurs exactes sont conservées dans [tokens.json](tokens.json). Les tokens
 
 | Rôle / token | Clair | Sombre | Usage |
 | --- | --- | --- | --- |
-| `background` | `#F5F7FA` | `#111F29` | Fond de page |
-| `foreground` | `#172B3A` | `#EDF3F8` | Texte principal |
-| `card` | `#FFFFFF` | `#192B38` | Surface de travail |
-| `popover` | `#FFFFFF` | `#203542` | Dialog, Sheet, menu flottant |
-| `primary` | `#244D73` | `#9BC9EF` | Action principale, lien |
-| `primary-foreground` | `#FFFFFF` | `#102638` | Texte sur bouton principal |
-| `primary-hover` | `#1C3F60` | `#B6DBF7` | Hover et pression du bouton principal |
-| `secondary` | `#E7EEF4` | `#29404F` | Action secondaire |
-| `muted` | `#EDF1F5` | `#233744` | Surface inactive, skeleton |
-| `muted-foreground` | `#536574` | `#B2C2CD` | Métadonnées, aide, placeholder |
-| `accent` | `#E5EFF7` | `#1E374A` | Sélection, item de navigation actif |
-| `accent-foreground` | `#244D73` | `#9BC9EF` | Texte de sélection |
-| `border` | `#CED7DF` | `#394B59` | Séparation décorative |
-| `input` | `#778895` | `#8194A4` | Contour nécessaire pour identifier un contrôle |
-| `ring` | `#275F8C` | `#9BC9EF` | Focus au clavier |
+| `background` | `#FAFAF9` | `#1C1917` | Fond de page |
+| `foreground` | `#172B3A` | `#FAFAF9` | Texte principal |
+| `card` | `#FFFFFF` | `#292524` | Surface de travail |
+| `popover` | `#FFFFFF` | `#302B28` | Dialog, Sheet, menu flottant |
+| `primary` | `#244D73` | `#B8D1AD` | Action principale, lien |
+| `primary-foreground` | `#FFFFFF` | `#172316` | Texte sur bouton principal |
+| `primary-hover` | `#1C3F60` | `#D0E2C8` | Hover et pression du bouton principal |
+| `secondary` | `#F0F0EE` | `#3B3531` | Action secondaire |
+| `muted` | `#F5F5F4` | `#34302D` | Surface inactive, skeleton |
+| `muted-foreground` | `#625B54` | `#C2B9AF` | Métadonnées, aide, placeholder |
+| `accent` | `#E5EFF7` | `#263527` | Sélection, item de navigation actif |
+| `accent-foreground` | `#244D73` | `#B8D1AD` | Texte de sélection |
+| `border` | `#D6D3D1` | `#534A43` | Séparation décorative |
+| `input` | `#847A71` | `#A89F96` | Contour nécessaire pour identifier un contrôle |
+| `ring` | `#275F8C` | `#B8D1AD` | Focus au clavier |
 | `success` / `success-muted` | `#1D694B` / `#E8F4ED` | `#9DE1BD` / `#18362B` | Prêt, réussite persistante |
 | `warning` / `warning-muted` | `#855000` / `#FFF4DA` | `#F4D18B` / `#3B2D14` | En attente, données périmées |
-| `info` / `info-muted` | `#244D73` / `#E5EFF7` | `#9BC9EF` / `#1E374A` | En préparation, information |
+| `info` / `info-muted` | `#244D73` / `#E5EFF7` | `#D9C4A8` / `#3A3025` | En préparation, information |
 | `destructive` / `destructive-muted` | `#B42335` / `#FDEBEF` | `#FFB4B8` / `#3B2027` | Erreur, annulation, confirmation destructive |
 
 Les foregrounds de `card`, `popover` et `secondary` suivent le texte principal. `destructive-foreground` vaut blanc en clair et `#3B0C16` en sombre ; il sert uniquement à un bouton destructeur plein. Les tokens `sidebar-*` sont explicités dans le JSON pour s’intégrer aux noms déjà présents.
@@ -76,7 +80,7 @@ Les foregrounds de `card`, `popover` et `secondary` suivent le texte principal. 
 - Contours de contrôle et focus : au moins **3:1** avec la surface adjacente. `border` est décoratif ; employer `input` pour un champ ou bouton outline dont le contour porte l’identification.
 - Un badge d’état associe le texte `success`, `warning`, `info` ou `destructive` au fond `*-muted`. Il garde un libellé lisible et, si utile, une icône. Ne jamais utiliser sa couleur seule.
 - Un bouton secondaire utilise `secondary-foreground` sur `secondary`, avec contour `input` si sa forme doit être distinguée de la surface. Au hover, contour `ring` ; pas de changement d’opacité du texte.
-- Focus de 2 px, offset de 2 px rempli par la surface locale. Sur un bouton plein, cet espace rend l’anneau distinct du bouton ; ne pas coller deux bleus sans séparation.
+- Focus de 2 px, offset de 2 px rempli par la surface locale. Sur un bouton plein, cet espace rend l’anneau distinct du bouton ; ne pas coller l’accent et l’anneau de même couleur sans séparation.
 - Les états désactivés conservent le texte principal ou secondaire, sans `opacity-50` sur l’ensemble. Ajouter attribut disabled, fond muted et explication voisine lorsque la cause n’est pas évidente.
 - Ne pas fabriquer des états en ajoutant `/50`, une transparence ou un `color-mix` non vérifié. Les combinaisons translucides nécessitent un calcul après composition sur le fond réel.
 - Les surfaces sont opaques. Éviter gradients décoratifs, glassmorphism, halos et cartes dont chaque état utilise une nouvelle couleur.
@@ -85,23 +89,23 @@ Le vérificateur contrôle les paires prévues dans les deux thèmes, y compris 
 
 ### Contraste texte / fond des boutons et badges
 
-Contrastes sRGB calculés sur les fonds opaques du JSON ; seuil de **4,5:1 pour chaque libellé**, quelle que soit la taille du bouton/badge. Aucun texte blanc n’est posé sur le bleu clair du thème sombre : son bouton utilise le foreground encre `#102638`.
+Contrastes sRGB calculés sur les fonds opaques du JSON ; seuil de **4,5:1 pour chaque libellé**, quelle que soit la taille du bouton/badge. Le bouton sauge du sombre utilise un texte vert très foncé `#172316` ; son contraste est calculé, sans supposer que le blanc convient à un accent clair.
 
 | Cas | Texte / fond | Clair | Sombre |
 | --- | --- | --- | --- |
-| Bouton principal | primary-foreground / primary | 8,81:1 | 8,84:1 |
-| Bouton principal hover/pressed | primary-foreground / primary-hover | 10,88:1 | 10,66:1 |
-| Bouton secondaire | secondary-foreground / secondary | 12,43:1 | 9,68:1 |
-| Bouton outline au repos | foreground / card | 14,55:1 | 13,00:1 |
-| Bouton ghost au survol | foreground / muted | 12,82:1 | 11,04:1 |
+| Bouton principal | primary-foreground / primary | 8,81:1 | 9,90:1 |
+| Bouton principal hover/pressed | primary-foreground / primary-hover | 10,88:1 | 11,95:1 |
+| Bouton secondaire | secondary-foreground / secondary | 12,75:1 | 11,56:1 |
+| Bouton outline au repos | foreground / card | 14,55:1 | 14,52:1 |
+| Bouton ghost au survol | foreground / muted | 13,34:1 | 12,51:1 |
 | Bouton destructeur doux / badge Annulée | destructive / destructive-muted | 5,66:1 | 8,77:1 |
 | Confirmation destructive pleine | destructive-foreground / destructive | 6,50:1 | 9,98:1 |
 | Badge En attente | warning / warning-muted | 6,11:1 | 9,13:1 |
-| Badge En préparation | info / info-muted | 7,56:1 | 7,05:1 |
+| Badge En préparation | info / info-muted | 7,56:1 | 7,62:1 |
 | Badge Prête | success / success-muted | 5,86:1 | 8,70:1 |
-| Badge Terminée / badge neutre | muted-foreground / muted | 5,31:1 | 6,75:1 |
+| Badge Terminée / badge neutre | muted-foreground / muted | 6,12:1 | 6,75:1 |
 
-En hover/pressed, un bouton secondaire ou destructeur doux conserve cette paire texte/fond et renforce seulement son contour. Les liens de navigation et badges sélectionnés utilisent accent-foreground/accent, jamais primary-foreground/accent. Disabled et pending ne réduisent pas l’opacité du libellé ; le contraste reste mesurable sur la paire de tokens choisie. Pour un futur accent restaurant, recalculer toutes ces paires, y compris survol, avant application. Ne pas présumer que les classes actuelles `hover:bg-primary/80` ou `disabled:opacity-50` respectent ces mesures : elles doivent être remplacées lors de l’adoption des primitives.
+Le bouton secondaire utilise foreground/muted au survol ; le destructeur doux conserve sa paire texte/fond et renforce son contour. Les liens de navigation et badges sélectionnés utilisent accent-foreground/accent, jamais primary-foreground/accent. Disabled et pending ne réduisent pas l’opacité du libellé ; le contraste reste mesurable sur la paire de tokens choisie. Pour un futur accent restaurant, recalculer toutes ces paires, y compris survol, avant application. Les primitives utilisent désormais des fonds opaques et aucune baisse d’opacité du libellé ; conserver cette règle lors des futures modifications.
 
 ## 4. Typographie et données
 
@@ -210,7 +214,7 @@ Checkbox/radio : indicateur visible, label et zone de clic de 44 px ; nom access
 
 ### Badge et état de commande
 
-Badge = 14 px/500, padding 4 × 8 px, pill, texte complet. Il ne reçoit pas le focus s’il n’est pas interactif. Utiliser `Badge` existant, puis centraliser une variante sémantique au moment d’une adoption UI ; ces variantes n’existent pas encore.
+Badge = 14 px/500, padding 4 × 8 px, pill, texte complet. Il ne reçoit pas le focus s’il n’est pas interactif. `Badge` fournit les variantes `warning`, `info`, `success`, `neutral` et `destructive` utilisées par les tickets.
 
 | Valeur API actuelle | FR | EN | Paire de tokens | Icône Lucide possible |
 | --- | --- | --- | --- | --- |
@@ -255,7 +259,7 @@ Pas d’image de plat inventée. Si une future feature fournit de vraies photos,
 
 Durées : feedback 120 ms, disclosure 180 ms, overlay 220 ms ; easing `cubic-bezier(0.2, 0, 0, 1)`. Motion uniquement pour une action ou un changement compréhensible. Pas de bounce, parallax, compteurs animés ou entrée de chaque ticket. Focus et mise à jour ARIA immédiats. Sous `prefers-reduced-motion: reduce`, transitions et pulses passent à 0 ; état final intact.
 
-Aucun module analytics n’est créé. Si un graphique est demandé plus tard, lui donner un titre, unité, période, légende, valeurs accessibles et alternative tabulaire ; distinguer les séries par forme/libellé en plus de la couleur. Les `chart-*` actuels sont un héritage à définir dans la tâche concernée, pas une palette de statuts.
+Aucun module analytics n’est créé. Si un graphique est demandé plus tard, lui donner un titre, unité, période, légende, valeurs accessibles et alternative tabulaire ; distinguer les séries par forme/libellé en plus de la couleur. Aucun token `chart-*` n’est exposé par le thème actuel ; définir une palette dans la tâche graphique concernée.
 
 ## 10. Langue et microcopy
 
@@ -333,7 +337,7 @@ Une règle globale peut évoluer lorsqu’une demande produit concrète le justi
 
 Référence d’accessibilité : [WCAG 2.2](https://www.w3.org/TR/WCAG22/). Cible : niveau AA ; la cible produit de 44 px et les textes tous à 4,5:1 vont plus loin que certains minima. Cela ne constitue pas une certification de l’application.
 
-Pour le présent livrable documentaire, depuis la racine :
+Pour la référence documentaire, depuis la racine :
 
 ```powershell
 py -3 docs/design-system/verify.py
@@ -354,10 +358,12 @@ Pour une future modification UI :
 - [ ] Depuis `apps/frontend`, exécuter `npm run lint`, `npm run typecheck`, `npm run format:check`, `npm run build` selon le périmètre ; `npm run test` et couverture ciblée si comportement modifié. Ne pas lancer typecheck pendant le build.
 - [ ] Enregistrer résultats et limites, mettre à jour docs et carte kanban, commit et push.
 
-Les instructions AGENTS imposent cette revue aux agents ; elles ne constituent pas un contrôle automatique de l’esthétique par ESLint. Les contrôles actuels imposent déjà les primitives partagées. Toute future automatisation des tokens ou régression visuelle est un travail distinct.
+Les instructions AGENTS imposent cette revue aux agents ; elles ne constituent pas un contrôle automatique de l’esthétique par ESLint. Les contrôles actuels imposent déjà les primitives partagées. Vitest vérifie automatiquement les couleurs/rayons CSS contre le JSON ; Playwright vérifie les contrastes calculés, les états, le focus, le responsive et la taille de texte. Ces contrôles ne remplacent pas la revue visuelle des futurs écrans.
 
 ## 15. Historique
 
 | Version | Date | Changement |
 | --- | --- | --- |
-| 1.0.0 | 2026-10-06 | Création du référentiel Porcelaine et encre, tokens clair/sombre, recettes et consignes d’adoption. Aucun écran migré. |
+| 1.0.0 — référence | 2026-10-06 | Création du référentiel initial Porcelaine et encre, tokens clair/sombre, recettes et consignes d’adoption. |
+| 1.0.0 — adoption | 2026-10-06 | Application de la même palette et des règles visuelles aux primitives et écrans existants ; contrôle CI des tokens et tests navigateur. |
+| 1.1.0 | 2026-10-06 | Revue utilisateur : fonds clairs neutres, bases sombres stone et accent sauge. Boutons bleus du clair conservés ; contrastes recalculés et tests navigateur relancés. |

@@ -37,12 +37,8 @@ export default async function OrganizationTeamPage({
 
   if (!organizationsResponse.ok || !Array.isArray(organizationsResponse.data)) {
     return (
-      <main className="mx-auto min-h-[70vh] max-w-3xl px-5 py-12 sm:py-16">
-        <Alert
-          variant="destructive"
-          role="alert"
-          className="rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive"
-        >
+      <main className="mx-auto min-h-[70vh] max-w-3xl p-4 sm:p-6 lg:p-8">
+        <Alert variant="destructive" role="alert">
           <AlertDescription>{t("serviceError")}</AlertDescription>
         </Alert>
       </main>
@@ -73,7 +69,7 @@ export default async function OrganizationTeamPage({
   })
 
   return (
-    <main className="mx-auto min-h-[70vh] max-w-3xl px-5 py-12 sm:py-16">
+    <main className="mx-auto min-h-[70vh] max-w-3xl p-4 sm:p-6 lg:p-8">
       <Link
         href="/organization"
         className="text-sm font-medium text-primary underline-offset-4 hover:underline"
@@ -81,14 +77,14 @@ export default async function OrganizationTeamPage({
         {t("backToOrganizations")}
       </Link>
 
-      <Card className="mt-6 rounded-2xl border border-border bg-card p-6 shadow-sm sm:p-10">
+      <Card className="mt-6 rounded-lg border border-border bg-card p-6 sm:p-10">
         <CardHeader className="px-0">
           <p className="mb-2 text-sm font-medium text-primary">
             {organization.name}
           </p>
 
           <CardTitle>
-            <h1 className="text-3xl font-semibold tracking-tight">
+            <h1 className="text-2xl font-semibold tracking-tight sm:text-[2rem]">
               {t("teamTitle")}
             </h1>
           </CardTitle>
@@ -158,11 +154,7 @@ export default async function OrganizationTeamPage({
 
           <div className="mt-4">
             {restaurants === null ? (
-              <Alert
-                variant="destructive"
-                role="alert"
-                className="rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive"
-              >
+              <Alert variant="destructive" role="alert">
                 <AlertDescription>{t("serviceError")}</AlertDescription>
               </Alert>
             ) : (

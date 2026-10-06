@@ -1,5 +1,6 @@
 "use client"
 
+import { Clock, CookingPot, Check, CheckCheck, X } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -11,8 +12,19 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { getAvailableOrderTransitions } from "@/lib/order-dashboard"
-import type { OrderTicketProps } from "@/types/orders"
+import type { OrderStatus, OrderTicketProps } from "@/types/orders"
 import { useTranslations } from "next-intl"
+
+const statusPresentation = {
+  Pending: { variant: "warning", Icon: Clock },
+  Preparing: { variant: "info", Icon: CookingPot },
+  Ready: { variant: "success", Icon: Check },
+  Completed: { variant: "neutral", Icon: CheckCheck },
+  Cancelled: { variant: "destructive", Icon: X },
+} as const satisfies Record<
+  OrderStatus,
+  { variant: string; Icon: typeof Clock }
+>
 
 export function OrderTicket({
   order,
@@ -31,20 +43,25 @@ export function OrderTicket({
     timeStyle: "short",
   }).format(new Date(order.createdAt))
   const transitions = getAvailableOrderTransitions(role, order.status)
+  const { variant, Icon } = statusPresentation[order.status]
 
   return (
     <article lang={order.menuLocale ?? undefined}>
-      <Card className="rounded-2xl text-sm">
+      <Card>
         <CardHeader className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <div className="flex flex-wrap items-center gap-2">
-              <CardTitle className="text-sm font-semibold">
+              <CardTitle className="text-lg font-semibold">
                 <h2>
                   {t("orderReference", { reference: order.id.slice(0, 8) })}
                 </h2>
               </CardTitle>
 
-              <Badge variant="secondary">{t(`statuses.${order.status}`)}</Badge>
+              <Badge variant={variant}>
+                <Icon aria-hidden="true" />
+
+                {t(`statuses.${order.status}`)}
+              </Badge>
             </div>
 
             <CardDescription className="mt-1 text-sm">
@@ -53,14 +70,14 @@ export function OrderTicket({
             </CardDescription>
           </div>
 
-          <p className="font-semibold">{total}</p>
+          <p className="font-semibold tabular-nums">{total}</p>
         </CardHeader>
 
         <CardContent>
           <ul className="grid gap-3 border-t border-border pt-4">
             {order.lines.map((line, index) => (
               <li key={`${line.productId}:${index}`}>
-                <p className="font-medium">
+                <p className="text-lg font-semibold">
                   {t("lineItem", {
                     quantity: line.quantity,
                     product: line.productName,
@@ -86,6 +103,7 @@ export function OrderTicket({
                 key={status}
                 type="button"
                 size="lg"
+                variant={status === "Cancelled" ? "destructive" : "default"}
                 aria-label={t("actionForOrder", {
                   action: t(`actions.${status}`),
                   reference: order.id.slice(0, 8),

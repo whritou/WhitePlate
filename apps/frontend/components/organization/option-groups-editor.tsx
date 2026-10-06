@@ -47,7 +47,7 @@ export function OptionGroupsEditor({
           {t("optionGroupsTitle")}
         </h4>
 
-        <p className="mt-1 text-xs text-muted-foreground">
+        <p className="mt-1 text-sm text-muted-foreground">
           {t("optionGroupsDescription")}
         </p>
       </header>
@@ -126,7 +126,7 @@ function OptionGroupCard({
 
       <CardContent className="grid gap-4">
         {archived ? (
-          <p className="text-xs text-muted-foreground">
+          <p className="text-sm text-muted-foreground">
             {t("archivedOptionsHistory")}
           </p>
         ) : (

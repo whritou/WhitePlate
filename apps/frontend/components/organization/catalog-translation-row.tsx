@@ -60,7 +60,7 @@ export function CatalogTranslationRow({
         <h3 className="font-medium">{row.name}</h3>
       </div>
 
-      <Label className="grid gap-1.5 text-sm font-medium">
+      <Label className="grid gap-1.5 font-medium">
         {t("translatedName")}
 
         <Input
@@ -72,12 +72,12 @@ export function CatalogTranslationRow({
           }}
           maxLength={row.type === "products" ? 160 : 120}
           required
-          className="h-9 rounded-md border border-input bg-background px-3 text-sm font-normal outline-none focus-visible:ring-2 focus-visible:ring-ring/30"
+          className="px-3 font-normal"
         />
       </Label>
 
       {row.type === "products" && (
-        <Label className="grid gap-1.5 text-sm font-medium">
+        <Label className="grid gap-1.5 font-medium">
           {t("translatedDescription")}
 
           <Textarea
@@ -89,7 +89,7 @@ export function CatalogTranslationRow({
             }}
             maxLength={1000}
             rows={2}
-            className="rounded-md border border-input bg-background px-3 py-2 text-sm font-normal outline-none focus-visible:ring-2 focus-visible:ring-ring/30"
+            className="px-3 py-2 font-normal"
           />
         </Label>
       )}

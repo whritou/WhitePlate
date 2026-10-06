@@ -112,8 +112,8 @@ def validate(data):
 
 def render(data):
     parts = ['<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="1020" viewBox="0 0 1280 1020" role="img" aria-labelledby="title desc">',
-             '<title id="title">WhitePlate — Porcelaine et encre</title>',
-             '<desc id="desc">Planche de conception : palettes et exemples statiques de catalogue, formulaire et ticket cuisine dans les thèmes clair et sombre. Aucun écran de production migré.</desc>']
+             '<title id="title">WhitePlate — Porcelaine, encre et sauge</title>',
+             '<desc id="desc">Planche de conception : palettes et exemples statiques de catalogue, formulaire et ticket cuisine dans les thèmes clair et sombre. Planche statique, distincte des captures du frontend.</desc>']
 
     def rect(x, y, w, h, color, radius=0, stroke=None, stroke_width=1):
         edge = f' stroke="{stroke}" stroke-width="{stroke_width}"' if stroke else ""
@@ -131,9 +131,9 @@ def render(data):
         x = index * 640
         rect(x, 0, 640, 1020, c["background"])
         text(x + 32, 54, "WhitePlate", c["foreground"], 24, 600)
-        text(x + 32, 86, "Porcelaine et encre", c["foreground"], 32, 600)
+        text(x + 32, 86, "Porcelaine, encre et sauge", c["foreground"], 32, 600)
         text(x + 32, 116, "Référence de design · " + ("Thème clair" if mode == "light" else "Thème sombre"), c["muted-foreground"], 14)
-        roles = [("card", "Porcelaine"), ("primary", "Encre"), ("success", "Prête"), ("warning", "Attente"), ("destructive", "Erreur")]
+        roles = [("card", "Porcelaine"), ("primary", "Encre" if mode == "light" else "Sauge"), ("success", "Prête"), ("warning", "Attente"), ("destructive", "Erreur")]
         for i, (role, label) in enumerate(roles):
             sx = x + 32 + i * 116
             rect(sx, 146, 96, 48, c[role], 8, c["border"] if role == "card" else None)
@@ -163,7 +163,7 @@ def render(data):
         text(x + 52, 865, "2 × Sandwich poulet", c["foreground"], 18, 600)
         text(x + 384, 865, "Total : 23,00 €", c["foreground"], 16, 600)
         button(x + 52, 885, 240, "Marquer comme prête", c)
-        text(x + 32, 990, "v1.0 · Planche statique · Écrans existants à migrer", c["muted-foreground"], 14)
+        text(x + 32, 990, "v1.1 · Planche statique · Référence du frontend", c["muted-foreground"], 14)
     parts.append("</svg>")
     (HERE / "overview.svg").write_text("\n".join(parts) + "\n", encoding="utf-8")
     print("Rendered docs/design-system/overview.svg from tokens.json")

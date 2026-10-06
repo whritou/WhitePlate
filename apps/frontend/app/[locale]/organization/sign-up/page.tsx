@@ -22,12 +22,12 @@ export default async function OrganizationSignUpPage() {
 
   return (
     <main className="mx-auto min-h-[70vh] max-w-2xl px-5 py-12 sm:py-20">
-      <Card className="rounded-2xl border border-border bg-card p-6 shadow-sm sm:p-10">
+      <Card className="rounded-lg border border-border bg-card p-6 sm:p-10">
         <CardHeader className="px-0">
           <p className="mb-2 text-sm font-medium text-primary">WhitePlate</p>
 
           <CardTitle>
-            <h1 className="text-3xl font-semibold tracking-tight">
+            <h1 className="text-2xl font-semibold tracking-tight sm:text-[2rem]">
               {t("organizationTitle")}
             </h1>
           </CardTitle>

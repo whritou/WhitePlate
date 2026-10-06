@@ -33,10 +33,7 @@ export function OrganizationForm() {
 
   return (
     <form onSubmit={submit} className="grid gap-5">
-      <Label
-        className="grid gap-2 text-sm font-medium"
-        htmlFor="organization-name"
-      >
+      <Label className="grid gap-2 font-medium" htmlFor="organization-name">
         {t("organizationName")}
 
         <Input
@@ -45,7 +42,7 @@ export function OrganizationForm() {
           disabled={state.status === "pending"}
           required
           maxLength={200}
-          className="h-11 rounded-lg border border-input bg-background px-3 outline-none focus-visible:ring-2 focus-visible:ring-ring/30"
+          className="px-3"
         />
       </Label>
 
@@ -64,11 +61,7 @@ export function OrganizationForm() {
         }
       />
 
-      <Button
-        type="submit"
-        disabled={state.status === "pending"}
-        className="h-11 rounded-lg"
-      >
+      <Button type="submit" disabled={state.status === "pending"}>
         {state.status === "pending" ? (
           <LoaderCircle className="size-4 animate-spin" />
         ) : (

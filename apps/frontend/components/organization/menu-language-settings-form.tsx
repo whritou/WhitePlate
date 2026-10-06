@@ -88,7 +88,7 @@ export function MenuLanguageSettingsForm({
               key={locale}
               className="flex flex-wrap items-center justify-between gap-3 px-4 py-3"
             >
-              <Label className="flex min-w-0 items-center gap-3 text-sm">
+              <Label className="flex min-w-0 items-center gap-3">
                 <RadioGroupItem
                   value={locale}
                   aria-label={languageName(locale, uiLocale)}
@@ -129,10 +129,7 @@ export function MenuLanguageSettingsForm({
       </div>
 
       <div className="grid gap-2 sm:grid-cols-[1fr_auto] sm:items-end">
-        <Label
-          className="grid gap-2 text-sm font-medium"
-          htmlFor="new-menu-locale"
-        >
+        <Label className="grid gap-2 font-medium" htmlFor="new-menu-locale">
           {t("addMenuLanguage")}
 
           <Input
@@ -150,7 +147,7 @@ export function MenuLanguageSettingsForm({
             autoCapitalize="off"
             autoCorrect="off"
             spellCheck={false}
-            className="h-10 rounded-md border border-input bg-background px-3 text-sm font-normal outline-none focus-visible:ring-2 focus-visible:ring-ring/30"
+            className="px-3 font-normal"
           />
         </Label>
 

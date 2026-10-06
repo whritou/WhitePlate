@@ -17,14 +17,16 @@ function SheetContent({
 }: SheetContentProps) {
   return (
     <Dialog.Portal>
-      <Dialog.Backdrop className="fixed inset-0 z-50 bg-black/40" />
+      <Dialog.Backdrop className="fixed inset-0 z-40 bg-black/40" />
 
       <Dialog.Popup
         data-slot="sheet-content"
         data-side={side}
         className={cn(
-          "fixed inset-y-0 z-50 flex w-[min(20rem,calc(100vw-2.5rem))] flex-col gap-6 overflow-y-auto overscroll-contain border-border bg-background p-5 shadow-xl outline-none motion-reduce:transition-none",
-          side === "left" ? "left-0 border-r" : "right-0 border-l",
+          "fixed inset-y-0 z-40 flex w-[min(20rem,calc(100vw-2.5rem))] flex-col gap-6 overflow-y-auto overscroll-contain border-border bg-popover p-5 text-popover-foreground shadow-xl outline-none motion-reduce:transition-none",
+          side === "left"
+            ? "left-0 rounded-r-xl border-r"
+            : "right-0 rounded-l-xl border-l",
           className
         )}
         {...props}

@@ -104,7 +104,7 @@ export function OptionGroupForm({
 
         <p
           id={`${prefix}-selection-bounds-hint`}
-          className="text-xs text-muted-foreground sm:col-span-2"
+          className="text-sm text-muted-foreground sm:col-span-2"
         >
           {t("selectionBoundsHint")}
         </p>

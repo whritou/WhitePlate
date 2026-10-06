@@ -49,7 +49,7 @@ export function OrderDashboard(props: OrderDashboardProps) {
 
           <h1
             id="kitchen-orders-title"
-            className="text-3xl font-semibold tracking-tight"
+            className="text-2xl font-semibold tracking-tight sm:text-[2rem]"
           >
             {t("title")}
           </h1>
@@ -119,7 +119,10 @@ export function OrderDashboard(props: OrderDashboardProps) {
         )}
 
         {loadError && (
-          <Alert variant="destructive" role={isStale ? "status" : "alert"}>
+          <Alert
+            variant={isStale ? "warning" : "destructive"}
+            role={isStale ? "status" : "alert"}
+          >
             <AlertDescription>
               {isStale ? t("stale") : t(`errors.${loadError}`)}
 
@@ -144,7 +147,7 @@ export function OrderDashboard(props: OrderDashboardProps) {
         {isInitialLoading ? (
           <OrderLoadingSkeleton />
         ) : page?.items.length === 0 ? (
-          <Card className="rounded-2xl border border-dashed px-6 py-12 text-center">
+          <Card className="rounded-lg border border-dashed px-6 py-12 text-center">
             <CardHeader className="px-0">
               <CardTitle className="text-xl font-semibold">
                 <h2>{t("emptyTitle")}</h2>
@@ -158,7 +161,7 @@ export function OrderDashboard(props: OrderDashboardProps) {
         ) : (
           page && (
             <>
-              <ol className="grid gap-3">
+              <ol className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,18rem),1fr))] gap-4">
                 {page.items.map((order) => (
                   <li key={order.id}>
                     <OrderTicket
@@ -201,10 +204,13 @@ export function OrderDashboard(props: OrderDashboardProps) {
 
 function OrderLoadingSkeleton() {
   return (
-    <ol aria-hidden="true" className="grid gap-3">
+    <ol
+      aria-hidden="true"
+      className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,18rem),1fr))] gap-4"
+    >
       {Array.from({ length: 3 }, (_, index) => (
         <li key={index}>
-          <Card className="rounded-2xl px-4 py-5">
+          <Card className="rounded-lg px-4 py-5">
             <CardHeader className="flex flex-row items-center justify-between gap-4 px-0">
               <div className="grid w-full max-w-sm gap-3">
                 <div className="flex gap-2">

@@ -19,10 +19,7 @@ export function AuthField({
   icon?: React.ReactNode
 }) {
   return (
-    <Label
-      className="grid gap-2 text-sm font-medium text-foreground"
-      htmlFor={id}
-    >
+    <Label className="grid gap-2 font-medium text-foreground" htmlFor={id}>
       {label}
 
       <span className="relative">
@@ -38,7 +35,7 @@ export function AuthField({
           type={type}
           autoComplete={autoComplete}
           required={required}
-          className={`h-11 w-full rounded-lg border border-input bg-background px-3 text-sm text-foreground transition outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30 ${icon ? "ps-10" : ""}`}
+          className={icon ? "ps-10" : undefined}
         />
       </span>
     </Label>

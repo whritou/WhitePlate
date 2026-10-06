@@ -412,5 +412,15 @@
       "conflict": "Le catalogue a changé. Actualisez et réessayez.",
       "unavailable": "Le service de catalogue est indisponible. Réessayez."
     }
+  },
+  "DesignSystemTest": {
+    "title": "Design system WhitePlate",
+    "restaurant": "Bistro du Port",
+    "controls": "Contrôles et retours d’état",
+    "orders": "Tickets cuisine",
+    "action": "Enregistrer les modifications",
+    "badge": "Statut",
+    "disabled": "Champ indisponible",
+    "longLabel": "Enregistrer les modifications du sandwich au poulet de saison et de toutes ses options"
   }
 }

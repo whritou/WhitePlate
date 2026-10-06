@@ -15,7 +15,7 @@ export default async function VerifyEmailPage({
     <main className="mx-auto grid min-h-[60vh] max-w-xl content-center px-5 py-16 text-center">
       <p className="mb-2 text-sm font-medium text-primary">WhitePlate</p>
 
-      <h1 className="text-3xl font-semibold tracking-tight">
+      <h1 className="text-2xl font-semibold tracking-tight sm:text-[2rem]">
         {invalid
           ? t("verificationInvalidTitle")
           : t("verificationPendingTitle")}
@@ -29,7 +29,7 @@ export default async function VerifyEmailPage({
 
       <Button
         size="lg"
-        className="mx-auto mt-7 h-10 rounded-lg"
+        className="mx-auto mt-7"
         nativeButton={false}
         render={<Link href="/sign-in" />}
       >

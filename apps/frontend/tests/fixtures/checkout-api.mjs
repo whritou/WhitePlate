@@ -107,10 +107,12 @@ const server = createServer(async (request, response) => {
   const subtotal = 11 * quantity
   const discountAmount = input.discountCode ? subtotal / 10 : 0
   const taxAmount = (subtotal - discountAmount) / 10
+  const menuLocale = input.menuLocale === "fr" ? "fr" : "en"
   const receipt = {
     id: randomUUID(),
     tenantId,
     customerName: input.customerName,
+    menuLocale,
     currency: "EUR",
     discountCode: input.discountCode,
     subtotal,
@@ -123,7 +125,7 @@ const server = createServer(async (request, response) => {
     lines: [
       {
         productId,
-        productName: "Soup",
+        productName: menuLocale === "fr" ? "Soupe" : "Soup",
         baseUnitPrice: 10,
         taxRatePercent: 10,
         quantity,
@@ -131,7 +133,13 @@ const server = createServer(async (request, response) => {
         discountAmount,
         taxAmount,
         total: subtotal - discountAmount + taxAmount,
-        options: [{ optionId, name: "Sourdough", priceAdjustment: 1 }],
+        options: [
+          {
+            optionId,
+            name: menuLocale === "fr" ? "Levain" : "Sourdough",
+            priceAdjustment: 1,
+          },
+        ],
       },
     ],
   }

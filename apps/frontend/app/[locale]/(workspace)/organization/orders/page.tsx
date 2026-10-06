@@ -94,7 +94,7 @@ export default async function KitchenOrdersPage({
   }
 
   return (
-    <main className="mx-auto min-h-[70vh] max-w-5xl px-5 py-12 sm:py-16">
+    <main className="mx-auto min-h-[70vh] max-w-7xl p-4 sm:p-6 lg:p-8">
       <OrderDashboard
         key={`${session.user.id}:${membership.id}:${locale}`}
         userId={session.user.id}
@@ -125,8 +125,8 @@ async function PageMessage({
   const t = await getTranslations("KitchenOrders")
 
   return (
-    <main className="mx-auto min-h-[70vh] max-w-5xl px-5 py-12 sm:py-16">
-      <Card className="rounded-2xl border border-border bg-card p-6">
+    <main className="mx-auto min-h-[70vh] max-w-7xl p-4 sm:p-6 lg:p-8">
+      <Card className="rounded-lg border border-border bg-card p-6">
         <h1 className="text-2xl font-semibold">{title}</h1>
 
         <p role="alert" className="mt-3 text-sm text-destructive">

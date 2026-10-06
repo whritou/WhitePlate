@@ -22,8 +22,8 @@ export function Receipt({ receipt }: { receipt: OrderReceipt }) {
       lang={receipt.menuLocale ?? undefined}
     >
       <CardHeader className="px-0">
-        <CardTitle>
-          <h2 id="cart-heading" className="text-xl font-semibold" role="status">
+        <CardTitle role="status">
+          <h2 id="cart-heading" className="text-xl font-semibold">
             {t("orderConfirmed")}
           </h2>
         </CardTitle>
@@ -52,7 +52,7 @@ export function Receipt({ receipt }: { receipt: OrderReceipt }) {
               </div>
 
               {line.options.length > 0 && (
-                <p className="mt-1 text-xs text-muted-foreground">
+                <p className="mt-1 text-sm text-muted-foreground">
                   {line.options.map((option) => option.name).join(", ")}
                 </p>
               )}

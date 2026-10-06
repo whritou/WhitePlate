@@ -35,7 +35,7 @@ function AlertDialogBackdrop({
     <AlertDialogPrimitive.Backdrop
       data-slot="alert-dialog-backdrop"
       className={cn(
-        "fixed inset-0 z-50 bg-black/50 transition-opacity duration-150 data-ending-style:opacity-0 data-starting-style:opacity-0 motion-reduce:transition-none",
+        "fixed inset-0 z-40 bg-black/50 transition-opacity duration-(--duration-overlay) data-ending-style:opacity-0 data-starting-style:opacity-0 motion-reduce:transition-none",
         className
       )}
       {...props}
@@ -48,7 +48,7 @@ function AlertDialogPopup({ className, ...props }: AlertDialogPopupProps) {
     <AlertDialogPrimitive.Popup
       data-slot="alert-dialog-popup"
       className={cn(
-        "fixed start-1/2 top-1/2 z-50 grid max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 gap-5 overflow-y-auto border border-border bg-popover p-5 text-popover-foreground shadow-lg transition-[opacity,scale] duration-150 outline-none data-ending-style:scale-95 data-ending-style:opacity-0 data-starting-style:scale-95 data-starting-style:opacity-0 motion-reduce:transition-none",
+        "fixed start-1/2 top-1/2 z-40 grid max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 gap-5 overflow-y-auto rounded-xl border border-border bg-popover p-5 text-popover-foreground shadow-lg transition-[opacity,scale] duration-(--duration-overlay) outline-none data-ending-style:scale-95 data-ending-style:opacity-0 data-starting-style:scale-95 data-starting-style:opacity-0 motion-reduce:transition-none",
         className
       )}
       {...props}
@@ -60,7 +60,7 @@ function AlertDialogTitle({ className, ...props }: AlertDialogTitleProps) {
   return (
     <AlertDialogPrimitive.Title
       data-slot="alert-dialog-title"
-      className={cn("font-heading text-base font-semibold", className)}
+      className={cn("font-heading text-xl font-semibold", className)}
       {...props}
     />
   )

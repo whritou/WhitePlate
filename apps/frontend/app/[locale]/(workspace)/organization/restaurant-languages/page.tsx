@@ -46,7 +46,7 @@ export default async function RestaurantMenuLanguagesPage({
     !catalogResponse.data
   ) {
     return (
-      <main className="mx-auto min-h-[70vh] max-w-3xl px-5 py-12 sm:py-16">
+      <main className="mx-auto min-h-[70vh] max-w-3xl p-4 sm:p-6 lg:p-8">
         <Link
           href="/organization"
           className="text-sm font-medium text-primary underline-offset-4 hover:underline"
@@ -54,11 +54,7 @@ export default async function RestaurantMenuLanguagesPage({
           {t("backToOrganizations")}
         </Link>
 
-        <Alert
-          variant="destructive"
-          role="alert"
-          className="mt-6 rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive"
-        >
+        <Alert variant="destructive" role="alert" className="mt-6">
           <AlertDescription>{t("menuLanguagesError")}</AlertDescription>
         </Alert>
       </main>
@@ -66,7 +62,7 @@ export default async function RestaurantMenuLanguagesPage({
   }
 
   return (
-    <main className="mx-auto min-h-[70vh] max-w-3xl px-5 py-12 sm:py-16">
+    <main className="mx-auto min-h-[70vh] max-w-3xl p-4 sm:p-6 lg:p-8">
       <Link
         href="/organization"
         className="text-sm font-medium text-primary underline-offset-4 hover:underline"
@@ -74,7 +70,7 @@ export default async function RestaurantMenuLanguagesPage({
         {t("backToOrganizations")}
       </Link>
 
-      <Card className="mt-6 rounded-xl border border-border bg-card p-6 shadow-sm sm:p-8">
+      <Card className="mt-6 rounded-lg border border-border bg-card p-6 sm:p-8">
         <CardHeader className="px-0">
           <p className="text-sm font-medium text-primary">WhitePlate</p>
 

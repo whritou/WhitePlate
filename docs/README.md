@@ -15,7 +15,7 @@ The currently recorded Coolify API image (`e13860e`) predates merge `8a2f835` (P
 | [Backend architecture](architecture/WHITEPLATE_BACKEND_ARCHITECTURE.md) | Project references, request paths, and test layout |
 | [Frontend architecture](architecture/WHITEPLATE_FRONTEND_ARCHITECTURE.md) | Routing, localization, rendering, and component map |
 | [Frontend implementation conventions](architecture/frontend-conventions.md) | Enforced UI, type, module, request and query boundaries |
-| [WhitePlate design system](design-system/README.md) | Required visual reference for future UI changes: Porcelaine et encre, tokens, components, screen recipes and adoption checklist; existing screens not yet migrated |
+| [WhitePlate design system](design-system/README.md) | Required visual reference for future UI changes: Porcelaine, encre et sauge, tokens, components, screen recipes and adoption checklist; applied to shared primitives and current screens |
 | [Technology stack](architecture/technology_stack.md) | Wired dependencies versus installed or proposed tools |
 | [Coding standards](coding-standards.md) | Rules for extending this codebase |
 | [API contracts](api/api-contracts.md) | Organization, staff, tenant, catalog, checkout, orders and SignalR routes |
