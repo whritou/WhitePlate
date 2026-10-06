@@ -1,6 +1,6 @@
 # Documentation index
 
-Reviewed against the working tree on 2026-10-04. WhitePlate contains the first-release restaurant API, Better Auth account/organization/team flows, owner restaurant creation, owner/manager category and product management, localized tenant menu browsing, an in-memory guest checkout, and a localized staff kitchen order dashboard with SignalR refresh hints and REST recovery. Localization migrations, catalog editing, checkout, the owner/manager/kitchen role matrix, cross-tenant denial and dashboard revocation recovery are verified on Neon `test`. Event delivery, production hub configuration and operations remain separately tracked; the local API logged an outbox polling error during acceptance. The kanban also records user-reported production OAuth/onboarding verification.
+Reviewed against the working tree on 2026-10-06. WhitePlate contains the first-release restaurant API, Better Auth account/organization/team flows, owner restaurant creation, owner/manager category and product management, localized tenant menu browsing, an in-memory guest checkout, and a localized staff kitchen order dashboard with SignalR refresh hints and REST recovery. Localization migrations, catalog editing, checkout, the owner/manager/kitchen role matrix, cross-tenant denial and dashboard revocation recovery are verified on Neon `test`. The main Vercel frontend now reaches the Coolify API and PostgreSQL; Better Auth's production user lookup and JWKS storage passed a TLS-backed runtime probe. Real-account signup, email verification, protected API access, event delivery, production hub configuration and operations remain open; see the [Coolify/Vercel runbook](deployment/coolify.md) and project kanban.
 
 ## Reading order
 
@@ -20,7 +20,7 @@ Reviewed against the working tree on 2026-10-04. WhitePlate contains the first-r
 | [Tenant isolation and security](architecture/tenancy-and-security.md) | Trust boundaries, membership authorization and deployment requirements |
 | [Authentication decision](architecture/decisions/0002-authentication.md) | Better Auth, JWT/API boundary, email binding, and migration ownership |
 | [Catalog localization and tenant domain decision](architecture/decisions/0003-catalog-localization-and-tenant-domain-policy.md) | Restaurant-configurable menu languages and first-release one-label subdomain policy; database rollout remains pending |
-| [Localized order snapshots decision](architecture/decisions/0004-localized-order-snapshots.md) | Implemented checkout locale and historical product/option label behavior; production rollout remains separate work |
+| [Localized order snapshots decision](architecture/decisions/0004-localized-order-snapshots.md) | Implemented checkout locale and historical product/option label behavior; Coolify Production schema is applied, hosted checkout acceptance remains |
 | [Coolify hosting decision](architecture/decisions/0005-coolify-hosting.md) | One hosted development stack, empty new database, existing Neon retained; dev stack deferred |
 | [Functional test plan](functional-test-plan.md) | Executable smoke checks and future acceptance criteria |
 | [Development roadmap](development-roadmap.md) | Implemented backend scope and unresolved frontend/deployment decisions |
