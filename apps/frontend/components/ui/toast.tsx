@@ -42,9 +42,13 @@ export function WorkspaceToastViewport() {
 
   return (
     <Toast.Viewport
-      aria-label={t("notifications")}
+      aria-labelledby="workspace-toast-label"
       className="pointer-events-none fixed inset-x-0 bottom-0 z-50 flex max-h-screen flex-col items-end gap-3 p-4 sm:inset-x-auto sm:right-0 sm:w-full sm:max-w-sm"
     >
+      <span className="sr-only" id="workspace-toast-label">
+        {t("notifications")}
+      </span>
+
       <WorkspaceToastList toasts={toasts} />
     </Toast.Viewport>
   )

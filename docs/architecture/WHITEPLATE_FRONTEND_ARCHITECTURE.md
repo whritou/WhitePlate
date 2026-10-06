@@ -99,7 +99,7 @@ The team route loads organization members and invitation summaries through serve
 
 ## Workspace mutation feedback
 
-`AppProviders` mounts one shared `WorkspaceToastProvider` built on Base UI Toast and the shadcn button. Successful catalog, translation, menu-language, organization, restaurant, invitation, pending-invitation revocation, and kitchen-order mutations announce localized feedback through a polite notification region; failures remain inline alerts so they persist for correction. The viewport does not steal focus, and keyboard users can reach the toast and its localized dismiss control. Success copy contains no server error details or private data.
+`AppProviders` mounts one shared `WorkspaceToastProvider` built on Base UI Toast and the shadcn button. Successful catalog, translation, menu-language, organization, restaurant, invitation, pending-invitation revocation, and kitchen-order mutations announce localized feedback through a polite notification region. Its name is provided by a visually hidden label, not a visible heading; failures remain inline alerts so they persist for correction. The viewport does not steal focus, and keyboard users can reach the toast and its localized dismiss control. Success copy contains no server error details or private data.
 
 ## Workspace loading and refresh states
 
