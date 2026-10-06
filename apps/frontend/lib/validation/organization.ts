@@ -2,6 +2,7 @@ import { isRecord, isUuid } from "./common"
 import type {
   CatalogTranslationInput,
   MenuLanguagesInput,
+  OrganizationRenameInput,
   StaffInvitationInput,
   StaffRole,
 } from "@/types/actions"
@@ -68,6 +69,23 @@ export function parseOrganizationName(form: unknown): string | null {
 
   return typeof name === "string" && name.trim() && name.trim().length <= 200
     ? name.trim()
+    : null
+}
+
+export function parseOrganizationRename(
+  form: unknown
+): OrganizationRenameInput | null {
+  if (!(form instanceof FormData)) return null
+
+  const organizationId = form.get("organizationId")
+  const name = form.get("name")
+
+  if (!isUuid(organizationId) || typeof name !== "string") return null
+
+  const normalizedName = name.trim()
+
+  return normalizedName && normalizedName.length <= 200
+    ? { organizationId, name: normalizedName }
     : null
 }
 

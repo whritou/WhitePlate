@@ -10,7 +10,8 @@ import type {
 
 export function useCatalogForm(
   action: CatalogFormAction,
-  resetOnSuccess = false
+  resetOnSuccess = false,
+  onSuccess?: () => void
 ) {
   const router = useRouter()
   const submitting = useRef(false)
@@ -39,6 +40,7 @@ export function useCatalogForm(
         if (resetOnSuccess) element.reset()
 
         setState({ status: "success" })
+        onSuccess?.()
         router.refresh()
       } catch {
         setState({ status: "error", error: "unavailable" })

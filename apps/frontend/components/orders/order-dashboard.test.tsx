@@ -38,13 +38,20 @@ vi.mock("next-intl", () => ({
       "actions.Preparing": "Start preparing",
       "actions.Cancelled": "Cancel order",
       "errors.forbidden": "You don’t have access to these orders.",
+      "errors.unavailable":
+        "We couldn’t load the latest orders. Try again in a moment.",
       retry: "Try again",
+      loadingOrders: "Loading orders…",
+      refreshingOrders: "Checking for updated orders…",
+      stale: "Showing saved orders. The latest refresh failed.",
       filterLabel: "Filter orders by status",
       title: "Kitchen orders",
       description: "Review incoming orders.",
       backToOrganizations: "All organizations",
       orderReference: `Order ${values?.reference ?? ""}`,
       lineItem: `${values?.quantity ?? ""} × ${values?.product ?? ""}`,
+      emptyTitle: "No orders in this view",
+      emptyDescription: "New orders will appear here.",
     }
 
     return messages[key] ?? key
@@ -92,12 +99,123 @@ beforeEach(() => {
     page: props.page,
     loadError: null,
     isStale: false,
+    isInitialLoading: false,
+    isFetching: false,
     pending: null,
     message: null,
     refresh: vi.fn(),
     retry: vi.fn(),
     updateStatus: vi.fn(),
   })
+})
+
+it("shows a polite loading status and decorative skeletons on an initial query", () => {
+  useDashboard.mockReturnValue({
+    page: null,
+    loadError: null,
+    isStale: false,
+    isInitialLoading: true,
+    isFetching: true,
+    pending: null,
+    message: null,
+    refresh: vi.fn(),
+    retry: vi.fn(),
+    updateStatus: vi.fn(),
+  })
+
+  const html = renderToStaticMarkup(createElement(OrderDashboard, props))
+
+  expect(html).toContain("Loading orders…")
+  expect(html).toContain('aria-busy="true"')
+  expect(html).toContain('aria-hidden="true"')
+  expect(html.indexOf('role="status"')).toBeLessThan(
+    html.indexOf('aria-busy="true"')
+  )
+  expect(html).not.toContain("We couldn’t load the latest orders.")
+})
+
+it("announces a background refresh while keeping current orders visible", () => {
+  useDashboard.mockReturnValue({
+    page: props.page,
+    loadError: null,
+    isStale: false,
+    isInitialLoading: false,
+    isFetching: true,
+    pending: null,
+    message: null,
+    refresh: vi.fn(),
+    retry: vi.fn(),
+    updateStatus: vi.fn(),
+  })
+
+  const html = renderToStaticMarkup(createElement(OrderDashboard, props))
+
+  expect(html).toContain("Checking for updated orders…")
+  expect(html).toContain("Ada")
+  expect(html).toContain("Soup")
+})
+
+it("keeps the last order snapshot visible with its stale-data warning", () => {
+  useDashboard.mockReturnValue({
+    page: props.page,
+    loadError: "unavailable",
+    isStale: true,
+    isInitialLoading: false,
+    isFetching: false,
+    pending: null,
+    message: null,
+    refresh: vi.fn(),
+    retry: vi.fn(),
+    updateStatus: vi.fn(),
+  })
+
+  const html = renderToStaticMarkup(createElement(OrderDashboard, props))
+
+  expect(html).toContain("Showing saved orders. The latest refresh failed.")
+  expect(html).toContain("Ada")
+  expect(html).toContain("Soup")
+})
+
+it("keeps the empty state separate from initial loading", () => {
+  useDashboard.mockReturnValue({
+    page: { items: [], nextCursor: null },
+    loadError: null,
+    isStale: false,
+    isInitialLoading: false,
+    isFetching: false,
+    pending: null,
+    message: null,
+    refresh: vi.fn(),
+    retry: vi.fn(),
+    updateStatus: vi.fn(),
+  })
+
+  const html = renderToStaticMarkup(createElement(OrderDashboard, props))
+
+  expect(html).toContain("No orders in this view")
+  expect(html).not.toContain("Loading orders…")
+  expect(html).not.toContain('aria-hidden="true"')
+})
+
+it("shows an unavailable error after an unsuccessful initial query", () => {
+  useDashboard.mockReturnValue({
+    page: null,
+    loadError: "unavailable",
+    isStale: false,
+    isInitialLoading: false,
+    isFetching: false,
+    pending: null,
+    message: null,
+    refresh: vi.fn(),
+    retry: vi.fn(),
+    updateStatus: vi.fn(),
+  })
+
+  const html = renderToStaticMarkup(createElement(OrderDashboard, props))
+
+  expect(html).toContain("We couldn’t load the latest orders.")
+  expect(html).toContain('role="alert"')
+  expect(html).not.toContain("Loading orders…")
 })
 
 it("shows the signed-in restaurant role and names each order action accessibly", () => {

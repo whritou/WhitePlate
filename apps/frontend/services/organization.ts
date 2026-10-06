@@ -7,6 +7,7 @@ import type { ApiResult } from "@/types/api"
 import type {
   CatalogTranslationInput,
   MenuLanguagesInput,
+  OrganizationRenameInput,
   StaffInvitationInput,
 } from "@/types/actions"
 
@@ -55,6 +56,17 @@ export async function saveCatalogTranslation({
 export async function createOrganization(name: string): Promise<ActionResult> {
   return actionResult(
     await whitePlateApi.post("/api/v1/organizations", { name })
+  )
+}
+
+export async function renameOrganization({
+  organizationId,
+  name,
+}: OrganizationRenameInput): Promise<ActionResult> {
+  return actionResult(
+    await whitePlateApi.patch(`/api/v1/organizations/${organizationId}`, {
+      name,
+    })
   )
 }
 

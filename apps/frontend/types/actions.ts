@@ -3,6 +3,10 @@ export type MenuLanguagesInput = {
   locales: string[]
   defaultLocale: string
 }
+export type OrganizationRenameInput = {
+  organizationId: string
+  name: string
+}
 export type CatalogTranslationInput = {
   tenantId: string
   entityType: "categories" | "products" | "option-groups" | "options"

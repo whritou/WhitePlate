@@ -65,6 +65,7 @@
     "noOrganizationsTitle": "Commencez par une organisation",
     "noOrganizationsDescription": "Créez-en une pour gérer les accès de vos restaurants et inviter votre équipe.",
     "manageTeamAction": "Gérer l’équipe",
+    "organizationSettingsAction": "Paramètres de l’organisation",
     "backToOrganizations": "Toutes les organisations",
     "teamTitle": "Invitez votre équipe",
     "teamDescription": "Choisissez l’adresse e-mail et le niveau d’accès. La personne devra confirmer cette même adresse pour rejoindre l’équipe.",
@@ -116,6 +117,26 @@
     "createRestaurantAction": "Créer le restaurant",
     "editCatalog": "Modifier le catalogue"
   },
+  "OrganizationSettings": {
+    "title": "Paramètres de l’organisation",
+    "description": "Modifiez le nom de votre équipe dans WhitePlate.",
+    "name": "Nom de l’organisation",
+    "save": "Enregistrer le nom",
+    "saving": "Enregistrement…",
+    "updated": "Le nom de l’organisation a été modifié.",
+    "backToOrganizations": "Toutes les organisations",
+    "notFoundTitle": "Organisation indisponible",
+    "notFound": "Cette organisation n’est pas accessible avec votre compte.",
+    "serviceError": "Impossible de charger cette organisation. Réessayez dans un instant.",
+    "errors": {
+      "invalid": "Impossible de modifier l’organisation. Vérifiez le nom et vos droits de propriétaire.",
+      "unavailable": "Impossible d’enregistrer les modifications. Réessayez dans un instant.",
+      "unauthorized": "Votre session a expiré. Reconnectez-vous pour continuer."
+    }
+  },
+  "WorkspaceLoading": {
+    "workspace": "Chargement de l’espace de travail…"
+  },
   "KitchenOrders": {
     "title": "Commandes en cuisine",
     "description": "Consultez les tickets reçus et mettez à jour leur état au fil de la préparation.",
@@ -150,6 +171,8 @@
     },
     "accessDeniedTitle": "Commandes indisponibles",
     "statusSaved": "L’état de la commande a été modifié.",
+    "loadingOrders": "Chargement des commandes…",
+    "refreshingOrders": "Recherche des nouvelles commandes…",
     "stale": "Les commandes enregistrées sont affichées. L’actualisation a échoué.",
     "retry": "Réessayer",
     "emptyTitle": "Aucune commande dans cette vue",
@@ -293,12 +316,16 @@
     "inactive": "Inactif",
     "deactivateDiscount": "Désactiver la réduction {code}",
     "deactivate": "Désactiver",
+    "deactivateDialogTitle": "Désactiver {code} ?",
+    "deactivating": "Désactivation…",
     "confirmDiscountDeactivation": "Ne plus accepter {code} au paiement ? L’historique des commandes existantes sera conservé.",
     "confirmDeactivation": "Confirmer la désactivation",
     "discountDeactivated": "Réduction désactivée.",
     "saved": "Modifications enregistrées.",
     "archive": "Archiver",
     "archiveName": "Archiver {name}",
+    "archiveDialogTitle": "Archiver {name} ?",
+    "archiving": "Archivage…",
     "archived": "Archivé",
     "confirmArchive": "Confirmer l’archivage",
     "cancel": "Annuler",

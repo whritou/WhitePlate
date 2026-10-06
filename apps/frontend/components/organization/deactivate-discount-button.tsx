@@ -4,6 +4,16 @@ import { useState } from "react"
 import { useTranslations } from "next-intl"
 import { deactivateDiscountAction } from "@/actions/catalog"
 import { ResultMessage } from "@/components/auth/result-message"
+import {
+  AlertDialog,
+  AlertDialogBackdrop,
+  AlertDialogClose,
+  AlertDialogDescription,
+  AlertDialogPopup,
+  AlertDialogPortal,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
 import { useCatalogForm } from "./use-catalog-form"
 import type { DiscountReferenceInput } from "@/types/catalog-management"
@@ -15,54 +25,88 @@ export function DeactivateDiscountButton({
 }: DiscountReferenceInput & { code: string }) {
   const t = useTranslations("Catalog")
   const [confirming, setConfirming] = useState(false)
-  const { pending, state, submit } = useCatalogForm(deactivateDiscountAction)
+  const { pending, state, submit } = useCatalogForm(
+    deactivateDiscountAction,
+    false,
+    () => setConfirming(false)
+  )
+  const submitting = pending || state.status === "pending"
 
-  if (!confirming)
-    return (
-      <Button
-        variant="outline"
-        type="button"
-        onClick={() => setConfirming(true)}
+  return (
+    <AlertDialog
+      open={confirming}
+      onOpenChange={(open) => {
+        if (!open && submitting) return
+
+        setConfirming(open)
+      }}
+    >
+      <AlertDialogTrigger
+        disabled={submitting}
+        render={<Button type="button" variant="outline" />}
         aria-label={t("deactivateDiscount", { code })}
       >
         {t("deactivate")}
-      </Button>
-    )
+      </AlertDialogTrigger>
 
-  return (
-    <form
-      onSubmit={submit}
-      aria-label={t("deactivateDiscount", { code })}
-      className="grid gap-3"
-    >
-      <input type="hidden" name="tenantId" value={tenantId} />
+      <AlertDialogPortal>
+        <AlertDialogBackdrop />
 
-      <input type="hidden" name="id" value={id} />
+        <AlertDialogPopup>
+          <div className="grid gap-1">
+            <AlertDialogTitle>
+              {t("deactivateDialogTitle", { code })}
+            </AlertDialogTitle>
 
-      <p className="text-sm">{t("confirmDiscountDeactivation", { code })}</p>
+            <AlertDialogDescription>
+              {t("confirmDiscountDeactivation", { code })}
+            </AlertDialogDescription>
+          </div>
 
-      <fieldset disabled={pending} className="flex flex-wrap gap-3">
-        <Button type="submit" variant="destructive">
-          {pending ? t("saving") : t("confirmDeactivation")}
-        </Button>
+          <form
+            onSubmit={submit}
+            aria-label={t("deactivateDiscount", { code })}
+            className="grid gap-4"
+          >
+            <input type="hidden" name="tenantId" value={tenantId} />
 
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => setConfirming(false)}
-        >
-          {t("cancel")}
-        </Button>
-      </fieldset>
+            <input type="hidden" name="id" value={id} />
 
-      <ResultMessage
-        state={state}
-        message={
-          state.status === "success"
-            ? t("discountDeactivated")
-            : t(`errors.${state.error ?? "unavailable"}`)
-        }
-      />
-    </form>
+            <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
+              <AlertDialogClose
+                disabled={submitting}
+                render={
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full sm:w-auto"
+                  />
+                }
+              >
+                {t("cancel")}
+              </AlertDialogClose>
+
+              <Button
+                type="submit"
+                variant="destructive"
+                disabled={submitting}
+                className="w-full sm:w-auto"
+              >
+                {submitting ? t("deactivating") : t("confirmDeactivation")}
+              </Button>
+            </div>
+
+            <ResultMessage
+              state={state}
+              message={
+                state.status === "success"
+                  ? t("discountDeactivated")
+                  : t(`errors.${state.error ?? "unavailable"}`)
+              }
+            />
+          </form>
+        </AlertDialogPopup>
+      </AlertDialogPortal>
+    </AlertDialog>
   )
 }

@@ -4,6 +4,16 @@ import { useState } from "react"
 import { useTranslations } from "next-intl"
 import { archiveCatalogItemAction } from "@/actions/catalog"
 import { ResultMessage } from "@/components/auth/result-message"
+import {
+  AlertDialog,
+  AlertDialogBackdrop,
+  AlertDialogClose,
+  AlertDialogDescription,
+  AlertDialogPopup,
+  AlertDialogPortal,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
 import { useCatalogForm } from "./use-catalog-form"
 import type {
@@ -26,56 +36,90 @@ export function ArchiveCatalogButton({
 }: ArchiveButtonProps) {
   const t = useTranslations("Catalog")
   const [confirming, setConfirming] = useState(false)
-  const { pending, state, submit } = useCatalogForm(archiveCatalogItemAction)
+  const { pending, state, submit } = useCatalogForm(
+    archiveCatalogItemAction,
+    false,
+    () => setConfirming(false)
+  )
+  const submitting = pending || state.status === "pending"
 
-  if (!confirming)
-    return (
-      <Button
-        variant="outline"
-        type="button"
-        onClick={() => setConfirming(true)}
+  return (
+    <AlertDialog
+      open={confirming}
+      onOpenChange={(open) => {
+        if (!open && submitting) return
+
+        setConfirming(open)
+      }}
+    >
+      <AlertDialogTrigger
+        disabled={submitting}
+        render={<Button type="button" variant="outline" />}
         aria-label={t("archiveName", { name })}
       >
         {t("archive")}
-      </Button>
-    )
+      </AlertDialogTrigger>
 
-  return (
-    <form
-      onSubmit={submit}
-      aria-label={t("archiveName", { name })}
-      className="grid gap-3"
-    >
-      <input type="hidden" name="tenantId" value={tenantId} />
+      <AlertDialogPortal>
+        <AlertDialogBackdrop />
 
-      <input type="hidden" name="id" value={id} />
+        <AlertDialogPopup>
+          <div className="grid gap-1">
+            <AlertDialogTitle>
+              {t("archiveDialogTitle", { name })}
+            </AlertDialogTitle>
 
-      <input type="hidden" name="entityType" value={entityType} />
+            <AlertDialogDescription>
+              {t(confirmationMessages[entityType], { name })}
+            </AlertDialogDescription>
+          </div>
 
-      <p className="text-sm">{t(confirmationMessages[entityType], { name })}</p>
+          <form
+            onSubmit={submit}
+            aria-label={t("archiveName", { name })}
+            className="grid gap-4"
+          >
+            <input type="hidden" name="tenantId" value={tenantId} />
 
-      <fieldset disabled={pending} className="flex gap-3">
-        <Button type="submit" variant="destructive">
-          {pending ? t("saving") : t("confirmArchive")}
-        </Button>
+            <input type="hidden" name="id" value={id} />
 
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => setConfirming(false)}
-        >
-          {t("cancel")}
-        </Button>
-      </fieldset>
+            <input type="hidden" name="entityType" value={entityType} />
 
-      <ResultMessage
-        state={state}
-        message={
-          state.status === "success"
-            ? t("archived")
-            : t(`errors.${state.error ?? "unavailable"}`)
-        }
-      />
-    </form>
+            <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
+              <AlertDialogClose
+                disabled={submitting}
+                render={
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full sm:w-auto"
+                  />
+                }
+              >
+                {t("cancel")}
+              </AlertDialogClose>
+
+              <Button
+                type="submit"
+                variant="destructive"
+                disabled={submitting}
+                className="w-full sm:w-auto"
+              >
+                {submitting ? t("archiving") : t("confirmArchive")}
+              </Button>
+            </div>
+
+            <ResultMessage
+              state={state}
+              message={
+                state.status === "success"
+                  ? t("archived")
+                  : t(`errors.${state.error ?? "unavailable"}`)
+              }
+            />
+          </form>
+        </AlertDialogPopup>
+      </AlertDialogPortal>
+    </AlertDialog>
   )
 }
