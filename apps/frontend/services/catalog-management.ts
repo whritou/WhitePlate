@@ -6,6 +6,8 @@ import type {
   ArchiveInput,
   CategoryInput,
   CatalogResult,
+  DiscountInput,
+  DiscountReferenceInput,
   ManagedCatalog,
   OptionGroupInput,
   OptionInput,
@@ -117,6 +119,34 @@ export async function saveOption(input: OptionInput): Promise<CatalogResult> {
       )
 
   return mutationResult(response)
+}
+
+export async function saveDiscount({
+  tenantId,
+  id,
+  code,
+  name,
+  kind,
+  value,
+}: DiscountInput): Promise<CatalogResult> {
+  const path = `/api/v1/tenants/${tenantId}/discounts`
+  const fields = { name, kind, value }
+
+  if (id)
+    return mutationResult(await whitePlateApi.put(`${path}/${id}`, fields))
+
+  if (!code) return { ok: false, error: "invalid" }
+
+  return mutationResult(await whitePlateApi.post(path, { code, ...fields }))
+}
+
+export async function deactivateDiscount({
+  tenantId,
+  id,
+}: DiscountReferenceInput): Promise<CatalogResult> {
+  return mutationResult(
+    await whitePlateApi.delete(`/api/v1/tenants/${tenantId}/discounts/${id}`)
+  )
 }
 
 export async function archiveCatalogItem({

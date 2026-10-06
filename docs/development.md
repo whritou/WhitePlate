@@ -188,7 +188,7 @@ The image does not configure HTTPS or provision a certificate. A production depl
 
 ### Catalog browser acceptance
 
-After the restaurant creation browser test has saved `.acceptance/restaurant.json`, run `node node_modules/playwright/cli.js test catalog-management.spec.ts` from `apps/frontend` with the same local frontend/API. It creates named categories and products in that test restaurant, persists price/tax/order/availability edits, checks French feedback and archive cancellation/confirmation, then reloads archived history. The fixture rows remain on Neon `test`; only rows created by that test are archived. The dashboard acceptance suite uses separate active fixtures. No option-group or discount editor is implemented in this slice.
+After the restaurant creation browser test has saved `.acceptance/restaurant.json`, run `node node_modules/playwright/cli.js test catalog-management.spec.ts discount-management.spec.ts` from `apps/frontend` with the same local frontend/API and the explicitly selected Neon `test` database. The catalog test creates named categories and products, persists price/tax/order/availability edits, checks French feedback and archive cancellation/confirmation, then reloads archived history. The discount test creates fixed and percentage codes, edits a discount without exposing its immutable code, verifies cancellation, and deactivates only the codes it creates. Fixture rows remain on Neon `test`; catalog rows are archived. Discount redemption, totals and tax rounding, tenant isolation, and receipt snapshots are not covered by this browser test and remain real checkout acceptance work.
 
 ### Staff dashboard browser acceptance
 

@@ -3,6 +3,8 @@ import { whitePlateApi } from "@/lib/api"
 import {
   archiveCatalogItemAction,
   saveCategoryAction,
+  deactivateDiscountAction,
+  saveDiscountAction,
   saveOptionAction,
   saveOptionGroupAction,
   saveProductAction,
@@ -18,6 +20,7 @@ const categoryId = "22222222-2222-4222-8222-222222222222"
 const productId = "33333333-3333-4333-8333-333333333333"
 const optionGroupId = "44444444-4444-4444-8444-444444444444"
 const optionId = "55555555-5555-4555-8555-555555555555"
+const discountId = "66666666-6666-4666-8666-666666666666"
 
 function form(fields: Record<string, string>) {
   const input = new FormData()
@@ -224,6 +227,92 @@ it("updates options using only the API's mutable fields", async () => {
     `/api/v1/tenants/${tenantId}/options/${optionId}`,
     { name: "Extra", priceAdjustment: 0, sortOrder: 0 }
   )
+})
+
+it("creates a normalized discount with only the API create fields", async () => {
+  vi.mocked(whitePlateApi.post).mockResolvedValue({
+    ok: true,
+    status: 201,
+    data: {},
+  })
+  expect(
+    await saveDiscountAction(
+      form({
+        tenantId,
+        code: " lunch-10 ",
+        name: " Lunch offer ",
+        kind: "FixedAmount",
+        value: "5.25",
+        role: "OrganizationOwner",
+        isActive: "false",
+      })
+    )
+  ).toEqual({ ok: true })
+  expect(whitePlateApi.post).toHaveBeenCalledWith(
+    `/api/v1/tenants/${tenantId}/discounts`,
+    { code: "LUNCH-10", name: "Lunch offer", kind: "FixedAmount", value: 5.25 }
+  )
+})
+
+it("updates discount details without sending a replacement code or active flag", async () => {
+  vi.mocked(whitePlateApi.put).mockResolvedValue({
+    ok: true,
+    status: 200,
+    data: {},
+  })
+  expect(
+    await saveDiscountAction(
+      form({
+        tenantId,
+        id: discountId,
+        code: "ATTEMPTED-CHANGE",
+        name: "New name",
+        kind: "Percentage",
+        value: "15",
+        isActive: "false",
+      })
+    )
+  ).toEqual({ ok: true })
+  expect(whitePlateApi.put).toHaveBeenCalledWith(
+    `/api/v1/tenants/${tenantId}/discounts/${discountId}`,
+    { name: "New name", kind: "Percentage", value: 15 }
+  )
+})
+
+it("deactivates only the validated discount in its selected tenant", async () => {
+  vi.mocked(whitePlateApi.delete).mockResolvedValue({
+    ok: true,
+    status: 204,
+    data: null,
+  })
+  expect(
+    await deactivateDiscountAction(
+      form({ tenantId, id: discountId, isActive: "true" })
+    )
+  ).toEqual({ ok: true })
+  expect(whitePlateApi.delete).toHaveBeenCalledWith(
+    `/api/v1/tenants/${tenantId}/discounts/${discountId}`
+  )
+})
+
+it("rejects malformed discount mutations before calling the API", async () => {
+  expect(
+    await saveDiscountAction(
+      form({
+        tenantId,
+        code: "LUNCH10",
+        name: "Lunch",
+        kind: "Percentage",
+        value: "100.01",
+      })
+    )
+  ).toEqual({ ok: false, error: "invalid" })
+  expect(
+    await deactivateDiscountAction(form({ tenantId, id: "invalid" }))
+  ).toEqual({ ok: false, error: "invalid" })
+  expect(whitePlateApi.post).not.toHaveBeenCalled()
+  expect(whitePlateApi.put).not.toHaveBeenCalled()
+  expect(whitePlateApi.delete).not.toHaveBeenCalled()
 })
 
 it.each([
