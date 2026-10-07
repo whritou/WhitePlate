@@ -123,7 +123,7 @@ export default async function OrderHistoryPage({
 
 function PageError({ title, message }: { title: string; message: string }) {
   return (
-    <main className="mx-auto min-h-[70vh] max-w-7xl p-4 sm:p-6 lg:p-8">
+    <main className="mx-auto min-h-[70vh] w-full min-w-0 p-4 sm:p-6 lg:p-8">
       <Card className="p-6">
         <h1 className="text-2xl font-semibold">{title}</h1>
 

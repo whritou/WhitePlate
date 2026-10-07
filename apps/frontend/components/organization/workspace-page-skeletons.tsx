@@ -1,6 +1,7 @@
 import type { ReactNode } from "react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { OrderKanbanSkeleton } from "@/components/orders/order-kanban-skeleton"
+import { cn } from "@/lib/utils"
 import type {
   WorkspaceLoadingPage,
   WorkspacePageSkeletonProps,
@@ -88,7 +89,12 @@ export function WorkspacePageSkeleton({
       <main
         aria-busy="true"
         data-skeleton-page={page}
-        className="mx-auto min-h-[70vh] max-w-5xl p-4 sm:p-6 lg:p-8"
+        className={cn(
+          "mx-auto min-h-[70vh] p-4 sm:p-6 lg:p-8",
+          page === "orders" || page === "orderHistory"
+            ? "w-full max-w-none"
+            : "max-w-5xl"
+        )}
       >
         <div aria-hidden="true" className="grid gap-6">
           {renderPageSkeleton(page)}

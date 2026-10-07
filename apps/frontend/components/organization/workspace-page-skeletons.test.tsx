@@ -27,6 +27,11 @@ const expectedRegions = {
   ],
   settings: ["settings-header", "settings-fields", "settings-submit"],
   orders: ["orders-header", "orders-filters", "orders-list"],
+  orderHistory: [
+    "order-history-header",
+    "order-history-filters",
+    "order-history-table",
+  ],
 } as const
 
 describe("WorkspacePageSkeleton", () => {
@@ -67,4 +72,19 @@ describe("WorkspacePageSkeleton", () => {
     expect(html).toContain('aria-hidden="true"')
     expect(html).toContain("motion-reduce:animate-none")
   })
+
+  it.each(["orders", "orderHistory"] as const)(
+    "uses the full workspace width for the %s skeleton",
+    (page) => {
+      const html = renderToStaticMarkup(
+        createElement(WorkspacePageSkeleton, {
+          page,
+          label: `Loading ${page}`,
+        })
+      )
+
+      expect(html).toContain("w-full max-w-none")
+      expect(html).not.toContain("max-w-5xl")
+    }
+  )
 })

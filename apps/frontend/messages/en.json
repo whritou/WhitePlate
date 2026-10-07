@@ -181,12 +181,11 @@
     "navigationLabel": "Workspace navigation",
     "openNavigation": "Open navigation",
     "closeNavigation": "Close navigation",
-    "navigationTitle": "Workspace navigation",
     "toggleTheme": "Toggle theme",
     "skipToContent": "Skip to content",
     "language": "Language",
-    "switchToEnglish": "Switch to English",
-    "switchToFrench": "Switch to French"
+    "english": "English",
+    "french": "French"
   },
   "WorkspaceToast": {
     "notifications": "Workspace notifications",
