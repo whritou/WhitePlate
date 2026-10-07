@@ -2,6 +2,7 @@ import { OrderHistoryTable } from "@/components/orders/order-history-table"
 import { Card } from "@/components/ui/card"
 import { auth } from "@/lib/auth"
 import { isValidTenantId, parseOrderStatusFilter } from "@/lib/order-dashboard"
+import { parseOptionalOrderHistoryDate } from "@/lib/order-history-filters"
 import { getOrderHistory, getRestaurantMemberships } from "@/services/orders"
 import type { OrderHistoryFilters } from "@/types/orders"
 import type { SearchParams } from "@/types/navigation"
@@ -50,8 +51,8 @@ export default async function OrderHistoryPage({
 
   const statusResult = parseOrderStatusFilter(one(params.status))
   const page = parsePositiveInt(one(params.page), 1, 100_000)
-  const from = optionalDate(one(params.from))
-  const through = optionalDate(one(params.through))
+  const fromResult = parseOptionalOrderHistoryDate(one(params.from))
+  const throughResult = parseOptionalOrderHistoryDate(one(params.through))
   const sortValue = one(params.sort)
   const directionValue = one(params.direction)
   const sort =
@@ -72,13 +73,15 @@ export default async function OrderHistoryPage({
   if (
     !statusResult.ok ||
     page === null ||
-    from === null ||
-    through === null ||
+    !fromResult.ok ||
+    !throughResult.ok ||
     sort === null ||
     direction === null ||
     searchValue === null ||
     search.length > 100 ||
-    (from && through && from > through)
+    (fromResult.value &&
+      throughResult.value &&
+      fromResult.value > throughResult.value)
   )
     return <PageError title={t("title")} message={t("invalidFilter")} />
 
@@ -86,8 +89,8 @@ export default async function OrderHistoryPage({
     tenantId: restaurant.id,
     status: statusResult.status,
     search: search || null,
-    from,
-    through,
+    from: fromResult.value,
+    through: throughResult.value,
     sort,
     direction,
     page,
@@ -151,19 +154,5 @@ function parsePositiveInt(
 
   return Number.isSafeInteger(parsed) && parsed > 0 && parsed <= max
     ? parsed
-    : null
-}
-
-function optionalDate(value: string | null | undefined): string | null {
-  if (value === undefined) return null
-  if (value === null) return null
-
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return null
-
-  const parsed = new Date(`${value}T00:00:00Z`)
-
-  return !Number.isNaN(parsed.valueOf()) &&
-    parsed.toISOString().slice(0, 10) === value
-    ? value
     : null
 }

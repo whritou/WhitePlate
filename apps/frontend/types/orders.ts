@@ -42,6 +42,8 @@ export type OrderHistoryFilters = {
   page: number
   pageSize: number
 }
+export type OptionalOrderHistoryDate =
+  { ok: true; value: string | null } | { ok: false }
 export type OrderHistoryTableProps = {
   tenantName: string
   locale: string
