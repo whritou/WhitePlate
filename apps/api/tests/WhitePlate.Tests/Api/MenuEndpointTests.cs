@@ -7,7 +7,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using WhitePlate.Api.Realtime;
 using WhitePlate.Domain.Catalog;
 using WhitePlate.Domain.Organizations;
 using WhitePlate.Domain.Tenants;
@@ -53,6 +55,9 @@ public sealed class MenuEndpointTests
             builder.ConfigureLogging(logging => logging.ClearProviders());
             builder.ConfigureServices(services =>
             {
+                var archiveDispatcher = services.FirstOrDefault(descriptor => descriptor.ServiceType == typeof(IHostedService) &&
+                    descriptor.ImplementationType == typeof(OrderArchiveDispatcher));
+                if (archiveDispatcher is not null) services.Remove(archiveDispatcher);
                 services.PostConfigure<TenantHostOptions>(options => options.BaseDomain = "example.test");
                 services.RemoveAll<DbContextOptions<WhitePlateDbContext>>();
                 services.RemoveAll<IDbContextOptionsConfiguration<WhitePlateDbContext>>();

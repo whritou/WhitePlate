@@ -19,6 +19,9 @@ public sealed class Order
     public int Version { get; private set; }
     public DateTimeOffset CreatedAt { get; private set; }
     public long CreatedAtTicks { get; private set; }
+    public DateTimeOffset? ClosedAt { get; private set; }
+    public long? ClosedAtTicks { get; private set; }
+    public DateTimeOffset? ArchivedAt { get; private set; }
     public List<OrderLine> Lines { get; private set; } = [];
     private Order() { }
 
@@ -66,17 +69,26 @@ public sealed class Order
         };
     }
 
-    public void TransitionTo(OrderStatus status)
+    public void TransitionTo(OrderStatus status, DateTimeOffset occurredAt)
     {
         if (Status == status) return;
         if (Status == OrderStatus.Cancelled || Status == OrderStatus.Completed || (int)status != (int)Status + 1)
             throw new InvalidOrderTransitionException();
-        Status = status; Version++;
+        Status = status;
+        if (status == OrderStatus.Completed)
+        {
+            ClosedAt = occurredAt;
+            ClosedAtTicks = occurredAt.UtcDateTime.Ticks;
+        }
+        Version++;
     }
 
-    public void Cancel()
+    public void Cancel(DateTimeOffset occurredAt)
     {
         if (Status is OrderStatus.Completed or OrderStatus.Cancelled) throw new InvalidOrderTransitionException();
-        Status = OrderStatus.Cancelled; Version++;
+        Status = OrderStatus.Cancelled;
+        ClosedAt = occurredAt;
+        ClosedAtTicks = occurredAt.UtcDateTime.Ticks;
+        Version++;
     }
 }

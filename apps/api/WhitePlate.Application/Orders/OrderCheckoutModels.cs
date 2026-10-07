@@ -31,8 +31,12 @@ public sealed record OrderSummaryDto(Guid Id, string CustomerName, string Curren
     string Status, int Version, DateTimeOffset CreatedAt, IReadOnlyList<OrderSummaryLineDto> Lines);
 public sealed record OrderPageDto(IReadOnlyList<OrderSummaryDto> Items, string? NextCursor);
 public sealed record OrderPageData(IReadOnlyList<OrderSummaryDto> Items, OrderPageCursor? NextCursor);
+public sealed record OrderHistoryPageDto(IReadOnlyList<OrderSummaryDto> Items, int Page, int PageSize, int TotalCount);
+public sealed record OrderHistoryPageData(IReadOnlyList<OrderSummaryDto> Items, int TotalCount);
 public sealed record OrderPageCursor(long CreatedAtTicks, Guid Id);
 public sealed record ListOrdersQuery(Guid TenantId, OrderStatus? Status, string? Cursor, int? PageSize);
+public sealed record ListOrderHistoryQuery(Guid TenantId, OrderStatus? Status, string? Search, DateOnly? From,
+    DateOnly? Through, string Sort, string Direction, int Page, int PageSize);
 public sealed record UpdateOrderStatusCommand(Guid TenantId, Guid OrderId, int ExpectedVersion,
     OrderStatus Status, WhitePlate.Domain.Identity.ExternalIdentity Identity);
 

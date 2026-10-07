@@ -9,8 +9,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
 using WhitePlate.Api.Configuration;
 using WhitePlate.Api.Contracts;
+using WhitePlate.Api.Realtime;
 using WhitePlate.Api.Tenancy;
 using WhitePlate.Domain.Tenants;
 using WhitePlate.Infrastructure.Persistence;
@@ -100,6 +102,9 @@ public sealed class TenantEndpointTests
             builder.ConfigureLogging(logging => logging.ClearProviders());
             builder.ConfigureServices(services =>
             {
+                var archiveDispatcher = services.FirstOrDefault(descriptor => descriptor.ServiceType == typeof(IHostedService) &&
+                    descriptor.ImplementationType == typeof(OrderArchiveDispatcher));
+                if (archiveDispatcher is not null) services.Remove(archiveDispatcher);
                 services.PostConfigure<TenantHostOptions>(options => options.BaseDomain = "example.test");
                 services.RemoveAll<DbContextOptions<WhitePlateDbContext>>();
                 services.RemoveAll<IDbContextOptionsConfiguration<WhitePlateDbContext>>();

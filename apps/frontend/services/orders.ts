@@ -1,12 +1,15 @@
 import "server-only"
 import {
   parseOrderPage,
+  parseOrderHistoryPage,
   parseRestaurantMemberships,
 } from "@/lib/order-dashboard"
 import { whitePlateApi } from "@/lib/api"
 import type { ApiResult } from "@/types/api"
 import type {
   OrderPage,
+  OrderHistoryPage,
+  OrderHistoryFilters,
   OrderStatus,
   RestaurantMembership,
   UpdateOrderStatusInput,
@@ -46,6 +49,34 @@ export async function getOrderPage(
   if (!response.ok) return response
 
   const data = parseOrderPage(response.data)
+
+  return data
+    ? { ok: true, status: 200, data }
+    : { ok: false, status: 502, error: "unavailable" }
+}
+
+export async function getOrderHistory(
+  filters: OrderHistoryFilters
+): Promise<ApiResult<OrderHistoryPage>> {
+  const query = new URLSearchParams({
+    sort: filters.sort,
+    direction: filters.direction,
+    page: String(filters.page),
+    pageSize: String(filters.pageSize),
+  })
+
+  if (filters.status) query.set("status", filters.status)
+  if (filters.search) query.set("search", filters.search)
+  if (filters.from) query.set("from", filters.from)
+  if (filters.through) query.set("through", filters.through)
+
+  const response = await whitePlateApi.get<unknown>(
+    `/api/v1/tenants/${filters.tenantId}/orders/history?${query}`
+  )
+
+  if (!response.ok) return response
+
+  const data = parseOrderHistoryPage(response.data)
 
   return data
     ? { ok: true, status: 200, data }

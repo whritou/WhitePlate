@@ -5,6 +5,7 @@ import type {
   OrderSummaryLine,
   OrderSummary,
   OrderPage,
+  OrderHistoryPage,
   RestaurantMembership,
   RestaurantRole,
 } from "@/types/orders"
@@ -47,6 +48,40 @@ export function parseOrderPage(value: unknown): OrderPage | null {
   }
 
   return { items, nextCursor: value.nextCursor }
+}
+
+export function parseOrderHistoryPage(value: unknown): OrderHistoryPage | null {
+  if (
+    !isRecord(value) ||
+    !Array.isArray(value.items) ||
+    typeof value.page !== "number" ||
+    !Number.isSafeInteger(value.page) ||
+    value.page < 1 ||
+    typeof value.pageSize !== "number" ||
+    !Number.isSafeInteger(value.pageSize) ||
+    value.pageSize < 1 ||
+    value.pageSize > 100 ||
+    typeof value.totalCount !== "number" ||
+    !Number.isSafeInteger(value.totalCount) ||
+    value.totalCount < 0
+  )
+    return null
+
+  const items: OrderSummary[] = []
+
+  for (const candidate of value.items) {
+    const order = parseOrderSummary(candidate)
+
+    if (!order) return null
+    items.push(order)
+  }
+
+  return {
+    items,
+    page: value.page,
+    pageSize: value.pageSize,
+    totalCount: value.totalCount,
+  }
 }
 
 export function parseOrderStatusFilter(

@@ -194,6 +194,21 @@ The shell did not expose npm, so checks used the bundled Node executable and ins
 | Browser diagnostics | No Next.js error overlay; initial confirmed-receipt error logs were empty. Later navigation produced `MessageNotSentError` and a Chrome-extension `RegisterClientLocalizationsError`; these logs are recorded separately from successful order acceptance. |
 | `git diff --check` | Passed. |
 
+## Order history, daily archival, and kitchen empty state — 2026-10-07
+
+Added a localized owner/manager history page with server-authorized search, status/date filters, sortable columns and bounded pagination. The API retains archived orders and snapshots while hiding them from kitchen lists. Completed/cancelled timestamps drive an idempotent UTC-midnight hosted archive worker; there is no configured restaurant timezone or scheduler, so UTC is the documented daily boundary. A migration backfills existing terminal orders from their creation time and still requires reviewed rollout to each database environment. The kitchen empty page now omits both explanatory copy and empty lanes. Current frontend and API architecture, contract, schema, test plan and roadmap were updated to match implementation. An initial full test run exposed the new hosted worker opening SQLite alongside test fixture initialization; SQLite-backed API test hosts now remove this production worker, leaving production composition unchanged.
+
+| Command/check | Actual result |
+| --- | --- |
+| `node_modules/.bin/vitest.cmd run` from `apps/frontend` | Passed: 46 files, 353 tests. Covers the empty state, normal Kanban rendering, owner/manager navigation, history parser, table filters/sort/pagination links and no-results state. |
+| `node_modules/.bin/eslint.cmd .` from `apps/frontend` | Passed. |
+| `node_modules/.bin/tsc.cmd --noEmit` from `apps/frontend` | Passed after the production build generated Next route types. |
+| `node_modules/.bin/prettier.cmd --check "**/*.{ts,tsx}"` from `apps/frontend` | Passed after formatting two modified test/component files. |
+| `node_modules/.bin/next.cmd build --webpack` from `apps/frontend` | Passed compile, TypeScript and route/page generation with process-only placeholder HTTPS origins and non-secret auth/database values. Better Auth logged schema-connection errors against the unavailable placeholder database during static generation; they did not fail the build. An initial sandboxed build could not write `.next` cache files, and an initial build using local HTTP environment values failed the production HTTPS validation. |
+| `dotnet test apps/api/WhitePlate.slnx --no-restore` | Passed: 152 tests after SQLite-backed API test hosts were updated to remove the new archive worker, avoiding concurrent fixture access. |
+| `git diff --check` | Passed; Git reported its configured LF-to-CRLF conversion notices for edited files. |
+| Database migration rollout / hosted daily-boundary run | Not performed. API tests used in-memory SQLite; no PostgreSQL environment was migrated. Apply the reviewed migration and verify the worker after deployment. |
+
 ## Organization team roster and invitation management — 2026-10-06
 
 Added owner-authorized API reads for organization owners, restaurant staff, and invitation status. Responses expose only role, optional verified email, organization/restaurant scope, expiry, and `Pending`/`Accepted`/`Revoked`/`Expired` status; issuer/subject values and invitation tokens/hashes remain private. Pending-only revocation is checked in the domain and API repository. The localized team page now shows separate roster and invitation cards, empty/error states, a shadcn confirmation dialog, success toast, and a content-matched team skeleton. No database schema or migration changed.

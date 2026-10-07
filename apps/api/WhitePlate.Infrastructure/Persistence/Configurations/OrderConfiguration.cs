@@ -24,9 +24,13 @@ public sealed class OrderConfiguration : IEntityTypeConfiguration<Order>
         builder.Property(order => order.Version).IsConcurrencyToken();
         builder.Property(order => order.CreatedAt).IsRequired();
         builder.Property(order => order.CreatedAtTicks).IsRequired();
+        builder.Property(order => order.ClosedAt);
+        builder.Property(order => order.ClosedAtTicks);
+        builder.Property(order => order.ArchivedAt);
         builder.HasMany(order => order.Lines).WithOne().HasForeignKey(line => line.OrderId).OnDelete(DeleteBehavior.Cascade);
         builder.HasIndex(order => new { order.TenantId, order.CreatedAt, order.Id });
         builder.HasIndex(order => new { order.TenantId, order.CreatedAtTicks, order.Id });
+        builder.HasIndex(order => new { order.Status, order.ClosedAtTicks, order.ArchivedAt });
     }
 }
 

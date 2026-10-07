@@ -50,7 +50,7 @@ vi.mock("next-intl", () => ({
       backToOrganizations: "All organizations",
       orderReference: `Order ${values?.reference ?? ""}`,
       lineItem: `${values?.quantity ?? ""} × ${values?.product ?? ""}`,
-      emptyTitle: "No orders in this view",
+      emptyTitle: "No orders for now",
       emptyDescription: "New orders will appear here.",
     }
 
@@ -176,7 +176,7 @@ it("keeps the last order snapshot visible with its stale-data warning", () => {
   expect(html).toContain("Soup")
 })
 
-it("keeps the empty state separate from initial loading", () => {
+it("shows only the empty state when the current view has no orders", () => {
   useDashboard.mockReturnValue({
     page: { items: [], nextCursor: null },
     loadError: null,
@@ -192,7 +192,10 @@ it("keeps the empty state separate from initial loading", () => {
 
   const html = renderToStaticMarkup(createElement(OrderDashboard, props))
 
-  expect(html).toContain("No orders in this view")
+  expect(html).toContain("No orders for now")
+  expect(html).not.toContain("No orders in this view")
+  expect(html).not.toContain("New orders will appear here.")
+  expect(html).not.toContain("data-order-lane=")
   expect(html).not.toContain("Loading orders…")
   expect(html).not.toContain('aria-hidden="true"')
 })

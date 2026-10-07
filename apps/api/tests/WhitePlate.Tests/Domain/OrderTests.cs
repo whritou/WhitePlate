@@ -27,12 +27,13 @@ public sealed class OrderTests
         ], null, 0m, DateTimeOffset.UtcNow);
         var version = order.Version;
 
-        order.TransitionTo(OrderStatus.Preparing);
-        order.TransitionTo(OrderStatus.Preparing);
+        var now = DateTimeOffset.UtcNow;
+        order.TransitionTo(OrderStatus.Preparing, now);
+        order.TransitionTo(OrderStatus.Preparing, now);
 
         Assert.Equal(OrderStatus.Preparing, order.Status);
         Assert.Equal(version + 1, order.Version);
-        Assert.Throws<InvalidOrderTransitionException>(() => order.TransitionTo(OrderStatus.Pending));
+        Assert.Throws<InvalidOrderTransitionException>(() => order.TransitionTo(OrderStatus.Pending, now));
     }
 
     [Fact]
@@ -41,10 +42,42 @@ public sealed class OrderTests
         var order = Order.Create(Guid.NewGuid(), "EUR", "Ada", [
             new OrderLineSnapshot(Guid.NewGuid(), "Soup", 10m, 0m, 1, [])
         ], null, 0m, DateTimeOffset.UtcNow);
-        order.TransitionTo(OrderStatus.Preparing);
-        order.TransitionTo(OrderStatus.Ready);
-        order.TransitionTo(OrderStatus.Completed);
+        var now = DateTimeOffset.UtcNow;
+        order.TransitionTo(OrderStatus.Preparing, now);
+        order.TransitionTo(OrderStatus.Ready, now);
+        order.TransitionTo(OrderStatus.Completed, now);
 
-        Assert.Throws<InvalidOrderTransitionException>(order.Cancel);
+        Assert.Throws<InvalidOrderTransitionException>(() => order.Cancel(now));
+    }
+
+    [Fact]
+    public void TerminalStatusRecordsWhenTheOrderWasClosed()
+    {
+        var createdAt = DateTimeOffset.Parse("2026-10-06T23:59:00Z");
+        var completedAt = DateTimeOffset.Parse("2026-10-07T00:02:00Z");
+        var order = Order.Create(Guid.NewGuid(), "EUR", "Ada", [
+            new OrderLineSnapshot(Guid.NewGuid(), "Soup", 10m, 0m, 1, [])
+        ], null, 0m, createdAt);
+        order.TransitionTo(OrderStatus.Preparing, completedAt);
+        order.TransitionTo(OrderStatus.Ready, completedAt);
+
+        order.TransitionTo(OrderStatus.Completed, completedAt);
+
+        Assert.Equal(completedAt, order.ClosedAt);
+        Assert.Null(order.ArchivedAt);
+    }
+
+    [Fact]
+    public void CancellingAnOrderRecordsWhenItWasClosed()
+    {
+        var cancelledAt = DateTimeOffset.Parse("2026-10-07T00:02:00Z");
+        var order = Order.Create(Guid.NewGuid(), "EUR", "Ada", [
+            new OrderLineSnapshot(Guid.NewGuid(), "Soup", 10m, 0m, 1, [])
+        ], null, 0m, DateTimeOffset.Parse("2026-10-06T23:59:00Z"));
+
+        order.Cancel(cancelledAt);
+
+        Assert.Equal(cancelledAt, order.ClosedAt);
+        Assert.Null(order.ArchivedAt);
     }
 }

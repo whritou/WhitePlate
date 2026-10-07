@@ -31,6 +31,44 @@ public sealed class ListOrdersQueryHandler(IOrderRepository orders, IStaffMember
     }
 }
 
+public sealed class ListOrderHistoryQueryHandler(IOrderRepository orders, IStaffMembershipRepository memberships)
+{
+    public async Task<Result<OrderHistoryPageDto>> HandleAsync(ListOrderHistoryQuery query, ExternalIdentity identity,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(query);
+        ArgumentNullException.ThrowIfNull(identity);
+        cancellationToken.ThrowIfCancellationRequested();
+        if (!await OrderStaffAccess.CanViewHistoryAsync(memberships, query.TenantId, identity, cancellationToken))
+            return Result<OrderHistoryPageDto>.Failure(new ApplicationError(ErrorCode.Forbidden));
+
+        if (query.Search?.Length > 100 || query.From > query.Through ||
+            query.Sort is not ("createdAt" or "total") || query.Direction is not ("asc" or "desc") ||
+            query.Page is < 1 or > 100_000 || query.PageSize is < 1 or > 100)
+            return Result<OrderHistoryPageDto>.Failure(new ApplicationError(ErrorCode.ValidationFailed,
+                new ValidationIssue("query", "invalid_order_history_filter", "The order history filter is invalid.")));
+
+        var from = query.From?.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc);
+        DateTime? until = query.Through is null || query.Through == DateOnly.MaxValue
+            ? null
+            : query.Through.Value.AddDays(1).ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc);
+        var requestedPage = query.Page;
+        var pageSize = query.PageSize;
+        var page = await orders.GetHistoryAsync(query.TenantId, query.Status, query.Search, from, until,
+            query.Sort, query.Direction == "desc", requestedPage, pageSize, cancellationToken);
+        var lastPage = Math.Max(1, (int)Math.Ceiling(page.TotalCount / (double)pageSize));
+        if (requestedPage > lastPage)
+        {
+            requestedPage = lastPage;
+            page = await orders.GetHistoryAsync(query.TenantId, query.Status, query.Search, from, until,
+                query.Sort, query.Direction == "desc", requestedPage, pageSize, cancellationToken);
+        }
+
+        return Result<OrderHistoryPageDto>.Success(new OrderHistoryPageDto(page.Items, requestedPage,
+            pageSize, page.TotalCount));
+    }
+}
+
 internal static class OrderCursorCodec
 {
     public static string Encode(OrderPageCursor cursor)
