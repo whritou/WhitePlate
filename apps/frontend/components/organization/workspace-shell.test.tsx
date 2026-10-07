@@ -119,7 +119,9 @@ it("renders verified workspace context, active links, and locale-preserving cont
     createElement(
       WorkspaceShell,
       {
-        organizations: [{ id: organizationId, name: "White Plate Group", isActive: true }],
+        organizations: [
+          { id: organizationId, name: "White Plate Group", isActive: true },
+        ],
         restaurants: [
           {
             id: tenantId,
