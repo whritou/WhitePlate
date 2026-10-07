@@ -14,12 +14,7 @@ const expectedRegions = {
     "team-invitation-form",
   ],
   restaurant: ["restaurant-header", "restaurant-fields", "restaurant-submit"],
-  catalog: [
-    "catalog-header",
-    "catalog-category-form",
-    "catalog-product-form",
-    "catalog-list",
-  ],
+  catalog: ["catalog-header", "catalog-tabs", "catalog-list"],
   menuLanguages: [
     "languages-header",
     "languages-settings",

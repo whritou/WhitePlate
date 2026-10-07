@@ -1,6 +1,6 @@
 # WhitePlate — Design system
 
-Version **1.1.0**, 6 octobre 2026. Direction : **Porcelaine, encre et sauge**.
+Version **1.2.0**, 7 octobre 2026. Direction : **Porcelaine, encre et sauge**.
 
 Ce document est la référence normative pour toute création ou modification d’interface WhitePlate. La palette clair/sombre, les polices système, les rayons et les primitives partagées sont appliqués au frontend dans `feat/design-system-adoption`. Les écrans d’authentification, de gestion, de cuisine et de commande utilisent ces styles. Les règles de comportement décrivent aussi les exigences à conserver lors des futures évolutions ; cette adoption visuelle ne modifie pas l’autorisation, les transitions de commande ni le retry checkout.
 
@@ -10,11 +10,11 @@ Ce document est la référence normative pour toute création ou modification d�
 
 WhitePlate aide des restaurateurs à gérer leurs établissements, leur carte et leur équipe, accompagne la cuisine pendant le service et permet aux clients de commander à emporter. Le système doit rendre une commande, son état et l’action suivante compréhensibles rapidement, sur téléphone comme sur écran de cuisine.
 
-La direction évoque une assiette blanche, l’encre d’une carte et une fiche de service structurée. Le thème clair associe un blanc cassé neutre à des boutons bleus. Le thème sombre associe des gris très foncés de type stone à un accent vert sauge, choisi par l’utilisateur ; les fonds ne sont plus bleutés. Les statuts gardent des fonds et libellés dédiés : vert menthe pour Prête, ambre pour l’attente, sable pour la préparation en sombre, rouge pour les erreurs et annulations. L’accent de navigation sauge ne remplace pas ces statuts.
+La direction évoque une assiette blanche, l’encre d’une carte et une fiche de service structurée. Le thème clair associe un blanc cassé neutre à des boutons sauge. Le thème sombre associe des gris très foncés de type stone à un accent vert sauge, choisi par l’utilisateur ; les fonds ne sont plus bleutés. Les statuts gardent des fonds et libellés dédiés : vert menthe pour Prête, ambre pour l’attente, sable pour la préparation en sombre, rouge pour les erreurs et annulations. L’accent de navigation sauge ne remplace pas ces statuts.
 
 1. **Le contexte avant l’action.** Montrer l’établissement ou l’organisation concernés, puis le titre, puis les actions disponibles.
 2. **Lisible pendant le service.** Quantités, libellés, références et actions priment sur les effets visuels. Les textes essentiels restent visibles.
-3. **Une intention par accent.** Bleu pour agir/naviguer, couleurs sémantiques pour informer. Une action principale par zone de décision.
+3. **Une intention par accent.** Sauge pour agir/naviguer, couleurs sémantiques pour informer. Une action principale par zone de décision.
 4. **Densité adaptée, langage commun.** Gestion structurée, cuisine immédiatement lisible, menu client plus aéré ; mêmes composants et mêmes significations.
 5. **Confiance par le retour d’état.** Chargement, absence de données, panne, interdiction, conflit et réussite sont distingués.
 6. **Identité discrète.** Les photos et la marque du restaurant peuvent prendre la place principale sur sa vitrine ; WhitePlate structure l’expérience.
@@ -31,18 +31,18 @@ Audit initial avant migration au 6 octobre 2026, sur la branche issue de `fix/wo
 
 | Élément | Avant migration | Cible du système |
 | --- | --- | --- |
-| Couleurs | Primaire orange, gris stone en OKLCH dans `app/globals.css` | Boutons bleus en clair, stone/sauge en sombre, surfaces neutres et états dédiés |
+| Couleurs | Primaire orange, gris stone en OKLCH dans `app/globals.css` | Boutons sauge dans les deux thèmes, stone en sombre, surfaces neutres et états dédiés |
 | Typographie | Arial pour corps et titres, aucune police téléchargée | Stack système commençant par Segoe UI, tailles et rôles explicites |
 | Boutons | Base UI `base-lyra`, rectangulaires, hauteur 24–36 px selon taille | Rayons 8 px, cible interactive 44 px, 48 px en cuisine/checkout |
 | Surfaces | Card carrée ; arrondis ajoutés localement, dont tickets `rounded-2xl` | Contrôles 8 px, cartes 12 px, overlays 16 px |
-| Navigation | Sidebar 256 px dès 768 px, appbar 64 px, Sheet mobile | Même structure ; sélection bleue et noms de groupes en casse phrase |
+| Navigation | Sidebar 256 px dès 768 px, appbar 64 px, Sheet mobile | Même structure ; sélection sauge et noms de groupes en casse phrase |
 | Feedback | Alert inline, toast succès 6 s/maximum 3, skeletons par route | Conserver le fonctionnement ; harmoniser tokens, tailles et états |
 | Cuisine | Kanban de tickets, onglets d’état, REST + hints SignalR | Cinq colonnes, déplacement par carte et bouton d’action suivante |
 | Marque restaurant | Aucun thème par restaurant branché à l’exécution | Limites de personnalisation définies pour une future feature séparée |
 
 Les valeurs JSON sont la **référence canonique**, recopiée dans `app/globals.css` et exposée par `@theme inline`. Le frontend n’importe pas le JSON côté client. Le test `app/design-tokens.test.ts`, exécuté par Vitest et la CI, bloque toute divergence de couleurs clair/sombre ou des quatre rayons communs. La source reste l’autorité sur le comportement en place ; ce document définit le design.
 
-L’adoption harmonise boutons/champs de 44 px minimum (48 px pour les grandes actions), focus opaque de 2 px avec décalage de 2 px, cartes de 12 px, overlays de 16 px, badges de 14 px, variantes sémantiques et labels désactivés sans baisse d’opacité. Les surcharges locales de contrôles sont retirées. La cuisine affiche une grille fluide, les cinq statuts avec icône et texte, et une variante destructrice pour Annuler. La sidebar utilise la casse phrase et une sélection bleue ; l’appbar opaque peut revenir à la ligne sur petit écran.
+L’adoption harmonise boutons/champs de 44 px minimum (48 px pour les grandes actions), focus opaque de 2 px avec décalage de 2 px, cartes de 12 px, overlays de 16 px, badges de 14 px, variantes sémantiques et labels désactivés sans baisse d’opacité. Les surcharges locales de contrôles sont retirées. La cuisine affiche une grille fluide, les cinq statuts avec icône et texte, et une variante destructrice pour Annuler. La sidebar utilise la casse phrase et une sélection sauge ; l’appbar opaque peut revenir à la ligne sur petit écran.
 
 Le parcours public et la connexion sont vérifiés dans le navigateur ; les composants de gestion/cuisine le sont dans une fixture locale sans accès aux données. L’acceptance authentifiée contre la base et la vérification du déploiement hébergé ne sont pas répétées par cette migration. Voir les résultats et limites dans [les preuves de vérification](../documentation-review.md).
 
@@ -288,9 +288,9 @@ Gestion desktop
 │ Organisation      ├───────────────────────────────────────────┤
 │ Équipe            │ Catalogue               Ajouter un produit│
 │ Paramètres        │ Description courte                        │
-│ Bistro du Port    │ Catégories → Produits → Options → Remises │
+│ Bistro du Port    │ Produits / Catégories / Remises          │
 │ Commandes         │ Nom / prix / disponibilité / modifier     │
-│ Catalogue [actif] │ Formulaire dans une section distincte     │
+│ Catalogue [actif] │ Édition dans une modale                    │
 └───────────────────┴───────────────────────────────────────────┘
 
 Ticket cuisine
@@ -316,7 +316,7 @@ Restaurant → langue du menu → catégories → plats/prix/options
 
 Le runtime actuel n’a pas de configuration de marque par restaurant. Cette section encadre son éventuelle introduction ; elle ne crée pas de réglage, DTO, table ou endpoint.
 
-La vitrine pourrait accepter nom, logo, photos et une couleur d’accent validée via un futur contrat. Seuls primaire/hover/foreground et accent/foreground de vitrine seraient dérivés et testés dans les deux thèmes. Une couleur non conforme retombe sur le bleu WhitePlate ; jamais de texte blanc arbitraire sur une couleur claire. Aucun CSS/HTML/JS libre fourni par un tenant.
+La vitrine pourrait accepter nom, logo, photos et une couleur d’accent validée via un futur contrat. Seuls primaire/hover/foreground et accent/foreground de vitrine seraient dérivés et testés dans les deux thèmes. Une couleur non conforme retombe sur la sauge WhitePlate ; jamais de texte blanc arbitraire sur une couleur claire. Aucun CSS/HTML/JS libre fourni par un tenant.
 
 La personnalisation ne change ni statuts, focus, erreurs, taille de cible, comportement clavier, ni UI de gestion/cuisine. Les assets et thèmes restent isolés par tenant côté serveur et cache. Formats/logo/upload, stockage et validation de couleur doivent être traités dans une tâche distincte avant de rendre ce paramétrage disponible.
 
@@ -368,3 +368,11 @@ Les instructions AGENTS imposent cette revue aux agents ; elles ne constituent p
 | 1.0.0 — adoption | 2026-10-06 | Application de la même palette et des règles visuelles aux primitives et écrans existants ; contrôle CI des tokens et tests navigateur. |
 | 1.2.0 | 2026-10-07 | Revue utilisateur : accent sauge plus vert sur les actions dans les deux thèmes, point de connexion live plus contrasté ; contrastes et aperçu recalculés. |
 | 1.1.0 | 2026-10-06 | Revue utilisateur : fonds clairs neutres, bases sombres stone et accent sauge. Boutons bleus du clair conservés ; contrastes recalculés et tests navigateur relancés. |
+
+### Catalogue et langues : adoption du 7 octobre 2026
+
+La gestion du catalogue utilise trois onglets : Produits, Catégories et Remises. Les listes montrent les informations sauvegardées ; recherche, catégorie et état actif/archivé servent à parcourir les produits. Ajouter et Modifier ouvrent des modales avec icône et libellé explicite. Les options sont accessibles depuis leur produit, dans une modale dédiée ; leurs propres ajouts/modifications ouvrent une modale enfant. Les confirmations destructrices restent distinctes. Les éléments archivés et remises inactives restent lisibles selon les droits existants.
+
+La page Langues sépare le résumé des langues activées et par défaut du tableau de traductions. Gérer les langues ouvre une modale. Chaque élément expose son texte d’origine, sa traduction sauvegardée ou son état À traduire ; la langue, le type, la recherche et l’état filtrent la liste. Le texte de repli du formulaire ne compte pas comme traduction sauvegardée. Annuler ou Échap abandonne le brouillon ; une réouverture reprend les données sauvegardées. Les modales contiennent le focus, le rendent au déclencheur et bloquent la fermeture pendant une mutation ; une erreur conserve le brouillon et une réussite ferme après acquittement.
+
+Les contrôles reprennent les tokens 1.2.0 et les composants partagés. Le texte introductif resté en 1.1.0 mentionnait encore des boutons bleus alors que les tokens et le runtime étaient déjà sauge ; il est aligné ici, sans nouvelle palette. Les résultats de vérification et les limites de la fixture figurent dans `../documentation-review.md`. L’historique des commandes reste inchangé.

@@ -1,3 +1,4 @@
+import type { EditorCallbacks } from "./editor"
 import type { CatalogTranslationData } from "./catalog"
 import type { FormEvent } from "react"
 
@@ -91,20 +92,23 @@ export type ArchiveInput = {
   entityType: CatalogEntityType
 }
 export type CatalogPageProps = { searchParams: Promise<{ tenantId?: string }> }
-export type CategoryFormProps = { tenantId: string; category?: CatalogCategory }
-export type ProductFormProps = {
+export type CategoryFormProps = EditorCallbacks & {
+  tenantId: string
+  category?: CatalogCategory
+}
+export type ProductFormProps = EditorCallbacks & {
   tenantId: string
   currency: string
   categories: CatalogCategory[]
   product?: CatalogProduct
 }
-export type OptionGroupFormProps = {
+export type OptionGroupFormProps = EditorCallbacks & {
   tenantId: string
   productId: string
   productName: string
   group?: CatalogOptionGroup
 }
-export type OptionFormProps = {
+export type OptionFormProps = EditorCallbacks & {
   tenantId: string
   currency: string
   group: CatalogOptionGroup
@@ -119,7 +123,7 @@ export type OptionGroupsEditorProps = {
   options: CatalogOption[]
   parentArchived: boolean
 }
-export type DiscountFormProps = {
+export type DiscountFormProps = EditorCallbacks & {
   tenantId: string
   currency: string
   discount?: CatalogDiscount

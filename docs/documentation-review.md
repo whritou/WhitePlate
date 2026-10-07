@@ -429,3 +429,21 @@ Mounted a shared Base UI toast provider for successful workspace mutations in ca
 | `node node_modules/next/dist/bin/next build --webpack` from `apps/frontend` | Passed compilation, TypeScript, and generation of all 37 pages using a process-only placeholder secret and a localhost database port that is not listening. The first attempt used a too-short placeholder and stopped at Better Auth configuration validation; the corrected rerun completed. Better Auth logged schema-connection diagnostics against the unavailable placeholder database, and Webpack emitted nonfatal cache-write EPERM warnings. |
 | `node node_modules/prettier/bin/prettier.cjs --check` across the frontend | The repository-wide check still reports its pre-existing formatting baseline. All modified TypeScript/TSX files pass separately with `--end-of-line=auto`, because two touched files are checked out with Windows CRLF line endings. |
 | `git diff --check` | Passed. |
+
+## Catalog and menu-language redesign verification — 2026-10-07
+
+Issue #41, branch `feat/catalog-menu-design`. Products/prices, categories, discounts, product options and menu-language/translation editing now use saved lists with explicit icon-labelled modal actions. Order history is unchanged. Tenant/session checks, server actions and API contracts remain in place. Architecture, development instructions, functional plan and the canonical design recipes are updated. The reference introduction was corrected from stale 1.1 blue wording to the existing 1.2 sage tokens; no new global palette was introduced.
+
+Commands were executed from `apps/frontend` through the bundled Node 24.19.0 runtime because npm was not available in the shell. Each following CLI is the package-script equivalent:
+
+| Check | Actual command/result |
+| --- | --- |
+| Unit tests | `node node_modules/vitest/vitest.mjs run`: 53 files, 369 tests passed. Focused tests first failed against inline forms/missing pending callbacks, then passed after implementation. |
+| Lint | `node node_modules/eslint/bin/eslint.js .`: passed. Earlier JSX spacing, ref-in-render, readiness effect and test file-length errors were repaired. |
+| Types | `node node_modules/typescript/bin/tsc --noEmit`: passed. |
+| Production build | `node node_modules/next/dist/bin/next build --webpack`: passed with process-only HTTPS `BETTER_AUTH_URL`, `API_AUDIENCE` and `API_BASE_URL` placeholders. Initial builds failed the existing production HTTPS guards because local .env values use HTTP. No environment file or auth guard changed. Webpack cache EPERM and existing pg SSL-mode warnings did not prevent the build. |
+| Format | `node node_modules/prettier/bin/prettier.cjs --check "**/*.{ts,tsx}"`: failed on 217 untouched files, including CRLF checkouts under the LF formatter rule. Scoped changed/new source formatting passes; unrelated files were not rewritten. This global CI check remains unresolved. |
+| Browser | `WHITEPLATE_ACCEPTANCE_URL=http://localhost:3012 node node_modules/@playwright/test/cli.js test --project=catalog-design`: 9 passed in 33.4 s. FR/EN, light/dark, keyboard tabs, focus restoration, nested option dialogs, cancellation resets, active/archived guards, translation status, 320–1440 px overflow and pending/rejected/acknowledged product saves are covered. Early runs corrected actual localized selectors and waited for fixture hydration before actions. |
+| Git whitespace | `git diff --check`: passed. |
+
+The development-only route mounts actual production components with fixed data. Save checks intercept POST requests and synthesize replies; no fixture mutation is sent to the API/database. Screenshots were inspected for catalog and translations. The authenticated catalog/discount/staff tests were adapted to modal actions and typechecked, but were not rerun against a database in this task. Hosted deployment, database persistence with these new controls, assistive-technology review and browser zoom remain unverified; keep the card in review until remaining acceptance is resolved. No API code changed, so .NET tests were not run. The fixture is guarded with production not-found.

@@ -1,3 +1,6 @@
+import { Languages } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { CatalogWorkspace } from "@/components/organization/catalog-workspace"
 import { getLocale, getTranslations } from "next-intl/server"
 import { headers } from "next/headers"
 import { redirect } from "next/navigation"
@@ -6,21 +9,7 @@ import { isUuid } from "@/lib/validation/common"
 import { getRestaurantMemberships } from "@/services/orders"
 import { getManagedCatalog } from "@/services/catalog-management"
 import { Link } from "@/i18n/navigation"
-import { CategoryForm } from "@/components/organization/category-form"
-import { ProductForm } from "@/components/organization/product-form"
-import { ArchiveCatalogButton } from "@/components/organization/archive-catalog-button"
-import { RestoreProductButton } from "@/components/organization/restore-product-button"
-import { OptionGroupsEditor } from "@/components/organization/option-groups-editor"
-import { DiscountsEditor } from "@/components/organization/discounts-editor"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Badge } from "@/components/ui/badge"
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-} from "@/components/ui/card"
 import type { CatalogPageProps } from "@/types/catalog-management"
 
 export default async function CatalogPage({ searchParams }: CatalogPageProps) {
@@ -57,197 +46,35 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
     )
   }
 
-  const categories = [...catalog.categories].sort(
-    (a, b) => a.sortOrder - b.sortOrder || a.name.localeCompare(b.name)
-  )
-
   return (
-    <main className="mx-auto max-w-7xl p-4 sm:p-6 lg:p-8">
-      <Link
-        href="/organization"
-        className="text-sm text-primary hover:underline"
-      >
-        {t("back")}
-      </Link>
+    <main className="mx-auto w-full max-w-7xl min-w-0 p-4 sm:p-6 lg:p-8">
+      <header className="mb-8 flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <p className="text-sm font-medium text-primary">{restaurant.name}</p>
 
-      <header className="my-6">
-        <p className="text-sm text-muted-foreground">
-          {restaurant.name} · {catalog.currency}
-        </p>
+          <h1 className="mt-2 text-2xl font-semibold sm:text-[2rem]">
+            {t("title")}
+          </h1>
 
-        <h1 className="mt-2 text-2xl font-semibold sm:text-[2rem]">
-          {t("title")}
-        </h1>
+          <p className="mt-2 max-w-2xl text-muted-foreground">{t("intro")}</p>
+        </div>
 
-        <p className="mt-2 text-muted-foreground">{t("intro")}</p>
-
-        <Link
-          href={`/organization/restaurant-languages?tenantId=${encodeURIComponent(catalog.tenantId)}`}
-          className="mt-3 inline-flex min-h-11 items-center text-sm font-medium text-primary underline-offset-4 hover:underline"
+        <Button
+          variant="outline"
+          nativeButton={false}
+          render={
+            <Link
+              href={`/organization/restaurant-languages?tenantId=${encodeURIComponent(catalog.tenantId)}`}
+            />
+          }
         >
+          <Languages aria-hidden="true" />
+
           {t("menuLanguagesLink")}
-        </Link>
+        </Button>
       </header>
 
-      <div className="grid gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>
-              <h2>{t("newCategory")}</h2>
-            </CardTitle>
-          </CardHeader>
-
-          <CardContent>
-            <CategoryForm tenantId={catalog.tenantId} />
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>
-              <h2>{t("newProduct")}</h2>
-            </CardTitle>
-          </CardHeader>
-
-          <CardContent>
-            <ProductForm
-              tenantId={catalog.tenantId}
-              currency={catalog.currency}
-              categories={categories}
-            />
-          </CardContent>
-        </Card>
-
-        <DiscountsEditor
-          tenantId={catalog.tenantId}
-          currency={catalog.currency}
-          discounts={catalog.discounts}
-        />
-
-        {categories.length === 0 && (
-          <p className="text-muted-foreground">{t("empty")}</p>
-        )}
-
-        <ul className="grid gap-6">
-          {categories.map((category) => (
-            <li key={category.id}>
-              <Card>
-                <CardHeader>
-                  <CardTitle>
-                    <h2 className="text-lg">{category.name}</h2>
-                  </CardTitle>
-
-                  {category.isArchived && (
-                    <CardDescription>
-                      <Badge>{t("archived")}</Badge>
-                    </CardDescription>
-                  )}
-                </CardHeader>
-
-                <CardContent className="grid gap-6">
-                  {!category.isArchived && (
-                    <CategoryForm
-                      tenantId={catalog.tenantId}
-                      category={category}
-                      key={`${category.id}:${category.name}:${category.sortOrder}`}
-                    />
-                  )}
-
-                  {!category.isArchived && (
-                    <ArchiveCatalogButton
-                      tenantId={catalog.tenantId}
-                      id={category.id}
-                      entityType="categories"
-                      name={category.name}
-                    />
-                  )}
-
-                  <ul className="grid gap-6">
-                    {catalog.products
-                      .filter((product) => product.categoryId === category.id)
-                      .sort(
-                        (a, b) =>
-                          a.sortOrder - b.sortOrder ||
-                          a.name.localeCompare(b.name)
-                      )
-                      .map((product) => (
-                        <li key={product.id}>
-                          <Card>
-                            <CardHeader>
-                              <CardTitle>
-                                <h3 className="text-base">{product.name}</h3>
-                              </CardTitle>
-
-                              <CardDescription>
-                                {product.basePrice.toFixed(2)}{" "}
-                                {catalog.currency} ·{" "}
-                                {t("taxValue", {
-                                  value: product.taxRatePercent,
-                                })}
-                              </CardDescription>
-
-                              <Badge>
-                                {t(
-                                  product.isArchived
-                                    ? "archived"
-                                    : product.isAvailable
-                                      ? "available"
-                                      : "unavailable"
-                                )}
-                              </Badge>
-                            </CardHeader>
-
-                            {!product.isArchived && !category.isArchived && (
-                              <CardContent className="grid gap-4">
-                                <ProductForm
-                                  tenantId={catalog.tenantId}
-                                  currency={catalog.currency}
-                                  categories={categories}
-                                  product={product}
-                                  key={JSON.stringify(product)}
-                                />
-
-                                <ArchiveCatalogButton
-                                  tenantId={catalog.tenantId}
-                                  id={product.id}
-                                  entityType="products"
-                                  name={product.name}
-                                />
-                              </CardContent>
-                            )}
-
-                            {product.isArchived && !category.isArchived && (
-                              <CardContent>
-                                <RestoreProductButton
-                                  tenantId={catalog.tenantId}
-                                  id={product.id}
-                                />
-                              </CardContent>
-                            )}
-
-                            <CardContent>
-                              <OptionGroupsEditor
-                                tenantId={catalog.tenantId}
-                                currency={catalog.currency}
-                                productId={product.id}
-                                productName={product.name}
-                                optionGroups={catalog.optionGroups}
-                                options={catalog.options}
-                                parentArchived={
-                                  product.isArchived || category.isArchived
-                                }
-                              />
-                            </CardContent>
-                          </Card>
-                        </li>
-                      ))}
-                  </ul>
-                </CardContent>
-              </Card>
-            </li>
-          ))}
-        </ul>
-      </div>
+      <CatalogWorkspace catalog={catalog} />
     </main>
   )
 }

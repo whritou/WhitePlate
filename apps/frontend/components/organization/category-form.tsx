@@ -3,17 +3,26 @@
 import { useTranslations } from "next-intl"
 import { saveCategoryAction } from "@/actions/catalog"
 import { ResultMessage } from "@/components/auth/result-message"
-import { Button } from "@/components/ui/button"
+import { EditorFormActions } from "@/components/ui/editor-dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useCatalogForm } from "./use-catalog-form"
 import type { CategoryFormProps } from "@/types/catalog-management"
 
-export function CategoryForm({ tenantId, category }: CategoryFormProps) {
+export function CategoryForm({
+  tenantId,
+  category,
+  onSuccess,
+  onPendingChange,
+  onCancel,
+}: CategoryFormProps) {
   const t = useTranslations("Catalog")
   const { pending, state, submit } = useCatalogForm(
     saveCategoryAction,
-    !category
+    !category,
+    onSuccess,
+    undefined,
+    onPendingChange
   )
   const prefix = category?.id ?? "new-category"
 
@@ -57,9 +66,13 @@ export function CategoryForm({ tenantId, category }: CategoryFormProps) {
           />
         </Label>
 
-        <Button type="submit">
-          {pending ? t("saving") : category ? t("save") : t("createCategory")}
-        </Button>
+        <EditorFormActions
+          pending={pending}
+          onCancel={onCancel}
+          label={
+            pending ? t("saving") : category ? t("save") : t("createCategory")
+          }
+        />
       </fieldset>
 
       <ResultMessage

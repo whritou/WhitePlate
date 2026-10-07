@@ -96,7 +96,7 @@ it("renders active discount management with restaurant currency and percentage",
   expect(html).toContain('aria-label="Deactivate discount LUNCH10"')
   expect(html).toContain("£5.50")
   expect(html).toContain("15%")
-  expect(html).toContain('name="code"')
+  expect(html).not.toContain("<form")
 })
 
 it("keeps inactive codes visible as read-only history", () => {
@@ -109,7 +109,7 @@ it("keeps inactive codes visible as read-only history", () => {
   expect(html).toContain("WELCOME15")
   expect(html).not.toContain('aria-label="Edit discount WELCOME15"')
   expect(html).not.toContain('aria-label="Deactivate discount WELCOME15"')
-  expect(html.match(/name="code"/g)).toHaveLength(1)
+  expect(html).not.toContain("<form")
 })
 
 it("shows a localized empty state while keeping the create form available", () => {

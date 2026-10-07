@@ -14,7 +14,8 @@ export function useCatalogForm(
   action: CatalogFormAction,
   resetOnSuccess = false,
   onSuccess?: () => void,
-  successMessage?: string
+  successMessage?: string,
+  onPendingChange?: (pending: boolean) => void
 ) {
   const router = useRouter()
   const t = useTranslations("Catalog")
@@ -31,6 +32,7 @@ export function useCatalogForm(
     const input = new FormData(element)
 
     submitting.current = true
+    onPendingChange?.(true)
     setState({ status: "pending" })
     startTransition(async () => {
       try {
@@ -52,6 +54,7 @@ export function useCatalogForm(
         setState({ status: "error", error: "unavailable" })
       } finally {
         submitting.current = false
+        onPendingChange?.(false)
       }
     })
   }

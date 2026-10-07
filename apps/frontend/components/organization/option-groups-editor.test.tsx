@@ -100,9 +100,7 @@ it("renders owner forms with accessible fields and the restaurant currency", () 
 
   expect(html).toContain('aria-label="Edit option group Size"')
   expect(html).toContain('aria-label="Edit option Large"')
-  expect(html).toContain("Minimum selections")
-  expect(html).toContain("Maximum selections")
-  expect(html).toContain("Price adjustment (GBP)")
+  expect(html).not.toContain("<form")
   expect(html).toContain("£1.25")
 })
 

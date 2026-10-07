@@ -1,5 +1,7 @@
 "use client"
 
+import { RotateCcw } from "lucide-react"
+
 import { restoreProductAction } from "@/actions/catalog"
 import { Button } from "@/components/ui/button"
 import { useCatalogForm } from "./use-catalog-form"
@@ -28,6 +30,8 @@ export function RestoreProductButton({
       <input type="hidden" name="id" value={id} />
 
       <Button type="submit" variant="outline" disabled={pending}>
+        <RotateCcw aria-hidden="true" className="size-4" />
+
         {pending ? t("restoringProduct") : t("restoreProduct")}
       </Button>
 

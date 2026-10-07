@@ -14,6 +14,10 @@ export default defineConfig({
   timeout: 120_000,
   expect: { timeout: 20_000 },
   projects: [
+    {
+      name: "catalog-design",
+      testMatch: ["catalog-design.spec.ts", "catalog-design-save.spec.ts"],
+    },
     { name: "orders-kanban", testMatch: "orders-kanban.spec.ts" },
     { name: "order-history", testMatch: "order-history.spec.ts" },
     { name: "workspace-locale", testMatch: "workspace-locale.spec.ts" },

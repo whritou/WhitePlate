@@ -239,3 +239,7 @@ Run frontend commands from `apps/frontend`. GitHub Actions is the clean-install 
 Inspect Git status and preserve pre-existing work. The initial review found the entire project untracked and no commits; do not infer that untracked application files are disposable. Root `.gitignore` now excludes generated .NET output and IDE user state, while the frontend has its own scoped ignore file. Review staged content before the initial commit.
 
 Update affected contracts, architecture, and test scenarios. Report the checks actually run, their outcomes, and remaining blockers rather than treating proposed scenarios as passing tests.
+
+### Catalog and translation design fixture
+
+With the frontend development server running locally, run `npm run test:browser -- --project=catalog-design`. Set `WHITEPLATE_ACCEPTANCE_URL=http://localhost:3012` when using that port. `/fr/catalog-design-test` displays the catalog; add `?view=languages` for menu languages/translations. The route is unavailable in production. Tests cover both locales/themes, 320–1440 px layouts, keyboard/focus, nested dialogs, cancellation, archived/inactive controls, and synthetic rejected/acknowledged saves. These tests do not prove API/database persistence. Optional `WHITEPLATE_DESIGN_SCREENSHOTS` writes review screenshots to the supplied directory.

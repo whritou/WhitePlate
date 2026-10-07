@@ -1,5 +1,7 @@
 "use client"
 
+import { Ban } from "lucide-react"
+
 import { useState } from "react"
 import { useTranslations } from "next-intl"
 import { deactivateDiscountAction } from "@/actions/catalog"
@@ -47,6 +49,8 @@ export function DeactivateDiscountButton({
         render={<Button type="button" variant="outline" />}
         aria-label={t("deactivateDiscount", { code })}
       >
+        <Ban aria-hidden="true" className="size-4" />
+
         {t("deactivate")}
       </AlertDialogTrigger>
 

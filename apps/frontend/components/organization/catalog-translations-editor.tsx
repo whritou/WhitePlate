@@ -1,11 +1,20 @@
 "use client"
 
-import { CatalogTranslationRow } from "@/components/organization/catalog-translation-row"
+import { useLocale, useTranslations } from "next-intl"
+import { useState } from "react"
+import { Search } from "lucide-react"
+import { CatalogTranslationRow } from "./catalog-translation-row"
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
 import type { CatalogTranslationData, TranslationRow } from "@/types/catalog"
-import { useLocale, useTranslations } from "next-intl"
-import { useState } from "react"
 
 export function CatalogTranslationsEditor({
   tenantId,
@@ -19,8 +28,13 @@ export function CatalogTranslationsEditor({
   catalog: CatalogTranslationData
 }) {
   const t = useTranslations("Auth")
+  const u = useTranslations("MenuTranslations")
   const uiLocale = useLocale()
-  const [locale, setLocale] = useState(defaultLocale)
+  const [chosenLocale, setLocale] = useState(defaultLocale)
+  const [search, setSearch] = useState("")
+  const [kind, setKind] = useState("all")
+  const [status, setStatus] = useState("all")
+  const locale = locales.includes(chosenLocale) ? chosenLocale : defaultLocale
   const rows: TranslationRow[] = [
     ...catalog.categories.map((item) => ({
       ...item,
@@ -46,79 +60,158 @@ export function CatalogTranslationsEditor({
       description: null,
     })),
   ].filter((item) => !item.isArchived)
-  const displayNames = new Intl.DisplayNames([uiLocale], { type: "language" })
+  const visible = rows.filter(
+    (row) =>
+      (kind === "all" || row.type === kind) &&
+      (status === "all" ||
+        (status === "missing"
+          ? !row.translations[locale]
+          : !!row.translations[locale])) &&
+      (row.name + " " + (row.translations[locale]?.name ?? ""))
+        .toLocaleLowerCase()
+        .includes(search.trim().toLocaleLowerCase())
+  )
+  const names = new Intl.DisplayNames([uiLocale], { type: "language" })
 
   return (
-    <section className="mt-10 border-t border-border pt-8">
-      <div className="flex flex-wrap items-end justify-between gap-4">
+    <Card>
+      <CardHeader className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h2 className="text-xl font-semibold tracking-tight">
-            {t("menuTranslationsTitle")}
-          </h2>
+          <CardTitle>
+            <h2>{t("menuTranslationsTitle")}</h2>
+          </CardTitle>
 
-          <p className="mt-1 max-w-xl text-sm leading-6 text-muted-foreground">
+          <CardDescription className="mt-2 max-w-xl">
             {t("menuTranslationsDescription")}
-          </p>
+          </CardDescription>
         </div>
 
-        <Label
-          className="grid gap-1.5 font-medium text-muted-foreground"
-          htmlFor="translation-locale"
-        >
-          {t("editLanguage")}
+        <div className="grid w-full gap-2 sm:w-auto">
+          <Label htmlFor="translation-locale">{t("editLanguage")}</Label>
 
           <NativeSelect
             id="translation-locale"
             value={locale}
             onChange={(event) => setLocale(event.target.value)}
-            className="w-full"
-            selectClassName="min-w-44 px-3 text-foreground"
+            selectClassName="w-full sm:min-w-48"
           >
             {locales.map((value) => (
               <NativeSelectOption key={value} value={value}>
-                {languageName(displayNames, value)} ({value})
+                {names.of(value) ?? value} ({value})
               </NativeSelectOption>
             ))}
           </NativeSelect>
-        </Label>
-      </div>
+        </div>
+      </CardHeader>
 
-      {rows.length === 0 ? (
-        <p className="mt-5 rounded-md border border-dashed border-border p-4 text-sm text-muted-foreground">
-          {t("noCatalogTranslations")}
-        </p>
-      ) : (
-        <ul className="mt-5 divide-y divide-border rounded-lg border border-border">
-          {rows.map((row) => {
-            const text =
-              row.translations[locale] ?? row.translations[defaultLocale]
+      <CardContent className="grid gap-5">
+        <div className="grid gap-4 border-b border-border pb-5 md:grid-cols-[minmax(0,1fr)_auto_auto]">
+          <div className="grid gap-2">
+            <Label htmlFor="translation-search">{u("search")}</Label>
 
-            return (
-              <li
-                key={`${locale}-${row.type}-${row.id}`}
-                className="p-4 sm:p-5"
-              >
-                <CatalogTranslationRow
-                  tenantId={tenantId}
-                  row={row}
-                  locale={locale}
-                  initialName={text?.name ?? row.name}
-                  initialDescription={text?.description ?? row.description}
-                  label={row.label}
-                />
-              </li>
-            )
+            <div className="relative">
+              <Search
+                aria-hidden="true"
+                className="absolute top-3 left-3 size-5 text-muted-foreground"
+              />
+
+              <Input
+                id="translation-search"
+                className="pl-10"
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                placeholder={u("searchPlaceholder")}
+              />
+            </div>
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="translation-kind">{u("type")}</Label>
+
+            <NativeSelect
+              id="translation-kind"
+              value={kind}
+              onChange={(event) => setKind(event.target.value)}
+              selectClassName="w-full"
+            >
+              <NativeSelectOption value="all">
+                {u("allTypes")}
+              </NativeSelectOption>
+
+              {(
+                ["categories", "products", "option-groups", "options"] as const
+              ).map((value, index) => (
+                <NativeSelectOption key={value} value={value}>
+                  {t(
+                    [
+                      "menuCategory",
+                      "menuProduct",
+                      "menuOptionGroup",
+                      "menuOption",
+                    ][index]
+                  )}
+                </NativeSelectOption>
+              ))}
+            </NativeSelect>
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="translation-status">{u("status")}</Label>
+
+            <NativeSelect
+              id="translation-status"
+              value={status}
+              onChange={(event) => setStatus(event.target.value)}
+              selectClassName="w-full"
+            >
+              <NativeSelectOption value="all">
+                {u("allStatuses")}
+              </NativeSelectOption>
+
+              <NativeSelectOption value="missing">
+                {u("missing")}
+              </NativeSelectOption>
+
+              <NativeSelectOption value="translated">
+                {u("translated")}
+              </NativeSelectOption>
+            </NativeSelect>
+          </div>
+        </div>
+
+        <p role="status" className="text-sm text-muted-foreground">
+          {u("progress", {
+            count: rows.filter((row) => !!row.translations[locale]).length,
+            total: rows.length,
           })}
-        </ul>
-      )}
-    </section>
-  )
-}
+        </p>
 
-function languageName(names: Intl.DisplayNames, locale: string) {
-  try {
-    return names.of(locale) ?? locale
-  } catch {
-    return locale
-  }
+        {visible.length === 0 ? (
+          <p className="py-8 text-center text-muted-foreground">
+            {rows.length === 0 ? t("noCatalogTranslations") : u("noResults")}
+          </p>
+        ) : (
+          <ul className="divide-y divide-border">
+            {visible.map((row) => {
+              const text =
+                row.translations[locale] ?? row.translations[defaultLocale]
+
+              return (
+                <li key={`${locale}-${row.type}-${row.id}`} className="py-5">
+                  <CatalogTranslationRow
+                    tenantId={tenantId}
+                    row={row}
+                    locale={locale}
+                    initialName={text?.name ?? row.name}
+                    initialDescription={text?.description ?? row.description}
+                    label={row.label}
+                  />
+                </li>
+              )
+            })}
+          </ul>
+        )}
+      </CardContent>
+    </Card>
+  )
 }

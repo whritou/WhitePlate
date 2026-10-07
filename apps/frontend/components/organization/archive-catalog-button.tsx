@@ -1,5 +1,7 @@
 "use client"
 
+import { Archive } from "lucide-react"
+
 import { useState } from "react"
 import { useTranslations } from "next-intl"
 import { archiveCatalogItemAction } from "@/actions/catalog"
@@ -58,6 +60,8 @@ export function ArchiveCatalogButton({
         render={<Button type="button" variant="outline" />}
         aria-label={t("archiveName", { name })}
       >
+        <Archive aria-hidden="true" className="size-4" />
+
         {t("archive")}
       </AlertDialogTrigger>
 

@@ -43,6 +43,24 @@ class TestFormData {
   constructor(readonly form: unknown) {}
 }
 
+it("locks the modal until the mutation settles and closes only on success", async () => {
+  const events: string[] = []
+  const { submit } = useCatalogForm(
+    async () => ({ ok: true }),
+    false,
+    () => events.push("saved"),
+    undefined,
+    (pending) => events.push(pending ? "locked" : "unlocked")
+  )
+
+  submit({
+    preventDefault() {},
+    currentTarget: {},
+  } as FormEvent<HTMLFormElement>)
+  await mocks.transitionTask
+  expect(events).toEqual(["locked", "saved", "unlocked"])
+})
+
 beforeEach(() => {
   vi.clearAllMocks()
   mocks.transitionTask = Promise.resolve()
