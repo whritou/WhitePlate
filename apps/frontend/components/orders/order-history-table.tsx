@@ -1,11 +1,18 @@
-import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react"
+import {
+  ArrowDown,
+  ArrowUp,
+  ArrowUpDown,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+} from "lucide-react"
+import type { LucideIcon } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
+import { OrderHistoryFilters as OrderHistoryFiltersPanel } from "@/components/orders/order-history-filters"
 import {
   Table,
   TableBody,
@@ -67,102 +74,7 @@ export function OrderHistoryTable({
         </p>
       </header>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>{t("filtersTitle")}</CardTitle>
-        </CardHeader>
-
-        <CardContent>
-          <form
-            method="get"
-            className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5"
-          >
-            <input type="hidden" name="tenantId" value={filters.tenantId} />
-
-            <div className="grid gap-2 text-sm font-medium lg:col-span-2">
-              <Label htmlFor="history-search">{t("search")}</Label>
-
-              <Input
-                id="history-search"
-                name="search"
-                defaultValue={filters.search ?? ""}
-                placeholder={t("searchPlaceholder")}
-              />
-            </div>
-
-            <div className="grid gap-2 text-sm font-medium">
-              <Label htmlFor="history-status">{t("status")}</Label>
-
-              <NativeSelect
-                id="history-status"
-                name="status"
-                defaultValue={filters.status ?? "all"}
-              >
-                <NativeSelectOption value="all">
-                  {t("allStatuses")}
-                </NativeSelectOption>
-
-                {(
-                  [
-                    "Pending",
-                    "Preparing",
-                    "Ready",
-                    "Completed",
-                    "Cancelled",
-                  ] as const
-                ).map((status) => (
-                  <NativeSelectOption key={status} value={status}>
-                    {t(`statuses.${status}`)}
-                  </NativeSelectOption>
-                ))}
-              </NativeSelect>
-            </div>
-
-            <div className="grid gap-2 text-sm font-medium">
-              <Label htmlFor="history-from">{t("from")}</Label>
-
-              <Input
-                id="history-from"
-                type="date"
-                name="from"
-                defaultValue={filters.from ?? ""}
-              />
-            </div>
-
-            <div className="grid gap-2 text-sm font-medium">
-              <Label htmlFor="history-through">{t("through")}</Label>
-
-              <Input
-                id="history-through"
-                type="date"
-                name="through"
-                defaultValue={filters.through ?? ""}
-              />
-            </div>
-
-            <input type="hidden" name="sort" value={filters.sort} />
-
-            <input type="hidden" name="direction" value={filters.direction} />
-
-            <input type="hidden" name="pageSize" value={filters.pageSize} />
-
-            <div className="flex items-end gap-2 sm:col-span-2 lg:col-span-5">
-              <Button type="submit">{t("applyFilters")}</Button>
-
-              <Button
-                variant="outline"
-                render={
-                  <Link
-                    href={`/organization/order-history?tenantId=${encodeURIComponent(filters.tenantId)}`}
-                  />
-                }
-              >
-                {t("clearFilters")}
-              </Button>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
+      <OrderHistoryFiltersPanel filters={filters} />
 
       <Card>
         <CardHeader>
@@ -286,36 +198,79 @@ export function OrderHistoryTable({
             </p>
 
             <div className="flex gap-2">
-              {page.page > 1 ? (
-                <Button
-                  variant="outline"
-                  render={<Link href={pageHref(filters, page.page - 1)} />}
-                >
-                  {t("previous")}
-                </Button>
-              ) : (
-                <Button variant="outline" disabled>
-                  {t("previous")}
-                </Button>
-              )}
+              <PageButton
+                filters={filters}
+                page={1}
+                label={t("firstPage")}
+                icon={ChevronsLeft}
+                disabled={page.page <= 1}
+              />
 
-              {page.page < pageCount ? (
-                <Button
-                  variant="outline"
-                  render={<Link href={pageHref(filters, page.page + 1)} />}
-                >
-                  {t("next")}
-                </Button>
-              ) : (
-                <Button variant="outline" disabled>
-                  {t("next")}
-                </Button>
-              )}
+              <PageButton
+                filters={filters}
+                page={page.page - 1}
+                label={t("previous")}
+                icon={ChevronLeft}
+                disabled={page.page <= 1}
+              />
+
+              <PageButton
+                filters={filters}
+                page={page.page + 1}
+                label={t("next")}
+                icon={ChevronRight}
+                disabled={page.page >= pageCount}
+              />
+
+              <PageButton
+                filters={filters}
+                page={pageCount}
+                label={t("lastPage")}
+                icon={ChevronsRight}
+                disabled={page.page >= pageCount}
+              />
             </div>
           </nav>
         </CardContent>
       </Card>
     </main>
+  )
+}
+
+function PageButton({
+  filters,
+  page,
+  label,
+  icon: Icon,
+  disabled,
+}: {
+  filters: OrderHistoryFilters
+  page: number
+  label: string
+  icon: LucideIcon
+  disabled: boolean
+}) {
+  const icon = <Icon aria-hidden="true" className="size-4" />
+
+  if (disabled) {
+    return (
+      <Button variant="outline" size="icon" aria-label={label} disabled>
+        {icon}
+      </Button>
+    )
+  }
+
+  return (
+    <Button
+      variant="outline"
+      size="icon"
+      aria-label={label}
+      nativeButton={false}
+      role="link"
+      render={<Link href={pageHref(filters, page)} aria-label={label} />}
+    >
+      {icon}
+    </Button>
   )
 }
 
