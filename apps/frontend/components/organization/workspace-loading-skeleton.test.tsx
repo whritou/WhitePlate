@@ -10,5 +10,7 @@ it("matches the overview content width and renders wrapping action placeholders"
 
   expect(html).toContain("max-w-7xl")
   expect(html).toContain('data-skeleton-page="overview"')
-  expect(html.match(/flex[^\"]*flex-wrap[^\"]*gap-3/g)?.length).toBeGreaterThanOrEqual(2)
+  expect(
+    html.match(/flex[^\"]*flex-wrap[^\"]*gap-3/g)?.length
+  ).toBeGreaterThanOrEqual(2)
 })
