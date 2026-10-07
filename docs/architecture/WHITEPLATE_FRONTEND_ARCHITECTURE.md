@@ -72,7 +72,7 @@ No `src/` folder exists. The TypeScript alias `@/*` resolves to the frontend roo
 
 `[locale]/not-found.tsx` renders the localized App Router not-found experience, and `[locale]/unauthorized/page.tsx` provides a localized access-denied destination. Workspace return links share the arrow-icon `BackLink` while each page controls its placement.
 
-`app/global-not-found.tsx` handles unmatched URLs outside the dynamic `[locale]` segment with the installed Next.js experimental `globalNotFound` convention. It imports the global stylesheet and provides its own full HTML document because the convention bypasses application layouts; it offers both locale destinations and follows the operating-system color preference. The localized `not-found.tsx` handles unknown routes within `/en` and `/fr` and keeps the workspace design-system presentation.
+`app/global-not-found.tsx` handles unmatched URLs outside the dynamic `[locale]` segment with the installed Next.js experimental `globalNotFound` convention. It imports the global stylesheet and provides its own full HTML document because the convention bypasses application layouts; it offers browser-back and home actions and follows the operating-system color preference. The localized `not-found.tsx` handles unknown routes within `/en` and `/fr` and keeps the workspace design-system presentation.
 
 ## Rendering and theme
 
