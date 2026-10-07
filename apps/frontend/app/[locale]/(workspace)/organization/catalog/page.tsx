@@ -80,6 +80,13 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
         </h1>
 
         <p className="mt-2 text-muted-foreground">{t("intro")}</p>
+
+        <Link
+          href={`/organization/restaurant-languages?tenantId=${encodeURIComponent(catalog.tenantId)}`}
+          className="mt-3 inline-flex min-h-11 items-center text-sm font-medium text-primary underline-offset-4 hover:underline"
+        >
+          {t("menuLanguagesLink")}
+        </Link>
       </header>
 
       <div className="grid gap-6">
