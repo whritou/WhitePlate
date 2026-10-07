@@ -186,6 +186,13 @@ test("staff roles, stale versions, revocation and tenant boundaries on the live 
       managerPage.getByRole("heading", { name: "Manage catalog", exact: true })
     ).toBeVisible()
 
+    await managerPage
+      .getByRole("tab", { name: "Categories", exact: true })
+      .click()
+    await managerPage
+      .getByRole("button", { name: "New category", exact: true })
+      .click()
+
     const managerCategory = managerPage.getByRole("form", {
       name: "New category",
       exact: true,

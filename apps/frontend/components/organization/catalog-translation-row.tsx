@@ -1,15 +1,10 @@
 "use client"
 
-import { saveCatalogTranslationAction } from "@/actions/organization"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { useWorkspaceToast } from "@/components/ui/toast"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import type { TranslationRow } from "@/types/catalog"
 import { useTranslations } from "next-intl"
-import { useState } from "react"
+import { Badge } from "@/components/ui/badge"
+import { EditorDialog } from "@/components/ui/editor-dialog"
+import type { TranslationRow } from "@/types/catalog"
+import { CatalogTranslationForm } from "./catalog-translation-form"
 
 export function CatalogTranslationRow({
   tenantId,
@@ -26,90 +21,62 @@ export function CatalogTranslationRow({
   initialDescription: string | null
   label: string
 }) {
-  const t = useTranslations("Auth")
-  const toast = useWorkspaceToast()
-  const [name, setName] = useState(initialName)
-  const [description, setDescription] = useState(initialDescription ?? "")
-  const [state, setState] = useState<"idle" | "pending" | "success" | "error">(
-    "idle"
-  )
-
-  async function save() {
-    setState("pending")
-
-    const result = await saveCatalogTranslationAction({
-      tenantId,
-      entityType: row.type,
-      entityId: row.id,
-      locale,
-      name,
-      description: row.type === "products" ? description : null,
-    }).catch(() => ({ ok: false as const }))
-
-    if (result.ok) {
-      toast.success(t("translationSaved"))
-      setState("idle")
-    } else setState("error")
-  }
+  const t = useTranslations("MenuTranslations")
+  const saved = row.translations[locale]
 
   return (
-    <div className="grid gap-3">
-      <div className="flex flex-wrap items-center gap-2">
-        <Badge variant="secondary">{label}</Badge>
+    <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]">
+      <div className="min-w-0">
+        <p className="mb-1 text-sm text-muted-foreground">{label}</p>
 
-        <h3 className="font-medium">{row.name}</h3>
-      </div>
+        <h3 className="font-semibold break-words">{row.name}</h3>
 
-      <Label className="grid gap-1.5 font-medium">
-        {t("translatedName")}
-
-        <Input
-          disabled={state === "pending"}
-          value={name}
-          onChange={(event) => {
-            setName(event.target.value)
-            setState("idle")
-          }}
-          maxLength={row.type === "products" ? 160 : 120}
-          required
-          className="px-3 font-normal"
-        />
-      </Label>
-
-      {row.type === "products" && (
-        <Label className="grid gap-1.5 font-medium">
-          {t("translatedDescription")}
-
-          <Textarea
-            disabled={state === "pending"}
-            value={description}
-            onChange={(event) => {
-              setDescription(event.target.value)
-              setState("idle")
-            }}
-            maxLength={1000}
-            rows={2}
-            className="px-3 py-2 font-normal"
-          />
-        </Label>
-      )}
-
-      <div className="flex flex-wrap items-center gap-3">
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={() => void save()}
-          disabled={state === "pending"}
-        >
-          {state === "pending" ? t("savingTranslation") : t("saveTranslation")}
-        </Button>
-
-        {state === "error" && (
-          <p role="alert" className="text-sm text-destructive">
-            {t("translationError")}
+        {row.description && (
+          <p className="mt-1 text-sm break-words text-muted-foreground">
+            {row.description}
           </p>
         )}
+      </div>
+
+      <div className="min-w-0">
+        <Badge variant={saved ? "success" : "warning"}>
+          {t(saved ? "translated" : "missing")}
+        </Badge>
+
+        {saved ? (
+          <div lang={locale} className="mt-2 break-words">
+            <p className="font-medium">{saved.name}</p>
+
+            {saved.description && (
+              <p className="mt-1 text-sm text-muted-foreground">
+                {saved.description}
+              </p>
+            )}
+          </div>
+        ) : (
+          <p className="mt-2 text-sm text-muted-foreground">
+            {t("fallbackNotice")}
+          </p>
+        )}
+      </div>
+
+      <div>
+        <EditorDialog
+          title={t("editTitle", { name: row.name, locale })}
+          label={t(saved ? "edit" : "add")}
+          description={t("editorHelp", { locale })}
+        >
+          {(callbacks) => (
+            <CatalogTranslationForm
+              tenantId={tenantId}
+              row={row}
+              locale={locale}
+              initialName={initialName}
+              initialDescription={initialDescription}
+              {...callbacks}
+            />
+          )}
+        </EditorDialog>
       </div>
     </div>
   )

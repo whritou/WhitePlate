@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl"
 import { saveProductAction } from "@/actions/catalog"
 import { ResultMessage } from "@/components/auth/result-message"
-import { Button } from "@/components/ui/button"
+import { EditorFormActions } from "@/components/ui/editor-dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
@@ -15,9 +15,18 @@ export function ProductForm({
   currency,
   categories,
   product,
+  onSuccess,
+  onPendingChange,
+  onCancel,
 }: ProductFormProps) {
   const t = useTranslations("Catalog")
-  const { pending, state, submit } = useCatalogForm(saveProductAction, !product)
+  const { pending, state, submit } = useCatalogForm(
+    saveProductAction,
+    !product,
+    onSuccess,
+    undefined,
+    onPendingChange
+  )
   const prefix = product?.id ?? "new-product"
   const activeCategories = categories.filter((category) => !category.isArchived)
 
@@ -154,9 +163,13 @@ export function ProductForm({
           </Label>
         )}
 
-        <Button type="submit">
-          {pending ? t("saving") : product ? t("save") : t("createProduct")}
-        </Button>
+        <EditorFormActions
+          pending={pending}
+          onCancel={onCancel}
+          label={
+            pending ? t("saving") : product ? t("save") : t("createProduct")
+          }
+        />
       </fieldset>
 
       <ResultMessage

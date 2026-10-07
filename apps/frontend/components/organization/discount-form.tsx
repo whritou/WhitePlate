@@ -4,7 +4,7 @@ import { useState } from "react"
 import { useTranslations } from "next-intl"
 import { saveDiscountAction } from "@/actions/catalog"
 import { ResultMessage } from "@/components/auth/result-message"
-import { Button } from "@/components/ui/button"
+import { EditorFormActions } from "@/components/ui/editor-dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
@@ -18,6 +18,9 @@ export function DiscountForm({
   tenantId,
   currency,
   discount,
+  onSuccess,
+  onPendingChange,
+  onCancel,
 }: DiscountFormProps) {
   const t = useTranslations("Catalog")
   const [kind, setKind] = useState<CatalogDiscount["kind"]>(
@@ -25,7 +28,10 @@ export function DiscountForm({
   )
   const { pending, state, submit } = useCatalogForm(
     saveDiscountAction,
-    !discount
+    !discount,
+    onSuccess,
+    undefined,
+    onPendingChange
   )
   const prefix = discount?.id ?? "new-discount"
   const valueMaximum = kind === "Percentage" ? 100 : 9999999999.99
@@ -128,9 +134,13 @@ export function DiscountForm({
           />
         </Label>
 
-        <Button type="submit">
-          {pending ? t("saving") : discount ? t("save") : t("createDiscount")}
-        </Button>
+        <EditorFormActions
+          pending={pending}
+          onCancel={onCancel}
+          label={
+            pending ? t("saving") : discount ? t("save") : t("createDiscount")
+          }
+        />
       </fieldset>
 
       <ResultMessage state={state} message={feedback} hideSuccess />

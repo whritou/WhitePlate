@@ -1,13 +1,8 @@
 import { CatalogTranslationsEditor } from "@/components/organization/catalog-translations-editor"
-import { MenuLanguageSettingsForm } from "@/components/organization/menu-language-settings-form"
+import { MenuLanguageSettings } from "@/components/organization/menu-language-settings"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import { Package } from "lucide-react"
+import { Button } from "@/components/ui/button"
 import { Link } from "@/i18n/navigation"
 import { auth } from "@/lib/auth"
 import { isUuid } from "@/lib/validation/common"
@@ -65,53 +60,45 @@ export default async function RestaurantMenuLanguagesPage({
   }
 
   return (
-    <main className="mx-auto min-h-[70vh] max-w-3xl p-4 sm:p-6 lg:p-8">
-      <Link
-        href="/organization"
-        className="text-sm font-medium text-primary underline-offset-4 hover:underline"
-      >
-        {t("backToOrganizations")}
-      </Link>
+    <main className="mx-auto grid w-full max-w-7xl min-w-0 gap-6 p-4 sm:p-6 lg:p-8">
+      <header className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold sm:text-[2rem]">
+            {t("menuLanguagesTitle")}
+          </h1>
 
-      <Card className="mt-6 rounded-lg border border-border bg-card p-6 sm:p-8">
-        <CardHeader className="px-0">
-          <p className="text-sm font-medium text-primary">WhitePlate</p>
-
-          <CardTitle>
-            <h1 className="mt-2 text-2xl font-semibold tracking-tight">
-              {t("menuLanguagesTitle")}
-            </h1>
-          </CardTitle>
-
-          <CardDescription className="mt-2 max-w-xl text-sm leading-6 text-muted-foreground">
+          <p className="mt-2 max-w-2xl text-muted-foreground">
             {t("menuLanguagesDescription")}
-          </CardDescription>
+          </p>
+        </div>
 
-          <Link
-            href={`/organization/catalog?tenantId=${encodeURIComponent(response.data.tenantId)}`}
-            className="inline-flex min-h-11 items-center text-sm font-medium text-primary underline-offset-4 hover:underline"
-          >
-            {catalogT("catalogLink")}
-          </Link>
-        </CardHeader>
-
-        <CardContent className="px-0">
-          <div className="mt-8">
-            <MenuLanguageSettingsForm
-              tenantId={response.data.tenantId}
-              locales={response.data.locales}
-              defaultLocale={response.data.defaultLocale}
+        <Button
+          variant="outline"
+          nativeButton={false}
+          render={
+            <Link
+              href={`/organization/catalog?tenantId=${encodeURIComponent(response.data.tenantId)}`}
             />
+          }
+        >
+          <Package aria-hidden="true" />
 
-            <CatalogTranslationsEditor
-              tenantId={response.data.tenantId}
-              locales={response.data.locales}
-              defaultLocale={response.data.defaultLocale}
-              catalog={catalogResponse.data}
-            />
-          </div>
-        </CardContent>
-      </Card>
+          {catalogT("catalogLink")}
+        </Button>
+      </header>
+
+      <MenuLanguageSettings
+        tenantId={response.data.tenantId}
+        locales={response.data.locales}
+        defaultLocale={response.data.defaultLocale}
+      />
+
+      <CatalogTranslationsEditor
+        tenantId={response.data.tenantId}
+        locales={response.data.locales}
+        defaultLocale={response.data.defaultLocale}
+        catalog={catalogResponse.data}
+      />
     </main>
   )
 }

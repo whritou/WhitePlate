@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl"
 import { saveOptionGroupAction } from "@/actions/catalog"
 import { ResultMessage } from "@/components/auth/result-message"
-import { Button } from "@/components/ui/button"
+import { EditorFormActions } from "@/components/ui/editor-dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useCatalogForm } from "./use-catalog-form"
@@ -14,11 +14,17 @@ export function OptionGroupForm({
   productId,
   productName,
   group,
+  onSuccess,
+  onPendingChange,
+  onCancel,
 }: OptionGroupFormProps) {
   const t = useTranslations("Catalog")
   const { pending, state, submit } = useCatalogForm(
     saveOptionGroupAction,
-    !group
+    !group,
+    onSuccess,
+    undefined,
+    onPendingChange
   )
   const prefix = group?.id ?? productId
 
@@ -109,9 +115,13 @@ export function OptionGroupForm({
           {t("selectionBoundsHint")}
         </p>
 
-        <Button type="submit">
-          {pending ? t("saving") : group ? t("save") : t("createOptionGroup")}
-        </Button>
+        <EditorFormActions
+          pending={pending}
+          onCancel={onCancel}
+          label={
+            pending ? t("saving") : group ? t("save") : t("createOptionGroup")
+          }
+        />
       </fieldset>
 
       <ResultMessage

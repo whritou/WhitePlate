@@ -1,18 +1,20 @@
 "use client"
 
+import { Plus } from "lucide-react"
 import { useLocale, useTranslations } from "next-intl"
 import { ArchiveCatalogButton } from "@/components/organization/archive-catalog-button"
 import { Badge } from "@/components/ui/badge"
+import { EditorDialog } from "@/components/ui/editor-dialog"
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
+  CardDescription,
 } from "@/components/ui/card"
 import type {
-  CatalogOption,
   CatalogOptionGroup,
+  CatalogOption,
   OptionGroupsEditorProps,
 } from "@/types/catalog-management"
 import { OptionForm } from "./option-form"
@@ -28,43 +30,43 @@ export function OptionGroupsEditor({
   parentArchived,
 }: OptionGroupsEditorProps) {
   const t = useTranslations("Catalog")
-  const titleId = `option-groups-${productId}`
-  const orderedGroups = [...optionGroups]
+  const u = useTranslations("CatalogView")
+  const groups = optionGroups
     .filter((group) => group.productId === productId)
-    .sort(
-      (first, second) =>
-        first.sortOrder - second.sortOrder ||
-        first.name.localeCompare(second.name)
-    )
+    .sort((a, b) => a.sortOrder - b.sortOrder || a.name.localeCompare(b.name))
 
   return (
-    <section
-      aria-labelledby={titleId}
-      className="grid gap-4 border-t border-border pt-5"
-    >
-      <header>
-        <h4 id={titleId} className="font-medium text-foreground">
-          {t("optionGroupsTitle")}
-        </h4>
-
-        <p className="mt-1 text-sm text-muted-foreground">
+    <section className="grid gap-5" aria-label={t("optionGroupsTitle")}>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="max-w-lg text-sm text-muted-foreground">
           {t("optionGroupsDescription")}
         </p>
-      </header>
 
-      {!parentArchived && (
-        <OptionGroupForm
-          tenantId={tenantId}
-          productId={productId}
-          productName={productName}
-        />
-      )}
+        {!parentArchived && (
+          <EditorDialog
+            primary
+            icon={Plus}
+            title={t("newOptionGroupFor", { name: productName })}
+            label={u("addGroup")}
+            description={u("groupEditorHelp")}
+          >
+            {(callbacks) => (
+              <OptionGroupForm
+                tenantId={tenantId}
+                productId={productId}
+                productName={productName}
+                {...callbacks}
+              />
+            )}
+          </EditorDialog>
+        )}
+      </div>
 
-      {orderedGroups.length === 0 ? (
-        <p className="text-sm text-muted-foreground">{t("noOptionGroups")}</p>
+      {groups.length === 0 ? (
+        <p className="py-6 text-muted-foreground">{t("noOptionGroups")}</p>
       ) : (
-        <ul className="grid gap-3">
-          {orderedGroups.map((group) => (
+        <ul className="grid gap-5">
+          {groups.map((group) => (
             <li key={group.id}>
               <OptionGroupCard
                 tenantId={tenantId}
@@ -98,46 +100,47 @@ function OptionGroupCard({
   parentArchived: boolean
 }) {
   const t = useTranslations("Catalog")
+  const u = useTranslations("CatalogView")
   const archived = parentArchived || group.isArchived
-  const orderedOptions = [...options]
+  const entries = options
     .filter((option) => option.groupId === group.id)
-    .sort(
-      (first, second) =>
-        first.sortOrder - second.sortOrder ||
-        first.name.localeCompare(second.name)
-    )
+    .sort((a, b) => a.sortOrder - b.sortOrder || a.name.localeCompare(b.name))
 
   return (
-    <Card size="sm" className="gap-3">
-      <CardHeader>
-        <CardTitle>
-          <h5 className="font-medium">{group.name}</h5>
-        </CardTitle>
+    <Card>
+      <CardHeader className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <CardTitle>
+            <h3 className="break-words">{group.name}</h3>
+          </CardTitle>
 
-        <CardDescription>
-          {t("selectionRule", {
-            min: group.minimumSelections,
-            max: group.maximumSelections,
-          })}
-        </CardDescription>
+          <CardDescription>
+            {t("selectionRule", {
+              min: group.minimumSelections,
+              max: group.maximumSelections,
+            })}
+          </CardDescription>
 
-        {archived && <Badge variant="secondary">{t("archived")}</Badge>}
-      </CardHeader>
+          {archived && <Badge variant="neutral">{t("archived")}</Badge>}
+        </div>
 
-      <CardContent className="grid gap-4">
-        {archived ? (
-          <p className="text-sm text-muted-foreground">
-            {t("archivedOptionsHistory")}
-          </p>
-        ) : (
-          <>
-            <OptionGroupForm
-              tenantId={tenantId}
-              productId={group.productId}
-              productName={productName}
-              group={group}
-              key={`${group.id}:${group.name}:${group.minimumSelections}:${group.maximumSelections}:${group.sortOrder}`}
-            />
+        {!archived && (
+          <div className="flex flex-wrap gap-2">
+            <EditorDialog
+              title={t("editOptionGroup", { name: group.name })}
+              label={u("edit")}
+              description={u("groupEditorHelp")}
+            >
+              {(callbacks) => (
+                <OptionGroupForm
+                  tenantId={tenantId}
+                  productId={group.productId}
+                  productName={productName}
+                  group={group}
+                  {...callbacks}
+                />
+              )}
+            </EditorDialog>
 
             <ArchiveCatalogButton
               tenantId={tenantId}
@@ -145,19 +148,19 @@ function OptionGroupCard({
               entityType="option-groups"
               name={group.name}
             />
-
-            <OptionForm tenantId={tenantId} currency={currency} group={group} />
-          </>
+          </div>
         )}
+      </CardHeader>
 
-        {orderedOptions.length === 0 ? (
+      <CardContent className="grid gap-4">
+        {entries.length === 0 ? (
           <p className="text-sm text-muted-foreground">{t("noOptions")}</p>
         ) : (
           <ul
             aria-label={t("optionsForGroup", { name: group.name })}
-            className="grid gap-2"
+            className="divide-y divide-border"
           >
-            {orderedOptions.map((option) => (
+            {entries.map((option) => (
               <li key={option.id}>
                 <OptionEntry
                   tenantId={tenantId}
@@ -169,6 +172,26 @@ function OptionGroupCard({
               </li>
             ))}
           </ul>
+        )}
+
+        {!archived && (
+          <div>
+            <EditorDialog
+              icon={Plus}
+              title={t("newOptionFor", { name: group.name })}
+              label={u("addOption")}
+              description={u("optionEditorHelp")}
+            >
+              {(callbacks) => (
+                <OptionForm
+                  tenantId={tenantId}
+                  currency={currency}
+                  group={group}
+                  {...callbacks}
+                />
+              )}
+            </EditorDialog>
+          </div>
         )}
       </CardContent>
     </Card>
@@ -189,36 +212,43 @@ function OptionEntry({
   parentArchived: boolean
 }) {
   const t = useTranslations("Catalog")
+  const u = useTranslations("CatalogView")
   const locale = useLocale()
   const archived = parentArchived || option.isArchived
-  const formattedAdjustment = new Intl.NumberFormat(locale, {
-    style: "currency",
-    currency,
-  }).format(option.priceAdjustment)
 
   return (
-    <Card size="sm" className="gap-3">
-      <CardHeader>
-        <CardTitle>
-          <h6 className="font-medium">{option.name}</h6>
-        </CardTitle>
+    <div className="flex flex-wrap items-center justify-between gap-3 py-4">
+      <div className="min-w-0">
+        <p className="font-medium break-words">{option.name}</p>
 
-        <CardDescription className="tabular-nums">
-          +{formattedAdjustment}
-        </CardDescription>
+        <p className="text-sm text-muted-foreground tabular-nums">
+          +
+          {new Intl.NumberFormat(locale, {
+            style: "currency",
+            currency,
+          }).format(option.priceAdjustment)}
+        </p>
 
-        {archived && <Badge variant="secondary">{t("archived")}</Badge>}
-      </CardHeader>
+        {archived && <Badge variant="neutral">{t("archived")}</Badge>}
+      </div>
 
       {!archived && (
-        <CardContent className="grid gap-3">
-          <OptionForm
-            tenantId={tenantId}
-            currency={currency}
-            group={group}
-            option={option}
-            key={`${option.id}:${option.name}:${option.priceAdjustment}:${option.sortOrder}`}
-          />
+        <div className="flex flex-wrap gap-2">
+          <EditorDialog
+            title={t("editOption", { name: option.name })}
+            label={u("edit")}
+            description={u("optionEditorHelp")}
+          >
+            {(callbacks) => (
+              <OptionForm
+                tenantId={tenantId}
+                currency={currency}
+                group={group}
+                option={option}
+                {...callbacks}
+              />
+            )}
+          </EditorDialog>
 
           <ArchiveCatalogButton
             tenantId={tenantId}
@@ -226,8 +256,8 @@ function OptionEntry({
             entityType="options"
             name={option.name}
           />
-        </CardContent>
+        </div>
       )}
-    </Card>
+    </div>
   )
 }

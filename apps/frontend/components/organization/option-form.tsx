@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl"
 import { saveOptionAction } from "@/actions/catalog"
 import { ResultMessage } from "@/components/auth/result-message"
-import { Button } from "@/components/ui/button"
+import { EditorFormActions } from "@/components/ui/editor-dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useCatalogForm } from "./use-catalog-form"
@@ -14,9 +14,18 @@ export function OptionForm({
   currency,
   group,
   option,
+  onSuccess,
+  onPendingChange,
+  onCancel,
 }: OptionFormProps) {
   const t = useTranslations("Catalog")
-  const { pending, state, submit } = useCatalogForm(saveOptionAction, !option)
+  const { pending, state, submit } = useCatalogForm(
+    saveOptionAction,
+    !option,
+    onSuccess,
+    undefined,
+    onPendingChange
+  )
   const prefix = option?.id ?? `new-option-${group.id}`
 
   return (
@@ -81,9 +90,11 @@ export function OptionForm({
           />
         </Label>
 
-        <Button type="submit">
-          {pending ? t("saving") : option ? t("save") : t("createOption")}
-        </Button>
+        <EditorFormActions
+          pending={pending}
+          onCancel={onCancel}
+          label={pending ? t("saving") : option ? t("save") : t("createOption")}
+        />
       </fieldset>
 
       <ResultMessage

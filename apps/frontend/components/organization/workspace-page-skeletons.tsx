@@ -93,7 +93,9 @@ export function WorkspacePageSkeleton({
           "mx-auto min-h-[70vh] p-4 sm:p-6 lg:p-8",
           page === "orders" || page === "orderHistory"
             ? "w-full max-w-none"
-            : "max-w-5xl"
+            : page === "catalog" || page === "menuLanguages"
+              ? "w-full max-w-7xl min-w-0"
+              : "max-w-5xl"
         )}
       >
         <div aria-hidden="true" className="grid gap-6">
@@ -205,20 +207,18 @@ function RestaurantSkeleton() {
 function CatalogSkeleton() {
   return (
     <>
-      <HeaderSkeleton back region="catalog-header" />
+      <HeaderSkeleton region="catalog-header" />
 
-      <Region name="catalog-category-form">
-        <CardSkeleton className="min-h-36" lines={2} />
+      <Region name="catalog-tabs" className="flex flex-wrap gap-2">
+        <Skeleton className="h-12 w-28" />
+
+        <Skeleton className="h-12 w-28" />
+
+        <Skeleton className="h-12 w-28" />
       </Region>
 
-      <Region name="catalog-product-form">
-        <CardSkeleton className="min-h-60" lines={4} />
-      </Region>
-
-      <Region name="catalog-list" className="grid gap-6">
-        <CardSkeleton className="min-h-52" lines={4} />
-
-        <CardSkeleton className="min-h-52" lines={4} />
+      <Region name="catalog-list">
+        <CardSkeleton className="min-h-96" lines={8} />
       </Region>
     </>
   )
@@ -227,16 +227,14 @@ function CatalogSkeleton() {
 function MenuLanguagesSkeleton() {
   return (
     <>
-      <HeaderSkeleton back region="languages-header" />
+      <HeaderSkeleton region="languages-header" />
 
       <Region name="languages-settings">
-        <CardSkeleton className="min-h-48" lines={3} />
+        <CardSkeleton className="min-h-36" lines={2} />
       </Region>
 
-      <Region name="languages-translations" className="grid gap-4">
-        <CardSkeleton className="min-h-40" lines={3} />
-
-        <CardSkeleton className="min-h-40" lines={3} />
+      <Region name="languages-translations">
+        <CardSkeleton className="min-h-96" lines={8} />
       </Region>
     </>
   )

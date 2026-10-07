@@ -1,6 +1,17 @@
 import { expect, test } from "@playwright/test"
+import type { Page } from "@playwright/test"
 import { readFile } from "node:fs/promises"
 import { requireAcceptanceDatabase } from "./acceptance-environment"
+
+async function openEditor(page: Page, title: string) {
+  await page.getByRole("button", { name: title, exact: true }).click()
+
+  const dialog = page.getByRole("dialog", { name: title, exact: true })
+
+  await expect(dialog).toBeVisible()
+
+  return dialog
+}
 
 test("owner creates, edits and archives catalog items with localized feedback", async ({
   page,
@@ -27,22 +38,25 @@ test("owner creates, edits and archives catalog items with localized feedback", 
   await expect(
     page.getByRole("heading", { name: "Manage catalog", exact: true })
   ).toBeVisible()
+  await page.getByRole("tab", { name: "Categories", exact: true }).click()
 
   const stamp = Date.now().toString(36)
   const categoryName = `Lunch ${stamp}`
   const productName = `Soup ${stamp}`
-  const category = page.getByRole("form", { name: "New category", exact: true })
+  const category = await openEditor(page, "New category")
 
   await category.getByLabel("Name", { exact: true }).fill(categoryName)
   await category.getByLabel("Display order", { exact: true }).fill("3")
   await category
     .getByRole("button", { name: "Create category", exact: true })
     .click()
+  await expect(category).toHaveCount(0)
   await expect(
     page.getByRole("heading", { name: categoryName, exact: true })
   ).toBeVisible()
+  await page.getByRole("tab", { name: "Products", exact: true }).click()
 
-  const product = page.getByRole("form", { name: "New product", exact: true })
+  const product = await openEditor(page, "New product")
 
   await product
     .getByLabel("Category", { exact: true })
@@ -55,26 +69,19 @@ test("owner creates, edits and archives catalog items with localized feedback", 
   await product
     .getByRole("button", { name: "Create product", exact: true })
     .click()
+  await expect(product).toHaveCount(0)
 
-  const edit = page.getByRole("form", {
-    name: `Edit product ${productName}`,
-    exact: true,
-  })
+  const edit = await openEditor(page, `Edit product ${productName}`)
 
-  await expect(edit).toBeVisible()
   await edit.getByLabel("Base price (GBP)", { exact: true }).fill("8.25")
   await edit.getByLabel("Availability", { exact: true }).selectOption("false")
   await edit.getByRole("button", { name: "Save changes", exact: true }).click()
-  await expect(
-    edit.getByLabel("Base price (GBP)", { exact: true })
-  ).toHaveValue("8.25")
+  await expect(edit).toHaveCount(0)
 
+  const options = await openEditor(page, `Options for ${productName}`)
   const groupName = `Size ${stamp}`
   const editedGroupName = `Portion ${stamp}`
-  const group = page.getByRole("form", {
-    name: `New option group for ${productName}`,
-    exact: true,
-  })
+  const group = await openEditor(page, `New option group for ${productName}`)
 
   await group.getByLabel("Name", { exact: true }).fill(groupName)
   await group.getByLabel("Minimum selections", { exact: true }).fill("0")
@@ -83,31 +90,20 @@ test("owner creates, edits and archives catalog items with localized feedback", 
   await group
     .getByRole("button", { name: "Create option group", exact: true })
     .click()
+  await expect(group).toHaveCount(0)
 
-  const editGroup = page.getByRole("form", {
-    name: `Edit option group ${groupName}`,
-    exact: true,
-  })
+  const editGroup = await openEditor(page, `Edit option group ${groupName}`)
 
-  await expect(editGroup).toBeVisible()
   await editGroup.getByLabel("Name", { exact: true }).fill(editedGroupName)
   await editGroup.getByLabel("Minimum selections", { exact: true }).fill("1")
-  await editGroup.getByLabel("Maximum selections", { exact: true }).fill("2")
   await editGroup.getByLabel("Display order", { exact: true }).fill("0")
   await editGroup
     .getByRole("button", { name: "Save changes", exact: true })
     .click()
-
-  const editedGroup = page.getByRole("form", {
-    name: `Edit option group ${editedGroupName}`,
-    exact: true,
-  })
+  await expect(editGroup).toHaveCount(0)
 
   const optionName = `Large ${stamp}`
-  const option = page.getByRole("form", {
-    name: `New option for ${editedGroupName}`,
-    exact: true,
-  })
+  const option = await openEditor(page, `New option for ${editedGroupName}`)
 
   await option.getByLabel("Name", { exact: true }).fill(optionName)
   await option
@@ -117,13 +113,10 @@ test("owner creates, edits and archives catalog items with localized feedback", 
   await option
     .getByRole("button", { name: "Create option", exact: true })
     .click()
+  await expect(option).toHaveCount(0)
 
-  const editOption = page.getByRole("form", {
-    name: `Edit option ${optionName}`,
-    exact: true,
-  })
+  const editOption = await openEditor(page, `Edit option ${optionName}`)
 
-  await expect(editOption).toBeVisible()
   await editOption
     .getByLabel("Price adjustment (GBP)", { exact: true })
     .fill("1.75")
@@ -131,12 +124,13 @@ test("owner creates, edits and archives catalog items with localized feedback", 
   await editOption
     .getByRole("button", { name: "Save changes", exact: true })
     .click()
+  await expect(editOption).toHaveCount(0)
 
   const secondOptionName = `Small ${stamp}`
-  const secondOption = page.getByRole("form", {
-    name: `New option for ${editedGroupName}`,
-    exact: true,
-  })
+  const secondOption = await openEditor(
+    page,
+    `New option for ${editedGroupName}`
+  )
 
   await secondOption.getByLabel("Name", { exact: true }).fill(secondOptionName)
   await secondOption
@@ -146,94 +140,106 @@ test("owner creates, edits and archives catalog items with localized feedback", 
   await secondOption
     .getByRole("button", { name: "Create option", exact: true })
     .click()
-
+  await expect(secondOption).toHaveCount(0)
+  await options.getByRole("button", { name: "Close", exact: true }).click()
   await page.reload()
+
+  const persisted = await openEditor(page, `Edit product ${productName}`)
+
   await expect(
-    editedGroup.getByLabel("Minimum selections", { exact: true })
+    persisted.getByLabel("Availability", { exact: true })
+  ).toHaveValue("false")
+  await expect(
+    persisted.getByLabel("Base price (GBP)", { exact: true })
+  ).toHaveValue("8.25")
+  await persisted.getByRole("button", { name: "Cancel", exact: true }).click()
+  await openEditor(page, `Options for ${productName}`)
+
+  const persistedGroup = await openEditor(
+    page,
+    `Edit option group ${editedGroupName}`
+  )
+
+  await expect(
+    persistedGroup.getByLabel("Minimum selections", { exact: true })
   ).toHaveValue("1")
   await expect(
-    editedGroup.getByLabel("Maximum selections", { exact: true })
+    persistedGroup.getByLabel("Maximum selections", { exact: true })
   ).toHaveValue("2")
-  await expect(
-    editOption.getByLabel("Price adjustment (GBP)", { exact: true })
-  ).toHaveValue("1.75")
-  await page.reload()
-  await expect(edit.getByLabel("Availability", { exact: true })).toHaveValue(
-    "false"
-  )
-  await expect(
-    edit.getByLabel("Base price (GBP)", { exact: true })
-  ).toHaveValue("8.25")
+  await persistedGroup
+    .getByRole("button", { name: "Cancel", exact: true })
+    .click()
 
-  const editCategory = page.getByRole("form", {
-    name: `Edit category ${categoryName}`,
-    exact: true,
-  })
+  const persistedOption = await openEditor(page, `Edit option ${optionName}`)
+
+  await expect(
+    persistedOption.getByLabel("Price adjustment (GBP)", { exact: true })
+  ).toHaveValue("1.75")
+  await persistedOption
+    .getByRole("button", { name: "Cancel", exact: true })
+    .click()
+  await options.getByRole("button", { name: "Close", exact: true }).click()
+  await page.getByRole("tab", { name: "Categories", exact: true }).click()
+
+  const editCategory = await openEditor(page, `Edit category ${categoryName}`)
 
   await editCategory.getByLabel("Display order", { exact: true }).fill("1")
   await editCategory
     .getByRole("button", { name: "Save changes", exact: true })
     .click()
+  await expect(editCategory).toHaveCount(0)
+  await page.reload()
+  await page.getByRole("tab", { name: "Categories", exact: true }).click()
+
+  const persistedCategory = await openEditor(
+    page,
+    `Edit category ${categoryName}`
+  )
+
   await expect(
-    editCategory.getByLabel("Display order", { exact: true })
+    persistedCategory.getByLabel("Display order", { exact: true })
   ).toHaveValue("1")
+  await persistedCategory
+    .getByRole("button", { name: "Cancel", exact: true })
+    .click()
   await page.goto(`/fr/organization/catalog?tenantId=${fixture.tenantId}`)
-  await expect(
-    page.getByRole("heading", { name: "Gérer le catalogue", exact: true })
-  ).toBeVisible()
+  await openEditor(page, `Options de ${productName}`)
 
   const archiveOption = page.getByRole("button", {
     name: `Archiver ${optionName}`,
     exact: true,
   })
+  const confirmation = page.getByRole("alertdialog")
 
   await archiveOption.click()
-
-  const optionDialog = page.getByRole("alertdialog")
-
-  await expect(optionDialog).toBeVisible()
-  await expect(optionDialog).toContainText(
-    `Archiver ${optionName} ? Cette option ne sera plus proposée dans les nouvelles commandes.`
-  )
+  await expect(confirmation).toContainText("Cette option ne sera plus proposée")
   await expect(
-    optionDialog.getByRole("button", { name: "Annuler", exact: true })
+    confirmation.getByRole("button", { name: "Annuler", exact: true })
   ).toBeFocused()
   await page.keyboard.press("Escape")
-  await expect(optionDialog).toBeHidden()
+  await expect(confirmation).toHaveCount(0)
   await expect(archiveOption).toBeFocused()
-  await expect(
-    page.getByRole("form", {
-      name: `Modifier l’option ${optionName}`,
-      exact: true,
-    })
-  ).toBeVisible()
-  await page
-    .getByRole("button", { name: `Archiver ${optionName}`, exact: true })
-    .click()
-  await page
+  await archiveOption.click()
+  await confirmation
     .getByRole("button", { name: "Confirmer l’archivage", exact: true })
     .click()
+  await expect(confirmation).toHaveCount(0)
   await expect(
-    page.getByRole("form", {
+    page.getByRole("button", {
       name: `Modifier l’option ${optionName}`,
       exact: true,
     })
   ).toHaveCount(0)
 
-  const secondOptionArchive = page.getByRole("button", {
-    name: `Archiver ${secondOptionName}`,
-    exact: true,
-  })
-
-  let failNextCatalogMutation = true
+  let failNext = true
 
   await page.route("**/organization/catalog*", async (route) => {
     if (
-      failNextCatalogMutation &&
+      failNext &&
       route.request().method() === "POST" &&
       route.request().headers()["next-action"]
     ) {
-      failNextCatalogMutation = false
+      failNext = false
       await route.abort("failed")
 
       return
@@ -241,20 +247,18 @@ test("owner creates, edits and archives catalog items with localized feedback", 
 
     await route.continue()
   })
-  await secondOptionArchive.click()
-
-  const failureDialog = page.getByRole("alertdialog")
-
-  await failureDialog
+  await page
+    .getByRole("button", { name: `Archiver ${secondOptionName}`, exact: true })
+    .click()
+  await confirmation
     .getByRole("button", { name: "Confirmer l’archivage", exact: true })
     .click()
-  await expect(failureDialog.getByRole("alert")).toContainText("indisponible")
-  await expect(failureDialog).toBeVisible()
+  await expect(confirmation.getByRole("alert")).toContainText("indisponible")
+  await expect(confirmation).toBeVisible()
   await page.unroute("**/organization/catalog*")
-  await failureDialog
+  await confirmation
     .getByRole("button", { name: "Annuler", exact: true })
     .click()
-  await expect(failureDialog).toBeHidden()
 
   const archiveGroup = page.getByRole("button", {
     name: `Archiver ${editedGroupName}`,
@@ -262,29 +266,26 @@ test("owner creates, edits and archives catalog items with localized feedback", 
   })
 
   await archiveGroup.click()
-
-  const groupDialog = page.getByRole("alertdialog")
-
-  await expect(groupDialog).toContainText(
-    `Archiver ${editedGroupName} et ses options ? Elles ne seront plus proposées dans les nouvelles commandes.`
-  )
-  await groupDialog
+  await expect(confirmation).toContainText("et ses options")
+  await confirmation
     .getByRole("button", { name: "Annuler", exact: true })
     .click()
-  await expect(groupDialog).toBeHidden()
   await expect(archiveGroup).toBeFocused()
-  await expect(editedGroup).toBeVisible()
   await archiveGroup.click()
-  await page
+  await confirmation
     .getByRole("button", { name: "Confirmer l’archivage", exact: true })
     .click()
-  await expect(editedGroup).toHaveCount(0)
+  await expect(confirmation).toHaveCount(0)
   await expect(
-    page.getByRole("form", {
-      name: `Modifier l’option ${secondOptionName}`,
+    page.getByRole("button", {
+      name: `Modifier le groupe d’options ${editedGroupName}`,
       exact: true,
     })
   ).toHaveCount(0)
+  await page
+    .getByRole("dialog", { name: `Options de ${productName}`, exact: true })
+    .getByRole("button", { name: "Fermer", exact: true })
+    .click()
 
   const archiveProduct = page.getByRole("button", {
     name: `Archiver ${productName}`,
@@ -292,54 +293,39 @@ test("owner creates, edits and archives catalog items with localized feedback", 
   })
 
   await archiveProduct.click()
-
-  const productDialog = page.getByRole("alertdialog")
-
-  await expect(productDialog).toContainText(
-    `Archiver ${productName} et ses options ? Il quittera le menu public.`
-  )
-  await productDialog
+  await expect(confirmation).toContainText("Il quittera le menu public")
+  await confirmation
     .getByRole("button", { name: "Annuler", exact: true })
     .click()
-  await expect(productDialog).toBeHidden()
   await expect(archiveProduct).toBeFocused()
-  await expect(
-    page.getByRole("form", {
-      name: `Modifier le produit ${productName}`,
-      exact: true,
-    })
-  ).toBeVisible()
   await archiveProduct.click()
-  await page
+  await confirmation
     .getByRole("button", { name: "Confirmer l’archivage", exact: true })
     .click()
   await expect(
-    page.getByRole("form", {
-      name: `Modifier le produit ${productName}`,
-      exact: true,
-    })
+    page.getByRole("heading", { name: productName, exact: true })
   ).toHaveCount(0)
+  await page.getByRole("tab", { name: "Catégories", exact: true }).click()
   await page
     .getByRole("button", { name: `Archiver ${categoryName}`, exact: true })
     .click()
-  await expect(page.getByRole("alertdialog")).toContainText(
-    `Archiver ${categoryName} et tous ses produits et options ?`
-  )
-  await page
+  await expect(confirmation).toContainText("tous ses produits et options")
+  await confirmation
     .getByRole("button", { name: "Confirmer l’archivage", exact: true })
     .click()
   await expect(
-    page.getByRole("form", {
+    page.getByRole("button", {
       name: `Modifier la catégorie ${categoryName}`,
       exact: true,
     })
   ).toHaveCount(0)
   await page.reload()
+  await page.getByLabel("Afficher", { exact: true }).selectOption("archived")
   await expect(
     page.getByRole("heading", { name: productName, exact: true })
   ).toBeVisible()
   await expect(
-    page.getByRole("form", {
+    page.getByRole("button", {
       name: `Modifier le produit ${productName}`,
       exact: true,
     })

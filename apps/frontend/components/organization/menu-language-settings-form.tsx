@@ -1,5 +1,8 @@
 "use client"
 
+import { EditorFormActions } from "@/components/ui/editor-dialog"
+import type { EditorCallbacks } from "@/types/editor"
+
 import { updateMenuLanguagesAction } from "@/actions/organization"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -10,13 +13,16 @@ import { useWorkspaceToast } from "@/components/ui/toast"
 import { useRouter } from "@/i18n/navigation"
 import type { FormState } from "@/types/catalog"
 import { useLocale, useTranslations } from "next-intl"
-import { useState, type FormEvent } from "react"
+import { useRef, useState, type FormEvent } from "react"
 
 export function MenuLanguageSettingsForm({
   tenantId,
+  onCancel,
+  onSuccess,
+  onPendingChange,
   locales: initialLocales,
   defaultLocale: initialDefaultLocale,
-}: {
+}: EditorCallbacks & {
   tenantId: string
   locales: string[]
   defaultLocale: string
@@ -25,6 +31,7 @@ export function MenuLanguageSettingsForm({
   const toast = useWorkspaceToast()
   const uiLocale = useLocale()
   const router = useRouter()
+  const locked = useRef(false)
   const [locales, setLocales] = useState(initialLocales)
   const [defaultLocale, setDefaultLocale] = useState(initialDefaultLocale)
   const [newLocale, setNewLocale] = useState("")
@@ -54,6 +61,9 @@ export function MenuLanguageSettingsForm({
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    if (locked.current) return
+    locked.current = true
+    onPendingChange?.(true)
     setState("pending")
 
     const result = await updateMenuLanguagesAction({
@@ -65,14 +75,17 @@ export function MenuLanguageSettingsForm({
     if (result.ok) {
       toast.success(t("menuLanguagesSaved"))
       setState("idle")
+      onSuccess?.()
       router.refresh()
     } else setState("error")
+    locked.current = false
+    onPendingChange?.(false)
   }
 
   return (
     <form onSubmit={(event) => void submit(event)} className="grid gap-6">
       <div className="grid gap-3">
-        <h2 className="text-base font-semibold">{t("menuLanguagesEnabled")}</h2>
+        <h3 className="text-base font-semibold">{t("menuLanguagesEnabled")}</h3>
 
         <RadioGroup
           aria-label={t("defaultMenuLanguage")}
@@ -167,11 +180,15 @@ export function MenuLanguageSettingsForm({
         </p>
       )}
 
-      <Button type="submit" disabled={state === "pending"} className="w-fit">
-        {state === "pending"
-          ? t("savingMenuLanguages")
-          : t("saveMenuLanguages")}
-      </Button>
+      <EditorFormActions
+        onCancel={onCancel}
+        pending={state === "pending"}
+        label={
+          state === "pending"
+            ? t("savingMenuLanguages")
+            : t("saveMenuLanguages")
+        }
+      />
     </form>
   )
 }
