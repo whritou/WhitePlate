@@ -6,6 +6,11 @@ namespace WhitePlate.Application.Orders;
 
 internal static class OrderStaffAccess
 {
+    public static async Task<bool> CanViewHistoryAsync(IStaffMembershipRepository memberships, Guid tenantId,
+        ExternalIdentity identity, CancellationToken cancellationToken) =>
+        await memberships.IsOrganizationOwnerOfTenantAsync(tenantId, identity, cancellationToken) ||
+        await memberships.HasRestaurantRoleAsync(tenantId, identity, RestaurantRole.Manager, cancellationToken);
+
     public static async Task<bool> CanViewAsync(IStaffMembershipRepository memberships, Guid tenantId,
         ExternalIdentity identity, CancellationToken cancellationToken) =>
         await memberships.IsOrganizationOwnerOfTenantAsync(tenantId, identity, cancellationToken) ||

@@ -508,6 +508,116 @@ public sealed class OrdersEndpointTests
     }
 
     [Fact]
+    public async Task ArchivedCompletedOrderLeavesKitchenListAndRemainsInManagerHistory()
+    {
+        using var factory = new OrdersFactory();
+        var seeded = await factory.SeedAsync();
+        await factory.SeedMembershipAsync(seeded.TenantId, "manager", RestaurantRole.Manager);
+        await factory.SeedMembershipAsync(seeded.TenantId, "kitchen", RestaurantRole.Kitchen);
+        await factory.SeedOwnerAsync(seeded.OrganizationId, "owner");
+        using var client = factory.CreateClient();
+        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", "manager");
+        client.DefaultRequestHeaders.Add("Idempotency-Key", "completed-history-0001");
+        using var create = await client.PostAsJsonAsync("https://bistro.example.test/api/v1/orders", new
+        {
+            customerName = "Ada Lovelace",
+            items = new[] { new { productId = seeded.ProductId, quantity = 1, optionIds = new[] { seeded.OptionId } } }
+        }, TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.Created, create.StatusCode);
+        using var createdJson = JsonDocument.Parse(await create.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
+        var orderId = createdJson.RootElement.GetProperty("id").GetGuid();
+
+        foreach (var (status, version) in new[] { ("Preparing", 1), ("Ready", 2), ("Completed", 3) })
+        {
+            using var update = new HttpRequestMessage(HttpMethod.Patch,
+                $"/api/v1/tenants/{seeded.TenantId}/orders/{orderId}/status")
+            {
+                Content = JsonContent.Create(new { status })
+            };
+            update.Headers.TryAddWithoutValidation("If-Match", $"\"{version}\"");
+            using var response = await client.SendAsync(update, TestContext.Current.CancellationToken);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        }
+
+        client.DefaultRequestHeaders.Remove("Idempotency-Key");
+        client.DefaultRequestHeaders.Add("Idempotency-Key", "cancelled-history-0001");
+        using var cancelledCreate = await client.PostAsJsonAsync("https://bistro.example.test/api/v1/orders", new
+        {
+            customerName = "Grace Hopper",
+            items = new[] { new { productId = seeded.ProductId, quantity = 1, optionIds = new[] { seeded.OptionId } } }
+        }, TestContext.Current.CancellationToken);
+        using var cancelledJson = JsonDocument.Parse(await cancelledCreate.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
+        var cancelledId = cancelledJson.RootElement.GetProperty("id").GetGuid();
+        using var cancel = new HttpRequestMessage(HttpMethod.Patch,
+            $"/api/v1/tenants/{seeded.TenantId}/orders/{cancelledId}/status")
+        {
+            Content = JsonContent.Create(new { status = "Cancelled" })
+        };
+        cancel.Headers.TryAddWithoutValidation("If-Match", "\"1\"");
+        using var cancelledResponse = await client.SendAsync(cancel, TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.OK, cancelledResponse.StatusCode);
+
+        await using (var scope = factory.Services.CreateAsyncScope())
+        {
+            var repository = scope.ServiceProvider.GetRequiredService<WhitePlate.Application.Orders.IOrderRepository>();
+            await repository.ArchiveClosedOrdersBeforeAsync(new DateTimeOffset(2026, 1, 2, 0, 0, 0, TimeSpan.Zero),
+                TestContext.Current.CancellationToken);
+        }
+
+        using var kitchen = await client.GetAsync($"/api/v1/tenants/{seeded.TenantId}/orders",
+            TestContext.Current.CancellationToken);
+        using var kitchenJson = JsonDocument.Parse(await kitchen.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
+        Assert.Empty(kitchenJson.RootElement.GetProperty("items").EnumerateArray());
+
+        using var history = await client.GetAsync(
+            $"/api/v1/tenants/{seeded.TenantId}/orders/history?status=Completed&search=ada&from=2026-01-01&through=2026-01-02&page=1&pageSize=1&sort=createdAt&direction=desc",
+            TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.OK, history.StatusCode);
+        using var historyJson = JsonDocument.Parse(await history.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
+        Assert.Equal(1, historyJson.RootElement.GetProperty("totalCount").GetInt32());
+        var historicalOrder = Assert.Single(historyJson.RootElement.GetProperty("items").EnumerateArray());
+        Assert.Equal(orderId, historicalOrder.GetProperty("id").GetGuid());
+        Assert.Equal("Completed", historicalOrder.GetProperty("status").GetString());
+        Assert.Equal("Soup", historicalOrder.GetProperty("lines")[0].GetProperty("productName").GetString());
+
+        using var referenceSearch = await client.GetAsync(
+            $"/api/v1/tenants/{seeded.TenantId}/orders/history?search={orderId.ToString()[..8].ToUpperInvariant()}",
+            TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.OK, referenceSearch.StatusCode);
+        using var referenceJson = JsonDocument.Parse(await referenceSearch.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
+        Assert.Equal(orderId, Assert.Single(referenceJson.RootElement.GetProperty("items").EnumerateArray())
+            .GetProperty("id").GetGuid());
+
+        using var cancelledHistory = await client.GetAsync(
+            $"/api/v1/tenants/{seeded.TenantId}/orders/history?status=Cancelled&search=Grace&from=2026-01-01&through=2026-01-02",
+            TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.OK, cancelledHistory.StatusCode);
+        using var cancelledHistoryJson = JsonDocument.Parse(await cancelledHistory.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
+        Assert.Equal("Cancelled", Assert.Single(cancelledHistoryJson.RootElement.GetProperty("items").EnumerateArray())
+            .GetProperty("status").GetString());
+
+        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", "owner");
+        using var ownerHistory = await client.GetAsync($"/api/v1/tenants/{seeded.TenantId}/orders/history?pageSize=1",
+            TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.OK, ownerHistory.StatusCode);
+
+        using var outOfRangeHistory = await client.GetAsync(
+            $"/api/v1/tenants/{seeded.TenantId}/orders/history?page=100&pageSize=1",
+            TestContext.Current.CancellationToken);
+        using var outOfRangeJson = JsonDocument.Parse(await outOfRangeHistory.Content.ReadAsStringAsync(
+            TestContext.Current.CancellationToken));
+        Assert.Equal(2, outOfRangeJson.RootElement.GetProperty("page").GetInt32());
+        Assert.Equal(2, outOfRangeJson.RootElement.GetProperty("totalCount").GetInt32());
+        using var ownerHistoryJson = JsonDocument.Parse(await ownerHistory.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
+        Assert.Equal(2, ownerHistoryJson.RootElement.GetProperty("totalCount").GetInt32());
+
+        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", "kitchen");
+        using var forbidden = await client.GetAsync($"/api/v1/tenants/{seeded.TenantId}/orders/history",
+            TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.Forbidden, forbidden.StatusCode);
+    }
+
+    [Fact]
     public async Task StaffOrderReadsAndUpdatesCannotCrossTheResolvedTenantBoundary()
     {
         using var factory = new OrdersFactory();
@@ -578,6 +688,9 @@ public sealed class OrdersEndpointTests
                 var dispatcher = services.FirstOrDefault(descriptor => descriptor.ServiceType == typeof(IHostedService) &&
                     descriptor.ImplementationType == typeof(OrderOutboxDispatcher));
                 if (dispatcher is not null) services.Remove(dispatcher);
+                var archiveDispatcher = services.FirstOrDefault(descriptor => descriptor.ServiceType == typeof(IHostedService) &&
+                    descriptor.ImplementationType == typeof(OrderArchiveDispatcher));
+                if (archiveDispatcher is not null) services.Remove(archiveDispatcher);
                 services.AddAuthentication(options =>
                 {
                     options.DefaultAuthenticateScheme = TestAuthenticationHandler.SchemeName;
@@ -593,7 +706,7 @@ public sealed class OrdersEndpointTests
             });
         }
 
-        public async Task<(Guid TenantId, Guid ProductId, Guid OptionId, Guid OtherProductId)> SeedAsync()
+        public async Task<(Guid TenantId, Guid ProductId, Guid OptionId, Guid OtherProductId, Guid OrganizationId)> SeedAsync()
         {
             using var scope = Services.CreateScope();
             var database = scope.ServiceProvider.GetRequiredService<WhitePlateDbContext>();
@@ -615,7 +728,16 @@ public sealed class OrdersEndpointTests
             database.ProductOptions.Add(option);
             database.PromotionDiscounts.Add(PromotionDiscount.Create(tenant.Id, "SAVE", "Save two", DiscountKind.FixedAmount, 2m));
             await database.SaveChangesAsync(TestContext.Current.CancellationToken);
-            return (tenant.Id, product.Id, option.Id, otherProduct.Id);
+            return (tenant.Id, product.Id, option.Id, otherProduct.Id, organization.Id);
+        }
+
+        public async Task SeedOwnerAsync(Guid organizationId, string subject)
+        {
+            using var scope = Services.CreateScope();
+            var database = scope.ServiceProvider.GetRequiredService<WhitePlateDbContext>();
+            database.OrganizationOwnerMemberships.Add(OrganizationOwnerMembership.Create(organizationId,
+                ExternalIdentity.Create("https://identity.example.test/", subject)));
+            await database.SaveChangesAsync(TestContext.Current.CancellationToken);
         }
 
         public async Task SeedMembershipAsync(Guid tenantId, string subject, RestaurantRole role)

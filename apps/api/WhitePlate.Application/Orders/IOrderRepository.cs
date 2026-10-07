@@ -20,6 +20,12 @@ public interface IOrderRepository
     Task<OrderPageData> ListAsync(Guid tenantId, OrderStatus? status, OrderPageCursor? cursor, int pageSize,
         CancellationToken cancellationToken);
 
+    Task<OrderHistoryPageData> GetHistoryAsync(Guid tenantId, OrderStatus? status, string? search,
+        DateTimeOffset? createdAtFrom, DateTimeOffset? createdAtUntil, string sort, bool descending,
+        int page, int pageSize, CancellationToken cancellationToken);
+
+    Task<int> ArchiveClosedOrdersBeforeAsync(DateTimeOffset cutoff, CancellationToken cancellationToken);
+
     Task<Result<OrderReceiptDto>> TransitionAsync(Guid tenantId, Guid orderId, int expectedVersion,
         OrderStatus status, DateTimeOffset now, CancellationToken cancellationToken);
 

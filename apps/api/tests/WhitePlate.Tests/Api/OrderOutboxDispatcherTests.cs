@@ -90,6 +90,10 @@ public sealed class OrderOutboxDispatcherTests
             throw new NotSupportedException();
         public Task<IdempotencyResult> CreateOrderAsync(Order order, OrderReceiptDto receipt, string keyHash, string requestHash, DateTimeOffset now, CancellationToken cancellationToken) => throw new NotSupportedException();
         public Task<OrderPageData> ListAsync(Guid tenantId, OrderStatus? status, OrderPageCursor? cursor, int pageSize, CancellationToken cancellationToken) => throw new NotSupportedException();
+        public Task<OrderHistoryPageData> GetHistoryAsync(Guid tenantId, OrderStatus? status, string? search,
+            DateTimeOffset? createdAtFrom, DateTimeOffset? createdAtUntil, string sort, bool descending,
+            int page, int pageSize, CancellationToken cancellationToken) => throw new NotSupportedException();
+        public Task<int> ArchiveClosedOrdersBeforeAsync(DateTimeOffset cutoff, CancellationToken cancellationToken) => throw new NotSupportedException();
         public Task<Result<OrderReceiptDto>> TransitionAsync(Guid tenantId, Guid orderId, int expectedVersion, OrderStatus status, DateTimeOffset now, CancellationToken cancellationToken) => throw new NotSupportedException();
     }
 }

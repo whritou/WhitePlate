@@ -6,6 +6,7 @@ export type WorkspaceLoadingPage =
   | "menuLanguages"
   | "settings"
   | "orders"
+  | "orderHistory"
 
 export type WorkspaceLoadingTranslationKey =
   | "organizationSignUp"
@@ -15,6 +16,7 @@ export type WorkspaceLoadingTranslationKey =
   | "menuLanguages"
   | "settings"
   | "orders"
+  | "orderHistory"
 
 export type WorkspacePageSkeletonProps = {
   page: WorkspaceLoadingPage

@@ -2,12 +2,7 @@
 
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card"
+import { Card, CardHeader, CardTitle } from "@/components/ui/card"
 import { Link, useRouter } from "@/i18n/navigation"
 import { buildOrdersHref } from "@/lib/orders/navigation"
 import type { useOrderDashboard } from "@/hooks/use-order-dashboard"
@@ -75,19 +70,19 @@ export function OrderDashboardContent({
                   <CardTitle>
                     <h2>{t("emptyTitle")}</h2>
                   </CardTitle>
-
-                  <CardDescription>{t("emptyDescription")}</CardDescription>
                 </CardHeader>
               </Card>
             )}
 
-            <OrderKanban
-              orders={page.items}
-              role={props.role}
-              locale={props.locale}
-              pending={pending}
-              onUpdate={updateStatus}
-            />
+            {page.items.length > 0 && (
+              <OrderKanban
+                orders={page.items}
+                role={props.role}
+                locale={props.locale}
+                pending={pending}
+                onUpdate={updateStatus}
+              />
+            )}
 
             {page.nextCursor && (
               <div className="flex justify-center">

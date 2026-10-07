@@ -70,6 +70,9 @@ public sealed class HealthEndpointTests
                 var dispatcher = services.FirstOrDefault(descriptor => descriptor.ServiceType == typeof(IHostedService) &&
                     descriptor.ImplementationType == typeof(OrderOutboxDispatcher));
                 if (dispatcher is not null) services.Remove(dispatcher);
+                var archiveDispatcher = services.FirstOrDefault(descriptor => descriptor.ServiceType == typeof(IHostedService) &&
+                    descriptor.ImplementationType == typeof(OrderArchiveDispatcher));
+                if (archiveDispatcher is not null) services.Remove(archiveDispatcher);
                 services.RemoveAll<DbContextOptions<WhitePlateDbContext>>();
                 services.RemoveAll<IDbContextOptionsConfiguration<WhitePlateDbContext>>();
                 services.AddDbContext<WhitePlateDbContext>(options => options.UseSqlite(connection));

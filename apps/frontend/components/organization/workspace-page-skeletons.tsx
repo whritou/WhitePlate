@@ -114,6 +114,8 @@ function renderPageSkeleton(page: WorkspaceLoadingPage) {
       return <SettingsSkeleton />
     case "orders":
       return <OrdersSkeleton />
+    case "orderHistory":
+      return <OrderHistorySkeleton />
   }
 }
 
@@ -279,6 +281,22 @@ function OrdersSkeleton() {
 
       <Region name="orders-list" className="grid gap-4">
         <OrderKanbanSkeleton />
+      </Region>
+    </>
+  )
+}
+
+function OrderHistorySkeleton() {
+  return (
+    <>
+      <HeaderSkeleton region="order-history-header" />
+
+      <Region name="order-history-filters">
+        <CardSkeleton className="min-h-48" lines={3} />
+      </Region>
+
+      <Region name="order-history-table">
+        <CardSkeleton className="min-h-96" lines={8} />
       </Region>
     </>
   )

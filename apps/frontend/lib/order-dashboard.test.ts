@@ -4,6 +4,7 @@ import {
   OrderEventTracker,
   parseOrderCursor,
   parseOrderPage,
+  parseOrderHistoryPage,
   parseRestaurantMemberships,
   parseOrderStatusFilter,
   resolveOrderHubUrl,
@@ -75,6 +76,14 @@ const page = {
   ],
   nextCursor: "opaque-cursor",
 }
+
+it("accepts a paginated order history response and rejects invalid page metadata", () => {
+  const history = { items: page.items, page: 2, pageSize: 25, totalCount: 31 }
+
+  expect(parseOrderHistoryPage(history)).toEqual(history)
+  expect(parseOrderHistoryPage({ ...history, totalCount: -1 })).toBeNull()
+  expect(parseOrderHistoryPage({ ...history, page: 0 })).toBeNull()
+})
 
 it("parses server order snapshots and paged cursors", () => {
   expect(parseOrderPage(page)).toEqual(page)

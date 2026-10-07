@@ -56,6 +56,9 @@ describe("buildWorkspaceNavigation", () => {
       `/organization/orders?tenantId=${ownerRestaurantId}`
     )
     expect(hrefs).toContain(
+      `/organization/order-history?tenantId=${ownerRestaurantId}`
+    )
+    expect(hrefs).toContain(
       `/organization/catalog?tenantId=${ownerRestaurantId}`
     )
     expect(hrefs).toContain(
@@ -68,6 +71,9 @@ describe("buildWorkspaceNavigation", () => {
 
     expect(hrefs).toContain(
       `/organization/orders?tenantId=${managerRestaurantId}`
+    )
+    expect(hrefs).toContain(
+      `/organization/order-history?tenantId=${managerRestaurantId}`
     )
     expect(hrefs).toContain(
       `/organization/catalog?tenantId=${managerRestaurantId}`
@@ -85,6 +91,9 @@ describe("buildWorkspaceNavigation", () => {
       "/organization",
       `/organization/orders?tenantId=${kitchenRestaurantId}`,
     ])
+    expect(hrefs).not.toContain(
+      `/organization/order-history?tenantId=${kitchenRestaurantId}`
+    )
   })
 })
 

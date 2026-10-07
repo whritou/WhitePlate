@@ -120,7 +120,7 @@ public sealed class OrderRepository(WhitePlateDbContext database) : IOrderReposi
     public async Task<OrderPageData> ListAsync(Guid tenantId, WhitePlate.Domain.Orders.OrderStatus? status,
         OrderPageCursor? cursor, int pageSize, CancellationToken cancellationToken)
     {
-        var query = database.Orders.AsNoTracking().Where(order => order.TenantId == tenantId);
+        var query = database.Orders.AsNoTracking().Where(order => order.TenantId == tenantId && order.ArchivedAt == null);
         if (status.HasValue) query = query.Where(order => order.Status == status.Value);
         if (cursor is not null)
             query = query.Where(order => order.CreatedAtTicks < cursor.CreatedAtTicks ||
@@ -145,6 +145,51 @@ public sealed class OrderRepository(WhitePlateDbContext database) : IOrderReposi
         return new OrderPageData(rows.Select(row => row.Item).ToArray(), nextCursor);
     }
 
+    public async Task<OrderHistoryPageData> GetHistoryAsync(Guid tenantId, WhitePlate.Domain.Orders.OrderStatus? status,
+        string? search, DateTimeOffset? createdAtFrom, DateTimeOffset? createdAtUntil, string sort,
+        bool descending, int page, int pageSize, CancellationToken cancellationToken)
+    {
+        var query = database.Orders.AsNoTracking().Where(order => order.TenantId == tenantId);
+        if (status.HasValue) query = query.Where(order => order.Status == status.Value);
+        if (createdAtFrom.HasValue) query = query.Where(order => order.CreatedAtTicks >= createdAtFrom.Value.UtcDateTime.Ticks);
+        if (createdAtUntil.HasValue) query = query.Where(order => order.CreatedAtTicks < createdAtUntil.Value.UtcDateTime.Ticks);
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var term = search.Trim();
+            var normalizedTerm = term.ToUpperInvariant();
+            query = Guid.TryParse(term, out var orderId)
+                ? query.Where(order => order.Id == orderId)
+                : query.Where(order => order.CustomerName.ToUpper().Contains(normalizedTerm) ||
+                    order.Id.ToString().ToUpper().StartsWith(normalizedTerm));
+        }
+
+        var totalCount = await query.CountAsync(cancellationToken);
+        var ordered = sort switch
+        {
+            "total" when descending => query.OrderByDescending(order => order.Total).ThenByDescending(order => order.Id),
+            "total" => query.OrderBy(order => order.Total).ThenBy(order => order.Id),
+            _ when descending => query.OrderByDescending(order => order.CreatedAtTicks).ThenByDescending(order => order.Id),
+            _ => query.OrderBy(order => order.CreatedAtTicks).ThenBy(order => order.Id)
+        };
+        var items = await ordered.Skip((page - 1) * pageSize).Take(pageSize).Select(order =>
+            new OrderSummaryDto(order.Id, order.CustomerName, order.Currency, order.MenuLocale, order.Total,
+                order.Status.ToString(), order.Version, order.CreatedAt,
+                order.Lines.Select(line => new OrderSummaryLineDto(line.ProductId, line.ProductName,
+                    line.Quantity, line.Options.Select(option => new OrderSummaryOptionDto(option.OptionId,
+                        option.Name)).ToArray())).ToArray())).ToListAsync(cancellationToken);
+        return new OrderHistoryPageData(items, totalCount);
+    }
+
+    public Task<int> ArchiveClosedOrdersBeforeAsync(DateTimeOffset cutoff, CancellationToken cancellationToken)
+    {
+        var query = database.Orders.Where(order => order.ArchivedAt == null && order.ClosedAtTicks != null &&
+            order.ClosedAtTicks < cutoff.UtcDateTime.Ticks &&
+            (order.Status == WhitePlate.Domain.Orders.OrderStatus.Completed ||
+             order.Status == WhitePlate.Domain.Orders.OrderStatus.Cancelled));
+        return query.ExecuteUpdateAsync(update => update.SetProperty(order => order.ArchivedAt, cutoff),
+            cancellationToken);
+    }
+
     public async Task<Result<OrderReceiptDto>> TransitionAsync(Guid tenantId, Guid orderId,
         int expectedVersion, WhitePlate.Domain.Orders.OrderStatus status, DateTimeOffset now,
         CancellationToken cancellationToken)
@@ -166,8 +211,8 @@ public sealed class OrderRepository(WhitePlateDbContext database) : IOrderReposi
         try
         {
             var previousVersion = order.Version;
-            if (status == WhitePlate.Domain.Orders.OrderStatus.Cancelled) order.Cancel();
-            else order.TransitionTo(status);
+            if (status == WhitePlate.Domain.Orders.OrderStatus.Cancelled) order.Cancel(now);
+            else order.TransitionTo(status, now);
             if (order.Version == previousVersion)
             {
                 await transaction.RollbackAsync(cancellationToken);

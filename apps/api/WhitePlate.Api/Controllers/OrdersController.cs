@@ -16,7 +16,7 @@ namespace WhitePlate.Api.Controllers;
 [Route("api/v1/orders")]
 public sealed class OrdersController(ICurrentTenant currentTenant, ICurrentIdentity currentIdentity,
     CreateOrderCommandHandler createOrder, CheckoutRequestRateLimiter checkoutRateLimiter,
-    ListOrdersQueryHandler listOrders,
+    ListOrdersQueryHandler listOrders, ListOrderHistoryQueryHandler listOrderHistory,
     UpdateOrderStatusCommandHandler updateStatus, ApiErrorMapper errors) : ControllerBase
 {
     [HttpPost]
@@ -74,6 +74,47 @@ public sealed class OrdersController(ICurrentTenant currentTenant, ICurrentIdent
         var result = await listOrders.HandleAsync(new ListOrdersQuery(tenantId, parsedStatus, cursor, pageSize),
             identity, cancellationToken);
         return result.IsSuccess ? Ok(result.Value) : errors.ToActionResult(errors.Create(HttpContext, result.Error));
+    }
+
+    [HttpGet("/api/v1/tenants/{tenantId:guid}/orders/history")]
+    [Authorize]
+    [ProducesResponseType<OrderHistoryPageDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status401Unauthorized, "application/problem+json")]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status403Forbidden, "application/problem+json")]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status400BadRequest, "application/problem+json")]
+    public async Task<ActionResult<OrderHistoryPageDto>> History(Guid tenantId, [FromQuery] string? status,
+        [FromQuery] string? search, [FromQuery] string? from, [FromQuery] string? through,
+        [FromQuery] string sort = "createdAt", [FromQuery] string direction = "desc",
+        [FromQuery] int page = 1, [FromQuery] int pageSize = 25, CancellationToken cancellationToken = default)
+    {
+        var identity = currentIdentity.Identity;
+        if (identity is null) return Unauthorized();
+        OrderStatus? parsedStatus = null;
+        if (status is not null)
+        {
+            if (!Enum.TryParse<OrderStatus>(status, ignoreCase: false, out var value) || !Enum.IsDefined(value))
+                return InvalidHistoryFilter("status");
+            parsedStatus = value;
+        }
+
+        if (!TryParseDate(from, out var fromDate) || !TryParseDate(through, out var throughDate))
+            return InvalidHistoryFilter("date");
+        var result = await listOrderHistory.HandleAsync(new ListOrderHistoryQuery(tenantId, parsedStatus,
+            search?.Trim(), fromDate, throughDate, sort, direction, page, pageSize), identity, cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : errors.ToActionResult(errors.Create(HttpContext, result.Error));
+    }
+
+    private ActionResult InvalidHistoryFilter(string field) => errors.ToActionResult(errors.Create(HttpContext,
+        new ApplicationError(ErrorCode.ValidationFailed,
+            new ValidationIssue(field, "invalid_order_history_filter", "The order history filter is invalid."))));
+
+    private static bool TryParseDate(string? value, out DateOnly? date)
+    {
+        date = null;
+        if (value is null) return true;
+        if (!DateOnly.TryParseExact(value, "yyyy-MM-dd", out var parsed)) return false;
+        date = parsed;
+        return true;
     }
 
     [HttpPatch("/api/v1/tenants/{tenantId:guid}/orders/{orderId:guid}/status")]

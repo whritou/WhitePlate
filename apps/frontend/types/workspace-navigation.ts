@@ -9,6 +9,7 @@ export type WorkspaceNavigationTranslationKey =
   | "settings"
   | "createRestaurant"
   | "orders"
+  | "orderHistory"
   | "catalog"
   | "menuLanguages"
 

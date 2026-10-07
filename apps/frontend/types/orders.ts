@@ -25,6 +25,29 @@ export type OrderSummary = {
 }
 
 export type OrderPage = { items: OrderSummary[]; nextCursor: string | null }
+export type OrderHistoryPage = {
+  items: OrderSummary[]
+  page: number
+  pageSize: number
+  totalCount: number
+}
+export type OrderHistoryFilters = {
+  tenantId: string
+  status: OrderStatus | null
+  search: string | null
+  from: string | null
+  through: string | null
+  sort: "createdAt" | "total"
+  direction: "asc" | "desc"
+  page: number
+  pageSize: number
+}
+export type OrderHistoryTableProps = {
+  tenantName: string
+  locale: string
+  filters: OrderHistoryFilters
+  page: OrderHistoryPage
+}
 
 export type RestaurantRole = "OrganizationOwner" | "Manager" | "Kitchen"
 

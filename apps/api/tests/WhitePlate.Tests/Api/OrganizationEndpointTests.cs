@@ -10,11 +10,13 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Text.Json;
 using System.Security.Cryptography;
 using System.Text;
+using WhitePlate.Api.Realtime;
 using WhitePlate.Domain.Identity;
 using WhitePlate.Domain.Organizations;
 using WhitePlate.Infrastructure.Persistence;
@@ -447,6 +449,9 @@ public sealed class OrganizationEndpointTests
             builder.ConfigureLogging(logging => logging.ClearProviders());
             builder.ConfigureServices(services =>
             {
+                var archiveDispatcher = services.FirstOrDefault(descriptor => descriptor.ServiceType == typeof(IHostedService) &&
+                    descriptor.ImplementationType == typeof(OrderArchiveDispatcher));
+                if (archiveDispatcher is not null) services.Remove(archiveDispatcher);
                 services.AddAuthentication("test")
                     .AddScheme<AuthenticationSchemeOptions, TestAuthenticationHandler>("test", _ => { });
                 services.RemoveAll<DbContextOptions<WhitePlateDbContext>>();

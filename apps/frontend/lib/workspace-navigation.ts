@@ -52,6 +52,13 @@ export function buildWorkspaceNavigation(
     ]
 
     if (restaurant.role !== "Kitchen") {
+      links.push({
+        href: `/organization/order-history?tenantId=${tenantId}`,
+        label: translate("orderHistory"),
+      })
+    }
+
+    if (restaurant.role !== "Kitchen") {
       links.push(
         {
           href: `/organization/catalog?tenantId=${tenantId}`,
