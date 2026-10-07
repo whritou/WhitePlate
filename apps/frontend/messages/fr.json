@@ -256,11 +256,11 @@
       "reconnecting": "Reconnexion aux mises à jour en direct…",
       "offline": "Mises à jour en direct indisponibles ; vous pouvez actualiser les commandes"
     },
-    "boardHelp": "Glissez une commande par sa poignée vers l’étape suivante, ou utilisez son bouton d’action. Les compteurs concernent cette page.",
+    "boardHelp": "Glissez une commande depuis une zone libre de sa carte. Sur écran tactile, maintenez la pression puis glissez ; utilisez un bouton d’action au clavier. Les compteurs concernent cette page.",
     "loadedCount": "{count, plural, one {# commande chargée} other {# commandes chargées}}",
     "emptyLane": "Aucune commande à cette étape",
     "dragOrder": "Déplacer la commande {reference}",
-    "dragInstructions": "Glissez vers une étape autorisée. Appuyez sur Échap pour annuler. Utilisez le bouton de l’étape suivante pour déplacer une commande au clavier.",
+    "dragInstructions": "Glissez depuis une zone de la carte hors des boutons vers une étape autorisée. Sur écran tactile, maintenez la pression avant de glisser. Appuyez sur Échap pour annuler. Utilisez un bouton d’action pour déplacer une commande au clavier.",
     "draggingOrder": "Déplacement de la commande {reference}. {destination}",
     "invalidDrop": "Choisissez une étape autorisée",
     "testRejectUpdates": "Refuser les mises à jour"

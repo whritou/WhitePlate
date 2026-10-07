@@ -9,7 +9,7 @@ export function OrderKanbanSkeleton() {
       {Array.from({ length: 5 }, (_, index) => (
         <div
           key={index}
-          className="grid gap-4 rounded-lg border border-border bg-muted p-3"
+          className="grid gap-4 rounded-lg border border-border bg-secondary p-3"
         >
           <Skeleton className="h-12 w-full" />
 

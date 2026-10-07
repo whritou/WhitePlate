@@ -76,7 +76,19 @@ export type OrderTicketProps = {
   locale: string
   pending: UpdateOrderStatusInput | null
   onUpdate: (input: Omit<UpdateOrderStatusInput, "tenantId">) => Promise<void>
-  dragHandle?: import("react").ReactNode
+  dragAffordance?: import("react").ReactNode
+  dragHandlers?: Pick<
+    import("react").HTMLAttributes<HTMLElement>,
+    | "onPointerDown"
+    | "onPointerMove"
+    | "onPointerUp"
+    | "onPointerCancel"
+    | "onLostPointerCapture"
+    | "onTouchStart"
+    | "onTouchMove"
+    | "onTouchEnd"
+    | "onTouchCancel"
+  >
   headingLevel?: "h2" | "h3"
 }
 
@@ -97,6 +109,14 @@ export type OrderDragState = {
   y: number
   active: boolean
   destination: string | null
+}
+
+export type OrderPendingTouch = {
+  identifier: number
+  order: OrderSummary
+  startX: number
+  startY: number
+  timer: number
 }
 
 export type OrderRealtimeProps = {

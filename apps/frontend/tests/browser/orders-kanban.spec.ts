@@ -4,12 +4,14 @@ import type { Page } from "@playwright/test"
 const orderId = "22222222-2222-4222-8222-222222222222"
 
 async function dragOrder(page: Page, destination: string) {
-  const handle = page.getByRole("button", { name: "Drag order 22222222" })
+  const surface = page.locator(
+    `[data-order-id="${orderId}"] [data-slot="card-content"]`
+  )
   const target = page.locator(`[data-order-lane="${destination}"]`)
 
-  await handle.scrollIntoViewIfNeeded()
+  await surface.scrollIntoViewIfNeeded()
 
-  const from = (await handle.boundingBox())!
+  const from = (await surface.boundingBox())!
 
   await page.mouse.move(from.x + from.width / 2, from.y + from.height / 2)
   await page.mouse.down()
@@ -18,6 +20,21 @@ async function dragOrder(page: Page, destination: string) {
   const to = (await target.boundingBox())!
 
   await page.mouse.move(to.x + to.width / 2, to.y + 80, { steps: 15 })
+  await page.mouse.up()
+}
+
+async function dragFromActionButton(page: Page, destination: string) {
+  const action = page
+    .locator(`[data-order-id="${orderId}"] [data-slot="card-footer"] button`)
+    .first()
+  const target = page.locator(`[data-order-lane="${destination}"]`)
+
+  const from = (await action.boundingBox())!
+  const to = (await target.boundingBox())!
+
+  await page.mouse.move(from.x + from.width / 2, from.y + from.height / 2)
+  await page.mouse.down()
+  await page.mouse.move(to.x + to.width / 2, to.y + 80, { steps: 12 })
   await page.mouse.up()
 }
 
@@ -62,6 +79,13 @@ test("dragging rejects skipped stages and kitchen cancellation, and accepts the 
   await expect(page.getByTestId("mutation-count")).toHaveText("1")
 })
 
+test("card buttons do not start a drag", async ({ page }) => {
+  await page.goto("/en/orders-kanban-test")
+  await dragFromActionButton(page, "Preparing")
+  await expect(page.getByTestId("mutation-count")).toHaveText("0")
+  await expect(page.locator('[data-order-lane="Pending"]')).toContainText("Ada")
+})
+
 test("owner can drag to Cancelled; rejected saves leave the ticket in its original lane", async ({
   page,
 }) => {
@@ -73,9 +97,7 @@ test("owner can drag to Cancelled; rejected saves leave the ticket in its origin
       .getByRole("alert")
       .filter({ hasText: "This order changed before your update was saved" })
   ).toBeVisible()
-  await expect(
-    page.getByRole("button", { name: "Drag order 22222222" })
-  ).toBeEnabled()
+  await expect(page.locator(`[data-order-id="${orderId}"]`)).toBeVisible()
   await expect(page.locator('[data-order-lane="Pending"]')).toContainText("Ada")
   await page.getByRole("checkbox", { name: "Reject updates" }).uncheck()
   await dragOrder(page, "Cancelled")
@@ -87,8 +109,10 @@ test("owner can drag to Cancelled; rejected saves leave the ticket in its origin
 test("Escape cancels a drag without submitting an update", async ({ page }) => {
   await page.goto("/en/orders-kanban-test")
 
-  const handle = page.getByRole("button", { name: "Drag order 22222222" })
-  const from = (await handle.boundingBox())!
+  const surface = page.locator(
+    `[data-order-id="${orderId}"] [data-slot="card-content"]`
+  )
+  const from = (await surface.boundingBox())!
   const to = (await page
     .locator('[data-order-lane="Preparing"]')
     .boundingBox())!
@@ -108,8 +132,10 @@ test("touch dragging moves an order between stacked mobile lanes", async ({
   await page.setViewportSize({ width: 375, height: 1400 })
   await page.goto("/en/orders-kanban-test")
 
-  const handle = page.getByRole("button", { name: "Drag order 22222222" })
-  const from = (await handle.boundingBox())!
+  const surface = page.locator(
+    `[data-order-id="${orderId}"] [data-slot="card-content"]`
+  )
+  const from = (await surface.boundingBox())!
   const to = (await page
     .locator('[data-order-lane="Preparing"]')
     .boundingBox())!
@@ -121,6 +147,7 @@ test("touch dragging moves an order between stacked mobile lanes", async ({
     type: "touchStart",
     touchPoints: [start],
   })
+  await page.waitForTimeout(400)
   for (let step = 1; step <= 20; step++) {
     await session.send("Input.dispatchTouchEvent", {
       type: "touchMove",
@@ -142,6 +169,40 @@ test("touch dragging moves an order between stacked mobile lanes", async ({
     "Ada"
   )
   await expect(page.getByTestId("mutation-count")).toHaveText("1")
+})
+
+test("touch scrolling that begins on a ticket does not move the order", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 375, height: 800 })
+  await page.goto("/en/orders-kanban-test")
+
+  const surface = page.locator(
+    `[data-order-id="${orderId}"] [data-slot="card-content"]`
+  )
+  const box = (await surface.boundingBox())!
+  const start = { x: box.x + box.width / 2, y: box.y + box.height / 2 }
+  const session = await page.context().newCDPSession(page)
+
+  await session.send("Input.dispatchTouchEvent", {
+    type: "touchStart",
+    touchPoints: [start],
+  })
+  for (let step = 1; step <= 8; step++) {
+    await session.send("Input.dispatchTouchEvent", {
+      type: "touchMove",
+      touchPoints: [{ x: start.x, y: start.y - step * 18 }],
+    })
+  }
+
+  await session.send("Input.dispatchTouchEvent", {
+    type: "touchEnd",
+    touchPoints: [],
+  })
+  await session.detach()
+
+  await expect(page.getByTestId("mutation-count")).toHaveText("0")
+  expect(await page.evaluate(() => window.scrollY)).toBeGreaterThan(0)
 })
 
 for (const locale of ["en", "fr"]) {
@@ -166,13 +227,37 @@ for (const locale of ["en", "fr"]) {
         "true"
       )
       await tabs.getByRole("tab").first().click()
-      for (const width of [320, 375, 768, 1024, 1440]) {
+      for (const width of [320, 375, 768, 1024, 1440, 1920]) {
         await page.setViewportSize({ width, height: 1000 })
         expect(
           await page.evaluate(
             () => document.documentElement.scrollWidth <= innerWidth
           )
         ).toBe(true)
+
+        const lanes = await page
+          .locator("[data-order-lane]")
+          .evaluateAll((elements) =>
+            elements.map((element) => element.getBoundingClientRect())
+          )
+        const firstRow = lanes.filter(
+          (lane) => Math.abs(lane.top - lanes[0].top) < 2
+        )
+        const expectedColumns =
+          width >= 1900
+            ? 5
+            : width >= 1280
+              ? 4
+              : width >= 1024
+                ? 3
+                : width >= 768
+                  ? 2
+                  : 1
+
+        expect(firstRow).toHaveLength(expectedColumns)
+        expect(
+          Math.min(...firstRow.map((lane) => lane.width))
+        ).toBeGreaterThanOrEqual(Math.min(width - 32, 288))
       }
 
       const action = page

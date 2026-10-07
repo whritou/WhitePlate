@@ -4,7 +4,6 @@ import { useRef } from "react"
 import { GripVertical } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
 import {
   ORDER_STATUSES,
   getAvailableOrderTransitions,
@@ -55,10 +54,17 @@ export function OrderKanban(props: OrderKanbanProps) {
       })
   }
 
-  const { drag, start, move, end, cancel } = useOrderDrag(
-    { ...props, onUpdate: update },
-    container
-  )
+  const {
+    drag,
+    start,
+    move,
+    end,
+    cancel,
+    pointerCancel,
+    touchStart,
+    touchMove,
+    touchEnd,
+  } = useOrderDrag({ ...props, onUpdate: update }, container)
   const available = drag
     ? getAvailableOrderTransitions(role, drag.order.status)
     : []
@@ -83,11 +89,11 @@ export function OrderKanban(props: OrderKanbanProps) {
               data-order-lane={status}
               aria-label={t(`statuses.${status}`)}
               className={cn(
-                "min-w-0 rounded-lg border border-border bg-muted p-3",
+                "min-w-0 rounded-lg border border-border bg-secondary p-3",
                 allowed && "border-input",
                 allowed &&
                   drag?.destination === status &&
-                  "outline-2 outline-ring"
+                  "bg-accent outline-2 outline-ring"
               )}
             >
               <header
@@ -113,10 +119,10 @@ export function OrderKanban(props: OrderKanbanProps) {
                   <li
                     key={order.id}
                     className={cn(
-                      "min-w-0 rounded-lg",
+                      "min-w-0 rounded-lg transition-transform",
                       drag?.active &&
                         drag.order.id === order.id &&
-                        "outline-2 outline-ring"
+                        "scale-[1.01] opacity-70 outline-2 outline-ring"
                     )}
                   >
                     <OrderTicket
@@ -126,27 +132,32 @@ export function OrderKanban(props: OrderKanbanProps) {
                       pending={pending}
                       onUpdate={update}
                       headingLevel="h3"
-                      dragHandle={
+                      dragAffordance={
                         getAvailableOrderTransitions(role, order.status)
                           .length > 0 ? (
-                          <Button
-                            variant="ghost"
-                            size="icon-lg"
-                            className="cursor-grab touch-none active:cursor-grabbing"
-                            aria-label={t("dragOrder", {
-                              reference: order.id.slice(0, 8),
-                            })}
-                            aria-describedby="order-drag-instructions"
-                            disabled={pending !== null}
-                            onPointerDown={(event) => start(event, order)}
-                            onPointerMove={move}
-                            onPointerUp={(event) => void end(event)}
-                            onPointerCancel={cancel}
-                            onLostPointerCapture={cancel}
+                          <span
+                            aria-hidden="true"
+                            className="pointer-events-none inline-flex size-11 shrink-0 items-center justify-center text-muted-foreground"
                           >
                             <GripVertical aria-hidden="true" />
-                          </Button>
+                          </span>
                         ) : undefined
+                      }
+                      dragHandlers={
+                        getAvailableOrderTransitions(role, order.status)
+                          .length > 0 && pending === null
+                          ? {
+                              onPointerDown: (event) => start(event, order),
+                              onPointerMove: move,
+                              onPointerUp: (event) => void end(event),
+                              onPointerCancel: pointerCancel,
+                              onLostPointerCapture: pointerCancel,
+                              onTouchStart: (event) => touchStart(event, order),
+                              onTouchMove: touchMove,
+                              onTouchEnd: (event) => void touchEnd(event),
+                              onTouchCancel: cancel,
+                            }
+                          : undefined
                       }
                     />
                   </li>
