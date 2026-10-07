@@ -1,7 +1,12 @@
+"use client"
+
 import Link from "next/link"
-import { ArrowRight, FileQuestion } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { ArrowLeft, FileQuestion, Home } from "lucide-react"
 
 export function GlobalNotFoundContent() {
+  const router = useRouter()
+
   return (
     <main className="grid min-h-screen place-items-center bg-background p-4 text-foreground sm:p-6">
       <section
@@ -25,38 +30,34 @@ export function GlobalNotFoundContent() {
 
           <p className="max-w-prose text-sm leading-6 text-muted-foreground">
             <span lang="en">
-              Choose a language to return to your WhitePlate workspace.
+              The address may be incorrect or the page may have moved.
             </span>
 
             <span aria-hidden="true"> </span>
 
             <span lang="fr">
-              Choisissez une langue pour revenir à votre espace WhitePlate.
+              L’adresse est peut-être incorrecte ou la page a été déplacée.
             </span>
           </p>
 
-          <nav
-            aria-label="Choose a language / Choisissez une langue"
-            className="flex flex-wrap gap-3"
-          >
-            <Link
-              href="/fr"
-              lang="fr"
-              className="inline-flex min-h-11 max-w-full items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-center font-medium text-primary-foreground transition-colors hover:bg-primary-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
-            >
-              Français
-              <ArrowRight aria-hidden="true" className="size-4 shrink-0" />
-            </Link>
-
-            <Link
-              href="/en"
-              lang="en"
+          <div className="flex flex-wrap gap-3">
+            <button
+              type="button"
+              onClick={() => router.back()}
               className="inline-flex min-h-11 max-w-full items-center justify-center gap-2 rounded-md border border-input bg-card px-4 py-2 text-center font-medium text-foreground transition-colors hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
             >
-              English
-              <ArrowRight aria-hidden="true" className="size-4 shrink-0" />
+              <ArrowLeft aria-hidden="true" className="size-4 shrink-0" />
+              Retour / Back
+            </button>
+
+            <Link
+              href="/"
+              className="inline-flex min-h-11 max-w-full items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-center font-medium text-primary-foreground transition-colors hover:bg-primary-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+            >
+              <Home aria-hidden="true" className="size-4 shrink-0" />
+              Accueil / Home
             </Link>
-          </nav>
+          </div>
         </div>
       </section>
     </main>
