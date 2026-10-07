@@ -1,4 +1,5 @@
 import { CatalogTranslationsEditor } from "@/components/organization/catalog-translations-editor"
+import { BackLink } from "@/components/organization/back-link"
 import { MenuLanguageSettings } from "@/components/organization/menu-language-settings"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Package } from "lucide-react"
@@ -45,12 +46,7 @@ export default async function RestaurantMenuLanguagesPage({
   ) {
     return (
       <main className="mx-auto min-h-[70vh] max-w-3xl p-4 sm:p-6 lg:p-8">
-        <Link
-          href="/organization"
-          className="text-sm font-medium text-primary underline-offset-4 hover:underline"
-        >
-          {t("backToOrganizations")}
-        </Link>
+        <BackLink label={t("backToOrganizations")} />
 
         <Alert variant="destructive" role="alert" className="mt-6">
           <AlertDescription>{t("menuLanguagesError")}</AlertDescription>
@@ -62,7 +58,9 @@ export default async function RestaurantMenuLanguagesPage({
   return (
     <main className="mx-auto grid w-full max-w-7xl min-w-0 gap-6 p-4 sm:p-6 lg:p-8">
       <header className="flex flex-wrap items-start justify-between gap-4">
-        <div>
+        <div className="grid justify-items-start">
+          <BackLink label={t("backToOrganizations")} className="mb-1" />
+
           <h1 className="text-2xl font-semibold sm:text-[2rem]">
             {t("menuLanguagesTitle")}
           </h1>

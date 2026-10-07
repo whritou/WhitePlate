@@ -197,7 +197,8 @@ it("shows only the empty state when the current view has no orders", () => {
   expect(html).not.toContain("New orders will appear here.")
   expect(html).not.toContain("data-order-lane=")
   expect(html).not.toContain("Loading orders…")
-  expect(html).not.toContain('aria-hidden="true"')
+  expect(html).toContain("All organizations")
+  expect(html).toContain("lucide-arrow-left")
 })
 
 it("shows an unavailable error after an unsuccessful initial query", () => {

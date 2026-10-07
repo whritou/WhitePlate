@@ -447,3 +447,21 @@ Commands were executed from `apps/frontend` through the bundled Node 24.19.0 run
 | Git whitespace | `git diff --check`: passed. |
 
 The development-only route mounts actual production components with fixed data. Save checks intercept POST requests and synthesize replies; no fixture mutation is sent to the API/database. Screenshots were inspected for catalog and translations. The authenticated catalog/discount/staff tests were adapted to modal actions and typechecked, but were not rerun against a database in this task. Hosted deployment, database persistence with these new controls, assistive-technology review and browser zoom remain unverified; keep the card in review until remaining acceptance is resolved. No API code changed, so .NET tests were not run. The fixture is guarded with production not-found.
+
+## Workspace feedback, error pages, and route consolidation — 2026-10-07
+
+Replaced visible toast-dismiss text with an accessible cross icon, added localized unauthorized and not-found pages, and added a shared arrow back-link at the existing page-specific positions. The active organization sign-up page and loading UI now live inside the authenticated workspace route group without changing `/[locale]/organization/sign-up`; the prior `app/[locale]/organization` tree contained no other tracked route files. Architecture and this design's follow-up record the change.
+
+Commands ran from `apps/frontend` using the installed local CLIs because `npm` was not available in PowerShell:
+
+| Check | Actual result |
+| --- | --- |
+| `node_modules/.bin/vitest.cmd run` | Passed: 53 files, 369 tests. The first run exposed an outdated assertion that the order dashboard contained no decorative icons; it now checks the new back-arrow link. |
+| `node_modules/.bin/eslint.cmd .` | Passed. |
+| `node_modules/.bin/tsc.cmd --noEmit` | Passed after the production build refreshed stale `.next` route types. The initial standalone typecheck referenced the sign-up page's previous path. |
+| `node_modules/.bin/prettier.cmd --check` on changed TypeScript/TSX files | Passed. |
+| `node_modules/.bin/prettier.cmd --check "**/*.{ts,tsx}"` | Failed on 207 repository-wide formatting findings outside the changed files; no unrelated files were rewritten. |
+| `node_modules/.bin/next.cmd build --webpack` | Passed with process-only `BETTER_AUTH_URL=https://localhost:3000` and `API_BASE_URL=https://localhost:5182`. Earlier attempts stopped at the existing production HTTPS checks for local environment URLs. Webpack emitted nonfatal `.next` cache EPERM warnings; the installed PostgreSQL driver emitted its SSL-mode compatibility warning. |
+| `git diff --check` | Passed. |
+
+No authenticated browser flow was run. The localized pages and preserved sign-up URL were confirmed in the successful route build; hosted authorization behavior remains outside this frontend change.

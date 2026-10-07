@@ -1,4 +1,5 @@
 import { OrganizationSettingsForm } from "@/components/organization/organization-settings-form"
+import { BackLink } from "@/components/organization/back-link"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import {
   Card,
@@ -7,7 +8,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { Link } from "@/i18n/navigation"
 import { auth } from "@/lib/auth"
 import { isUuid } from "@/lib/validation/common"
 import { getOrganizations } from "@/services/organization-queries"
@@ -68,12 +68,7 @@ export default async function OrganizationSettingsPage({
 
   return (
     <main className="mx-auto min-h-[70vh] max-w-3xl p-4 sm:p-6 lg:p-8">
-      <Link
-        href="/organization"
-        className="text-sm font-medium text-primary underline-offset-4 hover:underline"
-      >
-        {t("backToOrganizations")}
-      </Link>
+      <BackLink label={t("backToOrganizations")} />
 
       <Card className="mt-6 rounded-lg border border-border bg-card p-6 sm:p-10">
         <CardHeader className="px-0">

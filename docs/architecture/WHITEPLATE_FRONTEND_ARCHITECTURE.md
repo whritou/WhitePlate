@@ -12,12 +12,12 @@ apps/frontend/
     [locale]/                 # Auth, organization, invitation, settings, and localized pages
       (workspace)/organization/ # Verified-session shell and role-scoped navigation
         (overview)/           # Organization and restaurant overview
+        sign-up/              # Authenticated organization setup
         team/                 # Organization team and invitation workflow
         catalog/              # Restaurant catalog management
         restaurant-languages/ # Menu language and translation management
         orders/               # Server page and initial validated tickets
         order-history/        # Owner/manager-only searchable, filtered order history
-      organization/sign-up/   # Organization setup outside the workspace shell
     api/kitchen/               # Same-origin order reads and SignalR token route
     api/auth/[...all]/        # Better Auth handlers; browser token endpoint blocked
     .well-known/              # API JWT issuer metadata
@@ -70,6 +70,8 @@ No `src/` folder exists. The TypeScript alias `@/*` resolves to the frontend roo
 
 `generateStaticParams` enumerates both locales. Localized sign-in/sign-up, email recovery/verification, organization signup/team, and invitation acceptance pages are implemented. Locale segments are not tenant identifiers. Unsupported path behavior should be tested through Proxy, not inferred solely from the layout guard.
 
+`[locale]/not-found.tsx` renders the localized App Router not-found experience, and `[locale]/unauthorized/page.tsx` provides a localized access-denied destination. Workspace return links share the arrow-icon `BackLink` while each page controls its placement.
+
 ## Rendering and theme
 
 Auth pages keep session checks and protected API access on the server. `lib/api/` provides the shared GET/POST/PUT/PATCH/DELETE request factory, maps failures to safe result codes, and logs only bounded diagnostic metadata. Its authenticated server-only client validates the request origin, requires a verified Better Auth session, obtains a short-lived API JWT, and sends it to `API_BASE_URL`; API calls use `no-store`. Token requests through `/api/auth/token` are blocked from browser HTTP access. A separate same-origin `POST /api/kitchen/signalr-token` route checks a verified session and exact `Origin` before returning a short-lived JWT with no-store headers to the SignalR token factory. The token stays in memory and carries no tenant grant. A separate server-only public menu client sends no credentials and constructs its target from `PUBLIC_TENANT_API_URL_TEMPLATE` after validating the incoming Host against `STOREFRONT_BASE_DOMAIN`; it extracts exactly one tenant label and does not forward raw Host or forwarded-host headers. Restaurant menu language is selected with `menuLocale` independently of the `/en` or `/fr` interface locale. Owners and managers use `/[locale]/organization/restaurant-languages` to configure enabled languages and edit catalog translations. `AppProviders` provides an isolated TanStack Query client used by kitchen orders and a tenant-selection Zustand store; the server-rendered storefront does not consume those client caches. Custom domains remain deferred, and the API still resolves tenant hosts and authorizes all protected operations by membership. Resend delivery remains a separate server-only provider request. `ThemeProvider` is a Client Component using the `dark` class and the system theme by default.
@@ -84,7 +86,7 @@ The theme currently changes light/dark appearance only. There is no restaurant-s
 
 ## Organization workspace shell
 
-`/[locale]/(workspace)/organization/layout.tsx` requires a signed-in, verified Better Auth session and reads the user's organizations and restaurant memberships through the existing server-only services. It passes only those display records to `WorkspaceShell`. The client shell shows role-appropriate links in a desktop sidebar and a mobile shadcn-compatible Sheet built on Base UI Dialog. The Sheet contains its own scrolling and uses Base UI's focus containment, Escape dismissal, and focus restoration. Locale links retain the current route and query only when organization or tenant selectors match those verified records; an unknown selector is removed from the locale-switch URL. Pages and API handlers still enforce access independently; layout navigation data is not an authorization grant. Organization signup stays outside this shell.
+`/[locale]/(workspace)/organization/layout.tsx` requires a signed-in, verified Better Auth session and reads the user's organizations and restaurant memberships through the existing server-only services. It passes only those display records to `WorkspaceShell`. The client shell shows role-appropriate links in a desktop sidebar and a mobile shadcn-compatible Sheet built on Base UI Dialog. The Sheet contains its own scrolling and uses Base UI's focus containment, Escape dismissal, and focus restoration. Locale links retain the current route and query only when organization or tenant selectors match those verified records; an unknown selector is removed from the locale-switch URL. Pages and API handlers still enforce access independently; layout navigation data is not an authorization grant. Organization signup is inside this shell because it requires the same verified session and shares the workspace navigation; its public URL remains `/[locale]/organization/sign-up`.
 
 ## Catalog management
 

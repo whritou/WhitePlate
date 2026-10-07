@@ -10,6 +10,14 @@
     "english": "English",
     "french": "French"
   },
+  "StatusPages": {
+    "unauthorizedTitle": "You don’t have access to this page",
+    "unauthorizedDescription": "Your account may not have permission to view this page. Return to your organizations to continue.",
+    "backToOrganizations": "All organizations",
+    "notFoundTitle": "This page can’t be found",
+    "notFoundDescription": "The address may be incorrect, or the page may have moved.",
+    "home": "Go to home"
+  },
   "Auth": {
     "asideEyebrow": "A good service starts here",
     "asideTitle": "Bring your team to the table.",

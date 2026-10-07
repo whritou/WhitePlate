@@ -8,7 +8,7 @@ import MenuLanguagesLoading from "@/app/[locale]/(workspace)/organization/restau
 import NewRestaurantLoading from "@/app/[locale]/(workspace)/organization/restaurants/new/loading"
 import SettingsLoading from "@/app/[locale]/(workspace)/organization/settings/loading"
 import TeamLoading from "@/app/[locale]/(workspace)/organization/team/loading"
-import OrganizationSignUpLoading from "@/app/[locale]/organization/sign-up/loading"
+import OrganizationSignUpLoading from "@/app/[locale]/(workspace)/organization/sign-up/loading"
 
 const { getTranslations } = vi.hoisted(() => ({ getTranslations: vi.fn() }))
 
