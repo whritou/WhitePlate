@@ -465,3 +465,17 @@ Commands ran from `apps/frontend` using the installed local CLIs because `npm` w
 | `git diff --check` | Passed. |
 
 No authenticated browser flow was run. The localized pages and preserved sign-up URL were confirmed in the successful route build; hosted authorization behavior remains outside this frontend change.
+
+## Workspace overflow, page-specific loading UI, and global 404 — 2026-10-07
+
+Menu-language and catalog links in team settings now wrap within responsive restaurant cards, with a two-column list only when the viewport allows it. Team, restaurant creation, and organization settings loading skeletons now follow their page layouts. Localized not-found pages use WhitePlate styling, while the root `global-not-found.tsx` handles unmatched paths outside the locale segment as described by the installed Next.js documentation. The global page provides English and French navigation without depending on the locale layout. Architecture docs record the experimental Next.js global-not-found behavior.
+
+| Check | Actual result |
+| --- | --- |
+| `node node_modules/vitest/vitest.mjs run` from `apps/frontend` | Passed: 55 files, 374 tests, including responsive link wrapping, skeleton shape, localized not-found, and global not-found coverage. |
+| `node node_modules/eslint/bin/eslint.js .` from `apps/frontend` | Passed. |
+| `node node_modules/typescript/bin/tsc --noEmit` from `apps/frontend` | Passed. |
+| `node node_modules/prettier/bin/prettier.cjs --check` on changed files | Passed. |
+| `node node_modules/next/dist/bin/next build --webpack` from `apps/frontend` | Passed compilation, TypeScript, and page generation with process-only HTTPS auth/API placeholders. Next reported the experimental `globalNotFound` flag as enabled. Webpack cache writes emitted nonfatal sandbox EPERM warnings and the PostgreSQL driver emitted its SSL-mode compatibility warning. |
+| `git diff --check` | Passed; Git emitted only line-ending conversion warnings for CRLF-configured paths. |
+| Authenticated responsive browser acceptance | Not run; it requires the database-backed authenticated workspace setup. |

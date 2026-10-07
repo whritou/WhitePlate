@@ -54,17 +54,9 @@ function CardSkeleton({
   )
 }
 
-function HeaderSkeleton({
-  back = false,
-  region = "page-header",
-}: {
-  back?: boolean
-  region?: string
-}) {
+function HeaderSkeleton({ region = "page-header" }: { region?: string }) {
   return (
     <Region name={region} className="grid gap-4">
-      {back && <Skeleton className="h-4 w-36" />}
-
       <div className="grid max-w-2xl gap-3">
         <Skeleton className="h-4 w-40" />
 
@@ -95,7 +87,11 @@ export function WorkspacePageSkeleton({
             ? "w-full max-w-none"
             : page === "catalog" || page === "menuLanguages"
               ? "w-full max-w-7xl min-w-0"
-              : "max-w-5xl"
+              : page === "restaurant"
+                ? "max-w-2xl"
+                : page === "team" || page === "settings"
+                  ? "max-w-3xl"
+                  : "max-w-5xl"
         )}
       >
         <div aria-hidden="true" className="grid gap-6">
@@ -138,38 +134,76 @@ function OrganizationSignUpSkeleton() {
 function TeamSkeleton() {
   return (
     <>
-      <HeaderSkeleton back region="team-header" />
-
-      <Region name="team-actions">
-        <Skeleton className="h-10 w-44 rounded-lg" />
+      <Region name="team-back-link">
+        <Skeleton className="h-10 w-36 max-w-full rounded-md" />
       </Region>
 
-      <Region name="team-restaurants" className="grid gap-3">
-        <Skeleton className="h-6 w-48" />
+      <Region
+        name="team-card"
+        className="mt-6 grid gap-6 rounded-lg border border-border bg-card p-6 sm:p-10"
+      >
+        <Region name="team-header" className="grid gap-3">
+          <Skeleton className="h-4 w-40" />
 
-        <div className="grid gap-2 sm:grid-cols-2">
-          <CardSkeleton
-            className="flex grid-cols-[1fr_auto] items-center"
-            lines={0}
-          />
+          <Skeleton className="h-9 w-64 max-w-full" />
 
-          <CardSkeleton
-            className="flex grid-cols-[1fr_auto] items-center"
-            lines={0}
-          />
-        </div>
-      </Region>
+          <Lines />
+        </Region>
 
-      <Region name="team-roster">
-        <CardSkeleton className="min-h-48" lines={3} />
-      </Region>
+        <Region name="team-actions" className="mt-6">
+          <Skeleton className="h-11 w-52 max-w-full rounded-lg" />
+        </Region>
 
-      <Region name="team-invitations">
-        <CardSkeleton className="min-h-48" lines={3} />
-      </Region>
+        <Region name="team-restaurants" className="mt-8 grid min-w-0 gap-3">
+          <Skeleton className="h-6 w-48 max-w-full" />
 
-      <Region name="team-invitation-form">
-        <CardSkeleton className="min-h-72" lines={4} />
+          <div className="grid min-w-0 gap-2 sm:grid-cols-2">
+            {Array.from({ length: 2 }, (_, index) => (
+              <div
+                key={index}
+                className="grid min-w-0 gap-3 rounded-lg border border-border px-4 py-3"
+              >
+                <Skeleton className="h-4 w-2/3 max-w-full" />
+
+                <div className="flex min-w-0 flex-wrap gap-x-4 gap-y-2">
+                  <Skeleton className="h-4 w-36 max-w-full" />
+
+                  <Skeleton className="h-4 w-28 max-w-full" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </Region>
+
+        <Region name="team-directory" className="mt-8">
+          <div className="grid gap-5 lg:grid-cols-2">
+            <Region name="team-roster">
+              <CardSkeleton className="min-h-48" lines={4} />
+            </Region>
+
+            <Region name="team-invitations">
+              <CardSkeleton className="min-h-48" lines={4} />
+            </Region>
+          </div>
+        </Region>
+
+        <Region name="team-invitation-form" className="mt-8 grid gap-3">
+          <Skeleton className="h-6 w-48 max-w-full" />
+
+          <Skeleton className="h-4 w-full max-w-xl" />
+
+          <div className="mt-1 grid gap-5">
+            {[0, 1, 2].map((index) => (
+              <div key={index} className="grid gap-2">
+                <Skeleton className="h-4 w-32 max-w-full" />
+
+                <Skeleton className="h-11 w-full rounded-md" />
+              </div>
+            ))}
+
+            <Skeleton className="h-11 w-48 max-w-full rounded-lg" />
+          </div>
+        </Region>
       </Region>
     </>
   )
@@ -178,27 +212,45 @@ function TeamSkeleton() {
 function RestaurantSkeleton() {
   return (
     <>
-      <Region name="restaurant-header" className="grid gap-4">
-        <Skeleton className="h-4 w-32" />
-
-        <CardSkeleton className="min-h-32" lines={2} />
+      <Region name="restaurant-back-link">
+        <Skeleton className="h-10 w-20 max-w-full rounded-md" />
       </Region>
 
       <Region
-        name="restaurant-fields"
-        className="grid gap-5 rounded-lg border border-border bg-card p-6"
+        name="restaurant-card"
+        className="mt-6 grid gap-6 rounded-lg border border-border bg-card p-6 sm:p-10"
       >
-        {Array.from({ length: 3 }, (_, index) => (
-          <div key={index} className="grid gap-2">
-            <Skeleton className="h-4 w-32" />
+        <Region name="restaurant-header" className="grid gap-3">
+          <Skeleton className="h-9 w-64 max-w-full" />
 
-            <Skeleton className="h-10 w-full rounded-md" />
+          <Skeleton className="h-4 w-full max-w-xl" />
+        </Region>
+
+        <Region name="restaurant-fields" className="grid gap-5">
+          <div className="grid gap-2">
+            <Skeleton className="h-4 w-32 max-w-full" />
+
+            <Skeleton className="h-11 w-full rounded-md" />
           </div>
-        ))}
-      </Region>
 
-      <Region name="restaurant-submit">
-        <Skeleton className="h-10 w-44 rounded-lg" />
+          <div className="grid gap-2">
+            <Skeleton className="h-4 w-36 max-w-full" />
+
+            <Skeleton className="h-11 w-full rounded-md" />
+
+            <Skeleton className="h-4 w-full max-w-md" />
+          </div>
+
+          <div className="grid gap-2">
+            <Skeleton className="h-4 w-28 max-w-full" />
+
+            <Skeleton className="h-11 w-full rounded-md" />
+          </div>
+
+          <Region name="restaurant-submit">
+            <Skeleton className="h-11 w-44 max-w-full rounded-lg" />
+          </Region>
+        </Region>
       </Region>
     </>
   )
@@ -243,20 +295,39 @@ function MenuLanguagesSkeleton() {
 function SettingsSkeleton() {
   return (
     <>
-      <HeaderSkeleton back />
-
-      <Region name="settings-header">
-        <CardSkeleton className="min-h-32" lines={2} />
+      <Region name="settings-back-link">
+        <Skeleton className="h-10 w-36 max-w-full rounded-md" />
       </Region>
 
-      <Region name="settings-fields" className="grid gap-5">
-        <Skeleton className="h-4 w-36" />
+      <Region
+        name="settings-card"
+        className="mt-6 grid gap-6 rounded-lg border border-border bg-card p-6 sm:p-10"
+      >
+        <Region name="settings-header" className="grid gap-3">
+          <Skeleton className="h-9 w-64 max-w-full" />
 
-        <Skeleton className="h-10 w-full rounded-md" />
-      </Region>
+          <Skeleton className="h-4 w-full max-w-xl" />
+        </Region>
 
-      <Region name="settings-submit">
-        <Skeleton className="h-10 w-40 rounded-lg" />
+        <Region name="settings-fields" className="grid gap-4">
+          <div className="grid gap-2">
+            <Skeleton className="h-4 w-36 max-w-full" />
+
+            <Skeleton className="h-11 w-full rounded-md" />
+          </div>
+
+          <Region name="settings-submit">
+            <Skeleton className="h-11 w-48 max-w-full rounded-lg" />
+          </Region>
+        </Region>
+
+        <Region name="settings-archive" className="mt-2 grid gap-3">
+          <Skeleton className="h-6 w-36 max-w-full" />
+
+          <Lines count={1} />
+
+          <Skeleton className="h-11 w-48 max-w-full rounded-lg" />
+        </Region>
       </Region>
     </>
   )
