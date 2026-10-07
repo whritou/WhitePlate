@@ -36,6 +36,8 @@ it("renders successful notices in a polite, labelled region with a named dismiss
   expect(markup).toContain("Changes saved.")
   expect(markup).toContain('aria-label="Dismiss notification"')
   expect(markup).toContain("Dismiss notification")
+  expect(markup).toContain('aria-hidden="true"')
+  expect(markup).not.toContain(">Dismiss notification</")
   expect(markup).toContain('type="button"')
 })
 

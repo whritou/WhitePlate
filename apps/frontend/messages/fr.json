@@ -10,6 +10,14 @@
     "english": "Anglais",
     "french": "Français"
   },
+  "StatusPages": {
+    "unauthorizedTitle": "Vous n’avez pas accès à cette page",
+    "unauthorizedDescription": "Votre compte ne dispose peut-être pas des droits nécessaires. Revenez à vos organisations pour continuer.",
+    "backToOrganizations": "Toutes les organisations",
+    "notFoundTitle": "Cette page est introuvable",
+    "notFoundDescription": "L’adresse est peut-être incorrecte ou la page a été déplacée.",
+    "home": "Retour à l’accueil"
+  },
   "Auth": {
     "asideEyebrow": "Un bon service commence ici",
     "asideTitle": "Réunissez votre équipe.",

@@ -1,6 +1,6 @@
 import { OrderDashboard } from "@/components/orders/order-dashboard"
+import { BackLink } from "@/components/organization/back-link"
 import { Card } from "@/components/ui/card"
-import { Link } from "@/i18n/navigation"
 import { auth } from "@/lib/auth"
 import {
   isValidTenantId,
@@ -133,12 +133,7 @@ async function PageMessage({
           {message}
         </p>
 
-        <Link
-          href="/organization"
-          className="mt-5 inline-flex min-h-10 items-center text-sm font-medium text-primary underline-offset-4 hover:underline"
-        >
-          {t("backToOrganizations")}
-        </Link>
+        <BackLink label={t("backToOrganizations")} className="mt-2 w-fit" />
       </Card>
     </main>
   )

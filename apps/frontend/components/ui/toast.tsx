@@ -5,6 +5,7 @@ import { createContext, useCallback, useContext, type ReactNode } from "react"
 import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/button"
 import type { WorkspaceToastPublisher } from "@/types/workspace-toast"
+import { X } from "lucide-react"
 
 const WorkspaceToastContext = createContext<WorkspaceToastPublisher | null>(
   null
@@ -72,9 +73,9 @@ export function WorkspaceToastList({
 
         <Toast.Close
           aria-label={t("dismiss")}
-          render={<Button type="button" variant="ghost" size="sm" />}
+          render={<Button type="button" variant="ghost" size="icon" />}
         >
-          {t("dismiss")}
+          <X aria-hidden="true" />
         </Toast.Close>
       </Toast.Content>
     </Toast.Root>

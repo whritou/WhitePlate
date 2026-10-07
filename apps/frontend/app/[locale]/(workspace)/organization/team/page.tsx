@@ -1,4 +1,5 @@
 import { StaffInvitationForm } from "@/components/auth/staff-invitation-form"
+import { BackLink } from "@/components/organization/back-link"
 import { Button } from "@/components/ui/button"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import {
@@ -70,12 +71,7 @@ export default async function OrganizationTeamPage({
 
   return (
     <main className="mx-auto min-h-[70vh] max-w-3xl p-4 sm:p-6 lg:p-8">
-      <Link
-        href="/organization"
-        className="text-sm font-medium text-primary underline-offset-4 hover:underline"
-      >
-        {t("backToOrganizations")}
-      </Link>
+      <BackLink label={t("backToOrganizations")} />
 
       <Card className="mt-6 rounded-lg border border-border bg-card p-6 sm:p-10">
         <CardHeader className="px-0">

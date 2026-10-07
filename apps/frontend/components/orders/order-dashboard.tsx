@@ -1,8 +1,9 @@
 "use client"
 
 import { Badge } from "@/components/ui/badge"
+import { BackLink } from "@/components/organization/back-link"
 import { useOrderDashboard } from "@/hooks/use-order-dashboard"
-import { Link, useRouter } from "@/i18n/navigation"
+import { useRouter } from "@/i18n/navigation"
 import { OrderStatusTabs } from "./order-status-tabs"
 import { OrderDashboardContent } from "./order-dashboard-content"
 import { buildOrdersHref } from "@/lib/orders/navigation"
@@ -40,12 +41,7 @@ export function OrderDashboard(props: OrderDashboardProps) {
           </p>
         </div>
 
-        <Link
-          href="/organization"
-          className="text-sm font-medium text-primary hover:underline"
-        >
-          {t("backToOrganizations")}
-        </Link>
+        <BackLink label={t("backToOrganizations")} className="self-start" />
       </header>
 
       <OrderRealtimeConnection

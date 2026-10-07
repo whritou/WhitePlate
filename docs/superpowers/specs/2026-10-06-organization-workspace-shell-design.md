@@ -56,7 +56,7 @@ The route-group layout is recommended because this change intentionally establis
 - Component-test localized navigation, semantic active state, visible focus, account/theme controls, and role-filtered links. Verify each route selects its page-shaped loading fallback in both language catalogs.
 - Verify the mobile Sheet's Escape dismissal, focus containment/restoration, and contained scrolling using the installed Base UI Dialog behavior and browser coverage when an isolated authenticated browser environment is available.
 - Run the frontend tests, lint, typecheck, format check, and production build as appropriate. Record exact results in the documentation review.
-- Review the route move for unchanged URLs and confirm sign-up, auth, and storefront routes do not render the workspace shell.
+- Review the route move for unchanged URLs and confirm organization sign-up renders in the workspace shell while auth and storefront routes remain outside it.
 
 ## Documentation and scope
 
@@ -76,3 +76,7 @@ This design covers only the workspace sidebar and app bar card. Accessible mutat
 - `WorkspaceShell` uses the existing shadcn Base UI Button and Separator controls plus a local Sheet composition over Base UI Dialog.
 - Every overview, team, restaurant creation, catalog, menu-language, organization settings, kitchen orders, and organization sign-up route now has its own localized loading layout. The overview fallback is isolated under an invisible route group.
 - Vitest covers role links, selected context, locale query preservation, responsive layout markers, shell controls, and route-to-skeleton mappings. Full browser keyboard and focus-return verification remains an environment-dependent follow-up; the Sheet delegates those behaviors to Base UI Dialog.
+
+## Follow-up — 2026-10-07
+
+The organization sign-up route and its loading layout were moved into `(workspace)/organization/sign-up` after the initial implementation. This route already requires a verified session, so it now shares the workspace navigation. Next.js route groups do not alter the public URL: `/[locale]/organization/sign-up` is unchanged.

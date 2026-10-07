@@ -1,4 +1,5 @@
 import { RestaurantForm } from "@/components/organization/restaurant-form"
+import { BackLink } from "@/components/organization/back-link"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import {
   Card,
@@ -7,7 +8,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { Link } from "@/i18n/navigation"
 import { auth } from "@/lib/auth"
 import { isUuid } from "@/lib/validation/common"
 import { getOrganizations } from "@/services/organization-queries"
@@ -37,12 +37,7 @@ export default async function NewRestaurantPage({
 
   return (
     <main className="mx-auto min-h-[70vh] max-w-2xl p-4 sm:p-6 lg:p-8">
-      <Link
-        href="/organization"
-        className="text-sm text-primary underline-offset-4 hover:underline"
-      >
-        {t("back")}
-      </Link>
+      <BackLink label={t("back")} />
 
       {organization ? (
         <Card className="mt-6">
