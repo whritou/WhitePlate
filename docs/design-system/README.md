@@ -56,18 +56,18 @@ Les valeurs exactes sont conservées dans [tokens.json](tokens.json). Les tokens
 | `foreground` | `#172B3A` | `#FAFAF9` | Texte principal |
 | `card` | `#FFFFFF` | `#292524` | Surface de travail |
 | `popover` | `#FFFFFF` | `#302B28` | Dialog, Sheet, menu flottant |
-| `primary` | `#244D73` | `#B8D1AD` | Action principale, lien |
+| `primary` | `#527A58` | `#A9CE91` | Action principale, lien |
 | `primary-foreground` | `#FFFFFF` | `#172316` | Texte sur bouton principal |
-| `primary-hover` | `#1C3F60` | `#D0E2C8` | Hover et pression du bouton principal |
+| `primary-hover` | `#426849` | `#B9D9A0` | Hover et pression du bouton principal |
 | `secondary` | `#F0F0EE` | `#3B3531` | Action secondaire |
 | `muted` | `#F5F5F4` | `#34302D` | Surface inactive, skeleton |
 | `muted-foreground` | `#625B54` | `#C2B9AF` | Métadonnées, aide, placeholder |
 | `accent` | `#E5EFF7` | `#263527` | Sélection, item de navigation actif |
-| `accent-foreground` | `#244D73` | `#B8D1AD` | Texte de sélection |
+| `accent-foreground` | `#244D73` | `#A9CE91` | Texte de sélection |
 | `border` | `#D6D3D1` | `#534A43` | Séparation décorative |
 | `input` | `#847A71` | `#A89F96` | Contour nécessaire pour identifier un contrôle |
-| `ring` | `#275F8C` | `#B8D1AD` | Focus au clavier |
-| `success` / `success-muted` | `#1D694B` / `#E8F4ED` | `#9DE1BD` / `#18362B` | Prêt, réussite persistante |
+| `ring` | `#275F8C` | `#A9CE91` | Focus au clavier |
+| `success` / `success-muted` | `#1D694B` / `#E8F4ED` | `#59C77B` / `#18362B` | Prêt, réussite persistante |
 | `warning` / `warning-muted` | `#855000` / `#FFF4DA` | `#F4D18B` / `#3B2D14` | En attente, données périmées |
 | `info` / `info-muted` | `#244D73` / `#E5EFF7` | `#D9C4A8` / `#3A3025` | En préparation, information |
 | `destructive` / `destructive-muted` | `#B42335` / `#FDEBEF` | `#FFB4B8` / `#3B2027` | Erreur, annulation, confirmation destructive |
@@ -89,12 +89,12 @@ Le vérificateur contrôle les paires prévues dans les deux thèmes, y compris 
 
 ### Contraste texte / fond des boutons et badges
 
-Contrastes sRGB calculés sur les fonds opaques du JSON ; seuil de **4,5:1 pour chaque libellé**, quelle que soit la taille du bouton/badge. Le bouton sauge du sombre utilise un texte vert très foncé `#172316` ; son contraste est calculé, sans supposer que le blanc convient à un accent clair.
+Contrastes sRGB calculés sur les fonds opaques du JSON ; seuil de **4,5:1 pour chaque libellé**, quelle que soit la taille du bouton/badge. Les boutons sauge utilisent un texte blanc en thème clair et un texte vert très foncé `#172316` en thème sombre.
 
 | Cas | Texte / fond | Clair | Sombre |
 | --- | --- | --- | --- |
-| Bouton principal | primary-foreground / primary | 8,81:1 | 9,90:1 |
-| Bouton principal hover/pressed | primary-foreground / primary-hover | 10,88:1 | 11,95:1 |
+| Bouton principal | primary-foreground / primary | 4,90:1 | 9,25:1 |
+| Bouton principal hover/pressed | primary-foreground / primary-hover | 6,35:1 | 10,47:1 |
 | Bouton secondaire | secondary-foreground / secondary | 12,75:1 | 11,56:1 |
 | Bouton outline au repos | foreground / card | 14,55:1 | 14,52:1 |
 | Bouton ghost au survol | foreground / muted | 13,34:1 | 12,51:1 |
@@ -102,7 +102,7 @@ Contrastes sRGB calculés sur les fonds opaques du JSON ; seuil de **4,5:1 pour 
 | Confirmation destructive pleine | destructive-foreground / destructive | 6,50:1 | 9,98:1 |
 | Badge En attente | warning / warning-muted | 6,11:1 | 9,13:1 |
 | Badge En préparation | info / info-muted | 7,56:1 | 7,62:1 |
-| Badge Prête | success / success-muted | 5,86:1 | 8,70:1 |
+| Badge Prête | success / success-muted | 5,86:1 | 6,17:1 |
 | Badge Terminée / badge neutre | muted-foreground / muted | 6,12:1 | 6,75:1 |
 
 Le bouton secondaire utilise foreground/muted au survol ; le destructeur doux conserve sa paire texte/fond et renforce son contour. Les liens de navigation et badges sélectionnés utilisent accent-foreground/accent, jamais primary-foreground/accent. Disabled et pending ne réduisent pas l’opacité du libellé ; le contraste reste mesurable sur la paire de tokens choisie. Pour un futur accent restaurant, recalculer toutes ces paires, y compris survol, avant application. Les primitives utilisent désormais des fonds opaques et aucune baisse d’opacité du libellé ; conserver cette règle lors des futures modifications.
@@ -366,4 +366,5 @@ Les instructions AGENTS imposent cette revue aux agents ; elles ne constituent p
 | --- | --- | --- |
 | 1.0.0 — référence | 2026-10-06 | Création du référentiel initial Porcelaine et encre, tokens clair/sombre, recettes et consignes d’adoption. |
 | 1.0.0 — adoption | 2026-10-06 | Application de la même palette et des règles visuelles aux primitives et écrans existants ; contrôle CI des tokens et tests navigateur. |
+| 1.2.0 | 2026-10-07 | Revue utilisateur : accent sauge plus vert sur les actions dans les deux thèmes, point de connexion live plus contrasté ; contrastes et aperçu recalculés. |
 | 1.1.0 | 2026-10-06 | Revue utilisateur : fonds clairs neutres, bases sombres stone et accent sauge. Boutons bleus du clair conservés ; contrastes recalculés et tests navigateur relancés. |

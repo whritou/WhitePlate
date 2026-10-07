@@ -1,6 +1,7 @@
 "use client"
 
 import { Menu, Moon, Sun, X } from "lucide-react"
+import ReactFlagsSelect from "react-flags-select"
 import { useLocale, useTranslations } from "next-intl"
 import { useTheme } from "next-themes"
 import { useSearchParams } from "next/navigation"
@@ -16,7 +17,6 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet"
-import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
 import { Link, usePathname, useRouter } from "@/i18n/navigation"
 import {
   buildWorkspaceNavigation,
@@ -221,9 +221,18 @@ function WorkspaceNavigation({
 }
 
 const localeOptions = [
-  { locale: "en", flag: "🇬🇧", label: "english" },
-  { locale: "fr", flag: "🇫🇷", label: "french" },
+  { locale: "en", countryCode: "GB", label: "english" },
+  { locale: "fr", countryCode: "FR", label: "french" },
 ] as const
+
+export function localeToFlagCountryCode(locale: string) {
+  return localeOptions.find((option) => option.locale === locale)?.countryCode
+}
+
+export function localeFromFlagCountryCode(countryCode: string) {
+  return localeOptions.find((option) => option.countryCode === countryCode)
+    ?.locale
+}
 
 export function navigateToLocale(
   router: Pick<ReturnType<typeof useRouter>, "replace">,
@@ -248,22 +257,32 @@ function LocaleSelector({
 }) {
   const t = useTranslations("Workspace")
   const router = useRouter()
+  const countryCode = localeToFlagCountryCode(locale) ?? "GB"
+  const customLabels = Object.fromEntries(
+    localeOptions.map((option) => [option.countryCode, t(option.label)])
+  )
 
   return (
-    <NativeSelect
-      aria-label={t("language")}
-      className="w-auto shrink-0"
-      selectClassName="w-auto min-w-28 cursor-pointer border-transparent bg-transparent pr-8 text-sm font-medium hover:bg-muted focus-visible:border-ring"
-      value={locale}
-      onChange={(event) =>
-        navigateToLocale(router, currentHref, event.currentTarget.value)
-      }
-    >
-      {localeOptions.map((option) => (
-        <NativeSelectOption key={option.locale} value={option.locale}>
-          {option.flag} {t(option.label)}
-        </NativeSelectOption>
-      ))}
-    </NativeSelect>
+    <div role="group" aria-label={t("language")} className="shrink-0">
+      <ReactFlagsSelect
+        id="workspace-language"
+        rfsKey="workspace-language"
+        selected={countryCode}
+        onSelect={(selectedCountryCode) => {
+          const nextLocale = localeFromFlagCountryCode(selectedCountryCode)
+
+          if (nextLocale) navigateToLocale(router, currentHref, nextLocale)
+        }}
+        countries={localeOptions.map((option) => option.countryCode)}
+        customLabels={customLabels}
+        placeholder={t("language")}
+        selectedSize={14}
+        optionsSize={14}
+        fullWidth={false}
+        alignOptionsToRight
+        className="workspace-language-select"
+        selectButtonClassName="workspace-language-select__button"
+      />
+    </div>
   )
 }

@@ -1,7 +1,12 @@
 import { createElement } from "react"
 import { renderToStaticMarkup } from "react-dom/server"
 import { beforeEach, expect, it, vi } from "vitest"
-import { navigateToLocale, WorkspaceShell } from "./workspace-shell"
+import {
+  localeFromFlagCountryCode,
+  localeToFlagCountryCode,
+  navigateToLocale,
+  WorkspaceShell,
+} from "./workspace-shell"
 
 const mocks = vi.hoisted(() => ({
   pathname: "/organization/catalog",
@@ -42,8 +47,8 @@ vi.mock("next-intl", () => ({
       settings: "Settings",
       createRestaurant: "Create restaurant",
       orders: "Orders",
-      catalog: "Catalog",
-      menuLanguages: "Menu languages",
+      catalog: "Products & pricing",
+      menuLanguages: "Menu languages & translations",
       navigationLabel:
         mocks.locale === "fr"
           ? "Navigation de l’espace de travail"
@@ -129,11 +134,11 @@ it("renders verified workspace context, active links, and locale-preserving cont
 
   expect(html).toContain("Owner Restaurant")
   expect(html).toContain('aria-current="page"')
-  expect(html).toContain('aria-label="Language"')
-  expect(html).toContain('value="en"')
-  expect(html).toContain('value="fr"')
-  expect(html).toContain("🇬🇧 English")
-  expect(html).toContain("🇫🇷 French")
+  expect(html).toContain("Products &amp; pricing")
+  expect(html).toContain("Menu languages &amp; translations")
+  expect(html).toContain('role="group" aria-label="Language"')
+  expect(html).toContain('data-testid="workspace-language"')
+  expect(html).toContain('aria-haspopup="listbox"')
   expect(html).toContain('aria-label="Workspace navigation"')
   expect(html).toContain('<h2 class="sr-only">Workspace navigation</h2>')
   expect(html).toContain('aria-label="Open navigation"')
@@ -167,7 +172,7 @@ it("does not display an unverified URL selection as workspace context", () => {
   expect(html).toContain("Workspace")
 })
 
-it("localizes the flag dropdown and marks the current locale", () => {
+it("localizes the flag selector and marks the current locale", () => {
   mocks.locale = "fr"
 
   const html = renderToStaticMarkup(
@@ -179,11 +184,22 @@ it("localizes the flag dropdown and marks the current locale", () => {
   )
 
   expect(html).toContain('aria-label="Langue"')
-  expect(html).toContain('value="en">🇬🇧 Anglais</option>')
-  expect(html).toContain('value="fr" selected="">🇫🇷 Français</option>')
+  expect(html).toContain('aria-haspopup="listbox"')
+  expect(html).toContain('data-testid="workspace-language"')
+  expect(html).toContain('id="workspace-language-btn"')
+  expect(html).not.toContain("🇬🇧")
+  expect(html).not.toContain("🇫🇷")
   expect(html).toContain(
     '<h2 class="sr-only">Navigation de l’espace de travail</h2>'
   )
+})
+
+it("maps interface locales to the requested flag country codes", () => {
+  expect(localeToFlagCountryCode("en")).toBe("GB")
+  expect(localeToFlagCountryCode("fr")).toBe("FR")
+  expect(localeFromFlagCountryCode("GB")).toBe("en")
+  expect(localeFromFlagCountryCode("FR")).toBe("fr")
+  expect(localeFromFlagCountryCode("US")).toBeUndefined()
 })
 
 it("switches the locale while preserving the current path and query", () => {
