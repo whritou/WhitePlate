@@ -6,6 +6,7 @@ it("accepts an omitted date filter", () => {
     ok: true,
     value: null,
   })
+  expect(parseOptionalOrderHistoryDate("")).toEqual({ ok: true, value: null })
 })
 
 it("accepts a valid date and rejects invalid or repeated values", () => {
