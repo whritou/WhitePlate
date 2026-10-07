@@ -26,6 +26,8 @@ public sealed class Organization
 
     public void Deactivate() => IsActive = false;
 
+    public void Reactivate() => IsActive = true;
+
     private static string NormalizeName(string? name)
     {
         var normalized = name?.Trim();

@@ -63,7 +63,7 @@ beforeEach(() => {
   getTranslations.mockImplementation(async () => (key: string) => key)
   getOrganizations.mockResolvedValue({
     ok: true,
-    data: [{ id: organizationId, name: "White Plate Group" }],
+    data: [{ id: organizationId, name: "White Plate Group", isActive: true }],
   })
   getOrganizationRestaurants.mockResolvedValue({
     ok: true,

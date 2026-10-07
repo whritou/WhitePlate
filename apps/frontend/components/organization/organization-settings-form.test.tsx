@@ -35,6 +35,7 @@ it("renders the saved name in a labelled form scoped to its organization", () =>
     createElement(OrganizationSettingsForm, {
       organizationId,
       organizationName: "White Plate Group",
+      organizationActive: true,
     })
   )
 

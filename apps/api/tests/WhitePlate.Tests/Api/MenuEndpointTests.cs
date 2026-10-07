@@ -42,6 +42,19 @@ public sealed class MenuEndpointTests
         Assert.Equal("Bread", Assert.Single(group.GetProperty("options").EnumerateArray()).GetProperty("name").GetString());
     }
 
+    [Fact]
+    public async Task PublicMenuIsUnavailableWhenItsOrganizationIsArchived()
+    {
+        using var factory = new MenuFactory();
+        var organizationId = await factory.SeedAsync();
+        await factory.ArchiveOrganizationAsync(organizationId);
+        using var client = factory.CreateClient();
+
+        using var response = await client.GetAsync("https://bistro.example.test/api/v1/menu", TestContext.Current.CancellationToken);
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
     private sealed class MenuFactory : WebApplicationFactory<Program>
     {
         private readonly SqliteConnection connection = new("Data Source=:memory:");
@@ -65,7 +78,7 @@ public sealed class MenuEndpointTests
             });
         }
 
-        public async Task SeedAsync()
+        public async Task<Guid> SeedAsync()
         {
             using var scope = Services.CreateScope();
             var database = scope.ServiceProvider.GetRequiredService<WhitePlateDbContext>();
@@ -85,6 +98,17 @@ public sealed class MenuEndpointTests
             var group = ProductOptionGroup.Create(tenant.Id, product.Id, "Extras", 0, 1, 0);
             database.ProductOptionGroups.Add(group);
             database.ProductOptions.Add(ProductOption.Create(tenant.Id, group.Id, "Bread", 1m, 0));
+            await database.SaveChangesAsync(TestContext.Current.CancellationToken);
+            return organization.Id;
+        }
+
+        public async Task ArchiveOrganizationAsync(Guid organizationId)
+        {
+            using var scope = Services.CreateScope();
+            var database = scope.ServiceProvider.GetRequiredService<WhitePlateDbContext>();
+            var organization = await database.Organizations.SingleAsync(item => item.Id == organizationId,
+                TestContext.Current.CancellationToken);
+            organization.Deactivate();
             await database.SaveChangesAsync(TestContext.Current.CancellationToken);
         }
 

@@ -1,6 +1,7 @@
 "use client"
 
 import { renameOrganizationAction } from "@/actions/organization"
+import { OrganizationArchiveAction } from "@/components/organization/organization-archive-action"
 import { ResultMessage } from "@/components/auth/result-message"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -14,9 +15,11 @@ import { useRef, useState, useTransition, type FormEvent } from "react"
 export function OrganizationSettingsForm({
   organizationId,
   organizationName,
+  organizationActive,
 }: {
   organizationId: string
   organizationName: string
+  organizationActive: boolean
 }) {
   const t = useTranslations("OrganizationSettings")
   const toast = useWorkspaceToast()
@@ -84,6 +87,11 @@ export function OrganizationSettingsForm({
       </fieldset>
 
       <ResultMessage state={state} message={message} hideSuccess />
+
+      <OrganizationArchiveAction
+        organizationId={organizationId}
+        active={organizationActive}
+      />
     </form>
   )
 }

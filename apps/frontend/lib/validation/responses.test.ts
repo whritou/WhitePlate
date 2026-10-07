@@ -27,9 +27,12 @@ it("validates public menu JSON before interactive rendering", () => {
 })
 
 it("rejects malformed organization IDs rather than using them in API paths", () => {
-  expect(parseOrganizations([{ id, name: "Group" }])).toEqual([
-    { id, name: "Group" },
+  expect(parseOrganizations([{ id, name: "Group", isActive: true }])).toEqual([
+    { id, name: "Group", isActive: true },
   ])
+  expect(
+    parseOrganizations([{ id, name: "Group", isActive: "yes" }])
+  ).toBeNull()
   expect(parseOrganizations([{ id: "../orders", name: "Group" }])).toBeNull()
   expect(parseOrganizations([null])).toBeNull()
 })

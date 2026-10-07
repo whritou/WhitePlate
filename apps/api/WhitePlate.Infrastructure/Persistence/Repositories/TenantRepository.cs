@@ -10,7 +10,8 @@ public sealed class TenantRepository(WhitePlateDbContext database) : ITenantRepo
 {
     public Task<Tenant?> FindActiveBySubdomainAsync(TenantSubdomain subdomain, CancellationToken cancellationToken) =>
         database.Tenants.AsNoTracking().SingleOrDefaultAsync(
-            tenant => tenant.Subdomain == subdomain && tenant.IsActive, cancellationToken);
+            tenant => tenant.Subdomain == subdomain && tenant.IsActive && database.Organizations.Any(organization =>
+                organization.Id == tenant.OrganizationId && organization.IsActive), cancellationToken);
 
     public async Task<bool> TryAddAsync(Tenant tenant, CancellationToken cancellationToken)
     {

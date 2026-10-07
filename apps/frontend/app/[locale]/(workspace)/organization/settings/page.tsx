@@ -93,6 +93,7 @@ export default async function OrganizationSettingsPage({
             key={`${organization.id}:${organization.name}`}
             organizationId={organization.id}
             organizationName={organization.name}
+            organizationActive={organization.isActive}
           />
         </CardContent>
       </Card>

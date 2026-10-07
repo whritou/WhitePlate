@@ -9,7 +9,8 @@ public sealed class StaffMembershipRepository(WhitePlateDbContext database) : IS
 {
     public Task<bool> IsOrganizationOwnerAsync(Guid organizationId, ExternalIdentity identity,
         CancellationToken cancellationToken) => database.OrganizationOwnerMemberships.AsNoTracking().AnyAsync(
-        membership => membership.OrganizationId == organizationId && membership.Issuer == identity.Issuer &&
+        membership => membership.OrganizationId == organizationId && database.Organizations.Any(organization =>
+                organization.Id == membership.OrganizationId && organization.IsActive) && membership.Issuer == identity.Issuer &&
             membership.Subject == identity.Subject, cancellationToken);
 
     public async Task<bool> IsOrganizationOwnerOfTenantAsync(Guid tenantId, ExternalIdentity identity,
@@ -22,6 +23,8 @@ public sealed class StaffMembershipRepository(WhitePlateDbContext database) : IS
 
     public Task<bool> HasRestaurantRoleAsync(Guid tenantId, ExternalIdentity identity, RestaurantRole role,
         CancellationToken cancellationToken) => database.RestaurantMemberships.AsNoTracking().AnyAsync(
-        membership => membership.TenantId == tenantId && membership.Issuer == identity.Issuer &&
+        membership => membership.TenantId == tenantId && database.Tenants.Any(tenant => tenant.Id == membership.TenantId &&
+                database.Organizations.Any(organization => organization.Id == tenant.OrganizationId && organization.IsActive)) &&
+            membership.Issuer == identity.Issuer &&
             membership.Subject == identity.Subject && membership.Role == role, cancellationToken);
 }

@@ -2,7 +2,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 
 export function WorkspaceLoadingSkeleton({ label }: { label: string }) {
   return (
-    <div className="mx-auto max-w-5xl p-4 sm:p-6 lg:p-8">
+    <div className="mx-auto max-w-7xl p-4 sm:p-6 lg:p-8">
       <p role="status" aria-live="polite" className="sr-only">
         {label}
       </p>
@@ -57,7 +57,7 @@ export function WorkspaceLoadingSkeleton({ label }: { label: string }) {
                 >
                   <Skeleton className="h-4 w-2/5" />
 
-                  <div className="flex gap-3">
+                  <div className="flex flex-wrap gap-3">
                     <Skeleton className="h-4 w-24" />
 
                     <Skeleton className="h-4 w-20" />
@@ -87,10 +87,12 @@ export function WorkspaceLoadingSkeleton({ label }: { label: string }) {
                     <Skeleton className="h-4 w-3/4" />
                   </div>
 
-                  <div className="flex gap-3">
+                  <div className="flex flex-wrap gap-3">
                     <Skeleton className="h-9 w-24 rounded-lg" />
 
                     <Skeleton className="h-9 w-28 rounded-lg" />
+
+                    <Skeleton className="h-9 w-36 rounded-lg" />
                   </div>
                 </div>
               ))}

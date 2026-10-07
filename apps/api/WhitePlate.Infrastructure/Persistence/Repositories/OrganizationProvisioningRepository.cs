@@ -14,7 +14,8 @@ public sealed class OrganizationProvisioningRepository(WhitePlateDbContext datab
         CancellationToken cancellationToken) => await database.OrganizationOwnerMemberships.AsNoTracking()
         .Where(membership => membership.Issuer == identity.Issuer && membership.Subject == identity.Subject)
         .Join(database.Organizations.AsNoTracking(), membership => membership.OrganizationId,
-            organization => organization.Id, (membership, organization) => new OrganizationDto(organization.Id, organization.Name))
+            organization => organization.Id, (membership, organization) =>
+                new OrganizationDto(organization.Id, organization.Name, organization.IsActive))
         .ToListAsync(cancellationToken);
 
     public async Task<Organization?> FindOwnedAsync(Guid organizationId, ExternalIdentity identity,

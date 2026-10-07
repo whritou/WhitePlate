@@ -33,6 +33,7 @@ public interface ICatalogRepository
         WhitePlate.Domain.Catalog.DiscountKind kind, decimal value, CancellationToken cancellationToken);
     Task<bool> ArchiveCategoryAsync(Guid tenantId, Guid categoryId, CancellationToken cancellationToken);
     Task<bool> ArchiveProductAsync(Guid tenantId, Guid productId, CancellationToken cancellationToken);
+    Task<bool> RestoreProductAsync(Guid tenantId, Guid productId, CancellationToken cancellationToken) => Task.FromResult(false);
     Task<bool> ArchiveOptionGroupAsync(Guid tenantId, Guid groupId, CancellationToken cancellationToken);
     Task<bool> ArchiveOptionAsync(Guid tenantId, Guid optionId, CancellationToken cancellationToken);
     Task<bool> DeactivateDiscountAsync(Guid tenantId, Guid discountId, CancellationToken cancellationToken);

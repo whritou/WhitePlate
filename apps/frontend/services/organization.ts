@@ -71,6 +71,18 @@ export async function renameOrganization({
   )
 }
 
+export async function setOrganizationActive(
+  organizationId: string,
+  active: boolean
+): Promise<ActionResult> {
+  return actionResult(
+    await whitePlateApi.post(
+      `/api/v1/organizations/${organizationId}/${active ? "restore" : "archive"}`,
+      {}
+    )
+  )
+}
+
 export async function acceptStaffInvitation(
   token: string
 ): Promise<ActionResult> {
