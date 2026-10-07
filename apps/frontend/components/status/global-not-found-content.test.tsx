@@ -8,12 +8,19 @@ vi.mock("next/link", () => ({
     createElement("a", { href, ...props }, children as never),
 }))
 
-it("offers a styled not-found message and explicit locale destinations", () => {
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ back: vi.fn() }),
+}))
+
+it("offers a styled not-found message with back and home actions", () => {
   const html = renderToStaticMarkup(createElement(GlobalNotFoundContent))
 
   expect(html).toContain('data-not-found-page="global"')
   expect(html).toContain("Page not found")
   expect(html).toContain("Page introuvable")
-  expect(html).toContain('href="/fr"')
-  expect(html).toContain('href="/en"')
+  expect(html).toContain("Retour / Back")
+  expect(html).toContain("Accueil / Home")
+  expect(html).toContain('href="/"')
+  expect(html).toContain("<button")
+  expect(html).not.toContain('href="/fr"')
 })

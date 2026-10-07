@@ -468,7 +468,7 @@ No authenticated browser flow was run. The localized pages and preserved sign-up
 
 ## Workspace overflow, page-specific loading UI, and global 404 — 2026-10-07
 
-Menu-language and catalog links in team settings now wrap within responsive restaurant cards, with a two-column list only when the viewport allows it. Team, restaurant creation, and organization settings loading skeletons now follow their page layouts. Localized not-found pages use WhitePlate styling, while the root `global-not-found.tsx` handles unmatched paths outside the locale segment as described by the installed Next.js documentation. The global page provides English and French navigation without depending on the locale layout. Architecture docs record the experimental Next.js global-not-found behavior.
+Menu-language and catalog links in team settings now wrap within responsive restaurant cards, with a two-column list only when the viewport allows it. Team, restaurant creation, and organization settings loading skeletons now follow their page layouts. Localized not-found pages use WhitePlate styling, while the root `global-not-found.tsx` handles unmatched paths outside the locale segment as described by the installed Next.js documentation. The global page provides browser-back and home actions, with bilingual labels and no language selector. Architecture docs record the experimental Next.js global-not-found behavior.
 
 | Check | Actual result |
 | --- | --- |
@@ -479,3 +479,16 @@ Menu-language and catalog links in team settings now wrap within responsive rest
 | `node node_modules/next/dist/bin/next build --webpack` from `apps/frontend` | Passed compilation, TypeScript, and page generation with process-only HTTPS auth/API placeholders. Next reported the experimental `globalNotFound` flag as enabled. Webpack cache writes emitted nonfatal sandbox EPERM warnings and the PostgreSQL driver emitted its SSL-mode compatibility warning. |
 | `git diff --check` | Passed; Git emitted only line-ending conversion warnings for CRLF-configured paths. |
 | Authenticated responsive browser acceptance | Not run; it requires the database-backed authenticated workspace setup. |
+
+## Global 404 navigation follow-up — 2026-10-07
+
+Removed the locale chooser from the global not-found page. It now exposes a browser-back button and a home link while keeping the explanation bilingual. The root home link continues through the locale middleware. Updated the global 404 architecture note and regression coverage.
+
+| Check | Actual result |
+| --- | --- |
+| `node node_modules/vitest/vitest.mjs run` from `apps/frontend` | Passed: 55 files, 374 tests. |
+| `node node_modules/eslint/bin/eslint.js components/status/global-not-found-content.tsx components/status/global-not-found-content.test.tsx` from `apps/frontend` | Passed. |
+| `node node_modules/typescript/bin/tsc --noEmit` from `apps/frontend` | Passed. |
+| Prettier check for the modified TSX component and test | Passed. A check over the two full Markdown documents reported formatting findings; those large docs were not reformatted wholesale. |
+| `node node_modules/next/dist/bin/next build --webpack` from `apps/frontend` | Passed compilation, TypeScript, and generation of all 49 pages. Nonfatal webpack-cache EPERM and PostgreSQL SSL-mode warnings remain. |
+| `git diff --check` | Passed with line-ending conversion warnings only. |
