@@ -12,12 +12,12 @@ import {
   Sheet,
   SheetClose,
   SheetContent,
-  SheetDescription,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet"
-import { Link, usePathname } from "@/i18n/navigation"
+import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
+import { Link, usePathname, useRouter } from "@/i18n/navigation"
 import {
   buildWorkspaceNavigation,
   isWorkspaceLinkActive,
@@ -95,7 +95,7 @@ export function WorkspaceShell({
         </aside>
 
         <div className="flex min-w-0 flex-1 flex-col">
-          <header className="sticky top-0 z-30 flex min-h-16 flex-wrap items-center gap-2 border-b border-border bg-background px-3 py-2 sm:px-6">
+          <header className="sticky top-0 z-30 flex min-h-16 flex-wrap items-center gap-2 border-b border-border bg-background px-3 py-2 sm:px-6 md:justify-end">
             <div className="md:hidden">
               <Sheet
                 open={mobileNavigationOpen}
@@ -118,11 +118,9 @@ export function WorkspaceShell({
                   className="w-[min(20rem,calc(100vw-2.5rem))]"
                 >
                   <SheetHeader className="relative pr-12">
-                    <SheetTitle>{t("navigationTitle")}</SheetTitle>
-
-                    <SheetDescription className="truncate">
-                      {contextName}
-                    </SheetDescription>
+                    <SheetTitle className="sr-only">
+                      {t("navigationLabel")}
+                    </SheetTitle>
 
                     <SheetClose
                       aria-label={t("closeNavigation")}
@@ -143,11 +141,7 @@ export function WorkspaceShell({
               </Sheet>
             </div>
 
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium">{contextName}</p>
-            </div>
-
-            <LocaleLinks currentHref={currentHref} locale={locale} />
+            <LocaleSelector currentHref={currentHref} locale={locale} />
 
             <Separator orientation="vertical" className="hidden h-6 sm:block" />
 
@@ -226,7 +220,26 @@ function WorkspaceNavigation({
   )
 }
 
-function LocaleLinks({
+const localeOptions = [
+  { locale: "en", flag: "🇬🇧", label: "english" },
+  { locale: "fr", flag: "🇫🇷", label: "french" },
+] as const
+
+export function navigateToLocale(
+  router: Pick<ReturnType<typeof useRouter>, "replace">,
+  currentHref: string,
+  requestedLocale: string
+) {
+  const selectedLocale = localeOptions.find(
+    (option) => option.locale === requestedLocale
+  )
+
+  if (selectedLocale) {
+    router.replace(currentHref, { locale: selectedLocale.locale })
+  }
+}
+
+function LocaleSelector({
   currentHref,
   locale,
 }: {
@@ -234,28 +247,23 @@ function LocaleLinks({
   locale: string
 }) {
   const t = useTranslations("Workspace")
+  const router = useRouter()
 
   return (
-    <nav aria-label={t("language")} className="flex items-center text-sm">
-      <Link
-        href={currentHref}
-        locale="en"
-        aria-current={locale === "en" ? "page" : undefined}
-        aria-label={t("switchToEnglish")}
-        className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground aria-[current=page]:bg-accent aria-[current=page]:font-semibold aria-[current=page]:text-accent-foreground"
-      >
-        EN
-      </Link>
-
-      <Link
-        href={currentHref}
-        locale="fr"
-        aria-current={locale === "fr" ? "page" : undefined}
-        aria-label={t("switchToFrench")}
-        className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground aria-[current=page]:bg-accent aria-[current=page]:font-semibold aria-[current=page]:text-accent-foreground"
-      >
-        FR
-      </Link>
-    </nav>
+    <NativeSelect
+      aria-label={t("language")}
+      className="w-auto shrink-0"
+      selectClassName="w-auto min-w-28 cursor-pointer border-transparent bg-transparent pr-8 text-sm font-medium hover:bg-muted focus-visible:border-ring"
+      value={locale}
+      onChange={(event) =>
+        navigateToLocale(router, currentHref, event.currentTarget.value)
+      }
+    >
+      {localeOptions.map((option) => (
+        <NativeSelectOption key={option.locale} value={option.locale}>
+          {option.flag} {t(option.label)}
+        </NativeSelectOption>
+      ))}
+    </NativeSelect>
   )
 }

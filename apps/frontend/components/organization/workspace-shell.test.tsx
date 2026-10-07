@@ -1,12 +1,13 @@
 import { createElement } from "react"
 import { renderToStaticMarkup } from "react-dom/server"
 import { beforeEach, expect, it, vi } from "vitest"
-import { WorkspaceShell } from "./workspace-shell"
+import { navigateToLocale, WorkspaceShell } from "./workspace-shell"
 
 const mocks = vi.hoisted(() => ({
   pathname: "/organization/catalog",
   search: "tenantId=22222222-2222-4222-8222-222222222222",
   locale: "en",
+  replace: vi.fn(),
 }))
 
 vi.mock("@/i18n/navigation", async () => {
@@ -23,6 +24,7 @@ vi.mock("@/i18n/navigation", async () => {
         props.children as React.ReactNode
       ),
     usePathname: () => mocks.pathname,
+    useRouter: () => ({ replace: mocks.replace }),
   }
 })
 
@@ -42,23 +44,57 @@ vi.mock("next-intl", () => ({
       orders: "Orders",
       catalog: "Catalog",
       menuLanguages: "Menu languages",
-      navigationLabel: "Workspace navigation",
+      navigationLabel:
+        mocks.locale === "fr"
+          ? "Navigation de l’espace de travail"
+          : "Workspace navigation",
       openNavigation: "Open navigation",
       closeNavigation: "Close navigation",
-      navigationTitle: "Workspace navigation",
       organization: "Organization",
       restaurant: "Restaurant",
       toggleTheme: "Toggle theme",
       skipToContent: "Skip to content",
-      language: "Language",
-      switchToEnglish: "Switch to English",
-      switchToFrench: "Switch to French",
+      language: mocks.locale === "fr" ? "Langue" : "Language",
+      english: mocks.locale === "fr" ? "Anglais" : "English",
+      french: mocks.locale === "fr" ? "Français" : "French",
     })[key] ?? key,
 }))
 
 vi.mock("next-themes", () => ({
   useTheme: () => ({ resolvedTheme: "light", setTheme: vi.fn() }),
 }))
+
+vi.mock("@/components/ui/sheet", async () => {
+  const React = await import("react")
+
+  return {
+    Sheet: ({ children }: { children: React.ReactNode }) =>
+      React.createElement(React.Fragment, null, children),
+    SheetClose: (props: React.ComponentProps<"button">) =>
+      React.createElement("button", props),
+    SheetContent: ({ children, ...props }: React.ComponentProps<"div">) =>
+      React.createElement("div", props, children),
+    SheetHeader: ({ children, ...props }: React.ComponentProps<"div">) =>
+      React.createElement("div", props, children),
+    SheetTitle: ({ children, ...props }: React.ComponentProps<"h2">) =>
+      React.createElement("h2", props, children),
+    SheetTrigger: ({
+      children,
+      render,
+      ...props
+    }: React.ComponentProps<"button"> & { render?: React.ReactElement }) => {
+      const renderProps = render
+        ? (render.props as React.ComponentProps<"button">)
+        : {}
+
+      return React.createElement(
+        "button",
+        { ...renderProps, ...props },
+        children
+      )
+    },
+  }
+})
 
 vi.mock("@/components/auth/sign-out-button", () => ({
   SignOutButton: () => createElement("button", null, "Sign out"),
@@ -93,11 +129,21 @@ it("renders verified workspace context, active links, and locale-preserving cont
 
   expect(html).toContain("Owner Restaurant")
   expect(html).toContain('aria-current="page"')
-  expect(html).toContain(`href="/en/organization/catalog?tenantId=${tenantId}"`)
-  expect(html).toContain(`href="/fr/organization/catalog?tenantId=${tenantId}"`)
+  expect(html).toContain('aria-label="Language"')
+  expect(html).toContain('value="en"')
+  expect(html).toContain('value="fr"')
+  expect(html).toContain("🇬🇧 English")
+  expect(html).toContain("🇫🇷 French")
   expect(html).toContain('aria-label="Workspace navigation"')
+  expect(html).toContain('<h2 class="sr-only">Workspace navigation</h2>')
   expect(html).toContain('aria-label="Open navigation"')
   expect(html).toContain('aria-label="Toggle theme"')
+
+  const appBar = html.match(/<header[^>]*>([\s\S]*?)<\/header>/)?.[1] ?? ""
+
+  expect(appBar).not.toContain(
+    '<p class="text-sm font-medium">Owner Restaurant</p>'
+  )
   expect(html).toContain("md:flex")
   expect(html).toContain("md:hidden")
   expect(html).toContain("Sign out")
@@ -119,4 +165,38 @@ it("does not display an unverified URL selection as workspace context", () => {
 
   expect(html).not.toContain("55555555-5555-4555-8555-555555555555")
   expect(html).toContain("Workspace")
+})
+
+it("localizes the flag dropdown and marks the current locale", () => {
+  mocks.locale = "fr"
+
+  const html = renderToStaticMarkup(
+    createElement(
+      WorkspaceShell,
+      { organizations: [], restaurants: [] },
+      createElement("main", null, "Workspace content")
+    )
+  )
+
+  expect(html).toContain('aria-label="Langue"')
+  expect(html).toContain('value="en">🇬🇧 Anglais</option>')
+  expect(html).toContain('value="fr" selected="">🇫🇷 Français</option>')
+  expect(html).toContain(
+    '<h2 class="sr-only">Navigation de l’espace de travail</h2>'
+  )
+})
+
+it("switches the locale while preserving the current path and query", () => {
+  const replace = vi.fn()
+  const router = { replace } as unknown as Parameters<
+    typeof navigateToLocale
+  >[0]
+  const currentHref =
+    "/organization/orders?tenantId=22222222-2222-4222-8222-222222222222"
+
+  navigateToLocale(router, currentHref, "fr")
+  navigateToLocale(router, currentHref, "de")
+
+  expect(replace).toHaveBeenCalledOnce()
+  expect(replace).toHaveBeenCalledWith(currentHref, { locale: "fr" })
 })

@@ -70,6 +70,8 @@ it("renders filters, terminal status, sortable columns and preserved page naviga
   expect(html).toContain("status=Completed")
   expect(html).toContain("search=Ada+Lovelace")
   expect(html).toContain("page=1")
+  expect(html).toContain("w-full")
+  expect(html).not.toContain("max-w-7xl")
 })
 
 it("shows a no-results message when filters match no orders", () => {
