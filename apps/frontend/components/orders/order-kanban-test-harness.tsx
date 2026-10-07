@@ -70,7 +70,7 @@ export function OrderKanbanTestHarness({ role }: { role: RestaurantRole }) {
   }
 
   return (
-    <main className="mx-auto grid max-w-7xl gap-5 p-4 sm:p-6 lg:p-8">
+    <main className="grid min-w-0 gap-5 p-3 sm:p-4 lg:p-6">
       <h1 className="text-2xl font-semibold">{t("title")}</h1>
 
       <Label className="flex items-center gap-2">

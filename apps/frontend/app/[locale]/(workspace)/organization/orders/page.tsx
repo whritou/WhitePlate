@@ -125,7 +125,7 @@ async function PageMessage({
   const t = await getTranslations("KitchenOrders")
 
   return (
-    <main className="mx-auto min-h-[70vh] max-w-7xl p-4 sm:p-6 lg:p-8">
+    <main className="min-h-[70vh] w-full min-w-0 p-3 sm:p-4 lg:p-6">
       <Card className="rounded-lg border border-border bg-card p-6">
         <h1 className="text-2xl font-semibold">{title}</h1>
 

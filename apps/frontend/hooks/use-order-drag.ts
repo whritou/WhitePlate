@@ -1,24 +1,31 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import type { PointerEvent, RefObject } from "react"
+import type { PointerEvent, RefObject, TouchEvent } from "react"
 import { getAvailableOrderTransitions } from "@/lib/order-dashboard"
 import { resolveOrderDrop } from "@/lib/orders/kanban"
 import type {
   OrderDragState,
   OrderKanbanProps,
+  OrderPendingTouch,
   OrderSummary,
 } from "@/types/orders"
+
+const dragThreshold = 8
+const touchHoldDelay = 350
 
 export function useOrderDrag(
   props: OrderKanbanProps,
   container: RefObject<HTMLDivElement | null>
 ) {
   const current = useRef<OrderDragState | null>(null)
+  const pendingTouch = useRef<OrderPendingTouch | null>(null)
   const saving = useRef(false)
   const [drag, setDrag] = useState<OrderDragState | null>(null)
 
   function cancel() {
+    if (pendingTouch.current) window.clearTimeout(pendingTouch.current.timer)
+    pendingTouch.current = null
     current.current = null
     setDrag(null)
   }
@@ -34,6 +41,7 @@ export function useOrderDrag(
     return () => {
       window.removeEventListener("keydown", escape)
       window.removeEventListener("blur", cancel)
+      if (pendingTouch.current) window.clearTimeout(pendingTouch.current.timer)
     }
   }, [])
 
@@ -45,13 +53,24 @@ export function useOrderDrag(
       : null
   }
 
-  function start(event: PointerEvent<HTMLButtonElement>, order: OrderSummary) {
+  function canStart(order: OrderSummary) {
+    return (
+      !saving.current &&
+      !props.pending &&
+      getAvailableOrderTransitions(props.role, order.status).length > 0
+    )
+  }
+
+  function start(event: PointerEvent<HTMLElement>, order: OrderSummary) {
     if (
+      event.pointerType === "touch" ||
       event.button !== 0 ||
       !event.isPrimary ||
-      saving.current ||
-      props.pending ||
-      getAvailableOrderTransitions(props.role, order.status).length === 0
+      !canStart(order) ||
+      (event.target instanceof Element &&
+        event.target.closest(
+          "button, a, input, select, textarea, [role='button'], [data-no-order-drag]"
+        ))
     )
       return
 
@@ -68,7 +87,7 @@ export function useOrderDrag(
     }
   }
 
-  function move(event: PointerEvent<HTMLButtonElement>) {
+  function move(event: PointerEvent<HTMLElement>) {
     const previous = current.current
 
     if (!previous || previous.pointerId !== event.pointerId) return
@@ -78,7 +97,7 @@ export function useOrderDrag(
       Math.hypot(
         event.clientX - previous.startX,
         event.clientY - previous.startY
-      ) >= 8
+      ) >= dragThreshold
     const next = {
       ...previous,
       active,
@@ -91,30 +110,139 @@ export function useOrderDrag(
     if (active) setDrag(next)
   }
 
-  async function end(event: PointerEvent<HTMLButtonElement>) {
-    const snapshot = current.current
+  function pointerCancel(event: PointerEvent<HTMLElement>) {
+    if (event.pointerType !== "touch") cancel()
+  }
 
-    if (!snapshot || snapshot.pointerId !== event.pointerId) return
+  function touchStart(event: TouchEvent<HTMLElement>, order: OrderSummary) {
+    if (
+      !canStart(order) ||
+      event.touches.length !== 1 ||
+      (event.target instanceof Element &&
+        event.target.closest(
+          "button, a, input, select, textarea, [role='button'], [data-no-order-drag]"
+        ))
+    )
+      return
 
-    cancel()
-    if (!snapshot.active) return
+    const touch = event.touches[0]
+    const pending = {
+      identifier: touch.identifier,
+      order,
+      startX: touch.clientX,
+      startY: touch.clientY,
+      timer: 0,
+    }
 
+    pending.timer = window.setTimeout(() => {
+      if (pendingTouch.current !== pending) return
+      current.current = {
+        order,
+        pointerId: -1,
+        startX: pending.startX,
+        startY: pending.startY,
+        x: pending.startX,
+        y: pending.startY,
+        active: true,
+        destination: destination(pending.startX, pending.startY),
+      }
+      setDrag(current.current)
+    }, touchHoldDelay)
+    pendingTouch.current = pending
+  }
+
+  function touchMove(event: TouchEvent<HTMLElement>) {
+    const pending = pendingTouch.current
+
+    if (!pending) return
+
+    const touch = Array.from(event.touches).find(
+      (candidate) => candidate.identifier === pending.identifier
+    )
+
+    if (!touch) return
+
+    if (!current.current) {
+      if (
+        Math.hypot(
+          touch.clientX - pending.startX,
+          touch.clientY - pending.startY
+        ) >= dragThreshold
+      ) {
+        window.clearTimeout(pending.timer)
+        pendingTouch.current = null
+      }
+
+      return
+    }
+
+    event.preventDefault()
+
+    const next = {
+      ...current.current,
+      x: touch.clientX,
+      y: touch.clientY,
+      destination: destination(touch.clientX, touch.clientY),
+    }
+
+    current.current = next
+    setDrag(next)
+  }
+
+  function resolveDrop(snapshot: OrderDragState, x: number, y: number) {
     const input = resolveOrderDrop(
       snapshot.order,
       props.orders,
       props.role,
-      destination(event.clientX, event.clientY),
+      destination(x, y),
       props.pending !== null || saving.current
     )
 
     if (!input) return
     saving.current = true
-    try {
-      await props.onUpdate(input)
-    } finally {
+    void props.onUpdate(input).finally(() => {
       saving.current = false
-    }
+    })
   }
 
-  return { drag, start, move, end, cancel }
+  async function end(event: PointerEvent<HTMLElement>) {
+    const snapshot = current.current
+
+    if (!snapshot || snapshot.pointerId !== event.pointerId) return
+
+    cancel()
+    if (snapshot.active) resolveDrop(snapshot, event.clientX, event.clientY)
+  }
+
+  function touchEnd(event: TouchEvent<HTMLElement>) {
+    const snapshot = current.current
+    const pending = pendingTouch.current
+
+    if (!pending) return
+
+    const touch = Array.from(event.changedTouches).find(
+      (candidate) => candidate.identifier === pending.identifier
+    )
+
+    if (pendingTouch.current) window.clearTimeout(pending.timer)
+    pendingTouch.current = null
+    current.current = null
+    setDrag(null)
+
+    if (snapshot?.active && touch)
+      resolveDrop(snapshot, touch.clientX, touch.clientY)
+  }
+
+  return {
+    drag,
+    start,
+    move,
+    end,
+    cancel,
+    pointerCancel,
+    touchStart,
+    touchMove,
+    touchEnd,
+    touchCancel: cancel,
+  }
 }

@@ -19,6 +19,7 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { getAvailableOrderTransitions } from "@/lib/order-dashboard"
+import { cn } from "@/lib/utils"
 import type { OrderStatus, OrderTicketProps } from "@/types/orders"
 import { useTranslations } from "next-intl"
 
@@ -39,7 +40,8 @@ export function OrderTicket({
   locale,
   pending,
   onUpdate,
-  dragHandle,
+  dragAffordance,
+  dragHandlers,
   headingLevel: Heading = "h2",
 }: OrderTicketProps) {
   const t = useTranslations("KitchenOrders")
@@ -58,8 +60,13 @@ export function OrderTicket({
     <article
       data-order-id={order.id}
       tabIndex={-1}
-      className="rounded-lg outline-none focus-visible:outline-2 focus-visible:outline-ring"
+      className={cn(
+        "rounded-lg outline-none focus-visible:outline-2 focus-visible:outline-ring",
+        dragHandlers && "cursor-grab active:cursor-grabbing"
+      )}
+      aria-describedby={dragHandlers ? "order-drag-instructions" : undefined}
       lang={order.menuLocale ?? undefined}
+      {...dragHandlers}
     >
       <Card>
         <CardHeader className="flex flex-wrap items-start justify-between gap-4">
@@ -86,7 +93,7 @@ export function OrderTicket({
 
           <p className="font-semibold tabular-nums">{total}</p>
 
-          {dragHandle}
+          {dragAffordance}
         </CardHeader>
 
         <CardContent>

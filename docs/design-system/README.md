@@ -37,7 +37,7 @@ Audit initial avant migration au 6 octobre 2026, sur la branche issue de `fix/wo
 | Surfaces | Card carrée ; arrondis ajoutés localement, dont tickets `rounded-2xl` | Contrôles 8 px, cartes 12 px, overlays 16 px |
 | Navigation | Sidebar 256 px dès 768 px, appbar 64 px, Sheet mobile | Même structure ; sélection bleue et noms de groupes en casse phrase |
 | Feedback | Alert inline, toast succès 6 s/maximum 3, skeletons par route | Conserver le fonctionnement ; harmoniser tokens, tailles et états |
-| Cuisine | Kanban de tickets, onglets d’état, REST + hints SignalR | Cinq colonnes, déplacement autorisé par poignée et bouton d’action suivante |
+| Cuisine | Kanban de tickets, onglets d’état, REST + hints SignalR | Cinq colonnes, déplacement par carte et bouton d’action suivante |
 | Marque restaurant | Aucun thème par restaurant branché à l’exécution | Limites de personnalisation définies pour une future feature séparée |
 
 Les valeurs JSON sont la **référence canonique**, recopiée dans `app/globals.css` et exposée par `@theme inline`. Le frontend n’importe pas le JSON côté client. Le test `app/design-tokens.test.ts`, exécuté par Vitest et la CI, bloque toute divergence de couleurs clair/sombre ou des quatre rayons communs. La source reste l’autorité sur le comportement en place ; ce document définit le design.
@@ -164,9 +164,9 @@ Breakpoints conservés de Tailwind : sm 640, md 768, lg 1024, xl 1280, 2xl 1536 
 ### Cuisine
 
 - Onglets shadcn Base UI au-dessus du kanban : toutes les commandes puis les cinq états ; sélection explicite et accès clavier. Retour connexion près du titre sans dominer les commandes.
-- Cinq colonnes dans l’ordre `Pending`, `Preparing`, `Ready`, `Completed`, `Cancelled`. Grille fluide, colonne minimum 18 rem ; colonnes empilées lorsque la place manque, sans débordement horizontal de page. Les compteurs décrivent seulement la page REST chargée ; pagination et filtre serveur restent actifs.
+- Cinq colonnes dans l’ordre `Pending`, `Preparing`, `Ready`, `Completed`, `Cancelled`. Le tableau utilise toute la largeur disponible dans l’espace de travail ; sa grille fluide garde 18 rem minimum par colonne et affiche autant de colonnes par rangée que l’espace le permet. La colonne `Cancelled` suit le même flux. Aucun débordement horizontal de page. Les colonnes utilisent le fond sémantique `secondary`, les tickets `card` ; les compteurs décrivent seulement la page REST chargée et pagination/filtre serveur restent actifs.
 - Actions de 48 px minimum ; quantité/référence à 18 px, ingrédients/options à 16 px. Les états sont identifiables sans couleur.
-- Poignée de 48 px pour déplacement souris/tactile ; seules les transitions permises par le rôle sont acceptées. Escape annule. Le bouton nommé d’action suivante reste l’alternative clavier. Aucun déplacement optimiste : mutation/version, conflit et rafraîchissement REST restent autoritaires. Après disparition du contrôle activé, restaurer le focus au ticket déplacé (ou au tableau si le filtre le retire), sans détourner un focus déjà placé ailleurs.
+- Toute zone libre du ticket permet le glisser-déposer ; boutons et liens gardent leurs actions. Sur écran tactile, un appui long de 350 ms distingue le déplacement du défilement. La carte saisie et les étapes autorisées donnent un retour visuel ; seules les transitions permises par le rôle sont acceptées. Escape annule. Le bouton nommé d’action suivante reste l’alternative clavier. Aucun déplacement optimiste : mutation/version, conflit et rafraîchissement REST restent autoritaires. Après disparition du contrôle activé, restaurer le focus au ticket déplacé (ou au tableau si le filtre le retire), sans détourner un focus déjà placé ailleurs.
 
 ### Vitrine et commande
 
