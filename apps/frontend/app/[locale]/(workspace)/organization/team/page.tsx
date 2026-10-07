@@ -109,29 +109,31 @@ export default async function OrganizationTeamPage({
                 {t("restaurantMenuSettings")}
               </h2>
 
-              <ul className="grid gap-2 sm:grid-cols-2">
+              <ul className="grid min-w-0 gap-2 sm:grid-cols-2">
                 {restaurants.map((restaurant) => (
                   <li
                     key={restaurant.id}
-                    className="flex items-center justify-between gap-3 rounded-lg border border-border px-4 py-3"
+                    className="grid min-w-0 gap-2 rounded-lg border border-border px-4 py-3"
                   >
-                    <span className="truncate text-sm font-medium">
+                    <span className="min-w-0 text-sm font-medium break-words">
                       {restaurant.name}
                     </span>
 
-                    <Link
-                      href={`/organization/restaurant-languages?tenantId=${restaurant.id}`}
-                      className="shrink-0 text-sm font-medium text-primary underline-offset-4 hover:underline"
-                    >
-                      {t("editMenuLanguages")}
-                    </Link>
+                    <div className="flex min-w-0 flex-wrap items-start gap-x-4 gap-y-2">
+                      <Link
+                        href={`/organization/restaurant-languages?tenantId=${restaurant.id}`}
+                        className="min-w-0 text-sm font-medium break-words text-primary underline-offset-4 hover:underline"
+                      >
+                        {t("editMenuLanguages")}
+                      </Link>
 
-                    <Link
-                      href={`/organization/catalog?tenantId=${restaurant.id}`}
-                      className="shrink-0 text-sm font-medium text-primary hover:underline"
-                    >
-                      {t("editCatalog")}
-                    </Link>
+                      <Link
+                        href={`/organization/catalog?tenantId=${restaurant.id}`}
+                        className="min-w-0 text-sm font-medium break-words text-primary hover:underline"
+                      >
+                        {t("editCatalog")}
+                      </Link>
+                    </div>
                   </li>
                 ))}
               </ul>

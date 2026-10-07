@@ -6,21 +6,34 @@ import { WorkspacePageSkeleton } from "./workspace-page-skeletons"
 const expectedRegions = {
   organizationSignUp: ["organization-signup-card"],
   team: [
+    "team-card",
     "team-header",
     "team-actions",
     "team-restaurants",
+    "team-directory",
     "team-roster",
     "team-invitations",
     "team-invitation-form",
   ],
-  restaurant: ["restaurant-header", "restaurant-fields", "restaurant-submit"],
+  restaurant: [
+    "restaurant-card",
+    "restaurant-header",
+    "restaurant-fields",
+    "restaurant-submit",
+  ],
   catalog: ["catalog-header", "catalog-tabs", "catalog-list"],
   menuLanguages: [
     "languages-header",
     "languages-settings",
     "languages-translations",
   ],
-  settings: ["settings-header", "settings-fields", "settings-submit"],
+  settings: [
+    "settings-card",
+    "settings-header",
+    "settings-fields",
+    "settings-submit",
+    "settings-archive",
+  ],
   orders: ["orders-header", "orders-filters", "orders-list"],
   orderHistory: [
     "order-history-header",
@@ -80,6 +93,25 @@ describe("WorkspacePageSkeleton", () => {
 
       expect(html).toContain("w-full max-w-none")
       expect(html).not.toContain("max-w-5xl")
+    }
+  )
+
+  it.each([
+    ["team", "max-w-3xl", "team-card"],
+    ["settings", "max-w-3xl", "settings-card"],
+    ["restaurant", "max-w-2xl", "restaurant-card"],
+  ] as const)(
+    "matches the %s page's width and enclosing card",
+    (page, width, card) => {
+      const html = renderToStaticMarkup(
+        createElement(WorkspacePageSkeleton, {
+          page,
+          label: `Loading ${page}`,
+        })
+      )
+
+      expect(html).toContain(width)
+      expect(html).toContain(`data-skeleton-region="${card}"`)
     }
   )
 })

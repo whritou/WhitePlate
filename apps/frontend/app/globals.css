@@ -211,3 +211,26 @@
     scroll-behavior: auto !important;
   }
 }
+
+html.global-not-found {
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  html.global-not-found:not(.light) {
+    color-scheme: dark;
+    --background: #1C1917;
+    --foreground: #FAFAF9;
+    --card: #292524;
+    --card-foreground: #FAFAF9;
+    --primary: #A9CE91;
+    --primary-foreground: #172316;
+    --primary-hover: #B9D9A0;
+    --accent: #263527;
+    --border: #534A43;
+    --input: #A89F96;
+    --ring: #A9CE91;
+    --muted: #34302D;
+    --muted-foreground: #C2B9AF;
+  }
+}
