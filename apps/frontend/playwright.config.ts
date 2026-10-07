@@ -15,6 +15,8 @@ export default defineConfig({
   expect: { timeout: 20_000 },
   projects: [
     { name: "orders-kanban", testMatch: "orders-kanban.spec.ts" },
+    { name: "order-history", testMatch: "order-history.spec.ts" },
+    { name: "workspace-locale", testMatch: "workspace-locale.spec.ts" },
     { name: "design-system", testMatch: "design-system.spec.ts" },
     { name: "workspace-toasts", testMatch: "workspace-toast.spec.ts" },
     { name: "restaurant", testMatch: "restaurant-creation.spec.ts" },

@@ -30,7 +30,10 @@ export default async function RestaurantMenuLanguagesPage({
   if (!session) redirect(`/${locale}/sign-in`)
   if (!session.user.emailVerified) redirect(`/${locale}/verify-email`)
 
-  const t = await getTranslations("Auth")
+  const [t, catalogT] = await Promise.all([
+    getTranslations("Auth"),
+    getTranslations("Catalog"),
+  ])
 
   if (!isUuid(query.tenantId)) redirect(`/${locale}/organization`)
 
@@ -83,6 +86,13 @@ export default async function RestaurantMenuLanguagesPage({
           <CardDescription className="mt-2 max-w-xl text-sm leading-6 text-muted-foreground">
             {t("menuLanguagesDescription")}
           </CardDescription>
+
+          <Link
+            href={`/organization/catalog?tenantId=${encodeURIComponent(response.data.tenantId)}`}
+            className="inline-flex min-h-11 items-center text-sm font-medium text-primary underline-offset-4 hover:underline"
+          >
+            {catalogT("catalogLink")}
+          </Link>
         </CardHeader>
 
         <CardContent className="px-0">
