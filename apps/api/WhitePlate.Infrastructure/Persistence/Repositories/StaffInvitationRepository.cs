@@ -23,7 +23,9 @@ public sealed class StaffInvitationRepository(WhitePlateDbContext database) : IS
     {
         var invitation = await database.StaffInvitations.SingleOrDefaultAsync(
             item => item.TokenHash == tokenHash, cancellationToken);
-        if (invitation is null || !invitation.TryAccept(identity, now)) return false;
+        if (invitation is null || !await database.Organizations.AsNoTracking().AnyAsync(
+                organization => organization.Id == invitation.OrganizationId && organization.IsActive, cancellationToken) ||
+            !invitation.TryAccept(identity, now)) return false;
 
         if (invitation.Role == InvitationRole.OrganizationOwner)
         {
@@ -60,7 +62,8 @@ public sealed class StaffInvitationRepository(WhitePlateDbContext database) : IS
     {
         var isOwner = await database.OrganizationOwnerMemberships.AsNoTracking().AnyAsync(member =>
             member.OrganizationId == organizationId && member.Issuer == identity.Issuer &&
-            member.Subject == identity.Subject, cancellationToken);
+            member.Subject == identity.Subject && database.Organizations.Any(organization =>
+                organization.Id == member.OrganizationId && organization.IsActive), cancellationToken);
         if (!isOwner) return false;
         var invitation = await database.StaffInvitations.SingleOrDefaultAsync(item =>
             item.OrganizationId == organizationId && item.Id == invitationId, cancellationToken);

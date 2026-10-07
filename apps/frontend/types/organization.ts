@@ -3,7 +3,7 @@ export type ActionErrorMessage = "unauthorized" | "invalid" | "unavailable"
 export type ActionResult =
   { ok: true } | { ok: false; message: ActionErrorMessage }
 
-export type Organization = { id: string; name: string }
+export type Organization = { id: string; name: string; isActive: boolean }
 
 export type OrganizationTeamRole =
   "OrganizationOwner" | "RestaurantManager" | "KitchenStaff"

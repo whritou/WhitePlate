@@ -113,6 +113,7 @@ public static class ServiceRegistration
         services.AddScoped<IOrganizationRepository, OrganizationProvisioningRepository>();
         services.AddScoped<ProvisionOrganizationCommandHandler>();
         services.AddScoped<RenameOrganizationCommandHandler>();
+        services.AddScoped<SetOrganizationActiveCommandHandler>();
         services.AddScoped<CreateOrganizationCommandHandler>();
         services.AddScoped<IStaffInvitationRepository, StaffInvitationRepository>();
         services.AddScoped<CreateStaffInvitationCommandHandler>();

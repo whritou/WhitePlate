@@ -25,7 +25,8 @@ public sealed class OrderRepository(WhitePlateDbContext database) : IOrderReposi
         CancellationToken cancellationToken)
     {
         var tenant = await database.Tenants.AsNoTracking()
-            .SingleOrDefaultAsync(item => item.Id == tenantId && item.IsActive, cancellationToken);
+            .SingleOrDefaultAsync(item => item.Id == tenantId && item.IsActive && database.Organizations.Any(organization =>
+                organization.Id == item.OrganizationId && organization.IsActive), cancellationToken);
         if (tenant is null) return null;
 
         var locale = tenant.SupportsMenuLocale(requestedLocale) ?
@@ -37,7 +38,8 @@ public sealed class OrderRepository(WhitePlateDbContext database) : IOrderReposi
         string locale, string defaultLocale, IReadOnlyCollection<Guid> productIds, string? discountCode,
         CancellationToken cancellationToken)
     {
-        var currency = await database.Tenants.AsNoTracking().Where(tenant => tenant.Id == tenantId && tenant.IsActive)
+        var currency = await database.Tenants.AsNoTracking().Where(tenant => tenant.Id == tenantId && tenant.IsActive &&
+                database.Organizations.Any(organization => organization.Id == tenant.OrganizationId && organization.IsActive))
             .Select(tenant => tenant.Currency).SingleOrDefaultAsync(cancellationToken);
         if (currency is null) return new CheckoutCatalogDto(string.Empty, locale, [], null);
 

@@ -60,6 +60,8 @@ public sealed class Product
     }
     public void Archive() { IsArchived = true; IsAvailable = false; }
 
+    public void Restore() => IsArchived = false;
+
     private static string NormalizeName(string? name)
     {
         var value = name?.Trim();

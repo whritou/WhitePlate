@@ -11,11 +11,13 @@ All paths are rooted at `/api/v1`. Success responses contain the resource direct
 | `GET /tenant` | Public, resolved restaurant host | Return active tenant id, name, subdomain, default menu language, and enabled menu languages; invalid/unknown/inactive host receives `404` |
 | `GET /menu?locale={tag}` | Public, resolved restaurant host | Return the localized menu for an enabled language, or the restaurant default when omitted/unsupported; includes unavailable non-archived products with availability state |
 | `POST /organizations` | Better Auth bearer, verified email | Create an organization and make the caller its first owner |
-| `GET /organizations` | Better Auth bearer, owner | List the caller's organizations |
+| `GET /organizations` | Better Auth bearer, owner | List the caller's organizations with `isActive` so the workspace can show archived organizations |
 | `GET /organizations/{organizationId}/restaurants` | Better Auth bearer, owner | List restaurants owned by the organization |
 | `GET /organizations/{organizationId}/members` | Better Auth bearer, owner | List organization owners and restaurant staff memberships; return role, optional verified email, and restaurant scope without issuer or subject |
 | `GET /organizations/{organizationId}/invitations` | Better Auth bearer, owner | List invitation role, recipient email, restaurant scope, expiry, and `Pending`, `Accepted`, `Revoked`, or `Expired` status without token material |
 | `PATCH /organizations/{organizationId}` | Better Auth bearer, owner | Rename an owned organization |
+| `POST /organizations/{organizationId}/archive` | Better Auth bearer, active owner | Archive an organization without deleting organization, restaurant, catalog, invitation, or order data; suspend restaurant access, public menus, and new orders |
+| `POST /organizations/{organizationId}/restore` | Better Auth bearer, owner | Restore an archived organization; existing restaurant and product availability flags remain unchanged |
 | `POST /organizations/{organizationId}/restaurants` | Better Auth bearer, owner | Create a restaurant tenant with EUR, USD, or GBP currency |
 | `POST /organizations/{organizationId}/invitations` | Better Auth bearer, verified owner | Create a single-use seven-day invitation bound to the request email and role; token is returned once to the server action |
 | `DELETE /organizations/{organizationId}/invitations/{invitationId}` | Better Auth bearer, owner | Revoke a pending invitation; accepted, revoked, expired, missing, or foreign invitations return the same `404` |
@@ -31,6 +33,7 @@ All paths are rooted at `/api/v1`. Success responses contain the resource direct
 | `POST /tenants/{tenantId}/products` | Organization owner or restaurant manager | Create a product with base price and percentage tax |
 | `PUT /tenants/{tenantId}/products/{productId}` | Organization owner or restaurant manager | Update product details, price, tax, order, and availability |
 | `DELETE /tenants/{tenantId}/products/{productId}` | Organization owner or restaurant manager | Archive the product and its option descendants |
+| `POST /tenants/{tenantId}/products/{productId}/restore` | Organization owner or restaurant manager | Restore an archived product in an active category. The product remains unavailable until a manager explicitly enables it; archived option descendants remain archived. No permanent product purge route exists |
 | `POST /tenants/{tenantId}/products/{productId}/option-groups` | Organization owner or restaurant manager | Create a selection group with minimum/maximum counts |
 | `PUT /tenants/{tenantId}/option-groups/{groupId}` | Organization owner or restaurant manager | Update selection rules and display order |
 | `DELETE /tenants/{tenantId}/option-groups/{groupId}` | Organization owner or restaurant manager | Archive the group and its options |

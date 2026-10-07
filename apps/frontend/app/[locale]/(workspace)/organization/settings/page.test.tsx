@@ -72,7 +72,7 @@ beforeEach(() => {
   getOrganizations.mockResolvedValue({
     ok: true,
     status: 200,
-    data: [{ id: organizationId, name: "White Plate Group" }],
+    data: [{ id: organizationId, name: "White Plate Group", isActive: true }],
   })
 })
 
@@ -91,7 +91,13 @@ it("does not render a rename form for a foreign organization", async () => {
   getOrganizations.mockResolvedValue({
     ok: true,
     status: 200,
-    data: [{ id: "22222222-2222-4222-8222-222222222222", name: "Other" }],
+    data: [
+      {
+        id: "22222222-2222-4222-8222-222222222222",
+        name: "Other",
+        isActive: true,
+      },
+    ],
   })
 
   const page = await OrganizationSettingsPage({

@@ -16,6 +16,7 @@ import { getOrganizations } from "@/services/organization-queries"
 import { getLocale, getTranslations } from "next-intl/server"
 import { headers } from "next/headers"
 import { redirect } from "next/navigation"
+import { OrganizationArchiveAction } from "@/components/organization/organization-archive-action"
 
 export default async function OrganizationPage() {
   const locale = await getLocale()
@@ -105,19 +106,25 @@ export default async function OrganizationPage() {
                     {restaurant.name}
                   </span>
 
-                  <Link
-                    href={`/organization/restaurant-languages?tenantId=${restaurant.id}`}
-                    className="shrink-0 text-sm font-medium text-primary underline-offset-4 hover:underline"
+                  <div
+                    role="group"
+                    aria-label={t("restaurantMenuActions")}
+                    className="flex min-w-0 flex-wrap gap-3"
                   >
-                    {t("editMenuLanguages")}
-                  </Link>
+                    <Link
+                      href={`/organization/restaurant-languages?tenantId=${restaurant.id}`}
+                      className="inline-flex min-h-11 max-w-full min-w-0 items-center text-sm font-medium whitespace-normal text-primary underline-offset-4 hover:underline"
+                    >
+                      {t("editMenuLanguages")}
+                    </Link>
 
-                  <Link
-                    href={`/organization/catalog?tenantId=${restaurant.id}`}
-                    className="shrink-0 text-sm font-medium text-primary hover:underline"
-                  >
-                    {t("editCatalog")}
-                  </Link>
+                    <Link
+                      href={`/organization/catalog?tenantId=${restaurant.id}`}
+                      className="inline-flex min-h-11 max-w-full min-w-0 items-center text-sm font-medium whitespace-normal text-primary underline-offset-4 hover:underline"
+                    >
+                      {t("editCatalog")}
+                    </Link>
+                  </div>
                 </Card>
               </li>
             ))}
@@ -161,6 +168,12 @@ export default async function OrganizationPage() {
             <li key={organization.id}>
               <Card className="gap-0 rounded-lg border border-border p-6 has-data-[slot=card-footer]:pb-6">
                 <CardHeader className="px-0">
+                  {!organization.isActive && (
+                    <p className="text-sm font-medium text-muted-foreground">
+                      {t("organizationArchived")}
+                    </p>
+                  )}
+
                   <CardTitle>
                     <h2 className="text-lg font-semibold">
                       {organization.name}
@@ -169,26 +182,42 @@ export default async function OrganizationPage() {
                 </CardHeader>
 
                 <CardFooter className="border-0 p-0">
-                  <Link
-                    href={`/organization/team?organizationId=${organization.id}`}
-                    className="mt-5 inline-flex items-center gap-2 text-sm font-medium text-primary underline-offset-4 hover:underline"
-                  >
-                    {t("manageTeamAction")}
-                  </Link>
+                  {organization.isActive ? (
+                    <div
+                      role="group"
+                      aria-label={t("organizationActions")}
+                      className="mt-5 flex min-w-0 flex-wrap gap-3"
+                    >
+                      <Link
+                        href={`/organization/team?organizationId=${organization.id}`}
+                        className="inline-flex min-h-11 max-w-full min-w-0 items-center gap-2 text-sm font-medium whitespace-normal text-primary underline-offset-4 hover:underline"
+                      >
+                        {t("manageTeamAction")}
+                      </Link>
 
-                  <Link
-                    href={`/organization/settings?organizationId=${organization.id}`}
-                    className="mt-5 text-sm font-medium text-primary underline-offset-4 hover:underline"
-                  >
-                    {t("organizationSettingsAction")}
-                  </Link>
+                      <Link
+                        href={`/organization/settings?organizationId=${organization.id}`}
+                        className="inline-flex min-h-11 max-w-full min-w-0 items-center text-sm font-medium whitespace-normal text-primary underline-offset-4 hover:underline"
+                      >
+                        {t("organizationSettingsAction")}
+                      </Link>
 
-                  <Link
-                    href={`/organization/restaurants/new?organizationId=${organization.id}`}
-                    className="mt-5 text-sm font-medium text-primary underline-offset-4 hover:underline"
-                  >
-                    {t("createRestaurantAction")}
-                  </Link>
+                      <Link
+                        href={`/organization/restaurants/new?organizationId=${organization.id}`}
+                        className="inline-flex min-h-11 max-w-full min-w-0 items-center text-sm font-medium whitespace-normal text-primary underline-offset-4 hover:underline"
+                      >
+                        {t("createRestaurantAction")}
+                      </Link>
+                    </div>
+                  ) : (
+                    <div className="mt-4">
+                      <OrganizationArchiveAction
+                        organizationId={organization.id}
+                        active={false}
+                        compact
+                      />
+                    </div>
+                  )}
                 </CardFooter>
               </Card>
             </li>

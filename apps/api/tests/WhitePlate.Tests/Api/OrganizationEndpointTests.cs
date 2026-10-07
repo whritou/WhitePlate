@@ -436,6 +436,73 @@ public sealed class OrganizationEndpointTests
         Assert.Equal(HttpStatusCode.NotFound, forbiddenWrite.StatusCode);
     }
 
+    [Fact]
+    public async Task OwnerCanArchiveAndRestoreOrganizationWithoutLosingItsRestaurant()
+    {
+        using var factory = new OrganizationFactory();
+        var (organizationId, identity) = await factory.SeedOwnerAsync();
+        using var client = factory.CreateClient();
+        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", identity.Subject);
+        using var restaurantResponse = await client.PostAsJsonAsync($"/api/v1/organizations/{organizationId}/restaurants",
+            new { name = "Bistro", subdomain = "bistro", currency = "EUR" }, TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.Created, restaurantResponse.StatusCode);
+
+        using var archive = await client.PostAsync($"/api/v1/organizations/{organizationId}/archive", null,
+            TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.NoContent, archive.StatusCode);
+
+        using var listed = await client.GetAsync("/api/v1/organizations", TestContext.Current.CancellationToken);
+        using var listedJson = JsonDocument.Parse(await listed.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
+        Assert.False(listedJson.RootElement[0].GetProperty("isActive").GetBoolean());
+        using var blockedCreate = await client.PostAsJsonAsync($"/api/v1/organizations/{organizationId}/restaurants",
+            new { name = "Second", subdomain = "second", currency = "EUR" }, TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.NotFound, blockedCreate.StatusCode);
+
+        using var restore = await client.PostAsync($"/api/v1/organizations/{organizationId}/restore", null,
+            TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.NoContent, restore.StatusCode);
+        using var restoredList = await client.GetAsync("/api/v1/organizations", TestContext.Current.CancellationToken);
+        using var restoredJson = JsonDocument.Parse(await restoredList.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
+        Assert.True(restoredJson.RootElement[0].GetProperty("isActive").GetBoolean());
+        using var restoredCreate = await client.PostAsJsonAsync($"/api/v1/organizations/{organizationId}/restaurants",
+            new { name = "Second", subdomain = "second", currency = "EUR" }, TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.Created, restoredCreate.StatusCode);
+    }
+
+    [Fact]
+    public async Task OwnerCanRestoreAnArchivedProductWithoutMakingItAvailable()
+    {
+        using var factory = new OrganizationFactory();
+        var (organizationId, identity) = await factory.SeedOwnerAsync();
+        using var client = factory.CreateClient();
+        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", identity.Subject);
+        using var restaurantResponse = await client.PostAsJsonAsync($"/api/v1/organizations/{organizationId}/restaurants",
+            new { name = "Bistro", subdomain = "bistro", currency = "EUR" }, TestContext.Current.CancellationToken);
+        var restaurant = await restaurantResponse.Content.ReadFromJsonAsync<WhitePlate.Api.Contracts.TenantResponse>(TestContext.Current.CancellationToken);
+        using var categoryResponse = await client.PostAsJsonAsync($"/api/v1/tenants/{restaurant!.Id}/categories",
+            new { name = "Mains", sortOrder = 0 }, TestContext.Current.CancellationToken);
+        using var categoryJson = JsonDocument.Parse(await categoryResponse.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
+        var categoryId = categoryJson.RootElement.GetProperty("id").GetGuid();
+        using var productResponse = await client.PostAsJsonAsync($"/api/v1/tenants/{restaurant.Id}/products",
+            new { categoryId, name = "Soup", description = (string?)null, basePrice = 8m, taxRatePercent = 10m, sortOrder = 0 },
+            TestContext.Current.CancellationToken);
+        using var productJson = JsonDocument.Parse(await productResponse.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
+        var productId = productJson.RootElement.GetProperty("id").GetGuid();
+        using var archive = await client.DeleteAsync($"/api/v1/tenants/{restaurant.Id}/products/{productId}",
+            TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.NoContent, archive.StatusCode);
+
+        using var restore = await client.PostAsync($"/api/v1/tenants/{restaurant.Id}/products/{productId}/restore", null,
+            TestContext.Current.CancellationToken);
+
+        Assert.Equal(HttpStatusCode.NoContent, restore.StatusCode);
+        using var catalogResponse = await client.GetAsync($"/api/v1/tenants/{restaurant.Id}/catalog", TestContext.Current.CancellationToken);
+        using var catalog = JsonDocument.Parse(await catalogResponse.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
+        var product = Assert.Single(catalog.RootElement.GetProperty("products").EnumerateArray());
+        Assert.False(product.GetProperty("isArchived").GetBoolean());
+        Assert.False(product.GetProperty("isAvailable").GetBoolean());
+    }
+
     private sealed class OrganizationFactory : WebApplicationFactory<Program>
     {
         private readonly SqliteConnection connection = new("Data Source=:memory:");

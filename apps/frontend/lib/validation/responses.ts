@@ -27,12 +27,19 @@ export function parseOrganizations(value: unknown): Organization[] | null {
     !Array.isArray(value) ||
     !value.every(
       (item) =>
-        isRecord(item) && isUuid(item.id) && typeof item.name === "string"
+        isRecord(item) &&
+        isUuid(item.id) &&
+        typeof item.name === "string" &&
+        typeof item.isActive === "boolean"
     )
   )
     return null
 
-  return value.map((item) => ({ id: item.id, name: item.name }))
+  return value.map((item) => ({
+    id: item.id,
+    name: item.name,
+    isActive: item.isActive,
+  }))
 }
 
 export function parseRestaurants(value: unknown): Restaurant[] | null {

@@ -22,6 +22,7 @@ public sealed class OrganizationsController(
     RevokeStaffInvitationCommandHandler revokeInvitation,
     IOrganizationRepository organizations,
     RenameOrganizationCommandHandler renameOrganization,
+    SetOrganizationActiveCommandHandler setOrganizationActive,
     ApiErrorMapper errors,
     TimeProvider timeProvider) : ControllerBase
 {
@@ -103,6 +104,29 @@ public sealed class OrganizationsController(
         if (identity is null) return Unauthorized();
         var result = await renameOrganization.HandleAsync(organizationId, request.Name, identity, cancellationToken);
         return result.IsSuccess ? Ok(result.Value) : errors.ToActionResult(errors.Create(HttpContext, result.Error));
+    }
+
+    [HttpPost("{organizationId:guid}/archive")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status401Unauthorized, "application/problem+json")]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status404NotFound, "application/problem+json")]
+    public Task<IActionResult> Archive(Guid organizationId, CancellationToken cancellationToken) =>
+        SetOrganizationActiveAsync(organizationId, false, cancellationToken);
+
+    [HttpPost("{organizationId:guid}/restore")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status401Unauthorized, "application/problem+json")]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status404NotFound, "application/problem+json")]
+    public Task<IActionResult> Restore(Guid organizationId, CancellationToken cancellationToken) =>
+        SetOrganizationActiveAsync(organizationId, true, cancellationToken);
+
+    private async Task<IActionResult> SetOrganizationActiveAsync(Guid organizationId, bool isActive,
+        CancellationToken cancellationToken)
+    {
+        var identity = currentIdentity.Identity;
+        if (identity is null) return Unauthorized();
+        var result = await setOrganizationActive.HandleAsync(organizationId, isActive, identity, cancellationToken);
+        return result.IsSuccess ? NoContent() : errors.ToActionResult(errors.Create(HttpContext, result.Error));
     }
 
     [HttpPost("{organizationId:guid}/restaurants")]

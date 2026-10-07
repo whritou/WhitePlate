@@ -168,6 +168,18 @@ public sealed class TenantCatalogController(
         return result.IsSuccess ? NoContent() : errors.ToActionResult(errors.Create(HttpContext, result.Error));
     }
 
+    [HttpPost("products/{productId:guid}/restore")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status401Unauthorized, "application/problem+json")]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status404NotFound, "application/problem+json")]
+    public async Task<IActionResult> RestoreProduct(Guid tenantId, Guid productId, CancellationToken cancellationToken)
+    {
+        var identity = currentIdentity.Identity;
+        if (identity is null) return Unauthorized();
+        var result = await manageCatalog.RestoreProductAsync(tenantId, productId, identity, cancellationToken);
+        return result.IsSuccess ? NoContent() : errors.ToActionResult(errors.Create(HttpContext, result.Error));
+    }
+
     [HttpPost("products/{productId:guid}/option-groups")]
     [ProducesResponseType<MenuOptionGroupDto>(StatusCodes.Status201Created)]
     [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status400BadRequest, "application/problem+json")]

@@ -13,7 +13,8 @@ public sealed class RenameOrganizationCommandHandler(IOrganizationRepository org
         ArgumentNullException.ThrowIfNull(identity);
         cancellationToken.ThrowIfCancellationRequested();
         var organization = await organizations.FindOwnedAsync(organizationId, identity, cancellationToken);
-        if (organization is null) return Result<OrganizationDto>.Failure(new ApplicationError(ErrorCode.NotFound));
+        if (organization is null || !organization.IsActive)
+            return Result<OrganizationDto>.Failure(new ApplicationError(ErrorCode.NotFound));
         try
         {
             organization.Rename(name);

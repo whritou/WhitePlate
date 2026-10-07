@@ -99,6 +99,10 @@ public sealed class CatalogManagementCommandHandler(IStaffMembershipRepository m
         CancellationToken cancellationToken) => ArchiveAsync(tenantId, productId, identity,
         catalog.ArchiveProductAsync, cancellationToken);
 
+    public Task<Result<bool>> RestoreProductAsync(Guid tenantId, Guid productId, ExternalIdentity identity,
+        CancellationToken cancellationToken) => ArchiveAsync(tenantId, productId, identity,
+        catalog.RestoreProductAsync, cancellationToken);
+
     public Task<Result<bool>> ArchiveOptionGroupAsync(Guid tenantId, Guid groupId, ExternalIdentity identity,
         CancellationToken cancellationToken) => ArchiveAsync(tenantId, groupId, identity,
         catalog.ArchiveOptionGroupAsync, cancellationToken);

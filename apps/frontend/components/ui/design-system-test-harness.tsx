@@ -31,7 +31,9 @@ export function DesignSystemTestHarness() {
 
   return (
     <WorkspaceShell
-      organizations={[{ id: "design-fixture", name: t("restaurant") }]}
+      organizations={[
+        { id: "design-fixture", name: t("restaurant"), isActive: true },
+      ]}
       restaurants={[]}
     >
       <main className="mx-auto grid max-w-7xl gap-8 p-4 sm:p-6 lg:p-8">

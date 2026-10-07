@@ -1,4 +1,5 @@
 "use server"
+import { isUuid } from "@/lib/validation/common"
 
 import {
   parseArchiveInput,
@@ -17,6 +18,7 @@ import {
   saveOption,
   saveOptionGroup,
   saveProduct,
+  restoreProduct,
 } from "@/services/catalog-management"
 import type { CatalogResult } from "@/types/catalog-management"
 
@@ -72,4 +74,15 @@ export async function archiveCatalogItemAction(
   const parsed = parseArchiveInput(input)
 
   return parsed ? archiveCatalogItem(parsed) : { ok: false, error: "invalid" }
+}
+
+export async function restoreProductAction(
+  input: unknown
+): Promise<CatalogResult> {
+  const tenantId = input instanceof FormData ? input.get("tenantId") : null
+  const id = input instanceof FormData ? input.get("id") : null
+
+  return isUuid(tenantId) && isUuid(id)
+    ? restoreProduct(tenantId, id)
+    : { ok: false, error: "invalid" }
 }

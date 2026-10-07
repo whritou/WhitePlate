@@ -204,6 +204,17 @@ public sealed class CatalogRepository(WhitePlateDbContext database) : ICatalogRe
         return true;
     }
 
+    public async Task<bool> RestoreProductAsync(Guid tenantId, Guid productId, CancellationToken cancellationToken)
+    {
+        var product = await database.Products.SingleOrDefaultAsync(item => item.TenantId == tenantId &&
+            item.Id == productId && item.IsArchived && database.MenuCategories.Any(category =>
+                category.Id == item.CategoryId && category.TenantId == item.TenantId && !category.IsArchived), cancellationToken);
+        if (product is null) return false;
+        product.Restore();
+        await database.SaveChangesAsync(cancellationToken);
+        return true;
+    }
+
     public async Task<bool> ArchiveOptionGroupAsync(Guid tenantId, Guid groupId, CancellationToken cancellationToken)
     {
         var group = await database.ProductOptionGroups.SingleOrDefaultAsync(item => item.TenantId == tenantId &&

@@ -12,6 +12,7 @@ public sealed class StaffDirectoryRepository(WhitePlateDbContext database) : ISt
             .Where(membership => membership.Issuer == identity.Issuer && membership.Subject == identity.Subject)
             .Join(database.Organizations.AsNoTracking(), membership => membership.OrganizationId,
                 organization => organization.Id, (membership, organization) => organization)
+            .Where(organization => organization.IsActive)
             .OrderBy(organization => organization.Name)
             .Select(organization => new OrganizationMembershipDto(organization.Id, organization.Name, "OrganizationOwner"))
             .ToListAsync(cancellationToken);
@@ -25,7 +26,8 @@ public sealed class StaffDirectoryRepository(WhitePlateDbContext database) : ISt
             .ToListAsync(cancellationToken);
         var directTenantIds = directRoles.Select(membership => membership.TenantId).ToArray();
         var directTenants = await database.Tenants.AsNoTracking()
-            .Where(tenant => directTenantIds.Contains(tenant.Id) && !ownedIds.Contains(tenant.OrganizationId))
+            .Where(tenant => directTenantIds.Contains(tenant.Id) && !ownedIds.Contains(tenant.OrganizationId) &&
+                database.Organizations.Any(organization => organization.Id == tenant.OrganizationId && organization.IsActive))
             .Select(tenant => new { tenant.Id, tenant.OrganizationId, tenant.Name, tenant.Subdomain, tenant.Currency })
             .ToListAsync(cancellationToken);
         restaurants.AddRange(from tenant in directTenants

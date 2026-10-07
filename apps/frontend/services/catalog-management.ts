@@ -160,3 +160,15 @@ export async function archiveCatalogItem({
     )
   )
 }
+
+export async function restoreProduct(
+  tenantId: string,
+  id: string
+): Promise<CatalogResult> {
+  return mutationResult(
+    await whitePlateApi.post(
+      `/api/v1/tenants/${tenantId}/products/${id}/restore`,
+      {}
+    )
+  )
+}

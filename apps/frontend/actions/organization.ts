@@ -16,6 +16,7 @@ import {
   sendStaffInvitation,
   revokeStaffInvitation,
   acceptStaffInvitation,
+  setOrganizationActive,
 } from "@/services/organization"
 import type { ActionResult } from "@/types/organization"
 
@@ -51,6 +52,19 @@ export async function renameOrganizationAction(
   const value = parseOrganizationRename(form)
 
   return value ? renameOrganization(value) : { ok: false, message: "invalid" }
+}
+
+export async function setOrganizationActiveAction(
+  input: unknown
+): Promise<ActionResult> {
+  if (
+    !isRecord(input) ||
+    !isUuid(input.organizationId) ||
+    typeof input.active !== "boolean"
+  )
+    return { ok: false, message: "invalid" }
+
+  return setOrganizationActive(input.organizationId, input.active)
 }
 
 export async function sendStaffInvitationAction(

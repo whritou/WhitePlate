@@ -9,6 +9,7 @@ import { Link } from "@/i18n/navigation"
 import { CategoryForm } from "@/components/organization/category-form"
 import { ProductForm } from "@/components/organization/product-form"
 import { ArchiveCatalogButton } from "@/components/organization/archive-catalog-button"
+import { RestoreProductButton } from "@/components/organization/restore-product-button"
 import { OptionGroupsEditor } from "@/components/organization/option-groups-editor"
 import { DiscountsEditor } from "@/components/organization/discounts-editor"
 import { Alert, AlertDescription } from "@/components/ui/alert"
@@ -211,6 +212,15 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
                                   id={product.id}
                                   entityType="products"
                                   name={product.name}
+                                />
+                              </CardContent>
+                            )}
+
+                            {product.isArchived && !category.isArchived && (
+                              <CardContent>
+                                <RestoreProductButton
+                                  tenantId={catalog.tenantId}
+                                  id={product.id}
                                 />
                               </CardContent>
                             )}
