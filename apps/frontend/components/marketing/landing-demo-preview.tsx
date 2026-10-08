@@ -10,6 +10,8 @@ export function LandingDemoPreview() {
   const router = useRouter()
   const [view, setView] = useState("kitchen")
   const [bumped, setBumped] = useState(false)
+  const viewTabClassName =
+    "min-w-0 flex-1 items-center justify-center gap-1 rounded-md px-1 py-1 text-center font-sans text-label-sm transition-all sm:flex-none sm:gap-1.5 sm:px-3"
 
   return (
     <div className="min-w-0">
@@ -29,7 +31,7 @@ export function LandingDemoPreview() {
 
           <div className="flex w-full min-w-0 items-center rounded-lg bg-surface-container p-1 sm:w-auto">
             <Button
-              className="tab-trigger min-w-0 flex-1 items-center justify-center gap-1 rounded bg-surface-container-lowest px-1 py-1 text-center font-sans text-label-sm font-semibold text-on-surface shadow-xs transition-all sm:flex-none sm:gap-1.5 sm:px-3"
+              className={`${viewTabClassName} ${view === "kitchen" ? "bg-surface-container-lowest font-semibold text-on-surface shadow-xs" : "text-on-surface-variant hover:text-on-surface"}`}
               id="tab-btn-backoffice"
               type="button"
               variant="ghost"
@@ -42,7 +44,7 @@ export function LandingDemoPreview() {
             </Button>
 
             <Button
-              className="tab-trigger min-w-0 flex-1 items-center justify-center gap-1 rounded px-1 py-1 text-center font-sans text-label-sm text-on-surface-variant transition-all hover:text-on-surface sm:flex-none sm:gap-1.5 sm:px-3"
+              className={`${viewTabClassName} ${view === "storefront" ? "bg-surface-container-lowest font-semibold text-on-surface shadow-xs" : "text-on-surface-variant hover:text-on-surface"}`}
               id="tab-btn-storefront"
               type="button"
               variant="ghost"

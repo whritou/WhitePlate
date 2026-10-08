@@ -17,6 +17,7 @@ Severity describes the observed defect before this change: high blocks or obscur
 | 1. Landing entry | Medium | At 1024px in French, the hero split into two narrow columns. The signup action grew to about 124px while the adjacent demo action stayed about 54px. | Hero splits at 1280px. Shared buttons have matching geometry and equal-height grid tracks; text can wrap. Tablet and mobile hero checks cover action height. |
 | 1. Navigation | Medium | Mobile locale links measured 36px. Escape left the expanded navigation open. | Locale targets are at least 44px; navigation closes on Escape and restores trigger focus. The expanded menu scrolls within the available viewport. Full navigation waits until 1536px. |
 | 2. Hero preview | Medium | French KPI values/statuses escaped their cards at 1024px; narrow order rows squeezed names into a vertical strip beside their action. | KPI value rows wrap; order content reserves useful width and moves actions below when needed. Preview footer and storefront products reflow. |
+| 3. Preview controls | Medium | Clicking Customer Web swapped the preview, but the white active background and bold label stayed on Kitchen KDS. Both buttons also had a 4px corner radius inside a 16px rounded rail. | Both tabs derive the active background, text and weight from the same selected state; inactive styling follows the other tab. Buttons now use a 12px inset radius. Production preview shows the selected panel and tab moving together in either direction. |
 | 2. Metrics and features | Medium | Long French headings, fixed grids and large insets consumed mobile content width. Enlarged text could widen the page. | Mobile heading scale, smaller card insets, content-aware metric tracks and later feature columns. Long words can wrap within the public surfaces. |
 | 3. Kitchen/customer previews | Medium | The ticket columns, status stages and payment row competed for narrow-screen space. Apple Pay's light background could leave its white label unreadable. | Ticket columns stack on mobile; metadata wraps; stages use two columns; payment actions stack. Apple Pay uses the existing obsidian surface. |
 | 4. Pricing | Medium | Three pricing columns started at tablet width. The absolute popular badge and oversized insets crowded localized plan headings; the billing control was only 28px high. | Plans remain stacked below 1024px. The badge participates in layout, titles/prices wrap, and actions use shared buttons. Billing target is at least 44px with visible focus. |
@@ -55,6 +56,10 @@ Final kitchen and customer previews at 375px: stacked tickets, wrapping labels a
 
 ![Final: kitchen preview](assets/landing-demo-responsive/14-final-landing-previews-mobile.jpg)
 ![Final: customer preview](assets/landing-demo-responsive/15-final-customer-preview-mobile.jpg)
+
+Follow-up interaction check at 1280px: Customer Web is visibly selected while the customer storefront panel is shown. Kitchen KDS and its panel were then selected again. Both active and inactive buttons keep the same nested rounded shape.
+
+![Final: Customer Web selected](assets/landing-demo-responsive/27-after-customer-web-active.jpg)
 
 ### 4. Compare plans — corrected
 
@@ -112,10 +117,11 @@ Commands ran from `apps/frontend` using installed CLI entry points because npm i
 | Scoped Prettier check | Passed on changed components, configuration and browser specs. |
 | Whole-package `node node_modules/prettier/bin/prettier.cjs --check "**/*.{ts,tsx}"` | Final check failed on 193 existing files outside this task. The earlier run reported 194, including the then-unformatted new spec, which was corrected. Unrelated files were left intact. |
 | `node node_modules/next/dist/bin/next build --webpack` | Final search-width rebuild passed with 57 generated pages. Used inert HTTPS auth/API origins and an intentionally unreachable local database. Non-blocking webpack cache `EPERM` and Better Auth schema-validation diagnostics were logged. This does not verify database connectivity. |
+| Landing preview tab follow-up | Production preview on the rebuilt output: selected Customer Web and then Kitchen KDS. The active white surface and bold label followed each selection, each corresponding panel matched the selection, and both buttons computed to 12px corner radii inside the 16px rail. |
 | `py -3 docs/design-system/verify.py` from root | Passed: 86 contrast pairs, CSS/token parity, palette parity and documentation link scans. This is token verification, not complete accessibility certification. |
 | `git diff --check` | Passed. |
 
-The public matrix covers 320, 375, 639, 640, 768, 1023, 1024, 1279, 1280, 1440 and 1536px, both locales and both themes, and checks document overflow and clipped headings. French 200% root-text checks run at 320/768px, including useful product-title width. Focused regressions cover action insets/heights, KPI containment, locale target size, filter height/labels, Escape/focus, cart access and search/cart state. Manual review covered the complete landing scroll, desktop navigation, mobile FAQ expansion, dark menu and cart.
+The public matrix covers 320, 375, 639, 640, 768, 1023, 1024, 1279, 1280, 1440 and 1536px, both locales and both themes, and checks document overflow and clipped headings. French 200% root-text checks run at 320/768px, including useful product-title width. Focused regressions cover action insets/heights, KPI containment, locale target size, filter height/labels, Escape/focus, cart access and search/cart state. Manual review covered the complete landing scroll, desktop navigation, mobile FAQ expansion, dark menu and cart. The follow-up tab check confirmed both tab buttons' selected state, their matching visible panel and 12px/16px nested corner radii in the browser.
 
 ## Limits and remaining work
 
