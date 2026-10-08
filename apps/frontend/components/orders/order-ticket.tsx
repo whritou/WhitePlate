@@ -68,7 +68,9 @@ export function OrderTicket({
       lang={order.menuLocale ?? undefined}
       {...dragHandlers}
     >
-      <Card>
+      <Card
+        className={`border-t-4 ${order.status === "Pending" ? "border-t-warning-solid" : order.status === "Preparing" ? "border-t-info-solid" : order.status === "Ready" ? "border-t-success-solid" : "border-t-border"}`}
+      >
         <CardHeader className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <div className="flex flex-wrap items-center gap-2">

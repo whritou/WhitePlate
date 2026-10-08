@@ -1,14 +1,6 @@
 import { RestaurantMenu } from "@/components/storefront/restaurant-menu"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import { Link } from "@/i18n/navigation"
+import { LandingPage } from "@/components/marketing/landing-page"
 import { getPublicMenu } from "@/lib/api/public-storefront"
 import { getTranslations } from "next-intl/server"
 import { headers } from "next/headers"
@@ -58,11 +50,7 @@ async function PageContent({
 }: {
   searchParams: Promise<{ menuLocale?: string; step?: string }>
 }) {
-  const [t, query, requestHeaders] = await Promise.all([
-    getTranslations("HomePage"),
-    searchParams,
-    headers(),
-  ])
+  const [query, requestHeaders] = await Promise.all([searchParams, headers()])
   const storefront = await getPublicMenu(
     requestHeaders.get("host"),
     query.menuLocale
@@ -88,64 +76,7 @@ async function PageContent({
     )
   }
 
-  return (
-    <main className="flex min-h-svh items-center justify-center bg-background px-6 py-12">
-      <div className="flex w-full max-w-3xl min-w-0 flex-col gap-8">
-        <nav className="flex gap-3" aria-label={t("languageSelector")}>
-          <Link href="/" locale="en" lang="en">
-            {t("english")}
-          </Link>
-
-          <Link href="/" locale="fr" lang="fr">
-            {t("french")}
-          </Link>
-        </nav>
-
-        <Card className="p-6 sm:p-10">
-          <CardHeader className="px-0">
-            <p className="text-sm font-medium text-primary">WhitePlate</p>
-
-            <CardTitle>
-              <h1 className="mt-3 max-w-xl text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
-                {t("title")}
-              </h1>
-            </CardTitle>
-
-            <CardDescription className="mt-4 max-w-xl text-base leading-7 text-muted-foreground">
-              {t("description")}
-            </CardDescription>
-          </CardHeader>
-
-          <CardContent className="px-0">
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Button
-                size="lg"
-
-                nativeButton={false}
-                render={<Link href="/sign-up" />}
-              >
-                {t("getStarted")}
-              </Button>
-
-              <Button
-                size="lg"
-                variant="outline"
-
-                nativeButton={false}
-                render={<Link href="/sign-in" />}
-              >
-                {t("signIn")}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        <p className="text-sm text-muted-foreground">
-          {t("themeHint", { key: "d" })}
-        </p>
-      </div>
-    </main>
-  )
+  return <LandingPage />
 }
 
 function MenuLoading({ copy }: { copy: string }) {

@@ -49,7 +49,7 @@ export function CheckoutPanel({
   return (
     <section
       aria-labelledby="cart-heading"
-      className={isCart ? "lg:sticky lg:top-6" : "mx-auto mt-8 max-w-2xl"}
+      className={isCart ? "lg:sticky lg:top-6" : "lg:sticky lg:top-24"}
     >
       <Card className="gap-0 p-6 text-base has-data-[slot=card-footer]:pb-6 sm:p-8">
         {receipt ? (

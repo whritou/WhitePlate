@@ -243,3 +243,7 @@ Update affected contracts, architecture, and test scenarios. Report the checks a
 ### Catalog and translation design fixture
 
 With the frontend development server running locally, run `npm run test:browser -- --project=catalog-design`. Set `WHITEPLATE_ACCEPTANCE_URL=http://localhost:3012` when using that port. `/fr/catalog-design-test` displays the catalog; add `?view=languages` for menu languages/translations. The route is unavailable in production. Tests cover both locales/themes, 320–1440 px layouts, keyboard/focus, nested dialogs, cancellation, archived/inactive controls, and synthetic rejected/acknowledged saves. These tests do not prove API/database persistence. Optional `WHITEPLATE_DESIGN_SCREENSHOTS` writes review screenshots to the supplied directory.
+
+### Full Stitch redesign previews
+
+The public marketing page is `/en` or `/fr` on the base host. Visit `/en/demo` or `/fr/demo` for the illustrated restaurant menu; append `/checkout`, `/tracking` or `/dashboard` for the other supplied designs. Demo state is memory-only and resets on refresh or locale change. These routes do not charge payments or modify restaurant records. See [the redesign handoff](redesign-handoff.md) for scope, verification and future backend work.

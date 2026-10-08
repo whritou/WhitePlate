@@ -1,5 +1,6 @@
 "use client"
 
+import { OperationalMetrics } from "@/components/redesign/operational-metrics"
 import { Badge } from "@/components/ui/badge"
 import { BackLink } from "@/components/organization/back-link"
 import { useOrderDashboard } from "@/hooks/use-order-dashboard"
@@ -14,6 +15,7 @@ import { OrderRealtimeConnection } from "./order-realtime-connection"
 export function OrderDashboard(props: OrderDashboardProps) {
   const { tenantId, tenantName, role, selectedStatus, hubUrl } = props
   const t = useTranslations("KitchenOrders")
+  const design = useTranslations("Redesign")
   const router = useRouter()
   const dashboard = useOrderDashboard(props)
   const { page, loadError, isInitialLoading, isFetching, refresh, pending } =
@@ -43,6 +45,10 @@ export function OrderDashboard(props: OrderDashboardProps) {
 
         <BackLink label={t("backToOrganizations")} className="self-start" />
       </header>
+
+      <OperationalMetrics />
+
+      <p className="text-xs text-muted-foreground">{design("metricsNotice")}</p>
 
       <OrderRealtimeConnection
         tenantId={tenantId}

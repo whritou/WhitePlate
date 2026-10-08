@@ -1,6 +1,6 @@
 # WhitePlate design system
 
-Version **2.0.0**, 8 October 2026. Direction: **Culinary Commerce System**.
+Version **2.1.0**, 8 October 2026. Direction: **Culinary Commerce System**.
 
 This is WhitePlate's single canonical design reference, replacing the former Porcelaine, encre et sauge direction. The palette, font stacks, spacing, radius, breakpoints, and type scale are mirrored in shared frontend variables. That token migration does not mean every screen recipe or illustrative component in this document is implemented. Broader screen and component adoption is tracked separately in [issue #53](https://github.com/whritou/WhitePlate/issues/53); this replacement is tracked in [issue #52](https://github.com/whritou/WhitePlate/issues/52).
 
@@ -22,18 +22,18 @@ The attachment's named prose HEX values take priority over conflicting values in
 
 | Role | Light | Dark | Use |
 | --- | --- | --- | --- |
-| `background` | `#F8FAFC` | `#020617` | Canvas |
-| `foreground` | `#0F172A` | `#F8FAFC` | Main text |
+| `background` | `#F8F9FF` | `#020617` | Canvas |
+| `foreground` | `#0B1C30` | `#F8FAFC` | Main text |
 | `card` | `#FFFFFF` | `#0B0F19` | Work surface |
 | `popover` | `#FFFFFF` | `#1E293B` | Menus and overlays |
 | `primary` | `#FF5A1F` | `#FF5A1F` | Main action |
 | `primary-foreground` | `#0F172A` | `#0F172A` | Text on a primary action |
 | `primary-hover` | `#F97316` | `#F97316` | Hover/pressed action |
-| `secondary` | `#F1F5F9` | `#1E293B` | Secondary controls |
-| `muted` | `#F1F5F9` | `#0B0F19` | Quiet surfaces and disabled state |
-| `muted-foreground` | `#475569` | `#CBD5E1` | Supporting text |
+| `secondary` | `#E5EEFF` | `#1E293B` | Secondary controls |
+| `muted` | `#EFF4FF` | `#0B0F19` | Quiet surfaces and disabled state |
+| `muted-foreground` | `#45464D` | `#CBD5E1` | Supporting text |
 | `accent` | `#FFF7ED` | `#1E293B` | Subtle selection surface |
-| `border` | `#E2E8F0` | `#334155` | Surface separation |
+| `border` | `#DCE9FF` | `#334155` | Surface separation |
 | `input` | `#64748B` | `#94A3B8` | Visible control outline |
 | `ring` | `#0F172A` | `#F97316` | Keyboard focus |
 
@@ -56,7 +56,7 @@ The auxiliary light accent tint `#FFF7ED` fills the accent role where the source
 
 The attachment's YAML scale is represented in `typography` in [tokens.json](tokens.json) and exposed through Tailwind's named text tokens. Use **Plus Jakarta Sans** for headlines, dish names, and KPI figures; use **Inter** for body copy, modifiers, labels, and tabular data. Use tabular numerals for live order and KPI values.
 
-The frontend repository does not currently bundle either font. CSS stacks name these fonts first and fall back to locally available Segoe UI/Helvetica/Arial. Until font files are added through a separately reviewed asset change, users without these fonts installed see the system fallback. No remote font request is made.
+Inter and Plus Jakarta Sans are bundled in `apps/frontend/public/design` and loaded with local `@font-face` declarations using swap. No remote font request is made. System fallback stacks remain available.
 
 ## Shape, spacing, and responsive values
 
@@ -73,7 +73,7 @@ Responsive ranges from the attachment are mobile below 640px, tablet from 640px 
 
 ## Surface and elevation guidance
 
-The supplied dark foundation is canvas `#020617`, layer 1 `#0B0F19`, layer 2 `#1E293B`, and border `#334155`. The light foundation is canvas `#F8FAFC`, white surface `#FFFFFF`, muted surface `#F1F5F9`, and border `#E2E8F0`.
+The supplied dark foundation is canvas `#020617`, layer 1 `#0B0F19`, layer 2 `#1E293B`, and border `#334155`. The earlier source border `#E2E8F0` and muted source color `#F1F5F9` remains recorded in sourcePalette. The full Stitch screen exports refine the light foundation to canvas `#F8F9FF`, white surface `#FFFFFF`, muted surface `#EFF4FF`, and border `#DCE9FF`. Their named presentation roles are recorded in `presentationPalette` and mapped to semantic runtime variables, with dark adaptations.
 
 The following shadows and 12px backdrop blur are design guidance, not a claim that all surfaces or overlays currently use these effects:
 
@@ -139,3 +139,13 @@ The following entries record prior user-approved revisions and are retained as h
 | 1.1.0 | 2026-10-06 | Prior revision selected neutral light surfaces, stone dark surfaces, and sage accent. |
 | 1.2.0 | 2026-10-07 | Prior revision adjusted sage accent, contrast data, and static preview. Superseded by version 2.0.0. |
 | 2.0.0 | 2026-10-08 | Replaced the active system with the user-supplied Culinary Commerce System and migrated shared color/font/layout tokens. |
+
+## Full Stitch redesign adoption — 8 October 2026
+
+The user supplied the complete five-screen export and explicitly authorized illustrative data for missing backend capabilities. The landing page follows the exported layout; `/[locale]/demo`, `/demo/checkout`, `/demo/tracking`, and `/demo/dashboard` provide the four screen recipes with an in-memory cart and simulated order handling. Navigation among these routes preserves the preview cart during the session. Refreshing resets it. Payments never charge a card; masked payment fields are read-only. Preview scheduling, notifications, customization, stock controls, KPI data and order transitions do not write to a server.
+
+The existing tenant storefront, checkout, order tracking, auth frames, catalog cards, order tickets and workspace shell adopt the same tokens and imagery. Existing checkout validation, tenant authorization, query ownership and tracking capabilities remain in their established modules. Food photos are illustrative assets from the export, not catalog attachments. The live checkout includes clearly marked payment/scheduling illustrations alongside its existing authoritative order form.
+
+Intentional adaptations: WhitePlate replaces the source brand; normal-size orange buttons retain accessible dark text; Lucide icons replace the source icon font; dark mode, EN/FR copy, keyboard controls and mobile stacking extend the desktop references. Real backend-backed scheduling, payment, analytics, product media and tenant customization remain future work. The landing page is the real public marketing page, as clarified by the user; it does not display a demo notice. Its supplied marketing content is kept separate from simulated restaurant operations.
+
+See [redesign verification and handoff](../redesign-handoff.md) for actual checks and remaining limitations.

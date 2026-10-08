@@ -1,3 +1,4 @@
+import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
 import {
   Card,
@@ -13,6 +14,7 @@ import { ProductOrdering } from "./product-ordering"
 
 export function MenuProductCard({
   product,
+  imageIndex = 0,
   item,
   locked,
   orderRound,
@@ -20,6 +22,7 @@ export function MenuProductCard({
   onSave,
 }: {
   product: Product
+  imageIndex?: number
   item?: CartItem
   locked: boolean
   orderRound: number
@@ -29,7 +32,18 @@ export function MenuProductCard({
   const t = useTranslations("Storefront")
 
   return (
-    <Card size="sm" className="h-full gap-sm p-0 shadow-sm">
+    <Card
+      size="sm"
+      className="relative h-full gap-sm border-0 p-0 pr-28 shadow-sm"
+    >
+      <Image
+        src={`/design/photo-${[15, 16, 17, 18, 19, 20][imageIndex % 6]}.webp`}
+        alt=""
+        width={96}
+        height={96}
+        className="absolute top-4 right-4 size-24 rounded-md object-cover"
+      />
+
       <CardHeader className="p-md pb-0">
         <CardTitle>
           <h3 className="font-heading text-title-md leading-6">
@@ -52,7 +66,7 @@ export function MenuProductCard({
         )}
       </CardContent>
 
-      <CardFooter className="justify-between gap-sm border-t-0 p-md pt-0">
+      <CardFooter className="-mr-28 justify-between gap-sm border-t-0 p-md pt-0">
         <span className="font-heading text-headline-sm tabular-nums">
           {price.format(product.basePrice)}
         </span>
