@@ -14,7 +14,7 @@ test("checkout fits the narrow mobile viewport without page overflow", async ({
   expect(widths.scroll).toBeLessThanOrEqual(widths.client)
 })
 
-test("mobile menu category controls stay within their navigation area", async ({
+test("mobile menu categories scroll locally without widening the page", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 320, height: 740 })
@@ -22,22 +22,16 @@ test("mobile menu category controls stay within their navigation area", async ({
 
   const nav = page.locator("main nav").first()
   const navBounds = await nav.boundingBox()
-  const buttonBounds = await nav.getByRole("button").evaluateAll((buttons) =>
-    buttons.map((button) => {
-      const bounds = button.getBoundingClientRect()
-
-      return { left: bounds.left, right: bounds.right }
-    })
-  )
+  const widths = await page.evaluate(() => ({
+    client: document.documentElement.clientWidth,
+    scroll: document.documentElement.scrollWidth,
+  }))
 
   expect(navBounds).not.toBeNull()
-  expect(
-    buttonBounds.every(
-      (bounds) =>
-        bounds.left >= navBounds!.x &&
-        bounds.right <= navBounds!.x + navBounds!.width
-    )
-  ).toBe(true)
+  expect(navBounds!.width).toBeLessThanOrEqual(widths.client - 32)
+  expect(widths.scroll).toBeLessThanOrEqual(widths.client)
+  await nav.getByRole("button").last().focus()
+  await expect(nav.getByRole("button").last()).toBeInViewport()
 })
 
 test("mobile app bar keeps the restaurant brand mark without its wide wordmark", async ({
@@ -163,7 +157,7 @@ test("mobile pricing toggle and popular badge stay centered in their containers"
   const pricing = await page.locator("#pricing").boundingBox()
   const card = page.locator("#pricing [class*=ring-2]")
   const cardBounds = await card.boundingBox()
-  const badge = await card.locator("div.absolute").first().boundingBox()
+  const badge = await card.locator(":scope > div").first().boundingBox()
 
   expect(toggle).not.toBeNull()
   expect(pricing).not.toBeNull()

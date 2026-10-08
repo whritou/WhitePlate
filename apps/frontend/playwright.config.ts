@@ -16,7 +16,7 @@ export default defineConfig({
   projects: [
     {
       name: "responsive-layout",
-      testMatch: "responsive-layout.spec.ts",
+      testMatch: ["responsive-layout.spec.ts", "public-responsive.spec.ts"],
     },
     {
       name: "catalog-design",

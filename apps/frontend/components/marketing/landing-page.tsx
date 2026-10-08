@@ -13,7 +13,7 @@ export function LandingPage() {
     <>
       <MarketingHeader />
 
-      <main className="flex flex-col items-center">
+      <main className="flex flex-col items-center [overflow-wrap:anywhere]">
         <LandingHero />
 
         <LandingMetrics />

@@ -337,6 +337,10 @@ The dashboard check used an owner account. Kitchen-staff and manager permission 
 
 ## 3. Automation strategy
 
+### Public landing and demo responsive acceptance — 2026-10-08
+
+The `responsive-layout` Playwright project includes `public-responsive.spec.ts` for both public locales and light/dark themes at 320, 375, 639, 640, 768, 1023, 1024, 1279, 1280, 1440 and 1536px. It waits for the main heading before geometry measurements, checks document/heading overflow, doubled French root text, hero action heights, KPI containment, 44px locale targets, category-label fit and height, product action insets, desktop search width, Escape/focus and mobile cart/search/quantity behavior. These routes require no database. Run the public spec alone against a production preview; the existing broader spec includes development-only fixtures. See the [audit](audits/landing-demo-responsive.md) for actual commands, failures, evidence and limits.
+
 ### Coolify cutover gates — 2026-10-05
 
 The user selected an empty new Coolify database with one hosted main stack. Bootstrap queries confirmed 9 EF migrations, both business/auth schemas and no accounts/business rows. PostgreSQL is running/healthy with SSL enabled. API HTTPS domain/redirect, port 8080, exact frontend CORS, issuer/audience and database-readiness check are configured; application credentials/deployment and Vercel cutover remain pending. The regression suites pass (144 API / 204 frontend), but do not establish hosted behavior.

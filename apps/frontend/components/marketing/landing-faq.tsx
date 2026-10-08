@@ -7,7 +7,7 @@ export function LandingFaq() {
 
   return (
     <section
-      className="w-full bg-surface-container-low px-6 py-16 lg:px-12"
+      className="w-full bg-surface-container-low px-4 py-12 sm:px-6 sm:py-16 lg:px-8"
       id="faq"
     >
       <div className="mx-auto max-w-4xl space-y-10">
@@ -16,7 +16,7 @@ export function LandingFaq() {
             {t("clarityHardware")}
           </span>
 
-          <h2 className="font-heading text-headline-lg text-on-surface">
+          <h2 className="font-heading text-headline-lg-mobile text-balance text-on-surface sm:text-headline-lg">
             {t("frequentlyAskedQuestions")}
           </h2>
 

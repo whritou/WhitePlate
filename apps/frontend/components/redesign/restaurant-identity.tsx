@@ -55,10 +55,10 @@ export function RestaurantIdentity({
         <div className="absolute inset-0 bg-gradient-to-t from-obsidian via-obsidian/30 to-transparent" />
       </div>
 
-      <div className="relative z-10 mx-auto -mt-20 max-w-7xl px-4 sm:px-8">
-        <Card className="gap-6 border-0 bg-card p-5 shadow-lg sm:p-8">
+      <div className="relative z-10 mx-auto -mt-16 max-w-7xl px-4 sm:-mt-20 sm:px-6 lg:px-8">
+        <Card className="gap-5 border-0 bg-card p-4 shadow-lg sm:p-6 lg:p-8">
           <div className="flex flex-wrap items-center justify-between gap-5">
-            <div className="flex min-w-0 items-center gap-4">
+            <div className="flex min-w-0 flex-1 basis-64 flex-col items-start gap-3 sm:flex-row sm:gap-4">
               <Image
                 src="/design/photo-14.webp"
                 width={88}
@@ -107,7 +107,7 @@ export function RestaurantIdentity({
               </div>
             </div>
 
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <Button
                 variant="secondary"
                 size="sm"
@@ -135,7 +135,7 @@ export function RestaurantIdentity({
           </div>
 
           <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg bg-muted p-4">
-            <div className="flex flex-wrap gap-5">
+            <div className="grid min-w-0 gap-4 sm:grid-cols-2 xl:flex xl:flex-wrap xl:gap-5">
               <IdentityDetail
                 icon={<ShoppingBag />}
                 label={t("fulfillment")}
@@ -189,15 +189,15 @@ function IdentityDetail({
   value: string
 }) {
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex min-w-0 items-center gap-2">
       <span
         aria-hidden="true"
-        className="grid size-10 place-items-center rounded-md bg-secondary text-foreground [&_svg]:size-5"
+        className="grid size-10 shrink-0 place-items-center rounded-md bg-secondary text-foreground [&_svg]:size-5"
       >
         {icon}
       </span>
 
-      <div>
+      <div className="min-w-0">
         <p className="text-xs text-muted-foreground">{label}</p>
 
         <p className="text-sm font-semibold">{value}</p>

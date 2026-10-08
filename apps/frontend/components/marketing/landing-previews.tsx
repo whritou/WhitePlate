@@ -10,28 +10,28 @@ export function LandingPreviews() {
 
   return (
     <section
-      className="w-full bg-surface-container-low px-6 py-16 lg:px-12"
+      className="w-full bg-surface-container-low px-4 py-12 sm:px-6 sm:py-16 lg:px-8"
       id="previews"
     >
       <div className="mx-auto max-w-7xl space-y-12">
-        <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
-          <div>
+        <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-end lg:gap-8">
+          <div className="min-w-0 lg:flex-1">
             <span className="font-sans text-label-sm font-bold tracking-wider text-secondary-container uppercase">
               {t("operationalHarmony")}
             </span>
 
-            <h2 className="mt-1 font-heading text-headline-lg text-on-surface">
+            <h2 className="mt-1 font-heading text-headline-lg-mobile text-balance text-on-surface sm:text-headline-lg">
               {t("bothSidesOfTheCounterPerfectlyConnected")}
             </h2>
           </div>
 
-          <p className="max-w-[28rem] font-sans text-body-md text-on-surface-variant">
+          <p className="max-w-[28rem] font-sans text-body-md text-on-surface-variant lg:flex-1">
             {t("aSynchronizedFeedbackLoopBetweenLineCooks")}
           </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
-          <div className="space-y-5 rounded-lg bg-surface-container-lowest p-6 shadow-sm">
+        <div className="grid min-w-0 grid-cols-1 gap-6 xl:grid-cols-2">
+          <div className="min-w-0 space-y-5 rounded-lg bg-surface-container-lowest p-4 shadow-sm sm:p-6">
             <div className="flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex min-w-0 items-center gap-2">
                 <ReferenceIcon
@@ -49,7 +49,7 @@ export function LandingPreviews() {
               </span>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div className="space-y-3 rounded-xl bg-surface-container p-3">
                 <div className="flex items-center justify-between font-sans text-label-sm font-semibold text-on-surface">
                   <span className="">{t("newOrders2")}</span>
@@ -58,7 +58,7 @@ export function LandingPreviews() {
                 </div>
 
                 <div className="space-y-1 rounded-lg bg-surface-container-lowest p-3 shadow-xs">
-                  <div className="flex justify-between font-heading text-body-sm font-bold">
+                  <div className="flex flex-wrap justify-between gap-x-3 gap-y-1 font-heading text-body-sm font-bold">
                     <span className="">{t("value104AlexT")}</span>
 
                     <span className="text-secondary-container">
@@ -72,7 +72,7 @@ export function LandingPreviews() {
                 </div>
 
                 <div className="space-y-1 rounded-lg bg-surface-container-lowest p-3 shadow-xs">
-                  <div className="flex justify-between font-heading text-body-sm font-bold">
+                  <div className="flex flex-wrap justify-between gap-x-3 gap-y-1 font-heading text-body-sm font-bold">
                     <span className="">{t("value103MiaS")}</span>
 
                     <span className="text-on-surface-variant">
@@ -94,7 +94,7 @@ export function LandingPreviews() {
                 </div>
 
                 <div className="space-y-1 rounded-lg bg-surface-container-lowest p-3 shadow-xs">
-                  <div className="flex justify-between font-heading text-body-sm font-bold">
+                  <div className="flex flex-wrap justify-between gap-x-3 gap-y-1 font-heading text-body-sm font-bold">
                     <span className="">{t("value102DavidR")}</span>
 
                     <span className="font-semibold text-on-tertiary-container">
@@ -108,7 +108,7 @@ export function LandingPreviews() {
                 </div>
 
                 <div className="space-y-1 rounded-lg bg-surface-container-lowest p-3 shadow-xs">
-                  <div className="flex justify-between font-heading text-body-sm font-bold">
+                  <div className="flex flex-wrap justify-between gap-x-3 gap-y-1 font-heading text-body-sm font-bold">
                     <span className="">{t("value101SarahK")}</span>
 
                     <span className="font-semibold text-on-tertiary-container">
@@ -123,8 +123,8 @@ export function LandingPreviews() {
               </div>
             </div>
 
-            <div className="flex items-center justify-between gap-4 rounded-xl bg-surface-container p-4">
-              <div>
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-surface-container p-4">
+              <div className="min-w-0">
                 <p className="font-heading text-title-md text-on-surface">
                   {t("rushHourKitchenBuffer")}
                 </p>
@@ -140,8 +140,8 @@ export function LandingPreviews() {
             </div>
           </div>
 
-          <div className="space-y-5 rounded-lg bg-surface-container-lowest p-6 shadow-sm">
-            <div className="flex items-center justify-between">
+          <div className="min-w-0 space-y-5 rounded-lg bg-surface-container-lowest p-4 shadow-sm sm:p-6">
+            <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center gap-2">
                 <ReferenceIcon
                   name="touch_app"
@@ -159,7 +159,7 @@ export function LandingPreviews() {
             </div>
 
             <div className="space-y-3 rounded-xl bg-surface-container p-4">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-wrap items-center justify-between gap-2">
                 <span className="font-heading text-title-md font-bold text-on-surface">
                   {t("order104Status")}
                 </span>
@@ -179,7 +179,7 @@ export function LandingPreviews() {
                 <div className="h-2 rounded-full bg-surface-container-high"></div>
               </div>
 
-              <div className="flex justify-between pt-1 font-sans text-label-sm text-on-surface-variant">
+              <div className="grid grid-cols-2 gap-2 pt-1 font-sans text-label-sm text-on-surface-variant sm:grid-cols-4">
                 <span className="">{t("confirmed")}</span>
 
                 <span className="font-bold text-on-surface">
@@ -193,7 +193,7 @@ export function LandingPreviews() {
             </div>
 
             <div className="space-y-3 rounded-xl bg-surface p-4">
-              <div className="flex items-center justify-between text-on-surface">
+              <div className="flex flex-wrap items-center justify-between gap-2 text-on-surface">
                 <span className="font-heading text-title-md font-semibold">
                   {t("selectedPickupLocation")}
                 </span>
@@ -203,7 +203,7 @@ export function LandingPreviews() {
                 </span>
               </div>
 
-              <div className="flex items-center justify-between font-sans text-body-sm text-on-surface-variant">
+              <div className="flex flex-wrap items-center justify-between gap-2 font-sans text-body-sm text-on-surface-variant">
                 <span className="">{t("subtotal0PlatformSurcharge")}</span>
 
                 <span className="font-bold text-on-surface">
@@ -211,9 +211,9 @@ export function LandingPreviews() {
                 </span>
               </div>
 
-              <div className="grid grid-cols-2 gap-3 pt-2">
+              <div className="grid auto-rows-fr grid-cols-1 gap-3 pt-2 sm:grid-cols-2">
                 <Button
-                  className="flex items-center justify-center gap-1.5 rounded-lg bg-on-background py-2.5 font-heading text-title-md font-bold text-on-primary transition-opacity hover:opacity-95"
+                  className="flex items-center justify-center gap-1.5 rounded-lg bg-obsidian py-2.5 font-heading text-title-md font-bold text-on-primary transition-opacity hover:bg-obsidian/90"
                   type="button"
                   variant="ghost"
                   onClick={() => router.push("/demo")}

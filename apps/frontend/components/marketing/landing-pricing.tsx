@@ -18,7 +18,7 @@ export function LandingPricing() {
 
   return (
     <section
-      className="mx-auto w-full max-w-7xl px-6 py-20 lg:px-12"
+      className="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8 lg:py-20"
       id="pricing"
     >
       <div className="mx-auto mb-12 max-w-3xl space-y-4 text-center">
@@ -26,7 +26,7 @@ export function LandingPricing() {
           {t("predictableEconomics")}
         </div>
 
-        <h2 className="font-heading text-headline-lg text-on-surface">
+        <h2 className="font-heading text-headline-lg-mobile text-balance text-on-surface sm:text-headline-lg">
           {t("flatSubscriptionAbsolutelyZeroCommission")}
         </h2>
 
@@ -44,7 +44,7 @@ export function LandingPricing() {
 
           <Button
             aria-pressed={annual}
-            className="relative inline-flex h-7 w-14 shrink-0 cursor-pointer rounded-full bg-surface-container p-1 transition-colors duration-200 ease-in-out focus:outline-none"
+            className="relative inline-flex min-h-11 w-14 shrink-0 justify-start rounded-full bg-surface-container p-1"
             id="billing-toggle"
             type="button"
             variant="ghost"
@@ -58,7 +58,7 @@ export function LandingPricing() {
           </Button>
 
           <span
-            className="flex flex-wrap items-center justify-center gap-x-1.5 font-sans text-label-md text-on-surface-variant sm:justify-start"
+            className="flex min-w-0 flex-wrap items-center justify-center gap-x-1.5 font-sans text-label-md text-on-surface-variant sm:justify-start"
             id="label-annual"
           >
             <span className="">{t("annualBilling")}</span>
@@ -70,10 +70,10 @@ export function LandingPricing() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 items-stretch gap-8 md:grid-cols-3">
-        <div className="flex flex-col justify-between space-y-8 rounded-lg bg-surface-container-lowest p-8 shadow-sm">
+      <div className="grid grid-cols-1 items-stretch gap-6 lg:grid-cols-3">
+        <div className="flex min-w-0 flex-col justify-between space-y-6 rounded-lg bg-surface-container-lowest p-5 shadow-sm sm:p-6">
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-2">
               <h3 className="font-heading text-headline-sm text-on-surface">
                 {t("starter")}
               </h3>
@@ -87,7 +87,7 @@ export function LandingPricing() {
               {t("essentialWhiteLabelOrderingSetupForEmerging")}
             </p>
 
-            <div className="flex items-baseline gap-1 py-2">
+            <div className="flex flex-wrap items-baseline gap-x-1 gap-y-2 py-2">
               <span className="price-val font-heading text-headline-lg font-bold text-on-surface">
                 {formatPrice(annual ? 39 : 49)}
               </span>
@@ -149,21 +149,25 @@ export function LandingPricing() {
             </div>
           </div>
 
-          <Link
-            className="w-full rounded-xl bg-surface-container py-3 text-center font-heading text-title-md font-semibold text-on-surface transition-colors hover:bg-surface-container-high"
-            href="/sign-up"
+          <Button
+            variant="secondary"
+            size="lg"
+            className="w-full text-sm"
+            nativeButton={false}
+            role="link"
+            render={<Link href="/sign-up" />}
           >
             {t("start14DayTrial")}
-          </Link>
+          </Button>
         </div>
 
-        <div className="relative flex flex-col justify-between space-y-8 rounded-lg bg-surface-container-lowest p-8 pt-24 shadow-xl ring-2 ring-secondary-container sm:pt-8">
-          <div className="absolute top-3 left-1/2 w-[calc(100%-2rem)] -translate-x-1/2 rounded-full bg-secondary-container px-3 py-1 text-center font-sans text-label-sm font-bold tracking-wider text-primary-foreground uppercase shadow-md sm:-top-3.5 sm:w-auto sm:px-4">
+        <div className="relative flex min-w-0 flex-col justify-between space-y-6 rounded-lg bg-surface-container-lowest p-5 shadow-xl ring-2 ring-secondary-container sm:p-6">
+          <div className="w-full rounded-md bg-secondary-container px-3 py-2 text-center font-sans text-label-sm font-bold tracking-wider text-primary-foreground uppercase">
             {t("mostPopularForBusyVenues")}
           </div>
 
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-2">
               <h3 className="font-heading text-headline-sm text-on-surface">
                 {t("growth")}
               </h3>
@@ -177,7 +181,7 @@ export function LandingPricing() {
               {t("highVolumeRestaurantsRequiringCustomDomainsInstant")}
             </p>
 
-            <div className="flex items-baseline gap-1 py-2">
+            <div className="flex flex-wrap items-baseline gap-x-1 gap-y-2 py-2">
               <span className="price-val font-heading text-headline-lg font-bold text-on-surface">
                 {formatPrice(annual ? 95 : 119)}
               </span>
@@ -217,14 +221,14 @@ export function LandingPricing() {
                 <span className="">{t("customDomainEGOrderMybrandCom")}</span>
               </div>
 
-              <li className="flex items-center gap-3 text-on-surface">
+              <div className="flex items-center gap-2.5 text-on-surface">
                 <ReferenceIcon
                   name="check"
                   className="text-[18px] text-secondary-container"
                 />
 
                 <span className="">{t("automatedEmailPickupOrderAlerts")}</span>
-              </li>
+              </div>
 
               <div className="flex items-center gap-2.5">
                 <ReferenceIcon
@@ -248,17 +252,20 @@ export function LandingPricing() {
             </div>
           </div>
 
-          <Link
-            className="w-full rounded-xl bg-secondary-container py-3.5 text-center font-heading text-title-md font-bold text-primary-foreground shadow-md transition-all hover:bg-secondary active:scale-[0.98]"
-            href="/sign-up"
+          <Button
+            size="lg"
+            className="w-full text-sm"
+            nativeButton={false}
+            role="link"
+            render={<Link href="/sign-up" />}
           >
             {t("getStartedWithGrowth")}
-          </Link>
+          </Button>
         </div>
 
-        <div className="flex flex-col justify-between space-y-8 rounded-lg bg-surface-container-lowest p-8 shadow-sm">
+        <div className="flex min-w-0 flex-col justify-between space-y-6 rounded-lg bg-surface-container-lowest p-5 shadow-sm sm:p-6">
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-2">
               <h3 className="font-heading text-headline-sm text-on-surface">
                 {t("franchise")}
               </h3>
@@ -272,7 +279,7 @@ export function LandingPricing() {
               {t("forRestaurantGroupsWith5BranchesRequiring")}
             </p>
 
-            <div className="flex items-baseline gap-1 py-2">
+            <div className="flex flex-wrap items-baseline gap-x-1 gap-y-2 py-2">
               <span className="price-val font-heading text-headline-lg font-bold text-on-surface">
                 {formatPrice(annual ? 199 : 249)}
               </span>
@@ -338,12 +345,16 @@ export function LandingPricing() {
             </div>
           </div>
 
-          <Link
-            className="w-full rounded-xl bg-surface-container py-3 text-center font-heading text-title-md font-semibold text-on-surface transition-colors hover:bg-surface-container-high"
-            href="/sign-up"
+          <Button
+            variant="secondary"
+            size="lg"
+            className="w-full text-sm"
+            nativeButton={false}
+            role="link"
+            render={<Link href="/sign-up" />}
           >
             {t("contactEnterpriseTeam")}
-          </Link>
+          </Button>
         </div>
       </div>
     </section>

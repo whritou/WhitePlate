@@ -26,7 +26,7 @@ export function DemoLayout({ children }: { children: React.ReactNode }) {
                     ? "page"
                     : undefined
                 }
-                className="inline-flex min-h-10 items-center border-b-2 border-transparent aria-[current=page]:border-primary"
+                className="inline-flex min-h-11 items-center border-b-2 border-transparent px-1 text-center aria-[current=page]:border-primary"
               >
                 {t(screen)}
               </Link>

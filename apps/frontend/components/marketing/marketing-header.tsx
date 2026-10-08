@@ -3,7 +3,7 @@
 import { Menu, Moon, Sun, X } from "lucide-react"
 import { useLocale, useTranslations } from "next-intl"
 import { useTheme } from "next-themes"
-import { useState } from "react"
+import { useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Brand } from "@/components/ui/brand"
 import { Link, usePathname, useRouter } from "@/i18n/navigation"
@@ -15,6 +15,7 @@ export function MarketingHeader() {
   const router = useRouter()
   const { resolvedTheme, setTheme } = useTheme()
   const [open, setOpen] = useState(false)
+  const menuTrigger = useRef<HTMLButtonElement>(null)
   const sections = [
     "features",
     "solutions",
@@ -24,8 +25,16 @@ export function MarketingHeader() {
   ] as const
 
   return (
-    <header className="sticky top-0 z-50 bg-background/90 shadow-xs backdrop-blur-xl">
-      <div className="mx-auto flex min-h-20 max-w-7xl items-center justify-between gap-2 px-3 sm:gap-4 sm:px-6 lg:px-12">
+    <header
+      className="sticky top-0 z-50 bg-background/90 shadow-xs backdrop-blur-xl"
+      onKeyDown={(event) => {
+        if (event.key === "Escape" && open) {
+          setOpen(false)
+          menuTrigger.current?.focus()
+        }
+      }}
+    >
+      <div className="mx-auto flex min-h-20 max-w-7xl flex-wrap items-center justify-between gap-2 px-4 py-3 sm:gap-4 sm:px-6 lg:px-8">
         <div className="flex min-w-0 items-center gap-8">
           <Link href="/" aria-label={t("home")}>
             <Brand compactOnMobile />
@@ -33,7 +42,7 @@ export function MarketingHeader() {
 
           <nav
             aria-label={t("navigation")}
-            className="hidden items-center gap-5 xl:flex"
+            className="hidden items-center gap-5 2xl:flex"
           >
             {sections.map((section) => (
               <Link
@@ -47,7 +56,7 @@ export function MarketingHeader() {
           </nav>
         </div>
 
-        <div className="flex shrink-0 items-center gap-1 sm:gap-3">
+        <div className="flex max-w-full flex-wrap items-center gap-1 sm:gap-3">
           <div
             aria-label={t("language")}
             role="group"
@@ -67,7 +76,7 @@ export function MarketingHeader() {
                 }}
                 lang={language}
                 aria-current={locale === language ? "true" : undefined}
-                className={`grid min-h-9 min-w-9 place-items-center rounded-md text-xs font-semibold uppercase transition-colors sm:min-h-10 sm:min-w-10 ${locale === language ? "bg-card shadow-xs" : "text-muted-foreground"}`}
+                className={`grid min-h-11 min-w-11 place-items-center rounded-md text-xs font-semibold uppercase transition-colors ${locale === language ? "bg-card shadow-xs" : "text-muted-foreground"}`}
               >
                 {language}
               </Link>
@@ -88,7 +97,7 @@ export function MarketingHeader() {
           </Button>
 
           <Button
-            className="hidden text-sm sm:inline-flex"
+            className="hidden text-sm lg:inline-flex"
             variant="secondary"
             nativeButton={false}
             render={<Link href="/demo" />}
@@ -97,7 +106,7 @@ export function MarketingHeader() {
           </Button>
 
           <Button
-            className="hidden text-sm sm:inline-flex"
+            className="hidden text-sm lg:inline-flex"
             nativeButton={false}
             render={<Link href="/sign-up" />}
           >
@@ -105,12 +114,13 @@ export function MarketingHeader() {
           </Button>
 
           <Button
+            ref={menuTrigger}
             variant="ghost"
             size="icon"
             aria-label={t("menu")}
             aria-expanded={open}
             aria-controls="marketing-mobile-navigation"
-            className="xl:hidden"
+            className="2xl:hidden"
             onClick={() => setOpen(!open)}
           >
             {open ? <X aria-hidden="true" /> : <Menu aria-hidden="true" />}
@@ -122,7 +132,7 @@ export function MarketingHeader() {
         <nav
           id="marketing-mobile-navigation"
           aria-label={t("navigation")}
-          className="grid gap-1 border-t border-border bg-card p-4 xl:hidden"
+          className="absolute inset-x-0 top-full grid max-h-[calc(100dvh-5rem)] gap-1 overflow-y-auto overscroll-contain border-t border-border bg-card p-4 shadow-lg 2xl:hidden"
         >
           {sections.map((section) => (
             <Link

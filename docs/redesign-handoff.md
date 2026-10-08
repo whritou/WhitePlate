@@ -34,6 +34,8 @@ Application-wide responsive follow-up: a dedicated Playwright project checks the
 
 ## Remaining boundaries
 
+Issue #55's [landing and demo responsive audit](audits/landing-demo-responsive.md) supersedes the earlier narrow-screen observations for those two pages. It corrects the shared Card footer-padding override (the earlier `p-4` alone did not preserve the measured bottom inset), hero/action geometry, localized text reflow, category controls and mobile order access. That report records the complete scoped walkthrough, regressions and verification; it does not complete issue #53's broader hosted/authenticated acceptance.
+
 Payment processing, scheduled fulfillment, notifications, analytics, product media uploads and persisted tenant customization are future backend work. Wallet, directions and chat actions display local preview feedback. Legal/security footer labels have no published destination yet. These are visual placeholders, not claims that the corresponding services exist. Marketing text/prices follow the supplied export and are not connected to billing.
 
 Authenticated hosted workflows, live payments and production restaurant persistence were not exercised. No API source changed; .NET tests were not run for this frontend-only redesign. Issue #53 should remain In review until broader authenticated/hosted acceptance and visual review are completed.

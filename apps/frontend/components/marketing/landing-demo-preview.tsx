@@ -12,7 +12,7 @@ export function LandingDemoPreview() {
   const [bumped, setBumped] = useState(false)
 
   return (
-    <div className="lg:col-span-6">
+    <div className="min-w-0">
       <div className="relative overflow-hidden rounded-lg bg-surface-container-lowest p-4 shadow-xl sm:p-6">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3 pb-4">
           <div className="flex min-w-0 items-center gap-2">
@@ -67,7 +67,7 @@ export function LandingDemoPreview() {
                 {t("liveQueue")}
               </p>
 
-              <div className="mt-0.5 flex items-baseline gap-1.5">
+              <div className="mt-0.5 flex flex-wrap items-baseline gap-x-1.5 gap-y-1">
                 <span className="font-heading text-title-md font-bold text-on-surface">
                   {t("value6Orders")}
                 </span>
@@ -83,7 +83,7 @@ export function LandingDemoPreview() {
                 {t("avgPrepTime")}
               </p>
 
-              <div className="mt-0.5 flex items-baseline gap-1.5">
+              <div className="mt-0.5 flex flex-wrap items-baseline gap-x-1.5 gap-y-1">
                 <span className="font-heading text-title-md font-bold text-on-surface">
                   {t("value11m40s")}
                 </span>
@@ -99,7 +99,7 @@ export function LandingDemoPreview() {
                 {t("zeroFeeVolume")}
               </p>
 
-              <div className="mt-0.5 flex items-baseline gap-1.5">
+              <div className="mt-0.5 flex flex-wrap items-baseline gap-x-1.5 gap-y-1">
                 <span className="font-heading text-title-md font-bold text-on-surface">
                   {t("value1480")}
                 </span>
@@ -113,13 +113,13 @@ export function LandingDemoPreview() {
 
           <div className="space-y-2.5">
             <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-surface-container-low p-3.5 shadow-xs">
-              <div className="flex min-w-0 flex-1 items-center gap-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-secondary-container/10 font-heading text-title-md font-bold text-secondary-container">
+              <div className="flex min-w-0 flex-1 basis-56 items-center gap-3">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-secondary-container/10 font-heading text-title-md font-bold text-secondary-container">
                   {t("value48")}
                 </div>
 
                 <div className="min-w-0">
-                  <div className="flex flex-wrap items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2 [&>span]:max-w-full [&>span]:min-w-0">
                     <span className="font-heading text-title-md text-on-surface">
                       {t("claraDupont")}
                     </span>
@@ -147,13 +147,13 @@ export function LandingDemoPreview() {
             </div>
 
             <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-surface-container-low p-3.5 shadow-xs">
-              <div className="flex min-w-0 flex-1 items-center gap-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary-container font-heading text-title-md font-bold text-on-primary">
+              <div className="flex min-w-0 flex-1 basis-56 items-center gap-3">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary-container font-heading text-title-md font-bold text-on-primary">
                   {t("value49")}
                 </div>
 
                 <div className="min-w-0">
-                  <div className="flex flex-wrap items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2 [&>span]:max-w-full [&>span]:min-w-0">
                     <span className="font-heading text-title-md text-on-surface">
                       {t("marcAlcantara")}
                     </span>
@@ -221,7 +221,7 @@ export function LandingDemoPreview() {
                   {t("laPiccolaTrattoria")}
                 </h3>
 
-                <div className="flex items-center gap-2 font-sans text-label-sm text-on-primary-container">
+                <div className="flex flex-wrap items-center gap-2 font-sans text-label-sm text-on-primary-container">
                   <span className="flex items-center gap-1">
                     <ReferenceIcon
                       name="schedule"
@@ -264,7 +264,7 @@ export function LandingDemoPreview() {
             </span>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,8rem),1fr))] gap-3">
             <div className="flex flex-col justify-between rounded-xl bg-surface-container-low p-2.5">
               <div>
                 <Image
@@ -324,7 +324,7 @@ export function LandingDemoPreview() {
             </div>
           </div>
 
-          <div className="flex min-w-0 flex-col items-stretch gap-3 rounded-xl bg-surface-container p-2.5 sm:flex-row sm:items-center sm:justify-between sm:p-3">
+          <div className="flex min-w-0 flex-col items-stretch gap-3 rounded-xl bg-surface-container p-3">
             <div className="flex min-w-0 items-center gap-2">
               <span className="flex h-6 w-6 items-center justify-center rounded-full bg-secondary-container font-sans text-label-sm font-bold text-primary-foreground">
                 {t("value2")}
@@ -336,7 +336,7 @@ export function LandingDemoPreview() {
             </div>
 
             <Button
-              className="w-full rounded-lg bg-secondary-container px-3 py-2 text-center font-sans text-[0.75rem] font-bold whitespace-normal text-primary-foreground shadow-sm sm:w-auto sm:px-4 sm:py-1.5 sm:whitespace-nowrap"
+              className="w-full bg-secondary-container px-3 py-2 text-center font-sans text-[0.75rem] font-bold whitespace-normal text-primary-foreground shadow-sm"
               type="button"
               variant="ghost"
               onClick={() => router.push("/demo")}
@@ -346,7 +346,7 @@ export function LandingDemoPreview() {
           </div>
         </div>
 
-        <div className="mt-4 flex items-center justify-between pt-3 font-sans text-label-sm text-on-surface-variant">
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-2 pt-3 font-sans text-label-sm text-on-surface-variant">
           <span className="flex items-center gap-1.5">
             <span className="h-2 w-2 rounded-full bg-on-tertiary-container"></span>
 

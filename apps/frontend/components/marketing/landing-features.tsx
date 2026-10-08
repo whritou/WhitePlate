@@ -7,15 +7,15 @@ export function LandingFeatures() {
 
   return (
     <section
-      className="mx-auto w-full max-w-7xl px-6 py-20 lg:px-12"
+      className="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8 lg:py-20"
       id="features"
     >
-      <div className="mx-auto mb-16 max-w-3xl space-y-3 text-center">
+      <div className="mx-auto mb-8 max-w-3xl space-y-3 text-center sm:mb-12">
         <div className="inline-flex items-center gap-1.5 rounded-full bg-surface-container px-3 py-1 font-sans text-label-sm font-semibold tracking-wider text-on-surface uppercase">
           {t("architectureDeepDive")}
         </div>
 
-        <h2 className="font-heading text-headline-lg text-on-surface">
+        <h2 className="font-heading text-headline-lg-mobile text-balance text-on-surface sm:text-headline-lg">
           {t("engineeredForKitchenHeatAndEnterpriseScale")}
         </h2>
 
@@ -24,8 +24,8 @@ export function LandingFeatures() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-        <div className="flex flex-col justify-between rounded-lg bg-surface-container-lowest p-8 shadow-sm transition-shadow hover:shadow-md">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div className="flex min-w-0 flex-col justify-between rounded-lg bg-surface-container-lowest p-5 shadow-sm transition-shadow hover:shadow-md sm:p-6">
           <div className="space-y-5">
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-surface-container text-on-surface">
               <ReferenceIcon
@@ -79,7 +79,7 @@ export function LandingFeatures() {
           </div>
 
           <div className="mt-8 rounded-xl bg-surface-container-low p-4 pt-6">
-            <div className="mb-2 flex items-center justify-between font-sans text-label-sm">
+            <div className="mb-2 flex flex-wrap items-center justify-between gap-2 font-sans text-label-sm">
               <span className="font-semibold text-on-surface">
                 {t("activeFleetsManaged")}
               </span>
@@ -95,7 +95,7 @@ export function LandingFeatures() {
           </div>
         </div>
 
-        <div className="flex flex-col justify-between rounded-lg bg-surface-container-lowest p-8 shadow-sm transition-shadow hover:shadow-md">
+        <div className="flex min-w-0 flex-col justify-between rounded-lg bg-surface-container-lowest p-5 shadow-sm transition-shadow hover:shadow-md sm:p-6">
           <div className="space-y-5">
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-surface-container text-on-surface">
               <ReferenceIcon
@@ -148,8 +148,8 @@ export function LandingFeatures() {
             </ul>
           </div>
 
-          <div className="mt-8 flex items-center justify-between rounded-xl bg-surface-container-low p-4 pt-6">
-            <div className="flex items-center gap-2">
+          <div className="mt-8 flex flex-wrap items-center justify-between gap-3 rounded-xl bg-surface-container-low p-4">
+            <div className="flex flex-wrap items-center gap-2">
               <span className="h-5 w-5 rounded-full bg-secondary-container"></span>
 
               <span className="h-5 w-5 rounded-full bg-on-background"></span>
@@ -167,7 +167,7 @@ export function LandingFeatures() {
           </div>
         </div>
 
-        <div className="flex flex-col justify-between rounded-lg bg-surface-container-lowest p-8 shadow-sm transition-shadow hover:shadow-md">
+        <div className="flex min-w-0 flex-col justify-between rounded-lg bg-surface-container-lowest p-5 shadow-sm transition-shadow hover:shadow-md sm:p-6">
           <div className="space-y-5">
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-surface-container text-on-surface">
               <ReferenceIcon
@@ -220,7 +220,7 @@ export function LandingFeatures() {
             </ul>
           </div>
 
-          <div className="mt-8 flex items-center justify-between rounded-xl bg-surface-container-low p-4 pt-6">
+          <div className="mt-8 flex flex-wrap items-center justify-between gap-3 rounded-xl bg-surface-container-low p-4">
             <div>
               <p className="font-sans text-label-sm text-on-surface-variant">
                 {t("rushHourThrottle")}

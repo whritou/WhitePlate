@@ -12,15 +12,15 @@ export function LandingHero() {
   const router = useRouter()
 
   return (
-    <section className="relative mx-auto w-full max-w-7xl overflow-hidden px-6 py-12 lg:px-12 lg:py-20">
+    <section className="relative mx-auto w-full max-w-7xl overflow-hidden px-4 py-10 sm:px-6 sm:py-14 lg:px-8 lg:py-20">
       <div className="pointer-events-none absolute -top-32 -left-32 h-96 w-96 rounded-full bg-secondary-container/10 blur-3xl"></div>
 
       <div className="pointer-events-none absolute top-1/2 -right-48 h-96 w-96 rounded-full bg-surface-container-high/40 blur-3xl"></div>
 
-      <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:gap-16">
-        <div className="flex flex-col space-y-6 lg:col-span-6">
+      <div className="relative grid min-w-0 grid-cols-1 items-center gap-10 xl:grid-cols-2 xl:gap-12">
+        <div className="flex min-w-0 flex-col space-y-6">
           <div className="inline-flex w-fit items-center gap-2 rounded-full bg-surface-container px-3 py-1.5 shadow-sm">
-            <span className="flex h-2 w-2 rounded-full bg-secondary-container motion-safe:animate-pulse"></span>
+            <span className="flex h-2 w-2 shrink-0 rounded-full bg-secondary-container motion-safe:animate-pulse"></span>
 
             <span className="font-sans text-label-sm font-semibold tracking-wide text-on-surface uppercase">
               {t("theNextGenWhiteLabelClickCollect")}
@@ -38,10 +38,13 @@ export function LandingHero() {
             {t("launchYourOwnBrandedWebStorefrontIn")}
           </p>
 
-          <div className="flex flex-col items-stretch gap-4 pt-2 sm:flex-row sm:items-center">
-            <Link
-              className="group inline-flex items-center justify-center gap-2 rounded-xl bg-secondary-container px-4 py-3 font-heading text-label-md text-primary-foreground shadow-md transition-all hover:bg-secondary active:scale-[0.98] sm:gap-3 sm:px-7 sm:py-3.5 sm:text-title-md"
-              href="/sign-up"
+          <div className="grid auto-rows-fr gap-3 pt-2 sm:grid-cols-2 xl:grid-cols-1">
+            <Button
+              size="lg"
+              className="group min-h-14 w-full text-sm shadow-sm"
+              nativeButton={false}
+              role="link"
+              render={<Link href="/sign-up" />}
             >
               <span className="">{t("joinWhiteplate14DaysFree")}</span>
 
@@ -49,13 +52,14 @@ export function LandingHero() {
                 name="arrow_forward"
                 className="text-[20px] transition-transform group-hover:translate-x-0.5"
               />
-            </Link>
+            </Button>
 
             <Button
-              className="inline-flex items-center justify-center gap-2.5 rounded-xl bg-surface-container px-6 py-3.5 font-sans text-label-md text-on-surface shadow-sm transition-all hover:bg-surface-container-high active:scale-[0.98]"
+              className="min-h-14 w-full text-sm shadow-sm"
               id="hero-quick-demo-btn"
               type="button"
-              variant="ghost"
+              variant="secondary"
+              size="lg"
               onClick={() => router.push("/demo")}
             >
               <ReferenceIcon
@@ -68,7 +72,7 @@ export function LandingHero() {
           </div>
 
           <div className="flex flex-wrap items-center gap-6 pt-6">
-            <div className="flex items-center -space-x-2">
+            <div className="flex max-w-full min-w-0 items-center -space-x-2">
               <Image
                 className="h-10 w-10 rounded-full object-cover shadow-sm ring-2 ring-surface"
                 src="/design/photo-3.webp"
@@ -98,8 +102,8 @@ export function LandingHero() {
               </div>
             </div>
 
-            <div className="flex flex-col">
-              <div className="flex items-center gap-1 text-secondary-container">
+            <div className="flex max-w-full min-w-0 flex-col">
+              <div className="flex flex-wrap items-center gap-1 text-secondary-container">
                 <ReferenceIcon name="star" className="text-[18px]" />
 
                 <ReferenceIcon name="star" className="text-[18px]" />

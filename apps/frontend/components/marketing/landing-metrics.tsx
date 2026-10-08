@@ -5,19 +5,19 @@ export function LandingMetrics() {
   const t = useTranslations("Marketing")
 
   return (
-    <section className="w-full bg-surface-container-low px-6 py-10 lg:px-12">
-      <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-8 md:flex-row">
-        <div className="text-center md:text-left">
-          <h4 className="font-heading text-headline-sm text-on-surface">
+    <section className="w-full bg-surface-container-low px-4 py-10 sm:px-6 lg:px-8">
+      <div className="mx-auto grid max-w-7xl min-w-0 items-center gap-6 xl:grid-cols-2">
+        <div className="min-w-0 text-center xl:text-left">
+          <h2 className="font-heading text-headline-sm text-on-surface">
             {t("zeroCommissionInfiniteGrowth")}
-          </h4>
+          </h2>
 
           <p className="font-sans text-body-sm text-on-surface-variant">
             {t("independentRestaurantsSaveAnAverageOf2")}
           </p>
         </div>
 
-        <div className="grid w-full grid-cols-2 gap-6 text-center sm:grid-cols-4 md:w-auto">
+        <div className="grid min-w-0 grid-cols-[repeat(auto-fit,minmax(min(100%,8rem),1fr))] gap-3 text-center">
           <div className="flex min-w-0 flex-col items-center justify-center rounded-xl bg-surface p-3 text-center shadow-xs">
             <p className="font-heading text-headline-md font-extrabold text-secondary-container">
               {t("value0")}
