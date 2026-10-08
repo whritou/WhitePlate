@@ -145,14 +145,16 @@ export function DemoDashboard() {
                   <Badge variant="neutral">{t("downtownBranch")}</Badge>
                 </div>
 
-                <p className="mt-2 flex items-center gap-2 text-xs">
-                  <span
-                    className={`size-2 rounded-full ${paused ? "bg-destructive-solid" : "bg-success-solid"}`}
-                  />
+                <p className="mt-2 flex flex-col items-start gap-1 text-xs sm:flex-row sm:items-center sm:gap-2">
+                  <span className="flex min-w-0 items-center gap-2">
+                    <span
+                      className={`size-2 shrink-0 rounded-full ${paused ? "bg-destructive-solid" : "bg-success-solid"}`}
+                    />
 
-                  {paused ? t("ordersPaused") : t("acceptingOrders")}
+                    {paused ? t("ordersPaused") : t("acceptingOrders")}
+                  </span>
 
-                  <span className="ml-2 text-muted-foreground">
+                  <span className="text-muted-foreground sm:ml-2">
                     {t("averagePrep")}: {rush ? "24" : "14"} min
                   </span>
                 </p>

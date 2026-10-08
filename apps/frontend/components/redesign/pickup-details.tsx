@@ -31,7 +31,7 @@ export function PickupDetails({
   const [eco, setEco] = useState(true)
 
   return (
-    <div className="grid gap-6">
+    <div className="grid min-w-0 gap-6">
       <Card className="gap-5 border-0 p-6">
         <SectionTitle
           icon={<ShoppingBag />}

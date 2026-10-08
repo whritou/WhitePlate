@@ -84,7 +84,7 @@ export function DemoCheckout() {
                 event.preventDefault()
                 if (demo.placeOrder()) router.push("/demo/tracking")
               }}
-              className="grid items-start gap-8 lg:grid-cols-[minmax(0,1.35fr)_minmax(320px,0.95fr)]"
+              className="grid min-w-0 grid-cols-[minmax(0,1fr)] items-start gap-8 lg:grid-cols-[minmax(0,1.35fr)_minmax(320px,0.95fr)]"
             >
               <PickupDetails
                 name={demo.customerName}

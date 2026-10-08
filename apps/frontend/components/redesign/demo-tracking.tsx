@@ -55,7 +55,7 @@ export function DemoTracking() {
               </p>
             </div>
 
-            <Card className="flex-row items-center gap-6 border-0 p-5 shadow-md">
+            <Card className="flex-col items-stretch gap-4 border-0 p-5 shadow-md sm:flex-row sm:items-center sm:gap-6">
               <div>
                 <p className="text-xs text-muted-foreground">
                   {t("counterPin")}

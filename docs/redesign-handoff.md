@@ -30,6 +30,8 @@ Responsive follow-up for issue #53: the landing page and live demo preview were 
 
 - Responsive follow-up verification: full ESLint and TypeScript checks passed; Prettier passed on all six changed components. `next build --webpack` passed with inert HTTPS auth/API origins. The restricted Windows environment still logs non-blocking webpack cache `EPERM` and PostgreSQL SSL-mode warnings.
 
+Application-wide responsive follow-up: a dedicated Playwright project checks the French and English landing/menu, French checkout, tracking, dashboard, catalog fixture, order-history fixture and kitchen-orders fixture at 320, 390, 768 and 1280px. Seven responsive assertions passed, including checkout page width, category control bounds, mobile wordmark, stacked tracking actions and dashboard status. The authenticated organization routes redirected to sign-in in the available browser session, so those live screens received source review but could not be visually exercised with a signed-in account. The order-history fixture's table scroll remains local to its container and does not widen the page.
+
 ## Remaining boundaries
 
 Payment processing, scheduled fulfillment, notifications, analytics, product media uploads and persisted tenant customization are future backend work. Wallet, directions and chat actions display local preview feedback. Legal/security footer labels have no published destination yet. These are visual placeholders, not claims that the corresponding services exist. Marketing text/prices follow the supplied export and are not connected to billing.

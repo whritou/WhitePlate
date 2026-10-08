@@ -28,7 +28,7 @@ export function MarketingHeader() {
       <div className="mx-auto flex min-h-20 max-w-7xl items-center justify-between gap-2 px-3 sm:gap-4 sm:px-6 lg:px-12">
         <div className="flex min-w-0 items-center gap-8">
           <Link href="/" aria-label={t("home")}>
-            <Brand />
+            <Brand compactOnMobile />
           </Link>
 
           <nav

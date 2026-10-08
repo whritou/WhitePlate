@@ -65,7 +65,7 @@ export function DemoMenu() {
           <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-3 px-4 sm:px-8">
             <nav
               aria-label={t("categories")}
-              className="flex min-w-0 flex-1 gap-2 overflow-x-auto"
+              className="grid w-full min-w-0 grid-cols-2 gap-2 md:flex md:flex-1 md:overflow-x-auto"
             >
               {["popular", "burgers", "chicken", "sides", "drinks"].map(
                 (item) => (
@@ -73,7 +73,7 @@ export function DemoMenu() {
                     key={item}
                     size="sm"
                     variant={category === item ? "default" : "secondary"}
-                    className="shrink-0 rounded-full text-xs"
+                    className="min-w-0 rounded-full text-center text-xs whitespace-normal md:shrink-0 md:whitespace-nowrap"
                     aria-pressed={category === item}
                     onClick={() => setCategory(item)}
                   >

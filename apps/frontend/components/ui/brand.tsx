@@ -1,7 +1,13 @@
 import { UtensilsCrossed } from "lucide-react"
 import { cn } from "@/lib/utils"
 
-export function Brand({ className }: { className?: string }) {
+export function Brand({
+  className,
+  compactOnMobile = false,
+}: {
+  className?: string
+  compactOnMobile?: boolean
+}) {
   return (
     <span
       className={cn(
@@ -12,7 +18,9 @@ export function Brand({ className }: { className?: string }) {
       <span className="grid size-9 shrink-0 place-items-center rounded-md bg-primary text-primary-foreground">
         <UtensilsCrossed aria-hidden="true" className="size-5" />
       </span>
-      WhitePlate
+      <span className={cn(compactOnMobile && "hidden sm:inline")}>
+        WhitePlate
+      </span>
     </span>
   )
 }
