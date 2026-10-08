@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Plus+Jakarta+Sans:wght@600;700;800&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{colors:{"on-tertiary-container":"#009668","surface-variant":"#d3e4fe","surface-container-highest":"#d3e4fe","outline":"#76777d","surface-container-low":"#eff4ff","primary-fixed":"#dae2fd","secondary":"#ae3200","inverse-primary":"#bec6e0","on-primary-fixed":"#131b2e","secondary-fixed":"#ffdbd0","surface-tint":"#565e74","surface":"#f8f9ff","error-container":"#ffdad6","on-surface":"#0b1c30","tertiary-fixed":"#6ffbbe","inverse-surface":"#213145","on-tertiary":"#ffffff","on-error-container":"#93000a","surface-container-high":"#dce9ff","on-secondary-container":"#521300","on-error":"#ffffff","primary":"#000000","on-primary-fixed-variant":"#3f465c","on-secondary-fixed":"#3a0b00","surface-dim":"#cbdbf5","on-surface-variant":"#45464d","tertiary-container":"#002113","background":"#f8f9ff","primary-fixed-dim":"#bec6e0","on-background":"#0b1c30","secondary-container":"#fd591e","tertiary-fixed-dim":"#4edea3","inverse-on-surface":"#eaf1ff","secondary-fixed-dim":"#ffb59e","on-tertiary-fixed-variant":"#005236","error":"#ba1a1a","surface-container":"#e5eeff","on-primary":"#ffffff","surface-bright":"#f8f9ff","on-secondary":"#ffffff","surface-container-lowest":"#ffffff","primary-container":"#131b2e","tertiary":"#000000","on-primary-container":"#7c839b","outline-variant":"#c6c6cd","on-secondary-fixed-variant":"#852400","on-tertiary-fixed":"#002113"},borderRadius:{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},spacing:{"gutter":"1.5rem","margin":"2rem","space-sm":"0.5rem","space-md":"1rem","gutter-mobile":"1rem","space-xs":"0.25rem","space-xl":"2.5rem","space-lg":"1.5rem","margin-mobile":"1rem"},fontFamily:{"body-sm":["Inter"],"headline-md":["Plus Jakarta Sans"],"headline-sm":["Plus Jakarta Sans"],"headline-lg":["Plus Jakarta Sans"],"label-sm":["Inter"],"headline-lg-mobile":["Plus Jakarta Sans"],"display-hero":["Plus Jakarta Sans"],"display-hero-mobile":["Plus Jakarta Sans"],"title-md":["Plus Jakarta Sans"],"body-lg":["Inter"],"label-md":["Inter"],"body-md":["Inter"],"kpi-number":["Plus Jakarta Sans"]},fontSize:{"body-sm":["13px",{"lineHeight":"20px","fontWeight":"400"}],"headline-md":["24px",{"lineHeight":"32px","letterSpacing":"-0.015em","fontWeight":"600"}],"headline-sm":["20px",{"lineHeight":"28px","letterSpacing":"-0.01em","fontWeight":"600"}],"headline-lg":["32px",{"lineHeight":"40px","letterSpacing":"-0.02em","fontWeight":"700"}],"label-sm":["12px",{"lineHeight":"16px","letterSpacing":"0.02em","fontWeight":"500"}],"headline-lg-mobile":["26px",{"lineHeight":"34px","letterSpacing":"-0.015em","fontWeight":"700"}],"display-hero":["56px",{"lineHeight":"64px","letterSpacing":"-0.03em","fontWeight":"800"}],"display-hero-mobile":["36px",{"lineHeight":"44px","letterSpacing":"-0.02em","fontWeight":"800"}],"title-md":["16px",{"lineHeight":"24px","fontWeight":"600"}],"body-lg":["18px",{"lineHeight":"28px","fontWeight":"400"}],"label-md":["14px",{"lineHeight":"20px","letterSpacing":"0.01em","fontWeight":"600"}],"body-md":["15px",{"lineHeight":"24px","fontWeight":"400"}],"kpi-number":["32px",{"lineHeight":"36px","letterSpacing":"-0.02em","fontWeight":"700"}]}}}}</script></head><body class="bg-surface text-on-surface antialiased selection:bg-secondary-fixed selection:text-on-secondary-fixed"><aside class="fixed left-0 top-0 h-screen w-64 bg-surface-container-low z-50 flex flex-col justify-between shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="flex flex-col"><div class="h-16 px-space-lg flex items-center justify-between bg-surface-container-low"><div class="flex items-center gap-space-sm"><img alt="Logo officiel WhitePlate exact de l'appbar (icône cloche épurée au trait noir/ardoise avec plateau orange vif et typographie exacte WhitePlate)" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1XBTF4uupFeV3HXjtUwU8czqwApLLfqNcRdI4gZ8-aFd1RvRAwluVttwwj-OxWdHaBYVwGUpiASK6aJMF41T_3CLyIzkjb9KY8c7IEa7HRYYfQPNrlH-ePp020yr8YEAoGtovewRcPqLrgbVGj0Bsu2AVdDjI-WON15h-rZad3wqYdfY2-As74zCRQJLsaiGONhRFvGo4fS6mMmYZW_avP9pkKuGVg2cJkA9oXrgOo"/><span class="font-headline-sm text-headline-sm tracking-tight text-on-surface">WhitePlate</span></div><span class="px-space-xs py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm font-semibold">PRO</span></div><div class="px-space-md py-space-sm"><div class="px-space-sm py-space-xs text-on-surface-variant font-label-sm text-label-sm font-semibold tracking-wider uppercase">Operations</div></div><nav class="px-space-md space-y-1" data-active-classes="bg-primary-container text-on-primary-container font-semibold shadow-[0_1px_3px_0_rgba(15,23,42,0.05)]"><a class="flex items-center justify-between px-space-md py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all group" data-path="live-orders" href="#"><div class="flex items-center gap-space-md"><span class="material-symbols-outlined text-[20px]">dinner_dining</span><span class="font-label-md text-label-md">Live Orders</span></div><span class="px-space-xs py-0.5 rounded-full bg-secondary text-on-secondary font-label-sm text-label-sm font-semibold">4 live</span></a><a class="flex items-center gap-space-md px-space-md py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="order-history" href="#"><span class="material-symbols-outlined text-[20px]">receipt_long</span><span class="font-label-md text-label-md">Order History</span></a><a aria-current="page" class="flex items-center gap-space-md px-space-md py-2.5 rounded-lg transition-all bg-primary-container text-on-primary-container font-semibold shadow-[0_1px_3px_0_rgba(15,23,42,0.05)]" data-path="menu-builder" href="#"><span class="material-symbols-outlined text-[20px]">restaurant_menu</span><span class="font-label-md text-label-md">Menu Builder &amp; Translations</span></a><a class="flex items-center gap-space-md px-space-md py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="theming-studio" href="#"><span class="material-symbols-outlined text-[20px]">palette</span><span class="font-label-md text-label-md">Theming Studio</span></a><a class="flex items-center gap-space-md px-space-md py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="analytics-reports" href="#"><span class="material-symbols-outlined text-[20px]">query_stats</span><span class="font-label-md text-label-md">Analytics &amp; Reports</span></a><a class="flex items-center gap-space-md px-space-md py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="restaurant-settings" href="#"><span class="material-symbols-outlined text-[20px]">settings</span><span class="font-label-md text-label-md">Restaurant Settings</span></a></nav></div><div class="p-space-md bg-surface-container-low"><div class="p-space-md rounded-xl bg-surface-container flex items-center justify-between"><div class="flex items-center gap-space-sm"><div class="w-2 h-2 rounded-full bg-on-tertiary-container animate-pulse"></div><div class="flex flex-col"><span class="font-label-sm text-label-sm font-semibold text-on-surface">POS Terminal</span><span class="font-body-sm text-body-sm text-on-surface-variant">Kitchen Sync Active</span></div></div><span class="material-symbols-outlined text-[18px] text-on-surface-variant">cloud_done</span></div></div></aside><div class="pl-64 flex flex-col min-h-screen"><header class="fixed top-0 left-64 right-0 h-16 bg-surface/80 backdrop-blur-xl z-40 shadow-[0_1px_8px_rgba(0,0,0,0.04)] px-space-lg flex items-center justify-between gap-space-md"><div class="flex items-center gap-space-md"><div class="relative flex items-center bg-surface-container px-space-md py-1.5 rounded-lg cursor-pointer hover:bg-surface-container-high transition-colors"><span class="material-symbols-outlined text-[18px] text-on-surface-variant mr-space-xs">storefront</span><span class="font-label-md text-label-md text-on-surface font-semibold mr-space-xs">Bistro Madeleine - Central Paris</span><span class="material-symbols-outlined text-[18px] text-on-surface-variant">expand_more</span></div><div class="flex items-center gap-space-xs px-space-md py-1.5 rounded-full bg-surface-container-lowest shadow-[0_1px_3px_0_rgba(15,23,42,0.05)] cursor-pointer"><span class="w-2.5 h-2.5 rounded-full bg-on-tertiary-container animate-pulse"></span><span class="font-label-sm text-label-sm font-semibold text-on-surface">Online / Accepting Orders</span></div></div><div class="flex items-center gap-space-md"><button class="relative p-2 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-secondary-container"></span></button><div class="flex items-center gap-space-md pl-space-sm"><div class="text-right hidden sm:block"><div class="font-label-md text-label-md text-on-surface font-semibold leading-tight">Chef Antoine</div><div class="font-label-sm text-label-sm text-on-surface-variant leading-tight">Store Manager</div></div><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="w-full pt-16 flex-1 bg-surface px-space-lg py-space-md"><div class="flex flex-col w-full">
+<!-- Top Control Header Bar -->
+<div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-space-md mb-space-lg">
+<div>
+<div class="flex items-center gap-space-xs text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider mb-1">
+<span>Menu Management</span>
+<span>/</span>
+<span class="text-secondary font-semibold">Catalog &amp; Localization Studio</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight">Menu Builder &amp; Studio Polyglotte</h1>
+</div>
+<!-- Segmented Navigation & Mode Selector -->
+<div class="flex flex-wrap items-center gap-space-md">
+<div class="bg-surface-container-high p-1 rounded-xl flex items-center shadow-sm">
+<button class="flex items-center gap-space-xs px-space-md py-2 rounded-lg bg-surface-container-lowest text-on-surface font-label-md text-label-md shadow-sm transition-all duration-200" id="view-mode-catalog" onclick="switchMainView('catalog')" type="button">
+<span class="material-symbols-outlined text-[18px]">restaurant_menu</span>
+<span>Carte &amp; Produits</span>
+</button>
+<button class="flex items-center gap-space-xs px-space-md py-2 rounded-lg text-on-surface-variant hover:text-on-surface font-label-md text-label-md transition-all duration-200" id="view-mode-translate" onclick="switchMainView('translate')" type="button">
+<span class="material-symbols-outlined text-[18px]">translate</span>
+<span>Traductions &amp; Langues (FR / EN / ES / DE)</span>
+<span class="px-1.5 py-0.5 rounded-full bg-secondary text-on-secondary font-label-sm text-[10px] font-bold">4 dispo</span>
+</button>
+</div>
+<div class="flex items-center gap-space-xs">
+<button class="flex items-center gap-space-xs px-space-md py-2 rounded-lg bg-surface-container text-on-surface font-label-md text-label-md hover:bg-surface-container-high transition-colors shadow-sm" type="button">
+<span class="material-symbols-outlined text-[18px]">history</span>
+<span>Historique</span>
+</button>
+<button class="flex items-center gap-space-xs px-space-lg py-2 rounded-lg bg-secondary text-on-secondary font-label-md text-label-md shadow-md hover:brightness-110 active:scale-95 transition-all" onclick="showNotification('Menu synchronisé instantanément avec les terminaux et le storefront.')" type="button">
+<span class="material-symbols-outlined text-[18px]">publish</span>
+<span>Publier les changements</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Primary Studio Workspace: Grid with Category Rail & Dynamic Center View -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg items-start">
+<!-- LEFT RAIL: Categories Organizer (3 cols) -->
+<div class="lg:col-span-3 flex flex-col gap-space-md">
+<div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-secondary text-[20px]">layers</span>
+<h2 class="font-title-md text-title-md text-on-surface">Catégories</h2>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant bg-surface-container px-2 py-0.5 rounded-full font-semibold">5 sections</span>
+</div>
+<!-- Quick Reorder & Search -->
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-2.5 text-on-surface-variant text-[18px]">search</span>
+<input class="w-full pl-9 pr-3 py-2 bg-surface-container-low rounded-lg text-body-sm font-body-sm text-on-surface placeholder:text-outline focus:outline-none focus:ring-1 focus:ring-secondary" placeholder="Filtrer les catégories..." type="text"/>
+</div>
+<!-- Drag-and-Drop Category Stack -->
+<div class="flex flex-col gap-space-xs" id="category-list">
+<!-- Item 1: Active -->
+<div class="group flex items-center justify-between p-space-sm rounded-lg bg-primary-container text-on-primary-container shadow-sm cursor-pointer transition-all">
+<div class="flex items-center gap-space-sm min-w-0">
+<span class="material-symbols-outlined text-[18px] text-on-primary-container opacity-60 cursor-grab">drag_indicator</span>
+<div class="flex flex-col min-w-0">
+<span class="font-label-md text-label-md text-on-primary truncate">Burgers Gourmets</span>
+<span class="font-body-sm text-[11px] text-on-primary-container">6 créations actives</span>
+</div>
+</div>
+<div class="flex items-center gap-1">
+<button class="p-1 rounded hover:bg-surface-container/20 text-tertiary-fixed" title="Visibilité en ligne"><span class="material-symbols-outlined text-[16px]">visibility</span></button>
+<span class="material-symbols-outlined text-[16px] text-on-primary-container">chevron_right</span>
+</div>
+</div>
+<!-- Item 2 -->
+<div class="group flex items-center justify-between p-space-sm rounded-lg bg-surface hover:bg-surface-container transition-all cursor-pointer">
+<div class="flex items-center gap-space-sm min-w-0">
+<span class="material-symbols-outlined text-[18px] text-on-surface-variant opacity-40 cursor-grab">drag_indicator</span>
+<div class="flex flex-col min-w-0">
+<span class="font-label-md text-label-md text-on-surface truncate">Plats Signatures</span>
+<span class="font-body-sm text-[11px] text-on-surface-variant">4 spécialités</span>
+</div>
+</div>
+<div class="flex items-center gap-1">
+<button class="p-1 rounded text-on-surface-variant hover:text-on-surface" title="Visibilité en ligne"><span class="material-symbols-outlined text-[16px]">visibility</span></button>
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant">chevron_right</span>
+</div>
+</div>
+<!-- Item 3 -->
+<div class="group flex items-center justify-between p-space-sm rounded-lg bg-surface hover:bg-surface-container transition-all cursor-pointer">
+<div class="flex items-center gap-space-sm min-w-0">
+<span class="material-symbols-outlined text-[18px] text-on-surface-variant opacity-40 cursor-grab">drag_indicator</span>
+<div class="flex flex-col min-w-0">
+<span class="font-label-md text-label-md text-on-surface truncate">Sides &amp; Frites Maison</span>
+<span class="font-body-sm text-[11px] text-on-surface-variant">5 accompagnements</span>
+</div>
+</div>
+<div class="flex items-center gap-1">
+<button class="p-1 rounded text-on-surface-variant hover:text-on-surface" title="Visibilité en ligne"><span class="material-symbols-outlined text-[16px]">visibility</span></button>
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant">chevron_right</span>
+</div>
+</div>
+<!-- Item 4 -->
+<div class="group flex items-center justify-between p-space-sm rounded-lg bg-surface hover:bg-surface-container transition-all cursor-pointer">
+<div class="flex items-center gap-space-sm min-w-0">
+<span class="material-symbols-outlined text-[18px] text-on-surface-variant opacity-40 cursor-grab">drag_indicator</span>
+<div class="flex flex-col min-w-0">
+<span class="font-label-md text-label-md text-on-surface truncate">Desserts Artisanaux</span>
+<span class="font-body-sm text-[11px] text-on-surface-variant">4 douceurs</span>
+</div>
+</div>
+<div class="flex items-center gap-1">
+<button class="p-1 rounded text-on-surface-variant hover:text-on-surface" title="Visibilité en ligne"><span class="material-symbols-outlined text-[16px]">visibility</span></button>
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant">chevron_right</span>
+</div>
+</div>
+<!-- Item 5: Temporarily Hidden -->
+<div class="group flex items-center justify-between p-space-sm rounded-lg bg-surface hover:bg-surface-container opacity-60 transition-all cursor-pointer">
+<div class="flex items-center gap-space-sm min-w-0">
+<span class="material-symbols-outlined text-[18px] text-on-surface-variant opacity-40 cursor-grab">drag_indicator</span>
+<div class="flex flex-col min-w-0">
+<span class="font-label-md text-label-md text-on-surface truncate">Boissons &amp; Cocktails</span>
+<span class="font-body-sm text-[11px] text-secondary font-semibold">Masqué temporairement</span>
+</div>
+</div>
+<div class="flex items-center gap-1">
+<button class="p-1 rounded text-secondary hover:text-on-surface" title="Réactiver la catégorie"><span class="material-symbols-outlined text-[16px]">visibility_off</span></button>
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant">chevron_right</span>
+</div>
+</div>
+</div>
+<!-- Add Category Button -->
+<button class="w-full mt-space-xs py-2.5 px-space-sm rounded-lg bg-surface-container text-on-surface hover:bg-surface-container-high transition-colors font-label-md text-label-md flex items-center justify-center gap-space-xs" type="button">
+<span class="material-symbols-outlined text-[18px]">add_circle</span>
+<span>Ajouter une catégorie</span>
+</button>
+</div>
+<!-- Live Sync Status Banner -->
+<div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm flex items-center gap-space-md">
+<div class="w-10 h-10 rounded-lg bg-tertiary-fixed-dim/20 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-on-tertiary-container text-[22px]">devices</span>
+</div>
+<div class="flex flex-col">
+<div class="font-label-md text-label-md text-on-surface font-semibold">Multi-canaux Live Sync</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant">Menu synchronisé avec 2 KDS et QR Codes tables.</div>
+</div>
+</div>
+</div>
+<!-- MAIN CENTRAL AREA (9 cols): Switchable Catalog Editor vs Bilingual Translation Matrix -->
+<div class="lg:col-span-9 flex flex-col gap-space-lg">
+<!-- ================= CATALOG EDITOR MODE ================= -->
+<div class="flex flex-col gap-space-lg" id="catalog-mode-view">
+<!-- Active Dish Selected Banner -->
+<div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-lg">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between pb-space-md gap-space-md">
+<div class="flex items-center gap-space-md">
+<span class="px-space-sm py-1 rounded bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm font-semibold uppercase tracking-wider">Édition Produit</span>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Burger Le Rustique Truffé</h3>
+</div>
+<!-- 86 Item Toggle: En rupture / Masqué du menu -->
+<div class="flex items-center gap-space-md bg-surface-container-low px-space-md py-1.5 rounded-lg">
+<div class="flex flex-col text-right">
+<span class="font-label-sm text-label-sm font-semibold text-on-surface">Rupture de Stock (86-it)</span>
+<span class="font-body-sm text-[11px] text-on-surface-variant">Désactiver immédiatement du menu en ligne</span>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only peer" id="stock-toggle" onchange="toggleStockStatus(this)" type="checkbox"/>
+<div class="w-11 h-6 bg-surface-container-high peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-secondary"></div>
+</label>
+</div>
+</div>
+<!-- Product General Details Form -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-space-lg">
+<!-- Dish Photo Thumbnail Upload -->
+<div class="md:col-span-4 flex flex-col gap-space-xs">
+<label class="font-label-md text-label-md text-on-surface font-semibold">Photographie du met</label>
+<div class="relative group h-56 rounded-xl overflow-hidden bg-surface-container shadow-sm flex flex-col justify-end">
+<img class="w-full h-full object-cover" data-alt="High-end artisanal gourmet burger with black truffle mayonnaise, aged melted raclette cheese, caramelized onions, brioche bun, studio restaurant lighting, warm slate background, shallow depth of field, appetizing culinary photography" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAHRkFSvquXCZEPwtbsebtu0fqzhRwFm7Xelzd-Kt4P5lUwKnlY6QA6JC-lw0TkLFiDLUDDUS99J4GLfhk1dnsLsSL18hEtJJslVspoj4NBrncVqNpucNaYm-1xiVF-qDRGLX_3PuQNKrF3qkor08cle3ERWpuS08RUc-Xtdmzgj9h3xd4ax6EyzrahWtmJJwLyDRO_P_YOQ1MnsjYxhmqr8_3z7faPtFkS4Qc1Jw"/>
+<div class="absolute inset-0 bg-primary/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-space-xs text-on-primary">
+<span class="material-symbols-outlined text-[28px]">photo_camera</span>
+<span class="font-label-sm text-label-sm font-semibold">Changer la photo</span>
+</div>
+<div class="absolute bottom-2 left-2 right-2 flex justify-between items-center bg-surface-container-lowest/90 backdrop-blur-md px- space-sm py-1 rounded-lg">
+<span class="font-label-sm text-label-sm text-on-surface">JPEG • 2.4 MB</span>
+<button class="text-secondary hover:text-error text-label-sm font-semibold" type="button">Supprimer</button>
+</div>
+</div>
+<span class="font-body-sm text-[11px] text-on-surface-variant">Recommandé: Ratio 1:1 ou 4:3, min. 1200x1200px haute résolution.</span>
+</div>
+<!-- Core Metadata Form -->
+<div class="md:col-span-8 flex flex-col gap-space-md">
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-space-md">
+<div class="flex flex-col gap-1">
+<label class="font-label-md text-label-md text-on-surface font-semibold">Nom du met (Français)</label>
+<input class="w-full px-space-md py-2.5 rounded-lg bg-surface-container-low text-on-surface font-body-md text-body-md focus:bg-surface-container-lowest focus:outline-none focus:ring-2 focus:ring-secondary" type="text" value="Burger Le Rustique Truffé"/>
+</div>
+<div class="flex flex-col gap-1">
+<label class="font-label-md text-label-md text-on-surface font-semibold">Code SKU / Référence POS</label>
+<input class="w-full px-space-md py-2.5 rounded-lg bg-surface-container-low text-on-surface font-body-md text-body-md focus:bg-surface-container-lowest focus:outline-none focus:ring-2 focus:ring-secondary" type="text" value="BRG-RUST-01"/>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<div class="flex items-center justify-between">
+<label class="font-label-md text-label-md text-on-surface font-semibold">Description gourmande &amp; Composition</label>
+<button class="text-secondary font-label-sm text-label-sm flex items-center gap-1 hover:underline" onclick="switchMainView('translate')" type="button">
+<span class="material-symbols-outlined text-[14px]">translate</span> Traduire en 4 langues
+                  </button>
+</div>
+<textarea class="w-full px-space-md py-2.5 rounded-lg bg-surface-container-low text-on-surface font-body-md text-body-md focus:bg-surface-container-lowest focus:outline-none focus:ring-2 focus:ring-secondary leading-relaxed" rows="3">Bœuf Charolais haché 180g, crème de truffe noire du Périgord, Morbier au lait cru AOP affiné, oignons confits au cidre brut et roquette fraîche dans un pain bun artisanal aux graines de pavot.</textarea>
+</div>
+<!-- Price, VAT, Caloric & Prep fields -->
+<div class="grid grid-cols-2 sm:grid-cols-4 gap-space-md">
+<div class="flex flex-col gap-1">
+<label class="font-label-md text-label-md text-on-surface font-semibold">Prix TTC (€)</label>
+<div class="relative">
+<input class="w-full pl-3 pr-7 py-2 rounded-lg bg-surface-container-low text-on-surface font-headline-sm text-headline-sm focus:outline-none focus:ring-2 focus:ring-secondary" step="0.50" type="number" value="18.50"/>
+<span class="absolute right-3 top-2.5 font-label-md text-on-surface-variant">€</span>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<label class="font-label-md text-label-md text-on-surface font-semibold">Taux TVA</label>
+<select class="w-full px-3 py-2.5 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md focus:outline-none focus:ring-2 focus:ring-secondary">
+<option value="10">10.0% (Restauration)</option>
+<option value="5.5">5.5% (Emporté froid)</option>
+<option value="20">20.0% (Alcools)</option>
+</select>
+</div>
+<div class="flex flex-col gap-1">
+<label class="font-label-md text-label-md text-on-surface font-semibold">Temps de prep</label>
+<div class="relative">
+<input class="w-full px-3 py-2.5 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md focus:outline-none focus:ring-2 focus:ring-secondary" type="text" value="12 min"/>
+<span class="material-symbols-outlined absolute right-2.5 top-2.5 text-[18px] text-on-surface-variant">timer</span>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<label class="font-label-md text-label-md text-on-surface font-semibold">Statut KDS</label>
+<div class="flex items-center h-full">
+<span class="px-space-sm py-1.5 rounded-lg bg-tertiary-fixed-dim/30 text-on-tertiary-container font-label-sm text-label-sm font-semibold flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-on-tertiary-container"></span> Disponible
+                    </span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- ALLERGENS AND DIETARY CHIPS -->
+<div class="pt-space-md bg-surface-container-low p-space-md rounded-xl flex flex-col gap-space-xs">
+<span class="font-label-md text-label-md text-on-surface font-semibold">Allergènes déclarés &amp; Régimes</span>
+<div class="flex flex-wrap gap-space-xs items-center">
+<span class="px-space-md py-1 rounded-full bg-secondary text-on-secondary font-label-sm text-label-sm flex items-center gap-1 font-semibold">
+<span class="material-symbols-outlined text-[14px]">egg</span> Lactose / Lait cru
+                <button class="ml-1 opacity-80 hover:opacity-100" type="button">×</button>
+</span>
+<span class="px-space-md py-1 rounded-full bg-secondary text-on-secondary font-label-sm text-label-sm flex items-center gap-1 font-semibold">
+<span class="material-symbols-outlined text-[14px]">bakery_dining</span> Gluten (Blé)
+                <button class="ml-1 opacity-80 hover:opacity-100" type="button">×</button>
+</span>
+<span class="px-space-md py-1 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm hover:bg-surface-container-high cursor-pointer flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">add</span> Arachides
+              </span>
+<span class="px-space-md py-1 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm hover:bg-surface-container-high cursor-pointer flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">add</span> Crustacés
+              </span>
+<span class="px-space-md py-1 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm hover:bg-surface-container-high cursor-pointer flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">add</span> Céleri
+              </span>
+</div>
+</div>
+</div>
+<!-- MODIFIERS & OPTIONS GROUPS EDITOR -->
+<div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-lg">
+<div class="flex items-center justify-between">
+<div class="flex flex-col">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Groupes d'Options &amp; Modificateurs</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Personnalisations client obligatoires ou facultatives avec suppléments tarifaires.</p>
+</div>
+<button class="flex items-center gap-space-xs px-space-md py-2 rounded-lg bg-surface-container text-on-surface hover:bg-surface-container-high font-label-md text-label-md transition-colors shadow-sm" type="button">
+<span class="material-symbols-outlined text-[18px]">add</span>
+<span>Nouveau groupe d'options</span>
+</button>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-space-md">
+<!-- Group 1: Cuisson de la viande (Radio obligatoire) -->
+<div class="bg-surface-container-low rounded-xl p-space-md flex flex-col justify-between shadow-sm">
+<div class="flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md text-on-surface font-bold">Cuisson de la viande</span>
+<span class="px-2 py-0.5 rounded-full bg-error-container text-on-error-container font-label-sm text-[11px] font-semibold">1 Choix Requis</span>
+</div>
+<p class="font-body-sm text-[12px] text-on-surface-variant">Obligatoire pour transmission au KDS cuisine.</p>
+<div class="flex flex-col gap-1.5 mt-space-xs">
+<div class="flex items-center justify-between p-2 rounded-lg bg-surface-container-lowest text-on-surface text-body-sm">
+<span>Saignant</span>
+<span class="font-label-sm text-on-surface-variant font-semibold">+0.00€</span>
+</div>
+<div class="flex items-center justify-between p-2 rounded-lg bg-surface-container-lowest text-on-surface text-body-sm">
+<span>À point (Défaut)</span>
+<span class="font-label-sm text-on-surface-variant font-semibold">+0.00€</span>
+</div>
+<div class="flex items-center justify-between p-2 rounded-lg bg-surface-container-lowest text-on-surface text-body-sm">
+<span>Bien cuit</span>
+<span class="font-label-sm text-on-surface-variant font-semibold">+0.00€</span>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-between pt-space-md mt-space-sm">
+<button class="text-secondary font-label-sm text-label-sm font-semibold hover:underline">+ Ajouter cuisson</button>
+<button class="p-1 rounded text-on-surface-variant hover:text-on-surface"><span class="material-symbols-outlined text-[18px]">more_vert</span></button>
+</div>
+</div>
+<!-- Group 2: Choix de la sauce -->
+<div class="bg-surface-container-low rounded-xl p-space-md flex flex-col justify-between shadow-sm">
+<div class="flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md text-on-surface font-bold">Choix de la sauce</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface font-label-sm text-[11px] font-semibold">1 Option incluse</span>
+</div>
+<p class="font-body-sm text-[12px] text-on-surface-variant">Sauce servie dans ramequin individuel.</p>
+<div class="flex flex-col gap-1.5 mt-space-xs">
+<div class="flex items-center justify-between p-2 rounded-lg bg-surface-container-lowest text-on-surface text-body-sm">
+<span>Mayonnaise Truffe noire</span>
+<span class="font-label-sm text-on-surface-variant font-semibold">Inclus</span>
+</div>
+<div class="flex items-center justify-between p-2 rounded-lg bg-surface-container-lowest text-on-surface text-body-sm">
+<span>Barbecue Fumé maison</span>
+<span class="font-label-sm text-on-surface-variant font-semibold">Inclus</span>
+</div>
+<div class="flex items-center justify-between p-2 rounded-lg bg-surface-container-lowest text-on-surface text-body-sm">
+<span>Sauce Poivre de Sichuan</span>
+<span class="font-label-sm text-secondary font-semibold">+1.00€</span>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-between pt-space-md mt-space-sm">
+<button class="text-secondary font-label-sm text-label-sm font-semibold hover:underline">+ Ajouter sauce</button>
+<button class="p-1 rounded text-on-surface-variant hover:text-on-surface"><span class="material-symbols-outlined text-[18px]">more_vert</span></button>
+</div>
+</div>
+<!-- Group 3: Extras Gourmands (+1.50€ / Multi-select) -->
+<div class="bg-surface-container-low rounded-xl p-space-md flex flex-col justify-between shadow-sm">
+<div class="flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md text-on-surface font-bold">Extras &amp; Garnitures</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface font-label-sm text-[11px] font-semibold">Multi-choix libre</span>
+</div>
+<p class="font-body-sm text-[12px] text-on-surface-variant">Suppléments accumulables lors de la commande.</p>
+<div class="flex flex-col gap-1.5 mt-space-xs">
+<div class="flex items-center justify-between p-2 rounded-lg bg-surface-container-lowest text-on-surface text-body-sm">
+<span>Bacon croustillant fumé</span>
+<span class="font-label-sm text-secondary font-bold">+1.50€</span>
+</div>
+<div class="flex items-center justify-between p-2 rounded-lg bg-surface-container-lowest text-on-surface text-body-sm">
+<span>Double Morbier fondu</span>
+<span class="font-label-sm text-secondary font-bold">+2.00€</span>
+</div>
+<div class="flex items-center justify-between p-2 rounded-lg bg-surface-container-lowest text-on-surface text-body-sm">
+<span>Oignons frits croustillants</span>
+<span class="font-label-sm text-secondary font-bold">+1.50€</span>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-between pt-space-md mt-space-sm">
+<button class="text-secondary font-label-sm text-label-sm font-semibold hover:underline">+ Ajouter extra</button>
+<button class="p-1 rounded text-on-surface-variant hover:text-on-surface"><span class="material-symbols-outlined text-[18px]">more_vert</span></button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- ================= TRANSLATIONS & MULTI-LANGUAGE STUDIO MATRIX ================= -->
+<div class="hidden flex flex-col gap-space-lg" id="translate-mode-view">
+<!-- Translation Studio Header & Instant Actions -->
+<div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-md">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-space-md">
+<div>
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-secondary text-[22px]">g_translate</span>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Studio de Traduction Multilingue</h3>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Générez et validez instantanément les descriptions pour les touristes et clients internationaux.</p>
+</div>
+<!-- Auto-translate AI Trigger -->
+<div class="flex items-center gap-space-xs">
+<button class="flex items-center gap-space-xs px-space-md py-2.5 rounded-lg bg-surface-container-high hover:bg-surface-variant text-on-surface font-label-md text-label-md transition-all shadow-sm" onclick="autoTranslateAll()" type="button">
+<span class="material-symbols-outlined text-[18px] text-secondary">auto_fix_high</span>
+<span>Auto-traduire tout le met (AI)</span>
+</button>
+<button class="flex items-center gap-space-xs px-space-md py-2.5 rounded-lg bg-secondary text-on-secondary font-label-md text-label-md hover:brightness-110 shadow-sm transition-all" onclick="showNotification('Toutes les langues sont enregistrées avec succès.')" type="button">
+<span class="material-symbols-outlined text-[18px]">check_circle</span>
+<span>Valider le glossaire</span>
+</button>
+</div>
+</div>
+<!-- Language Selector Tabs (Pills) -->
+<div class="flex flex-wrap items-center gap-space-xs pt-space-xs">
+<span class="font-label-sm text-label-sm text-on-surface-variant font-semibold mr-space-xs">Langues actives:</span>
+<button class="px-space-md py-1.5 rounded-full bg-primary-container text-on-primary font-label-sm text-label-sm font-semibold flex items-center gap-1 shadow-sm">
+<span>🇫🇷 Français (Original)</span>
+</button>
+<button class="px-space-md py-1.5 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm font-semibold flex items-center gap-1">
+<span>🇬🇧 English</span>
+<span class="w-1.5 h-1.5 rounded-full bg-on-tertiary-container"></span>
+</button>
+<button class="px-space-md py-1.5 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm font-semibold flex items-center gap-1">
+<span>🇪🇸 Español</span>
+<span class="w-1.5 h-1.5 rounded-full bg-on-tertiary-container"></span>
+</button>
+<button class="px-space-md py-1.5 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm font-semibold flex items-center gap-1 hover:text-on-surface">
+<span>🇩🇪 Deutsch</span>
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+</button>
+<button class="px-space-xs py-1 text-on-surface-variant hover:text-secondary font-label-sm text-label-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">add</span> Ajouter langue
+            </button>
+</div>
+</div>
+<!-- SIDE-BY-SIDE BILINGUAL TRANSLATION WORKSPACE -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-space-lg">
+<!-- LEFT SIDE: French (Original / Source de référence) -->
+<div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-md">
+<div class="flex items-center justify-between pb-space-xs">
+<div class="flex items-center gap-space-xs">
+<span class="text-[20px]">🇫🇷</span>
+<span class="font-headline-sm text-headline-sm text-on-surface">Français (Source de référence)</span>
+</div>
+<span class="px-space-xs py-0.5 rounded bg-surface-container text-on-surface-variant font-label-sm text-[11px] font-bold">VERROUILLÉ</span>
+</div>
+<!-- French Title -->
+<div class="flex flex-col gap-1">
+<label class="font-label-md text-label-md text-on-surface font-semibold">Titre du produit</label>
+<input class="w-full px-space-md py-2.5 rounded-lg bg-surface-container-low text-on-surface font-body-md text-body-md opacity-90 cursor-not-allowed" readonly="" type="text" value="Burger Le Rustique Truffé"/>
+</div>
+<!-- French Description -->
+<div class="flex flex-col gap-1">
+<label class="font-label-md text-label-md text-on-surface font-semibold">Description gourmande</label>
+<textarea class="w-full px-space-md py-2.5 rounded-lg bg-surface-container-low text-on-surface font-body-md text-body-md opacity-90 cursor-not-allowed leading-relaxed" readonly="" rows="4">Bœuf Charolais haché 180g, crème de truffe noire du Périgord, Morbier au lait cru AOP affiné, oignons confits au cidre brut et roquette fraîche dans un pain bun artisanal aux graines de pavot.</textarea>
+</div>
+<!-- French Allergens Disclosures -->
+<div class="flex flex-col gap-1">
+<label class="font-label-md text-label-md text-on-surface font-semibold">Mention Allergènes &amp; Avertissements</label>
+<textarea class="w-full px-space-md py-2.5 rounded-lg bg-surface-container-low text-on-surface font-body-md text-body-md opacity-90 cursor-not-allowed leading-relaxed" readonly="" rows="3">Contient : Lait cru &amp; lactose, gluten de blé. Traces possibles de fruits à coque et sésame dans notre atelier de boulangerie.</textarea>
+</div>
+<div class="bg-surface-container-low p-space-sm rounded-lg flex items-center justify-between">
+<span class="font-body-sm text-[12px] text-on-surface-variant">Statut d'approbation culinaire</span>
+<span class="font-label-sm text-label-sm text-on-tertiary-container font-semibold flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">verified</span> Validé par Chef Antoine
+              </span>
+</div>
+</div>
+<!-- RIGHT SIDE: Target Language Column (English & Spanish View) -->
+<div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-md">
+<!-- Language Header with Instant Auto-Translate button -->
+<div class="flex items-center justify-between pb-space-xs">
+<div class="flex items-center gap-space-xs">
+<span class="text-[20px]">🇬🇧</span>
+<span class="font-headline-sm text-headline-sm text-on-surface">English (Storefront &amp; QR Menu)</span>
+</div>
+<button class="flex items-center gap-1 text-secondary font-label-sm text-label-sm font-semibold hover:underline" onclick="retranslateField('en')" type="button">
+<span class="material-symbols-outlined text-[14px]">sync</span> Ré-exécuter DeepL / AI
+              </button>
+</div>
+<!-- English Title Field -->
+<div class="flex flex-col gap-1">
+<div class="flex items-center justify-between">
+<label class="font-label-md text-label-md text-on-surface font-semibold">Product Title (English)</label>
+<span class="font-label-sm text-[11px] text-on-tertiary-container font-semibold">100% Traduit</span>
+</div>
+<input class="w-full px-space-md py-2.5 rounded-lg bg-surface text-on-surface font-body-md text-body-md focus:bg-surface-container-lowest focus:outline-none focus:ring-2 focus:ring-secondary" id="trans-title-en" type="text" value="The Rustic Truffle Burger"/>
+</div>
+<!-- English Description Field -->
+<div class="flex flex-col gap-1">
+<label class="font-label-md text-label-md text-on-surface font-semibold">Gourmet Description</label>
+<textarea class="w-full px-space-md py-2.5 rounded-lg bg-surface text-on-surface font-body-md text-body-md focus:bg-surface-container-lowest focus:outline-none focus:ring-2 focus:ring-secondary leading-relaxed" id="trans-desc-en" rows="4">Prime Charolais minced beef (180g), Périgord black truffle cream, mature raw-milk Morbier PDO cheese, artisanal hard cider caramelized onions, and crisp wild arugula in a seeded brioche bun.</textarea>
+</div>
+<!-- English Allergens Field -->
+<div class="flex flex-col gap-1">
+<label class="font-label-md text-label-md text-on-surface font-semibold">Allergen Disclosures &amp; Warnings</label>
+<textarea class="w-full px-space-md py-2.5 rounded-lg bg-surface text-on-surface font-body-md text-body-md focus:bg-surface-container-lowest focus:outline-none focus:ring-2 focus:ring-secondary leading-relaxed" id="trans-allergen-en" rows="3">Contains: Raw milk &amp; lactose, wheat gluten. May contain traces of tree nuts and sesame from our artisanal bakery line.</textarea>
+</div>
+<!-- Translation Metadata / Quality Score -->
+<div class="bg-surface-container-low p-space-sm rounded-lg flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[18px] text-on-tertiary-container">psychology</span>
+<span class="font-body-sm text-[12px] text-on-surface">Score d'adaptation gastronomique: <strong class="text-on-tertiary-container font-semibold">98%</strong></span>
+</div>
+<button class="px-space-sm py-1 rounded bg-secondary text-on-secondary font-label-sm text-label-sm font-semibold hover:brightness-110" type="button">Sauvegarder EN</button>
+</div>
+</div>
+</div>
+<!-- SECONDARY TRANSLATION PANEL: Español Preview Card -->
+<div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="text-[20px]">🇪🇸</span>
+<span class="font-title-md text-title-md text-on-surface">Español (Aperçu rapide)</span>
+<span class="px-2 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm text-[11px] font-semibold">Prêt pour révision</span>
+</div>
+<button class="text-secondary font-label-sm text-label-sm font-semibold hover:underline" type="button">Ouvrir en plein écran</button>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-space-md">
+<div class="bg-surface-container-low p-space-md rounded-lg flex flex-col gap-1">
+<span class="font-label-sm text-[11px] text-on-surface-variant uppercase font-semibold">Nombre del Plato</span>
+<p class="font-body-md text-body-md text-on-surface font-semibold">Hamburguesa Rústica con Trufa Negra</p>
+</div>
+<div class="bg-surface-container-low p-space-md rounded-lg flex flex-col gap-1 md:col-span-2">
+<span class="font-label-sm text-[11px] text-on-surface-variant uppercase font-semibold">Descripción adaptada</span>
+<p class="font-body-sm text-body-sm text-on-surface">Carne de res Charolesa picada 180g, crema de trufa negra de Périgord, queso Morbier DOP de leche cruda madurado, cebolla caramelizada a la sidra y rúcula fresca en pan brioche artesano.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Notification Toast Container -->
+<div class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none" id="toast-notification">
+<div class="bg-primary-container text-on-primary px-space-lg py-3 rounded-xl shadow-xl flex items-center gap-space-md">
+<span class="material-symbols-outlined text-secondary text-[22px]">check_circle</span>
+<span class="font-label-md text-label-md" id="toast-message">Action exécutée avec succès</span>
+</div>
+</div>
+<!-- Client-side Interactive View Switching Script -->
+<script>
+    function switchMainView(mode) {
+      const catalogView = document.getElementById('catalog-mode-view');
+      const translateView = document.getElementById('translate-mode-view');
+      const btnCatalog = document.getElementById('view-mode-catalog');
+      const btnTranslate = document.getElementById('view-mode-translate');
+
+      if (mode === 'catalog') {
+        catalogView.classList.remove('hidden');
+        translateView.classList.add('hidden');
+
+        btnCatalog.className = "flex items-center gap-space-xs px-space-md py-2 rounded-lg bg-surface-container-lowest text-on-surface font-label-md text-label-md shadow-sm transition-all duration-200";
+        btnTranslate.className = "flex items-center gap-space-xs px-space-md py-2 rounded-lg text-on-surface-variant hover:text-on-surface font-label-md text-label-md transition-all duration-200";
+      } else {
+        catalogView.classList.add('hidden');
+        translateView.classList.remove('hidden');
+
+        btnTranslate.className = "flex items-center gap-space-xs px-space-md py-2 rounded-lg bg-surface-container-lowest text-on-surface font-label-md text-label-md shadow-sm transition-all duration-200";
+        btnCatalog.className = "flex items-center gap-space-xs px-space-md py-2 rounded-lg text-on-surface-variant hover:text-on-surface font-label-md text-label-md transition-all duration-200";
+      }
+    }
+
+    function toggleStockStatus(checkbox) {
+      if (checkbox.checked) {
+        showNotification("Burger Le Rustique Truffé est désormais marqué 'EN RUPTURE (86)' sur tous les menus.");
+      } else {
+        showNotification("Burger Le Rustique Truffé est de nouveau disponible à la commande.");
+      }
+    }
+
+    function autoTranslateAll() {
+      const titleEn = document.getElementById('trans-title-en');
+      const descEn = document.getElementById('trans-desc-en');
+      const allergenEn = document.getElementById('trans-allergen-en');
+
+      titleEn.value = "The Rustic Truffle Gourmet Burger (Chef Signature)";
+      descEn.value = "Premium 180g hand-ground Charolais beef, rich Périgord black truffle butter cream, melted raw-milk Morbier PDO, organic cider confit onions and fresh garden arugula on artisan sesame brioche.";
+      allergenEn.value = "Contains: Raw milk cheese (lactose), wheat flour (gluten). Prepared in an artisan bakery handling tree nuts and sesame.";
+
+      showNotification("Traductions régénérées avec succès par l'intelligence WhitePlate.");
+    }
+
+    function retranslateField(lang) {
+      showNotification("Langue [" + lang.toUpperCase() + "] synchronisée avec les dernières modifications du menu français.");
+    }
+
+    function showNotification(msg) {
+      const toast = document.getElementById('toast-notification');
+      const toastMsg = document.getElementById('toast-message');
+      toastMsg.textContent = msg;
+      toast.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none');
+      setTimeout(() => {
+        toast.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none');
+      }, 3500);
+    }
+  </script>
+</div></main></div></body></html>

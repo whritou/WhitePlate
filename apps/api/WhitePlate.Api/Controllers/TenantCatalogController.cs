@@ -140,6 +140,22 @@ public sealed class TenantCatalogController(
         return result.IsSuccess ? Ok(result.Value) : errors.ToActionResult(errors.Create(HttpContext, result.Error));
     }
 
+    [HttpPut("categories/{categoryId:guid}/visibility")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status400BadRequest, "application/problem+json")]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status401Unauthorized, "application/problem+json")]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status404NotFound, "application/problem+json")]
+    public async Task<IActionResult> SetCategoryVisibility(Guid tenantId, Guid categoryId,
+        UpdateCategoryVisibilityRequest request, CancellationToken cancellationToken)
+    {
+        var identity = currentIdentity.Identity;
+        if (identity is null) return Unauthorized();
+        if (request.IsVisible is null) return BadRequest();
+        var result = await manageCatalog.SetCategoryVisibilityAsync(tenantId, categoryId,
+            request.IsVisible.Value, identity, cancellationToken);
+        return result.IsSuccess ? NoContent() : errors.ToActionResult(errors.Create(HttpContext, result.Error));
+    }
+
     [HttpDelete("categories/{categoryId:guid}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status401Unauthorized, "application/problem+json")]

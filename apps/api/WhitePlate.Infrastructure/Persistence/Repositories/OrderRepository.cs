@@ -44,7 +44,9 @@ public sealed class OrderRepository(WhitePlateDbContext database) : IOrderReposi
         if (currency is null) return new CheckoutCatalogDto(string.Empty, locale, [], null);
 
         var products = await database.Products.AsNoTracking().Where(product => product.TenantId == tenantId &&
-                productIds.Contains(product.Id) && product.IsAvailable && !product.IsArchived)
+                productIds.Contains(product.Id) && product.IsAvailable && !product.IsArchived &&
+                database.MenuCategories.Any(category => category.TenantId == tenantId &&
+                    category.Id == product.CategoryId && !category.IsArchived && category.IsVisible))
             .OrderBy(product => product.Id)
             .Select(product => new
             {

@@ -3,7 +3,9 @@ import { getTranslations } from "next-intl/server"
 import { CatalogWorkspace } from "@/components/organization/catalog-workspace"
 import { MenuLanguageSettings } from "@/components/organization/menu-language-settings"
 import { CatalogTranslationsEditor } from "@/components/organization/catalog-translations-editor"
+import { MenuBuilderWorkspace } from "@/components/organization/menu-builder-workspace"
 import type { ManagedCatalog } from "@/types/catalog-management"
+import { WorkspaceShell } from "@/components/organization/workspace-shell"
 import { FixtureReady } from "./ready"
 
 export const dynamic = "force-dynamic"
@@ -16,6 +18,7 @@ const catalog: ManagedCatalog = {
       id: "22222222-2222-4222-8222-222222222222",
       name: "Les entrées",
       sortOrder: 0,
+      isVisible: true,
       isArchived: false,
       translations: { fr: { name: "Les entrées", description: null } },
     },
@@ -23,6 +26,7 @@ const catalog: ManagedCatalog = {
       id: "22222222-2222-4222-8222-333333333333",
       name: "Ancienne carte",
       sortOrder: 1,
+      isVisible: true,
       isArchived: true,
       translations: {},
     },
@@ -142,7 +146,7 @@ const catalog: ManagedCatalog = {
 export default async function CatalogDesignTestPage({
   searchParams,
 }: {
-  searchParams: Promise<{ view?: string }>
+  searchParams: Promise<{ view?: string; shell?: string }>
 }) {
   if (process.env.NODE_ENV !== "development") notFound()
 
@@ -150,19 +154,40 @@ export default async function CatalogDesignTestPage({
   const t = await getTranslations("Auth")
   const c = await getTranslations("Catalog")
 
-  return (
+  const content = (
     <main className="mx-auto grid w-full max-w-7xl min-w-0 gap-6 p-4 sm:p-6 lg:p-8">
       <FixtureReady />
 
-      <header>
-        <p className="text-sm font-medium text-primary">Bistro du Potager</p>
+      {!["builder", "products", "translations"].includes(query.view ?? "") && (
+        <header>
+          <p className="text-sm font-medium text-primary">Bistro du Potager</p>
 
-        <h1 className="mt-2 text-2xl font-semibold sm:text-[2rem]">
-          {query.view === "languages" ? t("menuLanguagesTitle") : c("title")}
-        </h1>
-      </header>
+          <h1 className="mt-2 text-2xl font-semibold sm:text-[2rem]">
+            {query.view === "languages" ? t("menuLanguagesTitle") : c("title")}
+          </h1>
+        </header>
+      )}
 
-      {query.view === "languages" ? (
+      {["builder", "products", "translations"].includes(query.view ?? "") ? (
+        <MenuBuilderWorkspace
+          catalog={catalog}
+          restaurantName="Bistro du Potager"
+          settings={{
+            tenantId: catalog.tenantId,
+            locales: ["fr", "en"],
+            defaultLocale: "fr",
+          }}
+          description={{
+            tenantId: catalog.tenantId,
+            locales: ["fr", "en"],
+            defaultLocale: "fr",
+            translations: { fr: "Cuisine de saison" },
+          }}
+          initialView={
+            query.view === "translations" ? "translations" : "products"
+          }
+        />
+      ) : query.view === "languages" ? (
         <>
           <MenuLanguageSettings
             tenantId={catalog.tenantId}
@@ -181,5 +206,22 @@ export default async function CatalogDesignTestPage({
         <CatalogWorkspace catalog={catalog} />
       )}
     </main>
+  )
+
+  return query.shell === "1" ? (
+    <WorkspaceShell
+      organizations={[]}
+      restaurants={[
+        {
+          id: catalog.tenantId,
+          name: "Bistro du Potager",
+          role: "OrganizationOwner",
+        },
+      ]}
+    >
+      {content}
+    </WorkspaceShell>
+  ) : (
+    content
   )
 }

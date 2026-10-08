@@ -28,6 +28,7 @@ export function OptionGroupsEditor({
   optionGroups,
   options,
   parentArchived,
+  studio,
 }: OptionGroupsEditorProps) {
   const t = useTranslations("Catalog")
   const u = useTranslations("CatalogView")
@@ -37,8 +38,20 @@ export function OptionGroupsEditor({
 
   return (
     <section className="grid gap-5" aria-label={t("optionGroupsTitle")}>
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="max-w-lg text-sm text-muted-foreground">
+      <div
+        className={
+          studio
+            ? "grid gap-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center"
+            : "flex flex-wrap items-center justify-between gap-3"
+        }
+      >
+        <p
+          className={
+            studio
+              ? "max-w-[32rem] text-sm text-muted-foreground"
+              : "max-w-lg text-sm text-muted-foreground"
+          }
+        >
           {t("optionGroupsDescription")}
         </p>
 
@@ -65,7 +78,13 @@ export function OptionGroupsEditor({
       {groups.length === 0 ? (
         <p className="py-6 text-muted-foreground">{t("noOptionGroups")}</p>
       ) : (
-        <ul className="grid gap-5">
+        <ul
+          className={
+            studio
+              ? "grid grid-cols-[repeat(auto-fit,minmax(min(100%,14rem),1fr))] gap-4"
+              : "grid gap-5"
+          }
+        >
           {groups.map((group) => (
             <li key={group.id}>
               <OptionGroupCard
@@ -75,6 +94,7 @@ export function OptionGroupsEditor({
                 group={group}
                 options={options}
                 parentArchived={parentArchived}
+                studio={studio}
               />
             </li>
           ))}
@@ -91,6 +111,7 @@ function OptionGroupCard({
   group,
   options,
   parentArchived,
+  studio,
 }: {
   tenantId: string
   currency: string
@@ -98,6 +119,7 @@ function OptionGroupCard({
   group: CatalogOptionGroup
   options: CatalogOption[]
   parentArchived: boolean
+  studio?: boolean
 }) {
   const t = useTranslations("Catalog")
   const u = useTranslations("CatalogView")
@@ -107,11 +129,23 @@ function OptionGroupCard({
     .sort((a, b) => a.sortOrder - b.sortOrder || a.name.localeCompare(b.name))
 
   return (
-    <Card>
+    <Card
+      className={
+        studio
+          ? "h-full border-transparent bg-muted shadow-none dark:bg-secondary"
+          : undefined
+      }
+    >
       <CardHeader className="flex flex-wrap items-start justify-between gap-4">
-        <div>
+        <div className="min-w-0">
           <CardTitle>
-            <h3 className="break-words">{group.name}</h3>
+            <h3
+              className={
+                studio ? "text-base font-semibold break-words" : "break-words"
+              }
+            >
+              {group.name}
+            </h3>
           </CardTitle>
 
           <CardDescription>
@@ -127,6 +161,7 @@ function OptionGroupCard({
         {!archived && (
           <div className="flex flex-wrap gap-2">
             <EditorDialog
+              compact={studio}
               title={t("editOptionGroup", { name: group.name })}
               label={u("edit")}
               description={u("groupEditorHelp")}
@@ -145,6 +180,7 @@ function OptionGroupCard({
             <ArchiveCatalogButton
               tenantId={tenantId}
               id={group.id}
+              compact={studio}
               entityType="option-groups"
               name={group.name}
             />
@@ -158,7 +194,7 @@ function OptionGroupCard({
         ) : (
           <ul
             aria-label={t("optionsForGroup", { name: group.name })}
-            className="divide-y divide-border"
+            className={studio ? "grid gap-2" : "divide-y divide-border"}
           >
             {entries.map((option) => (
               <li key={option.id}>
@@ -168,6 +204,7 @@ function OptionGroupCard({
                   group={group}
                   option={option}
                   parentArchived={archived}
+                  studio={studio}
                 />
               </li>
             ))}
@@ -177,6 +214,7 @@ function OptionGroupCard({
         {!archived && (
           <div>
             <EditorDialog
+              primary={false}
               icon={Plus}
               title={t("newOptionFor", { name: group.name })}
               label={u("addOption")}
@@ -204,12 +242,14 @@ function OptionEntry({
   group,
   option,
   parentArchived,
+  studio,
 }: {
   tenantId: string
   currency: string
   group: CatalogOptionGroup
   option: CatalogOption
   parentArchived: boolean
+  studio?: boolean
 }) {
   const t = useTranslations("Catalog")
   const u = useTranslations("CatalogView")
@@ -217,8 +257,20 @@ function OptionEntry({
   const archived = parentArchived || option.isArchived
 
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3 py-4">
-      <div className="min-w-0">
+    <div
+      className={
+        studio
+          ? "grid gap-2 rounded-md bg-card p-3"
+          : "flex flex-wrap items-center justify-between gap-3 py-4"
+      }
+    >
+      <div
+        className={
+          studio
+            ? "flex min-w-0 items-start justify-between gap-2 text-sm"
+            : "min-w-0"
+        }
+      >
         <p className="font-medium break-words">{option.name}</p>
 
         <p className="text-sm text-muted-foreground tabular-nums">
@@ -233,8 +285,11 @@ function OptionEntry({
       </div>
 
       {!archived && (
-        <div className="flex flex-wrap gap-2">
+        <div
+          className={studio ? "flex justify-end gap-1" : "flex flex-wrap gap-2"}
+        >
           <EditorDialog
+            compact={studio}
             title={t("editOption", { name: option.name })}
             label={u("edit")}
             description={u("optionEditorHelp")}
@@ -253,6 +308,7 @@ function OptionEntry({
           <ArchiveCatalogButton
             tenantId={tenantId}
             id={option.id}
+            compact={studio}
             entityType="options"
             name={option.name}
           />

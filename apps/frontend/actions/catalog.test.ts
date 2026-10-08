@@ -8,6 +8,7 @@ import {
   saveOptionAction,
   saveOptionGroupAction,
   saveProductAction,
+  setCategoryVisibilityAction,
 } from "./catalog"
 
 vi.mock("server-only", () => ({}))
@@ -44,6 +45,43 @@ function product(overrides: Partial<Record<string, string>> = {}) {
 }
 
 afterEach(() => vi.resetAllMocks())
+
+it.each(["true", "false"])(
+  "sends explicit category visibility %s to the tenant-scoped endpoint",
+  async (isVisible) => {
+    vi.mocked(whitePlateApi.put).mockResolvedValue({
+      ok: true,
+      status: 204,
+      data: null,
+    })
+
+    expect(
+      await setCategoryVisibilityAction(
+        form({ tenantId, id: categoryId, isVisible, role: "OrganizationOwner" })
+      )
+    ).toEqual({ ok: true })
+    expect(whitePlateApi.put).toHaveBeenCalledWith(
+      `/api/v1/tenants/${tenantId}/categories/${categoryId}/visibility`,
+      { isVisible: isVisible === "true" }
+    )
+  }
+)
+
+it.each([
+  { tenantId, id: categoryId, isVisible: "0" },
+  { tenantId, id: categoryId, isVisible: "" },
+  { tenantId: "foreign", id: categoryId, isVisible: "false" },
+  { tenantId, id: "bad", isVisible: "true" },
+])(
+  "rejects malformed visibility form data without making a request: %o",
+  async (fields) => {
+    expect(await setCategoryVisibilityAction(form(fields))).toEqual({
+      ok: false,
+      error: "invalid",
+    })
+    expect(whitePlateApi.put).not.toHaveBeenCalled()
+  }
+)
 
 it("creates a normalized category with only its API contract fields", async () => {
   vi.mocked(whitePlateApi.post).mockResolvedValue({

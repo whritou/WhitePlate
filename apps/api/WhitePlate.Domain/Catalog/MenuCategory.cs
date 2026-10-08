@@ -11,6 +11,7 @@ public sealed class MenuCategory
     public string TranslationsJson { get; private set; } = "{}";
     public int SortOrder { get; private set; }
     public bool IsArchived { get; private set; }
+    public bool IsVisible { get; private set; } = true;
 
     private MenuCategory() { }
 
@@ -31,6 +32,7 @@ public sealed class MenuCategory
         SortOrder = sortOrder;
     }
     public void Archive() => IsArchived = true;
+    public void SetVisibility(bool isVisible) => IsVisible = isVisible;
 
     private static string NormalizeName(string? name)
     {

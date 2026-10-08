@@ -504,3 +504,7 @@ The static preview was regenerated from `docs/design-system/tokens.json`. Plus J
 | `py -3 docs/design-system/verify.py --render` from the repository root | Passed: 84 required contrast pairs across both themes, CSS/token parity, palette/reference parity, and local-link scans across 10 documents. Lowest checked text pair is light warning text on warning tint at 4.51:1; the primary Obsidian-on-Tangerine pair is 5.72:1. Static `overview.svg` regenerated. |
 | `git diff --check` | Passed; Git reported only its configured LF/CRLF conversion warnings. |
 | Frontend unit tests, lint, typecheck, build, and browser acceptance | Not run for this token and reference update. The existing app color/radius parity test source remains unchanged. |
+
+## M1 combined workspace verification — 2026-10-08
+
+See [M1 handoff](audits/menu-builder.md) for exact frontend/browser/API checks, reference comparisons, migration rollout and outstanding shared/hosted acceptance. Scope is the combined catalog/language workspace plus category visibility; no M2–M5 services are represented as operational.

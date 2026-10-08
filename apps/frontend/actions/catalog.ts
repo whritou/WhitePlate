@@ -19,8 +19,23 @@ import {
   saveOptionGroup,
   saveProduct,
   restoreProduct,
+  setCategoryVisibility,
 } from "@/services/catalog-management"
 import type { CatalogResult } from "@/types/catalog-management"
+
+export async function setCategoryVisibilityAction(
+  input: unknown
+): Promise<CatalogResult> {
+  const tenantId = input instanceof FormData ? input.get("tenantId") : null
+  const id = input instanceof FormData ? input.get("id") : null
+  const isVisible = input instanceof FormData ? input.get("isVisible") : null
+
+  return isUuid(tenantId) &&
+    isUuid(id) &&
+    (isVisible === "true" || isVisible === "false")
+    ? setCategoryVisibility({ tenantId, id, isVisible: isVisible === "true" })
+    : { ok: false, error: "invalid" }
+}
 
 export async function saveCategoryAction(
   input: unknown

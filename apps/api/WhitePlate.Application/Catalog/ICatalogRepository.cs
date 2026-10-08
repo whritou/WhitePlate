@@ -36,6 +36,8 @@ public interface ICatalogRepository
     Task<PromotionDiscountDto?> UpdateDiscountAsync(Guid tenantId, Guid discountId, string name,
         WhitePlate.Domain.Catalog.DiscountKind kind, decimal value, CancellationToken cancellationToken);
     Task<bool> ArchiveCategoryAsync(Guid tenantId, Guid categoryId, CancellationToken cancellationToken);
+    Task<bool> SetCategoryVisibilityAsync(Guid tenantId, Guid categoryId, bool isVisible,
+        CancellationToken cancellationToken) => Task.FromResult(false);
     Task<bool> ArchiveProductAsync(Guid tenantId, Guid productId, CancellationToken cancellationToken);
     Task<bool> RestoreProductAsync(Guid tenantId, Guid productId, CancellationToken cancellationToken) => Task.FromResult(false);
     Task<bool> ArchiveOptionGroupAsync(Guid tenantId, Guid groupId, CancellationToken cancellationToken);

@@ -31,6 +31,7 @@ All paths are rooted at `/api/v1`. Success responses contain the resource direct
 | `PUT /tenants/{tenantId}/catalog/{entityType}/{entityId}/translation` | Organization owner or restaurant manager | Save a translated name and optional product description for an enabled locale; supported entity types are categories, products, option-groups, and options |
 | `POST /tenants/{tenantId}/categories` | Organization owner or restaurant manager | Create a category |
 | `PUT /tenants/{tenantId}/categories/{categoryId}` | Organization owner or restaurant manager | Update a category name and sort order |
+| `PUT /tenants/{tenantId}/categories/{categoryId}/visibility` | Organization owner or restaurant manager | Set temporary public visibility with `{ "isVisible": true/false }`; requires an active category in the authorized tenant |
 | `DELETE /tenants/{tenantId}/categories/{categoryId}` | Organization owner or restaurant manager | Archive the category and its product/option descendants |
 | `POST /tenants/{tenantId}/products` | Organization owner or restaurant manager | Create a product with base price and percentage tax |
 | `PUT /tenants/{tenantId}/products/{productId}` | Organization owner or restaurant manager | Update product details, price, tax, order, and availability |
@@ -128,3 +129,7 @@ Errors use `ApiProblemResponse` with `application/problem+json`, `type: about:bl
 | `500` | `unexpected_error`: safe fallback without exception details |
 
 405 and 415 responses also preserve their status with stable `method_not_allowed` and `unsupported_media_type` codes. Binding/JSON failures use field `request`, code `invalid_value`, and fixed copy. See the [security boundaries](../architecture/tenancy-and-security.md) and [functional test plan](../functional-test-plan.md).
+
+## M1 category visibility — 2026-10-08
+
+Management category responses include required `isVisible` (boolean). New and migrated categories default to `true`. `PUT /api/v1/tenants/{tenantId}/categories/{categoryId}/visibility` accepts an explicit JSON boolean and returns `204`; absent/null/invalid values return `400`, missing identity returns `401`, and unauthorized, foreign or archived categories return `404`. It changes only visibility, preserving archive, ordering and product availability. Public menus omit hidden categories and their products. New checkout attempts with products under hidden categories fail with the existing `404` unavailable-item result; existing order snapshots are unchanged. Ordering continues through existing category/product updates. API and migration must precede frontend rollout; see [M1 verification](../audits/menu-builder.md).

@@ -16,61 +16,76 @@ import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
 import { Textarea } from "@/components/ui/textarea"
 import type { RestaurantDescriptionTranslations } from "@/types/catalog"
 import { useLocale, useTranslations } from "next-intl"
-import { useState, useTransition } from "react"
+import { useRef, useState, useTransition } from "react"
 
 export function RestaurantDescriptionEditor({
   tenantId,
   locales,
   defaultLocale,
   translations: initialTranslations,
-}: RestaurantDescriptionTranslations) {
+  onPendingChange,
+}: RestaurantDescriptionTranslations & {
+  onPendingChange?: (pending: boolean) => void
+}) {
   const t = useTranslations("RestaurantDescription")
   const uiLocale = useLocale()
   const router = useRouter()
-  const [locale, setLocale] = useState(defaultLocale)
+  const [chosenLocale, setLocale] = useState(defaultLocale)
+  const locale = locales.includes(chosenLocale) ? chosenLocale : defaultLocale
   const [translations, setTranslations] = useState(initialTranslations)
-  const [draft, setDraft] = useState(initialTranslations[defaultLocale] ?? "")
+  const [drafts, setDrafts] = useState<Record<string, string>>({})
+  const draft = drafts[locale] ?? translations[locale] ?? ""
   const [error, setError] = useState(false)
   const [saved, setSaved] = useState(false)
   const [pending, startTransition] = useTransition()
+  const submitting = useRef(false)
   const names = new Intl.DisplayNames([uiLocale], { type: "language" })
   const fallback = translations[locale] ?? translations[defaultLocale] ?? ""
 
   function changeLocale(nextLocale: string) {
     setLocale(nextLocale)
-    setDraft(translations[nextLocale] ?? "")
     setError(false)
     setSaved(false)
   }
 
   function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    if (submitting.current) return
+    submitting.current = true
+    onPendingChange?.(true)
     setError(false)
     setSaved(false)
     startTransition(async () => {
-      const result = await saveRestaurantDescriptionTranslationAction({
-        tenantId,
-        locale,
-        description: draft,
-      })
+      try {
+        const result = await saveRestaurantDescriptionTranslationAction({
+          tenantId,
+          locale,
+          description: draft,
+        })
 
-      if (!result.ok) {
+        if (!result.ok) {
+          setError(true)
+
+          return
+        }
+
+        setTranslations((current) => {
+          const next = { ...current }
+
+          if (draft.trim()) next[locale] = draft.trim()
+          else delete next[locale]
+
+          return next
+        })
+        setDrafts((current) => ({ ...current, [locale]: draft.trim() }))
+        setSaved(true)
+        router.refresh()
+      } catch {
         setError(true)
-
-        return
+      } finally {
+        submitting.current = false
+        onPendingChange?.(false)
       }
-
-      setTranslations((current) => {
-        const next = { ...current }
-
-        if (draft.trim()) next[locale] = draft.trim()
-        else delete next[locale]
-
-        return next
-      })
-      setDraft(draft.trim())
-      setSaved(true)
-      router.refresh()
     })
   }
 
@@ -88,7 +103,7 @@ export function RestaurantDescriptionEditor({
 
       <CardContent>
         <form className="grid gap-4" onSubmit={submit} aria-busy={pending}>
-          <div className="grid gap-2 sm:max-w-sm">
+          <div className="grid gap-2 sm:max-w-[24rem]">
             <Label htmlFor="restaurant-description-locale">
               {t("language")}
             </Label>
@@ -125,7 +140,10 @@ export function RestaurantDescriptionEditor({
               aria-describedby="restaurant-description-count"
               className="w-full resize-y"
               onChange={(event) => {
-                setDraft(event.target.value)
+                setDrafts((current) => ({
+                  ...current,
+                  [locale]: event.target.value,
+                }))
                 setSaved(false)
               }}
             />

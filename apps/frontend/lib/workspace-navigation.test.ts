@@ -61,7 +61,7 @@ describe("buildWorkspaceNavigation", () => {
     expect(hrefs).toContain(
       `/organization/catalog?tenantId=${ownerRestaurantId}`
     )
-    expect(hrefs).toContain(
+    expect(hrefs).not.toContain(
       `/organization/restaurant-languages?tenantId=${ownerRestaurantId}`
     )
   })
@@ -78,7 +78,7 @@ describe("buildWorkspaceNavigation", () => {
     expect(hrefs).toContain(
       `/organization/catalog?tenantId=${managerRestaurantId}`
     )
-    expect(hrefs).toContain(
+    expect(hrefs).not.toContain(
       `/organization/restaurant-languages?tenantId=${managerRestaurantId}`
     )
     expect(hrefs.some((href) => href.includes("organizationId="))).toBe(false)

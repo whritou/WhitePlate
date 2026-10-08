@@ -2,6 +2,7 @@ import "server-only"
 import { whitePlateApi } from "@/lib/api"
 import { parseManagedCatalog } from "@/lib/validation/catalog-management"
 import type { ApiResult } from "@/types/api"
+import type { CategoryVisibilityInput } from "@/types/menu-builder"
 import type {
   ArchiveInput,
   CategoryInput,
@@ -45,6 +46,19 @@ function mutationResult(response: ApiResult<unknown>): CatalogResult {
         ? error
         : "unavailable",
   }
+}
+
+export async function setCategoryVisibility({
+  tenantId,
+  id,
+  isVisible,
+}: CategoryVisibilityInput): Promise<CatalogResult> {
+  return mutationResult(
+    await whitePlateApi.put(
+      `/api/v1/tenants/${tenantId}/categories/${id}/visibility`,
+      { isVisible }
+    )
+  )
 }
 
 export async function saveCategory({

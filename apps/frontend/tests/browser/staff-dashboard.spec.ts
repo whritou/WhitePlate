@@ -183,12 +183,12 @@ test("staff roles, stale versions, revocation and tenant boundaries on the live 
 
     await managerPage.goto(`/en/organization/catalog?tenantId=${tenantId}`)
     await expect(
-      managerPage.getByRole("heading", { name: "Manage catalog", exact: true })
+      managerPage.getByRole("heading", {
+        name: "Menu Builder & Translations",
+        exact: true,
+      })
     ).toBeVisible()
 
-    await managerPage
-      .getByRole("tab", { name: "Categories", exact: true })
-      .click()
     await managerPage
       .getByRole("button", { name: "New category", exact: true })
       .click()
@@ -206,7 +206,7 @@ test("staff roles, stale versions, revocation and tenant boundaries on the live 
       .getByRole("button", { name: "Create category", exact: true })
       .click()
     await expect(
-      managerPage.getByRole("heading", {
+      managerPage.getByRole("button", {
         name: managerCategoryName,
         exact: true,
       })

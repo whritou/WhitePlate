@@ -49,6 +49,7 @@ const catalog = {
       id: categoryId,
       name: "Lunch",
       sortOrder: 0,
+      isVisible: true,
       isArchived: false,
       translations: {},
     },
@@ -82,6 +83,31 @@ it("accepts the actual management contract and preserves price, tax, order and c
     options: [],
     discounts: [],
   })
+})
+
+it.each([undefined, null, "false", 0])(
+  "rejects invalid category visibility rather than treating it as visible: %s",
+  (isVisible) => {
+    expect(
+      parseManagedCatalog(
+        { ...catalog, categories: [{ ...catalog.categories[0], isVisible }] },
+        tenantId
+      )
+    ).toBeNull()
+  }
+)
+
+it("preserves temporary category hiding independently of archival", () => {
+  const parsed = parseManagedCatalog(
+    {
+      ...catalog,
+      categories: [{ ...catalog.categories[0], isVisible: false }],
+    },
+    tenantId
+  )
+
+  expect(parsed?.categories[0].isVisible).toBe(false)
+  expect(parsed?.categories[0].isArchived).toBe(false)
 })
 
 it("validates and preserves active and inactive discount records from the tenant catalog", () => {

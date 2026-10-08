@@ -28,6 +28,7 @@ The currently recorded Coolify API image (`e13860e`) predates merge `8a2f835` (P
 | [Public order tracking decision](architecture/decisions/0006-public-order-tracking.md) | Expiring capability-based public status tracking and tenant-scoped ephemeral guest checkout |
 | [Functional test plan](functional-test-plan.md) | Executable smoke checks and future acceptance criteria |
 | [Development roadmap](development-roadmap.md) | Implemented backend scope and unresolved frontend/deployment decisions |
+| [Restaurant management backlog](planning/restaurant-management-backlog.md) | Future theming, dashboard, restaurant settings, unified menu/translations and live Kanban tasks with Stitch references and responsive acceptance criteria |
 | [Full Stitch redesign handoff](redesign-handoff.md) | Public landing, illustrative screen routes, visual adoption and verification |
 | [Landing and demo responsive audit](audits/landing-demo-responsive.md) | Responsive defects, fixes, captured walkthrough and browser verification for the public landing and menu |
 | [Documentation review](documentation-review.md) | Audit findings, verification evidence, and remaining blockers |
@@ -52,3 +53,7 @@ For intended behavior, use the proposed contract, schema, and acceptance plan to
 Update the relevant documents with changes to commands, routes, ports, dependencies, environment variables, trust boundaries, or data models. Link to one canonical explanation rather than copying it into every guide. Keep examples valid, fence code blocks, and use relative links within repository Markdown.
 
 When settling an open architecture decision, record its date, status, context, choice, alternatives, consequences, and affected documents in a new decision note under `docs/architecture/decisions/` (create that directory when the first decision is made). Until then, use the [open-decision register](development-roadmap.md).
+
+## M1 Menu Builder — 2026-10-08
+
+The combined catalog/language workspace and persisted category hiding are implemented in source. Local verification and separate remaining shared-database/hosted acceptance are in [M1 evidence](audits/menu-builder.md). The generated visibility migration is not applied to shared environments; other management roadmap cards remain separate.

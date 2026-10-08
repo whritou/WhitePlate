@@ -31,7 +31,7 @@ test("owner manages fixed and percentage discount codes", async ({
 
   expect(login.status()).toBe(200)
   await page.goto(`/en/organization/catalog?tenantId=${fixture.tenantId}`)
-  await page.getByRole("tab", { name: "Discounts", exact: true }).click()
+  await page.getByRole("button", { name: "Discounts", exact: true }).click()
 
   const stamp = Date.now().toString(36).toUpperCase()
   const fixedCode = `LUNCH-${stamp}`
@@ -179,7 +179,7 @@ test("owner manages fixed and percentage discount codes", async ({
     })
   ).toBeVisible()
   await page.goto(`/fr/organization/catalog?tenantId=${fixture.tenantId}`)
-  await page.getByRole("tab", { name: "Remises", exact: true }).click()
+  await page.getByRole("button", { name: "Remises", exact: true }).click()
 
   const frenchEditor = page.getByRole("region", { name: "Codes de réduction" })
   const frenchCreate = await openEditor(page, "Nouveau code de réduction")

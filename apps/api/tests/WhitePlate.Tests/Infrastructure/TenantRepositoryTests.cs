@@ -108,7 +108,8 @@ public sealed class TenantRepositoryTests
         Assert.Contains("uuid NOT NULL", script);
         Assert.Contains("Organizations", script);
         Assert.Contains("Currency", script);
-        Assert.Equal(12, database.Database.GetMigrations().Count());
+        Assert.Contains("\"IsVisible\" boolean NOT NULL DEFAULT TRUE", script);
+        Assert.Contains(database.Database.GetMigrations(), migration => migration.EndsWith("_CategoryVisibility", StringComparison.Ordinal));
         Assert.False(database.Database.HasPendingModelChanges());
     }
 

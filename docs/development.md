@@ -247,3 +247,7 @@ With the frontend development server running locally, run `npm run test:browser 
 ### Full Stitch redesign previews
 
 The public marketing page is `/en` or `/fr` on the base host. Visit `/en/demo` or `/fr/demo` for the illustrated restaurant menu; append `/checkout`, `/tracking` or `/dashboard` for the other supplied designs. Demo state is memory-only and resets on refresh or locale change. These routes do not charge payments or modify restaurant records. See [the redesign handoff](redesign-handoff.md) for scope, verification and future backend work.
+
+## M1 Menu Builder rollout — 2026-10-08
+
+The catalog route is the combined restaurant workspace; old language URLs redirect with tenant/query context. Per-product saves and keyboard display-order inputs reuse current operations; temporary category hiding adds the `CategoryVisibility` migration. Review/apply outstanding EF migrations explicitly and deploy API before frontend because management reads now require `isVisible`. No migration was applied by this feature work. Use the guarded acceptance environment for real browser save/reload and hosted public-menu/checkout checks; see [M1 evidence](audits/menu-builder.md).

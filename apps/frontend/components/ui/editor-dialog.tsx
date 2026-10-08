@@ -20,6 +20,7 @@ export function EditorDialog({
   label,
   icon: Icon = Pencil,
   primary,
+  compact,
   disabled,
   children,
 }: EditorDialogProps) {
@@ -39,11 +40,15 @@ export function EditorDialog({
         disabled={disabled}
         aria-label={title}
         render={
-          <Button type="button" variant={primary ? "default" : "outline"} />
+          <Button
+            type="button"
+            variant={primary ? "default" : compact ? "ghost" : "outline"}
+            size={compact ? "icon" : "default"}
+          />
         }
       >
         <Icon aria-hidden="true" className="size-4" />
-        {label}
+        <span className={compact ? "sr-only" : undefined}>{label}</span>
       </DialogTrigger>
       <DialogContent aria-busy={pending}>
         <header className="relative shrink-0 border-b border-border p-5 pr-16">
@@ -87,15 +92,19 @@ export function EditorFormActions({
   pending,
   label,
   onCancel,
+  className,
 }: {
   pending: boolean
   label: string
   onCancel?: () => void
+  className?: string
 }) {
   const t = useTranslations("Editor")
 
   return (
-    <div className="flex flex-wrap justify-end gap-2 border-t border-border pt-5 sm:col-span-2">
+    <div
+      className={`flex flex-wrap justify-end gap-2 border-t border-border pt-5 sm:col-span-2 ${className ?? ""}`}
+    >
       {onCancel && (
         <Button
           type="button"
