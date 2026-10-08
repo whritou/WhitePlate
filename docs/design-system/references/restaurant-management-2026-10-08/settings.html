@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Plus+Jakarta+Sans:wght@600;700;800&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{colors:{"on-tertiary-container":"#009668","surface-variant":"#d3e4fe","surface-container-highest":"#d3e4fe","outline":"#76777d","surface-container-low":"#eff4ff","primary-fixed":"#dae2fd","secondary":"#ae3200","inverse-primary":"#bec6e0","on-primary-fixed":"#131b2e","secondary-fixed":"#ffdbd0","surface-tint":"#565e74","surface":"#f8f9ff","error-container":"#ffdad6","on-surface":"#0b1c30","tertiary-fixed":"#6ffbbe","inverse-surface":"#213145","on-tertiary":"#ffffff","on-error-container":"#93000a","surface-container-high":"#dce9ff","on-secondary-container":"#521300","on-error":"#ffffff","primary":"#000000","on-primary-fixed-variant":"#3f465c","on-secondary-fixed":"#3a0b00","surface-dim":"#cbdbf5","on-surface-variant":"#45464d","tertiary-container":"#002113","background":"#f8f9ff","primary-fixed-dim":"#bec6e0","on-background":"#0b1c30","secondary-container":"#fd591e","tertiary-fixed-dim":"#4edea3","inverse-on-surface":"#eaf1ff","secondary-fixed-dim":"#ffb59e","on-tertiary-fixed-variant":"#005236","error":"#ba1a1a","surface-container":"#e5eeff","on-primary":"#ffffff","surface-bright":"#f8f9ff","on-secondary":"#ffffff","surface-container-lowest":"#ffffff","primary-container":"#131b2e","tertiary":"#000000","on-primary-container":"#7c839b","outline-variant":"#c6c6cd","on-secondary-fixed-variant":"#852400","on-tertiary-fixed":"#002113"},borderRadius:{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},spacing:{"gutter":"1.5rem","margin":"2rem","space-sm":"0.5rem","space-md":"1rem","gutter-mobile":"1rem","space-xs":"0.25rem","space-xl":"2.5rem","space-lg":"1.5rem","margin-mobile":"1rem"},fontFamily:{"body-sm":["Inter"],"headline-md":["Plus Jakarta Sans"],"headline-sm":["Plus Jakarta Sans"],"headline-lg":["Plus Jakarta Sans"],"label-sm":["Inter"],"headline-lg-mobile":["Plus Jakarta Sans"],"display-hero":["Plus Jakarta Sans"],"display-hero-mobile":["Plus Jakarta Sans"],"title-md":["Plus Jakarta Sans"],"body-lg":["Inter"],"label-md":["Inter"],"body-md":["Inter"],"kpi-number":["Plus Jakarta Sans"]},fontSize:{"body-sm":["13px",{"lineHeight":"20px","fontWeight":"400"}],"headline-md":["24px",{"lineHeight":"32px","letterSpacing":"-0.015em","fontWeight":"600"}],"headline-sm":["20px",{"lineHeight":"28px","letterSpacing":"-0.01em","fontWeight":"600"}],"headline-lg":["32px",{"lineHeight":"40px","letterSpacing":"-0.02em","fontWeight":"700"}],"label-sm":["12px",{"lineHeight":"16px","letterSpacing":"0.02em","fontWeight":"500"}],"headline-lg-mobile":["26px",{"lineHeight":"34px","letterSpacing":"-0.015em","fontWeight":"700"}],"display-hero":["56px",{"lineHeight":"64px","letterSpacing":"-0.03em","fontWeight":"800"}],"display-hero-mobile":["36px",{"lineHeight":"44px","letterSpacing":"-0.02em","fontWeight":"800"}],"title-md":["16px",{"lineHeight":"24px","fontWeight":"600"}],"body-lg":["18px",{"lineHeight":"28px","fontWeight":"400"}],"label-md":["14px",{"lineHeight":"20px","letterSpacing":"0.01em","fontWeight":"600"}],"body-md":["15px",{"lineHeight":"24px","fontWeight":"400"}],"kpi-number":["32px",{"lineHeight":"36px","letterSpacing":"-0.02em","fontWeight":"700"}]}}}}</script></head><body class="bg-surface text-on-surface antialiased selection:bg-secondary-fixed selection:text-on-secondary-fixed"><aside class="fixed left-0 top-0 h-screen w-64 bg-surface-container-low z-50 flex flex-col justify-between shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="flex flex-col"><div class="h-16 px-space-lg flex items-center justify-between bg-surface-container-low"><div class="flex items-center gap-space-sm"><img alt="Logo officiel WhitePlate exact de l'appbar (icône cloche épurée au trait noir/ardoise avec plateau orange vif et typographie exacte WhitePlate)" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1XBTF4uupFeV3HXjtUwU8czqwApLLfqNcRdI4gZ8-aFd1RvRAwluVttwwj-OxWdHaBYVwGUpiASK6aJMF41T_3CLyIzkjb9KY8c7IEa7HRYYfQPNrlH-ePp020yr8YEAoGtovewRcPqLrgbVGj0Bsu2AVdDjI-WON15h-rZad3wqYdfY2-As74zCRQJLsaiGONhRFvGo4fS6mMmYZW_avP9pkKuGVg2cJkA9oXrgOo"/><span class="font-headline-sm text-headline-sm tracking-tight text-on-surface">WhitePlate</span></div><span class="px-space-xs py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm font-semibold">PRO</span></div><div class="px-space-md py-space-sm"><div class="px-space-sm py-space-xs text-on-surface-variant font-label-sm text-label-sm font-semibold tracking-wider uppercase">Operations</div></div><nav class="px-space-md space-y-1" data-active-classes="bg-primary-container text-on-primary-container font-semibold shadow-[0_1px_3px_0_rgba(15,23,42,0.05)]"><a class="flex items-center justify-between px-space-md py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all group" data-path="live-orders" href="#"><div class="flex items-center gap-space-md"><span class="material-symbols-outlined text-[20px]">dinner_dining</span><span class="font-label-md text-label-md">Live Orders</span></div><span class="px-space-xs py-0.5 rounded-full bg-secondary text-on-secondary font-label-sm text-label-sm font-semibold">4 live</span></a><a class="flex items-center gap-space-md px-space-md py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="order-history" href="#"><span class="material-symbols-outlined text-[20px]">receipt_long</span><span class="font-label-md text-label-md">Order History</span></a><a class="flex items-center gap-space-md px-space-md py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="menu-builder" href="#"><span class="material-symbols-outlined text-[20px]">restaurant_menu</span><span class="font-label-md text-label-md">Menu Builder &amp; Translations</span></a><a class="flex items-center gap-space-md px-space-md py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="theming-studio" href="#"><span class="material-symbols-outlined text-[20px]">palette</span><span class="font-label-md text-label-md">Theming Studio</span></a><a class="flex items-center gap-space-md px-space-md py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="analytics-reports" href="#"><span class="material-symbols-outlined text-[20px]">query_stats</span><span class="font-label-md text-label-md">Analytics &amp; Reports</span></a><a aria-current="page" class="flex items-center gap-space-md px-space-md py-2.5 rounded-lg transition-all bg-primary-container text-on-primary-container font-semibold shadow-[0_1px_3px_0_rgba(15,23,42,0.05)]" data-path="restaurant-settings" href="#"><span class="material-symbols-outlined text-[20px]">settings</span><span class="font-label-md text-label-md">Restaurant Settings</span></a></nav></div><div class="p-space-md bg-surface-container-low"><div class="p-space-md rounded-xl bg-surface-container flex items-center justify-between"><div class="flex items-center gap-space-sm"><div class="w-2 h-2 rounded-full bg-on-tertiary-container animate-pulse"></div><div class="flex flex-col"><span class="font-label-sm text-label-sm font-semibold text-on-surface">POS Terminal</span><span class="font-body-sm text-body-sm text-on-surface-variant">Kitchen Sync Active</span></div></div><span class="material-symbols-outlined text-[18px] text-on-surface-variant">cloud_done</span></div></div></aside><div class="pl-64 flex flex-col min-h-screen"><header class="fixed top-0 left-64 right-0 h-16 bg-surface/80 backdrop-blur-xl z-40 shadow-[0_1px_8px_rgba(0,0,0,0.04)] px-space-lg flex items-center justify-between gap-space-md"><div class="flex items-center gap-space-md"><div class="relative flex items-center bg-surface-container px-space-md py-1.5 rounded-lg cursor-pointer hover:bg-surface-container-high transition-colors"><span class="material-symbols-outlined text-[18px] text-on-surface-variant mr-space-xs">storefront</span><span class="font-label-md text-label-md text-on-surface font-semibold mr-space-xs">Bistro Madeleine - Central Paris</span><span class="material-symbols-outlined text-[18px] text-on-surface-variant">expand_more</span></div><div class="flex items-center gap-space-xs px-space-md py-1.5 rounded-full bg-surface-container-lowest shadow-[0_1px_3px_0_rgba(15,23,42,0.05)] cursor-pointer"><span class="w-2.5 h-2.5 rounded-full bg-on-tertiary-container animate-pulse"></span><span class="font-label-sm text-label-sm font-semibold text-on-surface">Online / Accepting Orders</span></div></div><div class="flex items-center gap-space-md"><button class="relative p-2 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-secondary-container"></span></button><div class="flex items-center gap-space-md pl-space-sm"><div class="text-right hidden sm:block"><div class="font-label-md text-label-md text-on-surface font-semibold leading-tight">Chef Antoine</div><div class="font-label-sm text-label-sm text-on-surface-variant leading-tight">Store Manager</div></div><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="w-full pt-16 flex-1 bg-surface px-space-lg py-space-md"><div class="flex flex-col w-full">
+<!-- Sub-header / Context Ribbon -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-space-md pb-space-lg">
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center gap-space-xs text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider">
+<span>Boutique</span>
+<span class="material-symbols-outlined text-[14px]">chevron_right</span>
+<span class="text-secondary font-semibold">Configuration Opérationnelle</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight">Paramètres du Restaurant</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">Contrôlez les flux d'affluence, personnalisez les alertes convives et pilotez vos encaissements Stripe.</p>
+</div>
+<!-- Quick Health Status Badge -->
+<div class="flex items-center gap-space-md self-start md:self-auto">
+<div class="flex items-center gap-space-sm bg-surface-container-lowest px-space-md py-2.5 rounded-xl shadow-sm">
+<span class="relative flex h-3 w-3">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-on-tertiary-container opacity-75"></span>
+<span class="relative inline-flex rounded-full h-3 w-3 bg-on-tertiary-container"></span>
+</span>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm font-semibold text-on-surface">Synchronisation temps réel</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Bistrot Madeleine • KDS Actif</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Tab Navigation Strip -->
+<div class="w-full bg-surface-container-lowest rounded-xl p-1.5 shadow-sm mb-space-lg overflow-x-auto no-scrollbar">
+<div class="flex items-center gap-1 min-w-max" id="settings-tab-nav" role="tablist">
+<button class="tab-btn active-tab flex items-center gap-space-xs px-space-lg py-2.5 rounded-lg font-label-md text-label-md transition-all text-on-primary bg-primary shadow-sm" data-tab="tab-slots" type="button">
+<span class="material-symbols-outlined text-[18px]">nest_clock_farsight_analog</span>
+<span>Horaires &amp; Créneaux de retrait</span>
+</button>
+<button class="tab-btn flex items-center gap-space-xs px-space-lg py-2.5 rounded-lg font-label-md text-label-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all" data-tab="tab-notifications" type="button">
+<span class="material-symbols-outlined text-[18px]">mark_email_unread</span>
+<span>Notifications &amp; Emails</span>
+</button>
+<button class="tab-btn flex items-center gap-space-xs px-space-lg py-2.5 rounded-lg font-label-md text-label-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all" data-tab="tab-info" type="button">
+<span class="material-symbols-outlined text-[18px]">storefront</span>
+<span>Informations Établissement</span>
+</button>
+<button class="tab-btn flex items-center gap-space-xs px-space-lg py-2.5 rounded-lg font-label-md text-label-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all" data-tab="tab-stripe" type="button">
+<span class="material-symbols-outlined text-[18px]">account_balance</span>
+<span>Paiements &amp; Stripe Connect</span>
+</button>
+</div>
+</div>
+<!-- TAB PANES CONTAINER -->
+<div class="relative w-full pb-32">
+<!-- TAB 1: Horaires & Créneaux de retrait -->
+<div class="tab-content flex flex-col gap-space-lg" id="tab-slots">
+<!-- Kitchen Load Safety Banner & Slot Interval Tuning -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-space-md">
+<!-- Slot Logic Card -->
+<div class="lg:col-span-2 bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col justify-between gap-space-md">
+<div class="flex items-start justify-between">
+<div>
+<span class="font-label-sm text-label-sm text-secondary font-semibold uppercase tracking-wider">Régulation du Flux</span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Capacité Click &amp; Collect</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Limitez automatiquement le nombre de tickets par intervalle pour préserver l'exécution des cuisiniers.</p>
+</div>
+<div class="p-2.5 bg-secondary-fixed rounded-xl text-on-secondary-fixed">
+<span class="material-symbols-outlined text-[24px]">speed</span>
+</div>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-space-md pt-space-xs">
+<div class="bg-surface-container p-space-md rounded-xl flex flex-col gap-space-xs">
+<label class="font-label-sm text-label-sm font-semibold text-on-surface">Intervalle des Créneaux</label>
+<div class="relative">
+<select class="w-full bg-surface-container-lowest text-on-surface font-label-md text-label-md px-space-md py-2.5 rounded-lg appearance-none cursor-pointer pr-10 focus:outline-none focus:ring-2 focus:ring-secondary">
+<option value="10">Tous les 10 minutes</option>
+<option selected="" value="15">Tous les 15 minutes (Recommandé)</option>
+<option value="20">Tous les 20 minutes</option>
+<option value="30">Toutes les 30 minutes</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-2.5 text-on-surface-variant pointer-events-none text-[20px]">expand_more</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Fréquence de passage proposée aux clients.</span>
+</div>
+<div class="bg-surface-container p-space-md rounded-xl flex flex-col gap-space-xs">
+<label class="font-label-sm text-label-sm font-semibold text-on-surface">Plafond Commandes / Créneau</label>
+<div class="flex items-center bg-surface-container-lowest rounded-lg px-2 py-1">
+<button class="w-9 h-9 rounded-lg bg-surface-container flex items-center justify-center text-on-surface hover:bg-surface-variant transition-colors" onclick="const input = document.getElementById('slot-max'); if (input.value &gt; 1) input.value--;" type="button">
+<span class="material-symbols-outlined text-[18px]">remove</span>
+</button>
+<input class="w-full text-center font-headline-sm text-headline-sm text-on-surface bg-transparent focus:outline-none" id="slot-max" max="50" min="1" type="number" value="8"/>
+<button class="w-9 h-9 rounded-lg bg-surface-container flex items-center justify-center text-on-surface hover:bg-surface-variant transition-colors" onclick="const input = document.getElementById('slot-max'); input.value++;" type="button">
+<span class="material-symbols-outlined text-[18px]">add</span>
+</button>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Au-delà de 8 commandes, le créneau bascule complet.</span>
+</div>
+</div>
+<!-- Real-time dynamic gauge SVG -->
+<div class="bg-surface-container-low p-space-md rounded-xl flex items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-md">
+<svg class="w-12 h-12 flex-shrink-0" viewbox="0 0 36 36">
+<path class="text-surface-variant" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="3.5"></path>
+<path class="text-secondary" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="72, 100" stroke-linecap="round" stroke-width="3.5"></path>
+<text class="font-headline-sm text-[8px] font-bold fill-current text-on-surface" text-anchor="middle" x="18" y="20.5">72%</text>
+</svg>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface font-semibold">Taux de saturation estimé ce midi</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Pic projeté entre 12h30 et 13h15 : 6/8 commandes par intervalle.</span>
+</div>
+</div>
+<div class="hidden sm:flex items-center gap-space-xs px-space-sm py-1 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm font-semibold">
+<span class="material-symbols-outlined text-[14px]">shield</span> Sécurité Cuisine Active
+            </div>
+</div>
+</div>
+<!-- Buffer & Urgency settings -->
+<div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col justify-between gap-space-md">
+<div class="flex flex-col gap-space-xs">
+<span class="font-label-sm text-label-sm text-on-surface-variant font-semibold uppercase tracking-wider">Délais Opérationnels</span>
+<h3 class="font-title-md text-title-md text-on-surface">Délai Préparation Moyen</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Temps minimum nécessaire avant le premier retrait disponible lors d'une commande spontanée.</p>
+</div>
+<div class="flex items-center gap-space-sm">
+<div class="w-full bg-surface-container p-space-md rounded-xl text-center">
+<span class="font-display-hero text-[36px] leading-tight text-on-surface font-bold">20</span>
+<span class="block font-label-sm text-label-sm text-on-surface-variant uppercase font-semibold">Minutes tampon</span>
+</div>
+</div>
+<div class="flex flex-col gap-2 pt-2">
+<label class="flex items-center justify-between p-2.5 rounded-lg bg-surface hover:bg-surface-container cursor-pointer transition-colors">
+<span class="font-label-md text-label-md text-on-surface">Mode Urgence "Rush Kitchen"</span>
+<input checked="" class="w-4 h-4 accent-secondary rounded" type="checkbox"/>
+</label>
+<label class="flex items-center justify-between p-2.5 rounded-lg bg-surface hover:bg-surface-container cursor-pointer transition-colors">
+<span class="font-label-md text-label-md text-on-surface">Retrait différé (J+1 / J+2)</span>
+<input checked="" class="w-4 h-4 accent-secondary rounded" type="checkbox"/>
+</label>
+</div>
+</div>
+</div>
+<!-- Weekly Schedule Grid -->
+<div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col gap-space-md">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm pb-space-xs">
+<div>
+<h3 class="font-title-md text-title-md text-on-surface">Horaires d'Ouverture Click &amp; Collect</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Définit les plages d'ouverture du module de retrait sur votre boutique en ligne.</p>
+</div>
+<button class="self-start sm:self-auto px-space-md py-1.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-label-sm text-label-sm font-semibold transition-colors flex items-center gap-1" type="button">
+<span class="material-symbols-outlined text-[16px]">content_copy</span> Appliquer Lundi à Toute la Semaine
+          </button>
+</div>
+<!-- Schedule Table -->
+<div class="flex flex-col gap-2.5">
+<!-- Monday -->
+<div class="p-space-md rounded-xl bg-surface flex flex-col md:flex-row md:items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-md min-w-[140px]">
+<input checked="" class="w-4 h-4 accent-secondary rounded" id="day-mon" type="checkbox"/>
+<label class="font-label-md text-label-md font-semibold text-on-surface" for="day-mon">Lundi</label>
+</div>
+<div class="flex flex-wrap items-center gap-space-md flex-1">
+<div class="flex items-center gap-space-xs bg-surface-container-lowest px-space-md py-1.5 rounded-lg shadow-sm">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Midi:</span>
+<span class="font-label-md text-label-md font-semibold text-on-surface">11:30</span>
+<span class="text-on-surface-variant">—</span>
+<span class="font-label-md text-label-md font-semibold text-on-surface">14:30</span>
+</div>
+<div class="flex items-center gap-space-xs bg-surface-container-lowest px-space-md py-1.5 rounded-lg shadow-sm">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Soir:</span>
+<span class="font-label-md text-label-md font-semibold text-on-surface">18:45</span>
+<span class="text-on-surface-variant">—</span>
+<span class="font-label-md text-label-md font-semibold text-on-surface">22:30</span>
+</div>
+</div>
+<span class="px-space-xs py-0.5 rounded-full bg-surface-container-highest text-on-surface-variant font-label-sm text-label-sm self-start md:self-auto font-medium">8 créneaux / heure</span>
+</div>
+<!-- Tuesday -->
+<div class="p-space-md rounded-xl bg-surface flex flex-col md:flex-row md:items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-md min-w-[140px]">
+<input checked="" class="w-4 h-4 accent-secondary rounded" id="day-tue" type="checkbox"/>
+<label class="font-label-md text-label-md font-semibold text-on-surface" for="day-tue">Mardi</label>
+</div>
+<div class="flex flex-wrap items-center gap-space-md flex-1">
+<div class="flex items-center gap-space-xs bg-surface-container-lowest px-space-md py-1.5 rounded-lg shadow-sm">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Midi:</span>
+<span class="font-label-md text-label-md font-semibold text-on-surface">11:30</span>
+<span class="text-on-surface-variant">—</span>
+<span class="font-label-md text-label-md font-semibold text-on-surface">14:30</span>
+</div>
+<div class="flex items-center gap-space-xs bg-surface-container-lowest px-space-md py-1.5 rounded-lg shadow-sm">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Soir:</span>
+<span class="font-label-md text-label-md font-semibold text-on-surface">18:45</span>
+<span class="text-on-surface-variant">—</span>
+<span class="font-label-md text-label-md font-semibold text-on-surface">22:30</span>
+</div>
+</div>
+<span class="px-space-xs py-0.5 rounded-full bg-surface-container-highest text-on-surface-variant font-label-sm text-label-sm self-start md:self-auto font-medium">8 créneaux / heure</span>
+</div>
+<!-- Wednesday -->
+<div class="p-space-md rounded-xl bg-surface flex flex-col md:flex-row md:items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-md min-w-[140px]">
+<input checked="" class="w-4 h-4 accent-secondary rounded" id="day-wed" type="checkbox"/>
+<label class="font-label-md text-label-md font-semibold text-on-surface" for="day-wed">Mercredi</label>
+</div>
+<div class="flex flex-wrap items-center gap-space-md flex-1">
+<div class="flex items-center gap-space-xs bg-surface-container-lowest px-space-md py-1.5 rounded-lg shadow-sm">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Midi:</span>
+<span class="font-label-md text-label-md font-semibold text-on-surface">11:30</span>
+<span class="text-on-surface-variant">—</span>
+<span class="font-label-md text-label-md font-semibold text-on-surface">14:30</span>
+</div>
+<div class="flex items-center gap-space-xs bg-surface-container-lowest px-space-md py-1.5 rounded-lg shadow-sm">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Soir:</span>
+<span class="font-label-md text-label-md font-semibold text-on-surface">18:45</span>
+<span class="text-on-surface-variant">—</span>
+<span class="font-label-md text-label-md font-semibold text-on-surface">22:30</span>
+</div>
+</div>
+<span class="px-space-xs py-0.5 rounded-full bg-surface-container-highest text-on-surface-variant font-label-sm text-label-sm self-start md:self-auto font-medium">8 créneaux / heure</span>
+</div>
+<!-- Thursday -->
+<div class="p-space-md rounded-xl bg-surface flex flex-col md:flex-row md:items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-md min-w-[140px]">
+<input checked="" class="w-4 h-4 accent-secondary rounded" id="day-thu" type="checkbox"/>
+<label class="font-label-md text-label-md font-semibold text-on-surface" for="day-thu">Jeudi</label>
+</div>
+<div class="flex flex-wrap items-center gap-space-md flex-1">
+<div class="flex items-center gap-space-xs bg-surface-container-lowest px-space-md py-1.5 rounded-lg shadow-sm">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Midi:</span>
+<span class="font-label-md text-label-md font-semibold text-on-surface">11:30</span>
+<span class="text-on-surface-variant">—</span>
+<span class="font-label-md text-label-md font-semibold text-on-surface">14:30</span>
+</div>
+<div class="flex items-center gap-space-xs bg-surface-container-lowest px-space-md py-1.5 rounded-lg shadow-sm">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Soir:</span>
+<span class="font-label-md text-label-md font-semibold text-on-surface">18:45</span>
+<span class="text-on-surface-variant">—</span>
+<span class="font-label-md text-label-md font-semibold text-on-surface">23:00</span>
+</div>
+</div>
+<span class="px-space-xs py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm self-start md:self-auto font-semibold">Haute cadence</span>
+</div>
+<!-- Friday -->
+<div class="p-space-md rounded-xl bg-surface flex flex-col md:flex-row md:items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-md min-w-[140px]">
+<input checked="" class="w-4 h-4 accent-secondary rounded" id="day-fri" type="checkbox"/>
+<label class="font-label-md text-label-md font-semibold text-on-surface" for="day-fri">Vendredi</label>
+</div>
+<div class="flex flex-wrap items-center gap-space-md flex-1">
+<div class="flex items-center gap-space-xs bg-surface-container-lowest px-space-md py-1.5 rounded-lg shadow-sm">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Midi:</span>
+<span class="font-label-md text-label-md font-semibold text-on-surface">11:30</span>
+<span class="text-on-surface-variant">—</span>
+<span class="font-label-md text-label-md font-semibold text-on-surface">15:00</span>
+</div>
+<div class="flex items-center gap-space-xs bg-surface-container-lowest px-space-md py-1.5 rounded-lg shadow-sm">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Soir:</span>
+<span class="font-label-md text-label-md font-semibold text-on-surface">18:30</span>
+<span class="text-on-surface-variant">—</span>
+<span class="font-label-md text-label-md font-semibold text-on-surface">23:30</span>
+</div>
+</div>
+<span class="px-space-xs py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm self-start md:self-auto font-semibold">Rush Soir</span>
+</div>
+<!-- Saturday -->
+<div class="p-space-md rounded-xl bg-surface flex flex-col md:flex-row md:items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-md min-w-[140px]">
+<input checked="" class="w-4 h-4 accent-secondary rounded" id="day-sat" type="checkbox"/>
+<label class="font-label-md text-label-md font-semibold text-on-surface" for="day-sat">Samedi</label>
+</div>
+<div class="flex flex-wrap items-center gap-space-md flex-1">
+<div class="flex items-center gap-space-xs bg-surface-container-lowest px-space-md py-1.5 rounded-lg shadow-sm">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Continu:</span>
+<span class="font-label-md text-label-md font-semibold text-on-surface">11:30</span>
+<span class="text-on-surface-variant">—</span>
+<span class="font-label-md text-label-md font-semibold text-on-surface">23:30</span>
+</div>
+</div>
+<span class="px-space-xs py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm self-start md:self-auto font-semibold">Service continu</span>
+</div>
+<!-- Sunday -->
+<div class="p-space-md rounded-xl bg-surface/50 opacity-70 flex flex-col md:flex-row md:items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-md min-w-[140px]">
+<input class="w-4 h-4 accent-secondary rounded" id="day-sun" type="checkbox"/>
+<label class="font-label-md text-label-md font-semibold text-on-surface" for="day-sun">Dimanche</label>
+</div>
+<div class="flex items-center gap-space-md flex-1">
+<span class="font-body-sm text-body-sm text-on-surface-variant italic">Fermé aux commandes à emporter</span>
+</div>
+<span class="px-space-xs py-0.5 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm self-start md:self-auto">Fermé</span>
+</div>
+</div>
+</div>
+</div>
+<!-- TAB 2: Notifications & Emails -->
+<div class="tab-content hidden flex-col gap-space-lg" id="tab-notifications">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg">
+<!-- Left: Configuration of Transactional Steps -->
+<div class="lg:col-span-5 flex flex-col gap-space-md">
+<div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col gap-space-md">
+<div class="flex flex-col gap-space-xs">
+<span class="font-label-sm text-label-sm text-secondary font-semibold uppercase tracking-wider">Communication Client</span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Étapes Transactionnelles</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Choisissez l'événement à personnaliser ci-contre.</p>
+</div>
+<!-- Pipeline Selector List -->
+<div class="flex flex-col gap-2">
+<button class="w-full text-left p-space-md rounded-xl bg-surface-container flex items-center justify-between transition-all group" type="button">
+<div class="flex items-center gap-space-md">
+<div class="w-8 h-8 rounded-lg bg-primary text-on-primary flex items-center justify-center font-bold font-label-md">1</div>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md font-semibold text-on-surface">Commande Confirmée</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Envoi immédiat après paiement</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-[18px] text-on-surface">chevron_right</span>
+</button>
+<button class="w-full text-left p-space-md rounded-xl bg-surface hover:bg-surface-container flex items-center justify-between transition-all" type="button">
+<div class="flex items-center gap-space-md">
+<div class="w-8 h-8 rounded-lg bg-surface-container text-on-surface flex items-center justify-center font-bold font-label-md">2</div>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md font-semibold text-on-surface">En Préparation (Au Four)</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Lorsque le KDS passe en cours</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-[18px] text-on-surface-variant">chevron_right</span>
+</button>
+<button class="w-full text-left p-space-md rounded-xl bg-surface hover:bg-surface-container flex items-center justify-between transition-all" type="button">
+<div class="flex items-center gap-space-md">
+<div class="w-8 h-8 rounded-lg bg-secondary-fixed text-on-secondary-fixed flex items-center justify-center font-bold font-label-md">3</div>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md font-semibold text-on-surface">Prête au Comptoir</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Alerte convive + code retrait</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-[18px] text-on-surface-variant">chevron_right</span>
+</button>
+</div>
+</div>
+<!-- Email Customization Form -->
+<div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col gap-space-md">
+<h3 class="font-title-md text-title-md text-on-surface">Personnalisation du Modèle</h3>
+<div class="flex flex-col gap-space-xs">
+<label class="font-label-sm text-label-sm font-semibold text-on-surface">Objet du Courriel</label>
+<input class="w-full bg-surface text-on-surface font-body-md text-body-md px-space-md py-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary" type="text" value="Votre commande #WP-{{ORDER_ID}} est validée chez Bistro Madeleine"/>
+</div>
+<div class="flex flex-col gap-space-xs">
+<label class="font-label-sm text-label-sm font-semibold text-on-surface">Texte de Salutation &amp; Message d'Accueil</label>
+<textarea class="w-full bg-surface text-on-surface font-body-md text-body-md p-space-md rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary resize-none" rows="3">Merci de votre confiance ! Notre brigade a réceptionné votre sélection et prépare vos plats avec le plus grand soin.</textarea>
+</div>
+<div class="flex flex-col gap-space-xs">
+<label class="font-label-sm text-label-sm font-semibold text-on-surface">Bannière &amp; Entête Customisée</label>
+<div class="flex items-center gap-space-md">
+<div class="w-16 h-12 rounded-lg bg-surface overflow-hidden flex-shrink-0">
+<img class="w-full h-full object-cover" data-alt="Warm artisanal bistro kitchen preparation setting with copper pans, rustic sourdough bread, fresh herbs on marble counter, soft morning cinematic backlight, warm amber tones, high-end gastronomy photograph" src="https://lh3.googleusercontent.com/aida-public/AB6AXuASQzdI8e93PdGDQgHQ6G3k4lXRmOsCWCuQE6ZapZmgKwduvxP3IQJPx2VHxEVSEwBY5qydOZo2RV8w6DqwxiQTLsmOgLj8dvgi5SEzat393kAU18LFy_eXttND_KefVDkdqkXN1CHrrKGpapEm5AYLEsN5rdRv7_9Y5tMfp3Ix0boQnaZ76kUABTNlkl-YXW0NmowCoQZQ7WsF-NJT8iNER7iruJhFLVWEMZD4bg"/>
+</div>
+<button class="px-space-md py-2 rounded-lg bg-surface text-on-surface hover:bg-surface-container font-label-sm text-label-sm font-semibold transition-colors" type="button">Remplacer la bannière</button>
+</div>
+</div>
+<div class="pt-2 flex items-center justify-between">
+<span class="font-label-md text-label-md text-on-surface font-semibold">SMS instantané de rappel</span>
+<input checked="" class="w-4 h-4 accent-secondary rounded" type="checkbox"/>
+</div>
+</div>
+</div>
+<!-- Right: Real-time Live Email Preview Canvas -->
+<div class="lg:col-span-7 flex flex-col gap-space-xs">
+<div class="flex items-center justify-between px-space-xs">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-semibold">Prévisualisation Client (Apparence Reçue)</span>
+<div class="flex items-center gap-1">
+<span class="w-2.5 h-2.5 rounded-full bg-on-tertiary-container"></span>
+<span class="font-label-sm text-label-sm text-on-surface font-medium">Format Mobile &amp; Desktop</span>
+</div>
+</div>
+<!-- Email Client Canvas Window -->
+<div class="bg-surface-container-high p-space-lg rounded-2xl shadow-md flex justify-center items-start">
+<div class="w-full max-w-md bg-surface-container-lowest rounded-xl shadow-lg overflow-hidden flex flex-col">
+<!-- Mock Email Header -->
+<div class="bg-surface px-space-md py-3 flex items-center justify-between border-b-0">
+<div class="flex items-center gap-space-xs">
+<div class="w-3 h-3 rounded-full bg-error/40"></div>
+<div class="w-3 h-3 rounded-full bg-secondary/40"></div>
+<div class="w-3 h-3 rounded-full bg-on-tertiary-container/40"></div>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">noreply@bistromadeline.whiteplate.pro</span>
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant">mail</span>
+</div>
+<!-- Header Image -->
+<div class="h-32 w-full relative">
+<img class="w-full h-full object-cover" data-alt="Chic Parisian restaurant counter with fresh pastries, artisanal menu cards, and warm diffused architectural lighting, sophisticated atmosphere, hospitality branding photo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAixNE-AFo3tXWJzDkNXOKq0DMGCxSIHJat0G84beS9xafFmX-5m6DtOoG6CzShKK_BBQdlD9jb87UNc25L-pKpRsFknxT0CP94w1VugynAaOKK3XRIkQV27fn_n6DZT7IO9Cxa-Nu3m7ujN2rBt9qrODufeQ1L_bRIkXn9b_FQmGqzKBPu1ODQXRNF8tRWpQWA9F0aV1Gr7OXHWamrQxAl0c13T0i-OkSBPP8HjQ"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end p-space-md">
+<div class="flex items-center gap-space-xs">
+<span class="px-space-xs py-0.5 rounded bg-secondary text-on-secondary font-label-sm text-[10px] font-bold uppercase tracking-wider">Confirmé</span>
+<span class="text-white font-title-md text-title-md font-bold">Bistro Madeleine</span>
+</div>
+</div>
+</div>
+<!-- Email Content Body -->
+<div class="p-space-lg flex flex-col gap-space-md text-on-surface">
+<div class="flex flex-col gap-1">
+<h4 class="font-headline-sm text-headline-sm text-on-surface">Commande #WP-4829 confirmée !</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Merci de votre confiance ! Notre brigade a réceptionné votre sélection et prépare vos plats avec le plus grand soin.</p>
+</div>
+<!-- Slot Card Inside Email -->
+<div class="p-space-md rounded-xl bg-surface-container flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant font-medium">Heure de retrait estimée</span>
+<span class="font-headline-sm text-headline-sm text-secondary font-bold">Aujourd'hui à 12h45</span>
+</div>
+<div class="text-right flex flex-col items-end">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Code Click &amp; Collect</span>
+<span class="font-title-md text-title-md font-mono font-bold bg-surface px-2 py-0.5 rounded">#842</span>
+</div>
+</div>
+<!-- Order Recap -->
+<div class="flex flex-col gap-space-xs py-2">
+<span class="font-label-sm text-label-sm uppercase tracking-wider font-semibold text-on-surface-variant">Récapitulatif</span>
+<div class="flex justify-between items-center text-body-sm font-body-sm py-1">
+<span>1× Suprême de Volaille Fermière &amp; Purée Truffée</span>
+<span class="font-semibold">24,50 €</span>
+</div>
+<div class="flex justify-between items-center text-body-sm font-body-sm py-1">
+<span>1× Tarte Tatin Caramélisée &amp; Crème d'Isigny</span>
+<span class="font-semibold">9,00 €</span>
+</div>
+<div class="flex justify-between items-center pt-space-xs font-title-md text-title-md font-bold text-on-surface">
+<span>Total payé en ligne</span>
+<span>33,50 €</span>
+</div>
+</div>
+<!-- Counter Pickup Notice -->
+<div class="bg-surface p-space-sm rounded-lg flex items-start gap-space-xs">
+<span class="material-symbols-outlined text-[18px] text-secondary flex-shrink-0 mt-0.5">place</span>
+<p class="font-body-sm text-[12px] leading-tight text-on-surface-variant">
+                    Comptoir Retrait Express: 28 Rue Royale, 75008 Paris. Présentez votre numéro de commande sans faire la queue.
+                  </p>
+</div>
+</div>
+<!-- Email Footer -->
+<div class="bg-surface px-space-md py-3 text-center">
+<span class="font-label-sm text-[11px] text-on-surface-variant">WhitePlate Hospitality Engine © — Tous droits réservés</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- TAB 3: Informations Établissement -->
+<div class="tab-content hidden flex-col gap-space-lg" id="tab-info">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg">
+<!-- Store Identity & Fiscal details -->
+<div class="lg:col-span-7 flex flex-col gap-space-lg">
+<div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<div>
+<span class="font-label-sm text-label-sm text-secondary font-semibold uppercase tracking-wider">Identité Légale &amp; Publique</span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Fiche de l'Établissement</h2>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant text-[24px]">verified</span>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-space-md">
+<div class="flex flex-col gap-space-xs">
+<label class="font-label-sm text-label-sm font-semibold text-on-surface">Nom Commercial Enseigne</label>
+<input class="w-full bg-surface text-on-surface font-body-md text-body-md px-space-md py-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary" type="text" value="Bistro Madeleine - Central Paris"/>
+</div>
+<div class="flex flex-col gap-space-xs">
+<label class="font-label-sm text-label-sm font-semibold text-on-surface">Téléphone Comptoir</label>
+<input class="w-full bg-surface text-on-surface font-body-md text-body-md px-space-md py-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary" type="text" value="+33 1 42 68 55 00"/>
+</div>
+</div>
+<div class="flex flex-col gap-space-xs">
+<label class="font-label-sm text-label-sm font-semibold text-on-surface">Adresse Postale Complète</label>
+<input class="w-full bg-surface text-on-surface font-body-md text-body-md px-space-md py-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary" type="text" value="28 Rue Royale, 75008 Paris, France"/>
+</div>
+<!-- GPS Precision -->
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-space-md">
+<div class="flex flex-col gap-space-xs">
+<label class="font-label-sm text-label-sm font-semibold text-on-surface">Latitude GPS</label>
+<input class="w-full bg-surface text-on-surface font-mono font-body-md text-body-md px-space-md py-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary" type="text" value="48.8698"/>
+</div>
+<div class="flex flex-col gap-space-xs">
+<label class="font-label-sm text-label-sm font-semibold text-on-surface">Longitude GPS</label>
+<input class="w-full bg-surface text-on-surface font-mono font-body-md text-body-md px-space-md py-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary" type="text" value="2.3217"/>
+</div>
+</div>
+<!-- Curbside / Pick up guidelines -->
+<div class="flex flex-col gap-space-xs">
+<label class="font-label-sm text-label-sm font-semibold text-on-surface">Consignes de Retrait au Comptoir &amp; Curbside</label>
+<textarea class="w-full bg-surface text-on-surface font-body-md text-body-md p-space-md rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary resize-none" rows="3">Sonnez à la porte vitrée latérale côté rue ou présentez-vous à la caisse bar avec votre notification de commande. Emplacements vélos et zone arrêt-minute devant l'entrée.</textarea>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Ce texte est affiché sur l'écran récapitulatif client après paiement.</span>
+</div>
+</div>
+<!-- Tax & Business identification -->
+<div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col gap-space-md">
+<h3 class="font-title-md text-title-md text-on-surface">Paramètres Fiscaux &amp; Facturation</h3>
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-space-md">
+<div class="flex flex-col gap-space-xs sm:col-span-2">
+<label class="font-label-sm text-label-sm font-semibold text-on-surface">Numéro SIRET (14 chiffres)</label>
+<input class="w-full bg-surface text-on-surface font-mono font-body-md text-body-md px-space-md py-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary" type="text" value="849 203 912 00018"/>
+</div>
+<div class="flex flex-col gap-space-xs">
+<label class="font-label-sm text-label-sm font-semibold text-on-surface">Taux TVA Défaut</label>
+<select class="w-full bg-surface text-on-surface font-label-md text-label-md px-space-md py-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary">
+<option selected="" value="10">10.0% (Restauration)</option>
+<option value="5.5">5.5% (Plats emballés)</option>
+<option value="20">20.0% (Boissons alcoolisées)</option>
+</select>
+</div>
+</div>
+</div>
+</div>
+<!-- Right: Map Preview & Geographic Routing -->
+<div class="lg:col-span-5 flex flex-col gap-space-md">
+<div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col gap-space-md h-full">
+<div class="flex items-center justify-between">
+<div>
+<span class="font-label-sm text-label-sm text-secondary font-semibold uppercase tracking-wider">Itinéraire Convives</span>
+<h3 class="font-title-md text-title-md text-on-surface">Repérage Géographique</h3>
+</div>
+<span class="material-symbols-outlined text-on-tertiary-container text-[20px]">pin_drop</span>
+</div>
+<!-- Map View Container with mandatory data-location -->
+<div class="w-full h-72 rounded-xl bg-cover bg-center shadow-inner relative overflow-hidden" data-location="28 Rue Royale, 75008 Paris, France" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAMP-pSWJsW2HOoNpe4SPEu2LLtPJvK-_7QDT6KBcfKd4RTxBizcACG8dZGvJ4RwUfArBjx3L1-d3AJwHTw-JpQklktfQz6sxR6xglov_Bs4VwMzuqaHSzlPE6z4csx-y7XDOBXpqAT24b--8eWeZTo7r9hGELUTuKitZgLAch6lYzYenxkXFwdCGFT_svYRFGwZmi9ZOG-pRHqdgu_fwTLhgIlKyEKYG7TFvpuSQ')">
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex flex-col justify-end p-space-md">
+<div class="bg-surface-container-lowest/90 backdrop-blur-md p-space-sm rounded-lg flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-secondary text-[20px]">navigation</span>
+<span class="font-label-sm text-label-sm font-semibold text-on-surface">28 Rue Royale, 75008 Paris</span>
+</div>
+<span class="font-label-sm text-[11px] bg-secondary-fixed text-on-secondary-fixed px-1.5 py-0.5 rounded font-bold">Précis (100%)</span>
+</div>
+</div>
+</div>
+<div class="bg-surface p-space-md rounded-xl flex flex-col gap-space-xs">
+<span class="font-label-sm text-label-sm font-semibold text-on-surface">Lien Waze &amp; Google Maps synchronisé</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Le bouton « Ouvrir l'itinéraire » redirige directement vos clients vers le pas de tir de retrait de votre restaurant.</p>
+<div class="pt-2 flex items-center gap-space-md">
+<button class="px-space-md py-1.5 rounded-lg bg-surface-container text-on-surface font-label-sm text-label-sm font-semibold hover:bg-surface-container-high transition-colors" type="button">Tester le lien GPS</button>
+<button class="px-space-md py-1.5 rounded-lg bg-surface-container text-on-surface font-label-sm text-label-sm font-semibold hover:bg-surface-container-high transition-colors" type="button">Recalibrer les coordonnées</button>
+</div>
+</div>
+<div class="p-space-md rounded-xl bg-surface-container-low flex items-center gap-space-md mt-auto">
+<span class="material-symbols-outlined text-on-tertiary-container text-[24px]">contactless</span>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm font-semibold text-on-surface">Mode Borne Sans Contact</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Badge NFC activé au comptoir d'enlèvement.</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- TAB 4: Paiements & Stripe Connect -->
+<div class="tab-content hidden flex-col gap-space-lg" id="tab-stripe">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg">
+<!-- Left: Status & Payout Schedule -->
+<div class="lg:col-span-8 flex flex-col gap-space-lg">
+<!-- Stripe Status Banner -->
+<div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-md">
+<div class="w-14 h-14 rounded-2xl bg-[#635BFF]/10 flex items-center justify-center text-[#635BFF] flex-shrink-0">
+<span class="material-symbols-outlined text-[32px]">credit_card</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-space-xs">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Compte Stripe Connect</h2>
+<span class="px-space-xs py-0.5 rounded-full bg-on-tertiary-container text-on-tertiary font-label-sm text-label-sm font-semibold flex items-center gap-0.5">
+<span class="material-symbols-outlined text-[14px]">check_circle</span> Vérifié &amp; Actif
+                  </span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant font-mono">ID Compte: acct_1Nx48E2XfA9B93kZ • Virements activés</span>
+</div>
+</div>
+<button class="px-space-md py-2 rounded-lg bg-surface-container text-on-surface hover:bg-surface-container-high transition-colors font-label-md text-label-md font-semibold flex items-center gap-1 self-start sm:self-auto" type="button">
+<span>Tableau de bord Stripe</span>
+<span class="material-symbols-outlined text-[16px]">open_in_new</span>
+</button>
+</div>
+<!-- Automated Payout Timing Card -->
+<div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col gap-space-md">
+<div class="flex items-start justify-between">
+<div>
+<span class="font-label-sm text-label-sm text-secondary font-semibold uppercase tracking-wider">Trésorerie &amp; Encaissement</span>
+<h3 class="font-title-md text-title-md text-on-surface">Virements Bancaires Automatiques</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Fréquence de versement direct sur votre compte professionnel BNP Paribas.</p>
+</div>
+<span class="px-space-xs py-0.5 rounded-full bg-surface-container text-on-surface font-label-sm text-label-sm font-semibold">J+1 Ouvré</span>
+</div>
+<!-- Payout Visual Flow -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-space-md pt-space-xs">
+<div class="bg-surface p-space-md rounded-xl flex flex-col gap-1">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Solde disponible immédiat</span>
+<span class="font-headline-lg text-headline-lg text-on-surface font-bold">1 428,50 €</span>
+<span class="font-body-sm text-[12px] text-on-tertiary-container flex items-center gap-0.5">
+<span class="material-symbols-outlined text-[14px]">arrow_downward</span> Prochain virement demain 06:00
+                </span>
+</div>
+<div class="bg-surface p-space-md rounded-xl flex flex-col gap-1">
+<span class="font-label-sm text-label-sm text-on-surface-variant">En attente de compensation</span>
+<span class="font-headline-lg text-headline-lg text-on-surface font-bold">640,00 €</span>
+<span class="font-body-sm text-[12px] text-on-surface-variant">Transactions CB de l'après-midi</span>
+</div>
+<div class="bg-surface p-space-md rounded-xl flex flex-col gap-1">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Total transféré ce mois</span>
+<span class="font-headline-lg text-headline-lg text-on-surface font-bold">24 812,00 €</span>
+<span class="font-body-sm text-[12px] text-on-tertiary-container font-semibold">+18.4% vs mois dernier</span>
+</div>
+</div>
+<!-- Bank account connected -->
+<div class="p-space-md rounded-xl bg-surface-container flex items-center justify-between">
+<div class="flex items-center gap-space-md">
+<div class="p-2 rounded-lg bg-surface-container-lowest text-on-surface">
+<span class="material-symbols-outlined text-[20px]">account_balance</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md font-semibold text-on-surface">IBAN Professionnel Actif</span>
+<span class="font-body-sm text-body-sm font-mono text-on-surface-variant">FR76 3000 4008 1234 5678 9018 421</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-tertiary-container text-[20px]">lock</span>
+</div>
+</div>
+<!-- Accepted Payment Methods -->
+<div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col gap-space-md">
+<h3 class="font-title-md text-title-md text-on-surface">Modes de Paiement Reçus au Checkout</h3>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-space-md">
+<div class="p-space-md rounded-xl bg-surface flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-on-surface text-[20px]">phone_iphone</span>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md font-semibold text-on-surface">Apple Pay &amp; Google Pay</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Conversion en 1 clic</span>
+</div>
+</div>
+<input checked="" class="w-4 h-4 accent-secondary rounded" type="checkbox"/>
+</div>
+<div class="p-space-md rounded-xl bg-surface flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-on-surface text-[20px]">credit_card</span>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md font-semibold text-on-surface">Cartes Bancaires (CB / Visa / MC)</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Protégé 3D Secure 2.0</span>
+</div>
+</div>
+<input checked="" class="w-4 h-4 accent-secondary rounded" type="checkbox"/>
+</div>
+</div>
+</div>
+</div>
+<!-- Right: Real-time Fee breakdown & security -->
+<div class="lg:col-span-4 flex flex-col gap-space-md">
+<div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col gap-space-md">
+<span class="font-label-sm text-label-sm text-secondary font-semibold uppercase tracking-wider">Tarification Claire</span>
+<h3 class="font-title-md text-title-md text-on-surface">Frais &amp; Commissions</h3>
+<div class="flex flex-col gap-space-sm py-2">
+<div class="flex justify-between items-center text-body-sm font-body-sm">
+<span class="text-on-surface-variant">Frais Stripe Connect</span>
+<span class="font-semibold text-on-surface">1.2% + 0.18 €</span>
+</div>
+<div class="flex justify-between items-center text-body-sm font-body-sm">
+<span class="text-on-surface-variant">Frais WhitePlate Pro</span>
+<span class="font-semibold text-on-tertiary-container font-medium">0.0% (Inclus)</span>
+</div>
+<div class="flex justify-between items-center text-body-sm font-body-sm pt-2 bg-surface p-2 rounded-lg">
+<span class="font-semibold text-on-surface">Délai versement</span>
+<span class="font-bold text-on-surface">24h ouvrées (J+1)</span>
+</div>
+</div>
+<!-- Security Badge -->
+<div class="p-space-md rounded-xl bg-surface-container flex items-start gap-space-sm">
+<span class="material-symbols-outlined text-secondary text-[22px] flex-shrink-0">shield</span>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm font-semibold text-on-surface">Conformité DSP2 &amp; RGPD</span>
+<span class="font-body-sm text-[12px] text-on-surface-variant mt-0.5">Tous les flux financiers sont chiffrés de bout en bout et garantis par le standard bancaire PCI-DSS Niveau 1.</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- FLOATING BOTTOM ACTION BAR -->
+<div class="fixed bottom-0 left-64 right-0 z-40 bg-surface/90 backdrop-blur-xl px-space-lg py-space-md shadow-2xl flex items-center justify-between">
+<div class="flex items-center gap-space-md">
+<div class="hidden sm:flex items-center gap-space-xs text-on-surface-variant font-body-sm text-body-sm">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<span id="save-status-text">Modifications non enregistrées détectées</span>
+</div>
+</div>
+<div class="flex items-center gap-space-md">
+<button class="px-space-lg py-2.5 rounded-lg text-on-surface-variant hover:text-on-surface font-label-md text-label-md transition-colors" onclick="location.reload();" type="button">
+        Annuler les changements
+      </button>
+<button class="flex items-center gap-space-xs bg-secondary hover:bg-secondary/95 text-on-secondary font-headline-sm text-[15px] px-space-xl py-3 rounded-lg shadow-md transition-all active:scale-[0.98]" id="save-settings-btn" type="button">
+<span class="material-symbols-outlined text-[20px]">save</span>
+<span>Enregistrer les paramètres</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Interactive Tab & Notification scripts -->
+<script>
+  // Tab Switching Logic
+  const tabs = document.querySelectorAll('.tab-btn');
+  const panes = document.querySelectorAll('.tab-content');
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      // Deactivate all
+      tabs.forEach(t => {
+        t.classList.remove('text-on-primary', 'bg-primary', 'shadow-sm');
+        t.classList.add('text-on-surface-variant', 'hover:text-on-surface', 'hover:bg-surface-container');
+      });
+
+      panes.forEach(pane => {
+        pane.classList.add('hidden');
+        pane.classList.remove('flex');
+      });
+
+      // Activate selected
+      tab.classList.add('text-on-primary', 'bg-primary', 'shadow-sm');
+      tab.classList.remove('text-on-surface-variant', 'hover:text-on-surface', 'hover:bg-surface-container');
+
+      const targetId = tab.getAttribute('data-tab');
+      const targetPane = document.getElementById(targetId);
+      if (targetPane) {
+        targetPane.classList.remove('hidden');
+        targetPane.classList.add('flex');
+      }
+    });
+  });
+
+  // Save Button Micro-interaction feedback
+  const saveBtn = document.getElementById('save-settings-btn');
+  const saveStatus = document.getElementById('save-status-text');
+
+  saveBtn.addEventListener('click', () => {
+    const originalText = saveBtn.innerHTML;
+    saveBtn.innerHTML = '<span class="material-symbols-outlined text-[20px] animate-spin">refresh</span><span>Sauvegarde en cours...</span>';
+    saveBtn.disabled = true;
+
+    setTimeout(() => {
+      saveBtn.innerHTML = '<span class="material-symbols-outlined text-[20px]">check</span><span>Paramètres enregistrés !</span>';
+      saveBtn.classList.remove('bg-secondary');
+      saveBtn.classList.add('bg-on-tertiary-container');
+
+      if (saveStatus) {
+        saveStatus.textContent = "Tous les paramètres sont à jour et synchronisés avec le KDS.";
+      }
+
+      setTimeout(() => {
+        saveBtn.innerHTML = originalText;
+        saveBtn.classList.remove('bg-on-tertiary-container');
+        saveBtn.classList.add('bg-secondary');
+        saveBtn.disabled = false;
+      }, 2500);
+    }, 800);
+  });
+</script></main></div></body></html>
