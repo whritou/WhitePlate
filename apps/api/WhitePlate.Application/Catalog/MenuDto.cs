@@ -41,4 +41,7 @@ public sealed record CatalogManagementDto(Guid TenantId, string Currency,
     IReadOnlyList<PromotionDiscountDto> Discounts);
 public sealed record MenuDto(Guid TenantId, string RestaurantName, string Currency,
     string Locale, string DefaultLocale, IReadOnlyList<string> AvailableLocales,
-    IReadOnlyList<MenuCategoryDto> Categories);
+    IReadOnlyList<MenuCategoryDto> Categories)
+{
+    public string? RestaurantDescription { get; init; }
+}

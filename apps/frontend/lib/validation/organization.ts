@@ -2,6 +2,7 @@ import { isRecord, isUuid } from "./common"
 import type {
   CatalogTranslationInput,
   MenuLanguagesInput,
+  RestaurantDescriptionTranslationInput,
   OrganizationRenameInput,
   StaffInvitationInput,
   StaffRole,
@@ -26,6 +27,27 @@ export function parseMenuLanguages(input: unknown): MenuLanguagesInput | null {
     tenantId: input.tenantId,
     locales: [...input.locales],
     defaultLocale: input.defaultLocale,
+  }
+}
+
+export function parseRestaurantDescriptionTranslation(
+  input: unknown
+): RestaurantDescriptionTranslationInput | null {
+  if (
+    !isRecord(input) ||
+    !isUuid(input.tenantId) ||
+    typeof input.locale !== "string" ||
+    !input.locale.trim() ||
+    input.locale.length > 255 ||
+    typeof input.description !== "string" ||
+    input.description.length > 500
+  )
+    return null
+
+  return {
+    tenantId: input.tenantId,
+    locale: input.locale,
+    description: input.description,
   }
 }
 

@@ -1,7 +1,7 @@
 # Localized restaurant description and shop design
 
 **Date:** 2026-10-08  
-**Status:** Proposed; awaiting user review  
+**Status:** Approved by the user on 2026-10-08
 **Scope:** Public click-and-collect shop UX and restaurant description translations
 
 ## Context

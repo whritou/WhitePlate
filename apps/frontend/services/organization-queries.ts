@@ -4,6 +4,7 @@ import { whitePlateApi } from "@/lib/api"
 import {
   parseCatalog,
   parseMenuLanguageSettings,
+  parseRestaurantDescriptionTranslations,
   parseOrganizations,
   parseOrganizationInvitations,
   parseOrganizationMembers,
@@ -55,6 +56,13 @@ export async function getMenuLanguageSettings(tenantId: string) {
   return readResource(
     `/api/v1/tenants/${tenantId}/menu-languages`,
     parseMenuLanguageSettings
+  )
+}
+
+export async function getRestaurantDescriptionTranslations(tenantId: string) {
+  return readResource(
+    `/api/v1/tenants/${tenantId}/restaurant-description-translations`,
+    parseRestaurantDescriptionTranslations
   )
 }
 

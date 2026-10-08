@@ -13,6 +13,10 @@ public interface ICatalogRepository
         string defaultLocale, CancellationToken cancellationToken) => Task.FromResult<MenuLanguageSettingsDto?>(null);
     Task<bool> SetTranslationAsync(Guid tenantId, string entityType, Guid entityId, string locale, string name,
         string? description, CancellationToken cancellationToken) => Task.FromResult(false);
+    Task<RestaurantDescriptionTranslationsDto?> GetRestaurantDescriptionTranslationsAsync(Guid tenantId,
+        CancellationToken cancellationToken) => Task.FromResult<RestaurantDescriptionTranslationsDto?>(null);
+    Task<bool> SetRestaurantDescriptionTranslationAsync(Guid tenantId, string locale, string? description,
+        CancellationToken cancellationToken) => Task.FromResult(false);
     Task<CatalogManagementDto?> GetManagementCatalogAsync(Guid tenantId, CancellationToken cancellationToken);
     Task<bool> CategoryBelongsToTenantAsync(Guid tenantId, Guid categoryId, CancellationToken cancellationToken);
     Task<MenuCategoryDto> AddCategoryAsync(WhitePlate.Domain.Catalog.MenuCategory category, CancellationToken cancellationToken);

@@ -1,6 +1,7 @@
 import { CatalogTranslationsEditor } from "@/components/organization/catalog-translations-editor"
 import { BackLink } from "@/components/organization/back-link"
 import { MenuLanguageSettings } from "@/components/organization/menu-language-settings"
+import { RestaurantDescriptionEditor } from "@/components/organization/restaurant-description-editor"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Package } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -10,6 +11,7 @@ import { isUuid } from "@/lib/validation/common"
 import {
   getCatalog,
   getMenuLanguageSettings,
+  getRestaurantDescriptionTranslations,
 } from "@/services/organization-queries"
 import { getLocale, getTranslations } from "next-intl/server"
 import { headers } from "next/headers"
@@ -33,16 +35,19 @@ export default async function RestaurantMenuLanguagesPage({
 
   if (!isUuid(query.tenantId)) redirect(`/${locale}/organization`)
 
-  const [response, catalogResponse] = await Promise.all([
+  const [response, catalogResponse, descriptionResponse] = await Promise.all([
     getMenuLanguageSettings(query.tenantId),
     getCatalog(query.tenantId),
+    getRestaurantDescriptionTranslations(query.tenantId),
   ])
 
   if (
     !response.ok ||
     !response.data ||
     !catalogResponse.ok ||
-    !catalogResponse.data
+    !catalogResponse.data ||
+    !descriptionResponse.ok ||
+    !descriptionResponse.data
   ) {
     return (
       <main className="mx-auto min-h-[70vh] max-w-3xl p-4 sm:p-6 lg:p-8">
@@ -90,6 +95,8 @@ export default async function RestaurantMenuLanguagesPage({
         locales={response.data.locales}
         defaultLocale={response.data.defaultLocale}
       />
+
+      <RestaurantDescriptionEditor {...descriptionResponse.data} />
 
       <CatalogTranslationsEditor
         tenantId={response.data.tenantId}

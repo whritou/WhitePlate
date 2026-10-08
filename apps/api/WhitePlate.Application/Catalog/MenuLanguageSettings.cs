@@ -7,9 +7,42 @@ using WhitePlate.Domain.Identity;
 namespace WhitePlate.Application.Catalog;
 
 public sealed record MenuLanguageSettingsDto(Guid TenantId, IReadOnlyList<string> Locales, string DefaultLocale);
+public sealed record RestaurantDescriptionTranslationsDto(Guid TenantId, IReadOnlyList<string> Locales,
+    string DefaultLocale, IReadOnlyDictionary<string, string> Translations);
 
 public sealed class MenuLanguageSettingsHandler(IStaffMembershipRepository memberships, ICatalogRepository catalog)
 {
+    public async Task<Result<RestaurantDescriptionTranslationsDto>> GetDescriptionTranslationsAsync(Guid tenantId,
+        ExternalIdentity identity, CancellationToken cancellationToken)
+    {
+        if (!await CatalogAccess.CanManageAsync(memberships, tenantId, identity, cancellationToken))
+            return Result<RestaurantDescriptionTranslationsDto>.Failure(new ApplicationError(ErrorCode.NotFound));
+        var translations = await catalog.GetRestaurantDescriptionTranslationsAsync(tenantId, cancellationToken);
+        return translations is null
+            ? Result<RestaurantDescriptionTranslationsDto>.Failure(new ApplicationError(ErrorCode.NotFound))
+            : Result<RestaurantDescriptionTranslationsDto>.Success(translations);
+    }
+
+    public async Task<Result<bool>> SetDescriptionTranslationAsync(Guid tenantId, string locale,
+        string? description, ExternalIdentity identity, CancellationToken cancellationToken)
+    {
+        if (!await CatalogAccess.CanManageAsync(memberships, tenantId, identity, cancellationToken))
+            return Result<bool>.Failure(new ApplicationError(ErrorCode.NotFound));
+        try
+        {
+            var updated = await catalog.SetRestaurantDescriptionTranslationAsync(tenantId, locale, description,
+                cancellationToken);
+            return updated
+                ? Result<bool>.Success(true)
+                : Result<bool>.Failure(new ApplicationError(ErrorCode.NotFound));
+        }
+        catch (DomainRuleException exception)
+        {
+            return Result<bool>.Failure(new ApplicationError(ErrorCode.ValidationFailed,
+                new ValidationIssue(exception.Field, exception.Code, exception.Message)));
+        }
+    }
+
     public async Task<Result<MenuLanguageSettingsDto>> GetAsync(Guid tenantId, ExternalIdentity identity,
         CancellationToken cancellationToken)
     {

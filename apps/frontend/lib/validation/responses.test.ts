@@ -5,6 +5,7 @@ import {
   parseOrganizations,
   parseMenuLanguageSettings,
   parseCatalog,
+  parseRestaurantDescriptionTranslations,
 } from "./responses"
 
 const id = "11111111-1111-4111-8111-111111111111"
@@ -13,6 +14,7 @@ it("validates public menu JSON before interactive rendering", () => {
   const menu = {
     tenantId: id,
     restaurantName: "Bistro",
+    restaurantDescription: "A neighborhood bistro.",
     currency: "EUR",
     locale: "fr",
     defaultLocale: "en",
@@ -24,6 +26,32 @@ it("validates public menu JSON before interactive rendering", () => {
   expect(parseStorefrontMenu({ ...menu, categories: [{}] })).toBeNull()
   expect(parseStorefrontMenu({ ...menu, locale: "de" })).toBeNull()
   expect(parseStorefrontMenu({ ...menu, currency: "broken" })).toBeNull()
+})
+
+it("validates restaurant description translation settings before rendering", () => {
+  const settings = {
+    tenantId: id,
+    locales: ["en", "fr"],
+    defaultLocale: "en",
+    translations: { en: "Welcome to Bistro", fr: "Bienvenue au Bistro" },
+  }
+
+  expect(parseRestaurantDescriptionTranslations(settings)).toEqual(settings)
+  expect(
+    parseRestaurantDescriptionTranslations({ ...settings, translations: [] })
+  ).toBeNull()
+  expect(
+    parseRestaurantDescriptionTranslations({
+      ...settings,
+      translations: { fr: 123 },
+    })
+  ).toBeNull()
+  expect(
+    parseRestaurantDescriptionTranslations({
+      ...settings,
+      defaultLocale: "de",
+    })
+  ).toBeNull()
 })
 
 it("rejects malformed organization IDs rather than using them in API paths", () => {

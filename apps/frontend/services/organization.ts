@@ -7,6 +7,7 @@ import type { ApiResult } from "@/types/api"
 import type {
   CatalogTranslationInput,
   MenuLanguagesInput,
+  RestaurantDescriptionTranslationInput,
   OrganizationRenameInput,
   RevokeStaffInvitationInput,
   StaffInvitationInput,
@@ -35,6 +36,19 @@ export async function updateMenuLanguages({
       locales,
       defaultLocale,
     })
+  )
+}
+
+export async function saveRestaurantDescriptionTranslation({
+  tenantId,
+  locale,
+  description,
+}: RestaurantDescriptionTranslationInput): Promise<ActionResult> {
+  return actionResult(
+    await whitePlateApi.put(
+      `/api/v1/tenants/${tenantId}/restaurant-description-translations/${encodeURIComponent(locale)}`,
+      { description }
+    )
   )
 }
 

@@ -74,6 +74,7 @@ export type GuestCheckoutController = ReturnType<
 export type CheckoutPanelProps = {
   checkoutState: GuestCheckoutController
   mode: "cart" | "checkout"
+  estimatedSubtotal?: string
   onBack?: () => void
   onContinue?: () => void
   onNewOrder: () => void

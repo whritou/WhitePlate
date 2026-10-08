@@ -4,6 +4,7 @@ import type { StorefrontMenu, Product } from "@/types/storefront"
 import type {
   CatalogTranslationData,
   MenuLanguageSettings,
+  RestaurantDescriptionTranslations,
   LocalizedText,
 } from "@/types/catalog"
 import type {
@@ -154,6 +155,44 @@ export function parseMenuLanguageSettings(
   return parseMenuLanguages(value)
 }
 
+export function parseRestaurantDescriptionTranslations(
+  value: unknown
+): RestaurantDescriptionTranslations | null {
+  if (
+    !isRecord(value) ||
+    !isUuid(value.tenantId) ||
+    typeof value.defaultLocale !== "string" ||
+    !Array.isArray(value.locales) ||
+    value.locales.length === 0 ||
+    !value.locales.every(
+      (locale) => typeof locale === "string" && locale.length > 0
+    )
+  )
+    return null
+
+  const locales = value.locales as string[]
+
+  if (
+    !locales.includes(value.defaultLocale) ||
+    !isRecord(value.translations) ||
+    !Object.entries(value.translations).every(
+      ([locale, description]) =>
+        locale.length > 0 &&
+        locale.length <= 255 &&
+        typeof description === "string" &&
+        description.length <= 500
+    )
+  )
+    return null
+
+  return {
+    tenantId: value.tenantId,
+    locales: [...locales],
+    defaultLocale: value.defaultLocale,
+    translations: { ...value.translations } as Record<string, string>,
+  }
+}
+
 function isLocalizedText(value: unknown): value is LocalizedText {
   return (
     isRecord(value) &&
@@ -250,6 +289,7 @@ export function parseStorefrontMenu(value: unknown): StorefrontMenu | null {
     !isRecord(value) ||
     !isUuid(value.tenantId) ||
     typeof value.restaurantName !== "string" ||
+    !isDescription(value.restaurantDescription) ||
     typeof value.currency !== "string" ||
     !/^[A-Z]{3}$/.test(value.currency) ||
     typeof value.locale !== "string" ||
@@ -276,6 +316,7 @@ export function parseStorefrontMenu(value: unknown): StorefrontMenu | null {
   return {
     tenantId: value.tenantId,
     restaurantName: value.restaurantName,
+    restaurantDescription: value.restaurantDescription,
     currency: value.currency,
     locale: value.locale,
     defaultLocale: value.defaultLocale,

@@ -7,6 +7,7 @@ import {
   renameOrganizationAction,
   sendStaffInvitationAction,
   acceptStaffInvitationAction,
+  saveRestaurantDescriptionTranslationAction,
 } from "./organization"
 import { whitePlateApi } from "@/lib/api"
 import * as organizationActions from "./organization"
@@ -92,6 +93,34 @@ it("rejects file form fields and oversized non-product translation names", async
   ).toEqual({ ok: false, message: "invalid" })
   expect(whitePlateApi.post).not.toHaveBeenCalled()
   expect(whitePlateApi.put).not.toHaveBeenCalled()
+})
+
+it("saves only valid restaurant description translations through the API", async () => {
+  vi.mocked(whitePlateApi.put).mockResolvedValue({
+    ok: true,
+    status: 204,
+    data: undefined,
+  })
+
+  expect(
+    await saveRestaurantDescriptionTranslationAction({
+      tenantId: id,
+      locale: "fr",
+      description: "  Bienvenue  ",
+    })
+  ).toEqual({ ok: true })
+  expect(whitePlateApi.put).toHaveBeenCalledWith(
+    `/api/v1/tenants/${id}/restaurant-description-translations/fr`,
+    { description: "  Bienvenue  " }
+  )
+  expect(
+    await saveRestaurantDescriptionTranslationAction({
+      tenantId: id,
+      locale: "fr",
+      description: "a".repeat(501),
+    })
+  ).toEqual({ ok: false, message: "invalid" })
+  expect(whitePlateApi.put).toHaveBeenCalledTimes(1)
 })
 
 it("renames only the selected organization with a normalized name", async () => {

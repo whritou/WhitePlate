@@ -44,4 +44,41 @@ public sealed class TenantTests
         Assert.Throws<DomainRuleException>(() => Tenant.Create(Guid.Empty, "Bistro", "bistro", "EUR"));
         Assert.Throws<DomainRuleException>(() => Tenant.Create(Guid.NewGuid(), "Bistro", "bistro", "CAD"));
     }
+
+    [Fact]
+    public void ResolvesDescriptionByMenuLocaleThenDefault()
+    {
+        var tenant = Tenant.Create(Guid.NewGuid(), "Bistro", "bistro", "EUR");
+        tenant.UpdateMenuLocales(["en", "fr"], "en");
+        tenant.SetDescriptionTranslation("en", "English description");
+        tenant.SetDescriptionTranslation("fr", "Description française");
+
+        Assert.Equal("Description française", tenant.ResolveDescription("fr"));
+        tenant.SetDescriptionTranslation("fr", null);
+        Assert.Equal("English description", tenant.ResolveDescription("fr"));
+        Assert.Equal("English description", tenant.ResolveDescription("de"));
+    }
+
+    [Fact]
+    public void ClearingDescriptionPreservesOtherLocaleTranslations()
+    {
+        var tenant = Tenant.Create(Guid.NewGuid(), "Bistro", "bistro", "EUR");
+        tenant.UpdateMenuLocales(["en", "fr"], "en");
+        tenant.SetDescriptionTranslation("en", "  English intro  ");
+        tenant.SetDescriptionTranslation("fr", "Description française");
+
+        tenant.SetDescriptionTranslation("en", "   ");
+
+        Assert.Null(tenant.ResolveDescription("en"));
+        Assert.Equal("Description française", tenant.ResolveDescription("fr"));
+    }
+
+    [Fact]
+    public void RejectsDisabledDescriptionLocaleAndDescriptionsOver500Characters()
+    {
+        var tenant = Tenant.Create(Guid.NewGuid(), "Bistro", "bistro", "EUR");
+
+        Assert.Throws<DomainRuleException>(() => tenant.SetDescriptionTranslation("fr", "Texte"));
+        Assert.Throws<DomainRuleException>(() => tenant.SetDescriptionTranslation("en", new string('a', 501)));
+    }
 }
