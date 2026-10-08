@@ -50,11 +50,11 @@ export function AuthForm({
             {t("asideEyebrow")}
           </p>
 
-          <p className="max-w-xl text-4xl leading-tight font-semibold tracking-tight text-foreground xl:text-5xl">
+          <p className="max-w-[36rem] text-4xl leading-tight font-semibold tracking-tight text-foreground xl:text-5xl">
             {t("asideTitle")}
           </p>
 
-          <p className="mt-5 max-w-md text-base leading-7 text-muted-foreground">
+          <p className="mt-5 max-w-[28rem] text-base leading-7 text-muted-foreground">
             {t("asideDescription")}
           </p>
 

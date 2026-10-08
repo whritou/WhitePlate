@@ -34,9 +34,9 @@ export function LandingPricing() {
           {t("thirdPartyMarketplacesChargeUpTo30")}
         </p>
 
-        <div className="flex items-center justify-center gap-3 pt-4">
+        <div className="grid grid-cols-[minmax(0,1fr)_3.5rem_minmax(0,1fr)] items-center gap-x-2 pt-4 sm:flex sm:justify-center sm:gap-3">
           <span
-            className="font-sans text-label-md font-semibold text-on-surface"
+            className="text-center font-sans text-label-md font-semibold text-on-surface sm:text-start"
             id="label-monthly"
           >
             {t("monthlyBilling")}
@@ -53,12 +53,12 @@ export function LandingPricing() {
           >
             <span
               id="toggle-knob"
-              className={`pointer-events-none block size-5 rounded-full bg-secondary-container shadow-sm transition-transform ${annual ? "translate-x-7" : "translate-x-0"}`}
+              className={`pointer-events-none block size-5 rounded-full bg-secondary-container shadow-sm transition-transform ${annual ? "translate-x-6" : "translate-x-0"}`}
             ></span>
           </Button>
 
           <span
-            className="flex items-center gap-1.5 font-sans text-label-md text-on-surface-variant"
+            className="flex flex-wrap items-center justify-center gap-x-1.5 font-sans text-label-md text-on-surface-variant sm:justify-start"
             id="label-annual"
           >
             <span className="">{t("annualBilling")}</span>

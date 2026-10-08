@@ -34,27 +34,27 @@ export function MenuProductCard({
   return (
     <Card
       size="sm"
-      className="relative h-full gap-sm border-0 p-0 pr-28 shadow-sm"
+      className="grid h-full grid-cols-[minmax(0,1fr)_5rem] grid-rows-[auto_1fr_auto] gap-x-3 gap-y-3 border-0 p-4 shadow-sm sm:grid-cols-[minmax(0,1fr)_6rem]"
     >
       <Image
         src={`/design/photo-${[15, 16, 17, 18, 19, 20][imageIndex % 6]}.webp`}
         alt=""
         width={96}
         height={96}
-        className="absolute top-4 right-4 size-24 rounded-md object-cover"
+        className="col-start-2 row-start-1 size-20 rounded-md object-cover sm:size-24"
       />
 
-      <CardHeader className="p-md pb-0">
+      <CardHeader className="col-start-1 row-start-1 min-w-0 p-0 pb-0">
         <CardTitle>
-          <h3 className="font-heading text-title-md leading-6">
+          <h3 className="font-heading text-title-md leading-6 break-words">
             {product.name}
           </h3>
         </CardTitle>
       </CardHeader>
 
-      <CardContent className="flex flex-1 flex-col gap-sm p-md pt-0">
+      <CardContent className="col-start-1 row-start-2 flex min-w-0 flex-col gap-sm p-0 pt-0">
         {product.description && (
-          <p className="text-body-sm text-muted-foreground">
+          <p className="text-body-sm break-words text-muted-foreground">
             {product.description}
           </p>
         )}
@@ -66,7 +66,7 @@ export function MenuProductCard({
         )}
       </CardContent>
 
-      <CardFooter className="-mr-28 justify-between gap-sm border-t-0 p-md pt-0">
+      <CardFooter className="col-span-2 row-start-3 flex-wrap justify-between gap-3 border-t-0 p-0 pt-1">
         <span className="font-heading text-headline-sm tabular-nums">
           {price.format(product.basePrice)}
         </span>

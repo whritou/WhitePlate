@@ -129,7 +129,7 @@ export function DemoDashboard() {
       <div className="min-w-0 flex-1">
         <MarketingHeader />
 
-        <main className="mx-auto max-w-7xl p-4 sm:p-8">
+        <main className="mx-auto max-w-7xl p-3 sm:p-8">
           <header className="mb-8 flex flex-wrap items-center justify-between gap-5">
             <div className="flex items-center gap-4">
               <span className="grid size-14 place-items-center rounded-lg bg-primary text-primary-foreground shadow-sm">
@@ -258,18 +258,18 @@ export function DemoDashboard() {
                   .map((order) => (
                     <Card
                       key={order.id}
-                      className="flex-row flex-wrap items-center justify-between gap-5 border-0 p-5"
+                      className="grid grid-cols-1 gap-3 border-0 p-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:gap-5 sm:p-5"
                     >
-                      <div className="flex min-w-0 flex-1 items-start gap-4">
+                      <div className="flex min-w-0 items-start gap-3 sm:gap-4">
                         <span
-                          className={`grid size-12 shrink-0 place-items-center rounded-lg ${order.status === "Pending" ? "bg-warning-muted text-warning" : order.status === "Ready" ? "bg-success-muted text-success" : "bg-secondary"}`}
+                          className={`grid size-10 shrink-0 place-items-center rounded-lg sm:size-12 ${order.status === "Pending" ? "bg-warning-muted text-warning" : order.status === "Ready" ? "bg-success-muted text-success" : "bg-secondary"}`}
                         >
                           <CookingPot aria-hidden="true" className="size-6" />
                         </span>
 
                         <div className="min-w-0">
                           <div className="flex flex-wrap items-center gap-3">
-                            <h2 className="font-heading text-xl font-bold">
+                            <h2 className="font-heading text-lg font-bold sm:text-xl">
                               #WP-{order.id}
                             </h2>
 
@@ -286,7 +286,7 @@ export function DemoDashboard() {
                             </Badge>
                           </div>
 
-                          <p className="mt-3 text-sm">
+                          <p className="mt-2 text-sm sm:mt-3">
                             <strong>{order.name}</strong> ·{" "}
                             {price.format(order.total)}
                           </p>
@@ -297,7 +297,7 @@ export function DemoDashboard() {
                         </div>
                       </div>
 
-                      <div className="flex flex-wrap gap-2">
+                      <div className="flex flex-wrap justify-end gap-2 sm:pl-4">
                         {order.status === "Pending" && (
                           <Button
                             size="sm"

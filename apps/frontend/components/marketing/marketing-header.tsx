@@ -25,8 +25,8 @@ export function MarketingHeader() {
 
   return (
     <header className="sticky top-0 z-50 bg-background/90 shadow-xs backdrop-blur-xl">
-      <div className="mx-auto flex min-h-20 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-12">
-        <div className="flex items-center gap-8">
+      <div className="mx-auto flex min-h-20 max-w-7xl items-center justify-between gap-2 px-3 sm:gap-4 sm:px-6 lg:px-12">
+        <div className="flex min-w-0 items-center gap-8">
           <Link href="/" aria-label={t("home")}>
             <Brand />
           </Link>
@@ -47,11 +47,11 @@ export function MarketingHeader() {
           </nav>
         </div>
 
-        <div className="flex items-center gap-2 sm:gap-3">
+        <div className="flex shrink-0 items-center gap-1 sm:gap-3">
           <div
             aria-label={t("language")}
             role="group"
-            className="flex rounded-md bg-secondary p-1"
+            className="flex rounded-lg bg-secondary p-1"
           >
             {(["en", "fr"] as const).map((language) => (
               <Link
@@ -67,7 +67,7 @@ export function MarketingHeader() {
                 }}
                 lang={language}
                 aria-current={locale === language ? "true" : undefined}
-                className={`grid min-h-10 min-w-10 place-items-center rounded-sm text-xs font-semibold uppercase ${locale === language ? "bg-card shadow-xs" : "text-muted-foreground"}`}
+                className={`grid min-h-9 min-w-9 place-items-center rounded-md text-xs font-semibold uppercase transition-colors sm:min-h-10 sm:min-w-10 ${locale === language ? "bg-card shadow-xs" : "text-muted-foreground"}`}
               >
                 {language}
               </Link>

@@ -26,6 +26,10 @@ Node v24.19.0 was available; npm was not on PATH, so the installed package CLI e
 
 Browser review used the existing local development server and a production preview. Checked English/light/dark presentation and French desktop/mobile layouts, public landing copy without a demo banner, menu assets, cart quantity updates, checkout total (two burgers, fries and shake: $41.30 subtotal, $4.13 discount, $2.97 tax, $40.14 total), receipt consistency, Preparing → Ready progression, dashboard test tickets and pause/resume state. At a 390px viewport, the French landing, menu, tracking and dashboard had no horizontal document overflow. Desktop menu images had no failed loads. Temporary viewport overrides were reset.
 
+Responsive follow-up for issue #53: the landing page and live demo preview were checked at 320px and 375px, the French billing selector at 375px, the product action inset at 320px, and the dashboard and sign-in panel at narrow and desktop widths. The landing document has no horizontal overflow at 320px; the sign-in story text now renders at 448–576px rather than inheriting 16–40px spacing values; and the product action keeps a 16px inset from the card edge. Frontend lint, typecheck, formatting and production build were rerun for this follow-up; see the task handoff for final results.
+
+- Responsive follow-up verification: full ESLint and TypeScript checks passed; Prettier passed on all six changed components. `next build --webpack` passed with inert HTTPS auth/API origins. The restricted Windows environment still logs non-blocking webpack cache `EPERM` and PostgreSQL SSL-mode warnings.
+
 ## Remaining boundaries
 
 Payment processing, scheduled fulfillment, notifications, analytics, product media uploads and persisted tenant customization are future backend work. Wallet, directions and chat actions display local preview feedback. Legal/security footer labels have no published destination yet. These are visual placeholders, not claims that the corresponding services exist. Marketing text/prices follow the supplied export and are not connected to billing.

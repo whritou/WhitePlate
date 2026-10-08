@@ -14,22 +14,22 @@ export function LandingDemoPreview() {
   return (
     <div className="lg:col-span-6">
       <div className="relative overflow-hidden rounded-lg bg-surface-container-lowest p-4 shadow-xl sm:p-6">
-        <div className="mb-4 flex items-center justify-between pb-4">
-          <div className="flex items-center gap-2">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3 pb-4">
+          <div className="flex min-w-0 items-center gap-2">
             <div className="h-3 w-3 rounded-full bg-error-container"></div>
 
             <div className="h-3 w-3 rounded-full bg-surface-container-high"></div>
 
             <div className="h-3 w-3 rounded-full bg-on-tertiary-container/30"></div>
 
-            <span className="ml-2 font-mono font-sans text-label-sm text-on-surface-variant">
+            <span className="ml-1 min-w-0 font-mono font-sans text-label-sm break-all text-on-surface-variant sm:ml-2">
               {t("orderLapiccolaBistroCom")}
             </span>
           </div>
 
-          <div className="flex items-center rounded-lg bg-surface-container p-1">
+          <div className="flex w-full min-w-0 items-center rounded-lg bg-surface-container p-1 sm:w-auto">
             <Button
-              className="tab-trigger flex items-center gap-1.5 rounded bg-surface-container-lowest px-3 py-1 font-sans text-label-sm font-semibold text-on-surface shadow-xs transition-all"
+              className="tab-trigger min-w-0 flex-1 items-center justify-center gap-1 rounded bg-surface-container-lowest px-1 py-1 text-center font-sans text-label-sm font-semibold text-on-surface shadow-xs transition-all sm:flex-none sm:gap-1.5 sm:px-3"
               id="tab-btn-backoffice"
               type="button"
               variant="ghost"
@@ -42,7 +42,7 @@ export function LandingDemoPreview() {
             </Button>
 
             <Button
-              className="tab-trigger flex items-center gap-1.5 rounded px-3 py-1 font-sans text-label-sm text-on-surface-variant transition-all hover:text-on-surface"
+              className="tab-trigger min-w-0 flex-1 items-center justify-center gap-1 rounded px-1 py-1 text-center font-sans text-label-sm text-on-surface-variant transition-all hover:text-on-surface sm:flex-none sm:gap-1.5 sm:px-3"
               id="tab-btn-storefront"
               type="button"
               variant="ghost"
@@ -61,7 +61,7 @@ export function LandingDemoPreview() {
           id="view-backoffice"
           hidden={view !== "kitchen"}
         >
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 gap-2 min-[480px]:grid-cols-3 sm:gap-3">
             <div className="rounded-xl bg-surface-container-low p-3">
               <p className="font-sans text-label-sm text-on-surface-variant">
                 {t("liveQueue")}
@@ -112,14 +112,14 @@ export function LandingDemoPreview() {
           </div>
 
           <div className="space-y-2.5">
-            <div className="flex items-center justify-between gap-3 rounded-xl bg-surface-container-low p-3.5 shadow-xs">
-              <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-surface-container-low p-3.5 shadow-xs">
+              <div className="flex min-w-0 flex-1 items-center gap-3">
                 <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-secondary-container/10 font-heading text-title-md font-bold text-secondary-container">
                   {t("value48")}
                 </div>
 
-                <div>
-                  <div className="flex items-center gap-2">
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
                     <span className="font-heading text-title-md text-on-surface">
                       {t("claraDupont")}
                     </span>
@@ -136,7 +136,7 @@ export function LandingDemoPreview() {
               </div>
 
               <Button
-                className="rounded-lg bg-surface-container-high px-3 py-1.5 font-sans text-label-sm font-semibold text-on-surface transition-colors hover:bg-surface-variant"
+                className="ml-auto rounded-lg bg-surface-container-high px-3 py-1.5 font-sans text-label-sm font-semibold text-on-surface transition-colors hover:bg-surface-variant"
                 type="button"
                 variant="ghost"
                 onClick={() => setBumped(!bumped)}
@@ -146,14 +146,14 @@ export function LandingDemoPreview() {
               </Button>
             </div>
 
-            <div className="flex items-center justify-between gap-3 rounded-xl bg-surface-container-low p-3.5 shadow-xs">
-              <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-surface-container-low p-3.5 shadow-xs">
+              <div className="flex min-w-0 flex-1 items-center gap-3">
                 <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary-container font-heading text-title-md font-bold text-on-primary">
                   {t("value49")}
                 </div>
 
-                <div>
-                  <div className="flex items-center gap-2">
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
                     <span className="font-heading text-title-md text-on-surface">
                       {t("marcAlcantara")}
                     </span>
