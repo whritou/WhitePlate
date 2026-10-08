@@ -66,5 +66,6 @@ Verification recorded for this working tree:
 | Frontend `node node_modules/typescript/bin/tsc --noEmit` | Passed. |
 | Frontend `node node_modules/next/dist/bin/next build --webpack` | Passed compilation and all 49 generated pages with inert HTTPS `.invalid` URLs and unavailable local DB; expected Better Auth schema-connection errors were logged for the placeholder database. |
 | Frontend Prettier repository-wide check | Not clean at baseline: 215 existing files report formatting differences. Changed TS/TSX files were formatted individually. |
+| Local storefront fixture walkthrough | Passed on desktop: EN/FR descriptions and menu content, required-option validation, adding two configured items, €22 estimated subtotal, Escape dismissal with focus restoration, and checkout navigation retaining `menuLocale=fr`. The local fixture used no shared database. |
 
-Remaining: exercise the responsive modal/cart with the guarded browser fixture, apply the migration only in a reviewed target environment, and perform hosted acceptance after deployment. No migration was applied to a shared or production database in this task.
+Remaining: verify narrow mobile layout with a responsive viewport, apply the migration only in a reviewed target environment, and perform hosted acceptance after deployment. No migration was applied to a shared or production database in this task.

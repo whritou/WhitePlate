@@ -110,7 +110,7 @@ Operator-reported follow-up on 2026-10-06: opening the protected restaurant rout
 
 ### Restaurant descriptions and shop presentation — 2026-10-08
 
-The implementation adds API/domain coverage for per-locale persistence, selected/default description fallback, blank clearing, 500-character limits, and owner/manager versus kitchen/foreign-tenant access. The full API suite passed (163 tests), and the frontend suite passed (57 files, 382 tests). Frontend lint, typecheck, changed-file formatting, API build, and Next production build passed. The Next build used inert HTTPS `.invalid` endpoints and an unavailable local database; Better Auth logged expected schema-connection errors. The EF migration is generated but not applied to a shared database. SF-18/SF-19 responsive browser and hosted acceptance remain open.
+The implementation adds API/domain coverage for per-locale persistence, selected/default description fallback, blank clearing, 500-character limits, and owner/manager versus kitchen/foreign-tenant access. The full API suite passed (163 tests), and the frontend suite passed (57 files, 382 tests). Frontend lint, typecheck, changed-file formatting, API build, and Next production build passed. The Next build used inert HTTPS `.invalid` endpoints and an unavailable local database; Better Auth logged expected schema-connection errors. A local fixture walkthrough verified EN/FR menu descriptions, required-option validation, confirmed cart updates, estimated subtotal, Escape dismissal/focus restoration, and checkout locale preservation on desktop. The EF migration is generated but not applied to a shared database. Narrow mobile viewport and hosted acceptance remain open.
 
 ### Catalog management
 
