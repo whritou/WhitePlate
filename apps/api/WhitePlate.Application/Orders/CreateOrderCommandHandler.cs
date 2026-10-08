@@ -22,13 +22,17 @@ public sealed class CreateOrderCommandHandler(IOrderRepository orders, TimeProvi
         if (!IsValidIdempotencyKey(command.IdempotencyKey))
             return Validation("Idempotency-Key", "required", "A valid Idempotency-Key header is required.");
 
+        string? trackingTokenHash = null;
+        if (command.TrackingToken is not null && !OrderTrackingToken.TryHash(command.TrackingToken, out trackingTokenHash))
+            return Validation("trackingToken", "invalid_value", "The order tracking token is invalid.");
+
         var key = command.IdempotencyKey!.Trim();
         var locale = await orders.ResolveCheckoutLocaleAsync(command.TenantId, command.MenuLocale,
             cancellationToken);
         if (locale is null) return Result<OrderReceiptDto>.Failure(new ApplicationError(ErrorCode.NotFound));
 
         var keyHash = Hash(key);
-        var requestHash = Hash(CreateFingerprint(command, locale.Locale));
+        var requestHash = Hash(CreateFingerprint(command, locale.Locale, trackingTokenHash));
         var now = timeProvider.GetUtcNow();
         var existing = await orders.FindIdempotentOrderAsync(command.TenantId, keyHash, requestHash, now,
             cancellationToken);
@@ -96,7 +100,8 @@ public sealed class CreateOrderCommandHandler(IOrderRepository orders, TimeProvi
                 _ => 0m
             };
             var order = Order.Create(command.TenantId, catalog.Currency, command.CustomerName, snapshots,
-                normalizedCode, discountAmount, now, catalog.Locale);
+                normalizedCode, discountAmount, now, catalog.Locale, trackingTokenHash,
+                trackingTokenHash is null ? null : now.AddDays(30));
             var receipt = order.ToReceipt();
             var result = await orders.CreateOrderAsync(order, receipt, keyHash, requestHash, now,
                 cancellationToken);
@@ -117,12 +122,14 @@ public sealed class CreateOrderCommandHandler(IOrderRepository orders, TimeProvi
         !string.IsNullOrWhiteSpace(value) && value.Trim().Length <= 128 &&
         value.Trim().All(character => character is >= '!' and <= '~');
 
-    private static string CreateFingerprint(CreateOrderCommand command, string effectiveLocale)
+    private static string CreateFingerprint(CreateOrderCommand command, string effectiveLocale,
+        string? trackingTokenHash)
     {
         var canonical = new
         {
             customerName = command.CustomerName?.Trim(),
             menuLocale = effectiveLocale,
+            trackingTokenHash,
             discountCode = string.IsNullOrWhiteSpace(command.DiscountCode)
                 ? null
                 : command.DiscountCode.Trim().ToUpperInvariant(),

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest"
 import {
+  createTrackingToken,
   prepareCheckout,
   updateCart,
   validateOrderInput,
@@ -16,6 +17,26 @@ const input = {
 }
 
 describe("guest cart", () => {
+  it("creates a 256-bit URL-safe order tracking capability", () => {
+    expect(createTrackingToken()).toMatch(/^[A-Za-z0-9_-]{43}$/)
+  })
+
+  it("keeps a tracking capability across retries and rotates it for changed order content", () => {
+    let tokenNumber = 0
+    const makeToken = () => `${"A".repeat(42)}${++tokenNumber}`
+    const first = prepareCheckout(input, null, () => "first-key", makeToken)
+    const retry = prepareCheckout(input, first, () => "wrong-key", makeToken)
+    const changed = prepareCheckout(
+      { ...input, items: [{ productId, quantity: 3, optionIds: [] }] },
+      first,
+      () => "second-key",
+      makeToken
+    )
+
+    expect(retry.input.trackingToken).toBe(`${"A".repeat(42)}1`)
+    expect(changed.input.trackingToken).toBe(`${"A".repeat(42)}2`)
+  })
+
   it("does not send client prices, tenant IDs, or unknown fields in an order", () => {
     const forged = {
       ...input,

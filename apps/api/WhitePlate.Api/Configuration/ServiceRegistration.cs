@@ -86,6 +86,7 @@ public static class ServiceRegistration
         services.AddScoped<ICatalogRepository, CatalogRepository>();
         services.AddScoped<IOrderRepository, OrderRepository>();
         services.AddScoped<CreateOrderCommandHandler>();
+        services.AddScoped<GetPublicOrderTrackingQueryHandler>();
         services.AddScoped<ListOrdersQueryHandler>();
         services.AddScoped<ListOrderHistoryQueryHandler>();
         services.AddScoped<UpdateOrderStatusCommandHandler>();

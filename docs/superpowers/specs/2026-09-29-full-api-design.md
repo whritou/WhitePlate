@@ -45,7 +45,7 @@ Exact DTOs and route templates should remain consistent with these resource boun
 - Order statuses are `Pending -> Preparing -> Ready -> Completed`. A manager may cancel any order that is not completed. Repeating the current status is a no-op; other invalid transitions return `409`.
 - Staff status mutations require `If-Match` with the current order version. Missing preconditions return `428`; stale versions return `412` without overwriting newer state.
 - Public order creation requires an `Idempotency-Key`, unique per tenant and retained for 24 hours. Repeating the same key and normalized request returns the original receipt; reusing it for a different request returns `409`.
-- Return the receipt in the successful create response. No public order lookup route is included.
+- Return the receipt in the successful create response. The original design excluded public order lookup; [decision 0006](../../architecture/decisions/0006-public-order-tracking.md) later amended this only to add expiring capability-protected status tracking that returns no customer or payment data.
 - Staff order lists use cursor pagination with a default page size of 50 and a maximum of 100; filtering and ordering remain within the authorized tenant.
 - Public order creation has configurable per-tenant/IP rate limits and a request-body size limit. Rate-limit responses use the existing `429 rate_limited` error code.
 

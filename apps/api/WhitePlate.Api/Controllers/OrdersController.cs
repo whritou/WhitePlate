@@ -17,6 +17,7 @@ namespace WhitePlate.Api.Controllers;
 public sealed class OrdersController(ICurrentTenant currentTenant, ICurrentIdentity currentIdentity,
     CreateOrderCommandHandler createOrder, CheckoutRequestRateLimiter checkoutRateLimiter,
     ListOrdersQueryHandler listOrders, ListOrderHistoryQueryHandler listOrderHistory,
+    GetPublicOrderTrackingQueryHandler getPublicTracking,
     UpdateOrderStatusCommandHandler updateStatus, ApiErrorMapper errors) : ControllerBase
 {
     [HttpPost]
@@ -41,13 +42,28 @@ public sealed class OrdersController(ICurrentTenant currentTenant, ICurrentIdent
             .ToArray();
         var command = new CreateOrderCommand(tenant.Id, request.CustomerName, request.DiscountCode,
             request.MenuLocale, items,
-            Request.Headers["Idempotency-Key"].FirstOrDefault());
+            Request.Headers["Idempotency-Key"].FirstOrDefault(), request.TrackingToken);
         var result = await createOrder.HandleAsync(command, cancellationToken);
         if (!result.IsSuccess)
             return errors.ToActionResult(errors.Create(HttpContext, result.Error));
 
         Response.Headers["ETag"] = $"\"{result.Value.Version}\"";
         return StatusCode(StatusCodes.Status201Created, result.Value);
+    }
+
+    [HttpPost("{orderId:guid}/tracking")]
+    [RequireTenant]
+    [RequestSizeLimit(1024)]
+    [AllowAnonymous]
+    [ProducesResponseType<PublicOrderTrackingDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status404NotFound, "application/problem+json")]
+    public async Task<ActionResult<PublicOrderTrackingDto>> Track(Guid orderId, OrderTrackingRequest request,
+        CancellationToken cancellationToken)
+    {
+        Response.Headers.CacheControl = "no-store";
+        var tenant = currentTenant.Tenant ?? throw new InvalidOperationException("Tenant resolution is required.");
+        var result = await getPublicTracking.HandleAsync(tenant.Id, orderId, request.Token, cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : errors.ToActionResult(errors.Create(HttpContext, result.Error));
     }
 
     [HttpGet("/api/v1/tenants/{tenantId:guid}/orders")]

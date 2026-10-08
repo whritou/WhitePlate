@@ -1,7 +1,6 @@
 "use client"
 
 import { Alert, AlertDescription } from "@/components/ui/alert"
-
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -17,7 +16,13 @@ import type { CheckoutPanelProps } from "@/types/checkout"
 import { useTranslations } from "next-intl"
 import { Receipt } from "./receipt"
 
-export function CheckoutPanel({ checkoutState }: CheckoutPanelProps) {
+export function CheckoutPanel({
+  checkoutState,
+  mode,
+  onBack,
+  onContinue,
+  onNewOrder,
+}: CheckoutPanelProps) {
   const {
     cart,
     customerName,
@@ -28,9 +33,9 @@ export function CheckoutPanel({ checkoutState }: CheckoutPanelProps) {
     changingLanguage,
     locked,
     products,
+    trackingToken,
     changeCart,
     checkout,
-    startNewOrder,
     changeCustomerName,
     changeDiscountCode,
   } = checkoutState
@@ -38,20 +43,24 @@ export function CheckoutPanel({ checkoutState }: CheckoutPanelProps) {
   const uncertain = error === "unavailable"
   const c = useTranslations("Checkout")
   const t = useTranslations("Storefront")
+  const isCart = mode === "cart"
 
   return (
-    <aside aria-labelledby="cart-heading" className="lg:sticky lg:top-6">
-      <Card className="gap-0 p-6 text-base has-data-[slot=card-footer]:pb-6">
+    <section
+      aria-labelledby="cart-heading"
+      className={isCart ? "lg:sticky lg:top-6" : "mx-auto mt-8 max-w-2xl"}
+    >
+      <Card className="gap-0 p-6 text-base has-data-[slot=card-footer]:pb-6 sm:p-8">
         {receipt ? (
           <>
-            <Receipt receipt={receipt} />
+            <Receipt receipt={receipt} trackingToken={trackingToken} />
 
             <CardFooter className="border-0 p-0">
               <Button
                 type="button"
                 variant="outline"
                 className="mt-5 w-full"
-                onClick={startNewOrder}
+                onClick={onNewOrder}
               >
                 {c("newOrder")}
               </Button>
@@ -62,20 +71,30 @@ export function CheckoutPanel({ checkoutState }: CheckoutPanelProps) {
             <CardHeader className="px-0">
               <CardTitle>
                 <h2 id="cart-heading" className="text-xl font-semibold">
-                  {c("cartTitle")}
+                  {isCart ? c("cartTitle") : c("checkoutTitle")}
                 </h2>
               </CardTitle>
 
               <CardDescription className="mt-1 text-sm">
-                {c("cartCount", { count: quantity })}
+                {isCart
+                  ? c("cartCount", { count: quantity })
+                  : c("checkoutDescription")}
               </CardDescription>
             </CardHeader>
 
             <CardContent className="px-0">
               {cart.length === 0 ? (
-                <p className="my-6 text-sm text-muted-foreground">
-                  {c("emptyCart")}
-                </p>
+                <div className="my-6 grid gap-3">
+                  <p className="text-sm text-muted-foreground">
+                    {c("emptyCart")}
+                  </p>
+
+                  {!isCart && onBack && (
+                    <Button type="button" variant="outline" onClick={onBack}>
+                      {c("backToMenu")}
+                    </Button>
+                  )}
+                </div>
               ) : (
                 <ul className="mt-4 divide-y divide-border">
                   {cart.map((item) => {
@@ -90,7 +109,7 @@ export function CheckoutPanel({ checkoutState }: CheckoutPanelProps) {
                         ) ?? []
 
                     return (
-                      <li key={item.productId} className="py-4">
+                      <li key={item.productId} className="py-4 first:pt-0">
                         <p className="font-medium">
                           {product?.name ?? t("unavailableProduct")}
                         </p>
@@ -148,93 +167,122 @@ export function CheckoutPanel({ checkoutState }: CheckoutPanelProps) {
                 </ul>
               )}
 
-              <p className="mt-4 text-sm leading-5 text-muted-foreground">
-                {c("priceNote")}
-              </p>
+              {cart.length > 0 && (
+                <p className="mt-4 text-sm leading-5 text-muted-foreground">
+                  {c("priceNote")}
+                </p>
+              )}
 
-              <form
-                onSubmit={checkout}
-                className="mt-5 grid gap-4"
-                aria-busy={submitting}
-              >
-                <fieldset
-                  disabled={locked || cart.length === 0}
-                  className="grid gap-4"
-                >
-                  <Label
-                    className="grid gap-1.5 font-medium"
-                    htmlFor="customer-name"
-                  >
-                    {c("customerName")}
-
-                    <Input
-                      id="customer-name"
-                      name="customerName"
-                      autoComplete="name"
-                      maxLength={200}
-                      required
-
-                      value={customerName}
-                      onChange={(event) =>
-                        changeCustomerName(event.target.value)
-                      }
-                    />
-                  </Label>
-
-                  <Label
-                    className="grid gap-1.5 font-medium"
-                    htmlFor="discount-code"
-                  >
-                    {c("discountCode")}
-
-                    <Input
-                      id="discount-code"
-                      name="discountCode"
-                      maxLength={64}
-
-                      value={discountCode}
-                      onChange={(event) =>
-                        changeDiscountCode(event.target.value)
-                      }
-                    />
-                  </Label>
-                </fieldset>
-
-                {error && (
-                  <Alert variant="destructive" role="alert">
-                    <AlertDescription>{c(`errors.${error}`)}</AlertDescription>
-                  </Alert>
-                )}
-
+              {isCart ? (
                 <Button
-                  type="submit"
+                  type="button"
                   size="lg"
-                  className="w-full"
-                  disabled={submitting || changingLanguage || cart.length === 0}
+                  className="mt-5 w-full"
+                  disabled={cart.length === 0}
+                  onClick={onContinue}
                 >
-                  {submitting
-                    ? c("placingOrder")
-                    : uncertain
-                      ? c("retryOrder")
-                      : c("placeOrder")}
+                  {c("continueToCheckout")}
                 </Button>
+              ) : cart.length > 0 ? (
+                <form
+                  onSubmit={checkout}
+                  className="mt-5 grid gap-4"
+                  aria-busy={submitting}
+                >
+                  <fieldset
+                    disabled={locked || cart.length === 0}
+                    className="grid gap-4"
+                  >
+                    <Label
+                      className="grid gap-1.5 font-medium"
+                      htmlFor="customer-name"
+                    >
+                      {c("customerName")}
 
-                {submitting && (
-                  <p role="status" className="text-sm text-muted-foreground">
-                    {c("placingOrder")}
-                  </p>
-                )}
-              </form>
+                      <Input
+                        id="customer-name"
+                        name="customerName"
+                        autoComplete="name"
+                        maxLength={200}
+                        required
+                        value={customerName}
+                        onChange={(event) =>
+                          changeCustomerName(event.target.value)
+                        }
+                      />
+                    </Label>
+
+                    <Label
+                      className="grid gap-1.5 font-medium"
+                      htmlFor="discount-code"
+                    >
+                      {c("discountCode")}
+
+                      <Input
+                        id="discount-code"
+                        name="discountCode"
+                        maxLength={64}
+                        value={discountCode}
+                        onChange={(event) =>
+                          changeDiscountCode(event.target.value)
+                        }
+                      />
+                    </Label>
+                  </fieldset>
+
+                  {error && (
+                    <Alert variant="destructive" role="alert">
+                      <AlertDescription>
+                        {c(`errors.${error}`)}
+                      </AlertDescription>
+                    </Alert>
+                  )}
+
+                  <Button
+                    type="submit"
+                    size="lg"
+                    className="w-full"
+                    disabled={
+                      submitting || changingLanguage || cart.length === 0
+                    }
+                  >
+                    {submitting
+                      ? c("placingOrder")
+                      : uncertain
+                        ? c("retryOrder")
+                        : c("placeOrder")}
+                  </Button>
+
+                  {submitting && (
+                    <p role="status" className="text-sm text-muted-foreground">
+                      {c("placingOrder")}
+                    </p>
+                  )}
+
+                  {onBack && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      disabled={locked}
+                      onClick={onBack}
+                    >
+                      {c("backToMenu")}
+                    </Button>
+                  )}
+                </form>
+              ) : null}
             </CardContent>
 
-            <CardFooter className="border-0 p-0">
-              <p className="mt-4 text-sm leading-5 text-muted-foreground">
-                {c("visitOnly")}
-              </p>
-            </CardFooter>
+            {isCart && (
+              <CardFooter className="border-0 p-0">
+                <p className="mt-4 text-sm leading-5 text-muted-foreground">
+                  {c("visitOnly")}
+                </p>
+              </CardFooter>
+            )}
           </>
         )}
       </Card>
-    </aside>
+    </section>
   )
 }

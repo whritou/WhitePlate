@@ -27,6 +27,8 @@ public sealed class OrderConfiguration : IEntityTypeConfiguration<Order>
         builder.Property(order => order.ClosedAt);
         builder.Property(order => order.ClosedAtTicks);
         builder.Property(order => order.ArchivedAt);
+        builder.Property(order => order.TrackingTokenHash).HasMaxLength(64);
+        builder.Property(order => order.TrackingTokenExpiresAt);
         builder.HasMany(order => order.Lines).WithOne().HasForeignKey(line => line.OrderId).OnDelete(DeleteBehavior.Cascade);
         builder.HasIndex(order => new { order.TenantId, order.CreatedAt, order.Id });
         builder.HasIndex(order => new { order.TenantId, order.CreatedAtTicks, order.Id });

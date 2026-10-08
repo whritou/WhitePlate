@@ -182,6 +182,22 @@ public sealed class OrderRepository(WhitePlateDbContext database) : IOrderReposi
         return new OrderHistoryPageData(items, totalCount);
     }
 
+    public async Task<PublicOrderTrackingDto?> GetPublicTrackingAsync(Guid tenantId, Guid orderId,
+        string tokenHash, DateTimeOffset now, CancellationToken cancellationToken)
+    {
+        var order = await database.Orders.AsNoTracking().Where(item => item.TenantId == tenantId &&
+                item.Id == orderId && item.TrackingTokenHash != null)
+            .Select(item => new
+            {
+                item.TrackingTokenHash, item.TrackingTokenExpiresAt, item.Id, item.Status, item.Version, item.CreatedAt
+            }).SingleOrDefaultAsync(cancellationToken);
+        if (order is null || order.TrackingTokenExpiresAt <= now || !CryptographicOperations.FixedTimeEquals(
+                Convert.FromHexString(order.TrackingTokenHash!), Convert.FromHexString(tokenHash)))
+            return null;
+
+        return new PublicOrderTrackingDto(order.Id, order.Status.ToString(), order.Version, order.CreatedAt);
+    }
+
     public Task<int> ArchiveClosedOrdersBeforeAsync(DateTimeOffset cutoff, CancellationToken cancellationToken)
     {
         var query = database.Orders.Where(order => order.ArchivedAt == null && order.ClosedAtTicks != null &&

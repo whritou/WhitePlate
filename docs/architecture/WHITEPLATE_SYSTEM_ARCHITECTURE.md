@@ -11,6 +11,9 @@ flowchart LR
     Browser --> Kitchen["Localized staff order dashboard"]
     Storefront --> GuestCheckout["Public checkout action: validated host and UUID key"]
     GuestCheckout --> Api
+    Storefront --> TrackingPage["Public receipt and status tracker"]
+    TrackingPage --> TrackingBFF["Same-origin capability BFF"]
+    TrackingBFF --> Api
     Kitchen -->|REST reads and status action| Api
     Kitchen -->|SignalR refresh hints| Api
     Kitchen --> TokenRoute["Same-origin SignalR token route"]

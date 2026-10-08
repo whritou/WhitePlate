@@ -2,8 +2,8 @@
 
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
 import { ArrowLeft, FileQuestion, Home } from "lucide-react"
+import { Button } from "@/components/ui/button"
 
 export function GlobalNotFoundContent() {
   const router = useRouter()
@@ -43,9 +43,9 @@ export function GlobalNotFoundContent() {
 
           <div className="flex flex-wrap gap-3">
             <Button
+              type="button"
               variant="outline"
               onClick={() => router.back()}
-              className="min-h-11 max-w-full gap-2 px-4 py-2 text-center"
             >
               <ArrowLeft aria-hidden="true" className="size-4 shrink-0" />
               Retour / Back

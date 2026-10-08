@@ -15,7 +15,8 @@ public sealed record CheckoutCatalogDto(string Currency, string Locale, IReadOnl
 
 public sealed record CreateOrderItem(Guid ProductId, int Quantity, IReadOnlyList<Guid>? OptionIds);
 public sealed record CreateOrderCommand(Guid TenantId, string? CustomerName, string? DiscountCode,
-    string? MenuLocale, IReadOnlyList<CreateOrderItem>? Items, string? IdempotencyKey);
+    string? MenuLocale, IReadOnlyList<CreateOrderItem>? Items, string? IdempotencyKey,
+    string? TrackingToken = null);
 
 public sealed record OrderLineOptionDto(Guid OptionId, string Name, decimal PriceAdjustment);
 public sealed record OrderLineReceiptDto(Guid ProductId, string ProductName, decimal BaseUnitPrice,
@@ -33,6 +34,7 @@ public sealed record OrderPageDto(IReadOnlyList<OrderSummaryDto> Items, string? 
 public sealed record OrderPageData(IReadOnlyList<OrderSummaryDto> Items, OrderPageCursor? NextCursor);
 public sealed record OrderHistoryPageDto(IReadOnlyList<OrderSummaryDto> Items, int Page, int PageSize, int TotalCount);
 public sealed record OrderHistoryPageData(IReadOnlyList<OrderSummaryDto> Items, int TotalCount);
+public sealed record PublicOrderTrackingDto(Guid Id, string Status, int Version, DateTimeOffset CreatedAt);
 public sealed record OrderPageCursor(long CreatedAtTicks, Guid Id);
 public sealed record ListOrdersQuery(Guid TenantId, OrderStatus? Status, string? Cursor, int? PageSize);
 public sealed record ListOrderHistoryQuery(Guid TenantId, OrderStatus? Status, string? Search, DateOnly? From,

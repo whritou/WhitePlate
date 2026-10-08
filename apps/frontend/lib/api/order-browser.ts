@@ -1,6 +1,8 @@
 import { isRecord } from "@/lib/validation/common"
 import { browserRequest } from "./browser-request"
 import { parseOrderPage } from "@/lib/order-dashboard"
+import { parsePublicOrderTracking } from "@/lib/validation/public-order-tracking"
+import type { PublicOrderTracking } from "@/types/checkout"
 import type { OrderPage, OrderActionError, OrderStatus } from "@/types/orders"
 
 export class OrderRequestError extends Error {
@@ -57,4 +59,30 @@ export async function getSignalRToken(): Promise<string> {
   }
 
   return value.accessToken
+}
+
+export class PublicOrderTrackingError extends Error {
+  constructor(readonly code: "not_found" | "unavailable") {
+    super(code)
+  }
+}
+
+export async function fetchPublicOrderTracking(
+  orderId: string,
+  token: string,
+  signal: AbortSignal
+): Promise<PublicOrderTracking> {
+  const response = await browserRequest<unknown>(
+    `/api/public/orders/${orderId}/tracking`,
+    { method: "POST", body: { token }, signal }
+  )
+
+  if (response.status === 404) throw new PublicOrderTrackingError("not_found")
+  if (!response.ok) throw new PublicOrderTrackingError("unavailable")
+
+  const tracking = parsePublicOrderTracking(response.data, orderId)
+
+  if (!tracking) throw new PublicOrderTrackingError("unavailable")
+
+  return tracking
 }

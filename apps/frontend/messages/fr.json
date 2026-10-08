@@ -334,6 +334,8 @@
   },
   "Checkout": {
     "cartTitle": "Votre commande",
+    "checkoutTitle": "Vérifiez votre commande",
+    "checkoutDescription": "Vérifiez les articles et indiquez votre nom avant d’envoyer la commande.",
     "cartCount": "{count, plural, =0 {Aucun article} one {# article} other {# articles}}",
     "emptyCart": "Choisissez un article du menu pour commencer votre commande.",
     "quantity": "Quantité",
@@ -352,6 +354,9 @@
     "retryOrder": "Vérifier et réessayer cette commande",
     "visitOnly": "Votre panier et votre reçu restent sur cette page pour cette visite. Actualiser ou quitter la page les efface.",
     "newOrder": "Commencer une autre commande",
+    "continueToCheckout": "Continuer vers la commande",
+    "backToMenu": "Retour au menu",
+    "trackOrder": "Suivre l’état de la commande",
     "orderConfirmed": "Commande confirmée",
     "orderReference": "Référence de commande : {id}",
     "subtotal": "Sous-total",
@@ -376,6 +381,7 @@
     }
   },
   "Storefront": {
+    "clickCollect": "Click & collect",
     "loadingMenu": "Chargement du menu…",
     "menuLanguage": "Langue du menu",
     "changeLanguage": "Changer la langue du menu",
@@ -384,6 +390,21 @@
     "emptyCategory": "Aucun article dans cette rubrique pour le moment.",
     "unavailableProduct": "Indisponible pour le moment",
     "unavailable": "Le menu de ce restaurant est temporairement indisponible. Réessayez bientôt."
+  },
+  "OrderTracking": {
+    "clickCollect": "Click & collect",
+    "title": "État de votre commande",
+    "reference": "Référence de commande : {id}",
+    "progress": "Avancement de la commande",
+    "currentStatus": "Étape actuelle",
+    "placedAt": "Commande passée le {date}",
+    "refresh": "Actualiser l’état",
+    "refreshing": "Vérification de l’état…",
+    "loading": "Chargement de l’état de votre commande…",
+    "missingLink": "Ce lien de suivi est incomplet. Ouvrez le lien complet depuis la confirmation de commande.",
+    "notFound": "Ce lien est invalide ou a expiré. Demandez à la personne qui a passé la commande de partager un lien à jour.",
+    "unavailable": "Impossible de charger l’état de la commande. Réessayez dans un instant.",
+    "backToMenu": "Retour au menu du restaurant"
   },
   "Restaurants": {
     "title": "Créer un restaurant",

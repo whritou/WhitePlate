@@ -89,6 +89,76 @@ public sealed class OrdersEndpointTests
     }
 
     [Fact]
+    public async Task PublicTrackingRequiresTenantAndCapabilityAndReturnsOnlyOrderStatus()
+    {
+        using var factory = new OrdersFactory();
+        var seeded = await factory.SeedAsync();
+        using var client = factory.CreateClient();
+        client.DefaultRequestHeaders.Add("Idempotency-Key", "tracking-order-0001");
+        var trackingToken = Convert.ToBase64String(Enumerable.Repeat((byte)7, 32).ToArray())
+            .TrimEnd('=').Replace('+', '-').Replace('/', '_');
+
+        using var created = await client.PostAsJsonAsync("https://bistro.example.test/api/v1/orders", new
+        {
+            customerName = "Ada",
+            trackingToken,
+            items = new[] { new { productId = seeded.ProductId, quantity = 1, optionIds = new[] { seeded.OptionId } } }
+        }, TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.Created, created.StatusCode);
+        using var createdJson = JsonDocument.Parse(await created.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
+        var orderId = createdJson.RootElement.GetProperty("id").GetGuid();
+        Assert.False(createdJson.RootElement.TryGetProperty("trackingToken", out _));
+
+        using var tracking = await client.PostAsJsonAsync($"https://bistro.example.test/api/v1/orders/{orderId}/tracking",
+            new { token = trackingToken }, TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.OK, tracking.StatusCode);
+        Assert.Contains("no-store", tracking.Headers.CacheControl?.ToString());
+        using var trackingJson = JsonDocument.Parse(await tracking.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
+        Assert.Equal(orderId, trackingJson.RootElement.GetProperty("id").GetGuid());
+        Assert.Equal("Pending", trackingJson.RootElement.GetProperty("status").GetString());
+        Assert.False(trackingJson.RootElement.TryGetProperty("customerName", out _));
+        Assert.False(trackingJson.RootElement.TryGetProperty("total", out _));
+
+        await factory.SeedMembershipAsync(seeded.TenantId, "manager", RestaurantRole.Manager);
+        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", "manager");
+        using var transition = new HttpRequestMessage(HttpMethod.Patch,
+            $"/api/v1/tenants/{seeded.TenantId}/orders/{orderId}/status")
+        {
+            Content = JsonContent.Create(new { status = "Preparing" })
+        };
+        transition.Headers.TryAddWithoutValidation("If-Match", "\"1\"");
+        using var transitioned = await client.SendAsync(transition, TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.OK, transitioned.StatusCode);
+
+        using var updatedTracking = await client.PostAsJsonAsync(
+            $"https://bistro.example.test/api/v1/orders/{orderId}/tracking", new { token = trackingToken },
+            TestContext.Current.CancellationToken);
+        using var updatedJson = JsonDocument.Parse(await updatedTracking.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
+        Assert.Equal("Preparing", updatedJson.RootElement.GetProperty("status").GetString());
+
+        using var invalidToken = await client.PostAsJsonAsync($"https://bistro.example.test/api/v1/orders/{orderId}/tracking",
+            new { token = new string('A', 43) }, TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.NotFound, invalidToken.StatusCode);
+
+        using var foreignTenant = await client.PostAsJsonAsync($"https://other.example.test/api/v1/orders/{orderId}/tracking",
+            new { token = trackingToken }, TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.NotFound, foreignTenant.StatusCode);
+
+        factory.AdvanceTime(TimeSpan.FromDays(30));
+        using var expired = await client.PostAsJsonAsync($"https://bistro.example.test/api/v1/orders/{orderId}/tracking",
+            new { token = trackingToken }, TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.NotFound, expired.StatusCode);
+
+        using var scope = factory.Services.CreateScope();
+        var database = scope.ServiceProvider.GetRequiredService<WhitePlateDbContext>();
+        var order = await database.Orders.SingleAsync(item => item.Id == orderId, TestContext.Current.CancellationToken);
+        Assert.Equal(Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(
+            System.Text.Encoding.UTF8.GetBytes(trackingToken))).ToLowerInvariant(), order.TrackingTokenHash);
+        Assert.DoesNotContain(trackingToken, order.TrackingTokenHash);
+        Assert.Equal(DateTimeOffset.Parse("2026-01-31T00:00:00Z"), order.TrackingTokenExpiresAt);
+    }
+
+    [Fact]
     public async Task LocalizedCheckoutKeepsHistoricalLabelsAndIncludesEffectiveLocaleInIdempotency()
     {
         using var factory = new OrdersFactory();
