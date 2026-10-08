@@ -81,7 +81,7 @@ export function CatalogTranslationsEditor({
             <h2>{t("menuTranslationsTitle")}</h2>
           </CardTitle>
 
-          <CardDescription className="mt-2 max-w-xl">
+          <CardDescription className="mt-2 max-w-[36rem]">
             {t("menuTranslationsDescription")}
           </CardDescription>
         </div>

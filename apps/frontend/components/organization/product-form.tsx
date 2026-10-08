@@ -5,6 +5,7 @@ import { saveProductAction } from "@/actions/catalog"
 import { ResultMessage } from "@/components/auth/result-message"
 import { EditorFormActions } from "@/components/ui/editor-dialog"
 import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
 import { useCatalogForm } from "./use-catalog-form"
@@ -18,6 +19,7 @@ export function ProductForm({
   onSuccess,
   onPendingChange,
   onCancel,
+  studio,
 }: ProductFormProps) {
   const t = useTranslations("Catalog")
   const { pending, state, submit } = useCatalogForm(
@@ -51,7 +53,14 @@ export function ProductForm({
         <input type="hidden" name="categoryId" value={product.categoryId} />
       )}
 
-      <fieldset disabled={pending} className="grid gap-4 sm:grid-cols-2">
+      <fieldset
+        disabled={pending}
+        className={
+          studio
+            ? "grid gap-5 sm:grid-cols-2 xl:grid-cols-4"
+            : "grid gap-4 sm:grid-cols-2"
+        }
+      >
         {!product && (
           <Label htmlFor={`${prefix}-category`} className="grid gap-2">
             {t("category")}
@@ -71,7 +80,12 @@ export function ProductForm({
           </Label>
         )}
 
-        <Label htmlFor={`${prefix}-name`} className="grid gap-2">
+        <Label
+          htmlFor={`${prefix}-name`}
+          className={
+            studio ? "grid gap-2 sm:col-span-2 xl:col-span-4" : "grid gap-2"
+          }
+        >
           {t("name")}
 
           <Input
@@ -85,15 +99,20 @@ export function ProductForm({
 
         <Label
           htmlFor={`${prefix}-description`}
-          className="grid gap-2 sm:col-span-2"
+          className={
+            studio
+              ? "grid gap-2 sm:col-span-2 xl:col-span-4"
+              : "grid gap-2 sm:col-span-2"
+          }
         >
           {t("description")}
 
-          <Input
+          <Textarea
             id={`${prefix}-description`}
             name="description"
             defaultValue={product?.description ?? ""}
             maxLength={1000}
+            rows={4}
           />
         </Label>
 
@@ -164,6 +183,7 @@ export function ProductForm({
         )}
 
         <EditorFormActions
+          className={studio ? "xl:col-span-4" : undefined}
           pending={pending}
           onCancel={onCancel}
           label={

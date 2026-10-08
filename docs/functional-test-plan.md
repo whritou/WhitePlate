@@ -372,3 +372,16 @@ For each run, record source revision (or working-tree baseline before the first 
 ### Catalog/modal presentation acceptance — 2026-10-07
 
 The isolated `catalog-design` browser project verifies saved lists without inline edit inputs; Products/Categories/Discounts tabs; search and archived-parent guards; product and nested option dialogs; cancellation resetting drafts; keyboard Escape and focus restoration; pending dismissal protection; rejected input retention and close after synthetic acknowledgement. Menu checks separate enabled/default language summaries from translation rows, filter saved/missing translations without counting fallback text, and discard cancelled language/translation edits. Both English/French and light/dark are exercised at 320, 375, 768, 1024 and 1440 px. This suite uses fixed data and intercepts save requests, so it does not write to a database. The authenticated catalog, discount and manager tests now open the appropriate tab and modal before editing; rerun them in the guarded acceptance database to verify persisted mutations. Order history is intentionally unchanged.
+
+## M1 Menu Builder acceptance — 2026-10-08
+
+Local fixture/browser and API persistence results are recorded separately in [M1 evidence](audits/menu-builder.md). Before deployment, review/apply `CategoryVisibility` plus outstanding earlier migrations and deploy the API before the stricter frontend parser.
+
+- Follow an old localized `restaurant-languages` bookmark with tenant and repeated query values; verify the shared translations tab retains context and destination membership denial.
+- Create/update category, product, option group, option and discount through the combined workspace; reload and verify server values. Edit display order by keyboard and verify public ordering. Verify archived-product restore and parent-archive restrictions.
+- Leave product/description drafts, switch category/product/tab/menu language and return. Verify explicit discard, failed-save retention, synchronous duplicate protection, pending controls and dialog focus return. App EN/FR must not change menu-language configuration.
+- Save enabled/default menu languages and category/product/group/option translations; check per-locale errors, original/saved/missing/fallback presentation and public locale fallback.
+- Hide a category; read it back, verify public-menu omission and stale checkout rejection, and show it again without changing product availability. Repeat as owner/manager, kitchen, foreign tenant and after membership revocation.
+- Compare the supplied reference at 320/375/390/768/1024/1440px and wide desktop, EN/FR, light/dark, keyboard, 200% text and reduced motion. Check 44px phone/48px tablet targets, wrapping, contrast and dialogs without document overflow.
+
+Guarded shared-database browser acceptance and hosted verification remain outstanding; fixture synthetic save responses are not accepted as database read-back evidence.

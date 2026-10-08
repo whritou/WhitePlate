@@ -36,9 +36,11 @@ test("owner creates, edits and archives catalog items with localized feedback", 
   expect(login.status()).toBe(200)
   await page.goto(`/en/organization/catalog?tenantId=${fixture.tenantId}`)
   await expect(
-    page.getByRole("heading", { name: "Manage catalog", exact: true })
+    page.getByRole("heading", {
+      name: "Menu Builder & Translations",
+      exact: true,
+    })
   ).toBeVisible()
-  await page.getByRole("tab", { name: "Categories", exact: true }).click()
 
   const stamp = Date.now().toString(36)
   const categoryName = `Lunch ${stamp}`
@@ -52,9 +54,10 @@ test("owner creates, edits and archives catalog items with localized feedback", 
     .click()
   await expect(category).toHaveCount(0)
   await expect(
-    page.getByRole("heading", { name: categoryName, exact: true })
+    page.getByRole("button", { name: categoryName, exact: true })
   ).toBeVisible()
-  await page.getByRole("tab", { name: "Products", exact: true }).click()
+
+  await page.getByRole("button", { name: categoryName, exact: true }).click()
 
   const product = await openEditor(page, "New product")
 
@@ -71,14 +74,22 @@ test("owner creates, edits and archives catalog items with localized feedback", 
     .click()
   await expect(product).toHaveCount(0)
 
-  const edit = await openEditor(page, `Edit product ${productName}`)
+  await page
+    .getByRole("button", { name: `Select ${productName}`, exact: true })
+    .click()
+
+  const edit = page.getByRole("form", {
+    name: `Edit product ${productName}`,
+    exact: true,
+  })
 
   await edit.getByLabel("Base price (GBP)", { exact: true }).fill("8.25")
   await edit.getByLabel("Availability", { exact: true }).selectOption("false")
   await edit.getByRole("button", { name: "Save changes", exact: true }).click()
-  await expect(edit).toHaveCount(0)
+  await expect(
+    page.getByRole("button", { name: "Discard product changes", exact: true })
+  ).toBeDisabled()
 
-  const options = await openEditor(page, `Options for ${productName}`)
   const groupName = `Size ${stamp}`
   const editedGroupName = `Portion ${stamp}`
   const group = await openEditor(page, `New option group for ${productName}`)
@@ -141,10 +152,17 @@ test("owner creates, edits and archives catalog items with localized feedback", 
     .getByRole("button", { name: "Create option", exact: true })
     .click()
   await expect(secondOption).toHaveCount(0)
-  await options.getByRole("button", { name: "Close", exact: true }).click()
   await page.reload()
+  await page.getByRole("button", { name: categoryName, exact: true }).click()
 
-  const persisted = await openEditor(page, `Edit product ${productName}`)
+  await page
+    .getByRole("button", { name: `Select ${productName}`, exact: true })
+    .click()
+
+  const persisted = page.getByRole("form", {
+    name: `Edit product ${productName}`,
+    exact: true,
+  })
 
   await expect(
     persisted.getByLabel("Availability", { exact: true })
@@ -152,8 +170,6 @@ test("owner creates, edits and archives catalog items with localized feedback", 
   await expect(
     persisted.getByLabel("Base price (GBP)", { exact: true })
   ).toHaveValue("8.25")
-  await persisted.getByRole("button", { name: "Cancel", exact: true }).click()
-  await openEditor(page, `Options for ${productName}`)
 
   const persistedGroup = await openEditor(
     page,
@@ -178,8 +194,8 @@ test("owner creates, edits and archives catalog items with localized feedback", 
   await persistedOption
     .getByRole("button", { name: "Cancel", exact: true })
     .click()
-  await options.getByRole("button", { name: "Close", exact: true }).click()
-  await page.getByRole("tab", { name: "Categories", exact: true }).click()
+
+  await page.getByRole("button", { name: categoryName, exact: true }).click()
 
   const editCategory = await openEditor(page, `Edit category ${categoryName}`)
 
@@ -189,7 +205,8 @@ test("owner creates, edits and archives catalog items with localized feedback", 
     .click()
   await expect(editCategory).toHaveCount(0)
   await page.reload()
-  await page.getByRole("tab", { name: "Categories", exact: true }).click()
+
+  await page.getByRole("button", { name: categoryName, exact: true }).click()
 
   const persistedCategory = await openEditor(
     page,
@@ -203,7 +220,10 @@ test("owner creates, edits and archives catalog items with localized feedback", 
     .getByRole("button", { name: "Cancel", exact: true })
     .click()
   await page.goto(`/fr/organization/catalog?tenantId=${fixture.tenantId}`)
-  await openEditor(page, `Options de ${productName}`)
+  await page.getByRole("button", { name: categoryName, exact: true }).click()
+  await page
+    .getByRole("button", { name: `Sélectionner ${productName}`, exact: true })
+    .click()
 
   const archiveOption = page.getByRole("button", {
     name: `Archiver ${optionName}`,
@@ -282,10 +302,6 @@ test("owner creates, edits and archives catalog items with localized feedback", 
       exact: true,
     })
   ).toHaveCount(0)
-  await page
-    .getByRole("dialog", { name: `Options de ${productName}`, exact: true })
-    .getByRole("button", { name: "Fermer", exact: true })
-    .click()
 
   const archiveProduct = page.getByRole("button", {
     name: `Archiver ${productName}`,
@@ -305,7 +321,7 @@ test("owner creates, edits and archives catalog items with localized feedback", 
   await expect(
     page.getByRole("heading", { name: productName, exact: true })
   ).toHaveCount(0)
-  await page.getByRole("tab", { name: "Catégories", exact: true }).click()
+  await page.getByRole("button", { name: categoryName, exact: true }).click()
   await page
     .getByRole("button", { name: `Archiver ${categoryName}`, exact: true })
     .click()
@@ -320,7 +336,11 @@ test("owner creates, edits and archives catalog items with localized feedback", 
     })
   ).toHaveCount(0)
   await page.reload()
+  await page.getByRole("button", { name: categoryName, exact: true }).click()
   await page.getByLabel("Afficher", { exact: true }).selectOption("archived")
+  await page
+    .getByRole("button", { name: `Sélectionner ${productName}`, exact: true })
+    .click()
   await expect(
     page.getByRole("heading", { name: productName, exact: true })
   ).toBeVisible()

@@ -86,7 +86,7 @@ export function WorkspacePageSkeleton({
           page === "orders" || page === "orderHistory"
             ? "w-full max-w-none"
             : page === "catalog" || page === "menuLanguages"
-              ? "w-full max-w-7xl min-w-0"
+              ? "w-full max-w-[100rem] min-w-0"
               : page === "restaurant"
                 ? "max-w-2xl"
                 : page === "team" || page === "settings"
@@ -259,18 +259,41 @@ function RestaurantSkeleton() {
 function CatalogSkeleton() {
   return (
     <>
-      <HeaderSkeleton region="catalog-header" />
+      <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.7fr)]">
+        <HeaderSkeleton region="catalog-header" />
 
-      <Region name="catalog-tabs" className="flex flex-wrap gap-2">
-        <Skeleton className="h-12 w-28" />
+        <Region name="catalog-tabs" className="flex flex-wrap gap-2">
+          <Skeleton className="h-12 w-28" />
 
-        <Skeleton className="h-12 w-28" />
+          <Skeleton className="h-12 w-28" />
 
-        <Skeleton className="h-12 w-28" />
-      </Region>
+          <Skeleton className="h-12 w-28" />
+        </Region>
+      </div>
 
-      <Region name="catalog-list">
-        <CardSkeleton className="min-h-96" lines={8} />
+      <Region
+        name="catalog-list"
+        className="grid items-start gap-6 lg:grid-cols-[14rem_minmax(0,1fr)] xl:grid-cols-[16rem_minmax(0,1fr)]"
+      >
+        <div className="grid gap-5">
+          <Region name="catalog-categories">
+            <CardSkeleton className="min-h-80" lines={5} />
+          </Region>
+
+          <Region name="catalog-products">
+            <CardSkeleton className="min-h-48" lines={3} />
+          </Region>
+        </div>
+
+        <div className="grid gap-6">
+          <Region name="catalog-editor">
+            <CardSkeleton className="min-h-96" lines={8} />
+          </Region>
+
+          <Region name="catalog-options">
+            <CardSkeleton className="min-h-48" lines={4} />
+          </Region>
+        </div>
       </Region>
     </>
   )

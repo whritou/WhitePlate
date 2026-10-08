@@ -91,7 +91,7 @@ public sealed class CatalogRepository(WhitePlateDbContext database) : ICatalogRe
             .OrderBy(item => item.Code).ThenBy(item => item.Id).ToListAsync(cancellationToken);
         return new CatalogManagementDto(tenantId, currency,
             categories.Select(item => new CatalogCategoryAdminDto(item.Id, item.Name, item.SortOrder, item.IsArchived)
-                { Translations = CatalogTranslations.GetAll(item.TranslationsJson) }).ToArray(),
+                { IsVisible = item.IsVisible, Translations = CatalogTranslations.GetAll(item.TranslationsJson) }).ToArray(),
             products.Select(item => new CatalogProductAdminDto(item.Id, item.CategoryId, item.Name, item.Description,
                 item.BasePrice, item.TaxRatePercent, item.SortOrder, item.IsAvailable, item.IsArchived)
                 { Translations = CatalogTranslations.GetAll(item.TranslationsJson) }).ToArray(),
@@ -129,6 +129,17 @@ public sealed class CatalogRepository(WhitePlateDbContext database) : ICatalogRe
         if (await database.PromotionDiscounts.AnyAsync(item => item.TenantId == discount.TenantId && item.Code == discount.Code, cancellationToken))
             return false;
         database.PromotionDiscounts.Add(discount);
+        await database.SaveChangesAsync(cancellationToken);
+        return true;
+    }
+
+    public async Task<bool> SetCategoryVisibilityAsync(Guid tenantId, Guid categoryId, bool isVisible,
+        CancellationToken cancellationToken)
+    {
+        var category = await database.MenuCategories.SingleOrDefaultAsync(item => item.TenantId == tenantId &&
+            item.Id == categoryId && !item.IsArchived, cancellationToken);
+        if (category is null) return false;
+        category.SetVisibility(isVisible);
         await database.SaveChangesAsync(cancellationToken);
         return true;
     }
@@ -316,7 +327,7 @@ public sealed class CatalogRepository(WhitePlateDbContext database) : ICatalogRe
             ? normalizedLocale.Value
             : tenant.DefaultMenuLocale;
         var categories = await database.MenuCategories.AsNoTracking()
-            .Where(category => category.TenantId == tenant.Id && !category.IsArchived)
+            .Where(category => category.TenantId == tenant.Id && !category.IsArchived && category.IsVisible)
             .OrderBy(category => category.SortOrder).ThenBy(category => category.Id)
             .Select(category => new { category.Id, category.Name, category.TranslationsJson, category.SortOrder })
             .ToListAsync(cancellationToken);

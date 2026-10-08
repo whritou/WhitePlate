@@ -53,3 +53,7 @@ For intended behavior, use the proposed contract, schema, and acceptance plan to
 Update the relevant documents with changes to commands, routes, ports, dependencies, environment variables, trust boundaries, or data models. Link to one canonical explanation rather than copying it into every guide. Keep examples valid, fence code blocks, and use relative links within repository Markdown.
 
 When settling an open architecture decision, record its date, status, context, choice, alternatives, consequences, and affected documents in a new decision note under `docs/architecture/decisions/` (create that directory when the first decision is made). Until then, use the [open-decision register](development-roadmap.md).
+
+## M1 Menu Builder — 2026-10-08
+
+The combined catalog/language workspace and persisted category hiding are implemented in source. Local verification and separate remaining shared-database/hosted acceptance are in [M1 evidence](audits/menu-builder.md). The generated visibility migration is not applied to shared environments; other management roadmap cards remain separate.

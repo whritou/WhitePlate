@@ -17,6 +17,7 @@ public sealed class MenuCategoryConfiguration : IEntityTypeConfiguration<MenuCat
         builder.Property(category => category.TranslationsJson).IsRequired();
         builder.Property(category => category.SortOrder).IsRequired();
         builder.Property(category => category.IsArchived).IsRequired();
+        builder.Property(category => category.IsVisible).IsRequired().HasDefaultValue(true);
         builder.HasAlternateKey(category => new { category.TenantId, category.Id });
         builder.HasOne<Tenant>().WithMany().HasForeignKey(category => category.TenantId).OnDelete(DeleteBehavior.Cascade);
         builder.HasIndex(category => new { category.TenantId, category.SortOrder, category.Id });

@@ -80,7 +80,11 @@ export function parseManagedCatalog(
   )
 
   if (
-    !categories.every((category) => isSortOrder(category.sortOrder)) ||
+    !categories.every(
+      (category) =>
+        isSortOrder(category.sortOrder) &&
+        typeof category.isVisible === "boolean"
+    ) ||
     !products.every(
       (product) =>
         isSortOrder(product.sortOrder) &&

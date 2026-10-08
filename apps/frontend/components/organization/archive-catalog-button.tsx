@@ -35,6 +35,7 @@ export function ArchiveCatalogButton({
   id,
   entityType,
   name,
+  compact,
 }: ArchiveButtonProps) {
   const t = useTranslations("Catalog")
   const [confirming, setConfirming] = useState(false)
@@ -57,12 +58,18 @@ export function ArchiveCatalogButton({
     >
       <AlertDialogTrigger
         disabled={submitting}
-        render={<Button type="button" variant="outline" />}
+        render={
+          <Button
+            type="button"
+            variant={compact ? "ghost" : "outline"}
+            size={compact ? "icon" : "default"}
+          />
+        }
         aria-label={t("archiveName", { name })}
       >
         <Archive aria-hidden="true" className="size-4" />
 
-        {t("archive")}
+        <span className={compact ? "sr-only" : undefined}>{t("archive")}</span>
       </AlertDialogTrigger>
 
       <AlertDialogPortal>

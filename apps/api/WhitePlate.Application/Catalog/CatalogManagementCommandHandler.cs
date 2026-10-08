@@ -91,6 +91,10 @@ public sealed class CatalogManagementCommandHandler(IStaffMembershipRepository m
         catch (DomainRuleException exception) { return Invalid<PromotionDiscountDto>(exception); }
     }
 
+    public Task<Result<bool>> SetCategoryVisibilityAsync(Guid tenantId, Guid categoryId, bool isVisible,
+        ExternalIdentity identity, CancellationToken cancellationToken) => ArchiveAsync(tenantId, categoryId, identity,
+        (tenant, category, token) => catalog.SetCategoryVisibilityAsync(tenant, category, isVisible, token), cancellationToken);
+
     public Task<Result<bool>> ArchiveCategoryAsync(Guid tenantId, Guid categoryId, ExternalIdentity identity,
         CancellationToken cancellationToken) => ArchiveAsync(tenantId, categoryId, identity,
         catalog.ArchiveCategoryAsync, cancellationToken);

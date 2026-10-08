@@ -25,7 +25,7 @@ using WhitePlate.Infrastructure.Persistence;
 
 namespace WhitePlate.Tests.Api;
 
-public sealed class OrdersEndpointTests
+public sealed partial class OrdersEndpointTests
 {
     [Fact]
     public async Task KitchenHubNegotiationRequiresAuthentication()

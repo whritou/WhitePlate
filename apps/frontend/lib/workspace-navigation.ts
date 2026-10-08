@@ -59,16 +59,10 @@ export function buildWorkspaceNavigation(
     }
 
     if (restaurant.role !== "Kitchen") {
-      links.push(
-        {
-          href: `/organization/catalog?tenantId=${tenantId}`,
-          label: translate("catalog"),
-        },
-        {
-          href: `/organization/restaurant-languages?tenantId=${tenantId}`,
-          label: translate("menuLanguages"),
-        }
-      )
+      links.push({
+        href: `/organization/catalog?tenantId=${tenantId}`,
+        label: translate("catalog"),
+      })
     }
 
     sections.push({

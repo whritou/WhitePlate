@@ -1,6 +1,6 @@
 # Restaurant management backlog and Stitch references
 
-8 October 2026. Planning only: none of the future features below is implemented by this change.
+8 October 2026. This document records the planning baseline. M1 now has a source implementation and local verification; shared-database and hosted acceptance remain in review. See [M1 evidence](../audits/menu-builder.md). The other cards remain independent work and are not implemented by M1.
 
 The user requested kanban work for restaurant Theming Studio, a real restaurant dashboard, restaurant settings (opening hours, pickup-slot intervals, buffer time, Stripe connection, email and establishment details), a combined Menu Builder & Translations workspace, and a redesigned Live Orders Kanban/KDS with the additional features in those exports. Desktop visual fidelity and responsive implementation are mandatory.
 

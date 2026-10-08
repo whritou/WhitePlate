@@ -121,7 +121,7 @@ export default async function OrganizationTeamPage({
 
                     <div className="flex min-w-0 flex-wrap items-start gap-x-4 gap-y-2">
                       <Link
-                        href={`/organization/restaurant-languages?tenantId=${restaurant.id}`}
+                        href={`/organization/catalog?view=translations&tenantId=${restaurant.id}`}
                         className="min-w-0 text-sm font-medium break-words text-primary underline-offset-4 hover:underline"
                       >
                         {t("editMenuLanguages")}

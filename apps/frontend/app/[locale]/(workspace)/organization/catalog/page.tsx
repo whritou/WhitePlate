@@ -1,6 +1,5 @@
-import { Languages } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { CatalogWorkspace } from "@/components/organization/catalog-workspace"
+import { MenuBuilderWorkspace } from "@/components/organization/menu-builder-workspace"
+import { MenuBuilderRetry } from "@/components/organization/menu-builder-retry"
 import { getLocale, getTranslations } from "next-intl/server"
 import { headers } from "next/headers"
 import { redirect } from "next/navigation"
@@ -8,7 +7,10 @@ import { auth } from "@/lib/auth"
 import { isUuid } from "@/lib/validation/common"
 import { getRestaurantMemberships } from "@/services/orders"
 import { getManagedCatalog } from "@/services/catalog-management"
-import { Link } from "@/i18n/navigation"
+import {
+  getMenuLanguageSettings,
+  getRestaurantDescriptionTranslations,
+} from "@/services/organization-queries"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import type { CatalogPageProps } from "@/types/catalog-management"
 
@@ -29,7 +31,13 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
             (item.role === "OrganizationOwner" || item.role === "Manager")
         )
       : null
-  const response = restaurant ? await getManagedCatalog(restaurant.id) : null
+  const [response, languages, description] = restaurant
+    ? await Promise.all([
+        getManagedCatalog(restaurant.id),
+        getMenuLanguageSettings(restaurant.id),
+        getRestaurantDescriptionTranslations(restaurant.id),
+      ])
+    : [null, null, null]
   const catalog = response?.ok ? response.data : null
 
   if (!catalog || !restaurant) {
@@ -42,39 +50,26 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
             )}
           </AlertDescription>
         </Alert>
+
+        <MenuBuilderRetry />
       </main>
     )
   }
 
   return (
-    <main className="mx-auto w-full max-w-7xl min-w-0 p-4 sm:p-6 lg:p-8">
-      <header className="mb-8 flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <p className="text-sm font-medium text-primary">{restaurant.name}</p>
-
-          <h1 className="mt-2 text-2xl font-semibold sm:text-[2rem]">
-            {t("title")}
-          </h1>
-
-          <p className="mt-2 max-w-2xl text-muted-foreground">{t("intro")}</p>
-        </div>
-
-        <Button
-          variant="outline"
-          nativeButton={false}
-          render={
-            <Link
-              href={`/organization/restaurant-languages?tenantId=${encodeURIComponent(catalog.tenantId)}`}
-            />
-          }
-        >
-          <Languages aria-hidden="true" />
-
-          {t("menuLanguagesLink")}
-        </Button>
-      </header>
-
-      <CatalogWorkspace catalog={catalog} />
+    <main className="mx-auto w-full max-w-[100rem] min-w-0 p-4 sm:p-6 lg:p-8">
+      <MenuBuilderWorkspace
+        key={`${session.user.id}:${catalog.tenantId}`}
+        catalog={catalog}
+        restaurantName={restaurant.name}
+        settings={languages?.ok ? (languages.data ?? undefined) : undefined}
+        description={
+          description?.ok ? (description.data ?? undefined) : undefined
+        }
+        initialView={
+          query.view === "translations" ? "translations" : "products"
+        }
+      />
     </main>
   )
 }

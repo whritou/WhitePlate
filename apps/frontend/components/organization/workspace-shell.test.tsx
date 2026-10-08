@@ -47,7 +47,7 @@ vi.mock("next-intl", () => ({
       settings: "Settings",
       createRestaurant: "Create restaurant",
       orders: "Orders",
-      catalog: "Products & pricing",
+      catalog: "Menu Builder & Translations",
       menuLanguages: "Menu languages & translations",
       navigationLabel:
         mocks.locale === "fr"
@@ -136,8 +136,8 @@ it("renders verified workspace context, active links, and locale-preserving cont
 
   expect(html).toContain("Owner Restaurant")
   expect(html).toContain('aria-current="page"')
-  expect(html).toContain("Products &amp; pricing")
-  expect(html).toContain("Menu languages &amp; translations")
+  expect(html).toContain("Menu Builder &amp; Translations")
+  expect(html).not.toContain("Menu languages &amp; translations")
   expect(html).toContain('role="group" aria-label="Language"')
   expect(html).toContain('data-testid="workspace-language"')
   expect(html).toContain('aria-haspopup="listbox"')

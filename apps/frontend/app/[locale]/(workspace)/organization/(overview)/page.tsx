@@ -112,7 +112,7 @@ export default async function OrganizationPage() {
                     className="flex min-w-0 flex-wrap gap-3"
                   >
                     <Link
-                      href={`/organization/restaurant-languages?tenantId=${restaurant.id}`}
+                      href={`/organization/catalog?view=translations&tenantId=${restaurant.id}`}
                       className="inline-flex min-h-11 max-w-full min-w-0 items-center text-sm font-medium whitespace-normal text-primary underline-offset-4 hover:underline"
                     >
                       {t("editMenuLanguages")}

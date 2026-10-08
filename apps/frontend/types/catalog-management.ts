@@ -4,6 +4,7 @@ import type { FormEvent } from "react"
 
 export type CatalogCategory = CatalogTranslationData["categories"][number] & {
   sortOrder: number
+  isVisible: boolean
 }
 export type CatalogProduct = CatalogTranslationData["products"][number] & {
   basePrice: number
@@ -91,12 +92,15 @@ export type ArchiveInput = {
   id: string
   entityType: CatalogEntityType
 }
-export type CatalogPageProps = { searchParams: Promise<{ tenantId?: string }> }
+export type CatalogPageProps = {
+  searchParams: Promise<Record<string, string | string[] | undefined>>
+}
 export type CategoryFormProps = EditorCallbacks & {
   tenantId: string
   category?: CatalogCategory
 }
 export type ProductFormProps = EditorCallbacks & {
+  studio?: boolean
   tenantId: string
   currency: string
   categories: CatalogCategory[]
@@ -115,6 +119,7 @@ export type OptionFormProps = EditorCallbacks & {
   option?: CatalogOption
 }
 export type OptionGroupsEditorProps = {
+  studio?: boolean
   tenantId: string
   currency: string
   productId: string
@@ -133,6 +138,9 @@ export type DiscountsEditorProps = {
   currency: string
   discounts: CatalogDiscount[]
 }
-export type ArchiveButtonProps = ArchiveInput & { name: string }
+export type ArchiveButtonProps = ArchiveInput & {
+  name: string
+  compact?: boolean
+}
 export type CatalogSubmit = (event: FormEvent<HTMLFormElement>) => void
 export type CatalogFormAction = (input: FormData) => Promise<CatalogResult>

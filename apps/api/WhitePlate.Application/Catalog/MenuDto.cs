@@ -14,6 +14,7 @@ public sealed record MenuCategoryDto(Guid Id, string Name, int SortOrder, IReadO
 public sealed record PromotionDiscountDto(Guid Id, string Code, string Name, string Kind, decimal Value, bool IsActive);
 public sealed record CatalogCategoryAdminDto(Guid Id, string Name, int SortOrder, bool IsArchived)
 {
+    public bool IsVisible { get; init; } = true;
     public IReadOnlyDictionary<string, CatalogLocalizedText> Translations { get; init; } =
         new Dictionary<string, CatalogLocalizedText>();
 }
