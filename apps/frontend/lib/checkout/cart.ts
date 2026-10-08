@@ -36,6 +36,15 @@ export function validProductSelection(
   )
 }
 
+export function createTrackingToken(): string {
+  const bytes = crypto.getRandomValues(new Uint8Array(32))
+  let binary = ""
+
+  for (const byte of bytes) binary += String.fromCharCode(byte)
+
+  return btoa(binary).replace(/=/g, "").replace(/\+/g, "-").replace(/\//g, "_")
+}
+
 export function updateCart(items: CartItem[], item: CartItem): CartItem[] {
   const others = items.filter((line) => line.productId !== item.productId)
 
@@ -47,7 +56,8 @@ export function updateCart(items: CartItem[], item: CartItem): CartItem[] {
 export function prepareCheckout(
   input: OrderInput,
   previous: CheckoutAttempt | null,
-  createKey: () => string
+  createKey: () => string,
+  createTrackingToken?: () => string
 ): CheckoutAttempt {
   const normalized = {
     customerName: input.customerName.trim(),
@@ -61,11 +71,27 @@ export function prepareCheckout(
       }))
       .sort((a, b) => a.productId.localeCompare(b.productId)),
   }
+  const previousInput = previous
+    ? {
+        customerName: previous.input.customerName,
+        discountCode: previous.input.discountCode,
+        menuLocale: previous.input.menuLocale,
+        items: previous.input.items,
+      }
+    : null
 
-  return previous &&
-    JSON.stringify(previous.input) === JSON.stringify(normalized)
-    ? previous
-    : { key: createKey(), input: normalized }
+  if (previous && JSON.stringify(previousInput) === JSON.stringify(normalized))
+    return previous
+
+  const trackingToken = input.trackingToken ?? createTrackingToken?.()
+
+  return {
+    key: createKey(),
+    input: {
+      ...normalized,
+      ...(trackingToken ? { trackingToken } : {}),
+    },
+  }
 }
 
 export function validateOrderInput(input: unknown): input is OrderInput {
@@ -82,6 +108,9 @@ export function validateOrderInput(input: unknown): input is OrderInput {
         value.discountCode.length > 64)) ||
     typeof value.menuLocale !== "string" ||
     value.menuLocale.length > 128 ||
+    (value.trackingToken !== undefined &&
+      (typeof value.trackingToken !== "string" ||
+        !/^[A-Za-z0-9_-]{43}$/.test(value.trackingToken))) ||
     !Array.isArray(value.items) ||
     value.items.length < 1 ||
     value.items.length > 50

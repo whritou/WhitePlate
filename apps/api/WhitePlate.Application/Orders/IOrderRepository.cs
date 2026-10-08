@@ -24,6 +24,9 @@ public interface IOrderRepository
         DateTimeOffset? createdAtFrom, DateTimeOffset? createdAtUntil, string sort, bool descending,
         int page, int pageSize, CancellationToken cancellationToken);
 
+    Task<PublicOrderTrackingDto?> GetPublicTrackingAsync(Guid tenantId, Guid orderId, string tokenHash,
+        DateTimeOffset now, CancellationToken cancellationToken);
+
     Task<int> ArchiveClosedOrdersBeforeAsync(DateTimeOffset cutoff, CancellationToken cancellationToken);
 
     Task<Result<OrderReceiptDto>> TransitionAsync(Guid tenantId, Guid orderId, int expectedVersion,

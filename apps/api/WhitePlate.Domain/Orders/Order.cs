@@ -22,12 +22,15 @@ public sealed class Order
     public DateTimeOffset? ClosedAt { get; private set; }
     public long? ClosedAtTicks { get; private set; }
     public DateTimeOffset? ArchivedAt { get; private set; }
+    public string? TrackingTokenHash { get; private set; }
+    public DateTimeOffset? TrackingTokenExpiresAt { get; private set; }
     public List<OrderLine> Lines { get; private set; } = [];
     private Order() { }
 
     public static Order Create(Guid tenantId, string? currency, string? customerName,
         IReadOnlyList<OrderLineSnapshot>? lines, string? discountCode, decimal discountAmount,
-        DateTimeOffset createdAt, string? menuLocale = null)
+        DateTimeOffset createdAt, string? menuLocale = null, string? trackingTokenHash = null,
+        DateTimeOffset? trackingTokenExpiresAt = null)
     {
         var normalizedCurrency = currency?.ToUpperInvariant();
         var normalizedName = customerName?.Trim();
@@ -58,6 +61,12 @@ public sealed class Order
             remainingDiscount -= allocation;
         }
         var normalizedMenuLocale = menuLocale is null ? null : WhitePlate.Domain.Tenants.MenuLocale.Create(menuLocale).Value;
+        if (trackingTokenHash is not null && (trackingTokenHash.Length != 64 ||
+            trackingTokenHash.Any(character => !Uri.IsHexDigit(character)) || !trackingTokenExpiresAt.HasValue ||
+            trackingTokenExpiresAt <= createdAt))
+            throw new DomainRuleException("invalid_tracking_token", "trackingToken", "The order tracking token is invalid.");
+        if (trackingTokenHash is null && trackingTokenExpiresAt.HasValue)
+            throw new DomainRuleException("invalid_tracking_token", "trackingToken", "The order tracking token is invalid.");
         return new Order
         {
             Id = Guid.NewGuid(), TenantId = tenantId, Currency = normalizedCurrency, CustomerName = normalizedName,
@@ -65,7 +74,9 @@ public sealed class Order
             DiscountCode = string.IsNullOrWhiteSpace(discountCode) ? null : discountCode.Trim().ToUpperInvariant(),
             Subtotal = subtotal, DiscountAmount = discountAmount, TaxAmount = orderLines.Sum(line => line.TaxAmount),
             Total = orderLines.Sum(line => line.Total), Status = OrderStatus.Pending, Version = 1,
-            CreatedAt = createdAt, CreatedAtTicks = createdAt.UtcDateTime.Ticks, Lines = orderLines
+            CreatedAt = createdAt, CreatedAtTicks = createdAt.UtcDateTime.Ticks,
+            TrackingTokenHash = trackingTokenHash?.ToLowerInvariant(), TrackingTokenExpiresAt = trackingTokenExpiresAt,
+            Lines = orderLines
         };
     }
 

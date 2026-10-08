@@ -108,7 +108,7 @@ public sealed class TenantRepositoryTests
         Assert.Contains("uuid NOT NULL", script);
         Assert.Contains("Organizations", script);
         Assert.Contains("Currency", script);
-        Assert.Equal(10, database.Database.GetMigrations().Count());
+        Assert.Equal(11, database.Database.GetMigrations().Count());
         Assert.False(database.Database.HasPendingModelChanges());
     }
 

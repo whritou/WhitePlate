@@ -1,40 +1,40 @@
 "use client"
 
-import { useRef, useState, useTransition, type FormEvent } from "react"
+import { useTransition, type FormEvent } from "react"
 import { checkoutGuestOrder } from "@/actions/checkout"
+import { useGuestCheckoutStore } from "@/components/storefront/guest-checkout-provider"
 import {
   prepareCheckout,
-  updateCart,
+  createTrackingToken,
   validProductSelection,
   validateOrderInput,
 } from "@/lib/checkout/cart"
-import type { ApiError } from "@/types/api"
-import type { CartItem, CheckoutAttempt, OrderReceipt } from "@/types/checkout"
+import type { CartItem } from "@/types/checkout"
 import type { StorefrontMenu } from "@/types/storefront"
 
 export function useGuestCheckout(menu: StorefrontMenu) {
   const [changingLanguage, startLanguageChange] = useTransition()
-  const [cart, setCart] = useState<CartItem[]>([])
-  const [customerName, setCustomerName] = useState("")
-  const [discountCode, setDiscountCode] = useState("")
-  const [error, setError] = useState<ApiError | null>(null)
-  const [submitting, setSubmitting] = useState(false)
-  const [receipt, setReceipt] = useState<OrderReceipt | null>(null)
-  const [orderRound, setOrderRound] = useState(0)
-  const attempt = useRef<CheckoutAttempt | null>(null)
-  const inFlight = useRef(false)
+  const state = useGuestCheckoutStore((state) => state)
+  const {
+    cart,
+    customerName,
+    discountCode,
+    error,
+    submitting,
+    receipt,
+    orderRound,
+  } = state
   const uncertain = error === "unavailable"
   const locked = submitting || uncertain || changingLanguage || receipt !== null
   const products = menu.categories.flatMap((category) => category.products)
 
   function changeCart(item: CartItem) {
-    setCart((current) => updateCart(current, item))
-    setError(null)
+    state.changeCart(item)
   }
 
   async function checkout(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    if (inFlight.current) return
+    if (state.inFlight) return
 
     const input = {
       customerName,
@@ -54,54 +54,44 @@ export function useGuestCheckout(menu: StorefrontMenu) {
           return !product || !validProductSelection(product, item.optionIds)
         }))
     ) {
-      setError("invalid")
+      state.setError("invalid")
 
       return
     }
 
     const next =
-      uncertain && attempt.current
-        ? attempt.current
-        : prepareCheckout(input, attempt.current, () => crypto.randomUUID())
+      uncertain && state.attempt
+        ? state.attempt
+        : prepareCheckout(
+            input,
+            state.attempt,
+            () => crypto.randomUUID(),
+            createTrackingToken
+          )
 
-    attempt.current = next
-    inFlight.current = true
-    setSubmitting(true)
-    setError(null)
+    state.setAttempt(next)
+    state.setInFlight(true)
+    state.setSubmitting(true)
+    state.setError(null)
     try {
       const result = await checkoutGuestOrder(next.input, next.key)
 
       if (result.ok && result.receipt.tenantId === menu.tenantId) {
-        setReceipt(result.receipt)
-        setCart([])
+        state.setReceipt(result.receipt)
+        state.clearCart()
       } else {
-        setError(result.ok ? "unavailable" : result.error)
+        state.setError(result.ok ? "unavailable" : result.error)
       }
     } catch {
-      setError("unavailable")
+      state.setError("unavailable")
     } finally {
-      inFlight.current = false
-      setSubmitting(false)
+      state.setInFlight(false)
+      state.setSubmitting(false)
     }
   }
 
   function startNewOrder() {
-    setReceipt(null)
-    attempt.current = null
-    setError(null)
-    setCustomerName("")
-    setDiscountCode("")
-    setOrderRound((round) => round + 1)
-  }
-
-  function changeCustomerName(value: string) {
-    setCustomerName(value)
-    setError(null)
-  }
-
-  function changeDiscountCode(value: string) {
-    setDiscountCode(value)
-    setError(null)
+    state.startNewOrder()
   }
 
   return {
@@ -113,13 +103,14 @@ export function useGuestCheckout(menu: StorefrontMenu) {
     error,
     submitting,
     receipt,
+    trackingToken: state.attempt?.input.trackingToken ?? null,
     orderRound,
     locked,
     products,
     changeCart,
     checkout,
     startNewOrder,
-    changeCustomerName,
-    changeDiscountCode,
+    changeCustomerName: state.changeCustomerName,
+    changeDiscountCode: state.changeDiscountCode,
   }
 }

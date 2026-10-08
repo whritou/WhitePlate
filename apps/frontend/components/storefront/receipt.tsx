@@ -7,11 +7,19 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import type { OrderReceipt } from "@/types/checkout"
+import { Link } from "@/i18n/navigation"
 import { useLocale, useTranslations } from "next-intl"
 
-export function Receipt({ receipt }: { receipt: OrderReceipt }) {
+export function Receipt({
+  receipt,
+  trackingToken,
+}: {
+  receipt: OrderReceipt
+  trackingToken: string | null
+}) {
   const t = useTranslations("Checkout")
-  const price = new Intl.NumberFormat(useLocale(), {
+  const locale = useLocale()
+  const price = new Intl.NumberFormat(locale, {
     style: "currency",
     currency: receipt.currency,
   })
@@ -40,6 +48,19 @@ export function Receipt({ receipt }: { receipt: OrderReceipt }) {
       </CardHeader>
 
       <CardContent className="px-0">
+        {trackingToken && (
+          <p className="mt-4">
+            <Link
+              href={`/order/${receipt.id}#${trackingToken}`}
+              locale={locale}
+              referrerPolicy="no-referrer"
+              className="font-medium text-primary underline underline-offset-4"
+            >
+              {t("trackOrder")}
+            </Link>
+          </p>
+        )}
+
         <ul className="mt-5 divide-y divide-border">
           {receipt.lines.map((line) => (
             <li key={line.productId} className="py-3">

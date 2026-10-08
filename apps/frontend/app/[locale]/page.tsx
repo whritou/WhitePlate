@@ -17,7 +17,7 @@ import { Suspense } from "react"
 export async function generateMetadata({
   searchParams,
 }: {
-  searchParams: Promise<{ menuLocale?: string }>
+  searchParams: Promise<{ menuLocale?: string; step?: string }>
 }) {
   const [t, query, requestHeaders] = await Promise.all([
     getTranslations("HomePage"),
@@ -42,7 +42,7 @@ export async function generateMetadata({
 export default async function Page({
   searchParams,
 }: {
-  searchParams: Promise<{ menuLocale?: string }>
+  searchParams: Promise<{ menuLocale?: string; step?: string }>
 }) {
   const storefrontT = await getTranslations("Storefront")
 
@@ -56,7 +56,7 @@ export default async function Page({
 async function PageContent({
   searchParams,
 }: {
-  searchParams: Promise<{ menuLocale?: string }>
+  searchParams: Promise<{ menuLocale?: string; step?: string }>
 }) {
   const [t, query, requestHeaders] = await Promise.all([
     getTranslations("HomePage"),
@@ -70,7 +70,11 @@ async function PageContent({
 
   if (storefront.kind === "menu")
     return (
-      <RestaurantMenu key={storefront.menu.tenantId} menu={storefront.menu} />
+      <RestaurantMenu
+        key={storefront.menu.tenantId}
+        menu={storefront.menu}
+        step={query.step === "checkout" ? "checkout" : "shop"}
+      />
     )
   if (storefront.kind === "unavailable") {
     const storefrontT = await getTranslations("Storefront")

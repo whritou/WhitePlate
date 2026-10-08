@@ -334,6 +334,8 @@
   },
   "Checkout": {
     "cartTitle": "Your order",
+    "checkoutTitle": "Review your order",
+    "checkoutDescription": "Check your items and add your name before sending the order.",
     "cartCount": "{count, plural, =0 {No items yet} one {# item} other {# items}}",
     "emptyCart": "Choose something from the menu to start your order.",
     "quantity": "Quantity",
@@ -352,6 +354,9 @@
     "retryOrder": "Check and retry this order",
     "visitOnly": "Your cart and receipt stay on this page for this visit. Reloading or leaving the page clears them.",
     "newOrder": "Start another order",
+    "continueToCheckout": "Continue to checkout",
+    "backToMenu": "Back to menu",
+    "trackOrder": "Track order status",
     "orderConfirmed": "Order confirmed",
     "orderReference": "Order reference: {id}",
     "subtotal": "Subtotal",
@@ -376,6 +381,7 @@
     }
   },
   "Storefront": {
+    "clickCollect": "Click & collect",
     "loadingMenu": "Loading restaurant menu…",
     "menuLanguage": "Menu language",
     "changeLanguage": "Change menu language",
@@ -384,6 +390,21 @@
     "emptyCategory": "No items in this section yet.",
     "unavailableProduct": "Currently unavailable",
     "unavailable": "This restaurant menu is temporarily unavailable. Please try again shortly."
+  },
+  "OrderTracking": {
+    "clickCollect": "Click & collect",
+    "title": "Your order status",
+    "reference": "Order reference: {id}",
+    "progress": "Order progress",
+    "currentStatus": "Current status",
+    "placedAt": "Order placed {date}",
+    "refresh": "Refresh status",
+    "refreshing": "Checking status…",
+    "loading": "Loading your order status…",
+    "missingLink": "This tracking link is incomplete. Open the full link from your order confirmation.",
+    "notFound": "This order link is invalid or has expired. Ask the person who placed the order to share a current link.",
+    "unavailable": "We couldn’t load the order status. Try refreshing in a moment.",
+    "backToMenu": "Back to the restaurant menu"
   },
   "Restaurants": {
     "title": "Create a restaurant",

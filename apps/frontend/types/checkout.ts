@@ -10,7 +10,15 @@ export type OrderInput = {
   customerName: string
   discountCode: string | null
   menuLocale: string
+  trackingToken?: string
   items: CartItem[]
+}
+
+export type PublicOrderTracking = {
+  id: string
+  status: "Pending" | "Preparing" | "Ready" | "Completed" | "Cancelled"
+  version: number
+  createdAt: string
 }
 
 export type CheckoutAttempt = { key: string; input: OrderInput }
@@ -65,4 +73,8 @@ export type GuestCheckoutController = ReturnType<
 >
 export type CheckoutPanelProps = {
   checkoutState: GuestCheckoutController
+  mode: "cart" | "checkout"
+  onBack?: () => void
+  onContinue?: () => void
+  onNewOrder: () => void
 }
