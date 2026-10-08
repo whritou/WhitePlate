@@ -1,5 +1,20 @@
 # Documentation review baseline — 2026-09-28
 
+## Neon test migrations and storefront smoke check — 2026-10-08
+
+On `feat/storefront-description-shop`, the user authorized applying pending EF migrations to Neon `test`. The configured pooled test connection was converted in memory to its direct endpoint for migration work; no connection string or credentials were written to the repository. Review of the migration SQL showed additive columns/indexes and a backfill setting `ClosedAt` for completed/cancelled orders. Three pending migrations were applied; all 12 EF business migrations are now recorded. Coolify and Render were not modified.
+
+| Check | Actual result |
+| --- | --- |
+| `dotnet ef migrations list` against Neon `test` after update | Passed; all 12 entries present, none marked Pending. |
+| Local API `GET /health/ready` | Passed after starting the API with network access to Neon. |
+| `GET /api/v1/tenant` and `/api/v1/menu` with `Host: test.localhost:5182` | Passed; the `test` tenant exists but has no products. |
+| Storefront request with `Host: acceptance-muubmm04.localhost:3000` | HTTP 200; this active test tenant has five products. `bistro` and `bistrot` are not tenant subdomains in Neon `test`. |
+| API startup archive dispatcher | Marked six already-closed Neon test orders as archived; no rows were deleted. |
+| Automated test suites | Not run. |
+
+The local Next.js process uses process-only storefront environment values and a temporary `%TEMP%` DNS shim so Node resolves tenant `*.localhost` API hosts to loopback. These values are not persisted in `.env.local` or source. The project kanban could not be inspected in this shell (`gh` is unavailable; the GitHub board page was not fetchable).
+
 ## Orders kanban — 2026-10-06
 
 Branch `feat/orders-kanban`, [issue #30](https://github.com/whritou/WhitePlate/issues/30): replaces the staff ticket grid with five status lanes and shadcn-compatible Base UI status tabs, inspired by the requested [kanban reference](https://shadcnuikit.com/blocks/application-ui/kanban-board). Mouse/touch handles and existing next-step buttons call the same versioned mutation; stale, skipped, pending and role-disallowed drops are rejected. Saved order snapshots, REST authority, tenant/account query isolation, filter/cursor navigation, error feedback and SignalR refresh behavior remain in place. Counts describe the loaded page. Kitchen controls meet 48px targets, lanes wrap without page overflow, and keyboard focus returns to a moved ticket. Initial and route skeletons match the lanes; both translation catalogs are updated. The canonical kitchen design now records this approved layout and behavior.
