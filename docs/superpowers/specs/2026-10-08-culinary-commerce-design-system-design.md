@@ -1,40 +1,41 @@
-# Culinary Commerce System reference replacement
+# Culinary Commerce System replacement and runtime tokens
 
 **Date:** 2026-10-08
-**Status:** Proposed; awaiting user review
-**Scope:** Canonical design-system documentation, design token reference, static preview, and documentation that describes current runtime adoption
+**Status:** Approved by user 2026-10-08; implementation in progress
+**Scope:** Canonical design-system documentation, design tokens, static preview, shared frontend CSS variables, and documentation that describes runtime adoption
 
 ## Context
 
-The user supplied `DESIGN.md` as the new WhitePlate design direction and confirmed that it replaces the previous canonical system. The current canonical reference is “Porcelaine, encre et sauge.” Its token JSON is also consumed by `apps/frontend/app/design-tokens.test.ts`, which compares the top-level light/dark palette and radii to the unchanged runtime CSS. The current design documentation and architecture describe the old palette as already adopted.
+The user supplied `DESIGN.md` as the new WhitePlate design direction and confirmed that it replaces the previous canonical system. The current canonical reference is “Porcelaine, encre et sauge.” Its token JSON is also consumed by `apps/frontend/app/design-tokens.test.ts`, which compares the top-level light/dark palette and radii to the runtime CSS. Updating both sides together preserves that parity contract. The current design documentation and architecture describe the old palette as already adopted.
 
-The new attachment contains named prose HEX values that conflict with its YAML color table. The user selected the named prose HEX values as authoritative. The attachment's YAML provides typography, spacing, and radii. Its prose provides breakpoint ranges; it contains no YAML breakpoint tokens. The user approved keeping reference changes separate from runtime CSS, components, product behavior, and tests, while preserving the current top-level color/radius snapshot for parity checks.
+The new attachment contains named prose HEX values that conflict with its YAML color table. The user selected the named prose HEX values as authoritative. The attachment's YAML provides typography, spacing, and radii. Its prose provides breakpoint ranges; it contains no YAML breakpoint tokens. The user first approved a reference-only scope, then explicitly expanded approval to replace the old design system and update frontend CSS variables. The existing color/radius parity test reads the top-level `themes` and `radiusRem` token groups; those groups will now contain Culinary Commerce values and remain aligned with the corresponding CSS variables.
 
 ## Goals
 
 - Replace the canonical direction in `docs/design-system` with **Culinary Commerce System**.
-- Make the named prose palette, dark surfaces, and operational status colors authoritative in the new nested canonical token set.
+- Make the named prose palette, dark surfaces, and operational status colors authoritative in the canonical token set.
+- Replace current frontend semantic color, font-family, radius, and system-dark-mode CSS variable values with the new tokens while retaining existing variable names and component contracts.
 - Carry forward the existing project's accessibility, localization, focus/keyboard, reduced-motion, UI-state, retry, and tenant-isolation requirements.
 - Keep illustrative or unverified product features separate from implemented behavior.
-- Correct documentation that currently claims the new canonical reference is already mirrored by runtime CSS.
-- Preserve current frontend token-parity inputs without editing frontend application source or tests.
+- Correct documentation that describes only the previous design direction or overstates runtime adoption.
+- Keep frontend color/radius parity checking aligned by replacing the old JSON values together with their CSS variable values.
 
 ## Non-goals
 
-- Changing `apps/frontend/app/globals.css`, components, page styling, translations, application code, APIs, product behavior, or tests.
-- Migrating current screens to the new system. Runtime adoption is a separate kanban item and remains pending.
+- Changing component markup, page-specific styles, translations, APIs, product behavior, or test source.
+- Applying every component recipe or rearranging existing screens; broader screen-level design adoption remains a separate kanban item.
 - Implementing features depicted in the attachment that are not already verified in the product.
 - Changing application authentication, authorization, tenant boundaries, pricing, order transitions, cart behavior, or checkout retries.
 
 ## Proposed design
 
-### Canonical source and compatibility snapshot
+### Canonical source and runtime variables
 
-`docs/design-system/README.md` remains the single normative design reference. Rename its active design direction to **Culinary Commerce System** and make clear that it is the approved target while runtime adoption is pending.
+`docs/design-system/README.md` remains the single normative design reference. Rename its active design direction to **Culinary Commerce System**. The old direction is removed from active guidance; dated documentation-review entries remain historical records.
 
-Add a `canonicalReference` object to `docs/design-system/tokens.json` for the new reference palette and design values. Keep the existing top-level runtime token groups, including `themes` and `radiusRem`, byte-for-byte unchanged because `apps/frontend/app/design-tokens.test.ts` reads the top-level light/dark palette and radii as a compatibility snapshot. Update only root metadata needed to identify the new canonical reference and pending adoption. Preserve the existing frontend test contract; do not edit the test or CSS. Update `docs/design-system/verify.py` to validate `canonicalReference` and generate `overview.svg` from that target, while keeping documentation explicit that the preview is a static reference rather than an application screenshot.
+Replace the old active values in `docs/design-system/tokens.json` with Culinary Commerce tokens, keeping the top-level `themes` and `radiusRem` shape consumed by `apps/frontend/app/design-tokens.test.ts`. Update the existing semantic variables in `apps/frontend/app/globals.css` for light, dark, and system-dark global not-found styles. Keep variable names and component contracts stable so existing shared primitives adopt the palette without markup changes. Set font-family variables to Plus Jakarta Sans and Inter with local system fallbacks; do not add a network font dependency or remote font fetch. Update `docs/design-system/verify.py` to validate the new canonical tokens and generate `overview.svg` from them, while keeping documentation explicit that the preview is a static reference rather than an application screenshot.
 
-The JSON metadata and documentation must distinguish the current runtime snapshot from the new canonical target. The new target is canonical for future UI work; the legacy top-level token groups exist only so current CSS-parity checks continue to describe the unchanged runtime. Do not describe the runtime as already using Culinary Commerce.
+The JSON metadata and documentation must describe the new palette and frontend theme variables as Culinary Commerce. Do not claim that every component recipe or screen-level refinement has been adopted just because shared variables have changed.
 
 ### Palette and contrast
 
@@ -59,46 +60,47 @@ Use the attachment's YAML radius values (`0.25rem`, `0.5rem`, `0.75rem`, `1rem`,
 
 Use the prose breakpoint ranges: mobile below 640px, tablet 640–1024px, desktop 1024–1440px, and ultra-wide above 1440px. The attachment has no YAML breakpoint tokens, so these prose boundaries are authoritative for the new reference. Represent ranges without ambiguous overlap in JSON (640, 1024, and 1440px boundaries).
 
-Document the attachment's surface elevation and shadow guidance as visual guidance, while allowing reduced-motion preferences and avoiding motion that conveys status without a non-motion signal. Avoid asserting that the target values are already present in CSS.
+Document the attachment's surface elevation and shadow guidance as visual guidance, while allowing reduced-motion preferences and avoiding motion that conveys status without a non-motion signal. Global CSS variables cover the shared palette, font-family stacks, and radii; screen-specific spacing and component recipes remain guidance for later scoped adoption.
 
 ### Components and product boundaries
 
 Document general component guidance and existing product patterns, but label unimplemented examples as illustrative/future unless source inspection verifies them. This includes ratings, preparation-time claims, dietary flags, animated free-delivery/minimum-order progress, pickup scheduling, and per-tenant CSS customization variables. The reference must not imply those features or their data sources exist.
 
-Preserve existing behavior and cross-cutting requirements in the reference: English/French copy, accessible names, keyboard operation and visible/restored focus, reduced motion, distinct loading/error/pending/success states, retry semantics, server-authoritative pricing and status, and tenant isolation. Browser-provided tenant identity remains a selector and never grants authorization. Keep the reference separate from any runtime implementation.
+Preserve existing behavior and cross-cutting requirements in the reference: English/French copy, accessible names, keyboard operation and visible/restored focus, reduced motion, distinct loading/error/pending/success states, retry semantics, server-authoritative pricing and status, and tenant isolation. Browser-provided tenant identity remains a selector and never grants authorization. Updating shared theme variables does not change these product contracts.
 
 ### Documentation and preview
 
 Update the design-system README, token JSON, validator, generated SVG, and documentation that presently describes the old system as canonical or mirrored in runtime. At minimum inspect and update the design-system entry in `docs/README.md`, the frontend styling sections of `docs/development.md`, `docs/coding-standards.md`, `docs/architecture/WHITEPLATE_FRONTEND_ARCHITECTURE.md`, and `docs/architecture/frontend-conventions.md`, plus `docs/documentation-review.md`. Keep historical records accurate as historical evidence and append the new reference result rather than rewriting old verification claims.
 
-The reference validator should check required canonical token structure, valid HEX values, required contrast pairs, palette/README agreement, and local documentation links. The preview generator should show the new palette and distinguish the reference from current runtime styling. The existing app test remains the check for the legacy runtime color/radius snapshot.
+The reference validator should check required canonical token structure, valid HEX values, required contrast pairs, palette/README agreement, and local documentation links. The preview generator should show the new palette and be clearly identified as a static system reference. The existing app test contract continues to check the runtime color/radius CSS variables against the new root token values.
 
 ## Acceptance criteria
 
-- The design-system README identifies Culinary Commerce System as the sole canonical target and states that runtime adoption is pending.
-- `canonicalReference` contains the prose-authoritative palette/status values and the approved YAML typography, spacing, and radius values; breakpoint boundaries follow the prose ranges.
+- The design-system README identifies Culinary Commerce System as the sole canonical target and replaces the former active direction.
+- Root token groups contain the prose-authoritative palette/status values and the approved YAML typography, spacing, and radius values; breakpoint boundaries follow the prose ranges.
 - Orange primary action text is Obsidian and has at least 4.5:1 contrast on `#FF5A1F`.
 - Defined normal-text and control/focus combinations meet their documented contrast thresholds in light and dark themes.
-- The existing top-level `themes` and `radiusRem` values are unchanged, preserving the current frontend parity test contract.
-- The validator and generated preview read the new nested canonical target, and the preview is clearly static/reference-only.
-- Docs no longer claim that the new target is already mirrored by runtime; history continues to describe prior adoption accurately.
+- The `themes` and `radiusRem` token groups match the corresponding `:root` and `.dark` CSS variables, preserving the frontend parity test contract with the new values.
+- The validator and generated preview read the new root tokens, and the preview is clearly static/reference-only.
+- Shared CSS theme variables reflect the new palette, font-family stacks, and radii without component markup changes.
+- Active docs describe the new system; dated history continues to describe prior adoption accurately.
 - Unverified storefront, kitchen, and tenant-branding examples are explicitly marked illustrative/future.
-- No application source, CSS, component, test, or product behavior changes are included.
-- Runtime adoption has its own backlog card, separate from the reference-update card.
+- No component markup, test source, or product behavior changes are included.
+- Broader screen-level adoption has its own backlog card, separate from the shared-token work in #52.
 
 ## Verification plan
 
 - Run `py -3 docs/design-system/verify.py` from the repository root and record its actual result.
 - Run `git diff --check`.
-- Review JSON diff to confirm the top-level `themes` and `radiusRem` snapshots are unchanged.
-- Do not run frontend tests or builds for this documentation/token-reference-only scope; no frontend source or test changes are planned. Existing parity remains represented by its unchanged inputs, not newly claimed as re-verified.
+- Review JSON/CSS diffs to confirm top-level theme colors and radius values match in both modes.
+- Do not run frontend tests or builds for this token-variable scope; no test source or component behavior changes are planned. The existing parity test contract remains intact but is not newly claimed as executed.
 
 ## Decisions
 
 | Decision | Status | Consequence |
 | --- | --- | --- |
 | Culinary Commerce replaces the prior canonical design direction | Approved by user 2026-10-08 | `docs/design-system` remains the canonical reference location and is rewritten for this system. |
-| Named prose HEX values override conflicting YAML colors | Approved by user 2026-10-08 | The prose palette is used in nested canonical tokens. |
+| Named prose HEX values override conflicting YAML colors | Approved by user 2026-10-08 | The prose palette is used in the canonical token groups. |
 | Obsidian foreground on Tangerine primary actions | Approved by user 2026-10-08 | Orange primary actions meet text contrast without changing the approved orange. |
-| Keep current runtime color/radius snapshot and defer CSS adoption | Approved by user 2026-10-08 | The old top-level parity values stay intact; a separate runtime backlog task tracks future migration. |
+| Replace the old palette and update shared CSS token variables | Approved by user 2026-10-08 | Root canonical color/radius values and light/dark CSS variables change together; broader screen-level refinements stay separate. |
 | Treat unverified product examples as illustrative/future | Approved by user 2026-10-08 | The design reference cannot imply those capabilities are implemented. |
