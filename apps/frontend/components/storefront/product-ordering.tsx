@@ -71,7 +71,7 @@ export function ProductOrdering({
           <Button
             type="button"
             variant={item ? "outline" : "default"}
-            className="mt-4 min-h-11"
+            className="min-h-11 px-3 text-sm"
           />
         }
       >
