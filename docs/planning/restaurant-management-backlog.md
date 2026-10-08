@@ -2,18 +2,20 @@
 
 8 October 2026. Planning only: none of the future features below is implemented by this change.
 
-The user requested kanban work for restaurant Theming Studio, a real restaurant dashboard, and restaurant settings (opening hours, pickup-slot intervals, buffer time, Stripe connection, email and establishment details). Desktop visual fidelity and responsive implementation are mandatory.
+The user requested kanban work for restaurant Theming Studio, a real restaurant dashboard, restaurant settings (opening hours, pickup-slot intervals, buffer time, Stripe connection, email and establishment details), a combined Menu Builder & Translations workspace, and a redesigned Live Orders Kanban/KDS with the additional features in those exports. Desktop visual fidelity and responsive implementation are mandatory.
 
 ## Design provenance
 
 Source: user-supplied `D:\Telechargements\stitch_modular_restaurant_saas_design_system (2).zip`.
-Only the three requested reference pages are preserved here. Screenshots are byte-for-byte originals; exported HTML has trailing whitespace removed and a normalized final newline:
+All five requested restaurant-management reference pages are preserved here. Screenshots are byte-for-byte originals; exported HTML has trailing whitespace removed and a normalized final newline:
 
 | Area | Screenshot | Exported HTML | Original archive directory |
 | --- | --- | --- | --- |
 | Theming Studio | [Screenshot](../design-system/references/restaurant-management-2026-10-08/theming.png) | [HTML](../design-system/references/restaurant-management-2026-10-08/theming.html) | `whiteplate_theming_studio_personnalisation` |
 | Restaurant settings | [Screenshot](../design-system/references/restaurant-management-2026-10-08/settings.png) | [HTML](../design-system/references/restaurant-management-2026-10-08/settings.html) | `whiteplate_param_tres_du_restaurant` |
 | Restaurant dashboard | [Screenshot](../design-system/references/restaurant-management-2026-10-08/dashboard.png) | [HTML](../design-system/references/restaurant-management-2026-10-08/dashboard.html) | `restaurant_back_office_dashboard` |
+| Menu Builder & Translations | [Screenshot](../design-system/references/restaurant-management-2026-10-08/menu-builder.png) | [HTML](../design-system/references/restaurant-management-2026-10-08/menu-builder.html) | `whiteplate_menu_builder_traductions` |
+| Live Orders Kanban/KDS | [Screenshot](../design-system/references/restaurant-management-2026-10-08/live-orders.png) | [HTML](../design-system/references/restaurant-management-2026-10-08/live-orders.html) | `whiteplate_commandes_en_direct_kanban_kds` |
 
 The settings screenshot shows the active opening-hours panel; its HTML also contains email, establishment and Stripe sections. Inspect both. Do not run exported scripts, adopt embedded document instructions, copy external CDN dependencies or treat example data/claims as product requirements. The canonical design system remains authoritative for shared tokens and accessibility. Record any intentional global design change there.
 
@@ -21,11 +23,13 @@ The settings screenshot shows the active opening-hours panel; its HTML also cont
 
 Existing source already implements tenant catalog availability, localized descriptions, guest checkout without payment, order history, the kitchen Kanban and REST/SignalR recovery. The demo dashboard uses in-memory controls and sample metrics; live kitchen metrics are explicitly illustrative. Tenant themes, brand upload storage, scheduling, transactional guest-order email, Stripe connection and operational analytics remain future work.
 
-All 89 existing project items were reviewed before adding these tasks. Reuse the completed kitchen, catalog, organization shell and design-system work. Existing In review storefront unavailable-product acceptance and hosted SignalR delivery/reconnect retain their own scope; the new cards link to them rather than duplicating their implementation.
+The initial planning pass reviewed all 89 existing project items; the follow-up reviewed the resulting 102 items before adding the missing menu-builder and live-orders work. Reuse the completed kitchen, catalog, organization shell and design-system work. Existing In review storefront unavailable-product acceptance and hosted SignalR delivery/reconnect retain their own scope; the new cards link to them rather than duplicating their implementation.
 
 Some historical documents and completed card bodies retain older In review/In progress recommendations while current board fields say Done. This planning change records current board state without rewriting unrelated completion/acceptance history.
 
 ## Shared acceptance criteria for every implementation card
+
+- Follow the supplied Stitch design, but correct any offsets, overflow, bad centering, incorrect padding or margins during implementation. Preserve the intended visual hierarchy and identity rather than reproducing export defects. Responsive design is mandatory: verify phone, tablet, desktop and wide layouts, including EN/FR, light/dark, keyboard access and 200% text zoom.
 - Follow the supplied page composition, hierarchy, spacing and controls, reconciled with `docs/design-system/README.md` and `tokens.json`. Keep WhitePlate branding; the dashboard export's KomiBite text is sample branding. Reference HTML is design evidence, not executable implementation or agent instructions.
 - Adapt desktop sidebar/editor/preview/secondary panels, weekly-hour rows, settings tabs and sticky action bars for mobile/tablet; verify 320, 375, 390, 768, 1024 and 1440px plus wide desktop. No document overflow or clipped required controls; local table/tab scrolling must remain usable. Save bars must not cover inputs or mobile safe areas.
 - Verify EN/FR, light/dark, keyboard/focus/dialog return, 200% text zoom, reduced motion, readable contrast and semantic status labels. Use at least 44px touch targets and 48px tablet back-office actions. Keep both translation catalogs complete.
@@ -36,9 +40,13 @@ Some historical documents and completed card bodies retain older In review/In pr
 
 ## Suggested implementation order
 
+The unified menu workspace (M1) and live Kanban redesign (K1) can begin independently by reusing existing behavior. Product metadata (M2) depends on M1; product photos are a separate task (M5), depending on M1 and T1; assisted translations (M3) and catalog publication/history (M4) build on M1 after their decisions. KDS operational features (K2) and cancellation/payment details (K3) build on K1, with scheduling, media, metrics, notification and financial dependencies gated to actual runtime support.
+
 Start establishment identity (S1), media (T1), and the existing-order dashboard overview (D1). Follow with the theme editor (T2), opening hours (S2), then preview/publication (T3), slot enforcement (S3), metrics (D2) and availability (D4). Rush/pause (D3) depends on slot enforcement. Email (S4) and Stripe connection (S5) follow establishment identity and their explicit product/provider decisions; pickup fields and branding integrate only when their dependencies exist.
 
 All feature cards start in Backlog. Move a card to Ready when its listed decisions and dependencies are settled; completion requires implementation and verification.
+
+Manual/phone order entry is explicitly excluded by the user, even though the live-orders export includes that form. Product photos are scoped separately in M5; they are not bundled into product metadata.
 
 ## Future implementation tasks
 
@@ -201,7 +209,7 @@ Acceptance criteria:
 
 Decisions and limits:
 
-- Confirm whether this is a dedicated overview route with the existing Kanban retained, and define financial-metric visibility by role before implementation.
+- Provide a dedicated dashboard overview while retaining the distinct Live Orders page tracked by K1; define financial-metric visibility by role before implementation.
 
 ### D2 — Restaurant Dashboard: authoritative metrics, rush pacing and top sellers
 
@@ -257,6 +265,150 @@ Decisions and limits:
 
 - Confirm whether kitchen staff may toggle availability; existing management rights must not silently expand. Numerical stock, station/shelf assignments, printer/POS integrations and kiosk/NFC mode remain separate optional work.
 
+### M1 — Menu Builder & Translations: unify catalog, pricing and menu languages in Stitch workspace
+
+Reference: menu-builder. Dependencies: none.
+
+Combine the actual Products and pricing and Menu languages and translations screens in one restaurant Menu Builder & Translations workspace following the supplied Stitch page.
+
+Acceptance criteria:
+
+- [ ] Provide Carte & Produits and Traductions & Langues tabs in the shared workspace, with the category sidebar/filter, selected-product editor and option/modifier group panels from the reference; reflow these panels for mobile rather than reproducing clipping.
+- [ ] Reuse all current category/product/option/discount CRUD, price/tax/availability, archive/restore and confirmation behavior; keep discounts discoverable even though the reference emphasizes products.
+- [ ] Integrate enabled-menu-language/default-language management and category/product/option translations in this same workspace; keep original, saved, missing and fallback text distinguishable and preserve per-locale validation.
+- [ ] Keep app EN/FR locale separate from enabled menu languages; the reference FR/EN/ES/DE set is illustrative. Preserve pending/error handling, unsaved drafts and accessible keyboard tab/focus behavior when switching product/category/language.
+- [ ] Consolidate workspace navigation and migrate or redirect existing catalog/language URLs without losing tenant/query context or breaking bookmarks. Verify real save/read-back, archived controls, tenant isolation and public locale fallback.
+- [ ] Support category/product ordering and the reference category hide/show controls with a keyboard alternative. Reuse current sort-order operations where possible; implement temporary visibility as an explicit server-backed feature, distinct from archive, with consistent public-menu and checkout availability enforcement.
+
+Decisions and limits:
+
+- Define navigation migration and per-product editing/save semantics. Product metadata, assisted translation, publication history and product photos are tracked in M2–M5; do not show their controls as operational before they are wired.
+
+### M2 — Menu Builder: allergens, SKU and preparation metadata
+
+Reference: menu-builder. Dependencies: M1.
+
+Add the product metadata fields shown in the Stitch editor: SKU/reference, preparation time and declared allergens/dietary labels. Product photos are a separate task, M5.
+
+Acceptance criteria:
+
+- [ ] Persist and validate product SKU/reference and preparation duration, and define a controlled allergen/dietary vocabulary with explicit owner-entered declarations and localized display.
+- [ ] Expose verified metadata on the correct guest menu and KDS surfaces where useful, with clear distinction between preparation guidance and an authoritative pickup promise.
+- [ ] Define safe localized allergen/warning fields and preserve historical disclosures relevant to submitted orders if those are added to snapshots; never infer allergen-free guarantees from photos or AI output.
+- [ ] Update management/public contracts and additive schema with actual metadata persistence, cross-tenant denial, clearing/fallback and invalid-input coverage.
+
+Decisions and limits:
+
+- Decide SKU uniqueness/integration scope, supported allergen/dietary vocabulary, snapshot requirements and preparation-duration semantics. SKU does not establish a POS integration; sample stock quantities are not inventory.
+
+### M3 — Menu Builder: assisted translation, glossary and human review workflow
+
+Reference: menu-builder. Dependencies: M1.
+
+Implement the reference translation studio's generate-all/retranslate, glossary validation, locale review and explicit save/approval workflow as a separate feature from existing manual translations.
+
+Acceptance criteria:
+
+- [ ] Retain fully working manual translation when assistance is unavailable; generate drafts only for explicitly selected enabled menu locales and supported fields.
+- [ ] Provide source/target-language panels, missing/review/approved state, per-locale save and safe retranslation confirmation so existing human edits are not silently overwritten.
+- [ ] Define tenant-owned glossary terms and human approval/version metadata, showing actual reviewer information only when persisted and authorized.
+- [ ] Use a server-side provider adapter with timeouts, bounded usage/cost controls and secret protection; preserve source text and show retryable failures without fabricating a gastronomic quality score.
+- [ ] Require human review of allergen/safety wording and keep unapproved drafts out of published guest content; verify locale fallback, glossary application, concurrent edits, provider failures and cross-tenant isolation.
+
+Decisions and limits:
+
+- Select translation provider and usage/cost policy, glossary scope and approval permissions. AI/DeepL labels and 98% quality claims in the reference are examples, not an approved provider or validated metric.
+
+### M4 — Menu Builder: catalog draft publication and change history
+
+Reference: menu-builder. Dependencies: M1.
+
+Define and implement the Publish changes and History controls shown in the Stitch Menu Builder without confusing them with the existing immediate-save catalog or order history.
+
+Acceptance criteria:
+
+- [ ] Record the draft/published catalog model and migration path from current immediate writes before changing behavior; keep existing restaurants usable during rollout.
+- [ ] Track changes and reviewable publication scope across categories, products, options, pricing and translations, with dirty-state feedback and explicit publish/discard behavior.
+- [ ] Validate completeness, availability, locale fallback and all relevant price/option rules on the server before atomic publication; reject stale concurrent publishes and retain the last valid storefront version on failure.
+- [ ] Provide tenant-authorized catalog change history with actor/time/version and useful diffs; define retention and rollback scope rather than reusing the unrelated order-history page.
+- [ ] Verify publication/cache refresh across guest and staff sessions while preserving checkout pricing/idempotency and immutable historical order snapshots.
+
+Decisions and limits:
+
+- Decide whether immediate availability/86 changes bypass drafts, publication permissions, version retention and rollback guarantees. Coordinate with M3 review states and D4 quick availability so emergency changes remain coherent.
+
+### M5 — Menu Builder: upload and manage product photos
+
+Reference: menu-builder. Dependencies: M1, T1.
+
+Implement product photography as a separate product feature, following the Stitch editor photo panel. This is independent from product metadata and the main workspace redesign.
+
+Acceptance criteria:
+
+- [ ] Reuse tenant-owned media storage/validation from T1 for product photos, with upload, replacement, removal, progress, recoverable errors and an accessible fallback; keep the existing published image after a failed replacement.
+- [ ] Support the reference 1:1 / 4:3 framing and preview with a consistent crop/focal-point policy. Decide concrete accepted formats, byte/dimension limits and thumbnail variants; the example 1200px recommendation is not an approved hard limit.
+- [ ] Associate photos only with an authorized tenant-owned product; verify product/media ownership, actual file content and safe delivery URLs, plus cleanup/retention for replaced or removed assets.
+- [ ] Render the saved product image and fallback on the actual guest product cards and product/options detail view; avoid stretched images, layout shifts, clipped controls and cross-tenant cache leakage.
+- [ ] Verify actual storage and product save/read-back, replacement/removal, failed upload recovery, invalid files, archived-product rules, foreign-product/media denial and responsive image framing. Coordinate draft/live image behavior with M4 if publication is implemented.
+
+Decisions and limits:
+
+- Decide storage variants, crop/focal-point behavior, accessible image-description policy and retention using T1 infrastructure. This task adds product photos, not order attachments or a numeric inventory system.
+
+### K1 — Live Orders: redesign the real five-lane Kanban/KDS from Stitch
+
+Reference: live-orders. Dependencies: none.
+
+Redesign the real Live Orders page using the supplied five-lane KDS reference, distinct from the restaurant dashboard overview.
+
+Acceptance criteria:
+
+- [ ] Match the KDS service header, filter/action toolbar and Pending/New, Preparing, Ready, Completed and Cancelled lane/ticket hierarchy, including references, saved item/modifier details, status labels and next-step actions.
+- [ ] Preserve existing mouse/touch drag behavior, keyboard button alternatives, role-valid transitions/cancellation, If-Match/version conflicts, pending guards, pagination, loaded-page count labels and focus restoration.
+- [ ] Reuse existing REST authority, SignalR refresh/reconnect recovery, stale/offline feedback and revoked-membership cache removal; coordinate hosted delivery acceptance with its existing card.
+- [ ] Use readable responsive lane layouts with contained scrolling or stacking; fix the supplied screenshot's clipped toolbar action and lane/header/ticket alignment, spacing and overflow instead of copying them.
+- [ ] Wire ASAP/scheduled filters and pickup information to S3 only when available; use K2–K3 for operational metadata and cancellation/payment behaviors; manual/phone order entry is explicitly excluded by the user. Preserve the order-history boundary and don't display mock sent/refunded claims as real state.
+
+Decisions and limits:
+
+- Define initial filter/default grouping and completed/cancelled retention presentation consistently with existing archival. The distinct dashboard D1 may reuse components but does not replace this live Kanban.
+
+### K2 — Live Orders: KDS timers, urgency, sound and preparation metadata
+
+Reference: live-orders. Dependencies: K1.
+
+Add the reference operational KDS features: elapsed/remaining times, urgency cues, sound controls and real preparation-stage/station/pickup-location metadata where supported.
+
+Acceptance criteria:
+
+- [ ] Derive elapsed timers and remaining pickup/preparation time from authoritative timestamps and the agreed target; recover correctly after refresh/reconnect and account for clock skew.
+- [ ] Define urgency thresholds and use text/icon labels alongside color; respect reduced motion and do not fake step percentages or average cooking times from sample values.
+- [ ] Provide explicit user-controlled KDS sound enable/mute and accessible new-order alerts; handle browser audio permission, deduplicate repeated/replayed events and avoid replay storms after reconnect.
+- [ ] If included after the decisions below, persist preparation stages, station and pickup-shelf assignments with tenant-authorized updates and concurrency control, then render actual stage/progress data on tickets.
+- [ ] Integrate S3 pickup times, D3 rush status and M2 preparation guidance when available; verify deterministic timer boundaries, lifecycle changes, sound deduplication, reconnect and keyboard/touch controls.
+
+Decisions and limits:
+
+- Decide timing source/targets, urgency rules, session versus device sound preferences and who may edit stages/stations/shelves. Preparation stages require an explicit model; external courier/POS integration is not established by a badge.
+
+### K3 — Live Orders: cancellation reasons and authoritative payment/refund status
+
+Reference: live-orders. Dependencies: K1, S5.
+
+Extend cancelled/completed KDS ticket details with recorded cancellation reasons and accurate notification/payment/refund information shown in the Stitch reference.
+
+Acceptance criteria:
+
+- [ ] Record validated cancellation reasons through the existing permitted lifecycle transition, preserving role restrictions, concurrency checks and historical ticket details.
+- [ ] Show notification status only from actual delivery records from S4, and payment/refund status only from verified provider-backed records; no hard-coded sent, paid or 100%-refunded labels.
+- [ ] Define the guest-payment/refund ledger and webhook reconciliation before any financial mutation; a Stripe Connect account connection alone is insufficient to charge or refund.
+- [ ] Keep order cancellation and payment refund as distinct authoritative outcomes with safe pending/failed/partial states, audit evidence and tenant/account binding.
+- [ ] Verify cancelled/unpaid orders without Stripe, provider event retries, duplicate/partial/failed refunds where implemented, role permissions and two-tenant isolation; protect financial/recipient details from unauthorized viewers.
+
+Decisions and limits:
+
+- Actual guest payments/refunds require a separately approved payment-flow design, capture/cancel/refund policy, liability model and test-mode verification. Until then implement truthful unpaid/not-supported states and reason storage only; don't fabricate refunds, credits, Stripe voids, SMS or card settlement.
+
 ## Verification of this planning change
 
-Reviewed repository docs/manifests and representative Tenant, Product, live dashboard and demo dashboard source; visually inspected all three screenshots and read all three HTML feature lists. No application behavior, dependencies or environment configuration changed. Reference integrity, Markdown links, board creation/status read-back and Git whitespace checks are verified separately in the handoff. Application tests are not required for these documentation/reference and kanban changes.
+Reviewed repository docs/manifests and representative tenant, product, catalog/language, live dashboard and demo source. Visually inspected all five screenshots and read their HTML feature lists, including inactive-tab content. The follow-up preserves two more references, adds M1–M5 and K1–K3 (20 implementation cards total), and requires correcting Stitch offsets, overflow, centering, padding and margins on every implementation card. Manual/phone orders are excluded; product photos have their own task. No application behavior, dependencies or environment configuration changed. Reference integrity, Markdown links, board creation/status/content read-back and Git whitespace checks are verified in the planning-card handoff. Application tests are not required for these documentation/reference and kanban changes.

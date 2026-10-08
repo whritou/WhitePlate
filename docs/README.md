@@ -28,7 +28,7 @@ The currently recorded Coolify API image (`e13860e`) predates merge `8a2f835` (P
 | [Public order tracking decision](architecture/decisions/0006-public-order-tracking.md) | Expiring capability-based public status tracking and tenant-scoped ephemeral guest checkout |
 | [Functional test plan](functional-test-plan.md) | Executable smoke checks and future acceptance criteria |
 | [Development roadmap](development-roadmap.md) | Implemented backend scope and unresolved frontend/deployment decisions |
-| [Restaurant management backlog](planning/restaurant-management-backlog.md) | Future theming, dashboard and restaurant settings tasks with supplied Stitch references, dependencies and responsive acceptance criteria |
+| [Restaurant management backlog](planning/restaurant-management-backlog.md) | Future theming, dashboard, restaurant settings, unified menu/translations and live Kanban tasks with Stitch references and responsive acceptance criteria |
 | [Full Stitch redesign handoff](redesign-handoff.md) | Public landing, illustrative screen routes, visual adoption and verification |
 | [Landing and demo responsive audit](audits/landing-demo-responsive.md) | Responsive defects, fixes, captured walkthrough and browser verification for the public landing and menu |
 | [Documentation review](documentation-review.md) | Audit findings, verification evidence, and remaining blockers |
