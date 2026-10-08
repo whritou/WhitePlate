@@ -15,6 +15,10 @@ Status: the [full API design](superpowers/specs/2026-09-29-full-api-design.md) a
 
 Each stage should be implemented in small usable slices. No need to create all architectural layers before delivering a concrete feature.
 
+### Localized restaurant description and click-and-collect shop — 2026-10-08
+
+Implemented in source: tenant-scoped 500-character description translations, owner/manager management API, selected-menu-locale then default-locale public resolution, and the English/French management editor. The storefront now has category navigation, product cards, a confirm-before-save options dialog, desktop cart and mobile cart entry using the existing checkout flow. API suite (163), frontend suite (382), lint, typecheck, targeted formatting, API build, and Next build passed on this working tree. The Next build used inert HTTPS `.invalid` endpoints and an unavailable local database; expected Better Auth schema-connection errors were logged. A local fixture walkthrough verified the desktop shop, language fallback, option modal, cart estimate, keyboard dismissal/focus restoration, and checkout locale preservation. Narrow mobile viewport acceptance, migration rollout, and hosted acceptance remain pending. Kanban: [issue #50](https://github.com/whritou/WhitePlate/issues/50) tracks this scope and remains In progress until remaining acceptance is complete.
+
 ## Decision register
 
 D04 is resolved by the architecture. D02/D03/D05-D09 are approved in the full API design; deployment/provider-specific details remain open. D11 is resolved by [decisions 0003](architecture/decisions/0003-catalog-localization-and-tenant-domain-policy.md) and [0004](architecture/decisions/0004-localized-order-snapshots.md). The table records accepted decisions and their implementation status.

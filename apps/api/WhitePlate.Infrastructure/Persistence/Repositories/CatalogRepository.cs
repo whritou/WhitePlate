@@ -53,6 +53,27 @@ public sealed class CatalogRepository(WhitePlateDbContext database) : ICatalogRe
         return updated;
     }
 
+    public async Task<RestaurantDescriptionTranslationsDto?> GetRestaurantDescriptionTranslationsAsync(Guid tenantId,
+        CancellationToken cancellationToken)
+    {
+        var tenant = await database.Tenants.AsNoTracking().SingleOrDefaultAsync(item => item.Id == tenantId,
+            cancellationToken);
+        return tenant is null
+            ? null
+            : new RestaurantDescriptionTranslationsDto(tenant.Id, tenant.GetMenuLocales(),
+                tenant.DefaultMenuLocale, tenant.GetDescriptionTranslations());
+    }
+
+    public async Task<bool> SetRestaurantDescriptionTranslationAsync(Guid tenantId, string locale,
+        string? description, CancellationToken cancellationToken)
+    {
+        var tenant = await database.Tenants.SingleOrDefaultAsync(item => item.Id == tenantId, cancellationToken);
+        if (tenant is null) return false;
+        tenant.SetDescriptionTranslation(locale, description);
+        await database.SaveChangesAsync(cancellationToken);
+        return true;
+    }
+
     public async Task<CatalogManagementDto?> GetManagementCatalogAsync(Guid tenantId, CancellationToken cancellationToken)
     {
         var currency = await database.Tenants.AsNoTracking().Where(tenant => tenant.Id == tenantId)
@@ -288,6 +309,8 @@ public sealed class CatalogRepository(WhitePlateDbContext database) : ICatalogRe
     public async Task<MenuDto> GetMenuAsync(TenantDto tenant, string? requestedLocale,
         CancellationToken cancellationToken)
     {
+        var restaurant = await database.Tenants.AsNoTracking()
+            .SingleOrDefaultAsync(item => item.Id == tenant.Id, cancellationToken);
         var locale = MenuLocale.TryCreate(requestedLocale, out var normalizedLocale) &&
                      tenant.MenuLocales.Contains(normalizedLocale!.Value, StringComparer.OrdinalIgnoreCase)
             ? normalizedLocale.Value
@@ -341,7 +364,10 @@ public sealed class CatalogRepository(WhitePlateDbContext database) : ICatalogRe
             new MenuCategoryDto(category.Id,
                 CatalogTranslations.Get(category.TranslationsJson, locale, tenant.DefaultMenuLocale, category.Name).Name,
                 category.SortOrder,
-                productsByCategory.GetValueOrDefault(category.Id, []))).ToArray());
+                productsByCategory.GetValueOrDefault(category.Id, []))).ToArray())
+        {
+            RestaurantDescription = restaurant?.ResolveDescription(locale)
+        };
     }
 
     private async Task<string> GetDefaultLocaleAsync(Guid tenantId, CancellationToken cancellationToken) =>

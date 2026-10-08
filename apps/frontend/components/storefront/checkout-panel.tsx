@@ -19,6 +19,7 @@ import { Receipt } from "./receipt"
 export function CheckoutPanel({
   checkoutState,
   mode,
+  estimatedSubtotal,
   onBack,
   onContinue,
   onNewOrder,
@@ -168,9 +169,19 @@ export function CheckoutPanel({
               )}
 
               {cart.length > 0 && (
-                <p className="mt-4 text-sm leading-5 text-muted-foreground">
-                  {c("priceNote")}
-                </p>
+                <>
+                  {isCart && estimatedSubtotal && (
+                    <div className="mt-4 flex items-center justify-between border-t border-border pt-4 font-semibold">
+                      <span>{c("estimatedSubtotal")}</span>
+
+                      <span className="tabular-nums">{estimatedSubtotal}</span>
+                    </div>
+                  )}
+
+                  <p className="mt-3 text-sm leading-5 text-muted-foreground">
+                    {c("priceNote")}
+                  </p>
+                </>
               )}
 
               {isCart ? (

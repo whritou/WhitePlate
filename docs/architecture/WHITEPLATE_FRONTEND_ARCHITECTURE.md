@@ -4,6 +4,8 @@ Status: localized Better Auth flows, server-only API BFF, responsive organizatio
 
 ## Stack and source map
 
+The public tenant storefront reads its restaurant description from the localized menu DTO, displays product cards with a confirmation dialog for option selection, and keeps a desktop cart panel plus a mobile cart entry that opens the same cart and checkout flow. Owners/managers edit the 500-character description by enabled menu locale in the restaurant language workspace. The API resolves description fallback from selected menu locale to default menu locale.
+
 Next.js 16.3.4, React 19.2.8, strict TypeScript, Tailwind CSS 4, `next-intl`, and `next-themes` are wired into the application. shadcn Base UI components implement shared controls, cards and feedback. TanStack Query manages kitchen order reads and mutations. The [implementation conventions](frontend-conventions.md) define module ownership and enforced boundaries. Exact dependencies are recorded in the package manifest and lockfile.
 
 ```text

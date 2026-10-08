@@ -6,6 +6,7 @@ namespace WhitePlate.Domain.Tenants;
 public sealed class Tenant
 {
     public const int MaxNameLength = 200;
+    public const int MaxDescriptionLength = 500;
     private static readonly HashSet<string> SupportedCurrencies = new(StringComparer.Ordinal)
     {
         "EUR", "GBP", "USD"
@@ -19,6 +20,7 @@ public sealed class Tenant
     public bool IsActive { get; private set; }
     public string DefaultMenuLocale { get; private set; } = "en";
     public string MenuLocalesJson { get; private set; } = "[\"en\"]";
+    public string DescriptionTranslationsJson { get; private set; } = "{}";
 
     private Tenant() { }
 
@@ -77,5 +79,43 @@ public sealed class Tenant
 
         DefaultMenuLocale = normalizedDefault;
         MenuLocalesJson = JsonSerializer.Serialize(values);
+    }
+
+    public void SetDescriptionTranslation(string? locale, string? description)
+    {
+        var normalizedLocale = MenuLocale.Create(locale).Value;
+        if (!SupportsMenuLocale(normalizedLocale))
+            throw new DomainRuleException("unsupported_menu_locale", "locale",
+                "Enable this language in the restaurant menu settings before adding its description.");
+
+        var normalizedDescription = description?.Trim();
+        if (normalizedDescription?.Length > MaxDescriptionLength)
+            throw new DomainRuleException("invalid_description", "description",
+                $"Description cannot exceed {MaxDescriptionLength} characters.");
+
+        var translations = ReadDescriptionTranslations();
+        if (string.IsNullOrEmpty(normalizedDescription)) translations.Remove(normalizedLocale);
+        else translations[normalizedLocale] = normalizedDescription;
+        DescriptionTranslationsJson = JsonSerializer.Serialize(translations);
+    }
+
+    public string? ResolveDescription(string? locale)
+    {
+        var translations = ReadDescriptionTranslations();
+        var requestedLocale = MenuLocale.TryCreate(locale, out var normalizedLocale) &&
+                              SupportsMenuLocale(normalizedLocale!.Value)
+            ? normalizedLocale.Value
+            : DefaultMenuLocale;
+
+        return translations.GetValueOrDefault(requestedLocale) ??
+               translations.GetValueOrDefault(DefaultMenuLocale);
+    }
+
+    public IReadOnlyDictionary<string, string> GetDescriptionTranslations() => ReadDescriptionTranslations();
+
+    private Dictionary<string, string> ReadDescriptionTranslations()
+    {
+        var translations = JsonSerializer.Deserialize<Dictionary<string, string>>(DescriptionTranslationsJson) ?? [];
+        return new Dictionary<string, string>(translations, StringComparer.OrdinalIgnoreCase);
     }
 }

@@ -3,6 +3,11 @@ export type MenuLanguagesInput = {
   locales: string[]
   defaultLocale: string
 }
+export type RestaurantDescriptionTranslationInput = {
+  tenantId: string
+  locale: string
+  description: string
+}
 export type OrganizationRenameInput = {
   organizationId: string
   name: string

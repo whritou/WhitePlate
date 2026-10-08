@@ -67,6 +67,35 @@ public sealed class TenantCatalogController(
         return result.IsSuccess ? NoContent() : errors.ToActionResult(errors.Create(HttpContext, result.Error));
     }
 
+    [HttpGet("restaurant-description-translations")]
+    [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+    [ProducesResponseType<RestaurantDescriptionTranslationsDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status401Unauthorized, "application/problem+json")]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status404NotFound, "application/problem+json")]
+    public async Task<ActionResult<RestaurantDescriptionTranslationsDto>> GetRestaurantDescriptionTranslations(
+        Guid tenantId, CancellationToken cancellationToken)
+    {
+        var identity = currentIdentity.Identity;
+        if (identity is null) return Unauthorized();
+        var result = await menuLanguageSettings.GetDescriptionTranslationsAsync(tenantId, identity, cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : errors.ToActionResult(errors.Create(HttpContext, result.Error));
+    }
+
+    [HttpPut("restaurant-description-translations/{locale}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status400BadRequest, "application/problem+json")]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status401Unauthorized, "application/problem+json")]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status404NotFound, "application/problem+json")]
+    public async Task<IActionResult> UpdateRestaurantDescriptionTranslation(Guid tenantId, string locale,
+        UpdateRestaurantDescriptionRequest request, CancellationToken cancellationToken)
+    {
+        var identity = currentIdentity.Identity;
+        if (identity is null) return Unauthorized();
+        var result = await menuLanguageSettings.SetDescriptionTranslationAsync(tenantId, locale,
+            request.Description, identity, cancellationToken);
+        return result.IsSuccess ? NoContent() : errors.ToActionResult(errors.Create(HttpContext, result.Error));
+    }
+
     [HttpGet("catalog")]
     [ProducesResponseType<CatalogManagementDto>(StatusCodes.Status200OK)]
     [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status401Unauthorized, "application/problem+json")]

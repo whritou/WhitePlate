@@ -3,6 +3,7 @@
 import { isInvitationToken, isRecord, isUuid } from "@/lib/validation/common"
 import {
   parseMenuLanguages,
+  parseRestaurantDescriptionTranslation,
   parseCatalogTranslation,
   parseOrganizationName,
   parseOrganizationRename,
@@ -10,6 +11,7 @@ import {
 } from "@/lib/validation/organization"
 import {
   updateMenuLanguages,
+  saveRestaurantDescriptionTranslation,
   saveCatalogTranslation,
   createOrganization,
   renameOrganization,
@@ -26,6 +28,16 @@ export async function updateMenuLanguagesAction(
   const value = parseMenuLanguages(input)
 
   return value ? updateMenuLanguages(value) : { ok: false, message: "invalid" }
+}
+
+export async function saveRestaurantDescriptionTranslationAction(
+  input: unknown
+): Promise<ActionResult> {
+  const value = parseRestaurantDescriptionTranslation(input)
+
+  return value
+    ? saveRestaurantDescriptionTranslation(value)
+    : { ok: false, message: "invalid" }
 }
 
 export async function saveCatalogTranslationAction(

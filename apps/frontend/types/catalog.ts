@@ -49,4 +49,8 @@ export type MenuLanguageSettings = {
   defaultLocale: string
 }
 
+export type RestaurantDescriptionTranslations = MenuLanguageSettings & {
+  translations: Record<string, string>
+}
+
 export type CatalogManagement = CatalogTranslationData

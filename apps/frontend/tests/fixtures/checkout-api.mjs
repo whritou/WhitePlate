@@ -29,6 +29,9 @@ const server = createServer(async (request, response) => {
         ? "55555555-5555-4555-8555-555555555555"
         : tenantId,
       restaurantName: "Bistro fixture",
+      restaurantDescription: french
+        ? "Une cuisine de saison, préparée avec soin."
+        : "Seasonal cooking, prepared with care.",
       currency: "EUR",
       locale: french ? "fr" : "en",
       defaultLocale: "en",

@@ -1,6 +1,7 @@
 export type StorefrontMenu = {
   tenantId: string
   restaurantName: string
+  restaurantDescription: string | null
   currency: string
   locale: string
   defaultLocale: string

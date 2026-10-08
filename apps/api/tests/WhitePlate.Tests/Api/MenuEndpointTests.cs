@@ -21,6 +21,36 @@ namespace WhitePlate.Tests.Api;
 public sealed class MenuEndpointTests
 {
     [Fact]
+    public async Task PublicMenuReturnsTheRequestedRestaurantDescriptionTranslation()
+    {
+        using var factory = new MenuFactory();
+        await factory.SeedAsync();
+        using var client = factory.CreateClient();
+
+        using var response = await client.GetAsync("https://bistro.example.test/api/v1/menu?locale=fr",
+            TestContext.Current.CancellationToken);
+        using var json = JsonDocument.Parse(await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal("Bienvenue au Bistro", json.RootElement.GetProperty("restaurantDescription").GetString());
+    }
+
+    [Fact]
+    public async Task PublicMenuFallsBackToDefaultRestaurantDescriptionWhenTranslationIsMissing()
+    {
+        using var factory = new MenuFactory();
+        await factory.SeedAsync(includeFrenchDescription: false);
+        using var client = factory.CreateClient();
+
+        using var response = await client.GetAsync("https://bistro.example.test/api/v1/menu?locale=fr",
+            TestContext.Current.CancellationToken);
+        using var json = JsonDocument.Parse(await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal("Welcome to Bistro", json.RootElement.GetProperty("restaurantDescription").GetString());
+    }
+
+    [Fact]
     public async Task PublicMenuReturnsOnlyAvailableDataForTheResolvedTenant()
     {
         using var factory = new MenuFactory();
@@ -78,7 +108,7 @@ public sealed class MenuEndpointTests
             });
         }
 
-        public async Task<Guid> SeedAsync()
+        public async Task<Guid> SeedAsync(bool includeFrenchDescription = true)
         {
             using var scope = Services.CreateScope();
             var database = scope.ServiceProvider.GetRequiredService<WhitePlateDbContext>();
@@ -86,6 +116,10 @@ public sealed class MenuEndpointTests
             var organization = Organization.Create("Acme");
             database.Organizations.Add(organization);
             var tenant = Tenant.Create(organization.Id, "Bistro", "bistro", "EUR");
+            tenant.UpdateMenuLocales(["en", "fr"], "en");
+            tenant.SetDescriptionTranslation("en", "Welcome to Bistro");
+            if (includeFrenchDescription)
+                tenant.SetDescriptionTranslation("fr", "Bienvenue au Bistro");
             var otherTenant = Tenant.Create(organization.Id, "Other", "other", "USD");
             database.Tenants.AddRange(tenant, otherTenant);
             var category = MenuCategory.Create(tenant.Id, "Mains", 0);

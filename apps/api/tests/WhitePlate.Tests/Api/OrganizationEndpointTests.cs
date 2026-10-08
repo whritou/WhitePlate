@@ -19,12 +19,58 @@ using System.Text;
 using WhitePlate.Api.Realtime;
 using WhitePlate.Domain.Identity;
 using WhitePlate.Domain.Organizations;
+using WhitePlate.Domain.Tenants;
 using WhitePlate.Infrastructure.Persistence;
 
 namespace WhitePlate.Tests.Api;
 
 public sealed class OrganizationEndpointTests
 {
+    [Fact]
+    public async Task RestaurantOwnerAndManagerCanManageLocalizedRestaurantDescriptions()
+    {
+        using var factory = new OrganizationFactory();
+        var (organizationId, owner) = await factory.SeedOwnerAsync();
+        var tenantId = await factory.SeedRestaurantAsync(organizationId);
+        await factory.AddRestaurantMemberAsync(tenantId, "manager", RestaurantRole.Manager);
+
+        using var client = factory.CreateClient();
+        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", owner.Subject);
+        using var ownerWrite = await client.PutAsJsonAsync(
+            $"/api/v1/tenants/{tenantId}/restaurant-description-translations/fr",
+            new { description = "  Bienvenue au Bistro  " }, TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.NoContent, ownerWrite.StatusCode);
+
+        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", "manager");
+        using var managerRead = await client.GetAsync($"/api/v1/tenants/{tenantId}/restaurant-description-translations",
+            TestContext.Current.CancellationToken);
+
+        Assert.Equal(HttpStatusCode.OK, managerRead.StatusCode);
+        using var json = JsonDocument.Parse(await managerRead.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
+        Assert.Equal("en", json.RootElement.GetProperty("defaultLocale").GetString());
+        Assert.Equal("Bienvenue au Bistro", json.RootElement.GetProperty("translations").GetProperty("fr").GetString());
+    }
+
+    [Fact]
+    public async Task KitchenAndForeignTenantCannotReadRestaurantDescriptions()
+    {
+        using var factory = new OrganizationFactory();
+        var (organizationId, owner) = await factory.SeedOwnerAsync();
+        var tenantId = await factory.SeedRestaurantAsync(organizationId);
+        await factory.AddRestaurantMemberAsync(tenantId, "kitchen", RestaurantRole.Kitchen);
+        using var client = factory.CreateClient();
+        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", "kitchen");
+
+        using var kitchenResponse = await client.GetAsync($"/api/v1/tenants/{tenantId}/restaurant-description-translations",
+            TestContext.Current.CancellationToken);
+        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", owner.Subject);
+        using var foreignResponse = await client.GetAsync($"/api/v1/tenants/{Guid.NewGuid()}/restaurant-description-translations",
+            TestContext.Current.CancellationToken);
+
+        Assert.Equal(HttpStatusCode.NotFound, kitchenResponse.StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, foreignResponse.StatusCode);
+    }
+
     [Fact]
     public async Task RestaurantCreationRequiresAnAuthenticatedOrganizationOwner()
     {
@@ -538,6 +584,26 @@ public sealed class OrganizationEndpointTests
             database.OrganizationOwnerMemberships.Add(OrganizationOwnerMembership.Create(organization.Id, identity));
             await database.SaveChangesAsync(TestContext.Current.CancellationToken);
             return (organization.Id, identity);
+        }
+
+        public async Task<Guid> SeedRestaurantAsync(Guid organizationId)
+        {
+            using var scope = Services.CreateScope();
+            var database = scope.ServiceProvider.GetRequiredService<WhitePlateDbContext>();
+            var tenant = Tenant.Create(organizationId, "Bistro", "bistro", "EUR");
+            tenant.UpdateMenuLocales(["en", "fr"], "en");
+            database.Tenants.Add(tenant);
+            await database.SaveChangesAsync(TestContext.Current.CancellationToken);
+            return tenant.Id;
+        }
+
+        public async Task AddRestaurantMemberAsync(Guid tenantId, string subject, RestaurantRole role)
+        {
+            using var scope = Services.CreateScope();
+            var database = scope.ServiceProvider.GetRequiredService<WhitePlateDbContext>();
+            database.RestaurantMemberships.Add(RestaurantMembership.Create(tenantId,
+                ExternalIdentity.Create("https://identity.example.test/", subject), role));
+            await database.SaveChangesAsync(TestContext.Current.CancellationToken);
         }
 
         protected override void Dispose(bool disposing)
