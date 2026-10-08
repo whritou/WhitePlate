@@ -18,8 +18,8 @@ export function LandingMetrics() {
         </div>
 
         <div className="grid w-full grid-cols-2 gap-6 text-center sm:grid-cols-4 md:w-auto">
-          <div className="rounded-xl bg-surface p-3 shadow-xs">
-            <p className="font-heading text-kpi-number font-extrabold text-secondary-container">
+          <div className="flex min-w-0 flex-col items-center justify-center rounded-xl bg-surface p-3 text-center shadow-xs">
+            <p className="font-heading text-headline-md font-extrabold text-secondary-container">
               {t("value0")}
             </p>
 
@@ -28,8 +28,8 @@ export function LandingMetrics() {
             </p>
           </div>
 
-          <div className="rounded-xl bg-surface p-3 shadow-xs">
-            <p className="font-heading text-kpi-number font-extrabold text-on-surface">
+          <div className="flex min-w-0 flex-col items-center justify-center rounded-xl bg-surface p-3 text-center shadow-xs">
+            <p className="font-heading text-headline-md font-extrabold text-on-surface">
               {t("value15m")}
             </p>
 
@@ -38,8 +38,8 @@ export function LandingMetrics() {
             </p>
           </div>
 
-          <div className="rounded-xl bg-surface p-3 shadow-xs">
-            <p className="font-heading text-kpi-number font-extrabold text-on-surface">
+          <div className="flex min-w-0 flex-col items-center justify-center rounded-xl bg-surface p-3 text-center shadow-xs">
+            <p className="font-heading text-headline-md font-extrabold text-on-surface">
               {t("value38")}
             </p>
 
@@ -48,8 +48,8 @@ export function LandingMetrics() {
             </p>
           </div>
 
-          <div className="rounded-xl bg-surface p-3 shadow-xs">
-            <p className="font-heading text-kpi-number font-extrabold text-on-tertiary-container">
+          <div className="flex min-w-0 flex-col items-center justify-center rounded-xl bg-surface p-3 text-center shadow-xs">
+            <p className="font-heading text-headline-md font-extrabold text-on-tertiary-container">
               {t("value9998")}
             </p>
 

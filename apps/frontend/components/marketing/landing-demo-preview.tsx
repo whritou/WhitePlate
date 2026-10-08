@@ -324,19 +324,19 @@ export function LandingDemoPreview() {
             </div>
           </div>
 
-          <div className="flex items-center justify-between rounded-xl bg-surface-container p-3">
-            <div className="flex items-center gap-2">
+          <div className="flex min-w-0 flex-col items-stretch gap-3 rounded-xl bg-surface-container p-2.5 sm:flex-row sm:items-center sm:justify-between sm:p-3">
+            <div className="flex min-w-0 items-center gap-2">
               <span className="flex h-6 w-6 items-center justify-center rounded-full bg-secondary-container font-sans text-label-sm font-bold text-primary-foreground">
                 {t("value2")}
               </span>
 
-              <span className="font-heading text-title-md text-on-surface">
+              <span className="min-w-0 font-heading text-body-md text-on-surface sm:text-title-md">
                 {t("value3850Total")}
               </span>
             </div>
 
             <Button
-              className="rounded-lg bg-secondary-container px-4 py-1.5 font-sans text-label-sm font-bold text-primary-foreground shadow-sm"
+              className="w-full rounded-lg bg-secondary-container px-3 py-2 text-center font-sans text-[0.75rem] font-bold whitespace-normal text-primary-foreground shadow-sm sm:w-auto sm:px-4 sm:py-1.5 sm:whitespace-nowrap"
               type="button"
               variant="ghost"
               onClick={() => router.push("/demo")}

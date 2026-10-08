@@ -27,7 +27,7 @@ export function LandingHero() {
             </span>
           </div>
 
-          <h1 className="font-heading text-display-hero-mobile leading-none tracking-tight text-balance text-on-surface lg:text-display-hero">
+          <h1 className="font-heading text-headline-lg-mobile leading-tight tracking-tight text-balance text-on-surface sm:text-display-hero-mobile sm:leading-none lg:text-display-hero">
             {t("turnDinersIntoDirectCustomers")}{" "}
             <span className="text-secondary-container">
               {t("value0MarketplaceFees")}
@@ -40,7 +40,7 @@ export function LandingHero() {
 
           <div className="flex flex-col items-stretch gap-4 pt-2 sm:flex-row sm:items-center">
             <Link
-              className="group inline-flex items-center justify-center gap-3 rounded-xl bg-secondary-container px-7 py-3.5 font-heading text-headline-sm text-primary-foreground shadow-md transition-all hover:bg-secondary active:scale-[0.98]"
+              className="group inline-flex items-center justify-center gap-2 rounded-xl bg-secondary-container px-4 py-3 font-heading text-label-md text-primary-foreground shadow-md transition-all hover:bg-secondary active:scale-[0.98] sm:gap-3 sm:px-7 sm:py-3.5 sm:text-title-md"
               href="/sign-up"
             >
               <span className="">{t("joinWhiteplate14DaysFree")}</span>

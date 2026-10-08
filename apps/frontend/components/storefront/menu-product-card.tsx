@@ -66,7 +66,7 @@ export function MenuProductCard({
         )}
       </CardContent>
 
-      <CardFooter className="col-span-2 row-start-3 flex-wrap justify-between gap-3 border-t-0 p-0 pt-1">
+      <CardFooter className="col-span-2 row-start-3 flex-wrap justify-between gap-3 border-t-0 p-0 pt-1 pb-3">
         <span className="font-heading text-headline-sm tabular-nums">
           {price.format(product.basePrice)}
         </span>

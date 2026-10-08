@@ -32,19 +32,19 @@ export function LandingPreviews() {
 
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
           <div className="space-y-5 rounded-lg bg-surface-container-lowest p-6 shadow-sm">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
+            <div className="flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex min-w-0 items-center gap-2">
                 <ReferenceIcon
                   name="kitchen"
                   className="text-secondary-container"
                 />
 
-                <span className="font-heading text-title-md font-bold text-on-surface">
+                <span className="min-w-0 font-heading text-body-md leading-5 break-words text-on-surface sm:text-title-md sm:leading-6">
                   {t("backOfficeLiveKanban")}
                 </span>
               </div>
 
-              <span className="rounded-md bg-surface-container px-2.5 py-1 font-sans text-label-sm text-on-surface">
+              <span className="shrink-0 rounded-md bg-surface-container px-2.5 py-1 font-sans text-label-sm text-on-surface">
                 {t("autoRefreshOn")}
               </span>
             </div>

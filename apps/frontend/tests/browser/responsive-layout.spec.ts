@@ -135,3 +135,117 @@ test("marketing, menu, tracking and dashboard fit mobile, tablet and desktop wid
     }
   }
 })
+
+test("mobile landing hero keeps its headline and primary action compact", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 320, height: 740 })
+  await page.goto("/fr")
+
+  const title = page.locator("main h1").first()
+  const join = page.getByRole("link", { name: /Rejoignez WhitePlate/ })
+
+  expect(
+    await title.evaluate((element) => getComputedStyle(element).fontSize)
+  ).toBe("26px")
+  expect(
+    await join.evaluate((element) => getComputedStyle(element).fontSize)
+  ).toBe("14px")
+})
+
+test("mobile pricing toggle and popular badge stay centered in their containers", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 320, height: 740 })
+  await page.goto("/fr")
+
+  const toggle = await page.locator("#billing-toggle").boundingBox()
+  const pricing = await page.locator("#pricing").boundingBox()
+  const card = page.locator("#pricing [class*=ring-2]")
+  const cardBounds = await card.boundingBox()
+  const badge = await card.locator("div.absolute").first().boundingBox()
+
+  expect(toggle).not.toBeNull()
+  expect(pricing).not.toBeNull()
+  expect(
+    Math.abs(toggle!.x + toggle!.width / 2 - (pricing!.x + pricing!.width / 2))
+  ).toBeLessThanOrEqual(8)
+  expect(badge).not.toBeNull()
+  expect(cardBounds).not.toBeNull()
+  expect(badge!.x).toBeGreaterThanOrEqual(cardBounds!.x + 8)
+  expect(badge!.x + badge!.width).toBeLessThanOrEqual(
+    cardBounds!.x + cardBounds!.width - 8
+  )
+  expect(
+    Math.abs(
+      badge!.x + badge!.width / 2 - (cardBounds!.x + cardBounds!.width / 2)
+    )
+  ).toBeLessThanOrEqual(2)
+  expect(badge!.y).toBeGreaterThanOrEqual(cardBounds!.y)
+})
+
+test("mobile landing checkout summary stacks its total and payment action", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 320, height: 740 })
+  await page.goto("/fr")
+  await page.getByRole("button", { name: "Vitrine client" }).click()
+
+  const payment = page.getByRole("button", { name: /Payer avec Apple Pay/ })
+  const total = page.getByText("Total : 38,50 $")
+  const paymentBounds = await payment.boundingBox()
+  const totalBounds = await total.boundingBox()
+  const summary = await total.locator("../..").boundingBox()
+
+  expect(paymentBounds).not.toBeNull()
+  expect(totalBounds).not.toBeNull()
+  expect(summary).not.toBeNull()
+  expect(paymentBounds!.y).toBeGreaterThan(totalBounds!.y)
+  expect(paymentBounds!.width).toBeLessThanOrEqual(summary!.width)
+  expect(paymentBounds!.x + paymentBounds!.width).toBeLessThanOrEqual(
+    summary!.x + summary!.width
+  )
+  expect(
+    await payment.evaluate((element) => getComputedStyle(element).fontSize)
+  ).toBe("12px")
+})
+
+test("landing metrics stay centered and use restrained number sizing on desktop", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1280, height: 900 })
+  await page.goto("/fr")
+
+  const number = page.getByText("0%", { exact: true })
+
+  await expect(number).toBeVisible()
+  expect(
+    await number.evaluate((element) => getComputedStyle(element).fontSize)
+  ).toBe("24px")
+  expect(
+    await number.evaluate((element) => getComputedStyle(element).textAlign)
+  ).toBe("center")
+})
+
+test("mobile live-order preview heading and refresh status get separate space", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 320, height: 740 })
+  await page.goto("/fr")
+
+  const title = page.getByText("Tableau de commandes en direct", {
+    exact: true,
+  })
+  const status = page.getByText("Actualisation active", { exact: true })
+  const titleBounds = await title.boundingBox()
+  const statusBounds = await status.boundingBox()
+
+  expect(titleBounds).not.toBeNull()
+  expect(statusBounds).not.toBeNull()
+  expect(statusBounds!.y).toBeGreaterThanOrEqual(
+    titleBounds!.y + titleBounds!.height
+  )
+  expect(
+    await title.evaluate((element) => getComputedStyle(element).fontSize)
+  ).toBe("15px")
+})

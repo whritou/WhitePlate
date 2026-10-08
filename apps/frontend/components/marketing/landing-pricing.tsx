@@ -157,8 +157,8 @@ export function LandingPricing() {
           </Link>
         </div>
 
-        <div className="relative flex flex-col justify-between space-y-8 rounded-lg bg-surface-container-lowest p-8 shadow-xl ring-2 ring-secondary-container">
-          <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full bg-secondary-container px-4 py-1 font-sans text-label-sm font-bold tracking-wider text-primary-foreground uppercase shadow-md">
+        <div className="relative flex flex-col justify-between space-y-8 rounded-lg bg-surface-container-lowest p-8 pt-24 shadow-xl ring-2 ring-secondary-container sm:pt-8">
+          <div className="absolute top-3 left-1/2 w-[calc(100%-2rem)] -translate-x-1/2 rounded-full bg-secondary-container px-3 py-1 text-center font-sans text-label-sm font-bold tracking-wider text-primary-foreground uppercase shadow-md sm:-top-3.5 sm:w-auto sm:px-4">
             {t("mostPopularForBusyVenues")}
           </div>
 
