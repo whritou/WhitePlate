@@ -10,7 +10,7 @@ Generated files are not source. Do not edit `node_modules`, `.next`, `bin`, `obj
 
 ## Frontend
 
-For every UI change, follow the [design system](design-system/README.md), including its semantic tokens, component states, accessibility and delivery checklist. Its palette, common radii, focus and control sizes are implemented in the shared CSS/primitives; Vitest checks canonical color/radius parity. Introduce changes within the requested UI scope and document deviations rather than adding a competing local style.
+For every UI change, follow the [Culinary Commerce design system](design-system/README.md), including its semantic tokens, component states, accessibility and implementation boundaries. Shared colors, font stacks, spacing, radii and responsive tokens are exposed in the frontend theme; the existing Vitest check verifies color/radius parity. Introduce screen-level changes within the requested scope and document deviations rather than adding a competing local style.
 
 Follow the implemented [frontend conventions](architecture/frontend-conventions.md) for module ownership, dedicated types, thin actions, server services, request adapters and query lifecycle. ESLint and CI enforce the mechanical boundaries; review still needs to assess responsibility, accessibility and authorization.
 
