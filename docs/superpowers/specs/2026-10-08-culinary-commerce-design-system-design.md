@@ -2,7 +2,7 @@
 
 **Date:** 2026-10-08
 **Status:** Approved by user 2026-10-08; implementation in progress
-**Scope:** Canonical design-system documentation, design tokens, static preview, shared frontend CSS variables, and documentation that describes runtime adoption
+**Scope:** Canonical design-system documentation, design tokens, static preview, shared frontend CSS/theme variables, one semantic status-color utility mapping, and documentation that describes runtime adoption
 
 ## Context
 
@@ -22,7 +22,7 @@ The new attachment contains named prose HEX values that conflict with its YAML c
 
 ## Non-goals
 
-- Changing component markup, page-specific styles, translations, APIs, product behavior, or test source.
+- Changing component structure, page-specific layouts/styles, translations, APIs, product behavior, or test source. A status-indicator class may be remapped to the new solid-status token to preserve its visual meaning.
 - Applying every component recipe or rearranging existing screens; broader screen-level design adoption remains a separate kanban item.
 - Implementing features depicted in the attachment that are not already verified in the product.
 - Changing application authentication, authorization, tenant boundaries, pricing, order transitions, cart behavior, or checkout retries.
@@ -56,11 +56,11 @@ Retain the specified operational status hues and their light-theme text/tint pai
 
 Use the attachment's YAML typography scale and font pairing where prose does not conflict: Plus Jakarta Sans for headlines, dish names, hero hooks, and large KPI figures; Inter for body copy, modifiers, form labels, and table cells. Use tabular figures for live order and metric values. Keep all listed YAML sizes, weights, line heights, letter spacing, and named spacing values.
 
-Use the attachment's YAML radius values (`0.25rem`, `0.5rem`, `0.75rem`, `1rem`, `1.5rem`, and pill) with the prose geometry guidance: `0.5rem` core radius; cards/modals up to `1rem`; pill badges and category filters remain fully rounded. Keep the YAML spacing values for gutters, margins, and named gaps.
+Use the attachment's YAML radius values (`0.25rem`, `0.5rem`, `0.75rem`, `1rem`, `1.5rem`, and pill) with the prose geometry guidance: `0.5rem` core radius; cards/modals up to `1rem`; pill badges and category filters remain fully rounded. Keep the YAML spacing values for gutters, margins, and named gaps. Expose the supplied spacing, type-scale, and prose breakpoint values as shared CSS/Tailwind tokens while leaving existing default Tailwind breakpoints and page layouts unchanged.
 
 Use the prose breakpoint ranges: mobile below 640px, tablet 640–1024px, desktop 1024–1440px, and ultra-wide above 1440px. The attachment has no YAML breakpoint tokens, so these prose boundaries are authoritative for the new reference. Represent ranges without ambiguous overlap in JSON (640, 1024, and 1440px boundaries).
 
-Document the attachment's surface elevation and shadow guidance as visual guidance, while allowing reduced-motion preferences and avoiding motion that conveys status without a non-motion signal. Global CSS variables cover the shared palette, font-family stacks, and radii; screen-specific spacing and component recipes remain guidance for later scoped adoption.
+Document the attachment's surface elevation and shadow guidance as visual guidance, while allowing reduced-motion preferences and avoiding motion that conveys status without a non-motion signal. Global CSS/Tailwind variables cover the shared palette, font-family stacks, type scale, spacing, radii, and custom breakpoint tokens; screen-specific recipes remain guidance for later scoped adoption.
 
 ### Components and product boundaries
 
@@ -82,10 +82,10 @@ The reference validator should check required canonical token structure, valid H
 - Defined normal-text and control/focus combinations meet their documented contrast thresholds in light and dark themes.
 - The `themes` and `radiusRem` token groups match the corresponding `:root` and `.dark` CSS variables, preserving the frontend parity test contract with the new values.
 - The validator and generated preview read the new root tokens, and the preview is clearly static/reference-only.
-- Shared CSS theme variables reflect the new palette, font-family stacks, and radii without component markup changes.
+- Shared CSS/theme variables reflect the new palette, font-family stacks, type scale, spacing, radii, and custom breakpoints without changing page layouts or component structure.
 - Active docs describe the new system; dated history continues to describe prior adoption accurately.
 - Unverified storefront, kitchen, and tenant-branding examples are explicitly marked illustrative/future.
-- No component markup, test source, or product behavior changes are included.
+- No component structure, test source, or product behavior changes are included; the connected-state indicator uses the explicit solid mint utility while status labels keep the high-contrast text token.
 - Broader screen-level adoption has its own backlog card, separate from the shared-token work in #52.
 
 ## Verification plan

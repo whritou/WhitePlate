@@ -1,4 +1,4 @@
-"""Validate the design reference; optionally render its static SVG overview."""
+"""Validate Culinary Commerce design tokens and optionally render their static preview."""
 
 import argparse
 import json
@@ -21,11 +21,26 @@ DOCUMENTS = [
     ROOT / "readme.md",
 ]
 
+EXPECTED_SOURCE_PALETTE = {
+    "obsidian": "#0F172A",
+    "warmCharcoal": "#1E293B",
+    "tangerine": ["#FF5A1F", "#F97316"],
+    "mint": "#10B981",
+    "light": {"canvas": "#F8FAFC", "surface": "#FFFFFF", "muted": "#F1F5F9", "border": "#E2E8F0"},
+    "dark": {"canvas": "#020617", "layer1": "#0B0F19", "layer2": "#1E293B", "border": "#334155"},
+    "statuses": {
+        "pending": {"solid": "#F59E0B", "text": "#B45309", "tint": "#FEF3C7"},
+        "preparing": {"solid": "#3B82F6", "text": "#1D4ED8", "tint": "#DBEAFE"},
+        "ready": {"solid": "#10B981", "text": "#047857", "tint": "#D1FAE5"},
+        "cancelled": {"solid": "#EF4444", "text": "#B91C1C", "tint": "#FEE2E2"},
+    },
+}
+
 
 def luminance(color):
-    channels = [int(color[i:i + 2], 16) / 255 for i in (1, 3, 5)]
-    linear = [v / 12.92 if v <= 0.04045 else ((v + 0.055) / 1.055) ** 2.4 for v in channels]
-    return sum(v * w for v, w in zip(linear, (0.2126, 0.7152, 0.0722)))
+    channels = [int(color[index:index + 2], 16) / 255 for index in (1, 3, 5)]
+    linear = [value / 12.92 if value <= 0.04045 else ((value + 0.055) / 1.055) ** 2.4 for value in channels]
+    return sum(value * weight for value, weight in zip(linear, (0.2126, 0.7152, 0.0722)))
 
 
 def contrast(first, second):
@@ -33,44 +48,150 @@ def contrast(first, second):
     return (high + 0.05) / (low + 0.05)
 
 
-def pairs():
-    result = [(f"{role}-foreground", role, 4.5) for role in
-              ("card", "popover", "primary", "secondary", "accent", "destructive",
-               "sidebar", "sidebar-primary", "sidebar-accent")]
-    result.append(("foreground", "background", 4.5))
-    result.append(("primary-foreground", "primary-hover", 4.5))
-    for surface in ("background", "card", "popover", "muted", "secondary"):
-        result += [("foreground", surface, 4.5), ("muted-foreground", surface, 4.5)]
-    for role in ("success", "warning", "info", "destructive"):
-        result.append((role, f"{role}-muted", 4.5))
-        result.append(("foreground", f"{role}-muted", 4.5))
+def contrast_pairs():
+    pairs = [("primary-foreground", "primary", 4.5), ("primary-foreground", "primary-hover", 4.5),
+             ("destructive-foreground", "destructive-solid", 4.5)]
+    pairs += [("foreground", surface, 4.5) for surface in ("background", "card", "popover", "muted", "secondary", "accent")]
+    pairs += [("muted-foreground", surface, 4.5) for surface in ("background", "card", "popover", "muted", "secondary")]
+    for status in ("success", "warning", "info", "destructive"):
+        pairs.append((status, f"{status}-muted", 4.5))
         for surface in ("background", "card", "popover"):
-            result.append((role, surface, 4.5))
-    result.append(("muted-foreground", "accent", 4.5))
+            pairs.append((status, surface, 4.5))
     for surface in ("background", "card", "popover", "muted", "secondary", "accent"):
-        result += [("input", surface, 3), ("ring", surface, 3)]
-    result += [("primary", "background", 4.5), ("primary", "card", 4.5),
-               ("sidebar-ring", "sidebar", 3)]
-    return result
+        pairs += [("input", surface, 3), ("ring", surface, 3)]
+    pairs.append(("sidebar-ring", "sidebar", 3))
+    return pairs
+
+
+def css_color_tokens(source, selector):
+    escaped_selector = re.escape(selector)
+    match = re.search(rf"{escaped_selector}\s*\{{([^}}]+)\}}", source)
+    if not match:
+        return None
+    return css_declarations(match.group(1))
+
+
+def css_declarations(block):
+    return {
+        name: color.upper()
+        for name, color in re.findall(r"--([a-z-]+):\s*(#[0-9A-Fa-f]{6});", block)
+    }
 
 
 def validate(data):
     errors = []
     ratios = []
-    themes = data["themes"]
+    themes = data.get("themes", {})
     if set(themes) != {"light", "dark"}:
         errors.append("Both light and dark themes are required")
-    if set(themes["light"]) != set(themes["dark"]):
+    elif set(themes["light"]) != set(themes["dark"]):
         errors.append("Theme token names differ")
+
     for mode, colors in themes.items():
         for name, color in colors.items():
-            if not re.fullmatch(r"#[0-9A-F]{6}", color):
-                errors.append(f"Invalid sRGB color: {mode}.{name}")
-        for front, back, minimum in pairs():
+            if not isinstance(color, str) or not re.fullmatch(r"#[0-9A-F]{6}", color):
+                errors.append(f"Invalid uppercase sRGB color: {mode}.{name}")
+        if not all(name in colors for pair in contrast_pairs() for name in pair[:2]):
+            errors.append(f"{mode}: missing a required semantic contrast token")
+            continue
+        for front, back, minimum in contrast_pairs():
             ratio = contrast(colors[front], colors[back])
             ratios.append((mode, front, back, ratio, minimum))
             if ratio < minimum:
                 errors.append(f"{mode}: {front}/{back} = {ratio:.2f}:1; requires {minimum}:1")
+
+    if data.get("name") != "Culinary Commerce System":
+        errors.append("Canonical token name must be Culinary Commerce System")
+    if data.get("sourcePalette") != EXPECTED_SOURCE_PALETTE:
+        errors.append("sourcePalette differs from the user-supplied named prose HEX values")
+    expected_radius = {"sm": 0.25, "default": 0.5, "md": 0.75, "lg": 1, "xl": 1.5}
+    if data.get("radiusRem") != expected_radius:
+        errors.append("Radius tokens differ from the supplied YAML scale")
+    if data.get("radiusPx") != {"full": 9999}:
+        errors.append("Full-pill radius must remain 9999px")
+    expected_spacing = {"gutter": 1.5, "gutterMobile": 1, "margin": 2, "marginMobile": 1,
+                        "xs": 0.25, "sm": 0.5, "md": 1, "lg": 1.5, "xl": 2.5}
+    if data.get("spacingRem") != expected_spacing:
+        errors.append("Spacing tokens differ from the supplied YAML scale")
+    if data.get("breakpointsPx") != {"mobileMax": 640, "tabletMax": 1024, "desktopMax": 1440}:
+        errors.append("Breakpoints must preserve the approved 640/1024/1440px boundaries")
+    if set(data.get("typography", {})) != {
+        "display-hero", "display-hero-mobile", "headline-lg", "headline-lg-mobile",
+        "headline-md", "headline-sm", "title-md", "body-lg", "body-md", "body-sm",
+        "label-md", "label-sm", "kpi-number",
+    }:
+        errors.append("Typography tokens do not match the supplied YAML scale")
+
+    runtime_css = (ROOT / "apps/frontend/app/globals.css").read_text(encoding="utf-8")
+    for mode, selector in (("light", ":root"), ("dark", ".dark")):
+        actual = css_color_tokens(runtime_css, selector)
+        if actual != themes.get(mode):
+            errors.append(f"{selector} CSS colors differ from canonical {mode} tokens")
+
+    root_match = re.search(r":root\s*\{([^}]+)\}", runtime_css)
+    theme_match = re.search(r"@theme inline\s*\{([^}]+)\}", runtime_css)
+    if not root_match or not theme_match:
+        errors.append("Runtime root/theme declarations are missing")
+    else:
+        root_values = css_declarations(root_match.group(1))
+        theme_values = css_declarations(theme_match.group(1))
+        # CSS non-color custom properties use values other than HEX too.
+        root_values.update({name: value.strip() for name, value in re.findall(r"--([a-z-]+):\s*([^;]+);", root_match.group(1))})
+        theme_values.update({name: value.strip() for name, value in re.findall(r"--([a-z-]+):\s*([^;]+);", theme_match.group(1))})
+        if "Inter" not in root_values.get("font-sans", "") or "Plus Jakarta Sans" not in root_values.get("font-heading", ""):
+            errors.append("Runtime font stacks must prioritize Inter and Plus Jakarta Sans")
+        for key, value in expected_spacing.items():
+            if key in ("gutter", "gutterMobile", "margin", "marginMobile"):
+                css_name = {"gutter": "gutter", "gutterMobile": "gutter-mobile",
+                            "margin": "margin", "marginMobile": "margin-mobile"}[key]
+                expected = f"{value:g}rem"
+                if root_values.get(css_name) != expected:
+                    errors.append(f"Runtime --{css_name} differs from canonical spacing")
+            else:
+                expected = f"{value:g}rem"
+                if root_values.get(f"space-{key}") != expected or theme_values.get(f"spacing-{key}") != f"var(--space-{key})":
+                    errors.append(f"Runtime spacing token {key} differs from canonical spacing")
+        if root_values.get("radius") != f"{expected_radius['default']:g}rem":
+            errors.append("Runtime default radius differs from canonical tokens")
+        for role in ("sm", "md", "lg", "xl"):
+            if theme_values.get(f"radius-{role}") != f"{expected_radius[role]:g}rem":
+                errors.append(f"Runtime radius {role} differs from canonical tokens")
+        if theme_values.get("radius-full") != f"{data['radiusPx']['full']}px":
+            errors.append("Runtime full radius differs from canonical tokens")
+        for name, role in (("mobileMax", "tablet"), ("tabletMax", "desktop"), ("desktopMax", "ultrawide")):
+            expected = f"{data['breakpointsPx'][name] / 16:g}rem"
+            if theme_values.get(f"breakpoint-{role}") != expected:
+                errors.append(f"Runtime breakpoint {role} differs from canonical tokens")
+        if theme_values.get("container-storefront") != f"{data['storefrontMaxWidthPx'] / 16:g}rem":
+            errors.append("Runtime storefront container width differs from canonical tokens")
+        for name, scale in data["typography"].items():
+            css_name = f"text-{name}"
+            if theme_values.get(css_name) != f"{scale['sizePx'] / 16:g}rem":
+                errors.append(f"Runtime text size differs for {name}")
+            if theme_values.get(f"{css_name}--line-height") != f"{scale['lineHeightPx'] / 16:g}rem":
+                errors.append(f"Runtime line height differs for {name}")
+            if theme_values.get(f"{css_name}--font-weight") != str(scale["weight"]):
+                errors.append(f"Runtime font weight differs for {name}")
+            if scale.get("letterSpacing") and theme_values.get(f"{css_name}--letter-spacing") != scale["letterSpacing"]:
+                errors.append(f"Runtime letter spacing differs for {name}")
+
+    master = (HERE / "README.md").read_text(encoding="utf-8")
+    for line in master.splitlines():
+        cells = [cell.strip() for cell in line.split("|")[1:-1]]
+        if len(cells) != 4 or not cells[0].startswith("`"):
+            continue
+        role = cells[0].strip("`")
+        if role not in themes.get("light", {}):
+            continue
+        values = [re.findall(r"#[0-9A-Fa-f]{6}", cell) for cell in cells[1:3]]
+        expected = [[themes[mode][role]] for mode in ("light", "dark")]
+        if values != expected:
+            errors.append(f"README palette row differs from tokens for {role}")
+    for color in re.findall(r"#[0-9A-F]{6}", json.dumps(EXPECTED_SOURCE_PALETTE)):
+        if color not in master:
+            errors.append(f"README does not document supplied source color {color}")
+            break
+
     for path in DOCUMENTS:
         source = path.read_text(encoding="utf-8")
         for match in re.finditer(r"\[[^\]\n]*\]\(([^)\n]+)\)", source):
@@ -79,91 +200,64 @@ def validate(data):
                 continue
             if not (path.parent / target).exists():
                 errors.append(f"Missing file link: {path.relative_to(ROOT)} -> {target}")
-    # Keep the normative palette table synchronized with the structured tokens.
-    master = (HERE / "README.md").read_text(encoding="utf-8")
-    for line in master.splitlines():
-        cells = [cell.strip() for cell in line.split("|")[1:-1]]
-        if len(cells) == 4 and " / " in cells[1]:
-            front, back = cells[1].split(" / ", 1)
-            if front in themes["light"] and back in themes["light"]:
-                for mode, measured in zip(("light", "dark"), cells[2:4]):
-                    colors = themes[mode]
-                    expected = f"{contrast(colors[front], colors[back]):.2f}:1".replace(".", ",")
-                    if measured != expected:
-                        errors.append(f"Contrast table differs for {mode}: {front}/{back}")
-        if len(cells) != 4 or not cells[0].startswith("`"):
-            continue
-        names = re.findall(r"`([a-z-]+)`", cells[0])
-        if not names or any(name not in themes["light"] for name in names):
-            continue
-        for mode, cell in zip(("light", "dark"), cells[1:3]):
-            actual = re.findall(r"#[0-9A-F]{6}", cell)
-            expected = [themes[mode][name] for name in names]
-            if actual != expected:
-                errors.append(f"Palette table differs for {mode}: {names}")
+
+    contrast_note = data.get("contrastExceptions", [{}])[0]
+    if contrast_note.get("foreground") != "primary-foreground" or contrast_note.get("background") != "primary":
+        errors.append("Primary action contrast rationale is missing")
+    elif round(contrast(contrast_note["foreground"] if contrast_note["foreground"].startswith("#") else themes["light"][contrast_note["foreground"]],
+                       contrast_note["background"] if contrast_note["background"].startswith("#") else themes["light"][contrast_note["background"]]), 2) != 5.72:
+        errors.append("Obsidian-on-Tangerine primary contrast must calculate to 5.72:1")
+
     if errors:
         raise SystemExit("Validation failed:\n" + "\n".join(errors))
-    lowest_text = min((r for r in ratios if r[4] == 4.5), key=lambda r: r[3])
-    lowest_ui = min((r for r in ratios if r[4] == 3), key=lambda r: r[3])
-    print(f"PASS: {len(ratios)} contrast pairs across light/dark; {len(DOCUMENTS)} document link scans; palette/contrast table parity")
-    for label, row in (("Lowest text", lowest_text), ("Lowest control/focus", lowest_ui)):
-        print(f"{label}: {row[0]} {row[1]}/{row[2]} = {row[3]:.2f}:1")
+    lowest_text = min((row for row in ratios if row[4] == 4.5), key=lambda row: row[3])
+    lowest_ui = min((row for row in ratios if row[4] == 3), key=lambda row: row[3])
+    print(f"PASS: {len(ratios)} contrast pairs across light/dark; CSS/token parity; palette parity; {len(DOCUMENTS)} documentation link scans")
+    print(f"Lowest text: {lowest_text[0]} {lowest_text[1]}/{lowest_text[2]} = {lowest_text[3]:.2f}:1")
+    print(f"Lowest control/focus: {lowest_ui[0]} {lowest_ui[1]}/{lowest_ui[2]} = {lowest_ui[3]:.2f}:1")
 
 
 def render(data):
-    parts = ['<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="1020" viewBox="0 0 1280 1020" role="img" aria-labelledby="title desc">',
-             '<title id="title">WhitePlate — Porcelaine, encre et sauge</title>',
-             '<desc id="desc">Planche de conception : palettes et exemples statiques de catalogue, formulaire et ticket cuisine dans les thèmes clair et sombre. Planche statique, distincte des captures du frontend.</desc>']
+    parts = [
+        '<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="680" viewBox="0 0 1280 680" role="img" aria-labelledby="title desc">',
+        '<title id="title">WhitePlate — Culinary Commerce System</title>',
+        '<desc id="desc">Static reference board showing light and dark palette tokens, status colors, and typography. This is not a screenshot of the application.</desc>',
+    ]
 
-    def rect(x, y, w, h, color, radius=0, stroke=None, stroke_width=1):
-        edge = f' stroke="{stroke}" stroke-width="{stroke_width}"' if stroke else ""
-        parts.append(f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="{radius}" fill="{color}"{edge}/>')
+    def rect(x, y, width, height, fill, radius=0, stroke=None):
+        outline = f' stroke="{stroke}"' if stroke else ""
+        parts.append(f'<rect x="{x}" y="{y}" width="{width}" height="{height}" rx="{radius}" fill="{fill}"{outline}/>')
 
-    def text(x, y, value, color, size=16, weight=400):
-        parts.append(f'<text x="{x}" y="{y}" fill="{color}" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="{size}" font-weight="{weight}">{escape(value)}</text>')
+    def text(x, y, value, fill, size=16, weight=400, family="Inter, Segoe UI, Arial, sans-serif"):
+        parts.append(f'<text x="{x}" y="{y}" fill="{fill}" font-family="{family}" font-size="{size}" font-weight="{weight}">{escape(value)}</text>')
 
-    def button(x, y, w, label, c):
-        rect(x, y, w, 48, c["primary"], 8)
-        text(x + 16, y + 30, label, c["primary-foreground"], 16, 600)
-
+    swatches = [
+        ("Canvas", "background"), ("Surface", "card"), ("Muted", "muted"),
+        ("Tangerine", "primary"), ("Mint status", "success-solid"), ("Blue status", "info-solid"),
+    ]
+    statuses = [("Pending", "warning-muted", "warning"), ("Preparing", "info-muted", "info"),
+                ("Ready", "success-muted", "success"), ("Cancelled", "destructive-muted", "destructive")]
     for index, mode in enumerate(("light", "dark")):
-        c = data["themes"][mode]
+        colors = data["themes"][mode]
         x = index * 640
-        rect(x, 0, 640, 1020, c["background"])
-        text(x + 32, 54, "WhitePlate", c["foreground"], 24, 600)
-        text(x + 32, 86, "Porcelaine, encre et sauge", c["foreground"], 32, 600)
-        text(x + 32, 116, "Référence de design · " + ("Thème clair" if mode == "light" else "Thème sombre"), c["muted-foreground"], 14)
-        roles = [("card", "Porcelaine"), ("primary", "Encre" if mode == "light" else "Sauge"), ("success", "Prête"), ("warning", "Attente"), ("destructive", "Erreur")]
-        for i, (role, label) in enumerate(roles):
-            sx = x + 32 + i * 116
-            rect(sx, 146, 96, 48, c[role], 8, c["border"] if role == "card" else None)
-            text(sx, 219, label, c["foreground"], 14, 600)
-            text(sx, 239, c[role], c["muted-foreground"], 12)
-        text(x + 32, 294, "Gestion · Catalogue", c["foreground"], 20, 600)
-        rect(x + 32, 316, 576, 152, c["card"], 12, c["border"])
-        rect(x + 48, 332, 136, 40, c["accent"], 8)
-        text(x + 64, 358, "Catalogue", c["accent-foreground"], 16, 600)
-        text(x + 204, 359, "Bistro du Port", c["foreground"], 18, 600)
-        text(x + 52, 405, "Sandwich poulet", c["foreground"], 16, 600)
-        text(x + 483, 405, "9,50 €", c["foreground"], 16, 600)
-        text(x + 52, 435, "Disponible · Pain au choix", c["muted-foreground"], 14)
-        text(x + 32, 515, "Formulaire · Focus et action", c["foreground"], 20, 600)
-        text(x + 32, 546, "Nom du produit", c["foreground"], 16, 600)
-        rect(x + 30, 558, 580, 52, c["background"], 10, c["ring"], 2)
-        rect(x + 34, 562, 572, 44, c["card"], 8, c["input"])
-        text(x + 48, 591, "Soupe de saison", c["foreground"], 16)
-        text(x + 32, 637, "Le nom sera visible dans le menu.", c["muted-foreground"], 14)
-        button(x + 32, 655, 260, "Enregistrer les modifications", c)
-        text(x + 32, 750, "Cuisine · Une action évidente", c["foreground"], 20, 600)
-        rect(x + 32, 772, 576, 180, c["card"], 12, c["border"])
-        text(x + 52, 805, "Commande A82F", c["foreground"], 18, 600)
-        rect(x + 384, 785, 204, 32, c["info-muted"], 16)
-        text(x + 400, 806, "En préparation", c["info"], 14, 600)
-        text(x + 52, 835, "Camille · 12:42", c["muted-foreground"], 14)
-        text(x + 52, 865, "2 × Sandwich poulet", c["foreground"], 18, 600)
-        text(x + 384, 865, "Total : 23,00 €", c["foreground"], 16, 600)
-        button(x + 52, 885, 240, "Marquer comme prête", c)
-        text(x + 32, 990, "v1.1 · Planche statique · Référence du frontend", c["muted-foreground"], 14)
+        rect(x, 0, 640, 680, colors["background"])
+        text(x + 32, 54, "WhitePlate", colors["foreground"], 20, 700, "Plus Jakarta Sans, Segoe UI, Arial, sans-serif")
+        text(x + 32, 100, "Culinary Commerce System", colors["foreground"], 28, 700, "Plus Jakarta Sans, Segoe UI, Arial, sans-serif")
+        text(x + 32, 128, f"Canonical token reference · {mode.title()} theme", colors["muted-foreground"], 14)
+        for swatch_index, (label, role) in enumerate(swatches):
+            sx = x + 32 + (swatch_index % 3) * 188
+            sy = 164 + (swatch_index // 3) * 104
+            rect(sx, sy, 164, 58, colors[role], 8, colors["border"])
+            text(sx, sy + 80, label, colors["foreground"], 14, 600)
+            text(sx, sy + 99, colors[role], colors["muted-foreground"], 12)
+        text(x + 32, 404, "Operational states", colors["foreground"], 18, 700, "Plus Jakarta Sans, Segoe UI, Arial, sans-serif")
+        for status_index, (label, tint, foreground) in enumerate(statuses):
+            sy = 422 + status_index * 48
+            rect(x + 32, sy, 280, 36, colors[tint], 18)
+            text(x + 48, sy + 24, label, colors[foreground], 14, 600)
+            text(x + 334, sy + 24, f"{colors[foreground]} / {colors[tint]}", colors["muted-foreground"], 12)
+        rect(x + 32, 632, 576, 1, colors["border"])
+        text(x + 32, 662, "Static reference generated from tokens.json", colors["muted-foreground"], 12)
     parts.append("</svg>")
     (HERE / "overview.svg").write_text("\n".join(parts) + "\n", encoding="utf-8")
     print("Rendered docs/design-system/overview.svg from tokens.json")
@@ -171,9 +265,9 @@ def render(data):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--render", action="store_true", help="regenerate the static design overview after validation")
+    parser.add_argument("--render", action="store_true", help="render the static palette preview after validation")
     args = parser.parse_args()
-    tokens = json.loads((HERE / "tokens.json").read_text(encoding="utf-8"))
-    validate(tokens)
+    token_data = json.loads((HERE / "tokens.json").read_text(encoding="utf-8"))
+    validate(token_data)
     if args.render:
-        render(tokens)
+        render(token_data)

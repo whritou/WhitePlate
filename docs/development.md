@@ -125,7 +125,7 @@ For later schema changes, run `dotnet ef migrations add NAME --project apps/api/
 
 ## Validation commands
 
-Every UI task must first read and follow the [design system](design-system/README.md) and its delivery checklist. For changes to the reference itself, run `py -3 docs/design-system/verify.py` from the repository root to check defined contrast pairs, palette-table parity and local file links. `--render` also regenerates its static SVG overview from tokens. This documentation tooling does not validate rendered application accessibility or migrate runtime CSS.
+Every UI task must first read and follow the [design system](design-system/README.md) and its implementation guidance. For changes to the reference or shared tokens, run `py -3 docs/design-system/verify.py` from the repository root to check defined contrast pairs, token/CSS parity and local file links. `--render` also regenerates its static SVG overview from tokens. This documentation tooling does not validate rendered application accessibility or page-level adoption.
 
 From `apps/frontend`:
 
@@ -150,7 +150,7 @@ The xUnit v3 suite uses Microsoft Testing Platform selected in root `global.json
 
 ## Design system browser verification
 
-The shared theme and controls implement [Porcelaine, encre et sauge](design-system/README.md). `npm run test` includes a canonical light/dark color and radius parity check; changing CSS colors requires updating the reference in the same change. The development-only `/en/design-system-test` and `/fr/design-system-test` routes render actual controls, the workspace shell and kitchen tickets with fixed data. Production returns 404. They do not authorize access to organizations or read a database.
+Shared theme variables mirror the palette, font stacks, spacing, radii, and responsive tokens in the [Culinary Commerce design system](design-system/README.md). `npm run test` includes an existing canonical light/dark color and radius parity check; changing CSS colors requires updating the reference in the same change. The development-only `/en/design-system-test` and `/fr/design-system-test` routes render actual controls, the workspace shell and kitchen tickets with fixed data. Production returns 404. They do not authorize access to organizations or read a database.
 
 With a local development frontend, run `npm run test:browser -- --project=design-system --project=workspace-toasts --reporter=line`. The first project checks rendered contrast, hover/pressed/disabled/pending states, keyboard focus, FR/EN, both themes, 320/375/768/1024/1440px, 200% text size and reduced motion, plus signed-out sign-in layouts. Use process-local `WHITEPLATE_ACCEPTANCE_URL=http://localhost:3010` to select the port. For the four storefront cases, start the deterministic checkout API and Next routing from the guest fixture instructions below, then set `WHITEPLATE_DESIGN_STOREFRONT_FIXTURE=1`. Those cases explicitly select the menu locale, test invalid discount recovery and complete a fixture order. They are skipped unless opted in. Optional `WHITEPLATE_DESIGN_SCREENSHOTS` supplies an output directory for screenshots of fixed fixture data; no screenshots of credentials or real tenant data are recorded.
 
