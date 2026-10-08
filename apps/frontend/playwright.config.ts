@@ -15,6 +15,10 @@ export default defineConfig({
   expect: { timeout: 20_000 },
   projects: [
     {
+      name: "responsive-layout",
+      testMatch: ["responsive-layout.spec.ts", "public-responsive.spec.ts"],
+    },
+    {
       name: "catalog-design",
       testMatch: ["catalog-design.spec.ts", "catalog-design-save.spec.ts"],
     },

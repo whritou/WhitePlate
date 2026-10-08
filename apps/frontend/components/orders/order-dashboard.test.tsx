@@ -21,6 +21,7 @@ vi.mock("@/i18n/navigation", async () => {
 })
 
 vi.mock("next-intl", () => ({
+  useLocale: () => "en",
   useTranslations: () => (key: string, values?: Record<string, string>) => {
     if (key === "actionForOrder") {
       return `${values?.action ?? ""} order ${values?.reference ?? ""}`

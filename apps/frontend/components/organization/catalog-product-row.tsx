@@ -1,5 +1,6 @@
 "use client"
 
+import Image from "next/image"
 import { SlidersHorizontal } from "lucide-react"
 import { useLocale, useTranslations } from "next-intl"
 import { Badge } from "@/components/ui/badge"
@@ -29,6 +30,14 @@ export function CatalogProductRow({
     <article className="grid gap-4 py-5 xl:grid-cols-[minmax(0,1fr)_auto]">
       <div className="grid min-w-0 gap-3 sm:grid-cols-[minmax(0,1fr)_auto]">
         <div className="min-w-0">
+          <Image
+            src="/design/photo-15.webp"
+            width={80}
+            height={80}
+            alt=""
+            className="float-left mr-4 mb-3 size-20 rounded-md object-cover"
+          />
+
           <p className="mb-1 text-sm break-words text-muted-foreground">
             {category?.name}
           </p>

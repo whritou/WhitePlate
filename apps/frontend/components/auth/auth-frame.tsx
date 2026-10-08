@@ -1,7 +1,9 @@
 "use client"
 
 import { Card } from "@/components/ui/card"
-import { UtensilsCrossed } from "lucide-react"
+import { Brand } from "@/components/ui/brand"
+import { Link } from "@/i18n/navigation"
+import Image from "next/image"
 
 export function AuthFrame({
   children,
@@ -11,24 +13,28 @@ export function AuthFrame({
   aside?: React.ReactNode
 }) {
   return (
-    <main className="min-h-[calc(100vh-8rem)] bg-background px-4 py-8 sm:px-6 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(24rem,28rem)] lg:items-center lg:gap-16 lg:px-16 lg:py-14">
-      <section className="mx-auto w-full max-w-md lg:order-2">
+    <main className="relative mx-auto min-h-svh max-w-7xl bg-background px-4 pt-28 pb-8 sm:px-6 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(24rem,30rem)] lg:items-center lg:gap-16 lg:px-12 lg:pb-14">
+      <Link href="/" className="absolute top-8 left-6 lg:left-12">
+        <Brand />
+      </Link>
+
+      <section className="mx-auto w-full max-w-[28rem] lg:order-2">
         {children}
       </section>
 
       <aside className="mx-auto mt-10 hidden w-full max-w-2xl lg:order-1 lg:block">
-        <Card className="relative gap-0 overflow-hidden rounded-lg border border-border bg-secondary px-10 py-12 xl:px-14 xl:py-16">
-          <div
-            className="absolute -top-16 -right-16 h-64 w-64 rounded-full border-[36px] border-primary/10"
-            aria-hidden="true"
+        <Card className="relative min-h-[38rem] justify-end gap-0 overflow-hidden rounded-lg border-0 bg-obsidian px-10 py-12 text-white xl:px-14 xl:py-16 [&_.text-foreground]:text-white [&_.text-muted-foreground]:text-white/75">
+          <Image
+            src="/design/photo-13.webp"
+            alt=""
+            fill
+            sizes="50vw"
+            className="object-cover opacity-35"
           />
 
-          <UtensilsCrossed
-            className="mb-8 size-7 text-primary"
-            aria-hidden="true"
-          />
+          <div className="absolute inset-0 bg-gradient-to-t from-obsidian via-obsidian/50 to-transparent" />
 
-          {aside}
+          <div className="relative z-10">{aside}</div>
         </Card>
       </aside>
     </main>

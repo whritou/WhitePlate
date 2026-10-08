@@ -1,378 +1,151 @@
-# WhitePlate — Design system
+# WhitePlate design system
 
-Version **1.2.0**, 7 octobre 2026. Direction : **Porcelaine, encre et sauge**.
+Version **2.1.0**, 8 October 2026. Direction: **Culinary Commerce System**.
 
-Ce document est la référence normative pour toute création ou modification d’interface WhitePlate. La palette clair/sombre, les polices système, les rayons et les primitives partagées sont appliqués au frontend dans `feat/design-system-adoption`. Les écrans d’authentification, de gestion, de cuisine et de commande utilisent ces styles. Les règles de comportement décrivent aussi les exigences à conserver lors des futures évolutions ; cette adoption visuelle ne modifie pas l’autorisation, les transitions de commande ni le retry checkout.
+This is WhitePlate's single canonical design reference, replacing the former Porcelaine, encre et sauge direction. The palette, font stacks, spacing, radius, breakpoints, and type scale are mirrored in shared frontend variables. That token migration does not mean every screen recipe or illustrative component in this document is implemented. Broader screen and component adoption is tracked separately in [issue #53](https://github.com/whritou/WhitePlate/issues/53); this replacement is tracked in [issue #52](https://github.com/whritou/WhitePlate/issues/52).
 
-[Aperçu visuel](overview.svg) · [Tokens structurés](tokens.json) · [Vérificateur et générateur de l’aperçu](verify.py) · [Architecture frontend](../architecture/WHITEPLATE_FRONTEND_ARCHITECTURE.md) · [Conventions d’implémentation](../architecture/frontend-conventions.md) · [Tâche GitHub #28](https://github.com/whritou/WhitePlate/issues/28)
+[Static token preview](overview.svg) · [Canonical tokens](tokens.json) · [Validator and preview generator](verify.py) · [Frontend architecture](../architecture/WHITEPLATE_FRONTEND_ARCHITECTURE.md) · [Implementation conventions](../architecture/frontend-conventions.md)
 
-## 1. Brief et principes
+## Design intent
 
-WhitePlate aide des restaurateurs à gérer leurs établissements, leur carte et leur équipe, accompagne la cuisine pendant le service et permet aux clients de commander à emporter. Le système doit rendre une commande, son état et l’action suivante compréhensibles rapidement, sur téléphone comme sur écran de cuisine.
+WhitePlate supports restaurant operations, kitchen order handling, and guest ordering. The system pairs an operationally calm obsidian/slate foundation with a clear tangerine action color and mint success signal. Dense operational information should remain legible at a glance; guest ordering can give food and restaurant identity more room.
 
-La direction évoque une assiette blanche, l’encre d’une carte et une fiche de service structurée. Le thème clair associe un blanc cassé neutre à des boutons sauge. Le thème sombre associe des gris très foncés de type stone à un accent vert sauge, choisi par l’utilisateur ; les fonds ne sont plus bleutés. Les statuts gardent des fonds et libellés dédiés : vert menthe pour Prête, ambre pour l’attente, sable pour la préparation en sombre, rouge pour les erreurs et annulations. L’accent de navigation sauge ne remplace pas ces statuts.
+- **Make context and next action clear.** Keep the organization, order, or menu context apparent and give each decision area one primary action.
+- **Keep service information readable.** Prioritize order references, item names, quantities, prices, and status. Avoid motion and decoration that compete with those details.
+- **Use semantic color consistently.** Status color supports a text or icon label. Color alone never communicates order state, errors, or selection.
+- **Adapt density by surface.** Back-office screens may use denser tables and grids; storefronts may use more open product layouts.
+- **Keep behavior authoritative.** The server remains the authority for tenant access, price, discounts, order state, and checkout outcomes.
 
-1. **Le contexte avant l’action.** Montrer l’établissement ou l’organisation concernés, puis le titre, puis les actions disponibles.
-2. **Lisible pendant le service.** Quantités, libellés, références et actions priment sur les effets visuels. Les textes essentiels restent visibles.
-3. **Une intention par accent.** Sauge pour agir/naviguer, couleurs sémantiques pour informer. Une action principale par zone de décision.
-4. **Densité adaptée, langage commun.** Gestion structurée, cuisine immédiatement lisible, menu client plus aéré ; mêmes composants et mêmes significations.
-5. **Confiance par le retour d’état.** Chargement, absence de données, panne, interdiction, conflit et réussite sont distingués.
-6. **Identité discrète.** Les photos et la marque du restaurant peuvent prendre la place principale sur sa vitrine ; WhitePlate structure l’expérience.
+## Source palette and semantic tokens
 
-### Choix et alternatives
+The attachment's named prose HEX values take priority over conflicting values in its YAML palette. The exact supplied palette is preserved in `sourcePalette` in [tokens.json](tokens.json). The runtime uses accessible foreground/text and tint roles, while keeping the named solid colors available for indicators and visual examples.
 
-Une évolution de l’orange actuel aurait limité la migration, mais conservé une proximité entre marque et alerte. Une direction gastronomique à sérifs et textures aurait favorisé la vitrine au détriment des formulaires et de la cuisine. Porcelaine, encre et sauge apporte une identité commune aux trois usages, sans imiter une carte de restaurant dans chaque écran de gestion. Après revue du rendu, l’utilisateur a demandé des fonds plus neutres et choisi le vert sauge pour l’accent sombre ; la version 1.1 conserve les boutons bleus du clair et adopte cette correction.
+| Role | Light | Dark | Use |
+| --- | --- | --- | --- |
+| `background` | `#F8F9FF` | `#020617` | Canvas |
+| `foreground` | `#0B1C30` | `#F8FAFC` | Main text |
+| `card` | `#FFFFFF` | `#0B0F19` | Work surface |
+| `popover` | `#FFFFFF` | `#1E293B` | Menus and overlays |
+| `primary` | `#FF5A1F` | `#FF5A1F` | Main action |
+| `primary-foreground` | `#0F172A` | `#0F172A` | Text on a primary action |
+| `primary-hover` | `#F97316` | `#F97316` | Hover/pressed action |
+| `secondary` | `#E5EEFF` | `#1E293B` | Secondary controls |
+| `muted` | `#EFF4FF` | `#0B0F19` | Quiet surfaces and disabled state |
+| `muted-foreground` | `#45464D` | `#CBD5E1` | Supporting text |
+| `accent` | `#FFF7ED` | `#1E293B` | Subtle selection surface |
+| `border` | `#DCE9FF` | `#334155` | Surface separation |
+| `input` | `#64748B` | `#94A3B8` | Visible control outline |
+| `ring` | `#0F172A` | `#F97316` | Keyboard focus |
 
-Les skills `brainstorming`, `frontend-design` et `ui-ux-pro-max` ont guidé le cadrage, la critique visuelle et les règles d’interaction. Les deux recherches locales « restaurant operations dashboard » et « restaurant management » ont renvoyé une structure de landing page et une paire de polices de menu : ces éléments ne conviennent pas à l’espace métier et ne sont pas repris. Les recommandations vérifiées sur la hiérarchie fonctionnelle et les erreurs de formulaire ont alimenté ce document. La palette finale est un choix spécifique à WhitePlate.
+The primary action uses Obsidian text: `#0F172A` on `#FF5A1F` is **5.72:1**. White on the same orange is **3.12:1**, below the 4.5:1 normal-text target. Hover orange `#F97316` also uses Obsidian text.
 
-## 2. État constaté et portée
+The supplied operational colors are:
 
-Audit initial avant migration au 6 octobre 2026, sur la branche issue de `fix/workspace-mobile-toast-label` (trace historique) :
+| State | Solid | Light text | Light tint |
+| --- | --- | --- | --- |
+| Pending / action required | `#F59E0B` | `#B45309` | `#FEF3C7` |
+| Preparing / in kitchen | `#3B82F6` | `#1D4ED8` | `#DBEAFE` |
+| Ready / handed off | `#10B981` | `#047857` | `#D1FAE5` |
+| Cancelled / refunded | `#EF4444` | `#B91C1C` | `#FEE2E2` |
 
-| Élément | Avant migration | Cible du système |
+The dark theme retains the same solid status colors and uses lighter status text on dark tints to preserve legibility. Alert and order-status labels use the text/tint pair; a solid color is for a compact indicator and is not a substitute for its text label. The source status palette remains recorded unchanged in JSON.
+
+The auxiliary light accent tint `#FFF7ED` fills the accent role where the source gives no separate accent HEX. Dark status tints and their lighter text variants are theme adaptations for contrast; they do not change the supplied status palette.
+
+## Typography
+
+The attachment's YAML scale is represented in `typography` in [tokens.json](tokens.json) and exposed through Tailwind's named text tokens. Use **Plus Jakarta Sans** for headlines, dish names, and KPI figures; use **Inter** for body copy, modifiers, labels, and tabular data. Use tabular numerals for live order and KPI values.
+
+Inter and Plus Jakarta Sans are bundled in `apps/frontend/public/design` and loaded with local `@font-face` declarations using swap. No remote font request is made. System fallback stacks remain available.
+
+## Shape, spacing, and responsive values
+
+| Token | Value |
+| --- | ---: |
+| Radius `sm` / `default` / `md` / `lg` / `xl` | 0.25 / 0.5 / 0.75 / 1 / 1.5 rem |
+| Radius `full` | 9999 px |
+| Spacing `xs` / `sm` / `md` / `lg` / `xl` | 0.25 / 0.5 / 1 / 1.5 / 2.5 rem |
+| Desktop gutter / mobile gutter | 1.5 / 1 rem |
+| Desktop margin / mobile margin | 2 / 1 rem |
+| Storefront max width (design target) | 1280 px |
+
+Responsive ranges from the attachment are mobile below 640px, tablet from 640px to 1024px, desktop from 1024px to 1440px, and ultra-wide above 1440px. These are named custom breakpoint tokens; existing default Tailwind breakpoints remain intact so this token migration does not silently change current page layouts. The shared CSS also exposes `gutter`, `gutter-mobile`, `margin`, and `margin-mobile` variables for later screen adoption.
+
+## Surface and elevation guidance
+
+The supplied dark foundation is canvas `#020617`, layer 1 `#0B0F19`, layer 2 `#1E293B`, and border `#334155`. The earlier source border `#E2E8F0` and muted source color `#F1F5F9` remains recorded in sourcePalette. The full Stitch screen exports refine the light foundation to canvas `#F8F9FF`, white surface `#FFFFFF`, muted surface `#EFF4FF`, and border `#DCE9FF`. Their named presentation roles are recorded in `presentationPalette` and mapped to semantic runtime variables, with dark adaptations.
+
+The following shadows and 12px backdrop blur are design guidance, not a claim that all surfaces or overlays currently use these effects:
+
+| Level | Shadow | Intended example |
 | --- | --- | --- |
-| Couleurs | Primaire orange, gris stone en OKLCH dans `app/globals.css` | Boutons sauge dans les deux thèmes, stone en sombre, surfaces neutres et états dédiés |
-| Typographie | Arial pour corps et titres, aucune police téléchargée | Stack système commençant par Segoe UI, tailles et rôles explicites |
-| Boutons | Base UI `base-lyra`, rectangulaires, hauteur 24–36 px selon taille | Rayons 8 px, cible interactive 44 px, 48 px en cuisine/checkout |
-| Surfaces | Card carrée ; arrondis ajoutés localement, dont tickets `rounded-2xl` | Contrôles 8 px, cartes 12 px, overlays 16 px |
-| Navigation | Sidebar 256 px dès 768 px, appbar 64 px, Sheet mobile | Même structure ; sélection sauge et noms de groupes en casse phrase |
-| Feedback | Alert inline, toast succès 6 s/maximum 3, skeletons par route | Conserver le fonctionnement ; harmoniser tokens, tailles et états |
-| Cuisine | Kanban de tickets, onglets d’état, REST + hints SignalR | Cinq colonnes, déplacement par carte et bouton d’action suivante |
-| Marque restaurant | Aucun thème par restaurant branché à l’exécution | Limites de personnalisation définies pour une future feature séparée |
+| 0 | None | Canvas |
+| 1 | `0 1px 3px 0 rgba(15, 23, 42, 0.05), 0 1px 2px -1px rgba(15, 23, 42, 0.05)` | Resting card |
+| 2 | `0 4px 6px -1px rgba(15, 23, 42, 0.08), 0 2px 4px -2px rgba(15, 23, 42, 0.06)` | Hovered or sticky surface |
+| 3 | `0 20px 25px -5px rgba(15, 23, 42, 0.12), 0 8px 10px -6px rgba(15, 23, 42, 0.08)` | Drawer or modal |
 
-Les valeurs JSON sont la **référence canonique**, recopiée dans `app/globals.css` et exposée par `@theme inline`. Le frontend n’importe pas le JSON côté client. Le test `app/design-tokens.test.ts`, exécuté par Vitest et la CI, bloque toute divergence de couleurs clair/sombre ou des quatre rayons communs. La source reste l’autorité sur le comportement en place ; ce document définit le design.
+Respect reduced-motion preferences. Motion must not be the only signal for a status or outcome.
 
-L’adoption harmonise boutons/champs de 44 px minimum (48 px pour les grandes actions), focus opaque de 2 px avec décalage de 2 px, cartes de 12 px, overlays de 16 px, badges de 14 px, variantes sémantiques et labels désactivés sans baisse d’opacité. Les surcharges locales de contrôles sont retirées. La cuisine affiche une grille fluide, les cinq statuts avec icône et texte, et une variante destructrice pour Annuler. La sidebar utilise la casse phrase et une sélection sauge ; l’appbar opaque peut revenir à la ligne sur petit écran.
+## Product and implementation boundaries
 
-Le parcours public et la connexion sont vérifiés dans le navigateur ; les composants de gestion/cuisine le sont dans une fixture locale sans accès aux données. L’acceptance authentifiée contre la base et la vérification du déploiement hébergé ne sont pas répétées par cette migration. Voir les résultats et limites dans [les preuves de vérification](../documentation-review.md).
+Design examples describe a target or illustration. They do not add product behavior or assert that related source data exists.
 
-## 3. Couleurs et tokens
-
-Les valeurs exactes sont conservées dans [tokens.json](tokens.json). Les tokens sont nommés par rôle, jamais par page ou par restaurant. Les valeurs HEX sRGB facilitent la revue et le calcul de contraste ; une migration CSS peut conserver HEX ou convertir en OKLCH sans changer leur rendu.
-
-| Rôle / token | Clair | Sombre | Usage |
-| --- | --- | --- | --- |
-| `background` | `#FAFAF9` | `#1C1917` | Fond de page |
-| `foreground` | `#172B3A` | `#FAFAF9` | Texte principal |
-| `card` | `#FFFFFF` | `#292524` | Surface de travail |
-| `popover` | `#FFFFFF` | `#302B28` | Dialog, Sheet, menu flottant |
-| `primary` | `#527A58` | `#A9CE91` | Action principale, lien |
-| `primary-foreground` | `#FFFFFF` | `#172316` | Texte sur bouton principal |
-| `primary-hover` | `#426849` | `#B9D9A0` | Hover et pression du bouton principal |
-| `secondary` | `#F0F0EE` | `#3B3531` | Action secondaire |
-| `muted` | `#F5F5F4` | `#34302D` | Surface inactive, skeleton |
-| `muted-foreground` | `#625B54` | `#C2B9AF` | Métadonnées, aide, placeholder |
-| `accent` | `#E5EFF7` | `#263527` | Sélection, item de navigation actif |
-| `accent-foreground` | `#244D73` | `#A9CE91` | Texte de sélection |
-| `border` | `#D6D3D1` | `#534A43` | Séparation décorative |
-| `input` | `#847A71` | `#A89F96` | Contour nécessaire pour identifier un contrôle |
-| `ring` | `#275F8C` | `#A9CE91` | Focus au clavier |
-| `success` / `success-muted` | `#1D694B` / `#E8F4ED` | `#59C77B` / `#18362B` | Prêt, réussite persistante |
-| `warning` / `warning-muted` | `#855000` / `#FFF4DA` | `#F4D18B` / `#3B2D14` | En attente, données périmées |
-| `info` / `info-muted` | `#244D73` / `#E5EFF7` | `#D9C4A8` / `#3A3025` | En préparation, information |
-| `destructive` / `destructive-muted` | `#B42335` / `#FDEBEF` | `#FFB4B8` / `#3B2027` | Erreur, annulation, confirmation destructive |
-
-Les foregrounds de `card`, `popover` et `secondary` suivent le texte principal. `destructive-foreground` vaut blanc en clair et `#3B0C16` en sombre ; il sert uniquement à un bouton destructeur plein. Les tokens `sidebar-*` sont explicités dans le JSON pour s’intégrer aux noms déjà présents.
-
-### Règles de combinaison
-
-- Texte courant : au moins **4,5:1**. Garder ce seuil aussi pour les titres plutôt que dépendre de l’exception des grands caractères.
-- Contours de contrôle et focus : au moins **3:1** avec la surface adjacente. `border` est décoratif ; employer `input` pour un champ ou bouton outline dont le contour porte l’identification.
-- Un badge d’état associe le texte `success`, `warning`, `info` ou `destructive` au fond `*-muted`. Il garde un libellé lisible et, si utile, une icône. Ne jamais utiliser sa couleur seule.
-- Un bouton secondaire utilise `secondary-foreground` sur `secondary`, avec contour `input` si sa forme doit être distinguée de la surface. Au hover, contour `ring` ; pas de changement d’opacité du texte.
-- Focus de 2 px, offset de 2 px rempli par la surface locale. Sur un bouton plein, cet espace rend l’anneau distinct du bouton ; ne pas coller l’accent et l’anneau de même couleur sans séparation.
-- Les états désactivés conservent le texte principal ou secondaire, sans `opacity-50` sur l’ensemble. Ajouter attribut disabled, fond muted et explication voisine lorsque la cause n’est pas évidente.
-- Ne pas fabriquer des états en ajoutant `/50`, une transparence ou un `color-mix` non vérifié. Les combinaisons translucides nécessitent un calcul après composition sur le fond réel.
-- Les surfaces sont opaques. Éviter gradients décoratifs, glassmorphism, halos et cartes dont chaque état utilise une nouvelle couleur.
-
-Le vérificateur contrôle les paires prévues dans les deux thèmes, y compris hover, métadonnées, badges, focus et contours. Il ne prouve pas l’accessibilité des pages rendues.
-
-### Contraste texte / fond des boutons et badges
-
-Contrastes sRGB calculés sur les fonds opaques du JSON ; seuil de **4,5:1 pour chaque libellé**, quelle que soit la taille du bouton/badge. Les boutons sauge utilisent un texte blanc en thème clair et un texte vert très foncé `#172316` en thème sombre.
-
-| Cas | Texte / fond | Clair | Sombre |
-| --- | --- | --- | --- |
-| Bouton principal | primary-foreground / primary | 4,90:1 | 9,25:1 |
-| Bouton principal hover/pressed | primary-foreground / primary-hover | 6,35:1 | 10,47:1 |
-| Bouton secondaire | secondary-foreground / secondary | 12,75:1 | 11,56:1 |
-| Bouton outline au repos | foreground / card | 14,55:1 | 14,52:1 |
-| Bouton ghost au survol | foreground / muted | 13,34:1 | 12,51:1 |
-| Bouton destructeur doux / badge Annulée | destructive / destructive-muted | 5,66:1 | 8,77:1 |
-| Confirmation destructive pleine | destructive-foreground / destructive | 6,50:1 | 9,98:1 |
-| Badge En attente | warning / warning-muted | 6,11:1 | 9,13:1 |
-| Badge En préparation | info / info-muted | 7,56:1 | 7,62:1 |
-| Badge Prête | success / success-muted | 5,86:1 | 6,17:1 |
-| Badge Terminée / badge neutre | muted-foreground / muted | 6,12:1 | 6,75:1 |
-
-Le bouton secondaire utilise foreground/muted au survol ; le destructeur doux conserve sa paire texte/fond et renforce son contour. Les liens de navigation et badges sélectionnés utilisent accent-foreground/accent, jamais primary-foreground/accent. Disabled et pending ne réduisent pas l’opacité du libellé ; le contraste reste mesurable sur la paire de tokens choisie. Pour un futur accent restaurant, recalculer toutes ces paires, y compris survol, avant application. Les primitives utilisent désormais des fonds opaques et aucune baisse d’opacité du libellé ; conserver cette règle lors des futures modifications.
-
-## 4. Typographie et données
-
-Stack cible corps et titres : `"Segoe UI", "Helvetica Neue", Arial, sans-serif`. Elle reste locale, supporte le français et l’anglais et évite toute dépendance réseau. Ne pas installer de police pour appliquer ce système. Le monospace reste réservé aux exemples techniques dans la documentation ; aucun UUID ou prix n’en a besoin dans l’UI.
-
-| Rôle | Taille rem (px à racine 16 px) | Interligne | Graisse |
-| --- | --- | --- | --- |
-| Caption non essentielle | 0,75 (12) | 1,5 | 400–500 |
-| Aide, métadonnée, navigation gestion | 0,875 (14) | 1,5 | 400–600 |
-| Corps, champ, bouton, produit | 1 (16) | 1,5 | 400 / 600 pour action |
-| Quantité et référence cuisine | 1,125 (18) | 1,4 | 600 |
-| Titre de section | 1,25 (20) | 1,3 | 600 |
-| Titre de page mobile | 1,5 (24) | 1,25 | 600 |
-| Titre de page desktop | 2 (32) | 1,2 | 600 |
-| Nom restaurant sur vitrine | 2 à 2,5 (32–40) | 1,2 | 600 |
-
-Utiliser un vrai `h1` par page et des `h2`/`h3` sans sauter de niveau. `CardTitle` rend actuellement un div : y placer une vraie balise de titre. Alignement gauche et casse phrase ; pas de groupes de navigation en capitales espacées. Tracking normal sur le corps, jusqu’à `-0.02em` pour les grands titres uniquement.
-
-Limiter le texte descriptif à 65–75 caractères par ligne. Ne pas tronquer un nom de plat, une option, une erreur ou un total. Les longs noms d’organisation peuvent être tronqués dans la barre si leur valeur complète est accessible ailleurs sur la page ; un tooltip seul ne suffit pas sur mobile.
-
-Prix et quantités : chiffres tabulaires, prix alignés à droite dans les listes, quantité avant le plat. Utiliser `Intl.NumberFormat` et la devise du restaurant, jamais un symbole codé en dur. Dates via `Intl.DateTimeFormat` et `<time dateTime>`. Ne pas transformer la locale en devise. Référence courte de commande lisible avec son libellé ; conserver la référence serveur complète dans le reçu lorsque disponible.
-
-## 5. Espacement, forme et profondeur
-
-Base de 4 px : **4, 8, 12, 16, 20, 24, 32, 40, 48, 64**. Valeurs en rem dans le JSON ; pas de hauteur fixe sur les zones de texte.
-
-| Relation | Valeur cible |
+| Example in the supplied design | Reference status |
 | --- | --- |
-| Label → champ ; icône → texte | 8 px |
-| Champ → aide/erreur | 4–8 px |
-| Champs d’un formulaire | 20–24 px |
-| Actions voisines | 8–12 px |
-| Padding carte/ticket | 20 px gestion, 24 px client ; 16 px minimum mobile |
-| En-tête → contenu de page | 24–32 px |
-| Sections de page | 32 px gestion ; 40 px vitrine |
-| Marges de page | 16 px mobile ; 24 px dès sm ; 32 px dès lg |
+| Restaurant rating or preparation-time claim | Illustrative/future unless its value and source are implemented and verified |
+| Dietary flags such as vegan | Illustrative/future unless backed by verified catalog data |
+| Animated progress toward free delivery or a minimum order | Illustrative/future; do not infer pricing or eligibility |
+| ASAP/scheduled pickup selector and available time slots | Illustrative/future unless scheduling is implemented and server-backed |
+| `--tenant-primary`, `--tenant-radius`, `--tenant-font` customization engine | Illustrative/future; no tenant CSS injection or runtime tenant theme is implied |
+| Restaurant hero ratios, editorial dish cards, quick-add counters, KPI sparklines, kitchen timers, modifier modal | Visual recipes; apply only where matching product behavior and data already exist |
 
-Rayons : 4 px petit marqueur, **8 px contrôle**, **12 px carte**, **16 px dialog/Sheet/toast**. Pill uniquement pour un badge, filtre ou compteur ; pas pour tous les boutons. Les fiches de commande ressemblent à des objets de travail, pas à des bulles.
+Current API and source contracts take precedence. Do not infer a tenant feature, rating, schedule, delivery promise, or dietary fact from a mockup. Tenant identity supplied by the browser is only a selector and never grants authorization. Tenant ownership must remain enforced for reads, writes, caches, and real-time subscriptions.
 
-La hiérarchie vient des surfaces et du contenu. Pas d’ombre sur les listes ou cartes ordinaires. Ombre overlay uniquement : clair `0 8px 24px rgb(23 43 58 / 12%)`, sombre `0 8px 24px rgb(0 0 0 / 32%)`. Le fond d’un overlay peut assombrir la page ; son texte reste sur une surface opaque.
+## Accessibility, localization, and state behavior
 
-Échelle de z-index : contenu 0, sticky 30, overlay 40, toast 50, skip link 60. Un toast ne masque jamais l’action de confirmation ni le bouton de fermeture d’une modal ; vérifier leur placement ensemble.
+- Keep controls keyboard operable with visible focus and predictable focus restoration after dialogs, drawers, and failed actions.
+- Preserve semantic headings, accessible names, live-region announcements, and text/icon status labels. Do not depend on color alone.
+- Keep touch targets at least 44px under existing shared-control rules; use at least 48px for tablet back-office controls as specified in the new design.
+- Maintain readable disabled controls and distinguish loading, empty, pending, error, success, and offline states. Provide retry only when the existing operation contract supports it.
+- Respect reduced motion and 200% text zoom without hiding required actions or content.
+- Keep user-visible copy in both English and French translation catalogs. A visual token change does not authorize untranslated copy or locale behavior changes.
+- Keep prices, discounts, tenant authorization, order status transitions, checkout receipts, and retry/idempotency behavior server-authoritative and unchanged by design work.
 
-## 6. Mise en page et responsive
+## Runtime mapping and verification
 
-Breakpoints conservés de Tailwind : sm 640, md 768, lg 1024, xl 1280, 2xl 1536 px. Les règles ci-dessous sont des comportements, pas des modèles de téléphone.
+`tokens.json` is the structured source for shared light/dark colors, typography, radii, spacing, and breakpoints. The frontend mirrors semantic color values in `apps/frontend/app/globals.css`; Tailwind theme aliases expose the font, color, spacing, radius, breakpoint, and type tokens. The client does not import the JSON. `apps/frontend/app/design-tokens.test.ts` remains the existing runtime color/radius parity check.
 
-### Gestion
+Run the reference validator from the repository root:
 
-- Sidebar de 16 rem dès md ; en dessous, déclencheur 44 × 44 px et Sheet. Si les libellés ne tiennent pas au zoom, repasser au menu mobile plutôt que cacher les noms.
-- Appbar d’au moins 4 rem, contexte à gauche, langue/thème/compte à droite. Elle peut prendre plusieurs lignes sur petit écran.
-- Contenu jusqu’à 80 rem hors sidebar, largeur fluide et `min-width: 0`. Formulaire simple jusqu’à 40 rem ; auth jusqu’à 28 rem.
-- Une ligne titre/description/action, puis sections fonctionnelles. Les listes utilisent lignes et séparateurs ; les Card encadrent une tâche ou un groupe, pas chaque texte.
-- Éditeur catalogue : catégories, produits, groupes d’options et remises conservent leurs relations explicites. Une présentation en deux colonnes n’est admise que si chaque panneau garde au moins 20 rem ; sinon empiler.
-
-### Cuisine
-
-- Onglets shadcn Base UI au-dessus du kanban : toutes les commandes puis les cinq états ; sélection explicite et accès clavier. Retour connexion près du titre sans dominer les commandes.
-- Cinq colonnes dans l’ordre `Pending`, `Preparing`, `Ready`, `Completed`, `Cancelled`. Le tableau utilise toute la largeur disponible dans l’espace de travail ; sa grille fluide garde 18 rem minimum par colonne et affiche autant de colonnes par rangée que l’espace le permet. La colonne `Cancelled` suit le même flux. Aucun débordement horizontal de page. Les colonnes utilisent le fond sémantique `secondary`, les tickets `card` ; les compteurs décrivent seulement la page REST chargée et pagination/filtre serveur restent actifs.
-- Actions de 48 px minimum ; quantité/référence à 18 px, ingrédients/options à 16 px. Les états sont identifiables sans couleur.
-- Toute zone libre du ticket permet le glisser-déposer ; boutons et liens gardent leurs actions. Sur écran tactile, un appui long de 350 ms distingue le déplacement du défilement. La carte saisie et les étapes autorisées donnent un retour visuel ; seules les transitions permises par le rôle sont acceptées. Escape annule. Le bouton nommé d’action suivante reste l’alternative clavier. Aucun déplacement optimiste : mutation/version, conflit et rafraîchissement REST restent autoritaires. Après disparition du contrôle activé, restaurer le focus au ticket déplacé (ou au tableau si le filtre le retire), sans détourner un focus déjà placé ailleurs.
-
-### Vitrine et commande
-
-- Jusqu’à 72 rem ; menu à gauche et panier de 22 rem dès lg lorsque les deux restent lisibles. En dessous, panier dans le flux après le menu ; un raccourci vers ce panier peut être ajouté dans une tâche UI ciblée.
-- Restaurant, langue du menu, catégories, plats et prix structurent la page. Aucun faux badge « populaire », temps de préparation ou note inventée.
-- Une éventuelle barre panier sticky laisse un padding inférieur égal à sa hauteur et au safe area. Elle ne recouvre ni champ ni focus ; le reçu garde une place normale dans le flux.
-- Auth et onboarding suivent une colonne calme, logo/nom, titre, aide courte, formulaire, navigation secondaire. Aucun décor à droite obligatoire.
-
-Vérifier à **320, 375, 768, 1024 et 1440 px**, zoom 200 %, texte agrandi et reflow à 400 %. Aucun scroll horizontal de page. Une table réellement bidimensionnelle peut avoir son propre scroll nommé ; les formulaires et tickets s’empilent. Éviter des boutons en `whitespace-nowrap` qui débordent : autoriser le retour à la ligne et une hauteur minimale.
-
-## 7. Composants et contrats visuels
-
-Réutiliser `apps/frontend/components/ui` avec Base UI. Le style installé `base-lyra` est une base technique ; sa couleur orange, ses angles carrés et ses petites tailles ne définissent pas l’identité cible. Ne pas remplacer la librairie ni supposer une API Radix `asChild`.
-
-### Boutons et liens
-
-| Intention | Variante existante à faire évoluer | Aspect cible |
-| --- | --- | --- |
-| Action principale | `default` | Fond primary, texte primary-foreground, hover primary-hover |
-| Action secondaire | `outline` | Fond card, texte foreground, contour input |
-| Action moins importante | `secondary` | Fond secondary, texte secondary-foreground |
-| Action utilitaire | `ghost` | Texte foreground, hover muted ; pas pour validation principale |
-| Destruction | `destructive` | Texte destructive sur destructive-muted ; bouton plein seulement dans confirmation si utile |
-| Navigation textuelle | Lien normal / `link` | Primary, souligné dans le texte ; focus visible |
-
-Hauteur minimum **44 px**, padding horizontal 16 px, texte 16 px ; **48 px** en cuisine/checkout. Une taille compacte de 36 px peut exister en gestion desktop seulement si la cible effective reste 44 px sans recouvrir ses voisines. Les badges non interactifs peuvent être plus petits.
-
-États requis : repos, hover, pressed, focus-visible, disabled, pending. Un pending conserve la largeur, nomme l’action (« Enregistrement… »), empêche le doublon et expose `aria-busy`. Une icône de chargement ne remplace pas le texte. Un lien stylé comme un bouton utilise le `render` Base UI existant ; un bouton déclenchant une mutation reste un vrai bouton.
-
-### Champs et choix
-
-`Input`, `Textarea`, `Label`, `NativeSelect`, `Checkbox` et `RadioGroup` restent les primitives. Label toujours visible, unité/devise et contraintes avant saisie si elles aident. Placeholder = exemple, jamais label. Hauteur champ 44 px, texte 16 px, contour input, focus ring. Textarea minimum 3 lignes avec redimensionnement vertical.
-
-Label associé via id ; aide/erreur par `aria-describedby`, erreur via `aria-invalid`. Après soumission invalide, focus sur un résumé relié aux champs si plusieurs erreurs, sinon sur le champ invalide. Conserver les valeurs. Pas de toast comme seul message d’erreur. Ne pas voler le focus au blur.
-
-Checkbox/radio : indicateur visible, label et zone de clic de 44 px ; nom accessible explicite pour les primitives custom. Montrer pour les options produit le nombre requis/maximum et le supplément dans la devise du menu. Utiliser `selectClassName` pour styler l’élément NativeSelect, `className` pour son wrapper.
-
-### Surfaces, listes et navigation
-
-- Card complète : Header/Title/Description/Content/Footer lorsqu’ils sont utiles. Liste sémantique et vrais titres à l’intérieur ; pas de Card imbriquée sans fonction distincte.
-- Ligne de liste : nom, informations secondaires, état, action ; alignement constant. Les petites actions ont des noms qui incluent l’objet concerné.
-- Navigation active : accent + accent-foreground, graisse 600, `aria-current="page"`. Grouper par organisation/restaurant avec casse phrase ; préserver les liens filtrés par les records serveur.
-- Filtre d’état : libellé, valeur sélectionnée persistante et accès clavier ; si plusieurs boutons, état pressé explicite. Ne pas annoncer de faux compteur global si seule une page est chargée.
-- Tables : en-têtes et caption, alignement numérique à droite, action nommée. Sur mobile, cartes/lignes descriptives ou scroll contenu ; aucune colonne métier silencieusement supprimée.
-
-### Badge et état de commande
-
-Badge = 14 px/500, padding 4 × 8 px, pill, texte complet. Il ne reçoit pas le focus s’il n’est pas interactif. `Badge` fournit les variantes `warning`, `info`, `success`, `neutral` et `destructive` utilisées par les tickets.
-
-| Valeur API actuelle | FR | EN | Paire de tokens | Icône Lucide possible |
-| --- | --- | --- | --- | --- |
-| `Pending` | En attente | Pending | warning / warning-muted | Clock |
-| `Preparing` | En préparation | Preparing | info / info-muted | CookingPot |
-| `Ready` | Prête | Ready | success / success-muted | Check |
-| `Completed` | Terminée | Completed | muted-foreground / muted | CheckCheck |
-| `Cancelled` | Annulée | Cancelled | destructive / destructive-muted | X |
-
-Ce mapping ne crée pas de statut ni de transition. Les droits et transitions restent ceux de `getAvailableOrderTransitions` et de l’API. Disponibilité catalogue, invitation en attente/expirée et connexion utilisent leurs propres libellés, même lorsqu’ils réemploient une paire de couleurs.
-
-### Dialog, Sheet, Alert et toast
-
-- Sheet mobile : titre et description accessibles, scroll interne, Escape, confinement/restauration du focus fournis par Base UI ; largeur maximum 20 rem sans déborder du viewport.
-- AlertDialog : titre avec l’objet, conséquences exactes, Annuler + action explicite. Focus initial sur l’action sûre pour destruction ; retour au déclencheur. Respecter le blocage pending déjà implémenté ; une erreur laisse le dialog ouvert.
-- Alert : message persistant, cause compréhensible et action possible. Danger pour erreur bloquante, warning pour stale, info pour information ; rôle d’annonce adapté, sans région live dupliquée.
-- Toast : succès bref uniquement, durée actuelle 6 s et maximum 3 conservés. Région polie nommée par label invisible, bouton Fermer accessible, aucun déplacement de focus. Pas de notification pour chaque événement SignalR. Les erreurs et les reçus restent dans la page.
-- Skeleton : même géométrie que le contenu attendu, décor masqué aux lecteurs d’écran, une annonce localisée, `aria-busy`, mouvement arrêté sous reduced-motion.
-
-## 8. États et sécurité de l’expérience
-
-| Situation | Présentation attendue | Comportement à préserver |
-| --- | --- | --- |
-| Première lecture | Skeleton de page, statut « Chargement… » | Ne pas afficher un vide avant résolution |
-| Refresh en fond | Données en place, annonce discrète | Ne pas remplacer toute la grille par un loader |
-| Aucun résultat | Phrase concrète + action pertinente | Différencier filtre vide et aucune donnée créée |
-| Mutation pending | Bouton occupé et champs concernés verrouillés | Pas de clic doublé, pas de fausse réussite |
-| Validation | Erreurs proches des champs | Valeurs conservées, correction guidée |
-| Conflit de version | Alert explicite, rafraîchir les données serveur | Ne pas afficher une transition comme réussie |
-| Reconnexion/panne cuisine | Warning près des commandes périmées | SignalR = hint ; REST reste autoritaire |
-| Accès révoqué/interdit | Message sûr et navigation de sortie | Retirer les tickets ; aucune donnée stale d’un accès interdit |
-| Checkout incertain | « Confirmation non reçue » + réessayer | Garder payload et clé d’essai ; champs/langue verrouillés |
-| Checkout confirmé | Reçu, référence et totaux serveur | Aucune promesse de paiement ou de retrait non implémentée |
-
-Le design ne doit jamais contourner la vérification tenant, masquer une perte d’autorisation, transformer le retry en nouvelle commande ou calculer un prix final autoritaire dans le navigateur. Aucun tenant sélectionné dans l’UI n’accorde un droit. Les labels du reçu et des tickets restent les snapshots de commande ; une refonte ne les remplace pas par la traduction actuelle du catalogue.
-
-## 9. Icônes, images, mouvement et visualisation
-
-Lucide React déjà installé : SVG 16 px dans une métadonnée, 20 px pour contrôle, 24 px seulement si nécessaire. Stroke cohérent, icône décorative `aria-hidden`. Une action uniquement iconographique reçoit un nom traduit et une cible 44 px. Aucune emoji comme pictogramme de produit ou statut.
-
-Pas d’image de plat inventée. Si une future feature fournit de vraies photos, cadrage 4:3, proportions réservées, alt utile si l’image apporte une information ; sinon alt vide lorsque le nom voisin suffit. Une absence d’image reste une ligne de menu propre, pas une illustration placeholder imposée. Aucun téléchargement ni champ image n’est ajouté par cette spécification.
-
-Durées : feedback 120 ms, disclosure 180 ms, overlay 220 ms ; easing `cubic-bezier(0.2, 0, 0, 1)`. Motion uniquement pour une action ou un changement compréhensible. Pas de bounce, parallax, compteurs animés ou entrée de chaque ticket. Focus et mise à jour ARIA immédiats. Sous `prefers-reduced-motion: reduce`, transitions et pulses passent à 0 ; état final intact.
-
-Aucun module analytics n’est créé. Si un graphique est demandé plus tard, lui donner un titre, unité, période, légende, valeurs accessibles et alternative tabulaire ; distinguer les séries par forme/libellé en plus de la couleur. Aucun token `chart-*` n’est exposé par le thème actuel ; définir une palette dans la tâche graphique concernée.
-
-## 10. Langue et microcopy
-
-L’interface reste FR/EN via `next-intl`, clés et interpolations identiques dans les deux catalogues. La langue du menu, la langue de l’interface et la devise sont indépendantes. Appliquer `lang` aux labels sauvegardés et au menu comme aujourd’hui. Prévoir des libellés 30 % plus longs ; ne pas réduire le texte pour faire tenir une traduction.
-
-| Intention | FR | EN |
-| --- | --- | --- |
-| Sauver une modification | Enregistrer les modifications | Save changes |
-| Ajouter un plat | Ajouter au panier | Add to cart |
-| Envoyer la commande | Confirmer la commande | Place order |
-| Confirmation incertaine | La confirmation n’a pas été reçue. Réessayez pour vérifier cette commande. | Confirmation was not received. Retry to check this order. |
-| Données périmées | Les commandes affichées peuvent ne plus être à jour. | These orders may be out of date. |
-| Conflit | Cette commande a changé. Actualisez avant de réessayer. | This order has changed. Refresh before trying again. |
-| Catalogue vide | Aucun produit. Ajoutez votre premier produit. | No products yet. Add your first product. |
-
-Ces exemples sont des recommandations de formulation, pas des clés déjà ajoutées. Employer les clés existantes lorsque leur sens est correct ; toute modification doit être appliquée aux deux catalogues. Bouton et feedback utilisent le même verbe. Éviter « Soumettre », jargon réseau, UUID comme titre, détails de serveur, faux urgence, récompenses et excuses automatiques. Une réussite ne se prétend pas terminée avant acquittement serveur.
-
-## 11. Recettes d’écrans
-
-Les schémas décrivent une composition cible, pas une route ou une feature nouvelle.
-
-```text
-Gestion desktop
-┌───────────────────┬───────────────────────────────────────────┐
-│ WhitePlate        │ Bistro du Port           FR  Thème Compte │
-│ Organisation      ├───────────────────────────────────────────┤
-│ Équipe            │ Catalogue               Ajouter un produit│
-│ Paramètres        │ Description courte                        │
-│ Bistro du Port    │ Produits / Catégories / Remises          │
-│ Commandes         │ Nom / prix / disponibilité / modifier     │
-│ Catalogue [actif] │ Édition dans une modale                    │
-└───────────────────┴───────────────────────────────────────────┘
-
-Ticket cuisine
-┌─────────────────────────────────────┐
-│ Commande A82F         En préparation │
-│ Camille · 12:42                      │
-│ 2 × Sandwich poulet                 │
-│     Pain complet · Sauce à part     │
-│ 1 × Soupe                           │
-│ Total                     23,00 €   │
-│ [Marquer comme prête]               │
-└─────────────────────────────────────┘
-
-Menu mobile
-Restaurant → langue du menu → catégories → plats/prix/options
-→ panier (quantités et total estimé) → client / remise
-→ Confirmer la commande → reçu avec montants serveur
-```
-
-**Équipe** : membres puis invitations ; rôle et restaurant explicites ; formulaire séparé ; état/expiration et révocation uniquement lorsqu’autorisé. **Paramètres** : une colonne, contexte de l’organisation, nom, aide, action de sauvegarde. **Catalogue** : distinguer édition, disponibilité et archive ; historique archivé lisible sans action de restauration inventée. **Langues** : langues activées, langue par défaut, puis traductions par élément ; ne pas modifier la langue UI en même temps. **Reçu** : confirmation, référence, lignes/options, taxes/remise/total, nouvelle commande. Aucun écran ne présente paiement, réservation, stock ou heure de retrait comme actifs.
-
-## 12. Marque blanche : limites prévues
-
-Le runtime actuel n’a pas de configuration de marque par restaurant. Cette section encadre son éventuelle introduction ; elle ne crée pas de réglage, DTO, table ou endpoint.
-
-La vitrine pourrait accepter nom, logo, photos et une couleur d’accent validée via un futur contrat. Seuls primaire/hover/foreground et accent/foreground de vitrine seraient dérivés et testés dans les deux thèmes. Une couleur non conforme retombe sur la sauge WhitePlate ; jamais de texte blanc arbitraire sur une couleur claire. Aucun CSS/HTML/JS libre fourni par un tenant.
-
-La personnalisation ne change ni statuts, focus, erreurs, taille de cible, comportement clavier, ni UI de gestion/cuisine. Les assets et thèmes restent isolés par tenant côté serveur et cache. Formats/logo/upload, stockage et validation de couleur doivent être traités dans une tâche distincte avant de rendre ce paramétrage disponible.
-
-## 13. Adoption dans le code
-
-Avant **chaque** changement UI, lire ce document, les tokens et la primitive existante. Identifier la surface, les états, le contexte tenant et les catalogues concernés. Appliquer le système au périmètre touché et à ses composants communs nécessaires, sans lancer une refonte des pages voisines.
-
-1. Pour une première adoption globale, migrer les tokens dans `app/globals.css` et les exposer par `@theme inline` Tailwind 4. Réutiliser les noms existants ; ajouter hover et états dédiés avec leurs foregrounds/fonds. Mettre à jour rayons et font stacks. Lire la documentation Next installée si du code Next est touché.
-2. Harmoniser les primitives `components/ui` (dimensions, focus, états, surfaces) avant d’accumuler des surcharges par écran. Les changements partagés exigent une revue de leurs usages auth/gestion/cuisine/client.
-3. Appliquer les recettes aux écrans du changement demandé ; traductions FR/EN, skeleton et retours d’état font partie du même périmètre.
-4. Vérifier les états critiques, thèmes, tailles d’écran, clavier et contraste ; documenter les éventuels écarts temporaires et leur carte kanban.
-
-Le JSON n’est pas à importer côté client ou dans un service métier : il décrit le design. La CSS active reste la source exécutable. Au moment d’une migration, tenir JSON, document et CSS alignés, sans script de génération ni dépendance nouvelle si une modification directe suffit.
-
-Une règle globale peut évoluer lorsqu’une demande produit concrète le justifie : modifier d’abord cette référence et les tokens associés, noter le motif et la portée. Une exception locale doit figurer dans le changement avec son motif, les surfaces et la vérification. Aucune exception ne supprime accessibilité ou isolation tenant. Les anciens specs restent des traces historiques et n’annulent pas ce référentiel visuel.
-
-## 14. Vérification et règle de livraison
-
-Référence d’accessibilité : [WCAG 2.2](https://www.w3.org/TR/WCAG22/). Cible : niveau AA ; la cible produit de 44 px et les textes tous à 4,5:1 vont plus loin que certains minima. Cela ne constitue pas une certification de l’application.
-
-Pour la référence documentaire, depuis la racine :
-
-```powershell
+```sh
 py -3 docs/design-system/verify.py
-py -3 docs/design-system/verify.py --render
-git diff --check
 ```
 
-`--render` régénère uniquement `overview.svg` à partir du JSON, après vérification. Sans argument, le script ne modifie rien. Python utilise seulement sa bibliothèque standard ; aucune dépendance frontend ajoutée. L’aperçu est une planche statique de conception, pas une capture de l’application.
+Regenerate the static token board with:
 
-Pour une future modification UI :
+```sh
+py -3 docs/design-system/verify.py --render
+```
 
-- [ ] Lire cette référence et les AGENTS applicables ; préciser les règles/états concernés dans le handoff.
-- [ ] Utiliser tokens sémantiques et primitives partagées ; éviter couleurs inline et variantes concurrentes.
-- [ ] Vérifier clair/sombre, FR/EN, 320/375/768/1024/1440 px, zoom et texte long.
-- [ ] Tester clavier, focus visible/non masqué, noms accessibles, dialog/sheet et régions live.
-- [ ] Vérifier loading/empty/error/pending/success, stale/conflit/revocation ou checkout incertain si concernés.
-- [ ] Vérifier couleurs réellement rendues, transparences, survol et focus ; JSON seul insuffisant.
-- [ ] Depuis `apps/frontend`, exécuter `npm run lint`, `npm run typecheck`, `npm run format:check`, `npm run build` selon le périmètre ; `npm run test` et couverture ciblée si comportement modifié. Ne pas lancer typecheck pendant le build.
-- [ ] Enregistrer résultats et limites, mettre à jour docs et carte kanban, commit et push.
+The SVG is generated from tokens and is not a screenshot or verification of rendered app screens. This token replacement does not verify application contrast, component behavior, or page-level layout adoption. Existing frontend checks and broader screen adoption remain separate work.
 
-Les instructions AGENTS imposent cette revue aux agents ; elles ne constituent pas un contrôle automatique de l’esthétique par ESLint. Les contrôles actuels imposent déjà les primitives partagées. Vitest vérifie automatiquement les couleurs/rayons CSS contre le JSON ; Playwright vérifie les contrastes calculés, les états, le focus, le responsive et la taille de texte. Ces contrôles ne remplacent pas la revue visuelle des futurs écrans.
+## Superseded reference history
 
-## 15. Historique
+The following entries record prior user-approved revisions and are retained as historical evidence only; none is active guidance now.
 
-| Version | Date | Changement |
+| Version | Date | Historical record |
 | --- | --- | --- |
-| 1.0.0 — référence | 2026-10-06 | Création du référentiel initial Porcelaine et encre, tokens clair/sombre, recettes et consignes d’adoption. |
-| 1.0.0 — adoption | 2026-10-06 | Application de la même palette et des règles visuelles aux primitives et écrans existants ; contrôle CI des tokens et tests navigateur. |
-| 1.2.0 | 2026-10-07 | Revue utilisateur : accent sauge plus vert sur les actions dans les deux thèmes, point de connexion live plus contrasté ; contrastes et aperçu recalculés. |
-| 1.1.0 | 2026-10-06 | Revue utilisateur : fonds clairs neutres, bases sombres stone et accent sauge. Boutons bleus du clair conservés ; contrastes recalculés et tests navigateur relancés. |
+| 1.0.0 | 2026-10-06 | Initial Porcelaine et encre reference and light/dark token set. |
+| 1.1.0 | 2026-10-06 | Prior revision selected neutral light surfaces, stone dark surfaces, and sage accent. |
+| 1.2.0 | 2026-10-07 | Prior revision adjusted sage accent, contrast data, and static preview. Superseded by version 2.0.0. |
+| 2.0.0 | 2026-10-08 | Replaced the active system with the user-supplied Culinary Commerce System and migrated shared color/font/layout tokens. |
 
-### Catalogue et langues : adoption du 7 octobre 2026
+## Full Stitch redesign adoption — 8 October 2026
 
-La gestion du catalogue utilise trois onglets : Produits, Catégories et Remises. Les listes montrent les informations sauvegardées ; recherche, catégorie et état actif/archivé servent à parcourir les produits. Ajouter et Modifier ouvrent des modales avec icône et libellé explicite. Les options sont accessibles depuis leur produit, dans une modale dédiée ; leurs propres ajouts/modifications ouvrent une modale enfant. Les confirmations destructrices restent distinctes. Les éléments archivés et remises inactives restent lisibles selon les droits existants.
+The user supplied the complete five-screen export and explicitly authorized illustrative data for missing backend capabilities. The landing page follows the exported layout; `/[locale]/demo`, `/demo/checkout`, `/demo/tracking`, and `/demo/dashboard` provide the four screen recipes with an in-memory cart and simulated order handling. Navigation among these routes preserves the preview cart during the session. Refreshing resets it. Payments never charge a card; masked payment fields are read-only. Preview scheduling, notifications, customization, stock controls, KPI data and order transitions do not write to a server.
 
-La page Langues sépare le résumé des langues activées et par défaut du tableau de traductions. Gérer les langues ouvre une modale. Chaque élément expose son texte d’origine, sa traduction sauvegardée ou son état À traduire ; la langue, le type, la recherche et l’état filtrent la liste. Le texte de repli du formulaire ne compte pas comme traduction sauvegardée. Annuler ou Échap abandonne le brouillon ; une réouverture reprend les données sauvegardées. Les modales contiennent le focus, le rendent au déclencheur et bloquent la fermeture pendant une mutation ; une erreur conserve le brouillon et une réussite ferme après acquittement.
+The existing tenant storefront, checkout, order tracking, auth frames, catalog cards, order tickets and workspace shell adopt the same tokens and imagery. Existing checkout validation, tenant authorization, query ownership and tracking capabilities remain in their established modules. Food photos are illustrative assets from the export, not catalog attachments. The live checkout includes clearly marked payment/scheduling illustrations alongside its existing authoritative order form.
 
-Les contrôles reprennent les tokens 1.2.0 et les composants partagés. Le texte introductif resté en 1.1.0 mentionnait encore des boutons bleus alors que les tokens et le runtime étaient déjà sauge ; il est aligné ici, sans nouvelle palette. Les résultats de vérification et les limites de la fixture figurent dans `../documentation-review.md`. L’historique des commandes reste inchangé.
+Intentional adaptations: WhitePlate replaces the source brand; normal-size orange buttons retain accessible dark text; Lucide icons replace the source icon font; dark mode, EN/FR copy, keyboard controls and mobile stacking extend the desktop references. Real backend-backed scheduling, payment, analytics, product media and tenant customization remain future work. The landing page is the real public marketing page, as clarified by the user; it does not display a demo notice. Its supplied marketing content is kept separate from simulated restaurant operations.
+
+See [redesign verification and handoff](../redesign-handoff.md) for actual checks and remaining limitations.

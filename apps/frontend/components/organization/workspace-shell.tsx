@@ -6,6 +6,8 @@ import { useLocale, useTranslations } from "next-intl"
 import { useTheme } from "next-themes"
 import { useSearchParams } from "next/navigation"
 import { useState } from "react"
+import { Brand } from "@/components/ui/brand"
+import { WorkspaceLinkIcon } from "./workspace-link-icon"
 import { SignOutButton } from "@/components/auth/sign-out-button"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
@@ -73,13 +75,13 @@ export function WorkspaceShell({
       </Link>
 
       <div className="flex min-h-screen">
-        <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r border-border bg-card md:flex">
+        <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col border-r border-sidebar-border bg-sidebar md:flex">
           <div className="px-5 py-6">
             <Link href="/organization" className="text-lg font-semibold">
-              WhitePlate
+              <Brand />
             </Link>
 
-            <p className="mt-1 truncate text-sm text-muted-foreground">
+            <p className="mt-5 truncate rounded-md bg-secondary p-3 text-sm font-medium text-foreground">
               {contextName}
             </p>
           </div>
@@ -95,7 +97,7 @@ export function WorkspaceShell({
         </aside>
 
         <div className="flex min-w-0 flex-1 flex-col">
-          <header className="sticky top-0 z-30 flex min-h-16 flex-wrap items-center gap-2 border-b border-border bg-background px-3 py-2 sm:px-6 md:justify-end">
+          <header className="sticky top-0 z-30 flex min-h-16 flex-wrap items-center gap-2 border-b border-border/50 bg-background/90 px-3 py-2 backdrop-blur-xl sm:px-6">
             <div className="md:hidden">
               <Sheet
                 open={mobileNavigationOpen}
@@ -140,6 +142,10 @@ export function WorkspaceShell({
                 </SheetContent>
               </Sheet>
             </div>
+
+            <p className="mr-auto hidden font-heading text-sm font-semibold md:block">
+              {contextName}
+            </p>
 
             <LocaleSelector currentHref={currentHref} locale={locale} />
 
@@ -188,7 +194,7 @@ function WorkspaceNavigation({
     >
       {sections.map((section) => (
         <section key={section.id} className="mb-5 last:mb-0">
-          <h2 className="mb-2 px-3 text-sm font-semibold text-muted-foreground">
+          <h2 className="mb-2 px-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
             {section.label}
           </h2>
 
@@ -206,8 +212,10 @@ function WorkspaceNavigation({
                     href={link.href}
                     aria-current={active ? "page" : undefined}
                     onClick={onNavigate}
-                    className={`flex min-h-11 items-center rounded-md px-3 py-2 text-sm transition-colors hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring ${active ? "bg-accent font-semibold text-accent-foreground" : "text-muted-foreground"}`}
+                    className={`flex min-h-12 items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring ${active ? "bg-obsidian font-semibold text-white" : "text-muted-foreground"}`}
                   >
+                    <WorkspaceLinkIcon href={link.href} />
+
                     {link.label}
                   </Link>
                 </li>

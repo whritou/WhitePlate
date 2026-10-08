@@ -15,7 +15,7 @@ The currently recorded Coolify API image (`e13860e`) predates merge `8a2f835` (P
 | [Backend architecture](architecture/WHITEPLATE_BACKEND_ARCHITECTURE.md) | Project references, request paths, and test layout |
 | [Frontend architecture](architecture/WHITEPLATE_FRONTEND_ARCHITECTURE.md) | Routing, localization, rendering, and component map |
 | [Frontend implementation conventions](architecture/frontend-conventions.md) | Enforced UI, type, module, request and query boundaries |
-| [WhitePlate design system](design-system/README.md) | Required visual reference for future UI changes: Porcelaine, encre et sauge, tokens, components, screen recipes and adoption checklist; applied to shared primitives and current screens |
+| [WhitePlate design system](design-system/README.md) | Canonical Culinary Commerce reference, shared runtime tokens, visual guidance, accessibility and implementation boundaries |
 | [Technology stack](architecture/technology_stack.md) | Wired dependencies versus installed or proposed tools |
 | [Coding standards](coding-standards.md) | Rules for extending this codebase |
 | [API contracts](api/api-contracts.md) | Organization, staff, tenant, catalog, checkout, orders and SignalR routes |
@@ -28,6 +28,8 @@ The currently recorded Coolify API image (`e13860e`) predates merge `8a2f835` (P
 | [Public order tracking decision](architecture/decisions/0006-public-order-tracking.md) | Expiring capability-based public status tracking and tenant-scoped ephemeral guest checkout |
 | [Functional test plan](functional-test-plan.md) | Executable smoke checks and future acceptance criteria |
 | [Development roadmap](development-roadmap.md) | Implemented backend scope and unresolved frontend/deployment decisions |
+| [Full Stitch redesign handoff](redesign-handoff.md) | Public landing, illustrative screen routes, visual adoption and verification |
+| [Landing and demo responsive audit](audits/landing-demo-responsive.md) | Responsive defects, fixes, captured walkthrough and browser verification for the public landing and menu |
 | [Documentation review](documentation-review.md) | Audit findings, verification evidence, and remaining blockers |
 | [Root agent instructions](../AGENTS.md) | Working rules for development agents |
 | [API agent instructions](../apps/api/AGENTS.md) | Scoped backend project and test rules |

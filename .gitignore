@@ -7,3 +7,6 @@
 .env
 .env.*
 !.env.example
+
+# Local design extraction and verification scratch files
+.tmp/
