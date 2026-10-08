@@ -65,7 +65,7 @@ export function OrderRealtimeConnection({
     >
       <span
         aria-hidden="true"
-        className={`size-2 rounded-full ${visibleStatus === "connected" ? "bg-success" : "bg-muted-foreground/50"}`}
+        className={`size-2 rounded-full ${visibleStatus === "connected" ? "bg-success-solid" : "bg-muted-foreground/50"}`}
       />
 
       {t(`connection.${visibleStatus}`)}

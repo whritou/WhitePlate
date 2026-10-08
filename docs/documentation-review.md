@@ -492,3 +492,15 @@ Removed the locale chooser from the global not-found page. It now exposes a brow
 | Prettier check for the modified TSX component and test | Passed. A check over the two full Markdown documents reported formatting findings; those large docs were not reformatted wholesale. |
 | `node node_modules/next/dist/bin/next build --webpack` from `apps/frontend` | Passed compilation, TypeScript, and generation of all 49 pages. Nonfatal webpack-cache EPERM and PostgreSQL SSL-mode warnings remain. |
 | `git diff --check` | Passed with line-ending conversion warnings only. |
+
+## Culinary Commerce design-system replacement — 2026-10-08
+
+Replaced the active canonical Porcelaine, encre et sauge direction with the user-supplied Culinary Commerce System. Named prose HEX values are authoritative over the conflicting YAML palette; typography, spacing, radii, and prose breakpoints are represented as canonical tokens. Shared light/dark and system-dark CSS variables now use the new palette. Existing page layouts and product behavior remain unchanged; the connected-order indicator now references the explicit solid mint token while status text keeps the higher-contrast text token. Earlier design-system review entries above remain historical evidence.
+
+The static preview was regenerated from `docs/design-system/tokens.json`. Plus Jakarta Sans and Inter are listed first in local CSS stacks, with system fallbacks because the frontend does not bundle those font files. Screen-level layout/component adoption remains in kanban issue #53.
+
+| Check | Actual result |
+| --- | --- |
+| `py -3 docs/design-system/verify.py --render` from the repository root | Passed: 84 required contrast pairs across both themes, CSS/token parity, palette/reference parity, and local-link scans across 10 documents. Lowest checked text pair is light warning text on warning tint at 4.51:1; the primary Obsidian-on-Tangerine pair is 5.72:1. Static `overview.svg` regenerated. |
+| `git diff --check` | Passed; Git reported only its configured LF/CRLF conversion warnings. |
+| Frontend unit tests, lint, typecheck, build, and browser acceptance | Not run for this token and reference update. The existing app color/radius parity test source remains unchanged. |
