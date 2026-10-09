@@ -8,6 +8,24 @@ export const jsxBlockSpacing = {
   create(context) {
     const source = context.sourceCode
 
+    // Translation wrappers containing only text are inline prose, like JSXText.
+    function isInlineCopy(child) {
+      if (child.type !== "JSXElement" || child.openingElement.name.name !== "Copy")
+        return false
+
+      const containsElement = (value) => {
+        if (!value || typeof value !== "object") return false
+        if (Array.isArray(value)) return value.some(containsElement)
+        if (value.type === "JSXElement" || value.type === "JSXFragment") return true
+
+        return Object.entries(value).some(([key, entry]) =>
+          key !== "parent" && key !== "loc" && key !== "range" && containsElement(entry)
+        )
+      }
+
+      return !child.children.some(containsElement)
+    }
+
     function checkChildren(node) {
       const children = node.children.filter(
         (child) => child.type !== "JSXText" || child.value.trim() !== ""
@@ -19,6 +37,7 @@ export const jsxBlockSpacing = {
 
         // Preserve inline text, spaces and controls on the same line.
         if (previous.type === "JSXText" || current.type === "JSXText") continue
+        if (isInlineCopy(previous) || isInlineCopy(current)) continue
         if (
           previous.type === "JSXExpressionContainer" &&
           previous.expression.type === "Literal" &&

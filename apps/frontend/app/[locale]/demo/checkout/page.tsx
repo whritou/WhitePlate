@@ -1,5 +1,9 @@
-import { DemoCheckout } from "@/components/redesign/demo-checkout"
-
+import { Suspense } from "react"
+import { CheckoutPage } from "@/components/lovable/pages/checkout"
 export default function Page() {
-  return <DemoCheckout />
+  return (
+    <Suspense>
+      <CheckoutPage />
+    </Suspense>
+  )
 }

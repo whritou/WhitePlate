@@ -1,5 +1,7 @@
 # WhitePlate frontend
 
+The public landing and localized demo routes use the supplied Lovable design. See [migration documentation](../../docs/lovable-migration.md) for route mapping, local fonts/assets and backend connections. Demo actions are browser simulations; they do not replace real tenant services. Run `npm run test:browser -- --project lovable-migration` against `WHITEPLATE_ACCEPTANCE_URL=http://localhost:3015` after starting a local server.
+
 Next.js App Router app with localized Better Auth and organization/team flows, tenant menu browsing, language/translation settings, and guest cart/checkout. Protected API operations use server-side Better Auth JWTs. Guest checkout uses a same-origin public BFF and an in-memory cart; server receipt pricing and retry safety are verified with a local API fixture. Kitchen tickets use TanStack Query reads/action mutations and SignalR invalidation hints. Live authenticated dashboard acceptance remains separately tracked.
 
 Run from this directory:
@@ -14,7 +16,7 @@ Open `/en` or `/fr` on `http://localhost:3000`. Press `d` outside text-entry con
 | Command | Purpose |
 | --- | --- |
 | `npm run dev` | Webpack development server |
-| `npm run build` | Production Webpack build; uses system font stacks and does not fetch Google fonts |
+| `npm run build` | Production Webpack build; bundled local fonts with system fallbacks, no Google font fetch |
 | `npm run start` | Serve a completed production build |
 | `npm run lint` | ESLint with the Next.js React plugin's legacy context API adapted for ESLint 10 |
 | `npm run test` | Run Vitest unit tests, including the shared API request factory |

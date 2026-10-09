@@ -1,5 +1,9 @@
-import { DemoDashboard } from "@/components/redesign/demo-dashboard"
-
+import { Suspense } from "react"
+import { DashboardPage } from "@/components/lovable/pages/dashboard"
 export default function Page() {
-  return <DemoDashboard />
+  return (
+    <Suspense>
+      <DashboardPage />
+    </Suspense>
+  )
 }

@@ -1,5 +1,7 @@
 # WhitePlate frontend architecture
 
+Public marketing and `/[locale]/demo` routes now use the scoped Lovable components. Thin App Router entries render isolated client models/views; existing tenant-host routing and real authenticated/guest services remain unchanged. The demo layout uses its own sample BackofficeProvider, and browser storage is explicitly demo-prefixed. See [route mapping, design, assets and backend connections](../lovable-migration.md). Earlier Stitch landing/demo descriptions below are superseded only for those routes; retained shared components still serve real screens.
+
 M5 supplies a separate gallery editor beside product metadata. Ordered drafts remain local; interactive queries use account/tenant/locale/product keys. Server-only services use the shared token-aware HTTP factory and bounded binary BFF routes. Guest cards show the saved cover; the actual options dialog renders the saved gallery in its scrollable body. Delivery is same-origin and no-store, bypassing shared image optimization. Both catalogs contain photo states/errors. See [ADR 0008](decisions/0008-product-photo-gallery.md) and [M5 evidence](../audits/product-photos.md).
 
 
@@ -139,7 +141,7 @@ The canonical [design system](../design-system/README.md) defines the Culinary C
 
 Shared controls use Base UI. `components.json` records the `base-lyra` style and aliases. UI modules use `@/lib/utils`, which re-exports `cn`. Inspect each component API before composing it; see [implementation conventions](frontend-conventions.md).
 
-The public landing is composed by `components/marketing/landing-page.tsx`. The illustrative menu uses `components/redesign/demo-menu.tsx` and its focused `demo-menu-cart.tsx` summary. Category controls scroll locally; below 1280px a fixed count/total link focuses and scrolls to the in-page order summary, with bottom space and safe-area padding. Desktop uses the sticky order sidebar. The [responsive audit](../audits/landing-demo-responsive.md) records scoped layout rules and verified EN/FR, light/dark and enlarged-text behavior. These demo controls do not call restaurant or payment mutations.
+The public landing is composed by `components/marketing/landing-page.tsx`, delegating to `components/lovable/landing-page.tsx`. The illustrative menu now uses Lovable Storefront and shared customer pages, with an accessible basket dialog and local checkout/tracking. Category controls scroll locally. Backoffice navigation targets localized demo subroutes; menu editor panels stack on narrow screens. The [Lovable migration](../lovable-migration.md) records current scope and checks; the earlier [responsive audit](../audits/landing-demo-responsive.md) is historical Stitch evidence. Demo controls do not call restaurant or payment mutations.
 
 ## Extending the frontend
 

@@ -10,6 +10,8 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 ## WhitePlate frontend rules
 
+The canonical design system includes an approved scoped Lovable reference for the public landing and `/[locale]/demo` only. Follow [its migration documentation](../../docs/lovable-migration.md) for source tokens/assets, browser-only state and remaining backend connections. Do not extend that scoped palette to live screens without an explicit design change. Existing Culinary Commerce rules below remain the default elsewhere.
+
 Read [frontend architecture](../../docs/architecture/WHITEPLATE_FRONTEND_ARCHITECTURE.md) and [implementation conventions](../../docs/architecture/frontend-conventions.md) before edits. The latter defines the implemented module ownership and request/query lifecycle.
 
 - For every UI task, also read the [design system](../../docs/design-system/README.md) and [canonical tokens](../../docs/design-system/tokens.json) before editing. They define the Culinary Commerce identity, component states, screen recipes and delivery checklist, including light/dark, FR/EN, keyboard, responsive and product-specific error/retry states. Adopt it within the requested scope; do not hard-code colors or local radius overrides as new defaults. Centralize shared variants in `components/ui` and semantic tokens in `app/globals.css` when implementation is requested. Report which rules were applied, any remaining deviations, and actual verification. Agent instructions and review enforce design adherence; no automatic visual compliance is claimed.

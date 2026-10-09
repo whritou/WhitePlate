@@ -1,5 +1,9 @@
-import { DemoTracking } from "@/components/redesign/demo-tracking"
-
+import { Suspense } from "react"
+import { TrackingPage } from "@/components/lovable/pages/tracking"
 export default function Page() {
-  return <DemoTracking />
+  return (
+    <Suspense>
+      <TrackingPage />
+    </Suspense>
+  )
 }

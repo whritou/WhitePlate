@@ -1,5 +1,7 @@
 # Full Stitch redesign handoff
 
+Historical handoff: the landing and `/demo` descriptions below are superseded by the [Lovable migration](lovable-migration.md). Live screen changes and retained shared components remain applicable. The canonical reference is now 2.1.2 with an approved Lovable scope; older verification here belongs to the Stitch task.
+
 8 October 2026 · branch `feat/stitch-app-redesign` · issue #53.
 
 ## Delivered
