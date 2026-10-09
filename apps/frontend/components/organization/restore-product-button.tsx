@@ -11,16 +11,19 @@ import { useTranslations } from "next-intl"
 export function RestoreProductButton({
   tenantId,
   id,
+  onPendingChange,
 }: {
   tenantId: string
   id: string
+  onPendingChange?: (pending: boolean) => void
 }) {
   const t = useTranslations("Catalog")
   const { pending, state, submit } = useCatalogForm(
     restoreProductAction,
     false,
     undefined,
-    t("productRestored")
+    t("productRestored"),
+    onPendingChange
   )
 
   return (

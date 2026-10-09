@@ -27,6 +27,62 @@ namespace WhitePlate.Tests.Api;
 public sealed class OrganizationEndpointTests
 {
     [Fact]
+    public async Task ProductCategoryMovePersistsAndRejectsForeignArchivedOrMissingCategories()
+    {
+        using var factory = new OrganizationFactory();
+        var (organizationId, ownerIdentity) = await factory.SeedOwnerAsync();
+        using var client = factory.CreateClient();
+        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", ownerIdentity.Subject);
+        var ct = TestContext.Current.CancellationToken;
+        async Task<Guid> CreateId(string path, object body)
+        {
+            using var response = await client.PostAsJsonAsync(path, body, ct);
+            Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+            using var json = JsonDocument.Parse(await response.Content.ReadAsStringAsync(ct));
+            return json.RootElement.GetProperty("id").GetGuid();
+        }
+        var tenant = await CreateId($"/api/v1/organizations/{organizationId}/restaurants",
+            new { name = "Menu", subdomain = "move-menu", currency = "EUR" });
+        var foreign = await CreateId($"/api/v1/organizations/{organizationId}/restaurants",
+            new { name = "Other", subdomain = "move-other", currency = "EUR" });
+        var original = await CreateId($"/api/v1/tenants/{tenant}/categories", new { name = "Starters", sortOrder = 0 });
+        var target = await CreateId($"/api/v1/tenants/{tenant}/categories", new { name = "Mains", sortOrder = 1 });
+        var foreignCategory = await CreateId($"/api/v1/tenants/{foreign}/categories", new { name = "Other", sortOrder = 0 });
+        var archived = await CreateId($"/api/v1/tenants/{tenant}/categories", new { name = "Old", sortOrder = 2 });
+        using var archive = await client.DeleteAsync($"/api/v1/tenants/{tenant}/categories/{archived}", ct);
+        Assert.Equal(HttpStatusCode.NoContent, archive.StatusCode);
+        var productId = await CreateId($"/api/v1/tenants/{tenant}/products",
+            new { categoryId = original, name = "Soup", description = "Seasonal", basePrice = 8m, taxRatePercent = 10m, sortOrder = 0 });
+        var path = $"/api/v1/tenants/{tenant}/products/{productId}";
+        foreach (var category in new[] { foreignCategory, archived, Guid.NewGuid(), Guid.Empty })
+        {
+            using var denied = await client.PutAsJsonAsync(path,
+                new { categoryId = category, name = "Rejected", description = "Changed", basePrice = 99m, taxRatePercent = 10m, sortOrder = 9, isAvailable = true }, ct);
+            Assert.Equal(HttpStatusCode.NotFound, denied.StatusCode);
+            using var catalog = await client.GetAsync($"/api/v1/tenants/{tenant}/catalog", ct);
+            using var json = JsonDocument.Parse(await catalog.Content.ReadAsStringAsync(ct));
+            var saved = json.RootElement.GetProperty("products").EnumerateArray().Single(item => item.GetProperty("id").GetGuid() == productId);
+            Assert.Equal(original, saved.GetProperty("categoryId").GetGuid());
+            Assert.Equal("Soup", saved.GetProperty("name").GetString());
+            Assert.Equal(8m, saved.GetProperty("basePrice").GetDecimal());
+        }
+        using var moved = await client.PutAsJsonAsync(path,
+            new { categoryId = target, name = "Soup", description = "Seasonal", basePrice = 8m, taxRatePercent = 10m, sortOrder = 3, isAvailable = true }, ct);
+        Assert.Equal(HttpStatusCode.OK, moved.StatusCode);
+        using var readBack = await client.GetAsync($"/api/v1/tenants/{tenant}/catalog", ct);
+        using var savedJson = JsonDocument.Parse(await readBack.Content.ReadAsStringAsync(ct));
+        var savedProduct = savedJson.RootElement.GetProperty("products").EnumerateArray().Single(item => item.GetProperty("id").GetGuid() == productId);
+        Assert.Equal(target, savedProduct.GetProperty("categoryId").GetGuid());
+        Assert.Equal(3, savedProduct.GetProperty("sortOrder").GetInt32());
+        using var legacy = await client.PutAsJsonAsync(path,
+            new { name = "Legacy edit", description = "Seasonal", basePrice = 8m, taxRatePercent = 10m, sortOrder = 4, isAvailable = true }, ct);
+        Assert.Equal(HttpStatusCode.OK, legacy.StatusCode);
+        using var legacyRead = await client.GetAsync($"/api/v1/tenants/{tenant}/catalog", ct);
+        using var legacyJson = JsonDocument.Parse(await legacyRead.Content.ReadAsStringAsync(ct));
+        Assert.Equal(target, legacyJson.RootElement.GetProperty("products")[0].GetProperty("categoryId").GetGuid());
+    }
+
+    [Fact]
     public async Task RestaurantOwnerAndManagerCanManageLocalizedRestaurantDescriptions()
     {
         using var factory = new OrganizationFactory();

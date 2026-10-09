@@ -1,4 +1,5 @@
 import "server-only"
+import { isUuid } from "@/lib/validation/common"
 import { whitePlateApi } from "@/lib/api"
 import { parseManagedCatalog } from "@/lib/validation/catalog-management"
 import type { ApiResult } from "@/types/api"
@@ -72,6 +73,27 @@ export async function saveCategory({
     ? await whitePlateApi.put(`${path}/${id}`, { name, sortOrder })
     : await whitePlateApi.post(path, { name, sortOrder })
 
+  if (
+    !id &&
+    response.ok &&
+    typeof response.data === "object" &&
+    response.data !== null &&
+    "id" in response.data &&
+    isUuid(response.data.id)
+  ) {
+    return {
+      ok: true,
+      category: {
+        id: response.data.id,
+        name,
+        sortOrder,
+        isVisible: true,
+        isArchived: false,
+        translations: {},
+      },
+    }
+  }
+
   return mutationResult(response)
 }
 
@@ -90,7 +112,11 @@ export async function saveProduct(input: ProductInput): Promise<CatalogResult> {
   const path = `/api/v1/tenants/${tenantId}/products`
   const fields = { name, description, basePrice, taxRatePercent, sortOrder }
   const response = id
-    ? await whitePlateApi.put(`${path}/${id}`, { ...fields, isAvailable })
+    ? await whitePlateApi.put(`${path}/${id}`, {
+        categoryId,
+        ...fields,
+        isAvailable,
+      })
     : await whitePlateApi.post(path, { categoryId, ...fields })
 
   return mutationResult(response)

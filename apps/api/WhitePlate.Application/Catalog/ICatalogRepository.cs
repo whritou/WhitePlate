@@ -28,7 +28,8 @@ public interface ICatalogRepository
     Task<bool> AddDiscountAsync(WhitePlate.Domain.Catalog.PromotionDiscount discount, CancellationToken cancellationToken);
     Task<MenuCategoryDto?> UpdateCategoryAsync(Guid tenantId, Guid categoryId, string name, int sortOrder, CancellationToken cancellationToken);
     Task<MenuProductDto?> UpdateProductAsync(Guid tenantId, Guid productId, string name, string? description,
-        decimal basePrice, decimal taxRatePercent, int sortOrder, bool isAvailable, CancellationToken cancellationToken);
+        decimal basePrice, decimal taxRatePercent, int sortOrder, bool isAvailable, CancellationToken cancellationToken,
+        Guid? categoryId = null);
     Task<MenuOptionGroupDto?> UpdateOptionGroupAsync(Guid tenantId, Guid groupId, string name, int minimumSelections,
         int maximumSelections, int sortOrder, CancellationToken cancellationToken);
     Task<MenuOptionDto?> UpdateOptionAsync(Guid tenantId, Guid optionId, string name, decimal priceAdjustment,

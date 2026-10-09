@@ -201,7 +201,7 @@
     "createRestaurant": "Créer un restaurant",
     "orders": "Commandes",
     "orderHistory": "Historique des commandes",
-    "catalog": "Menu Builder & Traductions",
+    "catalog": "Menu & catégories",
     "menuLanguages": "Langues et traductions du menu",
     "navigationLabel": "Navigation de l’espace de travail",
     "openNavigation": "Ouvrir la navigation",
@@ -585,7 +585,10 @@
     "status": "État de traduction",
     "allStatuses": "Toutes les traductions",
     "progress": "{count, plural, one {# élément traduit} other {# éléments traduits}} sur {total}",
-    "noResults": "Aucun élément ne correspond à ces filtres."
+    "noResults": "Aucun élément ne correspond à ces filtres.",
+    "table": "Traductions",
+    "translatedText": "Texte traduit",
+    "actions": "Actions"
   },
   "RestaurantDescription": {
     "title": "Description du restaurant",
@@ -1069,7 +1072,7 @@
     "title": "Menu Builder & Traductions",
     "intro": "Composez votre carte, fixez vos prix et gérez toutes les langues du menu dans un même espace.",
     "sections": "Espace du menu",
-    "products": "Carte & Produits",
+    "products": "Menu",
     "translations": "Traductions & Langues",
     "discountsHelp": "Créez, modifiez et désactivez les codes de réduction de ce restaurant.",
     "saveHelp": "Enregistrez chaque élément. Les changements sont immédiatement en ligne.",
@@ -1103,7 +1106,19 @@
     "localizationStudio": "Catalogue & studio de traduction",
     "categoryCount": "{count, plural, one {# section} other {# sections}}",
     "categoryProductCount": "{count, plural, one {# produit actif} other {# produits actifs}}",
-    "languageCount": "{count, plural, one {# langue} other {# langues}}"
+    "languageCount": "{count, plural, one {# langue} other {# langues}}",
+    "chooseCategory": "Choisir une catégorie",
+    "startCategory": "Créez votre première catégorie ici, puis continuez le produit.",
+    "orderFor": "Ordre d’affichage de {name}",
+    "saveOrderFor": "Enregistrer l’ordre de {name}",
+    "orderingHelp": "Les nombres les plus petits apparaissent en premier. Enregistrez chaque changement ; les produits sont triés dans leur catégorie.",
+    "status": "Statut",
+    "actions": "Actions",
+    "extras": "Suppléments",
+    "selectionPrice": "Choix / supplément",
+    "editProduct": "Modifier le produit",
+    "productDetails": "Détails du produit",
+    "noDescription": "Aucune description ajoutée."
   },
   "BrandAssets": {
     "eyebrow": "Identité du restaurant",

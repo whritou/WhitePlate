@@ -270,3 +270,9 @@ The public marketing page is `/en` or `/fr` on the base host. Visit `/en/demo` o
 ## M1 Menu Builder rollout — 2026-10-08
 
 The catalog route is the combined restaurant workspace; old language URLs redirect with tenant/query context. Per-product saves and keyboard display-order inputs reuse current operations; temporary category hiding adds the `CategoryVisibility` migration. Review/apply outstanding EF migrations explicitly and deploy API before frontend because management reads now require `isVisible`. No migration was applied by this feature work. Use the guarded acceptance environment for real browser save/reload and hosted public-menu/checkout checks; see [M1 evidence](audits/menu-builder.md).
+
+## Menu manager rollout — 2026-10-09
+
+Deploy the API before the frontend: product updates now send optional `categoryId`, which an old API would silently ignore. The existing composite category foreign key is reused; no migration or provider configuration is added. Descriptions remain plain text. Tables and a right-side sheet replace the earlier inline editor; product forms can create and immediately select an active category.
+
+With the local frontend running, run `node node_modules/@playwright/test/cli.js test --project=menu-builder --project=catalog-design --project=product-photos`. Use `WHITEPLATE_ACCEPTANCE_URL=http://localhost:3012` for that dev port. The development fixture `/en/catalog-design-test?view=builder&empty=1` supports the empty-menu creation scenario; it is unavailable in production. Real persistence and hosted public-menu acceptance remain separate from intercepted fixture saves. See [menu-manager evidence](audits/menu-manager.md).

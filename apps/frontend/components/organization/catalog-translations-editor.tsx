@@ -1,7 +1,7 @@
 "use client"
 
 import { useLocale, useTranslations } from "next-intl"
-import { useState } from "react"
+import { useId, useState } from "react"
 import { Search } from "lucide-react"
 import { CatalogTranslationRow } from "./catalog-translation-row"
 import {
@@ -14,6 +14,13 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
+import {
+  Table,
+  TableBody,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 import type { CatalogTranslationData, TranslationRow } from "@/types/catalog"
 
 export function CatalogTranslationsEditor({
@@ -21,15 +28,22 @@ export function CatalogTranslationsEditor({
   locales,
   defaultLocale,
   catalog,
+  readOnly,
+  includeArchived,
+  onPendingChange,
 }: {
   tenantId: string
   locales: string[]
   defaultLocale: string
   catalog: CatalogTranslationData
+  readOnly?: boolean
+  includeArchived?: boolean
+  onPendingChange?: (pending: boolean) => void
 }) {
   const t = useTranslations("Auth")
   const u = useTranslations("MenuTranslations")
   const uiLocale = useLocale()
+  const prefix = useId()
   const [chosenLocale, setLocale] = useState(defaultLocale)
   const [search, setSearch] = useState("")
   const [kind, setKind] = useState("all")
@@ -59,7 +73,7 @@ export function CatalogTranslationsEditor({
       label: t("menuOption"),
       description: null,
     })),
-  ].filter((item) => !item.isArchived)
+  ].filter((item) => includeArchived || !item.isArchived)
   const visible = rows.filter(
     (row) =>
       (kind === "all" || row.type === kind) &&
@@ -87,10 +101,10 @@ export function CatalogTranslationsEditor({
         </div>
 
         <div className="grid w-full gap-2 sm:w-auto">
-          <Label htmlFor="translation-locale">{t("editLanguage")}</Label>
+          <Label htmlFor={`${prefix}-locale`}>{t("editLanguage")}</Label>
 
           <NativeSelect
-            id="translation-locale"
+            id={`${prefix}-locale`}
             value={locale}
             onChange={(event) => setLocale(event.target.value)}
             selectClassName="w-full sm:min-w-48"
@@ -107,7 +121,7 @@ export function CatalogTranslationsEditor({
       <CardContent className="grid gap-5">
         <div className="grid gap-4 border-b border-border pb-5 md:grid-cols-[minmax(0,1fr)_auto_auto]">
           <div className="grid gap-2">
-            <Label htmlFor="translation-search">{u("search")}</Label>
+            <Label htmlFor={`${prefix}-search`}>{u("search")}</Label>
 
             <div className="relative">
               <Search
@@ -116,7 +130,7 @@ export function CatalogTranslationsEditor({
               />
 
               <Input
-                id="translation-search"
+                id={`${prefix}-search`}
                 className="pl-10"
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
@@ -126,10 +140,10 @@ export function CatalogTranslationsEditor({
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="translation-kind">{u("type")}</Label>
+            <Label htmlFor={`${prefix}-kind`}>{u("type")}</Label>
 
             <NativeSelect
-              id="translation-kind"
+              id={`${prefix}-kind`}
               value={kind}
               onChange={(event) => setKind(event.target.value)}
               selectClassName="w-full"
@@ -156,10 +170,10 @@ export function CatalogTranslationsEditor({
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="translation-status">{u("status")}</Label>
+            <Label htmlFor={`${prefix}-status`}>{u("status")}</Label>
 
             <NativeSelect
-              id="translation-status"
+              id={`${prefix}-status`}
               value={status}
               onChange={(event) => setStatus(event.target.value)}
               selectClassName="w-full"
@@ -191,25 +205,40 @@ export function CatalogTranslationsEditor({
             {rows.length === 0 ? t("noCatalogTranslations") : u("noResults")}
           </p>
         ) : (
-          <ul className="divide-y divide-border">
-            {visible.map((row) => {
-              const text =
-                row.translations[locale] ?? row.translations[defaultLocale]
+          <Table aria-label={u("table")}>
+            <TableHeader>
+              <TableRow>
+                <TableHead scope="col">{u("original")}</TableHead>
 
-              return (
-                <li key={`${locale}-${row.type}-${row.id}`} className="py-5">
+                <TableHead scope="col">{u("translatedText")}</TableHead>
+
+                <TableHead scope="col">{u("status")}</TableHead>
+
+                <TableHead scope="col">{u("actions")}</TableHead>
+              </TableRow>
+            </TableHeader>
+
+            <TableBody>
+              {visible.map((row) => {
+                const text =
+                  row.translations[locale] ?? row.translations[defaultLocale]
+
+                return (
                   <CatalogTranslationRow
+                    key={`${locale}-${row.type}-${row.id}`}
                     tenantId={tenantId}
                     row={row}
                     locale={locale}
                     initialName={text?.name ?? row.name}
                     initialDescription={text?.description ?? row.description}
                     label={row.label}
+                    readOnly={readOnly || row.isArchived}
+                    onPendingChange={onPendingChange}
                   />
-                </li>
-              )
-            })}
-          </ul>
+                )
+              })}
+            </TableBody>
+          </Table>
         )}
       </CardContent>
     </Card>

@@ -1,5 +1,9 @@
 # Database schema and tenant model
 
+## Menu manager category reassignment — 2026-10-09
+
+The 9 October menu-manager refactor permits reassignment of the existing `Products.CategoryId` through product updates. Both categories are checked against the same tenant and archival state before persistence. Existing composite foreign keys remain authoritative; there are no added columns, schema changes or migrations for this refactor. See [menu-manager evidence](../audits/menu-manager.md).
+
 ## M5 product photo media extension — 2026-10-09
 
 Generated migration `20261009112850_ProductPhotoGallery` adds nullable `MediaAssets.ProductId` and default-zero `SortOrder`. The composite foreign key `(TenantId, ProductId)` references `Products(TenantId, Id)`, with restricted deletion. Active brand-slot uniqueness applies only to `ProductId IS NULL`; the tenant/product/active/order index supports ordered galleries. Each photo owns three normalized object keys suffixed `/320`, `/640`, `/1200`.

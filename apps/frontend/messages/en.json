@@ -201,7 +201,7 @@
     "createRestaurant": "Create restaurant",
     "orders": "Orders",
     "orderHistory": "Order history",
-    "catalog": "Menu Builder & Translations",
+    "catalog": "Menu & Categories",
     "menuLanguages": "Menu languages & translations",
     "navigationLabel": "Workspace navigation",
     "openNavigation": "Open navigation",
@@ -585,7 +585,10 @@
     "status": "Translation status",
     "allStatuses": "All translations",
     "progress": "{count} of {total} items translated",
-    "noResults": "No items match these filters."
+    "noResults": "No items match these filters.",
+    "table": "Translations",
+    "translatedText": "Translated text",
+    "actions": "Actions"
   },
   "RestaurantDescription": {
     "title": "Restaurant description",
@@ -1069,7 +1072,7 @@
     "title": "Menu Builder & Translations",
     "intro": "Build your menu, set prices and manage every menu language in one workspace.",
     "sections": "Menu workspace",
-    "products": "Menu & products",
+    "products": "Menu",
     "translations": "Translations & languages",
     "discountsHelp": "Create, edit and deactivate discount codes for this restaurant.",
     "saveHelp": "Save each item explicitly. Saved changes are live immediately.",
@@ -1103,7 +1106,19 @@
     "localizationStudio": "Catalog & localization studio",
     "categoryCount": "{count, plural, one {# section} other {# sections}}",
     "categoryProductCount": "{count, plural, one {# active product} other {# active products}}",
-    "languageCount": "{count, plural, one {# language} other {# languages}}"
+    "languageCount": "{count, plural, one {# language} other {# languages}}",
+    "chooseCategory": "Choose a category",
+    "startCategory": "Create your first category here, then continue with the product.",
+    "orderFor": "Display order for {name}",
+    "saveOrderFor": "Save order for {name}",
+    "orderingHelp": "Lower numbers appear first. Save each order change; products are ordered within their category.",
+    "status": "Status",
+    "actions": "Actions",
+    "extras": "Extras",
+    "selectionPrice": "Selections / extra price",
+    "editProduct": "Edit product",
+    "productDetails": "Product details",
+    "noDescription": "No description added."
   },
   "BrandAssets": {
     "eyebrow": "Restaurant identity",

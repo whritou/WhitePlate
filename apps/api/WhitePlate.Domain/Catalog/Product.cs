@@ -40,6 +40,12 @@ public sealed class Product
     }
 
     public void SetAvailability(bool available) => IsAvailable = available;
+    public void ChangeCategory(Guid categoryId)
+    {
+        if (categoryId == Guid.Empty)
+            throw new DomainRuleException("invalid_category", "categoryId", "A category is required.");
+        CategoryId = categoryId;
+    }
     public void SetTranslation(string? locale, string? name, string? description) =>
         TranslationsJson = CatalogTranslations.Set(TranslationsJson, locale, name, description,
             MaxNameLength, MaxDescriptionLength);

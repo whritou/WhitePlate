@@ -1,22 +1,23 @@
 "use client"
 
 import { useState } from "react"
-import {
-  Eye,
-  EyeOff,
-  Layers3,
-  Plus,
-  ChevronRight,
-  Search,
-  ArrowDownUp,
-} from "lucide-react"
+import { Eye, EyeOff } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { setCategoryVisibilityAction } from "@/actions/catalog"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { EditorDialog } from "@/components/ui/editor-dialog"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 import { ResultMessage } from "@/components/auth/result-message"
 import type {
   CatalogCategory,
@@ -24,6 +25,7 @@ import type {
 } from "@/types/catalog-management"
 import { CategoryForm } from "./category-form"
 import { ArchiveCatalogButton } from "./archive-catalog-button"
+import { CatalogOrderForm } from "./catalog-order-form"
 import { useCatalogForm } from "./use-catalog-form"
 
 export function MenuBuilderCategories({
@@ -41,6 +43,7 @@ export function MenuBuilderCategories({
 }) {
   const t = useTranslations("Catalog")
   const u = useTranslations("MenuBuilder")
+  const v = useTranslations("CatalogView")
   const [search, setSearch] = useState("")
   const categories = [...catalog.categories]
     .sort((a, b) => a.sortOrder - b.sortOrder || a.id.localeCompare(b.id))
@@ -48,179 +51,146 @@ export function MenuBuilderCategories({
       item.name.toLocaleLowerCase().includes(search.trim().toLocaleLowerCase())
     )
 
-  const selected = categories.find((item) => item.id === selectedId)
-
   return (
-    <Card>
-      <CardHeader className="flex flex-wrap items-center justify-between gap-2">
-        <CardTitle className="min-w-0">
-          <h2 className="flex items-center gap-2 text-lg">
-            <Layers3 aria-hidden="true" className="size-5" />
-
-            {u("categories")}
-          </h2>
+    <Card className="min-w-0">
+      <CardHeader className="flex flex-wrap items-center justify-between gap-4">
+        <CardTitle>
+          <h2>{u("categories")}</h2>
         </CardTitle>
 
-        <span className="shrink-0 rounded-full bg-secondary px-2.5 py-1 text-xs font-medium whitespace-nowrap">
-          {u("categoryCount", {
-            count: catalog.categories.filter((item) => !item.isArchived).length,
-          })}
-        </span>
-      </CardHeader>
-
-      <CardContent className="grid gap-4">
-        <div className="relative">
+        <div className="grid gap-2">
           <Label htmlFor="builder-category-search" className="sr-only">
             {u("categorySearch")}
           </Label>
 
-          <Search
-            aria-hidden="true"
-            className="pointer-events-none absolute top-3.5 left-3 size-4 text-muted-foreground"
-          />
-
           <Input
             id="builder-category-search"
             value={search}
-            disabled={pending}
             onChange={(event) => setSearch(event.target.value)}
+            disabled={pending}
             placeholder={u("categorySearch")}
-            className="pl-9"
           />
         </div>
+      </CardHeader>
 
-        <Button
-          variant={selectedId === "all" ? "secondary" : "ghost"}
-          aria-pressed={selectedId === "all"}
-          disabled={pending}
-          onClick={() => onSelect("all")}
-        >
-          {u("allCategories")}
-        </Button>
+      <CardContent className="grid min-w-0 gap-4">
+        <Table aria-label={u("categories")}>
+          <TableHeader>
+            <TableRow>
+              <TableHead scope="col">{t("name")}</TableHead>
 
-        <ul className="grid gap-2">
-          {categories.map((category) => (
-            <li
-              key={category.id}
-              className={
-                selectedId === category.id
-                  ? "min-w-0 rounded-lg bg-obsidian text-on-primary"
-                  : "min-w-0 rounded-lg bg-muted text-foreground dark:bg-secondary"
-              }
-            >
-              <div className="flex min-w-0 flex-wrap items-center gap-0.5 p-1">
-                <Button
-                  className={`h-auto min-w-0 flex-1 justify-start gap-2 px-2 py-2 text-left text-inherit ${selectedId === category.id ? "hover:bg-white/10 hover:text-inherit active:bg-white/20" : "hover:bg-surface-variant active:border-brand-text active:bg-surface-dim"}`}
-                  variant="ghost"
-                  aria-label={category.name}
-                  aria-pressed={selectedId === category.id}
-                  disabled={pending}
-                  onClick={() => onSelect(category.id)}
-                >
-                  <span className="grid min-w-0 gap-1">
-                    <span
-                      className="truncate font-semibold"
-                      title={category.name}
-                    >
-                      {category.name}
-                    </span>
+              <TableHead scope="col">{v("products")}</TableHead>
 
-                    <span className="text-xs font-normal opacity-80">
-                      {category.isArchived
-                        ? t("archived")
-                        : !category.isVisible
-                          ? u("hidden")
-                          : u("categoryProductCount", {
-                              count: catalog.products.filter(
-                                (item) =>
-                                  item.categoryId === category.id &&
-                                  !item.isArchived
-                              ).length,
-                            })}
-                    </span>
-                  </span>
-                </Button>
+              <TableHead scope="col">{u("status")}</TableHead>
 
-                {!category.isArchived && (
-                  <CategoryVisibility
-                    category={category}
-                    tenantId={catalog.tenantId}
-                    busy={pending}
-                    onPendingChange={onPendingChange}
-                  />
-                )}
+              <TableHead scope="col">{t("sortOrder")}</TableHead>
 
-                <ChevronRight
-                  aria-hidden="true"
-                  className="mr-1 size-4 shrink-0 opacity-60"
-                />
-              </div>
-            </li>
-          ))}
-        </ul>
+              <TableHead scope="col">{u("actions")}</TableHead>
+            </TableRow>
+          </TableHeader>
 
-        {selected && !selected.isArchived && (
-          <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border pt-2">
-            <span className="flex items-center gap-1 text-xs text-muted-foreground">
-              <ArrowDownUp aria-hidden="true" className="size-3.5" />
+          <TableBody>
+            {categories.map((category) => (
+              <TableRow key={category.id}>
+                <TableCell className="min-w-40">
+                  <Button
+                    variant="ghost"
+                    className="h-auto px-0 text-left whitespace-normal"
+                    aria-pressed={selectedId === category.id}
+                    disabled={pending}
+                    onClick={() => onSelect(category.id)}
+                  >
+                    {category.name}
+                  </Button>
+                </TableCell>
 
-              {u("order", { value: selected.sortOrder })}
-            </span>
+                <TableCell>
+                  {
+                    catalog.products.filter(
+                      (item) =>
+                        item.categoryId === category.id && !item.isArchived
+                    ).length
+                  }
+                </TableCell>
 
-            <div className="flex gap-1">
-              <EditorDialog
-                compact
-                title={t("editCategory", { name: selected.name })}
-                label={u("editCategory")}
-                description={u("categoryHelp")}
-                disabled={pending}
-              >
-                {(callbacks) => (
-                  <CategoryForm
-                    tenantId={catalog.tenantId}
-                    category={selected}
-                    {...callbacks}
-                    onPendingChange={(value) => {
-                      callbacks.onPendingChange?.(value)
-                      onPendingChange(value)
-                    }}
-                  />
-                )}
-              </EditorDialog>
+                <TableCell>
+                  <Badge
+                    variant={
+                      category.isArchived
+                        ? "neutral"
+                        : category.isVisible
+                          ? "success"
+                          : "warning"
+                    }
+                  >
+                    {category.isArchived
+                      ? t("archived")
+                      : u(category.isVisible ? "visible" : "hidden")}
+                  </Badge>
+                </TableCell>
 
-              <ArchiveCatalogButton
-                compact
-                tenantId={catalog.tenantId}
-                id={selected.id}
-                entityType="categories"
-                name={selected.name}
-              />
-            </div>
-          </div>
-        )}
+                <TableCell>
+                  {category.isArchived ? (
+                    category.sortOrder
+                  ) : (
+                    <CatalogOrderForm
+                      tenantId={catalog.tenantId}
+                      item={category}
+                      pending={pending}
+                      onPendingChange={onPendingChange}
+                    />
+                  )}
+                </TableCell>
+
+                <TableCell>
+                  {!category.isArchived && (
+                    <div className="flex flex-wrap gap-2">
+                      <CategoryVisibility
+                        category={category}
+                        tenantId={catalog.tenantId}
+                        busy={pending}
+                        onPendingChange={onPendingChange}
+                      />
+
+                      <EditorDialog
+                        compact
+                        title={t("editCategory", { name: category.name })}
+                        label={u("editCategory")}
+                        description={u("categoryHelp")}
+                        disabled={pending}
+                      >
+                        {(callbacks) => (
+                          <CategoryForm
+                            tenantId={catalog.tenantId}
+                            category={category}
+                            {...callbacks}
+                            onPendingChange={(value) => {
+                              callbacks.onPendingChange?.(value)
+                              onPendingChange(value)
+                            }}
+                          />
+                        )}
+                      </EditorDialog>
+
+                      <ArchiveCatalogButton
+                        compact
+                        tenantId={catalog.tenantId}
+                        id={category.id}
+                        entityType="categories"
+                        name={category.name}
+                        onPendingChange={onPendingChange}
+                      />
+                    </div>
+                  )}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
 
         {categories.length === 0 && (
           <p className="text-sm text-muted-foreground">{u("noCategories")}</p>
         )}
-
-        <EditorDialog
-          icon={Plus}
-          title={t("newCategory")}
-          label={t("newCategory")}
-          description={u("categoryHelp")}
-          disabled={pending}
-        >
-          {(callbacks) => (
-            <CategoryForm
-              tenantId={catalog.tenantId}
-              {...callbacks}
-              onPendingChange={(value) => {
-                callbacks.onPendingChange?.(value)
-                onPendingChange(value)
-              }}
-            />
-          )}
-        </EditorDialog>
       </CardContent>
     </Card>
   )
@@ -264,7 +234,7 @@ function CategoryVisibility({
         type="submit"
         variant="ghost"
         size="icon"
-        className="text-inherit hover:bg-white/10 hover:text-inherit active:bg-white/20"
+        className="text-foreground"
         aria-busy={pending}
         disabled={busy || pending}
         aria-label={t(
@@ -273,10 +243,6 @@ function CategoryVisibility({
         )}
       >
         <Icon aria-hidden="true" className="size-4" />
-
-        <span className="sr-only">
-          {t(category.isVisible ? "visible" : "hidden")}
-        </span>
       </Button>
 
       {state.status === "error" && (
