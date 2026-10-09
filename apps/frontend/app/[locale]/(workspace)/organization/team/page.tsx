@@ -75,7 +75,7 @@ export default async function OrganizationTeamPage({
 
       <Card className="mt-6 rounded-lg border border-border bg-card p-6 sm:p-10">
         <CardHeader className="px-0">
-          <p className="mb-2 text-sm font-medium text-primary">
+          <p className="mb-2 text-sm font-medium text-brand-text">
             {organization.name}
           </p>
 
@@ -122,14 +122,14 @@ export default async function OrganizationTeamPage({
                     <div className="flex min-w-0 flex-wrap items-start gap-x-4 gap-y-2">
                       <Link
                         href={`/organization/catalog?view=translations&tenantId=${restaurant.id}`}
-                        className="min-w-0 text-sm font-medium break-words text-primary underline-offset-4 hover:underline"
+                        className="min-w-0 text-sm font-medium break-words text-brand-text underline-offset-4 hover:underline"
                       >
                         {t("editMenuLanguages")}
                       </Link>
 
                       <Link
                         href={`/organization/catalog?tenantId=${restaurant.id}`}
-                        className="min-w-0 text-sm font-medium break-words text-primary hover:underline"
+                        className="min-w-0 text-sm font-medium break-words text-brand-text hover:underline"
                       >
                         {t("editCatalog")}
                       </Link>

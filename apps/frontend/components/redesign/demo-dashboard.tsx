@@ -112,7 +112,7 @@ export function DemoDashboard() {
             <Link
               key={key}
               href={href}
-              className={`flex min-h-12 items-center gap-3 rounded-md px-3 text-sm ${key === "dashboard" ? "bg-obsidian font-semibold text-white" : "hover:bg-secondary"}`}
+              className={`flex min-h-12 items-center gap-3 rounded-md px-3 text-sm ${key === "dashboard" ? "bg-obsidian font-semibold text-white hover:bg-obsidian/90" : "text-muted-foreground hover:bg-surface-variant hover:text-foreground active:bg-surface-dim"}`}
             >
               <Icon aria-hidden="true" className="size-5" />
 

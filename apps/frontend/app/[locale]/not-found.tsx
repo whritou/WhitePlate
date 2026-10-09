@@ -12,12 +12,12 @@ export default async function NotFoundPage() {
         data-not-found-page="localized"
         className="grid w-full max-w-3xl gap-6 rounded-lg border border-border bg-card p-6 sm:grid-cols-[auto_1fr] sm:items-start sm:gap-8 sm:p-10"
       >
-        <div className="grid size-14 place-items-center rounded-lg bg-accent text-primary">
+        <div className="grid size-14 place-items-center rounded-lg bg-accent text-brand-text">
           <FileQuestion aria-hidden="true" className="size-7" />
         </div>
 
         <div className="grid justify-items-start gap-4">
-          <p className="text-sm font-semibold text-primary">404</p>
+          <p className="text-sm font-semibold text-brand-text">404</p>
 
           <h1 className="text-2xl font-semibold tracking-tight sm:text-[2rem]">
             {t("notFoundTitle")}

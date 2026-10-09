@@ -12,7 +12,7 @@ export function LandingCta() {
         <div className="pointer-events-none absolute -right-20 -bottom-20 h-80 w-80 rounded-full bg-secondary-container/20 blur-3xl"></div>
 
         <div className="z-10 max-w-[36rem] min-w-0 space-y-4">
-          <span className="inline-block rounded-full bg-surface-container/20 px-3 py-1 font-sans text-label-sm font-bold tracking-wider text-secondary-container uppercase">
+          <span className="inline-block rounded-full bg-surface-container/20 px-3 py-1 font-sans text-label-sm font-bold tracking-wider text-primary-hover uppercase">
             {t("takeBackYourMargins")}
           </span>
 

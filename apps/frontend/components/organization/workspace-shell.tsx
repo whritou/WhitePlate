@@ -126,7 +126,7 @@ export function WorkspaceShell({
 
                     <SheetClose
                       aria-label={t("closeNavigation")}
-                      className="absolute top-0 right-0 inline-flex size-11 items-center justify-center rounded-md text-foreground hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+                      className="absolute top-0 right-0 inline-flex size-11 items-center justify-center rounded-md text-foreground hover:bg-surface-variant focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring active:bg-surface-dim"
                     >
                       <X aria-hidden="true" className="size-4" />
                     </SheetClose>
@@ -212,7 +212,7 @@ function WorkspaceNavigation({
                     href={link.href}
                     aria-current={active ? "page" : undefined}
                     onClick={onNavigate}
-                    className={`flex min-h-12 items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring ${active ? "bg-obsidian font-semibold text-white" : "text-muted-foreground"}`}
+                    className={`flex min-h-12 items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring ${active ? "bg-obsidian font-semibold text-white hover:bg-obsidian/90" : "text-muted-foreground hover:bg-surface-variant hover:text-foreground active:bg-surface-dim"}`}
                   >
                     <WorkspaceLinkIcon href={link.href} />
 

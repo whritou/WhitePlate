@@ -137,7 +137,7 @@ export function MarketingHeader() {
           {sections.map((section) => (
             <Link
               key={section}
-              className="rounded-md p-3 font-medium hover:bg-secondary"
+              className="rounded-md p-3 font-medium hover:bg-surface-variant active:bg-surface-dim"
               href={`/#${section === "solutions" ? "features" : section}`}
               onClick={() => setOpen(false)}
             >
@@ -147,7 +147,7 @@ export function MarketingHeader() {
 
           <Link
             href="/demo"
-            className="rounded-md bg-secondary p-3 font-medium"
+            className="rounded-md bg-secondary p-3 font-medium hover:bg-surface-variant active:bg-surface-dim"
             onClick={() => setOpen(false)}
           >
             {t("tryDemo")}
@@ -155,7 +155,7 @@ export function MarketingHeader() {
 
           <Link
             href="/sign-up"
-            className="rounded-md bg-primary p-3 font-semibold text-primary-foreground"
+            className="rounded-md bg-primary p-3 font-semibold text-primary-foreground hover:bg-primary-hover active:brightness-90"
             onClick={() => setOpen(false)}
           >
             {t("getStarted")}

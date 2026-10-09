@@ -24,7 +24,7 @@ export default async function OrganizationSignUpPage() {
     <main className="mx-auto min-h-[70vh] max-w-2xl px-5 py-12 sm:py-20">
       <Card className="rounded-lg border border-border bg-card p-6 sm:p-10">
         <CardHeader className="px-0">
-          <p className="mb-2 text-sm font-medium text-primary">WhitePlate</p>
+          <p className="mb-2 text-sm font-medium text-brand-text">WhitePlate</p>
 
           <CardTitle>
             <h1 className="text-2xl font-semibold tracking-tight sm:text-[2rem]">

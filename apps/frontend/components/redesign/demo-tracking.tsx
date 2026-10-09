@@ -46,7 +46,7 @@ export function DemoTracking() {
               <p className="mt-4 flex items-center gap-2 text-sm">
                 <AlarmClock
                   aria-hidden="true"
-                  className="size-5 text-primary"
+                  className="size-5 text-brand-text"
                 />
 
                 {demo.status === "Preparing"
@@ -61,7 +61,7 @@ export function DemoTracking() {
                   {t("counterPin")}
                 </p>
 
-                <strong className="mt-1 block font-heading text-3xl tracking-widest text-primary">
+                <strong className="mt-1 block font-heading text-3xl tracking-widest text-brand-text">
                   4892
                 </strong>
 
@@ -123,7 +123,7 @@ export function DemoTracking() {
                     <h2 className="flex items-center gap-3 text-xl">
                       <Store
                         aria-hidden="true"
-                        className="size-5 text-primary"
+                        className="size-5 text-brand-text"
                       />
 
                       {t("storeLocation")}
@@ -138,7 +138,7 @@ export function DemoTracking() {
                     <div className="flex items-center gap-3 rounded-lg bg-card p-5 shadow-lg">
                       <MapPin
                         aria-hidden="true"
-                        className="size-6 text-primary"
+                        className="size-6 text-brand-text"
                       />
 
                       <p className="text-sm font-semibold">
@@ -197,7 +197,7 @@ export function DemoTracking() {
 
               <Card className="flex-row items-center justify-between gap-3 border-0 bg-muted p-6">
                 <div className="flex items-center gap-3">
-                  <Bell aria-hidden="true" className="size-5 text-primary" />
+                  <Bell aria-hidden="true" className="size-5 text-brand-text" />
 
                   <p className="text-sm font-semibold">
                     {alerts ? t("alertsActive") : t("alertsPaused")}

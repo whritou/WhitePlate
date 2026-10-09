@@ -157,7 +157,7 @@ function RestaurantMenuContent({
                     {menu.categories.map((category) => (
                       <li key={category.id}>
                         <a
-                          className="inline-flex min-h-11 items-center rounded-full border border-border bg-card px-md text-label-md whitespace-nowrap text-foreground transition-colors hover:border-primary hover:bg-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring motion-reduce:transition-none"
+                          className="inline-flex min-h-11 items-center rounded-full border border-border bg-card px-md text-label-md whitespace-nowrap text-foreground transition-colors hover:border-input hover:bg-surface-variant focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring active:border-primary active:bg-surface-dim motion-reduce:transition-none"
                           href={`#category-${category.id}`}
                         >
                           {category.name}

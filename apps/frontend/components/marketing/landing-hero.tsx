@@ -29,7 +29,7 @@ export function LandingHero() {
 
           <h1 className="font-heading text-headline-lg-mobile leading-tight tracking-tight text-balance text-on-surface sm:text-display-hero-mobile sm:leading-none lg:text-display-hero">
             {t("turnDinersIntoDirectCustomers")}{" "}
-            <span className="text-secondary-container">
+            <span className="text-brand-text">
               {t("value0MarketplaceFees")}
             </span>
           </h1>
@@ -64,7 +64,7 @@ export function LandingHero() {
             >
               <ReferenceIcon
                 name="play_circle"
-                className="text-[20px] text-secondary-container"
+                className="text-[20px] text-brand-text"
               />
 
               <span className="">{t("tryInteractiveDemo")}</span>
@@ -103,7 +103,7 @@ export function LandingHero() {
             </div>
 
             <div className="flex max-w-full min-w-0 flex-col">
-              <div className="flex flex-wrap items-center gap-1 text-secondary-container">
+              <div className="flex flex-wrap items-center gap-1 text-brand-text">
                 <ReferenceIcon name="star" className="text-[18px]" />
 
                 <ReferenceIcon name="star" className="text-[18px]" />

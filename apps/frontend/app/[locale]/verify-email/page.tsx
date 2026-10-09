@@ -13,7 +13,7 @@ export default async function VerifyEmailPage({
 
   return (
     <main className="mx-auto grid min-h-[60vh] max-w-xl content-center px-5 py-16 text-center">
-      <p className="mb-2 text-sm font-medium text-primary">WhitePlate</p>
+      <p className="mb-2 text-sm font-medium text-brand-text">WhitePlate</p>
 
       <h1 className="text-2xl font-semibold tracking-tight sm:text-[2rem]">
         {invalid

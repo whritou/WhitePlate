@@ -73,7 +73,7 @@ export function DemoCheckout() {
             <Card className="p-8">
               <p>{t("emptyCart")}</p>
 
-              <Link href="/demo" className="text-primary underline">
+              <Link href="/demo" className="text-brand-text underline">
                 {t("backToMenu")}
               </Link>
             </Card>

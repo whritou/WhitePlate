@@ -16,7 +16,7 @@ export function LandingPreviews() {
       <div className="mx-auto max-w-7xl space-y-12">
         <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-end lg:gap-8">
           <div className="min-w-0 lg:flex-1">
-            <span className="font-sans text-label-sm font-bold tracking-wider text-secondary-container uppercase">
+            <span className="font-sans text-label-sm font-bold tracking-wider text-brand-text uppercase">
               {t("operationalHarmony")}
             </span>
 
@@ -34,10 +34,7 @@ export function LandingPreviews() {
           <div className="min-w-0 space-y-5 rounded-lg bg-surface-container-lowest p-4 shadow-sm sm:p-6">
             <div className="flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex min-w-0 items-center gap-2">
-                <ReferenceIcon
-                  name="kitchen"
-                  className="text-secondary-container"
-                />
+                <ReferenceIcon name="kitchen" className="text-brand-text" />
 
                 <span className="min-w-0 font-heading text-body-md leading-5 break-words text-on-surface sm:text-title-md sm:leading-6">
                   {t("backOfficeLiveKanban")}
@@ -61,9 +58,7 @@ export function LandingPreviews() {
                   <div className="flex flex-wrap justify-between gap-x-3 gap-y-1 font-heading text-body-sm font-bold">
                     <span className="">{t("value104AlexT")}</span>
 
-                    <span className="text-secondary-container">
-                      {t("justNow")}
-                    </span>
+                    <span className="text-brand-text">{t("justNow")}</span>
                   </div>
 
                   <span className="font-sans text-xs text-on-surface-variant">
@@ -134,7 +129,7 @@ export function LandingPreviews() {
                 </p>
               </div>
 
-              <div className="flex items-center gap-1 rounded-lg bg-surface-container-lowest px-3 py-1.5 font-heading text-title-md font-bold text-secondary-container">
+              <div className="flex items-center gap-1 rounded-lg bg-surface-container-lowest px-3 py-1.5 font-heading text-title-md font-bold text-brand-text">
                 <span className="">{t("value15m938e")}</span>
               </div>
             </div>
@@ -143,10 +138,7 @@ export function LandingPreviews() {
           <div className="min-w-0 space-y-5 rounded-lg bg-surface-container-lowest p-4 shadow-sm sm:p-6">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center gap-2">
-                <ReferenceIcon
-                  name="touch_app"
-                  className="text-secondary-container"
-                />
+                <ReferenceIcon name="touch_app" className="text-brand-text" />
 
                 <span className="font-heading text-title-md font-bold text-on-surface">
                   {t("customerPickupJourney")}
@@ -198,7 +190,7 @@ export function LandingPreviews() {
                   {t("selectedPickupLocation")}
                 </span>
 
-                <span className="font-sans text-label-sm font-semibold text-secondary-container">
+                <span className="font-sans text-label-sm font-semibold text-brand-text">
                   {t("downtownCentral04Mi")}
                 </span>
               </div>
@@ -213,7 +205,7 @@ export function LandingPreviews() {
 
               <div className="grid auto-rows-fr grid-cols-1 gap-3 pt-2 sm:grid-cols-2">
                 <Button
-                  className="flex items-center justify-center gap-1.5 rounded-lg bg-obsidian py-2.5 font-heading text-title-md font-bold text-on-primary transition-opacity hover:bg-obsidian/90"
+                  className="flex items-center justify-center gap-1.5 rounded-lg bg-obsidian py-2.5 font-heading text-title-md font-bold text-on-primary transition-opacity hover:bg-obsidian/90 active:brightness-90"
                   type="button"
                   variant="ghost"
                   onClick={() => router.push("/demo")}

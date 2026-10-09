@@ -46,7 +46,7 @@ export function AuthForm({
     <AuthFrame
       aside={
         <>
-          <p className="mb-4 text-sm font-medium text-primary">
+          <p className="mb-4 text-sm font-medium text-brand-text">
             {t("asideEyebrow")}
           </p>
 
@@ -59,7 +59,7 @@ export function AuthForm({
           </p>
 
           <div className="mt-10 flex items-center gap-3 text-sm text-muted-foreground">
-            <span className="flex size-9 items-center justify-center rounded-full bg-background text-primary">
+            <span className="flex size-9 items-center justify-center rounded-full bg-background text-brand-text">
               <LockKeyhole className="size-4" />
             </span>
 
@@ -120,7 +120,7 @@ export function AuthForm({
 
               <Link
                 href="/forgot-password"
-                className="text-sm font-medium text-primary underline-offset-4 hover:underline"
+                className="text-sm font-medium text-brand-text underline-offset-4 hover:underline"
               >
                 {t("forgotLink")}
               </Link>
@@ -158,7 +158,7 @@ export function AuthForm({
                 <div className="-mt-1 text-end">
                   <Link
                     href="/forgot-password"
-                    className="text-sm text-primary underline-offset-4 hover:underline"
+                    className="text-sm text-brand-text underline-offset-4 hover:underline"
                   >
                     {t("forgotLink")}
                   </Link>
@@ -205,7 +205,7 @@ export function AuthForm({
               {mode === "signIn" ? t("noAccount") : t("hasAccount")}{" "}
               <Link
                 href={mode === "signIn" ? "/sign-up" : "/sign-in"}
-                className="font-medium text-primary underline-offset-4 hover:underline"
+                className="font-medium text-brand-text underline-offset-4 hover:underline"
               >
                 {mode === "signIn" ? t("signUpAction") : t("signInAction")}
               </Link>
@@ -216,7 +216,7 @@ export function AuthForm({
             <p className="mt-6 text-center text-sm text-muted-foreground">
               <Link
                 href="/sign-in"
-                className="font-medium text-primary underline-offset-4 hover:underline"
+                className="font-medium text-brand-text underline-offset-4 hover:underline"
               >
                 {t("backToSignIn")}
               </Link>

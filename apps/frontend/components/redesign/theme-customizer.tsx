@@ -19,7 +19,7 @@ export function ThemeCustomizer({
         <p className="flex min-w-0 flex-wrap items-center gap-2 text-xs">
           <Palette
             aria-hidden="true"
-            className="size-5 shrink-0 text-primary"
+            className="size-5 shrink-0 text-brand-text"
           />
 
           <strong>{t("tenantEngine")}</strong>

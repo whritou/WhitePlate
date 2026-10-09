@@ -26,7 +26,7 @@ export function TrackingBag() {
     <Card className="gap-6 border-0 p-6 shadow-sm sm:p-8">
       <CardHeader className="flex items-center justify-between p-0">
         <div>
-          <p className="mb-2 text-xs font-semibold text-primary">
+          <p className="mb-2 text-xs font-semibold text-brand-text">
             {t("orderSummary")}
           </p>
 
@@ -112,7 +112,7 @@ export function TrackingBag() {
         </div>
 
         <div className="flex items-center gap-3 rounded-md bg-secondary p-4">
-          <PiggyBank aria-hidden="true" className="size-9 text-primary" />
+          <PiggyBank aria-hidden="true" className="size-9 text-brand-text" />
 
           <div>
             <strong className="text-sm">{t("savedToday")}</strong>

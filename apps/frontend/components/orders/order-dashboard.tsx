@@ -26,7 +26,7 @@ export function OrderDashboard(props: OrderDashboardProps) {
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <div className="mb-1 flex flex-wrap items-center gap-2">
-            <p className="text-sm font-medium text-primary">{tenantName}</p>
+            <p className="text-sm font-medium text-brand-text">{tenantName}</p>
 
             <Badge variant="outline">{t(`roles.${role}`)}</Badge>
           </div>

@@ -13,7 +13,7 @@ export function BackLink({
     <Link
       href="/organization"
       className={cn(
-        "inline-flex min-h-11 max-w-full min-w-0 items-center gap-2 text-sm font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring focus-visible:outline-solid",
+        "inline-flex min-h-11 max-w-full min-w-0 items-center gap-2 text-sm font-medium text-brand-text underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring focus-visible:outline-solid",
         className
       )}
     >

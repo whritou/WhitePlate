@@ -110,7 +110,7 @@ export function MenuBuilderCategories({
             >
               <div className="flex min-w-0 flex-wrap items-center gap-0.5 p-1">
                 <Button
-                  className="h-auto min-w-0 flex-1 justify-start gap-2 px-2 py-3 text-left text-inherit hover:bg-secondary hover:text-secondary-foreground"
+                  className={`h-auto min-w-0 flex-1 justify-start gap-2 px-2 py-2 text-left text-inherit ${selectedId === category.id ? "hover:bg-white/10 hover:text-inherit active:bg-white/20" : "hover:bg-surface-variant active:border-brand-text active:bg-surface-dim"}`}
                   variant="ghost"
                   aria-label={category.name}
                   aria-pressed={selectedId === category.id}
@@ -264,7 +264,7 @@ function CategoryVisibility({
         type="submit"
         variant="ghost"
         size="icon"
-        className="text-inherit hover:bg-secondary hover:text-secondary-foreground"
+        className="text-inherit hover:bg-white/10 hover:text-inherit active:bg-white/20"
         aria-busy={pending}
         disabled={busy || pending}
         aria-label={t(

@@ -101,7 +101,7 @@ export function LandingPricing() {
               <div className="flex items-center gap-2.5">
                 <ReferenceIcon
                   name="check"
-                  className="text-[18px] text-secondary-container"
+                  className="text-[18px] text-brand-text"
                 />
 
                 <span className="">
@@ -112,7 +112,7 @@ export function LandingPricing() {
               <div className="flex items-center gap-2.5">
                 <ReferenceIcon
                   name="check"
-                  className="text-[18px] text-secondary-container"
+                  className="text-[18px] text-brand-text"
                 />
 
                 <span className="">{t("fullWhiteLabelCustomStorefront")}</span>
@@ -121,7 +121,7 @@ export function LandingPricing() {
               <div className="flex items-center gap-2.5">
                 <ReferenceIcon
                   name="check"
-                  className="text-[18px] text-secondary-container"
+                  className="text-[18px] text-brand-text"
                 />
 
                 <span className="">{t("upTo500OrdersMonth")}</span>
@@ -130,7 +130,7 @@ export function LandingPricing() {
               <div className="flex items-center gap-2.5">
                 <ReferenceIcon
                   name="check"
-                  className="text-[18px] text-secondary-container"
+                  className="text-[18px] text-brand-text"
                 />
 
                 <span className="">{t("standardKdsTabletInterface")}</span>
@@ -139,7 +139,7 @@ export function LandingPricing() {
               <div className="flex items-center gap-2.5">
                 <ReferenceIcon
                   name="check"
-                  className="text-[18px] text-secondary-container"
+                  className="text-[18px] text-brand-text"
                 />
 
                 <span className="">
@@ -172,7 +172,7 @@ export function LandingPricing() {
                 {t("growth")}
               </h3>
 
-              <span className="rounded bg-secondary-container/10 px-2.5 py-1 font-sans text-label-sm font-bold text-secondary-container">
+              <span className="rounded bg-secondary-container/10 px-2.5 py-1 font-sans text-label-sm font-bold text-brand-text">
                 {t("fastPacedQsr")}
               </span>
             </div>
@@ -195,7 +195,7 @@ export function LandingPricing() {
               <div className="flex items-center gap-2.5">
                 <ReferenceIcon
                   name="check"
-                  className="text-[18px] text-secondary-container"
+                  className="text-[18px] text-brand-text"
                 />
 
                 <span className="">
@@ -206,7 +206,7 @@ export function LandingPricing() {
               <div className="flex items-center gap-2.5">
                 <ReferenceIcon
                   name="check"
-                  className="text-[18px] text-secondary-container"
+                  className="text-[18px] text-brand-text"
                 />
 
                 <span className="">{t("multiStationKdsKitchenRouting")}</span>
@@ -215,7 +215,7 @@ export function LandingPricing() {
               <div className="flex items-center gap-2.5">
                 <ReferenceIcon
                   name="check"
-                  className="text-[18px] text-secondary-container"
+                  className="text-[18px] text-brand-text"
                 />
 
                 <span className="">{t("customDomainEGOrderMybrandCom")}</span>
@@ -224,7 +224,7 @@ export function LandingPricing() {
               <div className="flex items-center gap-2.5 text-on-surface">
                 <ReferenceIcon
                   name="check"
-                  className="text-[18px] text-secondary-container"
+                  className="text-[18px] text-brand-text"
                 />
 
                 <span className="">{t("automatedEmailPickupOrderAlerts")}</span>
@@ -233,7 +233,7 @@ export function LandingPricing() {
               <div className="flex items-center gap-2.5">
                 <ReferenceIcon
                   name="check"
-                  className="text-[18px] text-secondary-container"
+                  className="text-[18px] text-brand-text"
                 />
 
                 <span className="">
@@ -244,7 +244,7 @@ export function LandingPricing() {
               <div className="flex items-center gap-2.5">
                 <ReferenceIcon
                   name="check"
-                  className="text-[18px] text-secondary-container"
+                  className="text-[18px] text-brand-text"
                 />
 
                 <span className="">{t("advancedHourlyRevenueAnalytics")}</span>
@@ -293,7 +293,7 @@ export function LandingPricing() {
               <div className="flex items-center gap-2.5">
                 <ReferenceIcon
                   name="check"
-                  className="text-[18px] text-secondary-container"
+                  className="text-[18px] text-brand-text"
                 />
 
                 <span className="">
@@ -304,7 +304,7 @@ export function LandingPricing() {
               <div className="flex items-center gap-2.5">
                 <ReferenceIcon
                   name="check"
-                  className="text-[18px] text-secondary-container"
+                  className="text-[18px] text-brand-text"
                 />
 
                 <span className="">
@@ -315,7 +315,7 @@ export function LandingPricing() {
               <div className="flex items-center gap-2.5">
                 <ReferenceIcon
                   name="check"
-                  className="text-[18px] text-secondary-container"
+                  className="text-[18px] text-brand-text"
                 />
 
                 <span className="">
@@ -326,7 +326,7 @@ export function LandingPricing() {
               <div className="flex items-center gap-2.5">
                 <ReferenceIcon
                   name="check"
-                  className="text-[18px] text-secondary-container"
+                  className="text-[18px] text-brand-text"
                 />
 
                 <span className="">
@@ -337,7 +337,7 @@ export function LandingPricing() {
               <div className="flex items-center gap-2.5">
                 <ReferenceIcon
                   name="check"
-                  className="text-[18px] text-secondary-container"
+                  className="text-[18px] text-brand-text"
                 />
 
                 <span className="">{t("roleBasedAccessManagementRbac")}</span>

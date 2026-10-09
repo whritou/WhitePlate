@@ -20,7 +20,7 @@ export function CheckoutIllustration() {
       <Card className="border-0 p-6">
         <CardHeader className="px-0">
           <CardTitle className="flex items-center gap-3 text-xl">
-            <ShoppingBag aria-hidden="true" className="text-primary" />
+            <ShoppingBag aria-hidden="true" className="text-brand-text" />
 
             {t("fulfillmentTitle")}
           </CardTitle>
@@ -65,7 +65,7 @@ export function CheckoutIllustration() {
       <Card className="border-0 p-6">
         <CardHeader className="px-0">
           <CardTitle className="flex items-center gap-3 text-xl">
-            <CreditCard aria-hidden="true" className="text-primary" />
+            <CreditCard aria-hidden="true" className="text-brand-text" />
 
             {t("paymentTitle")}
           </CardTitle>

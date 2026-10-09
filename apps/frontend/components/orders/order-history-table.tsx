@@ -63,7 +63,7 @@ export function OrderHistoryTable({
   return (
     <main className="mx-auto grid min-h-[70vh] w-full min-w-0 gap-5 p-4 sm:p-6 lg:p-8">
       <header>
-        <p className="text-sm font-medium text-primary">{tenantName}</p>
+        <p className="text-sm font-medium text-brand-text">{tenantName}</p>
 
         <h1 className="mt-1 text-2xl font-semibold tracking-tight sm:text-[2rem]">
           {t("title")}

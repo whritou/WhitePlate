@@ -366,6 +366,7 @@ html.global-not-found {
   --color-error-container: var(--destructive-muted);
   --color-error: var(--destructive);
   --color-on-error: #ffffff;
+  --color-brand-text: var(--presentation-brand-text);
 }
 :root, .design-reference {
   --presentation-high: #DCE9FF;
@@ -373,12 +374,14 @@ html.global-not-found {
   --presentation-dim: #CBDBF5;
   --presentation-obsidian: #131B2E;
   --presentation-warm: #FFDBD0;
+  --presentation-brand-text: #9F3514;
 }
 .dark {
   --presentation-high: #1E293B;
   --presentation-variant: #334155;
   --presentation-dim: #334155;
   --presentation-warm: #422006;
+  --presentation-brand-text: #FF9878;
 }
 .theme-swatch-orange { background: var(--primary); }
 .theme-swatch-emerald { background: var(--success-solid); }

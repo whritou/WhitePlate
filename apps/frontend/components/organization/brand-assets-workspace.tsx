@@ -74,7 +74,7 @@ export function BrandAssetsWorkspace({
   return (
     <div className="grid min-w-0 grid-cols-1 gap-6 [overflow-wrap:anywhere]">
       <header className="grid gap-2">
-        <p className="text-xs font-semibold tracking-widest text-muted-foreground uppercase dark:text-primary">
+        <p className="text-xs font-semibold tracking-widest text-muted-foreground uppercase dark:text-brand-text">
           {t("eyebrow")}
         </p>
 
