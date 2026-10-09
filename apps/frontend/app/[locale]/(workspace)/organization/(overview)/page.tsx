@@ -46,7 +46,7 @@ export default async function OrganizationPage() {
     <main className="mx-auto min-h-[70vh] max-w-7xl p-4 sm:p-6 lg:p-8">
       <header className="mb-8 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="mb-2 text-sm font-medium text-primary">WhitePlate</p>
+          <p className="mb-2 text-sm font-medium text-brand-text">WhitePlate</p>
 
           <h1 className="text-2xl font-semibold tracking-tight sm:text-[2rem]">
             {t("organizationsHeading")}
@@ -81,7 +81,7 @@ export default async function OrganizationPage() {
 
                   <Link
                     href={`/organization/orders?tenantId=${restaurant.id}`}
-                    className="shrink-0 text-sm font-medium text-primary underline-offset-4 hover:underline"
+                    className="shrink-0 text-sm font-medium text-brand-text underline-offset-4 hover:underline"
                   >
                     {t("openOrders")}
                   </Link>
@@ -113,14 +113,14 @@ export default async function OrganizationPage() {
                   >
                     <Link
                       href={`/organization/catalog?view=translations&tenantId=${restaurant.id}`}
-                      className="inline-flex min-h-11 max-w-full min-w-0 items-center text-sm font-medium whitespace-normal text-primary underline-offset-4 hover:underline"
+                      className="inline-flex min-h-11 max-w-full min-w-0 items-center text-sm font-medium whitespace-normal text-brand-text underline-offset-4 hover:underline"
                     >
                       {t("editMenuLanguages")}
                     </Link>
 
                     <Link
                       href={`/organization/catalog?tenantId=${restaurant.id}`}
-                      className="inline-flex min-h-11 max-w-full min-w-0 items-center text-sm font-medium whitespace-normal text-primary underline-offset-4 hover:underline"
+                      className="inline-flex min-h-11 max-w-full min-w-0 items-center text-sm font-medium whitespace-normal text-brand-text underline-offset-4 hover:underline"
                     >
                       {t("editCatalog")}
                     </Link>
@@ -190,21 +190,21 @@ export default async function OrganizationPage() {
                     >
                       <Link
                         href={`/organization/team?organizationId=${organization.id}`}
-                        className="inline-flex min-h-11 max-w-full min-w-0 items-center gap-2 text-sm font-medium whitespace-normal text-primary underline-offset-4 hover:underline"
+                        className="inline-flex min-h-11 max-w-full min-w-0 items-center gap-2 text-sm font-medium whitespace-normal text-brand-text underline-offset-4 hover:underline"
                       >
                         {t("manageTeamAction")}
                       </Link>
 
                       <Link
                         href={`/organization/settings?organizationId=${organization.id}`}
-                        className="inline-flex min-h-11 max-w-full min-w-0 items-center text-sm font-medium whitespace-normal text-primary underline-offset-4 hover:underline"
+                        className="inline-flex min-h-11 max-w-full min-w-0 items-center text-sm font-medium whitespace-normal text-brand-text underline-offset-4 hover:underline"
                       >
                         {t("organizationSettingsAction")}
                       </Link>
 
                       <Link
                         href={`/organization/restaurants/new?organizationId=${organization.id}`}
-                        className="inline-flex min-h-11 max-w-full min-w-0 items-center text-sm font-medium whitespace-normal text-primary underline-offset-4 hover:underline"
+                        className="inline-flex min-h-11 max-w-full min-w-0 items-center text-sm font-medium whitespace-normal text-brand-text underline-offset-4 hover:underline"
                       >
                         {t("createRestaurantAction")}
                       </Link>

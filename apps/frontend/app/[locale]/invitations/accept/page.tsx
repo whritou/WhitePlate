@@ -28,7 +28,7 @@ export default async function AcceptInvitationPage({
     <main className="mx-auto grid min-h-[70vh] max-w-2xl content-center px-5 py-12">
       <Card className="rounded-lg border border-border bg-card p-6 sm:p-10">
         <CardHeader className="px-0">
-          <p className="mb-2 text-sm font-medium text-primary">WhitePlate</p>
+          <p className="mb-2 text-sm font-medium text-brand-text">WhitePlate</p>
 
           <CardTitle>
             <h1 className="text-2xl font-semibold tracking-tight sm:text-[2rem]">

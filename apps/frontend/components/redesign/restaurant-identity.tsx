@@ -100,7 +100,7 @@ export function RestaurantIdentity({
                 {illustrative && (
                   <p className="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                     <Star
-                      className="size-4 fill-primary text-primary"
+                      className="size-4 fill-brand-text text-brand-text"
                       aria-hidden="true"
                     />
 
@@ -145,7 +145,7 @@ export function RestaurantIdentity({
               >
                 <Heart
                   aria-hidden="true"
-                  className={favorite ? "fill-primary text-primary" : ""}
+                  className={favorite ? "fill-brand-text text-brand-text" : ""}
                 />
 
                 {t("favorite")}

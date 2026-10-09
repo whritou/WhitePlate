@@ -30,7 +30,7 @@ export function LandingFeatures() {
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-surface-container text-on-surface">
               <ReferenceIcon
                 name="hub"
-                className="text-[28px] text-secondary-container"
+                className="text-[28px] text-brand-text"
               />
             </div>
 
@@ -46,7 +46,7 @@ export function LandingFeatures() {
               <li className="flex items-center gap-2">
                 <ReferenceIcon
                   name="check_circle"
-                  className="text-[18px] text-secondary-container"
+                  className="text-[18px] text-brand-text"
                 />
 
                 <span className="">
@@ -57,7 +57,7 @@ export function LandingFeatures() {
               <li className="flex items-center gap-2">
                 <ReferenceIcon
                   name="check_circle"
-                  className="text-[18px] text-secondary-container"
+                  className="text-[18px] text-brand-text"
                 />
 
                 <span className="">
@@ -68,7 +68,7 @@ export function LandingFeatures() {
               <li className="flex items-center gap-2">
                 <ReferenceIcon
                   name="check_circle"
-                  className="text-[18px] text-secondary-container"
+                  className="text-[18px] text-brand-text"
                 />
 
                 <span className="">
@@ -100,7 +100,7 @@ export function LandingFeatures() {
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-surface-container text-on-surface">
               <ReferenceIcon
                 name="palette"
-                className="text-[28px] text-secondary-container"
+                className="text-[28px] text-brand-text"
               />
             </div>
 
@@ -116,7 +116,7 @@ export function LandingFeatures() {
               <li className="flex items-center gap-2">
                 <ReferenceIcon
                   name="check_circle"
-                  className="text-[18px] text-secondary-container"
+                  className="text-[18px] text-brand-text"
                 />
 
                 <span className="">
@@ -127,7 +127,7 @@ export function LandingFeatures() {
               <li className="flex items-center gap-2">
                 <ReferenceIcon
                   name="check_circle"
-                  className="text-[18px] text-secondary-container"
+                  className="text-[18px] text-brand-text"
                 />
 
                 <span className="">
@@ -138,7 +138,7 @@ export function LandingFeatures() {
               <li className="flex items-center gap-2">
                 <ReferenceIcon
                   name="check_circle"
-                  className="text-[18px] text-secondary-container"
+                  className="text-[18px] text-brand-text"
                 />
 
                 <span className="">
@@ -172,7 +172,7 @@ export function LandingFeatures() {
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-surface-container text-on-surface">
               <ReferenceIcon
                 name="insights"
-                className="text-[28px] text-secondary-container"
+                className="text-[28px] text-brand-text"
               />
             </div>
 
@@ -188,7 +188,7 @@ export function LandingFeatures() {
               <li className="flex items-center gap-2">
                 <ReferenceIcon
                   name="check_circle"
-                  className="text-[18px] text-secondary-container"
+                  className="text-[18px] text-brand-text"
                 />
 
                 <span className="">
@@ -199,7 +199,7 @@ export function LandingFeatures() {
               <li className="flex items-center gap-2">
                 <ReferenceIcon
                   name="check_circle"
-                  className="text-[18px] text-secondary-container"
+                  className="text-[18px] text-brand-text"
                 />
 
                 <span className="">
@@ -210,7 +210,7 @@ export function LandingFeatures() {
               <li className="flex items-center gap-2">
                 <ReferenceIcon
                   name="check_circle"
-                  className="text-[18px] text-secondary-container"
+                  className="text-[18px] text-brand-text"
                 />
 
                 <span className="">

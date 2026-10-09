@@ -39,7 +39,7 @@ export function DemoMenuCart() {
               <h2 className="flex items-center gap-2 text-base">
                 <ShoppingCart
                   aria-hidden="true"
-                  className="size-5 text-primary"
+                  className="size-5 text-brand-text"
                 />
 
                 {t("yourOrder")}
@@ -76,7 +76,7 @@ export function DemoMenuCart() {
                   <li key={item.productId}>
                     <div className="flex flex-wrap items-start justify-between gap-2 text-sm">
                       <p className="min-w-0 flex-1 basis-36">
-                        <span className="mr-2 font-semibold text-primary">
+                        <span className="mr-2 font-semibold text-brand-text">
                           {item.quantity}×
                         </span>
 
@@ -185,7 +185,7 @@ export function DemoMenuCart() {
         </Card>
 
         <p className="mt-4 flex items-center gap-2 rounded-md bg-muted p-4 text-xs text-muted-foreground">
-          <MapPin aria-hidden="true" className="size-5 text-primary" />
+          <MapPin aria-hidden="true" className="size-5 text-brand-text" />
 
           {t("address")}
         </p>

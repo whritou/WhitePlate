@@ -19,7 +19,7 @@ export function LandingMetrics() {
 
         <div className="grid min-w-0 grid-cols-[repeat(auto-fit,minmax(min(100%,8rem),1fr))] gap-3 text-center">
           <div className="flex min-w-0 flex-col items-center justify-center rounded-xl bg-surface p-3 text-center shadow-xs">
-            <p className="font-heading text-headline-md font-extrabold text-secondary-container">
+            <p className="font-heading text-headline-md font-extrabold text-brand-text">
               {t("value0")}
             </p>
 

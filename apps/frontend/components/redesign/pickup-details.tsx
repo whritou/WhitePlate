@@ -99,7 +99,7 @@ export function PickupDetails({
           <p className="flex items-center gap-3 rounded-md bg-muted p-4 text-sm">
             <MapPin
               aria-hidden="true"
-              className="size-5 shrink-0 text-primary"
+              className="size-5 shrink-0 text-brand-text"
             />
 
             <span>
@@ -251,7 +251,7 @@ export function PickupDetails({
       <Card className="gap-4 border-0 p-6">
         <Label className="flex items-center justify-between gap-4">
           <span className="flex items-center gap-3">
-            <Leaf aria-hidden="true" className="size-5 text-primary" />
+            <Leaf aria-hidden="true" className="size-5 text-brand-text" />
 
             <span>
               <strong className="block">{t("ecoTitle")}</strong>

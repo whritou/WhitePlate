@@ -70,7 +70,7 @@ export function OrderTracking({ orderId }: { orderId: string }) {
       <main className="mx-auto min-h-[60vh] max-w-7xl px-4 py-10 sm:px-8">
         <Card className="w-full gap-0 border-0 bg-transparent p-0 shadow-none">
           <CardHeader className="px-0">
-            <p className="text-sm font-medium text-primary">
+            <p className="text-sm font-medium text-brand-text">
               {t("clickCollect")}
             </p>
 

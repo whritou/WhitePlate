@@ -80,8 +80,8 @@ export function MenuBuilderCatalog({
       aria-busy={pending}
       className={
         userId
-          ? "grid min-w-0 items-start gap-6 @min-[52rem]:grid-cols-[14rem_minmax(0,1fr)]"
-          : "grid min-w-0 items-start gap-6 lg:grid-cols-[14rem_minmax(0,1fr)] xl:grid-cols-[16rem_minmax(0,1fr)]"
+          ? "grid min-w-0 items-start gap-5 @min-[52rem]:grid-cols-[18rem_minmax(0,1fr)]"
+          : "grid min-w-0 items-start gap-5 lg:grid-cols-[18rem_minmax(0,1fr)] xl:grid-cols-[20rem_minmax(0,1fr)]"
       }
     >
       <aside className="grid min-w-0 gap-5">

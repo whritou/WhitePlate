@@ -21,7 +21,7 @@ export function TrackingProgress({
     <Card className="gap-6 border-0 p-6 shadow-md sm:p-8">
       <CardHeader className="flex flex-wrap items-center justify-between gap-4 p-0">
         <div>
-          <p className="mb-2 text-xs font-semibold text-primary">
+          <p className="mb-2 text-xs font-semibold text-brand-text">
             {t("trackingStep", { step: active + 1 })}
           </p>
 
@@ -85,7 +85,7 @@ export function TrackingProgress({
                   </p>
 
                   {index === active && (
-                    <p className="mt-1 text-xs font-semibold text-primary">
+                    <p className="mt-1 text-xs font-semibold text-brand-text">
                       {t("currentStage")}
                     </p>
                   )}

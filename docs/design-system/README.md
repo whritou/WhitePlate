@@ -1,6 +1,6 @@
 # WhitePlate design system
 
-Version **2.1.0**, 8 October 2026. Direction: **Culinary Commerce System**.
+Version **2.1.1**, 9 October 2026. Direction: **Culinary Commerce System**.
 
 This is WhitePlate's single canonical design reference, replacing the former Porcelaine, encre et sauge direction. The palette, font stacks, spacing, radius, breakpoints, and type scale are mirrored in shared frontend variables. That token migration does not mean every screen recipe or illustrative component in this document is implemented. Broader screen and component adoption is tracked separately in [issue #53](https://github.com/whritou/WhitePlate/issues/53); this replacement is tracked in [issue #52](https://github.com/whritou/WhitePlate/issues/52).
 
@@ -38,6 +38,10 @@ The attachment's named prose HEX values take priority over conflicting values in
 | `ring` | `#0F172A` | `#F97316` | Keyboard focus |
 
 The primary action uses Obsidian text: `#0F172A` on `#FF5A1F` is **5.72:1**. White on the same orange is **3.12:1**, below the 4.5:1 normal-text target. Hover orange `#F97316` also uses Obsidian text.
+
+Orange brand text on light surfaces uses the darker presentation color `#9F3514` (at least **5.0:1** across the pale surface palette); dark surfaces use `#FF9878` (at least **4.9:1** across the dark surface palette). Keep the bright orange `secondary-container` for fills and indicators. Text on a solid orange fill continues to use `primary-foreground`.
+
+Use the `brand-text` role for normal-size orange text on surfaces. Shared button variants use `surface-variant` hover fills and `surface-dim` pressed fills; active secondary/ghost controls add a contrast-safe brand outline so pressed state remains visible in dark mode when the fills converge. These interaction checks are part of the token validator.
 
 The supplied operational colors are:
 

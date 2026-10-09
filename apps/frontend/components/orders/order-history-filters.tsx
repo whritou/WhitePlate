@@ -74,7 +74,7 @@ export function OrderHistoryFilters({
 
               <SheetClose
                 aria-label={t("closeFilters")}
-                className="absolute top-5 right-5 inline-flex size-11 items-center justify-center rounded-md text-foreground hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+                className="absolute top-5 right-5 inline-flex size-11 items-center justify-center rounded-md text-foreground hover:bg-surface-variant focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring active:bg-surface-dim"
               >
                 <X aria-hidden="true" className="size-4" />
               </SheetClose>

@@ -52,7 +52,7 @@ export function MenuBuilderWorkspace({
           <p className="mb-2 flex flex-wrap gap-x-3 gap-y-1 text-xs font-medium tracking-wider uppercase">
             <span>{t("management")}</span>
 
-            <span className="text-primary">{t("localizationStudio")}</span>
+            <span className="text-brand-text">{t("localizationStudio")}</span>
           </p>
 
           <h1 className="max-w-[25rem] font-heading text-[1.75rem] leading-tight font-bold tracking-tight sm:text-[2.25rem]">

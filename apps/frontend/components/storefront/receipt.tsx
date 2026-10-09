@@ -54,7 +54,7 @@ export function Receipt({
               href={`/order/${receipt.id}#${trackingToken}`}
               locale={locale}
               referrerPolicy="no-referrer"
-              className="font-medium text-primary underline underline-offset-4"
+              className="font-medium text-brand-text underline underline-offset-4"
             >
               {t("trackOrder")}
             </Link>

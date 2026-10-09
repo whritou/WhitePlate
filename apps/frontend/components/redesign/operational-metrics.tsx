@@ -77,7 +77,7 @@ export function OperationalMetrics({
               </p>
             </div>
 
-            <span className="grid size-11 shrink-0 place-items-center rounded-lg bg-secondary text-primary">
+            <span className="grid size-11 shrink-0 place-items-center rounded-lg bg-secondary text-brand-text">
               <Icon aria-hidden="true" className="size-5" />
             </span>
           </div>

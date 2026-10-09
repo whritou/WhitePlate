@@ -160,7 +160,9 @@ export default async function CatalogDesignTestPage({
 
       {!["builder", "products", "translations"].includes(query.view ?? "") && (
         <header>
-          <p className="text-sm font-medium text-primary">Bistro du Potager</p>
+          <p className="text-sm font-medium text-brand-text">
+            Bistro du Potager
+          </p>
 
           <h1 className="mt-2 text-2xl font-semibold sm:text-[2rem]">
             {query.view === "languages" ? t("menuLanguagesTitle") : c("title")}

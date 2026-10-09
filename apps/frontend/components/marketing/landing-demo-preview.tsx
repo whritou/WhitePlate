@@ -90,7 +90,7 @@ export function LandingDemoPreview() {
                   {t("value11m40s")}
                 </span>
 
-                <span className="font-sans text-label-sm font-semibold text-secondary-container">
+                <span className="font-sans text-label-sm font-semibold text-brand-text">
                   {t("value21m")}
                 </span>
               </div>
@@ -116,7 +116,7 @@ export function LandingDemoPreview() {
           <div className="space-y-2.5">
             <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-surface-container-low p-3.5 shadow-xs">
               <div className="flex min-w-0 flex-1 basis-56 items-center gap-3">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-secondary-container/10 font-heading text-title-md font-bold text-secondary-container">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-secondary-container/10 font-heading text-title-md font-bold text-brand-text">
                   {t("value48")}
                 </div>
 
@@ -189,7 +189,7 @@ export function LandingDemoPreview() {
             </div>
 
             <svg
-              className="h-8 w-24 text-secondary-container"
+              className="h-8 w-24 text-primary"
               fill="none"
               viewBox="0 0 100 30"
             >
@@ -227,7 +227,7 @@ export function LandingDemoPreview() {
                   <span className="flex items-center gap-1">
                     <ReferenceIcon
                       name="schedule"
-                      className="text-[14px] text-secondary-container"
+                      className="text-[14px] text-brand-text"
                     />
 
                     {t("value1520MinPickup")}
@@ -287,7 +287,7 @@ export function LandingDemoPreview() {
               </div>
 
               <Button
-                className="mt-2 w-full rounded-lg bg-surface py-1.5 font-sans text-label-sm font-semibold text-on-surface transition-colors hover:bg-secondary-container hover:text-primary-foreground"
+                className="mt-2 w-full rounded-lg bg-surface py-1.5 font-sans text-label-sm font-semibold text-on-surface transition-colors hover:bg-secondary-container hover:text-primary-foreground active:brightness-90"
                 type="button"
                 variant="ghost"
                 onClick={() => router.push("/demo")}
@@ -316,7 +316,7 @@ export function LandingDemoPreview() {
               </div>
 
               <Button
-                className="mt-2 w-full rounded-lg bg-surface py-1.5 font-sans text-label-sm font-semibold text-on-surface transition-colors hover:bg-secondary-container hover:text-primary-foreground"
+                className="mt-2 w-full rounded-lg bg-surface py-1.5 font-sans text-label-sm font-semibold text-on-surface transition-colors hover:bg-secondary-container hover:text-primary-foreground active:brightness-90"
                 type="button"
                 variant="ghost"
                 onClick={() => router.push("/demo")}

@@ -12,7 +12,7 @@ export function LandingFaq() {
     >
       <div className="mx-auto max-w-4xl space-y-10">
         <div className="space-y-2 text-center">
-          <span className="font-sans text-label-sm font-bold tracking-wider text-secondary-container uppercase">
+          <span className="font-sans text-label-sm font-bold tracking-wider text-brand-text uppercase">
             {t("clarityHardware")}
           </span>
 

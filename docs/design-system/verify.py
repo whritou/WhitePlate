@@ -100,6 +100,60 @@ def validate(data):
             if ratio < minimum:
                 errors.append(f"{mode}: {front}/{back} = {ratio:.2f}:1; requires {minimum}:1")
 
+    presentation = data.get("presentationPalette", {})
+    light_surface_names = ("background", "card", "popover", "muted", "secondary", "accent")
+    light_surfaces = [themes.get("light", {}).get(name) for name in light_surface_names]
+    light_surfaces += [presentation.get(name) for name in (
+        "surface-container-low", "surface-container", "surface-container-high",
+        "surface-variant", "surface-dim", "secondary-fixed",
+    )]
+    dark_surface_names = ("background", "card", "popover", "muted", "secondary")
+    dark_surfaces = [themes.get("dark", {}).get(name) for name in dark_surface_names]
+    dark_surfaces += [presentation.get("obsidian"), themes.get("dark", {}).get("border")]
+    for mode, foreground, surfaces in (
+        ("light", presentation.get("brand-text-light"), light_surfaces),
+        ("dark", presentation.get("brand-text-dark"), dark_surfaces),
+    ):
+        for surface in surfaces:
+            if not foreground or not surface:
+                errors.append(f"{mode}: missing brand text or surface contrast token")
+                break
+            ratio = contrast(foreground, surface)
+            ratios.append((mode, "brand-text", surface, ratio, 4.5))
+            if ratio < 4.5:
+                errors.append(f"{mode}: brand-text/{surface} = {ratio:.2f}:1; requires 4.5:1")
+
+    for mode, hover_surface, pressed_surface in (
+        ("light", presentation.get("surface-variant"), presentation.get("surface-dim")),
+        ("dark", themes.get("dark", {}).get("border"), themes.get("dark", {}).get("border")),
+    ):
+        colors = themes.get(mode, {})
+        for role, surface in (
+            ("foreground", hover_surface), ("foreground", pressed_surface),
+            ("secondary-foreground", hover_surface), ("secondary-foreground", pressed_surface),
+            ("ring", hover_surface), ("ring", pressed_surface),
+        ):
+            if role not in colors or not surface:
+                errors.append(f"{mode}: missing interaction contrast token {role}")
+                continue
+            minimum = 3 if role == "ring" else 4.5
+            ratio = contrast(colors[role], surface)
+            ratios.append((mode, role, surface, ratio, minimum))
+            if ratio < minimum:
+                errors.append(f"{mode}: {role}/{surface} = {ratio:.2f}:1; requires {minimum}:1")
+        pressed_foreground = "#" + "".join(
+            f"{int(colors['primary-foreground'][index:index + 2], 16) * 9 // 10:02X}"
+            for index in (1, 3, 5)
+        )
+        pressed_background = "#" + "".join(
+            f"{int(colors['primary-hover'][index:index + 2], 16) * 9 // 10:02X}"
+            for index in (1, 3, 5)
+        )
+        ratio = contrast(pressed_foreground, pressed_background)
+        ratios.append((mode, "pressed-primary", pressed_background, ratio, 4.5))
+        if ratio < 4.5:
+            errors.append(f"{mode}: pressed-primary/{pressed_background} = {ratio:.2f}:1; requires 4.5:1")
+
     if data.get("name") != "Culinary Commerce System":
         errors.append("Canonical token name must be Culinary Commerce System")
     if data.get("sourcePalette") != EXPECTED_SOURCE_PALETTE:
@@ -123,6 +177,14 @@ def validate(data):
         errors.append("Typography tokens do not match the supplied YAML scale")
 
     runtime_css = (ROOT / "apps/frontend/app/globals.css").read_text(encoding="utf-8")
+    for selector, expected in (
+        (":root, .design-reference", presentation.get("brand-text-light")),
+        (".dark", presentation.get("brand-text-dark")),
+    ):
+        declarations = re.findall(rf"{re.escape(selector)}\s*\{{([^}}]+)\}}", runtime_css)
+        if not any(re.search(r"--presentation-brand-text:\s*" + re.escape(expected or ""), block)
+                   for block in declarations):
+            errors.append(f"Runtime {selector} brand text differs from canonical presentation tokens")
     for mode, selector in (("light", ":root"), ("dark", ".dark")):
         actual = css_color_tokens(runtime_css, selector)
         if actual != themes.get(mode):
