@@ -1,5 +1,46 @@
 import { expect, test } from "@playwright/test"
 
+test("menu and categories each have one table and retain filters between tabs", async ({
+  page,
+}) => {
+  await page.goto(
+    "/en/catalog-design-test?view=builder&shell=1&tenantId=11111111-1111-4111-8111-111111111111"
+  )
+  await expect(page.getByTestId("fixture-ready")).toHaveAttribute(
+    "data-ready",
+    "true"
+  )
+  await expect(
+    page.getByRole("link", { name: "Menu & Categories", exact: true })
+  ).toBeVisible()
+  await expect(page.getByRole("tab")).toHaveCount(2)
+  await expect(page.getByRole("table")).toHaveCount(1)
+  await page.getByLabel("Search products", { exact: true }).fill("Soupe")
+  await page.getByRole("tab", { name: "Categories", exact: true }).click()
+  await expect(page).toHaveURL(/view=categories/)
+  await expect(page.getByRole("table")).toHaveCount(1)
+  await expect(
+    page.getByRole("table", { name: "Categories", exact: true })
+  ).toBeVisible()
+  await page.getByRole("button", { name: "Les entrées", exact: true }).click()
+  await expect(
+    page.getByRole("tab", { name: "Menu", exact: true })
+  ).toHaveAttribute("aria-selected", "true")
+  await expect(page.getByLabel("Search products", { exact: true })).toHaveValue(
+    "Soupe"
+  )
+  await expect(page.getByLabel("Category", { exact: true })).not.toHaveValue(
+    "all"
+  )
+  await expect(page.getByRole("table")).toHaveCount(1)
+  await page.getByRole("tab", { name: "Categories", exact: true }).click()
+  await page.reload()
+  await expect(
+    page.getByRole("tab", { name: "Categories", exact: true })
+  ).toHaveAttribute("aria-selected", "true")
+  await expect(page.getByRole("table")).toHaveCount(1)
+})
+
 test("menu tables open a right-side product sheet and retain its draft", async ({
   page,
 }) => {

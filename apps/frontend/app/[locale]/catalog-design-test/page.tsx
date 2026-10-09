@@ -158,7 +158,9 @@ export default async function CatalogDesignTestPage({
     <main className="mx-auto grid w-full max-w-7xl min-w-0 gap-6 p-4 sm:p-6 lg:p-8">
       <FixtureReady />
 
-      {!["builder", "products", "translations"].includes(query.view ?? "") && (
+      {!["builder", "products", "categories", "translations"].includes(
+        query.view ?? ""
+      ) && (
         <header>
           <p className="text-sm font-medium text-brand-text">
             Bistro du Potager
@@ -170,7 +172,9 @@ export default async function CatalogDesignTestPage({
         </header>
       )}
 
-      {["builder", "products", "translations"].includes(query.view ?? "") ? (
+      {["builder", "products", "categories", "translations"].includes(
+        query.view ?? ""
+      ) ? (
         <MenuBuilderWorkspace
           catalog={
             query.empty === "1"
@@ -196,7 +200,11 @@ export default async function CatalogDesignTestPage({
             translations: { fr: "Cuisine de saison" },
           }}
           initialView={
-            query.view === "translations" ? "translations" : "products"
+            query.view === "categories"
+              ? "categories"
+              : query.view === "translations"
+                ? "translations"
+                : "products"
           }
         />
       ) : query.view === "languages" ? (

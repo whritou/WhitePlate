@@ -20,7 +20,6 @@ import {
 } from "@/components/ui/table"
 import type { ManagedCatalog } from "@/types/catalog-management"
 import type { MenuLanguageSettings } from "@/types/catalog"
-import { MenuBuilderCategories } from "./menu-builder-categories"
 import { MenuBuilderProduct } from "./menu-builder-product"
 import { ProductForm } from "./product-form"
 import { CategoryForm } from "./category-form"
@@ -32,18 +31,21 @@ export function MenuBuilderCatalog({
   settings,
   pending,
   onPendingChange,
+  categoryId,
+  onCategoryChange,
 }: {
   userId?: string
   catalog: ManagedCatalog
   settings?: MenuLanguageSettings
   pending: boolean
   onPendingChange: (pending: boolean) => void
+  categoryId: string
+  onCategoryChange: (id: string) => void
 }) {
   const t = useTranslations("MenuBuilder")
   const c = useTranslations("Catalog")
   const u = useTranslations("CatalogView")
   const locale = useLocale()
-  const [categoryId, setCategoryId] = useState("all")
   const [search, setSearch] = useState("")
   const [visibility, setVisibility] = useState("active")
   const [selectedId, setSelectedId] = useState("")
@@ -190,7 +192,7 @@ export function MenuBuilderCatalog({
                 <NativeSelect
                   id="builder-category-filter"
                   value={categoryId}
-                  onChange={(event) => setCategoryId(event.target.value)}
+                  onChange={(event) => onCategoryChange(event.target.value)}
                   selectClassName="w-full"
                 >
                   <NativeSelectOption value="all">
@@ -298,14 +300,6 @@ export function MenuBuilderCatalog({
             )}
           </CardContent>
         </Card>
-
-        <MenuBuilderCategories
-          catalog={catalog}
-          selectedId={categoryId}
-          onSelect={setCategoryId}
-          pending={pending}
-          onPendingChange={onPendingChange}
-        />
       </fieldset>
 
       {catalog.products

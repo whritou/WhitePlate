@@ -1,15 +1,32 @@
 "use client"
 
 import { useState } from "react"
-import { Languages, TicketPercent, UtensilsCrossed } from "lucide-react"
+import {
+  Folder,
+  Languages,
+  Plus,
+  TicketPercent,
+  UtensilsCrossed,
+  X,
+} from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useRouter } from "@/i18n/navigation"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { EditorDialog } from "@/components/ui/editor-dialog"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogTitle,
+  DialogDescription,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 import type { MenuBuilderProps, MenuBuilderView } from "@/types/menu-builder"
 import { MenuBuilderCatalog } from "./menu-builder-catalog"
+import { MenuBuilderCategories } from "./menu-builder-categories"
+import { CategoryForm } from "./category-form"
 import { MenuLanguageSettings } from "./menu-language-settings"
 import { CatalogTranslationsEditor } from "./catalog-translations-editor"
 import { RestaurantDescriptionEditor } from "./restaurant-description-editor"
@@ -26,12 +43,20 @@ export function MenuBuilderWorkspace({
 }: MenuBuilderProps) {
   const t = useTranslations("MenuBuilder")
   const u = useTranslations("CatalogView")
+  const c = useTranslations("Catalog")
+  const e = useTranslations("Editor")
   const router = useRouter()
-  const [view, setView] = useState<MenuBuilderView>(initialView)
+  const [view, setView] = useState<MenuBuilderView>(
+    initialView === "categories" ? "categories" : "products"
+  )
+  const [translationsOpen, setTranslationsOpen] = useState(
+    initialView === "translations"
+  )
+  const [categoryId, setCategoryId] = useState("all")
   const [pending, setPending] = useState(false)
 
   function changeView(value: unknown) {
-    if (pending || (value !== "products" && value !== "translations")) return
+    if (pending || (value !== "products" && value !== "categories")) return
 
     setView(value)
 
@@ -82,29 +107,119 @@ export function MenuBuilderWorkspace({
             </TabsTrigger>
 
             <TabsTrigger
-              value="translations"
+              value="categories"
               disabled={pending}
-              aria-description={
-                settings
-                  ? t("languageCount", { count: settings.locales.length })
-                  : undefined
-              }
               className="grow flex-wrap data-active:border-transparent data-active:shadow-sm"
             >
-              <Languages aria-hidden="true" className="size-4 shrink-0" />
+              <Folder aria-hidden="true" className="size-4 shrink-0" />
 
-              {t("translations")}
-
-              {settings && (
-                <span
-                  aria-hidden="true"
-                  className="rounded-full bg-primary px-2 py-1 text-xs text-primary-foreground"
-                >
-                  {t("languageCount", { count: settings.locales.length })}
-                </span>
-              )}
+              {t("categories")}
             </TabsTrigger>
           </TabsList>
+
+          <Dialog
+            open={translationsOpen}
+            disablePointerDismissal
+            onOpenChange={(value) => {
+              if (pending) return
+              setTranslationsOpen(value)
+
+              const url = new URL(window.location.href)
+
+              url.searchParams.set("view", value ? "translations" : view)
+              window.history.replaceState(
+                null,
+                "",
+                url.pathname + url.search + url.hash
+              )
+            }}
+          >
+            <DialogTrigger
+              disabled={pending}
+              render={
+                <Button variant="outline" className="justify-self-start" />
+              }
+            >
+              <Languages aria-hidden="true" className="size-4" />
+
+              {t("translations")}
+            </DialogTrigger>
+
+            <DialogContent keepMounted className="max-w-[64rem]">
+              <header className="relative border-b border-border p-5 pr-16">
+                <DialogTitle className="text-xl font-semibold">
+                  {t("translations")}
+                </DialogTitle>
+
+                <DialogDescription className="mt-2 text-sm text-muted-foreground">
+                  {t("saveHelp")}
+                </DialogDescription>
+
+                <DialogClose
+                  disabled={pending}
+                  aria-label={e("close")}
+                  render={
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="absolute top-3 right-3"
+                    />
+                  }
+                >
+                  <X aria-hidden="true" />
+                </DialogClose>
+              </header>
+
+              <div className="grid min-h-0 min-w-0 gap-6 overflow-y-auto p-5">
+                {settings ? (
+                  <>
+                    <MenuLanguageSettings {...settings} />
+
+                    {description ? (
+                      <RestaurantDescriptionEditor
+                        {...description}
+                        onPendingChange={setPending}
+                      />
+                    ) : (
+                      <Alert variant="destructive">
+                        <AlertDescription>
+                          {t("descriptionUnavailable")}
+                        </AlertDescription>
+
+                        <Button
+                          variant="outline"
+                          className="mt-3"
+                          onClick={() => router.refresh()}
+                        >
+                          {t("retry")}
+                        </Button>
+                      </Alert>
+                    )}
+
+                    <CatalogTranslationsEditor
+                      {...settings}
+                      catalog={catalog}
+                      onPendingChange={setPending}
+                    />
+                  </>
+                ) : (
+                  <Alert variant="destructive" role="alert">
+                    <AlertDescription>
+                      {t("languagesUnavailable")}
+                    </AlertDescription>
+
+                    <Button
+                      variant="outline"
+                      className="mt-3"
+                      onClick={() => router.refresh()}
+                    >
+                      {t("retry")}
+                    </Button>
+                  </Alert>
+                )}
+              </div>
+            </DialogContent>
+          </Dialog>
 
           <EditorDialog
             title={u("discounts")}
@@ -135,54 +250,50 @@ export function MenuBuilderWorkspace({
           settings={settings}
           pending={pending}
           onPendingChange={setPending}
+          categoryId={categoryId}
+          onCategoryChange={setCategoryId}
         />
       </TabsContent>
 
       <TabsContent
-        value="translations"
+        value="categories"
         keepMounted
         className="grid gap-6 data-[hidden]:hidden"
       >
-        {settings ? (
-          <>
-            <MenuLanguageSettings {...settings} />
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <p className="text-sm text-muted-foreground">{t("categoryHelp")}</p>
 
-            {description ? (
-              <RestaurantDescriptionEditor
-                {...description}
-                onPendingChange={setPending}
+          <EditorDialog
+            primary
+            icon={Plus}
+            title={c("newCategory")}
+            label={c("newCategory")}
+            description={t("categoryHelp")}
+            disabled={pending}
+          >
+            {(callbacks) => (
+              <CategoryForm
+                tenantId={catalog.tenantId}
+                {...callbacks}
+                onPendingChange={(value) => {
+                  callbacks.onPendingChange?.(value)
+                  setPending(value)
+                }}
               />
-            ) : (
-              <Alert variant="destructive">
-                <AlertDescription>
-                  {t("descriptionUnavailable")}
-                </AlertDescription>
-
-                <Button
-                  variant="outline"
-                  className="mt-3"
-                  onClick={() => router.refresh()}
-                >
-                  {t("retry")}
-                </Button>
-              </Alert>
             )}
+          </EditorDialog>
+        </div>
 
-            <CatalogTranslationsEditor {...settings} catalog={catalog} />
-          </>
-        ) : (
-          <Alert variant="destructive" role="alert">
-            <AlertDescription>{t("languagesUnavailable")}</AlertDescription>
-
-            <Button
-              variant="outline"
-              className="mt-3"
-              onClick={() => router.refresh()}
-            >
-              {t("retry")}
-            </Button>
-          </Alert>
-        )}
+        <MenuBuilderCategories
+          catalog={catalog}
+          selectedId={categoryId}
+          onSelect={(id) => {
+            setCategoryId(id)
+            changeView("products")
+          }}
+          pending={pending}
+          onPendingChange={setPending}
+        />
       </TabsContent>
     </Tabs>
   )

@@ -4,10 +4,11 @@ User-approved scope: one-page table management of products, categories, extras a
 
 ## Behavior
 
+- The grouped sidebar entry Menu & Categories opens exactly two tabs. Menu shows one product table; Categories shows one category table. Clicking a category opens Menu with that category selected. Filters and drafts persist between tab switches, and `view=categories` survives reload.
 - Page-level New product/New category actions. New product remains enabled for an empty catalog.
 - Search and active/archived/all filters combine with all created category filters. A product under an archived category is treated as archived.
 - Products and categories use semantic tables with explicit numeric display-order saves. Lower numbers appear first; products sort within their category. Equal orders retain stable identifier ordering.
-- Product names open a right-side sheet with complete plain-text description, category, price/tax, availability, edit/archive/restore actions, photos, extras and scoped product/group/option translation tables. Category translations and menu-language/restaurant-description settings remain in the page's translations tab. Discounts remain accessible.
+- Product names open a right-side sheet with complete plain-text description, category, price/tax, availability, edit/archive/restore actions, photos, extras and scoped product/group/option translation tables. Category translations and menu-language/restaurant-description settings remain in the top-page translations dialog. Closing/reopening that dialog preserves its drafts. Existing `view=translations` links open the dialog. Discounts remain accessible.
 - Product creation/editing selects an active category or creates one in context. A successful category mutation returns its validated ID and is immediately selected; product fields remain intact. Failed category writes retain input. Nested portal submissions stop propagation so they cannot submit the parent product form.
 - Closing/reopening or switching products/tabs retains product/photo drafts for the account/tenant workspace. Discard restores the latest saved product; Cancel in the product form clears that product draft. Nested dialog Cancel/Escape clears only that dialog's input. Full navigation/reload discards local drafts. Pending writes disable workspace/sheet selection and dismissal; failed saves remain recoverable.
 - Existing option selection rules, prices/order, archiving, language fallback distinctions, category visibility, discounts, photos and product restore rules are retained. Restoring a product does not restore archived options or automatically enable availability.
@@ -33,7 +34,13 @@ Checks used bundled Node 24.19 and the frontend package's installed dependencies
 
 The initial category-reassignment regression failed before backend implementation. Browser checks exposed nested portal submission and narrow-screen table overflow; both were fixed and verified in the passing suite. Guarded real-database and hosted acceptance were not run.
 
-Screenshots: [desktop table](assets/menu-manager/table-fr-light-1440.png), [desktop sheet](assets/menu-manager/sheet-fr-light-1440.png), [phone dark sheet](assets/menu-manager/sheet-fr-dark-390.png), [desktop photos](assets/menu-manager/photo-fr-light-1440.png), [phone dark photos](assets/menu-manager/photo-en-dark-390.png).
+Screenshots: [Menu tab](assets/menu-manager/menu-tab-fr-light-1440.png), [Categories tab](assets/menu-manager/categories-tab-fr-light-1440.png), [initial combined layout](assets/menu-manager/table-fr-light-1440.png), [desktop sheet](assets/menu-manager/sheet-fr-light-1440.png), [phone dark sheet](assets/menu-manager/sheet-fr-dark-390.png), [desktop photos](assets/menu-manager/photo-fr-light-1440.png), [phone dark photos](assets/menu-manager/photo-en-dark-390.png).
+
+### Two-tab follow-up — 9 October 2026
+
+The user requested a grouped Menu & Categories sidebar entry and exactly two tabs, with one table in each. The translations tab moved to a retained page-level dialog; legacy translation links and description drafts remain available. The skeleton also presents two tab placeholders and one table surface. No global token/design deviation or API change was introduced.
+
+Final verification repeated `npm test` (66 files/429 tests passed), `npm run lint`, `npm run typecheck`, production `npm run build` with the same process-only HTTPS placeholders, and the three fixture browser projects (69 tests passed). All changed TypeScript files pass Prettier; the full formatting command still reports 165 untouched baseline files. `git diff --check` and the design-system validator passed. The new browser regression was observed failing against the prior layout before implementation. Older browser selectors were updated for the two-tab workflow and retained translations dialog, then the complete affected suite passed. API tests were not repeated because this follow-up has no backend changes. Shared-database/hosted acceptance and the user-owned kanban update remain unchanged.
 
 ## Remaining acceptance and kanban
 

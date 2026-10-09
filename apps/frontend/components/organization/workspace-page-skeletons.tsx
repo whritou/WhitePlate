@@ -266,8 +266,6 @@ function CatalogSkeleton() {
           <Skeleton className="h-12 w-28" />
 
           <Skeleton className="h-12 w-28" />
-
-          <Skeleton className="h-12 w-28" />
         </Region>
       </div>
 
@@ -280,10 +278,6 @@ function CatalogSkeleton() {
 
         <Region name="catalog-products">
           <CardSkeleton className="min-h-80" lines={6} />
-        </Region>
-
-        <Region name="catalog-categories">
-          <CardSkeleton className="min-h-48" lines={4} />
         </Region>
       </Region>
     </>
