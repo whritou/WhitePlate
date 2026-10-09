@@ -1,4 +1,4 @@
-import Image from "next/image"
+import { ProductPhotoImage } from "@/components/product/photo-image"
 import { Badge } from "@/components/ui/badge"
 import {
   Card,
@@ -14,7 +14,6 @@ import { ProductOrdering } from "./product-ordering"
 
 export function MenuProductCard({
   product,
-  imageIndex = 0,
   item,
   locked,
   orderRound,
@@ -36,12 +35,13 @@ export function MenuProductCard({
       size="sm"
       className="grid h-full grid-cols-[minmax(0,1fr)_5rem] grid-rows-[auto_1fr_auto] gap-x-3 gap-y-3 border-0 p-4 shadow-sm sm:grid-cols-[minmax(0,1fr)_6rem]"
     >
-      <Image
-        src={`/design/photo-${[15, 16, 17, 18, 19, 20][imageIndex % 6]}.webp`}
-        alt=""
-        width={96}
-        height={96}
-        className="col-start-2 row-start-1 size-20 rounded-md object-cover sm:size-24"
+      <ProductPhotoImage
+        key={product.photos?.[0]?.id ?? "fallback"}
+        productId={product.id}
+        photo={product.photos?.[0]}
+        size={320}
+        square
+        className="col-start-2 row-start-1 size-20 sm:size-24"
       />
 
       <CardHeader className="col-start-1 row-start-1 min-w-0 p-0 pb-0">

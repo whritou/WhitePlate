@@ -1,5 +1,20 @@
 # Functional test plan
 
+## M5 product photo acceptance
+
+[Local evidence](audits/product-photos.md) does not complete hosted storage acceptance.
+
+- With a real private bucket and migrated PostgreSQL, upload several JPEG/PNG/WebP images to an owned product. Verify all three variant writes, processed preview, save/reload and public-menu read-back in a separate guest session. Verify cover/order on actual guest cards/options gallery.
+- Replace/remove/clear the gallery while retaining unaffected images. Exercise stale expected IDs (412), partial/failed upload/save, draft privacy and recovery without duplicate mutations.
+- Reject corrupt content, SVG/GIF/ICO, animation, inputs over 4 MiB, over 4096px/16 megapixels, below-minimum dimensions, invalid framing, duplicate IDs and over-eight galleries. Verify orientation, both crops and no upscaling.
+- Deny foreign tenant/product/media, brand media attachment, retired-media reuse, kitchen-role access and revoked persisted membership on all protected operations. Archived products/categories reject writes; hidden/archived categories/products deny public delivery, with read-only inspection for authorized staff.
+- Race independent PostgreSQL connections changing a gallery or archiving a product/category. Check tenant/account/locale changes and shared proxy/CDN delivery for cache leakage.
+- Against the real bucket, verify cleanup after interrupted variant writes, 24-hour drafts, seven-day retired objects, active exclusions, delete-before-metadata and failed-delete retries. Verify the deployed Linux image decoder.
+- Verify EN/FR, light/dark, 320/375/390/768/1024/1440/1920px, keyboard/focus return, 200% text, reduced motion, readable contrast and fallbacks. Keep required controls visible, guest boxes stable across loading and mixed ratios, and states distinct for loading/empty/pending/validation/retry/success/offline/unavailable.
+
+M4 remains Backlog. Uploads stay private until explicit **Save photos**, which publishes that gallery immediately; product metadata save does not publish photo drafts.
+
+
 This is an acceptance plan with dated verification notes below. The API suite covers tenant/organization/staff/catalog CRUD, verified email and invitation binding, checkout pricing/idempotency, order workflow, body/rate limits, outbox dispatch, and hub authorization. Dashboard API contracts and frontend unit behavior are automated. Localization, real-database checkout snapshots, catalog editing, owner/manager/kitchen permissions, cross-tenant denial, open-dashboard revocation recovery, live outbox retry/delivery and reconnect REST recovery have local acceptance on Neon `test`; the guarded discount-management browser flow and checkout redemption/receipt-history remain separate acceptance items. Production SignalR configuration and actual token-expiration recovery remain open. Catalog-localization and localized-order migrations are applied on Neon `test` and Coolify Production. Vercel Production has completed hosted email/password signup and verification, organization creation/listing, an authenticated protected API request, restaurant creation, and owner access over TLS. The operator reports that signed-out and alternate-account attempts to open the protected restaurant route both redirected to `/fr?error=invalid_code`; accept this hosted frontend access-denial check without repeating it. The operator also reports Production `DATABASE_URL` targets Coolify PostgreSQL over verified TLS with `DATABASE_SSL_CA`, while Preview's target remains the old Render database; full Preview environment isolation remains open. Local email/password signup/invitation acceptance is verified on Neon `test`. Real Resend delivery beyond the hosted verification email, OAuth providers, and broader browser auth flows remain open. The earlier documentation audit is in [documentation review](documentation-review.md).
 
 ## Organization and catalog lifecycle acceptance

@@ -17,6 +17,7 @@ import { DiscountsEditor } from "./discounts-editor"
 import styles from "./menu-builder.module.css"
 
 export function MenuBuilderWorkspace({
+  userId,
   catalog,
   restaurantName,
   settings,
@@ -41,7 +42,11 @@ export function MenuBuilderWorkspace({
   }
 
   return (
-    <Tabs className={styles.workspace} value={view} onValueChange={changeView}>
+    <Tabs
+      className={`${styles.workspace} @container`}
+      value={view}
+      onValueChange={changeView}
+    >
       <header className="grid min-w-0 items-start gap-6 pb-2 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.7fr)]">
         <div className="min-w-0">
           <p className="mb-2 flex flex-wrap gap-x-3 gap-y-1 text-xs font-medium tracking-wider uppercase">
@@ -125,6 +130,7 @@ export function MenuBuilderWorkspace({
 
       <TabsContent value="products" keepMounted>
         <MenuBuilderCatalog
+          userId={userId}
           catalog={catalog}
           pending={pending}
           onPendingChange={setPending}

@@ -341,6 +341,9 @@ public sealed class CatalogRepository(WhitePlateDbContext database) : ICatalogRe
                 product.IsAvailable })
             .ToListAsync(cancellationToken);
         var productIds = products.Select(product => product.Id).ToArray();
+        var photos = await database.MediaAssets.AsNoTracking().Where(asset => asset.TenantId == tenant.Id &&
+            asset.ProductId != null && productIds.Contains(asset.ProductId.Value) && asset.IsActive && asset.IsReady)
+            .OrderBy(asset => asset.SortOrder).ThenBy(asset => asset.Id).ToListAsync(cancellationToken);
         var groups = await database.ProductOptionGroups.AsNoTracking()
             .Where(group => group.TenantId == tenant.Id && productIds.Contains(group.ProductId) && !group.IsArchived)
             .OrderBy(group => group.SortOrder).ThenBy(group => group.Id)
@@ -369,7 +372,9 @@ public sealed class CatalogRepository(WhitePlateDbContext database) : ICatalogRe
                 CatalogTranslations.Get(item.TranslationsJson, locale, tenant.DefaultMenuLocale, item.Name,
                     item.Description).Description,
                 item.BasePrice, item.TaxRatePercent, item.SortOrder,
-                groupsByProduct.GetValueOrDefault(item.Id, [])) { IsAvailable = item.IsAvailable }).ToArray());
+                groupsByProduct.GetValueOrDefault(item.Id, [])) { IsAvailable = item.IsAvailable,
+                    Photos = photos.Where(asset => asset.ProductId == item.Id).Select(asset =>
+                        new WhitePlate.Application.Media.ProductPhotoDto(asset.Id, asset.Width, asset.Height, asset.Bytes)).ToArray() }).ToArray());
         return new MenuDto(tenant.Id, tenant.Name, tenant.Currency, locale, tenant.DefaultMenuLocale,
             tenant.MenuLocales, categories.Select(category =>
             new MenuCategoryDto(category.Id,

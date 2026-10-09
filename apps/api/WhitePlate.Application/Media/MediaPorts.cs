@@ -6,6 +6,20 @@ public sealed record MediaAssetDto(Guid Id, string Slot, string ContentType, int
 public sealed record BrandAssetsDto(bool StorageAvailable, IReadOnlyList<MediaAssetDto> Assets);
 public sealed record NormalizedImage(byte[] Bytes, string ContentType, int Width, int Height);
 public sealed record MediaContent(byte[] Bytes, string ContentType);
+public sealed record ProductPhotoDto(Guid Id, int Width, int Height, long Bytes);
+public sealed record ProductPhotosDto(bool StorageAvailable, IReadOnlyList<ProductPhotoDto> Assets);
+public interface IProductImageProcessor
+{
+    Task<IReadOnlyDictionary<int, NormalizedImage>> NormalizeAsync(string aspect, byte[] bytes, CancellationToken ct);
+}
+public interface IProductPhotoRepository
+{
+    Task<bool> ProductExistsAsync(Guid tenantId, Guid productId, bool writable, CancellationToken ct);
+    Task<bool> PublicProductExistsAsync(Guid tenantId, Guid productId, CancellationToken ct);
+    Task<IReadOnlyList<MediaAsset>> ListAsync(Guid tenantId, Guid productId, CancellationToken ct);
+    Task<bool> SaveAsync(Guid tenantId, Guid productId, IReadOnlyList<Guid> ids,
+        IReadOnlyList<Guid> expectedIds, DateTimeOffset now, CancellationToken ct);
+}
 public sealed class MediaUnavailableException : Exception;
 public sealed class InvalidMediaException : Exception;
 

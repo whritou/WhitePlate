@@ -5,6 +5,8 @@ public sealed class MediaAsset
     private MediaAsset() { }
     public Guid Id { get; private set; }
     public Guid TenantId { get; private set; }
+    public Guid? ProductId { get; private set; }
+    public int SortOrder { get; private set; }
     public string Slot { get; private set; } = "";
     public string ContentType { get; private set; } = "";
     public string ObjectKey { get; private set; } = "";
@@ -31,6 +33,20 @@ public sealed class MediaAsset
     }
 
     public void MarkReady() => IsReady = true;
+    public static MediaAsset CreateProductPhoto(Guid tenantId, Guid productId, int width, int height,
+        long bytes, DateTimeOffset now)
+    {
+        if (productId == Guid.Empty) throw new ArgumentException("A product is required.");
+        var asset = Create(tenantId, "banner", "image/webp", width, height, bytes, now);
+        asset.Slot = "product";
+        asset.ProductId = productId;
+        return asset;
+    }
+    public void SetOrder(int order)
+    {
+        if (ProductId is null || order is < 0 or > 7) throw new ArgumentException("Invalid photo order.");
+        SortOrder = order;
+    }
     public void Activate()
     {
         if (!IsReady) throw new InvalidOperationException("The asset is not stored.");

@@ -24,7 +24,7 @@ using WhitePlate.Infrastructure.Persistence;
 
 namespace WhitePlate.Tests.Api;
 
-public sealed class BrandAssetsEndpointTests
+public sealed partial class BrandAssetsEndpointTests
 {
     private static CancellationToken Ct => TestContext.Current.CancellationToken;
 

@@ -37,11 +37,14 @@ export function OptionGroupsEditor({
     .sort((a, b) => a.sortOrder - b.sortOrder || a.name.localeCompare(b.name))
 
   return (
-    <section className="grid gap-5" aria-label={t("optionGroupsTitle")}>
+    <section
+      className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-5"
+      aria-label={t("optionGroupsTitle")}
+    >
       <div
         className={
           studio
-            ? "grid gap-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center"
+            ? "flex min-w-0 flex-wrap items-center justify-between gap-4"
             : "flex flex-wrap items-center justify-between gap-3"
         }
       >
@@ -132,11 +135,11 @@ function OptionGroupCard({
     <Card
       className={
         studio
-          ? "h-full border-transparent bg-muted shadow-none dark:bg-secondary"
+          ? "@container/option h-full border-transparent bg-muted shadow-none dark:bg-secondary"
           : undefined
       }
     >
-      <CardHeader className="flex flex-wrap items-start justify-between gap-4">
+      <CardHeader className="flex flex-wrap items-start justify-between gap-4 @max-[12rem]/option:px-2">
         <div className="min-w-0">
           <CardTitle>
             <h3
@@ -188,7 +191,7 @@ function OptionGroupCard({
         )}
       </CardHeader>
 
-      <CardContent className="grid gap-4">
+      <CardContent className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-4 @max-[12rem]/option:px-2">
         {entries.length === 0 ? (
           <p className="text-sm text-muted-foreground">{t("noOptions")}</p>
         ) : (
@@ -260,14 +263,14 @@ function OptionEntry({
     <div
       className={
         studio
-          ? "grid gap-2 rounded-md bg-card p-3"
+          ? "grid min-w-0 grid-cols-[minmax(0,1fr)] gap-2 rounded-md bg-card p-3 @max-[12rem]/option:p-1"
           : "flex flex-wrap items-center justify-between gap-3 py-4"
       }
     >
       <div
         className={
           studio
-            ? "flex min-w-0 items-start justify-between gap-2 text-sm"
+            ? "flex min-w-0 flex-wrap items-start justify-between gap-2 text-sm"
             : "min-w-0"
         }
       >
@@ -286,7 +289,9 @@ function OptionEntry({
 
       {!archived && (
         <div
-          className={studio ? "flex justify-end gap-1" : "flex flex-wrap gap-2"}
+          className={
+            studio ? "flex flex-wrap justify-end gap-1" : "flex flex-wrap gap-2"
+          }
         >
           <EditorDialog
             compact={studio}

@@ -15,6 +15,9 @@ public static class MediaRegistration
         services.AddSingleton<IMediaImageProcessor, BrandImageProcessor>();
         services.AddScoped<IMediaRepository, MediaRepository>();
         services.AddScoped<BrandMediaService>();
+        services.AddScoped<IProductPhotoRepository, ProductPhotoRepository>();
+        services.AddSingleton<IProductImageProcessor, ProductImageProcessor>();
+        services.AddScoped<ProductPhotoService>();
         services.AddScoped<ExpiredMediaCleanup>();
         services.AddHostedService<MediaCleanupDispatcher>();
         return services;

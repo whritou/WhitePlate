@@ -16,6 +16,7 @@ export type StorefrontMenu = {
       description: string | null
       basePrice: number
       isAvailable: boolean
+      photos?: import("./product-photos").ProductPhoto[]
       optionGroups: {
         id: string
         name: string

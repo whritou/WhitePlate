@@ -302,10 +302,16 @@ namespace WhitePlate.Infrastructure.Persistence.Migrations
                         .HasMaxLength(128)
                         .HasColumnType("character varying(128)");
 
+                    b.Property<Guid?>("ProductId")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("Slot")
                         .IsRequired()
                         .HasMaxLength(16)
                         .HasColumnType("character varying(16)");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("integer");
 
                     b.Property<Guid>("TenantId")
                         .HasColumnType("uuid");
@@ -325,7 +331,9 @@ namespace WhitePlate.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("TenantId", "Slot")
                         .IsUnique()
-                        .HasFilter("\"IsActive\" = true");
+                        .HasFilter("\"IsActive\" = true AND \"ProductId\" IS NULL");
+
+                    b.HasIndex("TenantId", "ProductId", "IsActive", "SortOrder");
 
                     b.ToTable("MediaAssets", (string)null);
                 });
@@ -750,6 +758,12 @@ namespace WhitePlate.Infrastructure.Persistence.Migrations
                         .HasForeignKey("TenantId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.HasOne("WhitePlate.Domain.Catalog.Product", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId", "ProductId")
+                        .HasPrincipalKey("TenantId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict);
                 });
 
             modelBuilder.Entity("WhitePlate.Domain.Orders.OrderLine", b =>

@@ -21,7 +21,9 @@ public sealed class ExpiredMediaCleanup(WhitePlateDbContext database, IMediaStor
                     .SetProperty(item => item.IsReady, false)
                     .SetProperty(item => item.ExpiresAt, DateTimeOffset.UnixEpoch), ct);
             if (claimed == 0) continue;
-            await storage.DeleteAsync(asset.ObjectKey, ct);
+            if (asset.ProductId is not null)
+                foreach (var size in new[] { 320, 640, 1200 }) await storage.DeleteAsync($"{asset.ObjectKey}/{size}", ct);
+            else await storage.DeleteAsync(asset.ObjectKey, ct);
             database.MediaAssets.Remove(asset);
             await database.SaveChangesAsync(ct);
         }

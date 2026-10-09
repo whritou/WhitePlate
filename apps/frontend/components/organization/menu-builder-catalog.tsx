@@ -15,10 +15,12 @@ import { MenuBuilderProduct } from "./menu-builder-product"
 import { ProductForm } from "./product-form"
 
 export function MenuBuilderCatalog({
+  userId,
   catalog,
   pending,
   onPendingChange,
 }: {
+  userId?: string
   catalog: ManagedCatalog
   pending: boolean
   onPendingChange: (pending: boolean) => void
@@ -76,7 +78,11 @@ export function MenuBuilderCatalog({
       disabled={pending}
       aria-label={t("products")}
       aria-busy={pending}
-      className="grid min-w-0 items-start gap-6 lg:grid-cols-[14rem_minmax(0,1fr)] xl:grid-cols-[16rem_minmax(0,1fr)]"
+      className={
+        userId
+          ? "grid min-w-0 items-start gap-6 @min-[52rem]:grid-cols-[14rem_minmax(0,1fr)]"
+          : "grid min-w-0 items-start gap-6 lg:grid-cols-[14rem_minmax(0,1fr)] xl:grid-cols-[16rem_minmax(0,1fr)]"
+      }
     >
       <aside className="grid min-w-0 gap-5">
         <MenuBuilderCategories
@@ -209,6 +215,7 @@ export function MenuBuilderCatalog({
               hidden={!selectedVisible || product.id !== selectedId}
             >
               <MenuBuilderProduct
+                userId={userId}
                 catalog={catalog}
                 product={product}
                 pending={pending}

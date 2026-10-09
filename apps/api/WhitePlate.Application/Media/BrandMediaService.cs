@@ -60,7 +60,7 @@ public sealed class BrandMediaService(IStaffMembershipRepository memberships, IM
     {
         if (!await CanManageAsync(tenantId, identity, ct)) return Failure<MediaContent>(ErrorCode.NotFound);
         var asset = await repository.FindAsync(tenantId, id, ct);
-        return await ReadAsync(asset, ct);
+        return await ReadAsync(asset?.ProductId is null ? asset : null, ct);
     }
 
     public async Task<Result<MediaContent>> PublicAsync(Guid tenantId, string slot, CancellationToken ct)

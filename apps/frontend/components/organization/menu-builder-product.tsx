@@ -17,13 +17,16 @@ import { ProductForm } from "./product-form"
 import { OptionGroupsEditor } from "./option-groups-editor"
 import { ArchiveCatalogButton } from "./archive-catalog-button"
 import { RestoreProductButton } from "./restore-product-button"
+import { ProductPhotosEditor } from "./product-photos-editor"
 
 export function MenuBuilderProduct({
+  userId,
   catalog,
   product,
   pending,
   onPendingChange,
 }: {
+  userId?: string
   catalog: ManagedCatalog
   product: CatalogProduct
   pending: boolean
@@ -115,40 +118,59 @@ export function MenuBuilderProduct({
           </div>
         </CardHeader>
 
-        <CardContent className="grid gap-5">
+        <CardContent className="@container grid gap-5">
           {!category?.isVisible && !category?.isArchived && (
             <p className="text-sm text-warning">{t("categoryHiddenHelp")}</p>
           )}
 
-          {!archived ? (
-            <>
-              <div ref={editor} onChange={() => setDirty(true)}>
-                <ProductForm
-                  studio
-                  key={revision}
-                  tenantId={catalog.tenantId}
-                  currency={catalog.currency}
-                  categories={catalog.categories}
-                  product={product}
-                  onPendingChange={onPendingChange}
-                  onSuccess={() => setDirty(false)}
-                />
-              </div>
-            </>
-          ) : (
-            <>
-              <p className="text-sm text-muted-foreground">
-                {t("archivedHelp")}
-              </p>
+          <div
+            className={
+              userId
+                ? "grid min-w-0 gap-6 @min-[42rem]:grid-cols-[minmax(0,14rem)_minmax(0,1fr)]"
+                : undefined
+            }
+          >
+            {userId && (
+              <ProductPhotosEditor
+                key={`${userId}:${catalog.tenantId}:${product.id}`}
+                userId={userId}
+                tenantId={catalog.tenantId}
+                productId={product.id}
+                archived={archived}
+                onPendingChange={onPendingChange}
+              />
+            )}
 
-              {product.isArchived && !category?.isArchived && (
-                <RestoreProductButton
-                  tenantId={catalog.tenantId}
-                  id={product.id}
-                />
-              )}
-            </>
-          )}
+            {!archived ? (
+              <>
+                <div ref={editor} onChange={() => setDirty(true)}>
+                  <ProductForm
+                    studio
+                    key={revision}
+                    tenantId={catalog.tenantId}
+                    currency={catalog.currency}
+                    categories={catalog.categories}
+                    product={product}
+                    onPendingChange={onPendingChange}
+                    onSuccess={() => setDirty(false)}
+                  />
+                </div>
+              </>
+            ) : (
+              <>
+                <p className="text-sm text-muted-foreground">
+                  {t("archivedHelp")}
+                </p>
+
+                {product.isArchived && !category?.isArchived && (
+                  <RestoreProductButton
+                    tenantId={catalog.tenantId}
+                    id={product.id}
+                  />
+                )}
+              </>
+            )}
+          </div>
         </CardContent>
       </Card>
 

@@ -1,5 +1,12 @@
 # Development guide
 
+## Product photo gallery rollout (M5)
+
+M5 reuses T1's private S3-compatible configuration. Review/apply `ProductPhotoGallery` after both T1 migrations, then deploy API before frontend. There are no new browser credentials or public bucket URLs. Missing bucket configuration produces an unavailable state. No shared migration was applied by this task.
+
+From `apps/frontend`, with the dev server running, use `node node_modules/@playwright/test/cli.js test --project product-photos --project menu-builder`. Set `WHITEPLATE_ACCEPTANCE_URL=http://localhost:3012` for that port. `/[locale]/photo-design-test` renders the actual Menu Builder with a sample catalog; `/[locale]/photo-guest-design-test` renders the real guest cards/options dialog. These routes return 404 in production. Browser fixtures mock image/save responses and do not prove S3 or PostgreSQL acceptance. See [policies](architecture/decisions/0008-product-photo-gallery.md), [evidence](audits/product-photos.md) and [acceptance](functional-test-plan.md).
+
+
 This guide runs the frontend and .NET API. The frontend includes Better Auth email/password, Google and Microsoft sign-in, verification/reset email, organization signup, email-bound staff invitation flows, owner/manager catalog and discount editing, localized storefront/checkout, and a localized staff kitchen order dashboard. The API validates Better Auth JWTs and retains persisted membership authorization. Neon `test` acceptance covers localized checkout snapshots, catalog editing, owner/manager/kitchen permissions, cross-tenant denial, dashboard revocation recovery, and live outbox/reconnect behavior. The guarded discount-management browser flow and checkout redemption/receipt-history remain separate test-plan scenarios. Vercel-to-Coolify protected API access and production business/auth schema setup are verified; a hosted account, organization, acceptance restaurant and owner-protected kitchen page were exercised over TLS. The operator reports that signed-out and alternate-account visits to the protected restaurant route redirected to `/fr?error=invalid_code`; this hosted access-denial behavior is accepted. Configured Google/Microsoft OAuth and broader real email delivery, hosted SignalR URL/CORS/TLS and token-expiry, Preview isolation, backups, and monitoring remain deployment work.
 
 ## Prerequisites and layout

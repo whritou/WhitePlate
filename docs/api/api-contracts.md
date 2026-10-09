@@ -1,5 +1,22 @@
 # API contracts
 
+## M5 product photo galleries — 2026-10-09
+
+Source implementation; actual S3/PostgreSQL/hosted acceptance remains open. See [ADR 0008](../architecture/decisions/0008-product-photo-gallery.md).
+
+| Method and route | Behavior |
+| --- | --- |
+| `GET /api/v1/tenants/{tenantId}/products/{productId}/photos` | Persisted owner/manager authorization; returns `{storageAvailable, assets: [{id, width, height, bytes}]}` in order; authorized staff can inspect retained archived-product galleries |
+| `POST …/photos/uploads?aspect=1:1` or `4:3` | Bounded `application/octet-stream`, at most 4 MiB; actual decoded-content validation and three private variants; 201 with a photo descriptor |
+| `GET …/photos/uploads/{assetId}/{size}` | Protected preview of exact tenant/product media; size 320, 640 or 1200; WebP bytes |
+| `PUT …/photos` | `{assetIds: UUID[], expectedIds: UUID[]}`; distinct ordered lists of at most eight; atomic save/reorder/removal, returning authoritative descriptors; stale gallery returns 412 |
+| `GET /api/v1/products/{productId}/photos/{assetId}/{size}` | Public host-resolved tenant; only current active photos of nonarchived products in visible, nonarchived categories |
+
+Empty desired IDs remove all photos. Missing/foreign products/media, revoked membership and unauthorized roles return 404. Archived products/categories reject mutations. Invalid files, ratios, duplicates or excessive length return validation errors. Storage failures return 503 and preserve the published gallery. Draft uploads alone are never public.
+
+Public menu products add ordered `photos` descriptors without bucket keys or URLs. Frontend BFF paths: protected `/api/product-photos?tenantId=…&productId=…`, public `/api/public/product-photos/{productId}/{assetId}/{size}`. Mutations require the configured exact origin and bounded body reads before shared-factory forwarding. Protected responses use `private, no-store` and `Vary: Cookie`; public images use `no-store` and `Vary: Host` at the BFF. Shared Next image optimization is bypassed.
+
+
 Status: the Better Auth frontend, email/password and social auth routes, server-side API token exchange, organization signup, email-bound invitations, public order tracking, and localized restaurant description management are wired in source. The `RestaurantDescriptionTranslations` EF migration is generated but not yet applied to a shared environment. The `PublicOrderTracking` schema migration is applied to Coolify Production, but its feature code is not deployed there and hosted tracking acceptance remains pending. Localized checkout snapshots, catalog language paths, restaurant description fallback and management authorization are covered by API tests. Catalog and order locale migrations are applied on Neon `test` and Coolify Production. Local email/password signup, organization creation, invitation acceptance, owner/manager/kitchen permissions, cross-tenant denial, REST revocation recovery, and live outbox/reconnect acceptance are recorded on Neon `test`. Local email/password signup, organization creation, and invitation acceptance were verified using locally intercepted email delivery. Vercel Production has also completed one hosted email/password signup and verification, organization listing, an authenticated protected API request, and restaurant creation against Coolify over verified TLS. The owner-protected team roster and invitation-list routes were added in merge `8a2f835` (PR #26); the currently recorded Coolify API deployment at `e13860e` predates them, so redeployment and hosted team-read verification remain open. The operator reports that both signed-out and alternate-account visits to the protected restaurant route redirected to `/fr?error=invalid_code`; consider this hosted access-denial behavior complete without a repeat check. This records the frontend redirect, not an independently observed API status code. Browser OAuth, hosted invitation acceptance, hosted SignalR delivery/token-expiry, and broader real email delivery remain open.
 
 ## 1. HTTP routes

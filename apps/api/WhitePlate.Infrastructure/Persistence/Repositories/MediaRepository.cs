@@ -9,7 +9,7 @@ namespace WhitePlate.Infrastructure.Persistence.Repositories;
 public sealed class MediaRepository(WhitePlateDbContext database) : IMediaRepository
 {
     public async Task<IReadOnlyList<MediaAsset>> ActiveAsync(Guid tenantId, CancellationToken ct) =>
-        await database.MediaAssets.AsNoTracking().Where(asset => asset.TenantId == tenantId && asset.IsActive).ToArrayAsync(ct);
+        await database.MediaAssets.AsNoTracking().Where(asset => asset.TenantId == tenantId && asset.ProductId == null && asset.IsActive).ToArrayAsync(ct);
     public Task<MediaAsset?> FindAsync(Guid tenantId, Guid id, CancellationToken ct) =>
         database.MediaAssets.AsNoTracking().SingleOrDefaultAsync(asset => asset.TenantId == tenantId && asset.Id == id, ct);
 
