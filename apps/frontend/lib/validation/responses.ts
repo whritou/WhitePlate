@@ -1,4 +1,5 @@
 import { isRecord, isUuid } from "./common"
+import { parsePhotoList } from "@/lib/product-photos"
 import { parseMenuLanguages } from "./organization"
 import type { StorefrontMenu, Product } from "@/types/storefront"
 import type {
@@ -279,6 +280,7 @@ function isProduct(value: unknown): value is Product {
     isDescription(value.description) &&
     isAmount(value.basePrice) &&
     typeof value.isAvailable === "boolean" &&
+    (value.photos === undefined || parsePhotoList(value.photos) !== null) &&
     Array.isArray(value.optionGroups) &&
     value.optionGroups.every(isOptionGroup)
   )

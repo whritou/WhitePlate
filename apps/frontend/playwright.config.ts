@@ -14,6 +14,10 @@ export default defineConfig({
   timeout: 120_000,
   expect: { timeout: 20_000 },
   projects: [
+    {
+      name: "product-photos",
+      testMatch: ["product-photos.spec.ts", "product-photo-guest.spec.ts"],
+    },
     { name: "brand-assets", testMatch: "brand-assets.spec.ts" },
     { name: "menu-builder", testMatch: "menu-builder.spec.ts" },
     {

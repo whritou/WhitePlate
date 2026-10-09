@@ -17,6 +17,7 @@ import { validProductSelection } from "@/lib/checkout/cart"
 import type { CartItem } from "@/types/checkout"
 import type { Product } from "@/types/storefront"
 import { useTranslations } from "next-intl"
+import { ProductPhotoGallery } from "@/components/product/photo-gallery"
 
 export function ProductOrdering({
   product,
@@ -94,6 +95,11 @@ export function ProductOrdering({
 
         <div className="min-h-0 overflow-y-auto overscroll-contain p-5 sm:p-6">
           <div className="grid gap-6">
+            <ProductPhotoGallery
+              productId={product.id}
+              photos={product.photos}
+            />
+
             {product.optionGroups.map((group) => (
               <fieldset key={group.id} className="grid gap-3">
                 <legend className="mb-1 font-semibold">

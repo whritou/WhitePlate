@@ -1,5 +1,8 @@
 # WhitePlate frontend architecture
 
+M5 supplies a separate gallery editor beside product metadata. Ordered drafts remain local; interactive queries use account/tenant/locale/product keys. Server-only services use the shared token-aware HTTP factory and bounded binary BFF routes. Guest cards show the saved cover; the actual options dialog renders the saved gallery in its scrollable body. Delivery is same-origin and no-store, bypassing shared image optimization. Both catalogs contain photo states/errors. See [ADR 0008](decisions/0008-product-photo-gallery.md) and [M5 evidence](../audits/product-photos.md).
+
+
 Status: localized Better Auth flows, server-only API BFF, responsive organization workspace shell, content-matched route loading skeletons, organization signup and rename settings, owner-only team roster/invitation reads and pending-invitation revocation, accessible mutation toasts, and owner/manager catalog and discount management are wired in source. The Better Auth schema is migrated on Neon `test` and Coolify Production; email/password signup plus invitation acceptance were verified on Neon with locally intercepted email. Hosted email/password signup, organization, restaurant creation and owner access are verified through Vercel and Coolify. Configured OAuth/real email delivery, hosted SignalR URL/CORS/TLS and expiry, public tenant DNS/TLS, Preview isolation and operational readiness remain open; see [authentication setup](../development.md#authentication-configuration). Commands are in the [package README](../../apps/frontend/README.md) and [development guide](../development.md).
 
 ## Stack and source map

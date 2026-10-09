@@ -341,6 +341,8 @@ Decisions and limits:
 
 ### M5 — Menu Builder: upload and manage product photos
 
+Implementation update (2026-10-09): the user approved the image policies and required several images per product. Source supplies an ordered gallery of up to eight photos, separate private drafts/save/discard, cover selection, replacement/removal, guest rendering and tenant-owned storage reuse. Shared migration/provider/hosted acceptance remain pending; see [M5 evidence](../audits/product-photos.md) and [ADR 0008](../architecture/decisions/0008-product-photo-gallery.md). The checklist below retains the full rollout scope.
+
 Reference: menu-builder. Dependencies: M1, T1.
 
 Implement product photography as a separate product feature, following the Stitch editor photo panel. This is independent from product metadata and the main workspace redesign.

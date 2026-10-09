@@ -6,6 +6,7 @@ import type {
 
 export type MenuBuilderView = "products" | "translations"
 export type MenuBuilderProps = {
+  userId?: string
   catalog: ManagedCatalog
   restaurantName?: string
   settings?: MenuLanguageSettings

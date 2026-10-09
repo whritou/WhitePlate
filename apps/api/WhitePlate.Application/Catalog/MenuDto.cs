@@ -9,6 +9,7 @@ public sealed record MenuProductDto(Guid Id, string Name, string? Description, d
     decimal TaxRatePercent, int SortOrder, IReadOnlyList<MenuOptionGroupDto> OptionGroups)
 {
     public bool IsAvailable { get; init; } = true;
+    public IReadOnlyList<WhitePlate.Application.Media.ProductPhotoDto> Photos { get; init; } = [];
 }
 public sealed record MenuCategoryDto(Guid Id, string Name, int SortOrder, IReadOnlyList<MenuProductDto> Products);
 public sealed record PromotionDiscountDto(Guid Id, string Code, string Name, string Kind, decimal Value, bool IsActive);

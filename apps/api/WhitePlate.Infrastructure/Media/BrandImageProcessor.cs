@@ -19,9 +19,10 @@ public sealed class BrandImageProcessor : IMediaImageProcessor
 
     public async Task<NormalizedImage> NormalizeAsync(string slot, string aspect, byte[] bytes, CancellationToken ct)
     {
-        var limit = slot switch { "logo" => 2, "favicon" => 1, "banner" => 4, _ => 0 };
-        if (!MediaAsset.IsSlot(slot) || bytes.Length == 0 || bytes.Length > limit * 1024 * 1024 ||
-            (slot == "banner" && aspect is not ("16:9" or "21:9"))) throw new InvalidMediaException();
+        var limit = slot switch { "logo" => 2, "favicon" => 1, "banner" or "product" => 4, _ => 0 };
+        if (limit == 0 || bytes.Length == 0 || bytes.Length > limit * 1024 * 1024 ||
+            (slot == "banner" && aspect is not ("16:9" or "21:9")) ||
+            (slot == "product" && aspect is not ("1:1" or "4:3"))) throw new InvalidMediaException();
         var format = Detect(bytes);
         RejectAnimation(bytes, format);
         if (slot == "favicon" ? format is not (MagickFormat.Png or MagickFormat.Ico) :
@@ -49,19 +50,25 @@ public sealed class BrandImageProcessor : IMediaImageProcessor
         settings.FrameCount = 1;
         using var image = new MagickImage(bytes, settings);
         image.AutoOrient();
-        var minimumWidth = slot switch { "logo" => 512U, "banner" => 640U, _ => 64U };
-        var minimumHeight = slot switch { "logo" => 512U, "banner" => 360U, _ => 64U };
+        var minimumWidth = slot switch { "logo" => 512U, "banner" => 640U, "product" => 320U, _ => 64U };
+        var minimumHeight = slot switch { "logo" => 512U, "banner" => 360U, "product" => aspect == "4:3" ? 240U : 320U, _ => 64U };
         if (image.Width < minimumWidth || image.Height < minimumHeight) throw new InvalidMediaException();
         image.Strip();
         image.ColorSpace = ColorSpace.sRGB;
         var width = slot == "banner" ? (aspect == "21:9" ? 1680U : 1600U) : (slot == "logo" ? 512U : 64U);
         var height = slot == "banner" ? (aspect == "21:9" ? 720U : 900U) : width;
-        image.Resize(new MagickGeometry(width, height) { FillArea = slot == "banner" });
+        if (slot == "product")
+        {
+            width = Math.Min(1200U, Math.Min(image.Width, aspect == "4:3" ? image.Height / 3 * 4 : image.Height));
+            width -= width % 4;
+            height = aspect == "4:3" ? width / 4 * 3 : width;
+        }
+        image.Resize(new MagickGeometry(width, height) { FillArea = slot is "banner" or "product" });
         image.BackgroundColor = MagickColors.Transparent;
         image.Extent(width, height, Gravity.Center);
         image.Quality = 85;
-        var outputFormat = slot == "banner" ? MagickFormat.WebP : MagickFormat.Png;
-        return new(image.ToByteArray(outputFormat), slot == "banner" ? "image/webp" : "image/png", (int)width, (int)height);
+        var outputFormat = slot is "banner" or "product" ? MagickFormat.WebP : MagickFormat.Png;
+        return new(image.ToByteArray(outputFormat), slot is "banner" or "product" ? "image/webp" : "image/png", (int)width, (int)height);
     }
 
     private static MagickFormat Detect(byte[] bytes)

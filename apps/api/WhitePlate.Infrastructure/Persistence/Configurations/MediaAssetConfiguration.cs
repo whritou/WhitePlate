@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using WhitePlate.Domain.Media;
 using WhitePlate.Domain.Tenants;
+using WhitePlate.Domain.Catalog;
 
 namespace WhitePlate.Infrastructure.Persistence.Configurations;
 
@@ -20,7 +21,10 @@ public sealed class MediaAssetConfiguration : IEntityTypeConfiguration<MediaAsse
             value => value.HasValue ? new DateTimeOffset(DateTime.SpecifyKind(value.Value, DateTimeKind.Utc)) : (DateTimeOffset?)null);
         builder.HasOne<Tenant>().WithMany().HasForeignKey(asset => asset.TenantId).OnDelete(DeleteBehavior.Restrict);
         builder.HasIndex(asset => asset.ObjectKey).IsUnique();
-        builder.HasIndex(asset => new { asset.TenantId, asset.Slot }).IsUnique().HasFilter("\"IsActive\" = true");
+        builder.HasIndex(asset => new { asset.TenantId, asset.Slot }).IsUnique().HasFilter("\"IsActive\" = true AND \"ProductId\" IS NULL");
+        builder.HasOne<Product>().WithMany().HasPrincipalKey(product => new { product.TenantId, product.Id })
+            .HasForeignKey(asset => new { asset.TenantId, asset.ProductId }).OnDelete(DeleteBehavior.Restrict);
+        builder.HasIndex(asset => new { asset.TenantId, asset.ProductId, asset.IsActive, asset.SortOrder });
         builder.HasIndex(asset => asset.ExpiresAt);
     }
 }
