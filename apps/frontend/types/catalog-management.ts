@@ -40,7 +40,7 @@ export type ManagedCatalog = {
   discounts: CatalogDiscount[]
 }
 export type CatalogResult =
-  | { ok: true }
+  | { ok: true; category?: CatalogCategory }
   | {
       ok: false
       error:
@@ -98,8 +98,10 @@ export type CatalogPageProps = {
 export type CategoryFormProps = EditorCallbacks & {
   tenantId: string
   category?: CatalogCategory
+  onCreated?: (category: CatalogCategory) => void
 }
 export type ProductFormProps = EditorCallbacks & {
+  onDirtyChange?: () => void
   studio?: boolean
   tenantId: string
   currency: string
@@ -141,6 +143,7 @@ export type DiscountsEditorProps = {
 export type ArchiveButtonProps = ArchiveInput & {
   name: string
   compact?: boolean
+  onPendingChange?: (pending: boolean) => void
 }
 export type CatalogSubmit = (event: FormEvent<HTMLFormElement>) => void
 export type CatalogFormAction = (input: FormData) => Promise<CatalogResult>

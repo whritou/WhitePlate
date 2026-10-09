@@ -401,6 +401,12 @@ Local fixture/browser and API persistence results are recorded separately in [M1
 
 Guarded shared-database browser acceptance and hosted verification remain outstanding; fixture synthetic save responses are not accepted as database read-back evidence.
 
+## Menu manager follow-up — 9 October 2026
+
+Run the `menu-builder`, `catalog-design` and `product-photos` fixture browser projects against the local development server. `menu-manager.spec.ts` covers right-sheet details/focus/draft retention, building an empty menu with inline category creation and failed-save recovery, combined status/category filters, order-save failures, and extras/translation editing failures. Existing projects cover archived guards, discounts, pending/duplicate writes, category visibility, photos, EN/FR, light/dark, keyboard, reduced motion and 320–1920px/200% text sizing. Intercepted save responses are UI evidence, not persistence evidence.
+
+The API suite verifies category reassignment and display-order read-back through HTTP/SQLite, rejected foreign/archived/missing/empty category assignments without a write, and backward-compatible updates omitting `categoryId`. In the explicitly guarded non-production acceptance environment, repeat category/product creation from an empty menu, reassignment between active categories, category/product order save/reload and public menu order, extras/translation saves and locale fallback, photo drafts, archive/restore and unauthorized/cross-tenant attempts with actual stored records. Deploy API before frontend; no new migration is required. Hosted acceptance and the project-card update remain separate handoff items.
+
 ## T1 brand assets acceptance
 
 Source checks: `dotnet test apps/api/WhitePlate.slnx`; frontend `npm test`, `npm run lint`, `npm run typecheck`, `npm run format:check`, `npm run build`; focused browser fixtures with `node node_modules/@playwright/test/cli.js test --project brand-assets` against the development server. Fixture screenshots and intercepted storage responses are UI evidence only.

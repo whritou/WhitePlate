@@ -146,7 +146,7 @@ const catalog: ManagedCatalog = {
 export default async function CatalogDesignTestPage({
   searchParams,
 }: {
-  searchParams: Promise<{ view?: string; shell?: string }>
+  searchParams: Promise<{ view?: string; shell?: string; empty?: string }>
 }) {
   if (process.env.NODE_ENV !== "development") notFound()
 
@@ -172,7 +172,17 @@ export default async function CatalogDesignTestPage({
 
       {["builder", "products", "translations"].includes(query.view ?? "") ? (
         <MenuBuilderWorkspace
-          catalog={catalog}
+          catalog={
+            query.empty === "1"
+              ? {
+                  ...catalog,
+                  categories: [],
+                  products: [],
+                  optionGroups: [],
+                  options: [],
+                }
+              : catalog
+          }
           restaurantName="Bistro du Potager"
           settings={{
             tenantId: catalog.tenantId,

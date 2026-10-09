@@ -115,6 +115,12 @@ Current API and source contracts take precedence. Do not infer a tenant feature,
 - Keep user-visible copy in both English and French translation catalogs. A visual token change does not authorize untranslated copy or locale behavior changes.
 - Keep prices, discounts, tenant authorization, order status transitions, checkout receipts, and retry/idempotency behavior server-authoritative and unchanged by design work.
 
+## Menu manager recipe — 9 October 2026
+
+Within the catalog workspace, use product/category tables with labeled search, status and category filters, explicit page creation actions and keyboard display-order saves. Product details open in a right-side sheet to respect the existing left navigation. The sheet presents complete plain-text content, photos, extras and translations, with explicit editing and archive/restore actions. Preserve drafts when closing/reopening the sheet; Cancel/Discard clears the corresponding product draft. Archived data is inspectable and read-only under the existing restoration rules.
+
+Table scroll containers must establish a positioning context so absolute screen-reader labels and compact action text remain inside local scrolling rather than expanding the document. A retained sheet must respect the HTML hidden state. Use semantic tokens and shared controls, readable status labels, FR/EN, both themes, focus restoration and the existing 44px/48px target rules; verify 200% text zoom and narrow-screen local table scrolling. This recipe is limited to the requested menu-manager scope and does not change tokens or other screen compositions.
+
 ## Runtime mapping and verification
 
 `tokens.json` is the structured source for shared light/dark colors, typography, radii, spacing, and breakpoints. The frontend mirrors semantic color values in `apps/frontend/app/globals.css`; Tailwind theme aliases expose the font, color, spacing, radius, breakpoint, and type tokens. The client does not import the JSON. `apps/frontend/app/design-tokens.test.ts` remains the existing runtime color/radius parity check.

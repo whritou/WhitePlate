@@ -7,5 +7,6 @@ export type NativeSelectProps = Omit<ComponentProps<"select">, "size"> & {
 }
 
 export type SheetContentProps = Dialog.Popup.Props & {
+  keepMounted?: boolean
   side?: "left" | "right"
 }

@@ -38,7 +38,11 @@
   :global(body):has(.workspace)
     :global([data-slot="dialog-content"])
     input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]),
-  :global(body):has(.workspace) :global([data-slot="dialog-content"]) select {
+  :global(body):has(.workspace) :global([data-slot="dialog-content"]) select,
+  :global(body):has(.workspace)
+    :global([data-slot="sheet-content"])
+    input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]),
+  :global(body):has(.workspace) :global([data-slot="sheet-content"]) select {
     min-height: 3rem;
   }
 }

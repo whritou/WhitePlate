@@ -51,7 +51,7 @@ All paths are rooted at `/api/v1`. Success responses contain the resource direct
 | `PUT /tenants/{tenantId}/categories/{categoryId}/visibility` | Organization owner or restaurant manager | Set temporary public visibility with `{ "isVisible": true/false }`; requires an active category in the authorized tenant |
 | `DELETE /tenants/{tenantId}/categories/{categoryId}` | Organization owner or restaurant manager | Archive the category and its product/option descendants |
 | `POST /tenants/{tenantId}/products` | Organization owner or restaurant manager | Create a product with base price and percentage tax |
-| `PUT /tenants/{tenantId}/products/{productId}` | Organization owner or restaurant manager | Update product details, price, tax, order, and availability |
+| `PUT /tenants/{tenantId}/products/{productId}` | Organization owner or restaurant manager | Update product details, price, tax, order, availability and optional `categoryId`; omitted/null preserves the current category. Current and target categories must be active and owned by the authorized tenant; foreign/missing/archived or empty UUID targets return `404` without a write |
 | `DELETE /tenants/{tenantId}/products/{productId}` | Organization owner or restaurant manager | Archive the product and its option descendants |
 | `POST /tenants/{tenantId}/products/{productId}/restore` | Organization owner or restaurant manager | Restore an archived product in an active category. The product remains unavailable until a manager explicitly enables it; archived option descendants remain archived. No permanent product purge route exists |
 | `POST /tenants/{tenantId}/products/{productId}/option-groups` | Organization owner or restaurant manager | Create a selection group with minimum/maximum counts |

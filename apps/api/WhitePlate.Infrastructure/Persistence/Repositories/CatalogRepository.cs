@@ -158,12 +158,18 @@ public sealed class CatalogRepository(WhitePlateDbContext database) : ICatalogRe
 
     public async Task<MenuProductDto?> UpdateProductAsync(Guid tenantId, Guid productId, string name,
         string? description, decimal basePrice, decimal taxRatePercent, int sortOrder, bool isAvailable,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken, Guid? categoryId = null)
     {
         var product = await database.Products.SingleOrDefaultAsync(item => item.TenantId == tenantId &&
             item.Id == productId && !item.IsArchived, cancellationToken);
         if (product is null) return null;
+        if (!await database.MenuCategories.AsNoTracking().AnyAsync(item => item.TenantId == tenantId &&
+            item.Id == product.CategoryId && !item.IsArchived, cancellationToken)) return null;
+        var targetCategoryId = categoryId ?? product.CategoryId;
+        if (!await database.MenuCategories.AsNoTracking().AnyAsync(item => item.TenantId == tenantId &&
+            item.Id == targetCategoryId && !item.IsArchived, cancellationToken)) return null;
         product.Update(name, description, basePrice, taxRatePercent, sortOrder, isAvailable);
+        product.ChangeCategory(targetCategoryId);
         product.SetTranslation(await GetDefaultLocaleAsync(tenantId, cancellationToken), name, description);
         await database.SaveChangesAsync(cancellationToken);
         return new MenuProductDto(product.Id, product.Name, product.Description, product.BasePrice,

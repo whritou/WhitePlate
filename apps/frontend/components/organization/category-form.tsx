@@ -15,12 +15,16 @@ export function CategoryForm({
   onSuccess,
   onPendingChange,
   onCancel,
+  onCreated,
 }: CategoryFormProps) {
   const t = useTranslations("Catalog")
   const { pending, state, submit } = useCatalogForm(
     saveCategoryAction,
     !category,
-    onSuccess,
+    (result) => {
+      if (result.category) onCreated?.(result.category)
+      onSuccess?.()
+    },
     undefined,
     onPendingChange
   )

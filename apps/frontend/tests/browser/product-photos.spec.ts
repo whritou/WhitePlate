@@ -39,6 +39,12 @@ test("failed uploads keep the saved cover and can be retried; invalid files do n
     "data-ready",
     "true"
   )
+  await page
+    .getByRole("button", {
+      name: "Select Burger Le Rustique Truffé",
+      exact: true,
+    })
+    .click()
   await page.getByLabel("Choose product photos").setInputFiles({
     name: "empty.png",
     mimeType: "image/png",
@@ -103,6 +109,12 @@ test("gallery replacement/save failures keep drafts and removal returns keyboard
     "data-ready",
     "true"
   )
+  await page
+    .getByRole("button", {
+      name: "Select Burger Le Rustique Truffé",
+      exact: true,
+    })
+    .click()
   await page.getByLabel("Choose product photos").setInputFiles({
     name: "burger.jpg",
     mimeType: "image/jpeg",
@@ -170,6 +182,15 @@ for (const locale of ["en", "fr"])
           "data-ready",
           "true"
         )
+        await page
+          .getByRole("button", {
+            name:
+              locale === "fr"
+                ? "Sélectionner Burger Le Rustique Truffé"
+                : "Select Burger Le Rustique Truffé",
+            exact: true,
+          })
+          .click()
         await expect(
           page.getByRole("region", {
             name:
@@ -213,7 +234,7 @@ for (const locale of ["en", "fr"])
         ) {
           await page.addStyleTag({ content: "html { font-size: 100% }" })
           await page.screenshot({
-            path: `../../docs/audits/assets/product-photos/${locale}-${mode}-${width}.png`,
+            path: `../../docs/audits/assets/menu-manager/photo-${locale}-${mode}-${width}.png`,
             fullPage: true,
           })
         }

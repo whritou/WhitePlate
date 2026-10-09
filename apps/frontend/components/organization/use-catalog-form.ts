@@ -8,12 +8,13 @@ import type { ActionState } from "@/types/organization"
 import type {
   CatalogFormAction,
   CatalogSubmit,
+  CatalogResult,
 } from "@/types/catalog-management"
 
 export function useCatalogForm(
   action: CatalogFormAction,
   resetOnSuccess = false,
-  onSuccess?: () => void,
+  onSuccess?: (result: Extract<CatalogResult, { ok: true }>) => void,
   successMessage?: string,
   onPendingChange?: (pending: boolean) => void
 ) {
@@ -25,6 +26,7 @@ export function useCatalogForm(
   const [state, setState] = useState<ActionState>({ status: "idle" })
   const submit: CatalogSubmit = (event) => {
     event.preventDefault()
+    event.stopPropagation()
 
     if (submitting.current) return
 
@@ -48,7 +50,7 @@ export function useCatalogForm(
 
         setState({ status: "success" })
         toast.success(successMessage ?? t("saved"))
-        onSuccess?.()
+        onSuccess?.(result)
         router.refresh()
       } catch {
         setState({ status: "error", error: "unavailable" })

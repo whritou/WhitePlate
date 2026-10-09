@@ -12,6 +12,11 @@ test("switching workspace tabs and products preserves an unsaved product draft",
   )
   await page.getByRole("tab", { name: "Menu & products", exact: true }).click()
 
+  await page
+    .getByRole("button", { name: "Select Soupe du potager", exact: true })
+    .click()
+  await page.getByRole("button", { name: "Edit product", exact: true }).click()
+
   const product = page.getByRole("form", {
     name: "Edit product Soupe du potager",
     exact: true,
@@ -20,18 +25,21 @@ test("switching workspace tabs and products preserves an unsaved product draft",
   await product
     .getByLabel("Name", { exact: true })
     .fill("Unsaved seasonal soup")
+  await page.getByRole("button", { name: "Close", exact: true }).click()
   await page
     .getByRole("button", {
       name: "Select Salade de tomates anciennes et burrata",
       exact: true,
     })
     .click()
+  await page.getByRole("button", { name: "Close", exact: true }).click()
   await page
     .getByRole("button", { name: "Select Soupe du potager", exact: true })
     .click()
   await expect(product.getByLabel("Name", { exact: true })).toHaveValue(
     "Unsaved seasonal soup"
   )
+  await page.getByRole("button", { name: "Close", exact: true }).click()
   await page
     .getByRole("tab", { name: "Translations & languages", exact: true })
     .click()
@@ -40,9 +48,22 @@ test("switching workspace tabs and products preserves an unsaved product draft",
   ).toBeVisible()
   await expect(page).toHaveURL(/context=keep/)
   await expect(page).toHaveURL(/view=translations/)
-  await page.getByLabel("Edit language", { exact: true }).selectOption("en")
-  await expect(page.getByText("Garden soup", { exact: true })).toBeVisible()
+
+  const translations = page.getByRole("tabpanel", {
+    name: "Translations & languages",
+    exact: true,
+  })
+
+  await translations
+    .getByLabel("Edit language", { exact: true })
+    .selectOption("en")
+  await expect(
+    translations.getByText("Garden soup", { exact: true })
+  ).toBeVisible()
   await page.getByRole("tab", { name: "Menu & products", exact: true }).click()
+  await page
+    .getByRole("button", { name: "Select Soupe du potager", exact: true })
+    .click()
   await expect(product.getByLabel("Name", { exact: true })).toHaveValue(
     "Unsaved seasonal soup"
   )
@@ -109,6 +130,11 @@ test("product save locks selection, rejects duplicate submissions and retains a 
     "true"
   )
 
+  await page
+    .getByRole("button", { name: "Select Soupe du potager", exact: true })
+    .click()
+  await page.getByRole("button", { name: "Edit product", exact: true }).click()
+
   const form = page.getByRole("form", {
     name: "Edit product Soupe du potager",
     exact: true,
@@ -141,13 +167,10 @@ test("product save locks selection, rejects duplicate submissions and retains a 
   await form.getByRole("button", { name: "Save changes", exact: true }).click()
   await startedPromise
   await expect(
-    page.getByRole("tab", { name: "Translations & languages", exact: true })
+    page.locator('[role="tab"]').filter({ hasText: "Translations & languages" })
   ).toBeDisabled()
   await expect(
-    page.getByRole("button", {
-      name: "Select Salade de tomates anciennes et burrata",
-      exact: true,
-    })
+    page.locator('[aria-label="Select Salade de tomates anciennes et burrata"]')
   ).toBeDisabled()
   await form.evaluate((element: HTMLFormElement) => element.requestSubmit())
   release()
@@ -157,7 +180,7 @@ test("product save locks selection, rejects duplicate submissions and retains a 
   )
   expect(writes).toBe(1)
   await expect(
-    page.getByRole("tab", { name: "Translations & languages", exact: true })
+    page.locator('[role="tab"]').filter({ hasText: "Translations & languages" })
   ).toBeEnabled()
   await page.unroute("**/catalog-design-test*")
   await page.route("**/catalog-design-test*", async (route) => {
@@ -207,7 +230,7 @@ test("category visibility errors preserve the saved state and recover controls",
   await expect(hide).toBeEnabled()
   await expect(page.getByText("Visible online", { exact: true })).toBeVisible()
   await expect(
-    page.getByRole("tab", { name: "Translations & languages", exact: true })
+    page.locator('[role="tab"]').filter({ hasText: "Translations & languages" })
   ).toBeEnabled()
 })
 
@@ -231,6 +254,21 @@ for (const locale of ["en", "fr"]) {
         "data-ready",
         "true"
       )
+      await page
+        .getByRole("button", {
+          name:
+            locale === "fr"
+              ? "Sélectionner Soupe du potager"
+              : "Select Soupe du potager",
+          exact: true,
+        })
+        .click()
+      await page
+        .getByRole("button", {
+          name: locale === "fr" ? "Modifier le produit" : "Edit product",
+          exact: true,
+        })
+        .click()
       for (const width of [320, 375, 390, 768, 1024, 1440, 1920]) {
         await page.setViewportSize({ width, height: 1000 })
         expect(
@@ -274,6 +312,13 @@ for (const locale of ["en", "fr"]) {
           () => document.documentElement.scrollWidth <= innerWidth
         )
       ).toBe(true)
+
+      await page
+        .getByRole("button", {
+          name: locale === "fr" ? "Fermer" : "Close",
+          exact: true,
+        })
+        .click()
 
       const tab = page.getByRole("tab", {
         name: locale === "fr" ? "Carte & Produits" : "Menu & products",

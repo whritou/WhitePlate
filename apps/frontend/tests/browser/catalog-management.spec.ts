@@ -78,6 +78,8 @@ test("owner creates, edits and archives catalog items with localized feedback", 
     .getByRole("button", { name: `Select ${productName}`, exact: true })
     .click()
 
+  await page.getByRole("button", { name: "Edit product", exact: true }).click()
+
   const edit = page.getByRole("form", {
     name: `Edit product ${productName}`,
     exact: true,
@@ -159,6 +161,8 @@ test("owner creates, edits and archives catalog items with localized feedback", 
     .getByRole("button", { name: `Select ${productName}`, exact: true })
     .click()
 
+  await page.getByRole("button", { name: "Edit product", exact: true }).click()
+
   const persisted = page.getByRole("form", {
     name: `Edit product ${productName}`,
     exact: true,
@@ -194,6 +198,8 @@ test("owner creates, edits and archives catalog items with localized feedback", 
   await persistedOption
     .getByRole("button", { name: "Cancel", exact: true })
     .click()
+
+  await page.getByRole("button", { name: "Close", exact: true }).click()
 
   await page.getByRole("button", { name: categoryName, exact: true }).click()
 
@@ -319,8 +325,9 @@ test("owner creates, edits and archives catalog items with localized feedback", 
     .getByRole("button", { name: "Confirmer l’archivage", exact: true })
     .click()
   await expect(
-    page.getByRole("heading", { name: productName, exact: true })
-  ).toHaveCount(0)
+    page.getByRole("button", { name: "Restaurer le produit", exact: true })
+  ).toBeVisible()
+  await page.getByRole("button", { name: "Fermer", exact: true }).click()
   await page.getByRole("button", { name: categoryName, exact: true }).click()
   await page
     .getByRole("button", { name: `Archiver ${categoryName}`, exact: true })

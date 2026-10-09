@@ -55,6 +55,7 @@ it("locks the modal until the mutation settles and closes only on success", asyn
 
   submit({
     preventDefault() {},
+    stopPropagation() {},
     currentTarget: {},
   } as FormEvent<HTMLFormElement>)
   await mocks.transitionTask
@@ -73,6 +74,7 @@ it("announces one generic success toast after a successful catalog mutation", as
   const form = { reset: vi.fn() }
   const event = {
     preventDefault: vi.fn(),
+    stopPropagation: vi.fn(),
     currentTarget: form,
   } as unknown as FormEvent<HTMLFormElement>
 
@@ -92,6 +94,7 @@ it("keeps catalog failures inline and does not announce success", async () => {
   const { submit } = useCatalogForm(action)
   const event = {
     preventDefault: vi.fn(),
+    stopPropagation: vi.fn(),
     currentTarget: {},
   } as unknown as FormEvent<HTMLFormElement>
 

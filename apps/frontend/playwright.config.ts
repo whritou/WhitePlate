@@ -19,7 +19,10 @@ export default defineConfig({
       testMatch: ["product-photos.spec.ts", "product-photo-guest.spec.ts"],
     },
     { name: "brand-assets", testMatch: "brand-assets.spec.ts" },
-    { name: "menu-builder", testMatch: "menu-builder.spec.ts" },
+    {
+      name: "menu-builder",
+      testMatch: ["menu-builder.spec.ts", "menu-manager.spec.ts"],
+    },
     {
       name: "responsive-layout",
       testMatch: ["responsive-layout.spec.ts", "public-responsive.spec.ts"],

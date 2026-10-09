@@ -46,6 +46,48 @@ function product(overrides: Partial<Record<string, string>> = {}) {
 
 afterEach(() => vi.resetAllMocks())
 
+it("returns the saved category for immediate selection in a product draft", async () => {
+  vi.mocked(whitePlateApi.post).mockResolvedValue({
+    ok: true,
+    status: 201,
+    data: { id: categoryId, name: "Mains", sortOrder: 2 },
+  })
+  expect(
+    await saveCategoryAction(form({ tenantId, name: "Mains", sortOrder: "2" }))
+  ).toEqual({
+    ok: true,
+    category: {
+      id: categoryId,
+      name: "Mains",
+      sortOrder: 2,
+      isVisible: true,
+      isArchived: false,
+      translations: {},
+    },
+  })
+})
+
+it("includes selected category in product updates", async () => {
+  vi.mocked(whitePlateApi.put).mockResolvedValue({
+    ok: true,
+    status: 200,
+    data: {},
+  })
+  await saveProductAction(product({ id: productId, isAvailable: "true" }))
+  expect(whitePlateApi.put).toHaveBeenCalledWith(
+    `/api/v1/tenants/${tenantId}/products/${productId}`,
+    {
+      categoryId,
+      name: "Soup",
+      description: "Fresh soup",
+      basePrice: 7.5,
+      taxRatePercent: 5.5,
+      sortOrder: 2,
+      isAvailable: true,
+    }
+  )
+})
+
 it.each(["true", "false"])(
   "sends explicit category visibility %s to the tenant-scoped endpoint",
   async (isVisible) => {
@@ -145,7 +187,7 @@ it("creates products with normalized decimal amounts and no browser authorizatio
   )
 })
 
-it("updates product availability without attempting to move categories", async () => {
+it("updates product availability with its selected category", async () => {
   vi.mocked(whitePlateApi.put).mockResolvedValue({
     ok: true,
     status: 200,
@@ -161,6 +203,7 @@ it("updates product availability without attempting to move categories", async (
     {
       name: "Soup",
       description: null,
+      categoryId,
       basePrice: 7.5,
       taxRatePercent: 5.5,
       sortOrder: 2,

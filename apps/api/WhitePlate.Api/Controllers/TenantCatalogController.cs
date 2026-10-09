@@ -197,7 +197,7 @@ public sealed class TenantCatalogController(
         if (identity is null) return Unauthorized();
         var result = await manageCatalog.UpdateProductAsync(new UpdateProductCommand(tenantId, productId,
             request.Name, request.Description, request.BasePrice, request.TaxRatePercent, request.SortOrder,
-            request.IsAvailable, identity), cancellationToken);
+            request.IsAvailable, identity, request.CategoryId), cancellationToken);
         return result.IsSuccess ? Ok(result.Value) : errors.ToActionResult(errors.Create(HttpContext, result.Error));
     }
 

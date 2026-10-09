@@ -36,6 +36,7 @@ export function ArchiveCatalogButton({
   entityType,
   name,
   compact,
+  onPendingChange,
 }: ArchiveButtonProps) {
   const t = useTranslations("Catalog")
   const [confirming, setConfirming] = useState(false)
@@ -43,7 +44,8 @@ export function ArchiveCatalogButton({
     archiveCatalogItemAction,
     false,
     () => setConfirming(false),
-    t("archived")
+    t("archived"),
+    onPendingChange
   )
   const submitting = pending || state.status === "pending"
 

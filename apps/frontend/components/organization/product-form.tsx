@@ -1,6 +1,7 @@
 "use client"
 
 import { useTranslations } from "next-intl"
+import { useState } from "react"
 import { saveProductAction } from "@/actions/catalog"
 import { ResultMessage } from "@/components/auth/result-message"
 import { EditorFormActions } from "@/components/ui/editor-dialog"
@@ -9,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
 import { useCatalogForm } from "./use-catalog-form"
+import { ProductCategoryField } from "./product-category-field"
 import type { ProductFormProps } from "@/types/catalog-management"
 
 export function ProductForm({
@@ -20,6 +22,7 @@ export function ProductForm({
   onPendingChange,
   onCancel,
   studio,
+  onDirtyChange,
 }: ProductFormProps) {
   const t = useTranslations("Catalog")
   const { pending, state, submit } = useCatalogForm(
@@ -30,16 +33,15 @@ export function ProductForm({
     onPendingChange
   )
   const prefix = product?.id ?? "new-product"
-  const activeCategories = categories.filter((category) => !category.isArchived)
-
-  if (!product && activeCategories.length === 0)
-    return (
-      <p className="text-sm text-muted-foreground">{t("categoryRequired")}</p>
-    )
+  const [categoryPending, setCategoryPending] = useState(false)
 
   return (
     <form
       onSubmit={submit}
+      onChange={(event) => {
+        if (event.currentTarget.contains(event.target as Node))
+          onDirtyChange?.()
+      }}
       aria-label={
         product ? t("editProduct", { name: product.name }) : t("newProduct")
       }
@@ -49,36 +51,25 @@ export function ProductForm({
 
       {product && <input type="hidden" name="id" value={product.id} />}
 
-      {product && (
-        <input type="hidden" name="categoryId" value={product.categoryId} />
-      )}
-
       <fieldset
-        disabled={pending}
+        disabled={pending || categoryPending}
         className={
           studio
-            ? "grid gap-5 sm:grid-cols-2 xl:grid-cols-4"
-            : "grid gap-4 sm:grid-cols-2"
+            ? "grid min-w-0 gap-5 sm:grid-cols-2 xl:grid-cols-4"
+            : "grid min-w-0 gap-4 sm:grid-cols-2"
         }
       >
-        {!product && (
-          <Label htmlFor={`${prefix}-category`} className="grid gap-2">
-            {t("category")}
-
-            <NativeSelect
-              id={`${prefix}-category`}
-              name="categoryId"
-              aria-label={t("category")}
-              defaultValue={activeCategories[0].id}
-            >
-              {activeCategories.map((category) => (
-                <NativeSelectOption key={category.id} value={category.id}>
-                  {category.name}
-                </NativeSelectOption>
-              ))}
-            </NativeSelect>
-          </Label>
-        )}
+        <ProductCategoryField
+          tenantId={tenantId}
+          categories={categories}
+          initialId={product?.categoryId}
+          prefix={prefix}
+          onCreated={onDirtyChange}
+          onPendingChange={(value) => {
+            setCategoryPending(value)
+            onPendingChange?.(value)
+          }}
+        />
 
         <Label
           htmlFor={`${prefix}-name`}

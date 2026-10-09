@@ -60,6 +60,8 @@ When settling an open architecture decision, record its date, status, context, c
 
 ## M1 Menu Builder — 2026-10-08
 
+The 9 October menu-manager follow-up replaces the picker/inline editor with product/category tables and a right-side product sheet containing extras, translations and photos. Category creation is available from page actions and product forms; category reassignment and keyboard display-order saves are persisted. Descriptions remain plain text by user decision. See [current evidence and remaining acceptance](audits/menu-manager.md).
+
 The combined catalog/language workspace and persisted category hiding are implemented in source. Local verification and separate remaining shared-database/hosted acceptance are in [M1 evidence](audits/menu-builder.md). The generated visibility migration is not applied to shared environments; other management roadmap cards remain separate.
 
 ## T1 brand assets — 2026-10-08

@@ -271,29 +271,20 @@ function CatalogSkeleton() {
         </Region>
       </div>
 
-      <Region
-        name="catalog-list"
-        className="grid items-start gap-6 lg:grid-cols-[14rem_minmax(0,1fr)] xl:grid-cols-[16rem_minmax(0,1fr)]"
-      >
-        <div className="grid gap-5">
-          <Region name="catalog-categories">
-            <CardSkeleton className="min-h-80" lines={5} />
-          </Region>
+      <Region name="catalog-list" className="grid min-w-0 gap-6">
+        <Region name="catalog-actions" className="flex flex-wrap gap-3">
+          <Skeleton className="h-12 w-40 max-w-full" />
 
-          <Region name="catalog-products">
-            <CardSkeleton className="min-h-48" lines={3} />
-          </Region>
-        </div>
+          <Skeleton className="h-12 w-40 max-w-full" />
+        </Region>
 
-        <div className="grid gap-6">
-          <Region name="catalog-editor">
-            <CardSkeleton className="min-h-96" lines={8} />
-          </Region>
+        <Region name="catalog-products">
+          <CardSkeleton className="min-h-80" lines={6} />
+        </Region>
 
-          <Region name="catalog-options">
-            <CardSkeleton className="min-h-48" lines={4} />
-          </Region>
-        </div>
+        <Region name="catalog-categories">
+          <CardSkeleton className="min-h-48" lines={4} />
+        </Region>
       </Region>
     </>
   )
