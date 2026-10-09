@@ -385,3 +385,11 @@ Local fixture/browser and API persistence results are recorded separately in [M1
 - Compare the supplied reference at 320/375/390/768/1024/1440px and wide desktop, EN/FR, light/dark, keyboard, 200% text and reduced motion. Check 44px phone/48px tablet targets, wrapping, contrast and dialogs without document overflow.
 
 Guarded shared-database browser acceptance and hosted verification remain outstanding; fixture synthetic save responses are not accepted as database read-back evidence.
+
+## T1 brand assets acceptance
+
+Source checks: `dotnet test apps/api/WhitePlate.slnx`; frontend `npm test`, `npm run lint`, `npm run typecheck`, `npm run format:check`, `npm run build`; focused browser fixtures with `node node_modules/@playwright/test/cli.js test --project brand-assets` against the development server. Fixture screenshots and intercepted storage responses are UI evidence only.
+
+Hosted acceptance remains separate: configure a private bucket and reviewed migrations; use two persisted tenants and a manager plus kitchen identity. Upload actual PNG/JPEG/WebP logos/banners and PNG/multisize ICO favicons, inspect normalized dimensions/transparency/crop, save and reload the workspace, then read bytes from the corresponding public tenant host. Uploading a draft must not change public bytes. Fail storage during replacement/save and verify the prior image persists. Remove each slot and verify logo/banner/default favicon fallbacks. Try invalid signatures, SVG, APNG/animated WebP, over-limit bytes/pixels, stale/missing preconditions and simultaneous saves. Verify cross-tenant IDs cannot read/overwrite drafts, kitchen is denied, membership revocation denies new previews/writes, and inactive hosts cannot read assets. Verify cleanup claims only expired private rows, retains active objects, survives provider failure, and eventually removes pending/retired objects without orphaning active pointers. Confirm provider version lifecycle separately.
+
+Check EN/FR, light/dark, 320/375/390/768/1024/1440/1920px, keyboard upload/confirmation focus return, 200% text sizing, reduced motion, contrast and 44px/48px actions. Verify the real reverse-proxy and Vercel upload limit and the Linux native decoder. Record migration application, actual S3 read-back and hosted public-delivery checks independently; do not mark the card Done from fixtures.

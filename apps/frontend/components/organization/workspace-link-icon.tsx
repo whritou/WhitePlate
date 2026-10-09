@@ -5,6 +5,7 @@ import {
   LayoutDashboard,
   Plus,
   Settings2,
+  Palette,
   UsersRound,
   UtensilsCrossed,
 } from "lucide-react"
@@ -25,7 +26,9 @@ export function WorkspaceLinkIcon({ href }: { href: string }) {
               ? History
               : path.endsWith("/orders")
                 ? UtensilsCrossed
-                : LayoutDashboard
+                : path.endsWith("/theming")
+                  ? Palette
+                  : LayoutDashboard
 
   return <Icon aria-hidden="true" className="size-5 shrink-0" />
 }

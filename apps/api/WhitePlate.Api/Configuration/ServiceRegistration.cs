@@ -147,6 +147,7 @@ public static class ServiceRegistration
             options.AddOperationTransformer<AuthenticationRequirementOperationTransformer>();
         });
         services.AddSingleton(TimeProvider.System);
+        services.AddBrandMedia(configuration);
         return services;
     }
 }

@@ -11,10 +11,15 @@ export function buildJsonRequestInit(
     idempotencyKey,
     ifMatch,
     signal,
+    bodyType,
   } = options
   const headers = new Headers({ Accept: "application/json" })
 
-  if (body !== undefined) headers.set("Content-Type", "application/json")
+  if (body !== undefined)
+    headers.set(
+      "Content-Type",
+      bodyType === "binary" ? "application/octet-stream" : "application/json"
+    )
   if (bearerToken) headers.set("Authorization", `Bearer ${bearerToken}`)
   if (idempotencyKey) headers.set("Idempotency-Key", idempotencyKey)
   if (ifMatch) headers.set("If-Match", ifMatch)
@@ -22,7 +27,11 @@ export function buildJsonRequestInit(
   return {
     method,
     headers,
-    ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+    ...(body === undefined
+      ? {}
+      : {
+          body: bodyType === "binary" ? (body as Blob) : JSON.stringify(body),
+        }),
     cache: "no-store",
     redirect: "error",
     credentials,

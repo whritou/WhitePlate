@@ -24,6 +24,7 @@ export async function generateMetadata({
   return storefront.kind === "menu"
     ? {
         title: storefront.menu.restaurantName,
+        icons: { icon: [{ url: "/api/public/brand-assets/favicon" }] },
         description: t("storefrontDescription", {
           restaurant: storefront.menu.restaurantName,
         }),

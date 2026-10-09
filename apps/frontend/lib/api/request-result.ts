@@ -51,7 +51,7 @@ export async function parseJsonResponse<T>(
   response: Response,
   diagnostic: ApiDiagnostic,
   onDiagnostic?: (diagnostic: ApiDiagnostic) => void,
-  responseType: "json" | "none" = "json"
+  responseType: "json" | "none" | "image" = "json"
 ): Promise<ApiResult<T>> {
   if (!response.ok) {
     return requestFailure(
@@ -66,6 +66,19 @@ export async function parseJsonResponse<T>(
       },
       onDiagnostic
     )
+  }
+
+  if (responseType === "image") {
+    const contentType = response.headers.get("content-type")?.split(";", 1)[0]
+
+    if (contentType !== "image/png" && contentType !== "image/webp")
+      return requestFailure(502, diagnostic, onDiagnostic)
+
+    return {
+      ok: true,
+      status: response.status,
+      data: (await response.blob()) as T,
+    }
   }
 
   if (
@@ -87,7 +100,8 @@ export async function parseJsonResponse<T>(
 }
 
 function mapHttpStatus(status: number): ApiError {
-  if (status === 400 || status === 422) return "invalid"
+  if (status === 400 || status === 413 || status === 415 || status === 422)
+    return "invalid"
   if (status === 401) return "unauthorized"
   if (status === 403) return "forbidden"
   if (status === 404) return "not_found"

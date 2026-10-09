@@ -24,6 +24,9 @@ export type RequestOptions = {
   signal?: AbortSignal
   idempotencyKey?: string
   ifMatch?: string
+  bodyType?: "binary"
+  responseType?: "json" | "none" | "image"
+  onUploadProgress?: (percent: number) => void
 }
 
 export type ApiRequestFactoryOptions = {
@@ -42,7 +45,6 @@ export type JsonRequestOptions = RequestOptions & {
   method?: ApiDiagnostic["method"]
   body?: unknown
   bearerToken?: string
-  responseType?: "json" | "none"
 }
 
 export type JsonRequestClientOptions = {

@@ -12,6 +12,7 @@ export type WorkspaceNavigationTranslationKey =
   | "orderHistory"
   | "catalog"
   | "menuLanguages"
+  | "theming"
 
 export type WorkspaceNavigationLink = {
   href: string

@@ -54,6 +54,18 @@ An HTTP-only API run may warn that it cannot determine the HTTPS port. This does
 
 ## Configuration
 
+### Brand media storage (T1)
+
+The API uses private S3-compatible storage. Supply server-only environment variables `Media__Endpoint` (HTTPS origin), `Media__Region` (signing region, including provider-specific `auto` where supported), `Media__Bucket`, `Media__AccessKey`, and `Media__SecretKey`. `Media__ForcePathStyle` defaults to `true`; adjust for your provider. `Media__AllowLocalHttp=true` permits only loopback HTTP for a local emulator. Do not expose these settings through frontend environment variables. No bucket is provisioned automatically and no public ACL is written.
+
+Provision a private bucket with public access blocked. Restrict the API credential to GetObject/PutObject/DeleteObject under `tenants/*/media/*`; use the provider's encryption and access controls. Provider versioning and noncurrent-object lifecycle, backup retention and credential rotation remain operator responsibilities. A configured client is not a storage health check: the listing's `storageAvailable` flag indicates valid configuration; network/provider failures return safe retryable errors.
+
+Review/apply `BrandMediaAssets` and `BrandMediaPublicationState` and preceding migrations deliberately before deployment. The API does not migrate on startup. Upload requests pass through the frontend BFF and API as binary bodies, with limits of 2 MiB/1 MiB/4 MiB for logo/favicon/banner; keep proxy limits at least 4 MiB. The SDK and native image decoder ship in the API image; verify decoding and storage on the target Linux image. The hourly cleanup worker runs at startup too, claims expired private metadata before deleting objects, and retries on failure. Pending uploads expire after 24 hours; retired assets after seven days. At most 20 retained unpublished uploads are allowed per tenant.
+
+The protected route is `/en/organization/theming?tenantId=<restaurant-id>` (or `/fr/…`). Uploading creates a private processed preview. Save immediately changes that asset slot; whole-theme publication is T3. Missing configuration disables upload controls with a retryable unavailable state; other API features remain usable. Public delivery uses the existing validated tenant-host configuration and fixed API template. No storage URLs or API tokens reach client components. See [T1 verification](audits/brand-assets.md) for the distinction between source/fixture tests and real S3/hosted acceptance.
+
+### Other runtime configuration
+
 | Source | Current purpose |
 | --- | --- |
 | `apps/frontend/next.config.ts` | next-intl plugin; authenticated server actions use `API_BASE_URL` |

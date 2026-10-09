@@ -21,7 +21,7 @@ The settings screenshot shows the active opening-hours panel; its HTML also cont
 
 ## Current boundaries and overlap
 
-Existing source already implements tenant catalog availability, localized descriptions, guest checkout without payment, order history, the kitchen Kanban and REST/SignalR recovery. The demo dashboard uses in-memory controls and sample metrics; live kitchen metrics are explicitly illustrative. Tenant themes, brand upload storage, scheduling, transactional guest-order email, Stripe connection and operational analytics remain future work.
+Existing source already implements tenant catalog availability, localized descriptions, guest checkout without payment, order history, the kitchen Kanban and REST/SignalR recovery. The demo dashboard uses in-memory controls and sample metrics; live kitchen metrics are explicitly illustrative. Tenant themes, scheduling, transactional guest-order email, Stripe connection and operational analytics remain future work.
 
 The initial planning pass reviewed all 89 existing project items; the follow-up reviewed the resulting 102 items before adding the missing menu-builder and live-orders work. Reuse the completed kitchen, catalog, organization shell and design-system work. Existing In review storefront unavailable-product acceptance and hosted SignalR delivery/reconnect retain their own scope; the new cards link to them rather than duplicating their implementation.
 
@@ -55,6 +55,8 @@ Manual/phone order entry is explicitly excluded by the user, even though the liv
 Reference: theming. Dependencies: none.
 
 Build tenant-owned brand media upload, replacement and removal using the supplied Brand Identity Assets card.
+
+Implementation update (2026-10-08): T1 is implemented in source with private S3-compatible storage and individual asset saves. Shared migration application, actual provider and hosted two-tenant acceptance remain pending; see [T1 evidence](../audits/brand-assets.md). The checklist below retains the complete acceptance scope.
 
 Acceptance criteria:
 

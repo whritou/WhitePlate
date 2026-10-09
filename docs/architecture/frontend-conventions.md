@@ -82,3 +82,7 @@ Primary references consulted for this cleanup:
 - [shadcn Native Select](https://ui.shadcn.com/docs/components/base/native-select)
 
 Record the actual commands and limits in [verification evidence](../documentation-review.md). Do not mark live acceptance or production configuration complete based on source wiring.
+
+## Binary brand media transport
+
+The shared request factory exposes `upload` and `image`; JSON remains the default. Binary uploads set `application/octet-stream` without JSON/base64 conversion. The shared client owns XHR upload progress for browser requests, and the same safe response parser accepts only PNG/WebP image responses. Feature components/hooks call the brand browser adapter; server services use the existing token-aware factory. The BFF enforces bounded stream reads and exact mutation origin before forwarding. Private images use same-origin, no-store routes and bypass Next's shared image optimizer.

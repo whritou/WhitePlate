@@ -10,5 +10,7 @@ public enum ErrorCode
     Forbidden,
     PreconditionFailed,
     PreconditionRequired,
-    Unexpected
+    Unexpected,
+    Unavailable,
+    RateLimited
 }

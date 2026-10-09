@@ -9,6 +9,7 @@ namespace WhitePlate.Infrastructure.Persistence;
 
 public sealed class WhitePlateDbContext(DbContextOptions<WhitePlateDbContext> options) : DbContext(options)
 {
+    public DbSet<WhitePlate.Domain.Media.MediaAsset> MediaAssets => Set<WhitePlate.Domain.Media.MediaAsset>();
     public DbSet<Organization> Organizations => Set<Organization>();
     public DbSet<OrganizationOwnerMembership> OrganizationOwnerMemberships => Set<OrganizationOwnerMembership>();
     public DbSet<RestaurantMembership> RestaurantMemberships => Set<RestaurantMembership>();

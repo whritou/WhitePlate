@@ -1,0 +1,33 @@
+using WhitePlate.Domain.Media;
+
+namespace WhitePlate.Application.Media;
+
+public sealed record MediaAssetDto(Guid Id, string Slot, string ContentType, int Width, int Height, long Bytes);
+public sealed record BrandAssetsDto(bool StorageAvailable, IReadOnlyList<MediaAssetDto> Assets);
+public sealed record NormalizedImage(byte[] Bytes, string ContentType, int Width, int Height);
+public sealed record MediaContent(byte[] Bytes, string ContentType);
+public sealed class MediaUnavailableException : Exception;
+public sealed class InvalidMediaException : Exception;
+
+public interface IMediaStorage
+{
+    bool IsAvailable { get; }
+    Task PutAsync(string key, byte[] bytes, string contentType, CancellationToken cancellationToken);
+    Task<byte[]> GetAsync(string key, CancellationToken cancellationToken);
+    Task DeleteAsync(string key, CancellationToken cancellationToken);
+}
+
+public interface IMediaImageProcessor
+{
+    Task<NormalizedImage> NormalizeAsync(string slot, string aspect, byte[] bytes, CancellationToken cancellationToken);
+}
+
+public interface IMediaRepository
+{
+    Task<IReadOnlyList<MediaAsset>> ActiveAsync(Guid tenantId, CancellationToken cancellationToken);
+    Task<MediaAsset?> FindAsync(Guid tenantId, Guid id, CancellationToken cancellationToken);
+    Task<bool> AddPendingAsync(MediaAsset asset, CancellationToken cancellationToken);
+    Task MarkReadyAsync(MediaAsset asset, CancellationToken cancellationToken);
+    Task<bool> SetActiveAsync(Guid tenantId, string slot, Guid? candidateId, Guid? expectedId,
+        DateTimeOffset now, CancellationToken cancellationToken);
+}
