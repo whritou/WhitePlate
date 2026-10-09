@@ -63,6 +63,10 @@ export function buildWorkspaceNavigation(
         href: `/organization/catalog?tenantId=${tenantId}`,
         label: translate("catalog"),
       })
+      links.push({
+        href: `/organization/theming?tenantId=${tenantId}`,
+        label: translate("theming"),
+      })
     }
 
     sections.push({

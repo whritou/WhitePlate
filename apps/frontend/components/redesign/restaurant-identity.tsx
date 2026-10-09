@@ -15,6 +15,7 @@ import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card } from "@/components/ui/card"
+import { BrandAssetImage } from "@/components/brand/asset-image"
 
 export function RestaurantIdentity({
   name,
@@ -28,6 +29,7 @@ export function RestaurantIdentity({
   illustrative?: boolean
 }) {
   const t = useTranslations("Redesign")
+  const brand = useTranslations("BrandAssets")
   const [favorite, setFavorite] = useState(false)
   const [shared, setShared] = useState(false)
 
@@ -43,14 +45,23 @@ export function RestaurantIdentity({
   return (
     <section className="relative">
       <div className="relative h-56 overflow-hidden bg-foreground sm:h-72 lg:h-80">
-        <Image
-          src="/design/photo-13.webp"
-          alt=""
-          fill
-          sizes="100vw"
-          preload
-          className="object-cover brightness-75"
-        />
+        {illustrative ? (
+          <Image
+            src="/design/photo-13.webp"
+            alt=""
+            fill
+            sizes="100vw"
+            preload
+            className="object-cover brightness-75"
+          />
+        ) : (
+          <BrandAssetImage
+            src="/api/public/brand-assets/banner"
+            label={brand("bannerFallback")}
+            cover
+            className="h-full w-full"
+          />
+        )}
 
         <div className="absolute inset-0 bg-gradient-to-t from-obsidian via-obsidian/30 to-transparent" />
       </div>
@@ -59,13 +70,21 @@ export function RestaurantIdentity({
         <Card className="gap-5 border-0 bg-card p-4 shadow-lg sm:p-6 lg:p-8">
           <div className="flex flex-wrap items-center justify-between gap-5">
             <div className="flex min-w-0 flex-1 basis-64 flex-col items-start gap-3 sm:flex-row sm:gap-4">
-              <Image
-                src="/design/photo-14.webp"
-                width={88}
-                height={88}
-                alt=""
-                className="size-16 shrink-0 rounded-lg object-cover sm:size-22"
-              />
+              {illustrative ? (
+                <Image
+                  src="/design/photo-14.webp"
+                  width={88}
+                  height={88}
+                  alt=""
+                  className="size-16 shrink-0 rounded-lg object-cover sm:size-22"
+                />
+              ) : (
+                <BrandAssetImage
+                  src="/api/public/brand-assets/logo"
+                  label={brand("logoFallback")}
+                  className="size-16 shrink-0 rounded-lg bg-card sm:size-22"
+                />
+              )}
 
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-3">

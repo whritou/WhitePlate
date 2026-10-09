@@ -14,6 +14,7 @@ export default defineConfig({
   timeout: 120_000,
   expect: { timeout: 20_000 },
   projects: [
+    { name: "brand-assets", testMatch: "brand-assets.spec.ts" },
     { name: "menu-builder", testMatch: "menu-builder.spec.ts" },
     {
       name: "responsive-layout",

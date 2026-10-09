@@ -133,3 +133,20 @@ Errors use `ApiProblemResponse` with `application/problem+json`, `type: about:bl
 ## M1 category visibility — 2026-10-08
 
 Management category responses include required `isVisible` (boolean). New and migrated categories default to `true`. `PUT /api/v1/tenants/{tenantId}/categories/{categoryId}/visibility` accepts an explicit JSON boolean and returns `204`; absent/null/invalid values return `400`, missing identity returns `401`, and unauthorized, foreign or archived categories return `404`. It changes only visibility, preserving archive, ordering and product availability. Public menus omit hidden categories and their products. New checkout attempts with products under hidden categories fail with the existing `404` unavailable-item result; existing order snapshots are unchanged. Ordering continues through existing category/product updates. API and migration must precede frontend rollout; see [M1 verification](../audits/menu-builder.md).
+
+## T1 brand assets — implemented source, hosted acceptance pending
+
+Protected owner/manager routes resolve persisted membership on every operation. Unknown or unauthorized tenants/assets return the same 404; missing authentication returns 401. Responses and image delivery are no-store. A browser tenant ID never grants access.
+
+| Method/path under `/api/v1` | Request | Success |
+| --- | --- | --- |
+| GET `/tenants/{tenantId}/brand-assets` | None | 200 `{ storageAvailable, assets: [{ id, slot, contentType, width, height, bytes }] }` |
+| POST `/tenants/{tenantId}/brand-assets/{slot}/uploads?aspect=16:9` | Raw binary, `Content-Type: application/octet-stream`; aspect also accepts `21:9` | 201 normalized private asset metadata |
+| GET `/tenants/{tenantId}/brand-assets/uploads/{assetId}` | Authenticated read | 200 PNG/WebP bytes for ready, unexpired tenant-owned media |
+| PUT `/tenants/{tenantId}/brand-assets/{slot}` | `{ "assetId": "<draft-guid>" }`, `If-Match: "<current-guid>"` or `"none"` | 204; draft becomes current immediately |
+| DELETE `/tenants/{tenantId}/brand-assets/{slot}` | Same precondition | 204; current slot removed, fallback restored |
+| GET `/brand-assets/{slot}` | Active tenant resolved from actual host; no private asset selector | 200 current PNG/WebP or 404 when absent |
+
+Slots are `logo`, `favicon`, `banner`. Upload alone never publishes. Save checks tenant, slot, readiness, expiry and prior publication; retired media cannot be republished as a draft. A serializable transaction compares the expected current ID before swapping pointers. Missing precondition is 428; stale precondition is 412. The old asset remains current after failed validation/storage/save. Normalization rules and limits are in [decision 0007](../architecture/decisions/0007-brand-media-storage.md). Invalid files return 400, oversized transport may return 413, unsupported transport type returns 415, and storage failures return 503 `unavailable`. A maximum of 20 retained unpublished uploads per tenant returns 429 `rate_limited`; serialization contention on pending creation also asks the client to retry.
+
+The same-origin BFF at `/api/brand-assets` validates selectors and body limits, requires the exact configured auth origin on mutations, and keeps tokens server-side. It forwards original binary bytes using the shared request factory. `/api/public/brand-assets/{slot}` derives its upstream solely from the validated incoming tenant host and fixed server configuration, ignores browser tenant selectors, and serves only public slot reads. A missing saved favicon falls back to `/favicon.ico`. `storageAvailable` means configured, not a verified provider health result.

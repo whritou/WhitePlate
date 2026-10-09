@@ -15,6 +15,13 @@ export function createApiRequestFactory(
   const request = createApiRequest(configuration)
 
   return {
+    upload: <T>(path: string, body: Blob, options?: RequestOptions) =>
+      request<T>("POST", path, body, { ...options, bodyType: "binary" }),
+    image: (path: string, options?: RequestOptions) =>
+      request<Blob>("GET", path, undefined, {
+        ...options,
+        responseType: "image",
+      }),
     get: <T>(path: string, options?: RequestOptions) =>
       request<T>("GET", path, undefined, options),
     post: <T, B = unknown>(path: string, body: B, options?: RequestOptions) =>

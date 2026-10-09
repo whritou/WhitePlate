@@ -12,6 +12,8 @@ public sealed class ApiErrorMapper(ILogger<ApiErrorMapper> logger)
     {
         var (status, code, title, message) = error.Code switch
         {
+            ErrorCode.Unavailable => (503, "unavailable", "Service Unavailable", "The service is temporarily unavailable. Please try again."),
+            ErrorCode.RateLimited => (429, "rate_limited", "Too Many Requests", "Too many requests. Please try again later."),
             ErrorCode.ValidationFailed => (400, "validation_failed", "Bad Request", "One or more request fields are invalid."),
             ErrorCode.NotFound => (404, "not_found", "Not Found", "The requested resource was not found."),
             ErrorCode.Conflict => (409, "conflict", "Conflict", "The request conflicts with the current resource state."),
