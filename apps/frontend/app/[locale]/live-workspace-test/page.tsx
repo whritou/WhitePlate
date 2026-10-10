@@ -1,3 +1,5 @@
+import { Link } from "@/i18n/navigation"
+import { OrganizationTeamDirectory } from "@/components/organization/organization-team-directory"
 import { notFound } from "next/navigation"
 import { getLocale } from "next-intl/server"
 import { WorkspaceShell } from "@/components/organization/workspace-shell"
@@ -30,35 +32,44 @@ export default async function LiveWorkspaceFixture({
 
   if (query.view === "store")
     return (
-      <RestaurantMenu
-        step={query.step === "checkout" ? "checkout" : "shop"}
-        menu={{
-          tenantId,
-          restaurantName: "Maison Verte",
-          restaurantDescription: "Cuisine de saison",
-          currency: "EUR",
-          locale: "fr",
-          defaultLocale: "fr",
-          availableLocales: ["fr", "en"],
-          categories: [
-            {
-              id: "c1",
-              name: "Entrées",
-              sortOrder: 0,
-              products: [
-                {
-                  id: "33333333-3333-4333-8333-333333333333",
-                  name: "Burrata & tomates anciennes",
-                  description: "Basilic et tomates",
-                  basePrice: 11,
-                  isAvailable: true,
-                  optionGroups: [],
-                },
-              ],
-            },
-          ],
-        }}
-      />
+      <>
+        <Link
+          href="/live-workspace-test?view=store&step=checkout"
+          className="block border-b p-2 text-xs"
+        >
+          Fixture checkout
+        </Link>
+
+        <RestaurantMenu
+          step={query.step === "checkout" ? "checkout" : "shop"}
+          menu={{
+            tenantId,
+            restaurantName: "Maison Verte",
+            restaurantDescription: "Cuisine de saison",
+            currency: "EUR",
+            locale: "fr",
+            defaultLocale: "fr",
+            availableLocales: ["fr", "en"],
+            categories: [
+              {
+                id: "c1",
+                name: "Entrées",
+                sortOrder: 0,
+                products: [
+                  {
+                    id: "33333333-3333-4333-8333-333333333333",
+                    name: "Burrata & tomates anciennes",
+                    description: "Basilic et tomates",
+                    basePrice: 11,
+                    isAvailable: true,
+                    optionGroups: [],
+                  },
+                ],
+              },
+            ],
+          }}
+        />
+      </>
     )
 
   return (
@@ -70,7 +81,34 @@ export default async function LiveWorkspaceFixture({
         Development fixture · No authentication bypass on production routes
       </p>
 
-      {query.view === "studio" ? (
+      {query.view === "team" ? (
+        <main className="live-page">
+          <h1 className="mb-6 font-display text-4xl font-bold">Maison Verte</h1>
+
+          {await OrganizationTeamDirectory({
+            organizationId: organization.id,
+            members: [
+              {
+                role: "RestaurantManager",
+                email: "manager@example.test",
+                tenantId,
+                tenantName: organization.name,
+              },
+            ],
+            invitations: [
+              {
+                id: "44444444-4444-4444-8444-444444444444",
+                role: "KitchenStaff",
+                email: "invite@example.test",
+                tenantId,
+                tenantName: organization.name,
+                status: "Pending",
+                expiresAt: "2026-10-20T12:00:00Z",
+              },
+            ],
+          })}
+        </main>
+      ) : query.view === "studio" ? (
         <LiveStudio
           key={`${userId}:${tenantId}`}
           userId={userId}

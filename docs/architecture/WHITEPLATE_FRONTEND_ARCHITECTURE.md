@@ -1,6 +1,6 @@
 # WhitePlate frontend architecture
 
-The approved Lovable design now also covers real workspaces and tenant customer shells. See [real routes, connected operations and explicit fictitious drafts](../lovable-live-workspace.md). Existing backend contracts are retained; hosted acceptance remains separate.
+The approved Lovable design now also covers real workspaces, tenant customer shells and account screens. See [real routes, connected operations and explicit fictitious drafts](../lovable-live-workspace.md). Existing backend contracts are retained; hosted acceptance remains separate.
 
 Public marketing and `/[locale]/demo` routes now use the scoped Lovable components. Thin App Router entries render isolated client models/views; existing tenant-host routing and real authenticated/guest services remain unchanged. The demo layout uses its own sample BackofficeProvider, and browser storage is explicitly demo-prefixed. See [route mapping, design, assets and backend connections](../lovable-migration.md). Earlier Stitch landing/demo descriptions below are superseded only for those routes; retained shared components still serve real screens.
 
@@ -176,3 +176,7 @@ Category visibility and ordering use the existing action/service/HTTP boundaries
 ## T1 brand asset workspace
 
 `/[locale]/organization/theming?tenantId=…` is a session-guarded owner/manager route in the existing organization shell. `components/organization/brand-assets-*` supplies the Stitch asset card and responsive brand preview; `hooks/use-brand-slot` keeps independent private drafts and retry state. TanStack keys include account, tenant and app locale. Services remain server-only behind `/api/brand-assets`; both translation catalogs include all UI states. Shared HTTP adapters now support bounded binary upload/image responses and real browser-to-BFF upload progress. They retain origin/path/token policy and safe status mapping. Public storefront branding uses `/api/public/brand-assets/{slot}`, whose upstream comes from the validated host and configured tenant template. The image component uses unoptimized same-origin requests so private previews never pass through a shared image optimizer. Development-only `/[locale]/brand-design-test` is a UI fixture and returns 404 in production.
+
+### Restored Lovable screen compositions
+
+`components/auth/auth-frame.tsx` adapts the recovered `AuthPage.tsx` composition while existing hooks/actions retain Better Auth. Real catalog/category navigation, Kanban lanes/tickets, history and team tables, Studio media sidebar, dashboard metrics/table and creation forms now follow source recipes. `live-checkout.tsx` uses the existing guest controller; `live-tracking-progress.tsx` consumes existing tracking status. Settings read restaurant records only after matching an authorized owner organization. No API contract was extended. Missing service-slot/contact/payment and custom-permission controls remain visibly illustrative. See [current mappings and verification](../lovable-live-workspace.md).

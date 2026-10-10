@@ -3,10 +3,13 @@ import { renderToStaticMarkup } from "react-dom/server"
 import { beforeEach, expect, it, vi } from "vitest"
 import OrganizationSettingsPage from "./page"
 
-const { getSession, getOrganizations } = vi.hoisted(() => ({
-  getSession: vi.fn(),
-  getOrganizations: vi.fn(),
-}))
+const { getSession, getOrganizations, getOrganizationRestaurants } = vi.hoisted(
+  () => ({
+    getSession: vi.fn(),
+    getOrganizations: vi.fn(),
+    getOrganizationRestaurants: vi.fn(),
+  })
+)
 
 vi.mock("@/lib/auth", () => ({ auth: { api: { getSession } } }))
 vi.mock("@/components/organization/live-settings", async () => {
@@ -26,6 +29,7 @@ vi.mock("@/components/ui/toast", () => ({
 
 vi.mock("@/services/organization-queries", () => ({
   getOrganizations,
+  getOrganizationRestaurants,
 }))
 
 vi.mock("@/i18n/navigation", async () => {
@@ -76,6 +80,11 @@ const organizationId = "11111111-1111-4111-8111-111111111111"
 
 beforeEach(() => {
   vi.clearAllMocks()
+  getOrganizationRestaurants.mockResolvedValue({
+    ok: true,
+    status: 200,
+    data: [],
+  })
   getSession.mockResolvedValue({ user: { emailVerified: true } })
   getOrganizations.mockResolvedValue({
     ok: true,
@@ -90,6 +99,7 @@ it("renders settings only for an organization in the owner list", async () => {
   })
   const html = renderToStaticMarkup(createElement(() => page))
 
+  expect(getOrganizationRestaurants).toHaveBeenCalledWith(organizationId)
   expect(html).toContain("Organization name")
   expect(html).toContain('value="White Plate Group"')
   expect(html).toContain(`value="${organizationId}"`)

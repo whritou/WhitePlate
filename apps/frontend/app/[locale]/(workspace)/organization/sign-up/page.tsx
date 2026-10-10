@@ -21,13 +21,13 @@ export default async function OrganizationSignUpPage() {
   const t = await getTranslations("Auth")
 
   return (
-    <main className="mx-auto min-h-[70vh] max-w-2xl px-5 py-12 sm:py-20">
-      <Card className="rounded-lg border border-border bg-card p-6 sm:p-10">
+    <main className="live-create-page mx-auto min-h-[70vh] max-w-3xl px-6 py-8">
+      <Card className="gap-6 border-0 bg-transparent p-0 shadow-none">
         <CardHeader className="px-0">
           <p className="mb-2 text-sm font-medium text-brand-text">WhitePlate</p>
 
           <CardTitle>
-            <h1 className="text-2xl font-semibold tracking-tight sm:text-[2rem]">
+            <h1 className="font-display text-4xl font-bold">
               {t("organizationTitle")}
             </h1>
           </CardTitle>

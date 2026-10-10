@@ -43,12 +43,12 @@ export default async function OrganizationPage() {
   )
 
   return (
-    <main className="mx-auto min-h-[70vh] max-w-7xl p-4 sm:p-6 lg:p-8">
+    <main className="mx-auto min-h-[70vh] max-w-[1600px] px-6 py-8">
       <header className="mb-8 flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="mb-2 text-sm font-medium text-brand-text">WhitePlate</p>
 
-          <h1 className="text-2xl font-semibold tracking-tight sm:text-[2rem]">
+          <h1 className="font-display text-4xl font-bold">
             {t("organizationsHeading")}
           </h1>
         </div>
@@ -163,10 +163,10 @@ export default async function OrganizationPage() {
           </CardFooter>
         </Card>
       ) : (
-        <ul className="grid gap-4 sm:grid-cols-2">
+        <ul className="grid gap-0 border sm:grid-cols-2">
           {organizations.map((organization) => (
             <li key={organization.id}>
-              <Card className="gap-0 rounded-lg border border-border p-6 has-data-[slot=card-footer]:pb-6">
+              <Card className="gap-0 border-0 border-r border-b border-border p-6 has-data-[slot=card-footer]:pb-6">
                 <CardHeader className="px-0">
                   {!organization.isActive && (
                     <p className="text-sm font-medium text-muted-foreground">

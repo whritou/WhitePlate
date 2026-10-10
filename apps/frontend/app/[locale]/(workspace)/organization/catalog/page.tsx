@@ -57,7 +57,7 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
   }
 
   return (
-    <main className="mx-auto w-full max-w-[100rem] min-w-0 p-4 sm:p-6 lg:p-8">
+    <main className="mx-auto w-full max-w-[1600px] min-w-0">
       <MenuBuilderWorkspace
         userId={session.user.id}
         key={`${session.user.id}:${catalog.tenantId}`}

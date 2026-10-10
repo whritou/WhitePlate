@@ -14,6 +14,7 @@ export default defineConfig({
   timeout: 120_000,
   expect: { timeout: 20_000 },
   projects: [
+    { name: "lovable-remaining", testMatch: "lovable-remaining.spec.ts" },
     { name: "lovable-migration", testMatch: "lovable-migration.spec.ts" },
     { name: "live-workspace", testMatch: "live-workspace.spec.ts" },
     {

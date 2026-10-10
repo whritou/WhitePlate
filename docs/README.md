@@ -1,6 +1,6 @@
 # Documentation index
 
-The approved Lovable design now also covers real workspaces and tenant customer shells. See [real routes, connected operations and explicit fictitious drafts](lovable-live-workspace.md). Existing backend contracts are retained; hosted acceptance remains separate.
+The approved Lovable design now also covers real workspaces, tenant customer shells and account screens, using the restored ZIP reference. See [real routes, connected operations and explicit fictitious drafts](lovable-live-workspace.md). Existing backend contracts are retained; hosted acceptance remains separate.
 
 [Lovable migration](lovable-migration.md): current landing/demo routes, scoped design, assets, browser-only behavior and backend connections.
 

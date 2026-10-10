@@ -10,6 +10,7 @@ export function AuthField({
   autoComplete,
   required = true,
   icon,
+  placeholder,
 }: {
   id: string
   label: string
@@ -17,6 +18,7 @@ export function AuthField({
   autoComplete?: string
   required?: boolean
   icon?: React.ReactNode
+  placeholder?: string
 }) {
   return (
     <Label className="grid gap-2 font-medium text-foreground" htmlFor={id}>
@@ -34,6 +36,7 @@ export function AuthField({
           name={id}
           type={type}
           autoComplete={autoComplete}
+          placeholder={placeholder}
           required={required}
           className={icon ? "ps-10" : undefined}
         />

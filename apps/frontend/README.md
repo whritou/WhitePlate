@@ -1,6 +1,6 @@
 # WhitePlate frontend
 
-The approved Lovable design now also covers real workspaces and tenant customer shells. See [real routes, connected operations and explicit fictitious drafts](../../docs/lovable-live-workspace.md). Existing backend contracts are retained; hosted acceptance remains separate.
+The approved Lovable design now also covers real workspaces, tenant customer shells and account screens. See [real routes, connected operations and explicit fictitious drafts](../../docs/lovable-live-workspace.md). Existing backend contracts are retained; hosted acceptance remains separate.
 
 The public landing and localized demo routes use the supplied Lovable design. See [migration documentation](../../docs/lovable-migration.md) for route mapping, local fonts/assets and backend connections. Demo actions are browser simulations; they do not replace real tenant services. Run `npm run test:browser -- --project lovable-migration` against `WHITEPLATE_ACCEPTANCE_URL=http://localhost:3015` after starting a local server.
 
@@ -40,3 +40,5 @@ Auth URLs: `/[locale]/sign-in`, `/sign-up`, `/forgot-password`, `/reset-password
 Read [frontend agent instructions](AGENTS.md) before changing Next.js code. See the [frontend architecture](../../docs/architecture/WHITEPLATE_FRONTEND_ARCHITECTURE.md), [development guide](../../docs/development.md), and [review findings](../../docs/documentation-review.md).
 
 Source lives directly in this directory, and `@/*` resolves here. Add translated text to both `messages/en.json` and `messages/fr.json`. Use navigation helpers from `@/i18n/navigation` for localized app links. Extend the existing `components/ui/button.tsx` when appropriate; do not regenerate it just to use it. Component-generation settings are in `components.json`.
+
+Remaining operational and account screen recipes now follow the restored Lovable export; see [routes, source mapping and backend limitations](../../docs/lovable-live-workspace.md#remaining-screens-and-restored-source--10-october-2026). Run the `lovable-remaining` Playwright project against a local development server for the new presentation checks.

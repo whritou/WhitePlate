@@ -1,6 +1,6 @@
 "use client"
 
-import { CheckoutIllustration } from "@/components/redesign/checkout-illustration"
+import { LiveCheckout } from "./live-checkout"
 import { LiveRestaurantIdentity as RestaurantIdentity } from "./live-restaurant-identity"
 import { LiveCustomerShell as CustomerShell } from "./live-customer-shell"
 import { LiveStoreActions } from "./live-store-actions"
@@ -88,27 +88,25 @@ function RestaurantMenuContent({
 
           <div className="mx-auto w-full px-6">
             {checkoutView ? (
-              <div className="mx-auto mt-8 grid max-w-6xl items-start gap-8 lg:grid-cols-[minmax(0,1.4fr)_minmax(320px,1fr)]">
-                <CheckoutIllustration />
-
-                <CheckoutPanel
-                  checkoutState={checkoutState}
-                  mode="checkout"
-                  onNewOrder={() => {
-                    checkoutState.startNewOrder()
-                    router.push({
-                      pathname: "/",
-                      query: { menuLocale: menu.locale },
-                    })
-                  }}
-                  onBack={() =>
-                    router.push({
-                      pathname: "/",
-                      query: { menuLocale: menu.locale },
-                    })
-                  }
-                />
-              </div>
+              <LiveCheckout
+                state={checkoutState}
+                name={menu.restaurantName}
+                price={price}
+                estimate={price.format(estimate)}
+                onNewOrder={() => {
+                  checkoutState.startNewOrder()
+                  router.push({
+                    pathname: "/",
+                    query: { menuLocale: menu.locale },
+                  })
+                }}
+                onBack={() =>
+                  router.push({
+                    pathname: "/",
+                    query: { menuLocale: menu.locale },
+                  })
+                }
+              />
             ) : (
               <>
                 {menu.categories.length > 0 && (

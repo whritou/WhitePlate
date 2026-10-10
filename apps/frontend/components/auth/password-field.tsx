@@ -1,38 +1,51 @@
 "use client"
 
+import { Link } from "@/i18n/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import type { AuthMode } from "@/types/auth"
-import { Eye, EyeOff, LockKeyhole } from "lucide-react"
+import { Eye, EyeOff } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useState } from "react"
 
 export function PasswordField({ mode }: { mode: AuthMode }) {
   const t = useTranslations("Auth")
+  const visual = useTranslations("LovableLive")
   const [showPassword, setShowPassword] = useState(false)
 
   return (
     <div className="grid gap-2">
-      <Label className="font-medium text-foreground" htmlFor="password">
-        {mode === "reset" ? t("newPassword") : t("password")}
-      </Label>
+      <div className="flex items-center justify-between gap-3">
+        <Label className="font-medium text-foreground" htmlFor="password">
+          {mode === "reset" ? t("newPassword") : t("password")}
+        </Label>
+
+        {mode === "signIn" && (
+          <Link
+            href="/forgot-password"
+            className="text-xs text-primary hover:underline"
+          >
+            {t("forgotLink")}
+          </Link>
+        )}
+      </div>
 
       <span className="relative">
-        <LockKeyhole
-          className="pointer-events-none absolute inset-y-0 start-3 my-auto size-4 text-muted-foreground"
-          aria-hidden="true"
-        />
-
         <Input
           id="password"
           name="password"
           type={showPassword ? "text" : "password"}
           autoComplete={mode === "signIn" ? "current-password" : "new-password"}
+          placeholder={
+            mode === "signIn"
+              ? visual("passwordPlaceholder")
+              : visual("newPasswordPlaceholder")
+          }
           minLength={8}
           maxLength={128}
           required
-          className="w-full ps-10 pe-12"
+          className="w-full pe-12"
         />
 
         <Button

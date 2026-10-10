@@ -1,5 +1,13 @@
 import { getTranslations } from "next-intl/server"
 import { Link } from "@/i18n/navigation"
+import {
+  Table,
+  TableHeader,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableCell,
+} from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import type { OrderPage } from "@/types/orders"
 export async function LiveDashboard({
@@ -14,6 +22,7 @@ export async function LiveDashboard({
   locale: string
 }) {
   const t = await getTranslations("LiveWorkspace")
+  const labels = await getTranslations("LovableLive")
   const k = await getTranslations("KitchenOrders")
   const totals = new Map<string, number>()
 
@@ -43,7 +52,7 @@ export async function LiveDashboard({
         </p>
       </header>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid border-y sm:grid-cols-2 xl:grid-cols-4">
         {[
           [t("loadedOrders"), page.items.length],
           [t("loadedTotal"), amount],
@@ -56,10 +65,13 @@ export async function LiveDashboard({
             page.items.filter((item) => item.status === "Ready").length,
           ],
         ].map(([label, value]) => (
-          <section className="border p-5" key={label}>
+          <section
+            className="border-b py-6 pr-6 sm:border-r sm:pl-6"
+            key={label}
+          >
             <h2 className="label-mono text-muted-foreground">{label}</h2>
 
-            <p className="mt-3 font-display text-3xl font-bold">{value}</p>
+            <p className="mt-3 font-display text-4xl font-bold">{value}</p>
           </section>
         ))}
       </div>
@@ -92,43 +104,65 @@ export async function LiveDashboard({
         </Button>
       </div>
 
-      <section className="border">
-        <h2 className="border-b p-5 font-display text-xl font-bold">
+      <section className="border-t pt-7">
+        <h2 className="mb-5 font-display text-2xl font-bold">
           {t("realOrders")}
         </h2>
 
         {page.items.length ? (
-          <ul className="divide-y">
-            {page.items.map((order) => (
-              <li
-                key={order.id}
-                className="flex flex-wrap items-center justify-between gap-3 p-5"
-              >
-                <div>
-                  <p className="font-bold">
-                    #{order.id.slice(0, 8)} · {order.customerName}
-                  </p>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>{t("realOrders")}</TableHead>
 
-                  <p className="text-sm text-muted-foreground">
-                    {order.lines
-                      .map((line) => `${line.quantity} × ${line.productName}`)
-                      .join(" · ")}
-                  </p>
-                </div>
+                <TableHead>{labels("status")}</TableHead>
 
-                <p className="border px-3 py-1 text-xs font-bold">
-                  {k(`statuses.${order.status}`)}
-                </p>
+                <TableHead className="text-right">{t("loadedTotal")}</TableHead>
+              </TableRow>
+            </TableHeader>
 
-                <p className="font-bold tabular-nums">
-                  {new Intl.NumberFormat(locale, {
-                    style: "currency",
-                    currency: order.currency,
-                  }).format(order.total)}
-                </p>
-              </li>
-            ))}
-          </ul>
+            <TableBody>
+              {page.items.map((order) => (
+                <TableRow key={order.id}>
+                  <TableCell className="py-3">
+                    <Link
+                      href={`/organization/orders?tenantId=${tenantId}`}
+                      className="font-bold hover:text-primary"
+                    >
+                      #{order.id.slice(0, 8)}
+                    </Link>
+
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {order.customerName}
+                    </p>
+
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {order.lines
+                        .map((line) => `${line.quantity} × ${line.productName}`)
+                        .join(" · ")}
+                    </p>
+                  </TableCell>
+
+                  <TableCell>
+                    <span className="inline-flex items-center gap-2">
+                      <span
+                        className={`size-2 ${order.status === "Pending" ? "bg-accent" : "bg-primary"}`}
+                      />
+
+                      {k(`statuses.${order.status}`)}
+                    </span>
+                  </TableCell>
+
+                  <TableCell className="text-right font-medium tabular-nums">
+                    {new Intl.NumberFormat(locale, {
+                      style: "currency",
+                      currency: order.currency,
+                    }).format(order.total)}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         ) : (
           <p className="p-5 text-muted-foreground">{t("emptyDashboard")}</p>
         )}

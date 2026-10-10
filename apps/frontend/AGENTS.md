@@ -10,7 +10,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 ## WhitePlate frontend rules
 
-The canonical design system includes the user-approved scoped Lovable reference for the public landing, `/[locale]/demo`, real organization/restaurant workspaces and tenant customer shells. Follow [landing/demo migration](../../docs/lovable-migration.md) and [real workspace migration](../../docs/lovable-live-workspace.md) for source tokens/assets, scope, browser drafts and remaining backend connections. Keep existing API operations authoritative and missing capabilities visibly fictitious. Authentication and unscoped screens retain the Culinary Commerce default below.
+The canonical design system includes the user-approved scoped Lovable reference for the public landing, `/[locale]/demo`, real organization/restaurant workspaces and tenant customer shells. Follow [landing/demo migration](../../docs/lovable-migration.md) and [real workspace migration](../../docs/lovable-live-workspace.md) for source tokens/assets, scope, browser drafts and remaining backend connections. Keep existing API operations authoritative and missing capabilities visibly fictitious. Account/authentication pages also follow the recovered Lovable AuthPage composition. Unscoped screens retain the Culinary Commerce default below.
 
 Read [frontend architecture](../../docs/architecture/WHITEPLATE_FRONTEND_ARCHITECTURE.md) and [implementation conventions](../../docs/architecture/frontend-conventions.md) before edits. The latter defines the implemented module ownership and request/query lifecycle.
 

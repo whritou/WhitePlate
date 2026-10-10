@@ -43,7 +43,7 @@ export function BrandAssetsPreview({
           <div
             role="group"
             aria-label={t("previewSize")}
-            className="flex flex-wrap gap-1 rounded-lg bg-secondary p-1"
+            className="flex flex-wrap gap-0 border bg-background p-0"
           >
             <Button
               variant={mobile ? "secondary" : "ghost"}
@@ -70,9 +70,9 @@ export function BrandAssetsPreview({
         </CardContent>
       </Card>
 
-      <div className="rounded-xl bg-secondary/70 p-3 sm:p-6 lg:p-8">
+      <div className="border bg-secondary p-6">
         <div
-          className={`mx-auto overflow-hidden rounded-2xl border border-border bg-card shadow-xl ${mobile ? "max-w-[24.375rem]" : "w-full"}`}
+          className={`mx-auto overflow-hidden border border-border bg-card ${mobile ? "max-w-[24.375rem]" : "w-full"}`}
         >
           <div className="flex min-w-0 items-center gap-2 border-b border-border p-3 text-xs text-muted-foreground">
             <BrandAssetImage

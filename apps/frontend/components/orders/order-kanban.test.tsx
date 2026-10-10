@@ -37,7 +37,5 @@ it("renders all five lanes with desktop-sized responsive columns", () => {
   )
 
   expect(html.match(/data-order-lane=/g)).toHaveLength(5)
-  expect(html).toContain(
-    "grid-cols-[repeat(auto-fit,minmax(min(100%,18rem),1fr))]"
-  )
+  expect(html).toContain("md:grid-cols-2 xl:grid-cols-4")
 })

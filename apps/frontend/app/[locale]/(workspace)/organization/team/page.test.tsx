@@ -29,6 +29,7 @@ vi.mock("@/i18n/navigation", () => ({
   useRouter: () => ({ refresh: vi.fn() }),
 }))
 vi.mock("next-intl", () => ({
+  useMessages: () => ({}),
   useTranslations: () => (key: string, values?: { email?: string }) =>
     values?.email ? `${key}:${values.email}` : key,
 }))

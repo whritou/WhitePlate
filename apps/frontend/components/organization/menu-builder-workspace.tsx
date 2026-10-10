@@ -68,11 +68,11 @@ export function MenuBuilderWorkspace({
 
   return (
     <Tabs
-      className={`${styles.workspace} @container`}
+      className={`${styles.workspace} live-menu-builder @container`}
       value={view}
       onValueChange={changeView}
     >
-      <header className="grid min-w-0 items-start gap-6 pb-2 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.7fr)]">
+      <header className="flex min-w-0 flex-wrap items-center justify-between gap-3 border-b px-6 py-3">
         <div className="min-w-0">
           <p className="mb-2 flex flex-wrap gap-x-3 gap-y-1 text-xs font-medium tracking-wider uppercase">
             <span>{t("management")}</span>
@@ -80,9 +80,7 @@ export function MenuBuilderWorkspace({
             <span className="text-brand-text">{t("localizationStudio")}</span>
           </p>
 
-          <h1 className="max-w-[25rem] font-heading text-[1.75rem] leading-tight font-bold tracking-tight sm:text-[2.25rem]">
-            {t("title")}
-          </h1>
+          <h1 className="font-display text-xl font-bold">{t("title")}</h1>
 
           {restaurantName && (
             <p className="mt-3 text-sm text-muted-foreground">
@@ -91,15 +89,15 @@ export function MenuBuilderWorkspace({
           )}
         </div>
 
-        <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] justify-items-start gap-4 xl:justify-items-end">
+        <div className="flex min-w-0 flex-wrap items-center gap-3">
           <TabsList
             aria-label={t("sections")}
-            className="w-full bg-secondary p-1.5"
+            className="w-auto bg-background p-0"
           >
             <TabsTrigger
               value="products"
               disabled={pending}
-              className="grow flex-wrap data-active:border-transparent data-active:shadow-sm"
+              className="label-mono flex-wrap border-b-2 px-4 py-3 data-active:border-primary data-active:shadow-none"
             >
               <UtensilsCrossed aria-hidden="true" className="size-4 shrink-0" />
 
@@ -109,7 +107,7 @@ export function MenuBuilderWorkspace({
             <TabsTrigger
               value="categories"
               disabled={pending}
-              className="grow flex-wrap data-active:border-transparent data-active:shadow-sm"
+              className="label-mono flex-wrap border-b-2 px-4 py-3 data-active:border-primary data-active:shadow-none"
             >
               <Folder aria-hidden="true" className="size-4 shrink-0" />
 

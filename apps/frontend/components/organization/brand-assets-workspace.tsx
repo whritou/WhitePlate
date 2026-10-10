@@ -72,7 +72,7 @@ export function BrandAssetsWorkspace({
   const available = Boolean(data?.storageAvailable) && !query.isError
 
   return (
-    <div className="grid min-w-0 grid-cols-1 gap-6 [overflow-wrap:anywhere]">
+    <div className="live-brand-studio grid min-w-0 grid-cols-1 gap-6 [overflow-wrap:anywhere]">
       <header className="grid gap-2">
         <p className="text-xs font-semibold tracking-widest text-muted-foreground uppercase dark:text-brand-text">
           {t("eyebrow")}
@@ -107,7 +107,7 @@ export function BrandAssetsWorkspace({
       {query.isPending && <p role="status">{t("loading")}</p>}
 
       {data && (
-        <div className="grid min-w-0 items-start gap-6 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+        <div className="grid min-w-0 items-start gap-6 lg:grid-cols-[300px_minmax(0,1fr)]">
           <Card className="@container">
             <CardHeader>
               <div className="flex flex-wrap items-center gap-3">
@@ -127,7 +127,7 @@ export function BrandAssetsWorkspace({
               </div>
             </CardHeader>
 
-            <CardContent className="grid gap-4 @sm:grid-cols-2">
+            <CardContent className="grid gap-4">
               {(["logo", "favicon", "banner"] as const).map((slot) => (
                 <BrandAssetSlot
                   key={slot}

@@ -5,7 +5,10 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Card } from "@/components/ui/card"
 import { auth } from "@/lib/auth"
 import { isUuid } from "@/lib/validation/common"
-import { getOrganizations } from "@/services/organization-queries"
+import {
+  getOrganizations,
+  getOrganizationRestaurants,
+} from "@/services/organization-queries"
 import type { SearchParams } from "@/types/navigation"
 import { getLocale, getTranslations } from "next-intl/server"
 import { headers } from "next/headers"
@@ -61,11 +64,14 @@ export default async function OrganizationSettingsPage({
     )
   }
 
+  const restaurants = await getOrganizationRestaurants(organization.id)
+
   return (
     <LiveSettings
       key={`${session.user.id}:${organization.id}`}
       organization={organization}
       userId={session.user.id}
+      restaurants={restaurants}
     >
       <OrganizationSettingsForm
         key={`${organization.id}:${organization.name}`}

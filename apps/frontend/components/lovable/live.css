@@ -50,7 +50,7 @@
 .lovable-live main > header h1 { font-size: 2.25rem; line-height: 1.15; font-weight: 700; }
 .lovable-live .workspace-language-select__button { border-radius: 0 !important; border-color: var(--border) !important; }
 .lovable-live .workspace-language-select ul { background: var(--background); color: var(--foreground); border-radius: 0; }
-.lovable-live .live-page { padding: 2rem 1.5rem; max-width: 90rem; margin-inline: auto; }
+.lovable-live .live-page { padding: 2rem 1.5rem; max-width: 100rem; margin-inline: auto; }
 .lovable-live .live-section { border: 1px solid var(--border); padding: 1.5rem; }
 .lovable-live .live-section-heading { font-size: 1.25rem; font-weight: 700; }
 .lovable-live [data-slot="toast"] { border-radius: 0; }
@@ -65,3 +65,22 @@
   .lovable-live .live-page { padding: 1.5rem 1rem; }
   .lovable-live main > header h1 { font-size: 1.75rem; }
 }
+
+/* Remaining source compositions: toolbar, tab strips, studio and account forms. */
+.lovable-auth [data-slot="card"] { border: 0; background: transparent; }
+.lovable-auth main section section { width: 100%; padding: 0; min-height: auto; }
+
+.lovable-auth [data-slot="input"], .lovable-auth main [data-slot="button"]:not([aria-label]) { min-height: 3rem; }
+.live-menu-builder > [data-slot="tabs-content"] { margin-top: 0; padding: 1.5rem; }
+.live-menu-builder > header > div:first-child > p:first-child { display: none; }
+.lovable-live .live-menu-builder [data-slot="tabs-list"] { border: 0; }
+.lovable-live .live-menu-builder [data-slot="tabs-trigger"] { border-radius: 0; border-bottom: 2px solid transparent; background: transparent; padding: .75rem 1rem; text-transform: uppercase; font-size: .75rem; letter-spacing: .08em; }
+.lovable-live .live-menu-builder [data-slot="tabs-trigger"][data-active] { border-bottom-color: var(--primary); background: transparent; color: var(--foreground); }
+.lovable-live .live-history [data-slot="table-head"], .lovable-live .live-team-directory [data-slot="table-head"] { background: var(--secondary); }
+.live-create-page [data-slot="card"] { border: 0; background: transparent; padding-inline: 0; }
+.live-create-page form { border: 1px solid var(--border); padding: 1.5rem; }
+.live-brand-studio [data-slot="card"] { gap: 0; padding: 0; }
+.live-brand-studio [data-slot="card-header"] { border-bottom: 1px solid var(--border); padding: 1rem; }
+.live-brand-studio [data-slot="card-content"] { padding: 1rem; }
+
+.lovable-auth .text-brand-text { color: var(--primary); }

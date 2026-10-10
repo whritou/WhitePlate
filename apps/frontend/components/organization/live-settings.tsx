@@ -24,8 +24,10 @@ export function LiveSettings({
   organization,
   userId,
   children,
+  restaurants,
 }: LiveSettingsProps) {
   const t = useTranslations("LiveWorkspace")
+  const errorText = useTranslations("OrganizationSettings")
   const model = useSettingsPageModel(
     `whiteplate-live-draft:${userId}:${organization.id}:settings`
   )
@@ -147,6 +149,40 @@ export function LiveSettings({
 
             {model.sec === "restaurants" && (
               <Card title="Restaurants" sub={t("realRestaurants")}>
+                {restaurants?.ok &&
+                  restaurants.data?.map((restaurant) => (
+                    <div
+                      key={restaurant.id}
+                      className="mb-4 flex flex-wrap items-center justify-between gap-4 border p-5"
+                    >
+                      <div>
+                        <p className="font-display text-lg font-bold">
+                          {restaurant.name}
+                        </p>
+
+                        <p className="mt-1 text-sm text-muted-foreground">
+                          {restaurant.subdomain} � {restaurant.currency}
+                        </p>
+                      </div>
+
+                      <Link
+                        className="btn-outline"
+                        href={`/organization/catalog?tenantId=${restaurant.id}`}
+                      >
+                        {t("openMenu")}
+                      </Link>
+                    </div>
+                  ))}
+
+                {restaurants && !restaurants.ok && (
+                  <p
+                    role="alert"
+                    className="mb-4 border border-destructive p-4 text-sm"
+                  >
+                    {errorText("serviceError")}
+                  </p>
+                )}
+
                 <Link
                   className="btn-primary"
                   href={`/organization/team?organizationId=${organization.id}`}
