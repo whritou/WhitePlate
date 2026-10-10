@@ -182,7 +182,9 @@ test("product save locks selection, rejects duplicate submissions and retains a 
   await expect(
     page.locator('[aria-label="Select Salade de tomates anciennes et burrata"]')
   ).toBeDisabled()
-  await form.evaluate((element: HTMLFormElement) => element.requestSubmit())
+  await form
+    .locator("form")
+    .evaluate((element: HTMLFormElement) => element.requestSubmit())
   release()
   await expect(form.getByRole("alert")).toBeVisible()
   await expect(form.getByLabel("Name", { exact: true })).toHaveValue(

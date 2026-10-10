@@ -26,9 +26,13 @@ export function LiveRestaurantIdentity({
         <div className="absolute inset-0 bg-ink/65" />
 
         <div className="absolute inset-0 flex flex-col justify-end gap-3 p-6 text-ink-foreground sm:p-8">
-          <h1 className="font-display text-4xl font-bold">{name}</h1>
+          <h1 className="font-display text-4xl font-bold wrap-anywhere">
+            {name}
+          </h1>
 
-          {description && <p className="max-w-2xl text-sm">{description}</p>}
+          {description && (
+            <p className="max-w-2xl text-sm wrap-anywhere">{description}</p>
+          )}
         </div>
       </div>
 

@@ -45,7 +45,7 @@ export function MenuProductCard({
 
       <CardHeader className="col-start-1 row-start-2 min-w-0 px-4 pt-4 pb-0">
         <CardTitle>
-          <h3 className="font-heading text-base font-bold break-words">
+          <h3 className="font-heading text-base font-bold wrap-anywhere">
             {product.name}
           </h3>
         </CardTitle>
@@ -53,7 +53,7 @@ export function MenuProductCard({
 
       <CardContent className="col-start-1 row-start-3 flex min-w-0 flex-col gap-3 px-4 pt-2 pb-0">
         {product.description && (
-          <p className="text-body-sm break-words text-muted-foreground">
+          <p className="text-body-sm wrap-anywhere text-muted-foreground">
             {product.description}
           </p>
         )}

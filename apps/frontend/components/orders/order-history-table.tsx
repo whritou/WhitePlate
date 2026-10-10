@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { OrderHistoryFilters as OrderHistoryFiltersPanel } from "@/components/orders/order-history-filters"
+import { OrderHistorySummary } from "./order-history-summary"
 import {
   Table,
   TableBody,
@@ -32,6 +33,8 @@ export function OrderHistoryTable({
   locale,
   filters,
   page,
+  route = "/organization/order-history",
+  onSelectOrder,
 }: OrderHistoryTableProps) {
   const t = useTranslations("OrderHistory")
   const pageCount = Math.max(1, Math.ceil(page.totalCount / page.pageSize))
@@ -57,7 +60,7 @@ export function OrderHistoryTable({
     )
     params.set("page", "1")
 
-    return `/organization/order-history?${params}`
+    return `${route}?${params}`
   }
 
   return (
@@ -72,14 +75,16 @@ export function OrderHistoryTable({
         </p>
       </header>
 
-      <OrderHistoryFiltersPanel filters={filters} />
+      <OrderHistorySummary orders={page.items} locale={locale} />
+
+      <OrderHistoryFiltersPanel filters={filters} route={route} />
 
       <Card className="gap-0 border p-0">
-        <CardHeader>
+        <CardHeader className="p-4 sm:p-6">
           <CardTitle>{t("resultsTitle", { count: page.totalCount })}</CardTitle>
         </CardHeader>
 
-        <CardContent className="p-0">
+        <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
           {page.items.length === 0 ? (
             <p className="rounded-md border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
               {t("noResults")}
@@ -126,9 +131,19 @@ export function OrderHistoryTable({
                 {page.items.map((order) => (
                   <TableRow key={order.id}>
                     <TableCell>
-                      <span className="font-mono text-xs">
-                        {order.id.slice(0, 8).toUpperCase()}
-                      </span>
+                      {onSelectOrder ? (
+                        <Button
+                          type="button"
+                          variant="link"
+                          onClick={() => onSelectOrder(order.id)}
+                        >
+                          {order.id.slice(0, 8).toUpperCase()}
+                        </Button>
+                      ) : (
+                        <span className="font-mono text-xs">
+                          {order.id.slice(0, 8).toUpperCase()}
+                        </span>
+                      )}
                     </TableCell>
 
                     <TableCell className="font-medium">
@@ -197,6 +212,7 @@ export function OrderHistoryTable({
 
             <div className="flex gap-2">
               <PageButton
+                route={route}
                 filters={filters}
                 page={1}
                 label={t("firstPage")}
@@ -205,6 +221,7 @@ export function OrderHistoryTable({
               />
 
               <PageButton
+                route={route}
                 filters={filters}
                 page={page.page - 1}
                 label={t("previous")}
@@ -213,6 +230,7 @@ export function OrderHistoryTable({
               />
 
               <PageButton
+                route={route}
                 filters={filters}
                 page={page.page + 1}
                 label={t("next")}
@@ -221,6 +239,7 @@ export function OrderHistoryTable({
               />
 
               <PageButton
+                route={route}
                 filters={filters}
                 page={pageCount}
                 label={t("lastPage")}
@@ -236,12 +255,14 @@ export function OrderHistoryTable({
 }
 
 function PageButton({
+  route,
   filters,
   page,
   label,
   icon: Icon,
   disabled,
 }: {
+  route: string
   filters: OrderHistoryFilters
   page: number
   label: string
@@ -265,14 +286,14 @@ function PageButton({
       aria-label={label}
       nativeButton={false}
       role="link"
-      render={<Link href={pageHref(filters, page)} aria-label={label} />}
+      render={<Link href={pageHref(filters, page, route)} aria-label={label} />}
     >
       {icon}
     </Button>
   )
 }
 
-function pageHref(filters: OrderHistoryFilters, page: number) {
+function pageHref(filters: OrderHistoryFilters, page: number, route: string) {
   const query = new URLSearchParams({
     tenantId: filters.tenantId,
     page: String(page),
@@ -286,7 +307,7 @@ function pageHref(filters: OrderHistoryFilters, page: number) {
   if (filters.from) query.set("from", filters.from)
   if (filters.through) query.set("through", filters.through)
 
-  return `/organization/order-history?${query}`
+  return `${route}?${query}`
 }
 
 function sortIcon(filters: OrderHistoryFilters, sort: "createdAt" | "total") {

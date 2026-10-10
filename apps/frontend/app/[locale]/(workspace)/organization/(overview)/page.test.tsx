@@ -16,6 +16,7 @@ const {
 }))
 
 vi.mock("next-intl/server", () => ({ getLocale, getTranslations }))
+vi.mock("next-intl", () => ({ useTranslations: () => (key: string) => key }))
 vi.mock("server-only", () => ({}))
 vi.mock("next/headers", () => ({ headers: async () => new Headers() }))
 vi.mock("next/navigation", () => ({ redirect: vi.fn() }))
@@ -56,20 +57,28 @@ beforeEach(() => {
         id: tenantId,
         name: "Bistro",
         role: "OrganizationOwner",
+        organizationId,
       },
     ],
   })
 })
 
-it("groups organization and restaurant menu actions so labels have spacing and can wrap", async () => {
-  const page = await OrganizationPage()
+it("shows each restaurant once with an entry link and keeps organization context", async () => {
+  const page = await OrganizationPage({
+    searchParams: Promise.resolve({ organizationId }),
+  })
   const html = renderToStaticMarkup(createElement(() => page))
 
-  expect(html).toContain('role="group" aria-label="organizationActions"')
-  expect(html).toContain('role="group" aria-label="restaurantMenuActions"')
-  expect(html).toMatch(
-    /flex[^\"]*flex-wrap[^\"]*gap-3[^\"]*"[^>]*>[\s\S]*editMenuLanguages[\s\S]*editCatalog/
+  expect(html).toContain(`/organization/team?organizationId=${organizationId}`)
+  expect(html).toContain(
+    `/organization/settings?organizationId=${organizationId}`
   )
+  expect(html).toContain(
+    `/organization/restaurants/new?organizationId=${organizationId}`
+  )
+  expect(html).toContain(`/organization/dashboard?tenantId=${tenantId}`)
+  expect(html.match(/Bistro/g)).toHaveLength(1)
+  expect(html).not.toContain("restaurantMenuSettings")
 })
 
 it("shows an archived organization with a restore action instead of operational links", async () => {
@@ -79,7 +88,7 @@ it("shows an archived organization with a restore action instead of operational 
   })
   getRestaurantMemberships.mockResolvedValue({ ok: true, data: [] })
 
-  const page = await OrganizationPage()
+  const page = await OrganizationPage({ searchParams: Promise.resolve({}) })
   const html = renderToStaticMarkup(createElement(() => page))
 
   expect(html).toContain("organizationArchived")

@@ -10,10 +10,7 @@ const canonical = JSON.parse(
 const css = readFileSync(new URL("./globals.css", import.meta.url), "utf8")
 
 describe("canonical WhitePlate design tokens", () => {
-  for (const [theme, selector] of [
-    ["light", ":root"],
-    ["dark", ".dark"],
-  ]) {
+  for (const [theme, selector] of [["light", ":root"]]) {
     it(`keeps every ${theme} runtime color aligned with the design reference`, () => {
       const body = css.match(
         new RegExp(`${selector.replace(".", "\\.")}\\s*\\{([^}]+)\\}`)
@@ -31,6 +28,11 @@ describe("canonical WhitePlate design tokens", () => {
       expect(colors).toEqual(canonical.themes[theme])
     })
   }
+
+  it("keeps runtime appearance light-only", () => {
+    expect(canonical.runtimeThemes).toEqual(["light"])
+    expect(css).not.toMatch(/\.dark\s*\{|prefers-color-scheme:\s*dark/)
+  })
 
   it("keeps control, card and overlay radii aligned with the reference", () => {
     for (const role of ["sm", "md", "lg", "xl"]) {

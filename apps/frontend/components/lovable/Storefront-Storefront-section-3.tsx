@@ -27,7 +27,7 @@ export function StorefrontSection3() {
           <h2 className="mb-3 text-lg font-bold">{tx(m, "cat", lang)}</h2>
 
           <div
-            className={`customer-products ${t.layout === "grid" ? "grid sm:grid-cols-2 lg:grid-cols-3" : "flex flex-col"}`}
+            className={`customer-products ${t.layout === "grid" ? "customer-product-grid grid" : "flex flex-col"}`}
           >
             {m.items.map((i) => {
               const q = qtyOf(i.id)
@@ -35,7 +35,7 @@ export function StorefrontSection3() {
               return (
                 <article
                   key={i.id}
-                  className={`overflow-hidden ${t.layout === "list" ? "flex" : ""}`}
+                  className={`min-w-0 overflow-hidden ${t.layout === "list" ? "customer-product-list flex" : ""}`}
                   style={{ border: `1px solid ${line}`, borderRadius: r }}
                 >
                   <SourceButton
@@ -85,10 +85,10 @@ export function StorefrontSection3() {
                     </Copy>
                   </SourceButton>
 
-                  <div className="customer-product-details flex min-w-0 flex-1 items-end justify-between gap-3">
+                  <div className="customer-product-details flex min-w-0 flex-1 flex-wrap items-end justify-between gap-3">
                     <SourceButton
                       onClick={() => setOpen(i)}
-                      className="text-left"
+                      className="min-w-0 flex-1 basis-44 flex-col items-start text-left [overflow-wrap:anywhere]"
                     >
                       <p className="font-bold">{tx(i, "n", lang)}</p>
 

@@ -50,7 +50,7 @@ export function Button({
       {...props}
       aria-label={text(props["aria-label"])}
       title={text(props.title)}
-      variant="ghost"
+      variant="unstyled"
       size={size}
       nativeButton={!element}
       render={element}

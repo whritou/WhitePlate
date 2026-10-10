@@ -10,6 +10,25 @@ import {
   resolveOrderHubUrl,
 } from "./order-dashboard"
 
+it("retains verified restaurant organization and subdomain for navigation", () => {
+  const restaurant = {
+    id: "22222222-2222-4222-8222-222222222222",
+    organizationId: "11111111-1111-4111-8111-111111111111",
+    name: "Bistro",
+    subdomain: "bistro",
+    role: "Manager",
+  }
+
+  expect(parseRestaurantMemberships({ restaurants: [restaurant] })).toEqual([
+    restaurant,
+  ])
+  expect(
+    parseRestaurantMemberships({
+      restaurants: [{ ...restaurant, subdomain: "foreign.example" }],
+    })
+  ).toBeNull()
+})
+
 it("bounds the event tracker after more than 512 different orders", () => {
   // Fail fast on invalid eviction rather than freezing this test's worker.
   const originalDelete = Map.prototype.delete

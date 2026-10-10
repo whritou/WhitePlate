@@ -39,13 +39,13 @@ export function StorefrontView() {
     <div
       style={themeVariables(t)}
       data-button-style={t.buttonStyle}
-      className="customer-page storefront-page relative min-h-full bg-background text-foreground"
+      className="customer-page storefront-page relative min-h-full min-w-0 bg-background text-foreground"
     >
       <header
         className="sticky top-0 z-20 flex flex-wrap items-center justify-between gap-3 px-6 py-3"
         style={{ background: t.bg, borderBottom: `1px solid ${line}` }}
       >
-        <div className="flex items-center gap-3">
+        <div className="flex max-w-full min-w-0 items-center gap-3">
           <Copy>
             {t.logo && (
               <img
@@ -56,12 +56,12 @@ export function StorefrontView() {
             )}
           </Copy>
 
-          <span className="text-xl font-bold">
+          <span className="min-w-0 text-xl font-bold [overflow-wrap:anywhere]">
             <Copy>{t.name}</Copy>
           </span>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex max-w-full flex-wrap items-center gap-2">
           <Copy>
             {menu.languages.length > 1 && (
               <SourceSelect

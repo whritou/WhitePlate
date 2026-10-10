@@ -206,7 +206,6 @@
     "navigationLabel": "Navigation de l’espace de travail",
     "openNavigation": "Ouvrir la navigation",
     "closeNavigation": "Fermer la navigation",
-    "toggleTheme": "Changer de thème",
     "skipToContent": "Aller au contenu",
     "language": "Langue",
     "english": "Anglais",
@@ -331,7 +330,13 @@
     "accessDeniedTitle": "Historique indisponible",
     "accessDenied": "Vous n’avez pas accès à l’historique des commandes de ce restaurant.",
     "loadError": "Impossible de charger l’historique. Réessayez dans un instant.",
-    "invalidFilter": "Un filtre est invalide. Vérifiez vos critères et réessayez."
+    "invalidFilter": "Un filtre est invalide. Vérifiez vos critères et réessayez.",
+    "summary": "Résumé des commandes",
+    "loadedOrders": "Commandes sur cette page",
+    "loadedTotal": "Total des commandes sur cette page",
+    "averageBasket": "Panier moyen sur cette page",
+    "summaryScope": "Les chiffres et le CSV concernent cette page chargée. Les totaux ne représentent ni les paiements ni le chiffre d’affaires.",
+    "exportCsv": "Exporter cette page en CSV"
   },
   "Checkout": {
     "cartTitle": "Votre commande",
@@ -816,7 +821,6 @@
     "pricing": "Tarifs",
     "faq": "FAQ",
     "language": "Langue",
-    "toggleTheme": "Changer de thème",
     "menu": "Carte",
     "tryDemo": "Essayer la démo",
     "getStarted": "Commencer",
@@ -3142,7 +3146,18 @@
     "legalName": "Raison sociale",
     "vat": "Numéro de TVA",
     "siret": "SIRET",
-    "billingEmail": "E-mail de facturation"
+    "billingEmail": "E-mail de facturation",
+    "visitShop": "Visiter la boutique",
+    "openOrganization": "Ouvrir l’organisation",
+    "openRestaurant": "Ouvrir le restaurant",
+    "noRestaurants": "Aucun restaurant pour le moment.",
+    "restaurantSettings": "Paramètres du restaurant",
+    "restaurantIdentity": "Identité et menu du restaurant",
+    "subdomain": "Sous-domaine de la boutique",
+    "restaurantSettingsScope": "Gérez les langues du menu, les descriptions du restaurant, le catalogue et les visuels avec les outils ci-dessous.",
+    "shopUnavailable": "Le domaine public de la boutique n’est pas encore configuré. Contactez votre administrateur pour activer la boutique du restaurant.",
+    "backToWorkspace": "Retour à l’espace de travail",
+    "contextNavigation": "Contexte de l’espace de travail"
   },
   "LovableLive": {
     "members": "Membres",

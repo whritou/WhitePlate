@@ -82,7 +82,7 @@ export function SettingsPanel1() {
                 >
                   <Copy>
                     {["EUR", "GBP", "CHF", "USD"].map((c) => (
-                      <SourceOption key={c}>
+                      <SourceOption key={c} value={c}>
                         <Copy>{c}</Copy>
                       </SourceOption>
                     ))}
@@ -108,7 +108,7 @@ export function SettingsPanel1() {
                       "Europe/Zurich",
                       "America/New_York",
                     ].map((c) => (
-                      <SourceOption key={c}>
+                      <SourceOption key={c} value={c}>
                         <Copy>{c}</Copy>
                       </SourceOption>
                     ))}

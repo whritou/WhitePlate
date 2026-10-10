@@ -14,7 +14,7 @@ export function WorkspaceLinkIcon({ href }: { href: string }) {
   const path = href.split("?", 1)[0]
   const Icon = path.endsWith("/team")
     ? UsersRound
-    : path.endsWith("/settings")
+    : path.endsWith("/settings") || path.endsWith("/restaurant-settings")
       ? Settings2
       : path.endsWith("/new")
         ? Plus

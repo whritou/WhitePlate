@@ -14,6 +14,7 @@ import type { AuthFormProps } from "@/types/auth"
 import { ArrowRight, LoaderCircle, ShieldCheck } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { PasswordField } from "./password-field"
+import Image from "next/image"
 
 export function AuthForm({
   mode,
@@ -60,9 +61,14 @@ export function AuthForm({
                     className="w-full"
                     onClick={() => void signInSocial("google")}
                   >
-                    <span className="text-lg font-bold" aria-hidden="true">
-                      G
-                    </span>
+                    <Image
+                      src="/auth/google.png"
+                      width={20}
+                      height={20}
+                      alt=""
+                      aria-hidden="true"
+                      className="shrink-0"
+                    />
 
                     {t("continueGoogle")}
                   </Button>
@@ -76,6 +82,15 @@ export function AuthForm({
                     className="w-full"
                     onClick={() => void signInSocial("microsoft")}
                   >
+                    <Image
+                      src="/auth/microsoft.svg"
+                      width={20}
+                      height={20}
+                      alt=""
+                      aria-hidden="true"
+                      className="shrink-0"
+                    />
+
                     {t("continueMicrosoft")}
                   </Button>
                 )}

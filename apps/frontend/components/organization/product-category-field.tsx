@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { Plus } from "lucide-react"
 import { useTranslations } from "next-intl"
-import { EditorDialog } from "@/components/ui/editor-dialog"
+import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
 import type { CatalogCategory } from "@/types/catalog-management"
@@ -16,6 +16,9 @@ export function ProductCategoryField({
   prefix,
   onPendingChange,
   onCreated,
+  formId,
+  disabled,
+  onAddingChange,
 }: {
   tenantId: string
   categories: CatalogCategory[]
@@ -23,10 +26,14 @@ export function ProductCategoryField({
   prefix: string
   onPendingChange: (pending: boolean) => void
   onCreated?: () => void
+  formId: string
+  disabled: boolean
+  onAddingChange: (adding: boolean) => void
 }) {
   const t = useTranslations("Catalog")
   const u = useTranslations("MenuBuilder")
   const [created, setCreated] = useState<CatalogCategory[]>([])
+  const [adding, setAdding] = useState(false)
   const [selectedId, setSelectedId] = useState(
     initialId ?? categories.find((item) => !item.isArchived)?.id ?? ""
   )
@@ -47,8 +54,10 @@ export function ProductCategoryField({
         <NativeSelect
           id={`${prefix}-category`}
           name="categoryId"
+          form={formId}
           value={selectedId}
           required
+          disabled={disabled}
           onChange={(event) => setSelectedId(event.target.value)}
           className="min-w-0 flex-1"
           selectClassName="w-full"
@@ -64,29 +73,49 @@ export function ProductCategoryField({
           ))}
         </NativeSelect>
 
-        <EditorDialog
-          icon={Plus}
-          title={t("createCategory")}
-          label={t("createCategory")}
-          description={u("categoryHelp")}
+        <Button
+          type="button"
+          variant="outline"
+          aria-expanded={adding}
+          disabled={disabled}
+          onClick={() => {
+            setAdding(!adding)
+            onAddingChange(!adding)
+          }}
         >
-          {(callbacks) => (
-            <CategoryForm
-              tenantId={tenantId}
-              {...callbacks}
-              onCreated={(category) => {
-                setCreated((current) => [...current, category])
-                setSelectedId(category.id)
-                onCreated?.()
-              }}
-              onPendingChange={(value) => {
-                callbacks.onPendingChange?.(value)
-                onPendingChange(value)
-              }}
-            />
-          )}
-        </EditorDialog>
+          <Plus aria-hidden="true" />
+
+          {t("createCategory")}
+        </Button>
       </div>
+
+      {adding && (
+        <section className="grid gap-3 border border-border bg-secondary p-4">
+          <h3 className="font-semibold">{t("createCategory")}</h3>
+
+          <p className="text-sm text-muted-foreground">{u("categoryHelp")}</p>
+
+          <CategoryForm
+            tenantId={tenantId}
+            onCancel={() => {
+              setAdding(false)
+              onAddingChange(false)
+            }}
+            onSuccess={() => {
+              setAdding(false)
+              onAddingChange(false)
+            }}
+            onCreated={(category) => {
+              setCreated((current) => [...current, category])
+              setSelectedId(category.id)
+              onCreated?.()
+            }}
+            onPendingChange={(value) => {
+              onPendingChange(value)
+            }}
+          />
+        </section>
+      )}
 
       {available.length === 0 && (
         <p className="text-sm text-muted-foreground">{u("startCategory")}</p>

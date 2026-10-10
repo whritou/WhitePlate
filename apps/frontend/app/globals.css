@@ -4,7 +4,6 @@
 @import "../components/lovable/lovable.css";
 @import "../components/lovable/live.css";
 
-@custom-variant dark (&:is(.dark *));
 
 /* Canonical reference: docs/design-system/tokens.json; verified by verify.py. */
 :root {
@@ -65,49 +64,6 @@
   --sidebar-accent-foreground: #0B1C30;
   --sidebar-border: #DCE9FF;
   --sidebar-ring: #0F172A;
-}
-
-.dark {
-  color-scheme: dark;
-  --background: #020617;
-  --foreground: #F8FAFC;
-  --card: #0B0F19;
-  --card-foreground: #F8FAFC;
-  --popover: #1E293B;
-  --popover-foreground: #F8FAFC;
-  --primary: #FF5A1F;
-  --primary-foreground: #0F172A;
-  --primary-hover: #F97316;
-  --secondary: #1E293B;
-  --secondary-foreground: #F8FAFC;
-  --muted: #0B0F19;
-  --muted-foreground: #CBD5E1;
-  --accent: #1E293B;
-  --accent-foreground: #F8FAFC;
-  --destructive: #FCA5A5;
-  --destructive-foreground: #0F172A;
-  --destructive-solid: #EF4444;
-  --destructive-muted: #450A0A;
-  --border: #334155;
-  --input: #94A3B8;
-  --ring: #F97316;
-  --success: #6EE7B7;
-  --success-solid: #10B981;
-  --success-muted: #064E3B;
-  --warning: #FCD34D;
-  --warning-solid: #F59E0B;
-  --warning-muted: #422006;
-  --info: #93C5FD;
-  --info-solid: #3B82F6;
-  --info-muted: #172554;
-  --sidebar: #0B0F19;
-  --sidebar-foreground: #F8FAFC;
-  --sidebar-primary: #FF5A1F;
-  --sidebar-primary-foreground: #0F172A;
-  --sidebar-accent: #1E293B;
-  --sidebar-accent-foreground: #F8FAFC;
-  --sidebar-border: #334155;
-  --sidebar-ring: #F97316;
 }
 
 .workspace-language-select button.workspace-language-select__button {
@@ -297,51 +253,6 @@ html.global-not-found {
   color-scheme: light;
 }
 
-@media (prefers-color-scheme: dark) {
-  html.global-not-found:not(.light) {
-    color-scheme: dark;
-    --background: #020617;
-    --foreground: #F8FAFC;
-    --card: #0B0F19;
-    --card-foreground: #F8FAFC;
-    --popover: #1E293B;
-    --popover-foreground: #F8FAFC;
-    --primary: #FF5A1F;
-    --primary-foreground: #0F172A;
-    --primary-hover: #F97316;
-    --secondary: #1E293B;
-    --secondary-foreground: #F8FAFC;
-    --muted: #0B0F19;
-    --muted-foreground: #CBD5E1;
-    --accent: #1E293B;
-    --accent-foreground: #F8FAFC;
-    --destructive: #FCA5A5;
-    --destructive-foreground: #0F172A;
-    --destructive-solid: #EF4444;
-    --destructive-muted: #450A0A;
-    --border: #334155;
-    --input: #94A3B8;
-    --ring: #F97316;
-    --success: #6EE7B7;
-    --success-solid: #10B981;
-    --success-muted: #064E3B;
-    --warning: #FCD34D;
-    --warning-solid: #F59E0B;
-    --warning-muted: #422006;
-    --info: #93C5FD;
-    --info-solid: #3B82F6;
-    --info-muted: #172554;
-    --sidebar: #0B0F19;
-    --sidebar-foreground: #F8FAFC;
-    --sidebar-primary: #FF5A1F;
-    --sidebar-primary-foreground: #0F172A;
-    --sidebar-accent: #1E293B;
-    --sidebar-accent-foreground: #F8FAFC;
-    --sidebar-border: #334155;
-    --sidebar-ring: #F97316;
-  }
-}
-
 /* Approved Stitch presentation roles, also recorded in canonical tokens.json. */
 @font-face { font-family: 'Inter'; src: url('/design/inter.ttf') format('truetype'); font-weight: 100 900; font-style: normal; font-display: swap; }
 @font-face { font-family: 'Plus Jakarta Sans'; src: url('/design/jakarta.ttf') format('truetype'); font-weight: 200 800; font-style: normal; font-display: swap; }
@@ -377,13 +288,6 @@ html.global-not-found {
   --presentation-obsidian: #131B2E;
   --presentation-warm: #FFDBD0;
   --presentation-brand-text: #9F3514;
-}
-.dark {
-  --presentation-high: #1E293B;
-  --presentation-variant: #334155;
-  --presentation-dim: #334155;
-  --presentation-warm: #422006;
-  --presentation-brand-text: #FF9878;
 }
 .theme-swatch-orange { background: var(--primary); }
 .theme-swatch-emerald { background: var(--success-solid); }

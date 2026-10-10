@@ -65,10 +65,6 @@ vi.mock("next-intl", () => ({
     })[key] ?? key,
 }))
 
-vi.mock("next-themes", () => ({
-  useTheme: () => ({ resolvedTheme: "light", setTheme: vi.fn() }),
-}))
-
 vi.mock("@/components/ui/sheet", async () => {
   const React = await import("react")
 
@@ -143,7 +139,7 @@ it("renders verified workspace context, active links, and locale-preserving cont
   expect(html).toContain('aria-haspopup="listbox"')
   expect(html).toContain('aria-label="Workspace navigation"')
   expect(html).toContain("lovable-surface lovable-live")
-  expect(html).toContain('aria-label="Toggle theme"')
+  expect(html).not.toContain('aria-label="Toggle theme"')
 
   const appBar = html.match(/<header[^>]*>([\s\S]*?)<\/header>/)?.[1] ?? ""
 

@@ -35,6 +35,7 @@ export function liveWorkspaceLinks(
           ["analytics", "analytics"],
           ["catalog", "catalog"],
           ["theming", "theming"],
+          ["restaurant-settings", "settings"],
         ] as const)
 
   return pages.map(([path, key]) => ({

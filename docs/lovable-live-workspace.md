@@ -124,3 +124,7 @@ New presentation checks live in `tests/browser/lovable-remaining.spec.ts` (`--pr
 | `python docs/design-system/verify.py`, `git diff --check` | Passed (119 canonical contrast pairs, token parity, documentation links and whitespace). |
 
 These runs use local fixtures and mocked network requests where applicable; they do not demonstrate hosted business acceptance. C# and API schemas were unchanged, so backend tests were not rerun. Kanban recording remains deferred by explicit user authorization.
+
+## Workspace regression follow-up — 10 October 2026
+
+The [#65 handoff](audits/workspace-regressions.md) supersedes theme-toggle and duplicated organization-overview behavior described in earlier baselines. Demo and real history now use one table/filter/summary/export implementation. Category creation stays inside the product editor, and Studio cards respond to their available container width. Restaurant settings are entry points to existing actions; theme publication and new settings APIs remain separate roadmap work.

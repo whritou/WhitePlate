@@ -17,12 +17,6 @@
   border-color: var(--ring);
 }
 
-:global(.dark) .workspace :global([data-slot="input"]),
-:global(.dark) .workspace :global([data-slot="textarea"]),
-:global(.dark) .workspace select {
-  background: var(--secondary);
-}
-
 @media (min-width: 40rem) {
   .workspace button,
   :global(body):has(.workspace) :global([data-slot="button"]),

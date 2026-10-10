@@ -45,6 +45,8 @@ export type OrderHistoryFilters = {
 export type OptionalOrderHistoryDate =
   { ok: true; value: string | null } | { ok: false }
 export type OrderHistoryTableProps = {
+  route?: string
+  onSelectOrder?: (id: string) => void
   tenantName: string
   locale: string
   filters: OrderHistoryFilters
@@ -57,6 +59,8 @@ export type RestaurantMembership = {
   id: string
   name: string
   role: RestaurantRole
+  organizationId?: string
+  subdomain?: string
 }
 
 export type OrderActionError =

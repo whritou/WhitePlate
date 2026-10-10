@@ -73,3 +73,7 @@ The combined catalog/language workspace and persisted category hiding are implem
 ## T1 brand assets — 2026-10-08
 
 Tenant-owned logo, favicon and banner uploads are wired in source using private S3-compatible storage, normalized images, protected draft previews and explicit per-asset save/removal. The workspace is `/[locale]/organization/theming?tenantId=…`; saved assets reach the public storefront through host-resolved delivery. See the [storage decision](architecture/decisions/0007-brand-media-storage.md), [setup](development.md#brand-media-storage-t1), and [verification evidence](audits/brand-assets.md). Generated media migrations are not applied to shared environments. A real bucket and hosted two-tenant acceptance remain unverified; T2/T3 and product-photo workflows remain separate.
+
+## Workspace regression fixes — 10 October 2026
+
+[Issue #65 evidence](audits/workspace-regressions.md) records light-only appearance, responsive shop/Studio cards, inline category creation, shared history filters/summary/export, demo locale switching, organization/restaurant navigation, restaurant settings entry points and official provider marks.

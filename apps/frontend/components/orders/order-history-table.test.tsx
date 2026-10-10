@@ -91,5 +91,8 @@ it("shows a no-results message when filters match no orders", () => {
   )
 
   expect(html).toContain("noResults")
+  expect(html).toContain("exportCsv")
+  expect(html).toContain("loadedTotal")
+  expect(html).toContain("averageBasket")
   expect(html).not.toContain('data-slot="table-row"')
 })
