@@ -42,6 +42,7 @@ test("the real team uses member tables while keeping invitation actions", async 
   await expect(
     page.getByText("manager@example.test", { exact: true })
   ).toBeVisible()
+  await page.getByRole("tab", { name: "Invitations", exact: true }).click()
   await expect(
     page.getByRole("button", { name: /Revoke/ }).first()
   ).toBeVisible()

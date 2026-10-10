@@ -1,34 +1,37 @@
 import {
-  BookOpen,
+  Utensils,
+  ListOrdered,
+  ChartNoAxesCombined,
   History,
   Languages,
   LayoutDashboard,
   Plus,
-  Settings2,
+  Settings,
   Palette,
-  UsersRound,
-  UtensilsCrossed,
+  Users,
 } from "lucide-react"
 
 export function WorkspaceLinkIcon({ href }: { href: string }) {
   const path = href.split("?", 1)[0]
   const Icon = path.endsWith("/team")
-    ? UsersRound
+    ? Users
     : path.endsWith("/settings") || path.endsWith("/restaurant-settings")
-      ? Settings2
+      ? Settings
       : path.endsWith("/new")
         ? Plus
         : path.endsWith("/catalog")
-          ? BookOpen
+          ? Utensils
           : path.endsWith("/restaurant-languages")
             ? Languages
             : path.endsWith("/order-history")
               ? History
               : path.endsWith("/orders")
-                ? UtensilsCrossed
+                ? ListOrdered
                 : path.endsWith("/theming")
                   ? Palette
-                  : LayoutDashboard
+                  : path.endsWith("/analytics")
+                    ? ChartNoAxesCombined
+                    : LayoutDashboard
 
-  return <Icon aria-hidden="true" className="size-5 shrink-0" />
+  return <Icon aria-hidden="true" className="size-4 shrink-0" />
 }

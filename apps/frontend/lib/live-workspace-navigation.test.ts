@@ -41,6 +41,36 @@ it("limits kitchen navigation to operational orders", () => {
   expect(links.map((link) => link.key)).toEqual(["orders"])
 })
 
+it("includes organization staff in restaurant navigation only for an authorized organization", () => {
+  const organizationId = "11111111-1111-4111-8111-111111111111"
+  const links = liveWorkspaceLinks(
+    new URLSearchParams({ tenantId: id }),
+    [{ id: organizationId, name: "Org", isActive: true }],
+    [{ ...restaurants[0], organizationId }]
+  )
+
+  expect(links.map((link) => link.key)).toEqual([
+    "dashboard",
+    "orders",
+    "orderHistory",
+    "analytics",
+    "catalog",
+    "theming",
+    "team",
+    "settings",
+  ])
+  expect(links.find((link) => link.key === "team")?.href).toBe(
+    `/organization/team?organizationId=${organizationId}&tenantId=${id}`
+  )
+  expect(
+    liveWorkspaceLinks(
+      new URLSearchParams({ tenantId: id }),
+      [],
+      [{ ...restaurants[0], organizationId }]
+    ).some((link) => link.key === "team")
+  ).toBe(false)
+})
+
 it("offers restaurant settings without losing the verified tenant", () => {
   expect(
     liveWorkspaceLinks(new URLSearchParams({ tenantId: id }), [], restaurants)

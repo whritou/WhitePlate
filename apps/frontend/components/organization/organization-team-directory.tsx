@@ -1,3 +1,5 @@
+import { TeamDirectoryTabs } from "./team-directory-tabs"
+import type { ReactNode } from "react"
 import { LovableRolePreview } from "./lovable-role-preview"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
@@ -28,7 +30,12 @@ export async function OrganizationTeamDirectory({
   organizationId,
   members,
   invitations,
-}: OrganizationTeamDirectoryProps) {
+  heading,
+  action,
+}: OrganizationTeamDirectoryProps & {
+  heading?: ReactNode
+  action?: ReactNode
+}) {
   const [locale, t, v] = await Promise.all([
     getLocale(),
     getTranslations("Auth"),
@@ -36,7 +43,7 @@ export async function OrganizationTeamDirectory({
   ])
 
   return (
-    <div className="live-team-directory grid min-w-0 gap-6">
+    <TeamDirectoryTabs heading={heading} action={action}>
       <div className="grid max-w-full grid-cols-3 border">
         {[
           [v("members"), members?.length ?? "—"],
@@ -192,6 +199,6 @@ export async function OrganizationTeamDirectory({
       </section>
 
       <LovableRolePreview />
-    </div>
+    </TeamDirectoryTabs>
   )
 }

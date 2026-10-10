@@ -3157,7 +3157,18 @@
     "restaurantSettingsScope": "Manage menu languages, restaurant descriptions, catalog and brand assets using the tools below.",
     "shopUnavailable": "The public shop domain is not configured yet. Contact your administrator to enable the restaurant storefront.",
     "backToWorkspace": "Back to workspace",
-    "contextNavigation": "Workspace context"
+    "contextNavigation": "Workspace context",
+    "navigation": {
+      "dashboard": "Dashboard",
+      "orders": "Orders",
+      "orderHistory": "History",
+      "analytics": "Analytics",
+      "catalog": "Menu",
+      "theming": "Studio",
+      "team": "Staff",
+      "settings": "Settings",
+      "createRestaurant": "Create restaurant"
+    }
   },
   "LovableLive": {
     "members": "Members",
@@ -3189,5 +3200,33 @@
     "namePlaceholder": "Your name",
     "passwordPlaceholder": "Enter your password",
     "newPasswordPlaceholder": "At least 8 characters"
+  },
+  "LiveParity": {
+    "title": "Menu builder",
+    "dishes": "Dishes",
+    "allergens": "Allergens",
+    "discounts": "Discount codes",
+    "languages": "Languages",
+    "editingIn": "Editing in",
+    "categories": "Categories",
+    "manageCategories": "Manage categories",
+    "allergenHelp": "Allergen assignments are not connected yet. This reference list cannot publish allergen information to your menu.",
+    "base": "Base",
+    "selectDish": "Select a dish to edit its details, photos and options.",
+    "dashboardTitle": "Service at a glance.",
+    "kitchen": "In the kitchen",
+    "latestOrders": "Latest orders",
+    "storefront": "Your storefront",
+    "payment": "Payments",
+    "paymentHelp": "Payment connection and service pause are not available yet.",
+    "orderCustomer": "Order / customer",
+    "created": "Created",
+    "viewAll": "View all",
+    "staffTitle": "Staff & roles",
+    "activity": "Activity",
+    "activityHelp": "Staff activity history is not connected yet.",
+    "connections": "Connections",
+    "orderConnection": "Order connection",
+    "snapshotHelp": "Loaded from the real order API. Live updates are available on the order board."
   }
 }

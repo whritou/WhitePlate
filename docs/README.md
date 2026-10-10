@@ -77,3 +77,5 @@ Tenant-owned logo, favicon and banner uploads are wired in source using private 
 ## Workspace regression fixes — 10 October 2026
 
 [Issue #65 evidence](audits/workspace-regressions.md) records light-only appearance, responsive shop/Studio cards, inline category creation, shared history filters/summary/export, demo locale switching, organization/restaurant navigation, restaurant settings entry points and official provider marks.
+
+The [real/demo parity follow-up](audits/live-demo-parity.md) supersedes the earlier menu/table/Sheet layout with four demo tabs, dish cards and an adjacent editor, and restores restaurant Staff navigation, source dashboard sections and Staff tabs. The demo itself is unchanged.

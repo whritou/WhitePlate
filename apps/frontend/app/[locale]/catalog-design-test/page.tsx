@@ -155,7 +155,13 @@ export default async function CatalogDesignTestPage({
   const c = await getTranslations("Catalog")
 
   const content = (
-    <main className="mx-auto grid w-full max-w-7xl min-w-0 gap-6 p-4 sm:p-6 lg:p-8">
+    <main
+      className={
+        query.view === "builder"
+          ? "w-full min-w-0"
+          : "mx-auto grid w-full max-w-7xl min-w-0 gap-6 p-4 sm:p-6 lg:p-8"
+      }
+    >
       <FixtureReady />
 
       {!["builder", "products", "categories", "translations"].includes(

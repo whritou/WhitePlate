@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test"
 
-test("menu and categories each have one table and retain filters between tabs", async ({
+test("demo tabs retain filters while category management stays reachable", async ({
   page,
 }) => {
   await page.goto(
@@ -11,37 +11,24 @@ test("menu and categories each have one table and retain filters between tabs", 
     "true"
   )
   await expect(
-    page.getByRole("link", { name: "Menu & Categories", exact: true })
+    page.getByRole("link", { name: "Menu", exact: true })
   ).toBeVisible()
-  await expect(page.getByRole("tab")).toHaveCount(2)
-  await expect(page.getByRole("table")).toHaveCount(1)
+  await expect(page.getByRole("tab")).toHaveCount(4)
   await page.getByLabel("Search products", { exact: true }).fill("Soupe")
-  await page.getByRole("tab", { name: "Categories", exact: true }).click()
-  await expect(page).toHaveURL(/view=categories/)
-  await expect(page.getByRole("table")).toHaveCount(1)
-  await expect(
-    page.getByRole("table", { name: "Categories", exact: true })
-  ).toBeVisible()
-  await page.getByRole("button", { name: "Les entrées", exact: true }).click()
-  await expect(
-    page.getByRole("tab", { name: "Menu", exact: true })
-  ).toHaveAttribute("aria-selected", "true")
+  await page.getByRole("tab", { name: "Languages", exact: true }).click()
+  await page.getByRole("tab", { name: "Dishes", exact: true }).click()
   await expect(page.getByLabel("Search products", { exact: true })).toHaveValue(
     "Soupe"
   )
-  await expect(page.getByLabel("Category", { exact: true })).not.toHaveValue(
-    "all"
-  )
-  await expect(page.getByRole("table")).toHaveCount(1)
-  await page.getByRole("tab", { name: "Categories", exact: true }).click()
-  await page.reload()
+  await page
+    .getByRole("button", { name: "Manage categories", exact: true })
+    .click()
   await expect(
-    page.getByRole("tab", { name: "Categories", exact: true })
-  ).toHaveAttribute("aria-selected", "true")
-  await expect(page.getByRole("table")).toHaveCount(1)
+    page.getByRole("table", { name: "Categories", exact: true })
+  ).toBeVisible()
 })
 
-test("menu tables open a right-side product sheet and retain its draft", async ({
+test("dish cards open an adjacent product editor and retain its draft", async ({
   page,
 }) => {
   await page.goto("/en/catalog-design-test?view=builder")
@@ -49,14 +36,16 @@ test("menu tables open a right-side product sheet and retain its draft", async (
     "data-ready",
     "true"
   )
-  await expect(page.getByRole("table", { name: "Products" })).toBeVisible()
+  await expect(
+    page.getByRole("list", { name: "Products", exact: true })
+  ).toBeVisible()
   await page
     .getByRole("button", { name: "Select Soupe du potager", exact: true })
     .click()
 
-  const sheet = page.locator('[data-slot="sheet-content"]')
+  const sheet = page.locator(".live-product-panel").filter({ visible: true })
 
-  await expect(sheet).toHaveAttribute("data-side", "right")
+  await expect(sheet).toBeVisible()
   await expect(
     sheet
       .getByRole("region", { name: "Product details" })
@@ -158,7 +147,7 @@ test("product status and category filters combine, including inherited archival"
     "true"
   )
 
-  const table = page.getByRole("table", { name: "Products", exact: true })
+  const table = page.getByRole("list", { name: "Products", exact: true })
 
   await expect(
     table.getByRole("button", { name: "Select Soupe du potager", exact: true })
@@ -170,9 +159,7 @@ test("product status and category filters combine, including inherited archival"
   await expect(
     table.getByRole("button", { name: "Select Velouté d’hiver", exact: true })
   ).toBeVisible()
-  await page
-    .getByLabel("Category", { exact: true })
-    .selectOption("22222222-2222-4222-8222-333333333333")
+  await page.getByRole("button", { name: /Ancienne carte/ }).click()
   await expect(
     table.getByRole("button", {
       name: "Select Produit de la catégorie archivée",
@@ -201,7 +188,7 @@ test("rejected display-order saves retain the input and restore controls", async
     })
   })
 
-  const table = page.getByRole("table", { name: "Products", exact: true })
+  const table = page.getByRole("list", { name: "Products", exact: true })
 
   await table
     .getByLabel("Display order for Soupe du potager", { exact: true })
@@ -260,7 +247,7 @@ test("extras and translations can be edited from the sheet and retain failed wri
   )
   await form.getByRole("button", { name: "Cancel", exact: true }).click()
 
-  const sheet = page.locator('[data-slot="sheet-content"]')
+  const sheet = page.locator(".live-product-panel").filter({ visible: true })
 
   await sheet.getByLabel("Edit language", { exact: true }).selectOption("en")
   await sheet

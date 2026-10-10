@@ -3157,7 +3157,18 @@
     "restaurantSettingsScope": "Gérez les langues du menu, les descriptions du restaurant, le catalogue et les visuels avec les outils ci-dessous.",
     "shopUnavailable": "Le domaine public de la boutique n’est pas encore configuré. Contactez votre administrateur pour activer la boutique du restaurant.",
     "backToWorkspace": "Retour à l’espace de travail",
-    "contextNavigation": "Contexte de l’espace de travail"
+    "contextNavigation": "Contexte de l’espace de travail",
+    "navigation": {
+      "dashboard": "Tableau de bord",
+      "orders": "Commandes",
+      "orderHistory": "Historique",
+      "analytics": "Analyses",
+      "catalog": "Menu",
+      "theming": "Studio",
+      "team": "Équipe",
+      "settings": "Paramètres",
+      "createRestaurant": "Créer un restaurant"
+    }
   },
   "LovableLive": {
     "members": "Membres",
@@ -3189,5 +3200,33 @@
     "namePlaceholder": "Votre nom",
     "passwordPlaceholder": "Votre mot de passe",
     "newPasswordPlaceholder": "Au moins 8 caractères"
+  },
+  "LiveParity": {
+    "title": "Éditeur de menu",
+    "dishes": "Plats",
+    "allergens": "Allergènes",
+    "discounts": "Codes de réduction",
+    "languages": "Langues",
+    "editingIn": "Langue de travail",
+    "categories": "Catégories",
+    "manageCategories": "Gérer les catégories",
+    "allergenHelp": "Les affectations d’allergènes ne sont pas encore connectées. Cette liste de référence ne peut pas publier d’informations sur votre menu.",
+    "base": "Base",
+    "selectDish": "Sélectionnez un plat pour modifier ses détails, photos et options.",
+    "dashboardTitle": "Votre service en un coup d’œil.",
+    "kitchen": "En cuisine",
+    "latestOrders": "Dernières commandes",
+    "storefront": "Votre boutique",
+    "payment": "Paiements",
+    "paymentHelp": "La connexion des paiements et la mise en pause du service ne sont pas encore disponibles.",
+    "orderCustomer": "Commande / client",
+    "created": "Créée",
+    "viewAll": "Tout voir",
+    "staffTitle": "Équipe et rôles",
+    "activity": "Activité",
+    "activityHelp": "L’historique d’activité de l’équipe n’est pas encore connecté.",
+    "connections": "Connexions",
+    "orderConnection": "Connexion des commandes",
+    "snapshotHelp": "Chargées depuis l’API réelle. Les mises à jour en direct sont disponibles sur le tableau des commandes."
   }
 }
