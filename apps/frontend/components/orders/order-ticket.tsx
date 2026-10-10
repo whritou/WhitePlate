@@ -13,7 +13,6 @@ import { Button } from "@/components/ui/button"
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
@@ -72,7 +71,7 @@ export function OrderTicket({
         <CardHeader className="flex flex-wrap items-start justify-between gap-3 border-b px-4 py-3">
           <div>
             <div className="flex flex-wrap items-center gap-2">
-              <CardTitle className="text-sm font-semibold">
+              <CardTitle className="font-display text-lg font-bold">
                 <Heading>
                   {t("orderReference", { reference: order.id.slice(0, 8) })}
                 </Heading>
@@ -84,19 +83,18 @@ export function OrderTicket({
                 {t(`statuses.${order.status}`)}
               </Badge>
             </div>
-
-            <CardDescription className="mt-1 text-sm">
-              {order.customerName} <span aria-hidden="true">·</span>{" "}
-              <time dateTime={order.createdAt}>{date}</time>
-            </CardDescription>
           </div>
-
-          <p className="font-semibold tabular-nums">{total}</p>
 
           {dragAffordance}
         </CardHeader>
 
         <CardContent className="px-4 py-3">
+          <p className="mb-2 font-semibold">{order.customerName}</p>
+
+          <p className="label-mono mb-3 text-muted-foreground">
+            <time dateTime={order.createdAt}>{date}</time>
+          </p>
+
           <ul className="grid gap-2">
             {order.lines.map((line, index) => (
               <li key={`${line.productId}:${index}`}>
@@ -118,6 +116,12 @@ export function OrderTicket({
             ))}
           </ul>
         </CardContent>
+
+        <div className="flex items-center justify-between border-t px-4 py-3">
+          <span className="label-mono text-muted-foreground">{t("total")}</span>
+
+          <p className="font-display text-lg font-bold tabular-nums">{total}</p>
+        </div>
 
         {transitions.length > 0 && (
           <CardFooter className="flex flex-wrap gap-2 border-t p-3">

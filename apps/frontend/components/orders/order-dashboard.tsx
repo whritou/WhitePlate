@@ -25,7 +25,7 @@ export function OrderDashboard(props: OrderDashboardProps) {
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <div className="mb-1 flex flex-wrap items-center gap-2">
-            <p className="text-sm font-medium text-brand-text">{tenantName}</p>
+            <p className="label-mono text-muted-foreground">{tenantName}</p>
 
             <Badge variant="outline">{t(`roles.${role}`)}</Badge>
           </div>
@@ -42,29 +42,30 @@ export function OrderDashboard(props: OrderDashboardProps) {
           </p>
         </div>
 
+        <div className="grid max-w-full grid-cols-3 border">
+          {[
+            [live("loadedOrders"), page?.items.length ?? "—"],
+            [
+              t("statuses.Pending"),
+              page?.items.filter((item) => item.status === "Pending").length ??
+                "—",
+            ],
+            [
+              t("statuses.Ready"),
+              page?.items.filter((item) => item.status === "Ready").length ??
+                "—",
+            ],
+          ].map(([label, count], index) => (
+            <div key={label} className={`px-5 py-3 ${index ? "border-l" : ""}`}>
+              <p className="label-mono text-muted-foreground">{label}</p>
+
+              <p className="font-display text-2xl font-bold">{count}</p>
+            </div>
+          ))}
+        </div>
+
         <BackLink label={t("backToOrganizations")} className="self-start" />
       </header>
-
-      <div className="grid max-w-full grid-cols-3 border">
-        {[
-          [live("loadedOrders"), page?.items.length ?? "—"],
-          [
-            t("statuses.Pending"),
-            page?.items.filter((item) => item.status === "Pending").length ??
-              "—",
-          ],
-          [
-            t("statuses.Ready"),
-            page?.items.filter((item) => item.status === "Ready").length ?? "—",
-          ],
-        ].map(([label, count], index) => (
-          <div key={label} className={`px-5 py-3 ${index ? "border-l" : ""}`}>
-            <p className="label-mono text-muted-foreground">{label}</p>
-
-            <p className="font-display text-2xl font-bold">{count}</p>
-          </div>
-        ))}
-      </div>
 
       <OrderRealtimeConnection
         tenantId={tenantId}

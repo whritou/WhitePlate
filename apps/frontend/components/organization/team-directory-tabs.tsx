@@ -29,7 +29,7 @@ export function TeamDirectoryTabs({
 
       <Tabs defaultValue="members" className="live-menu-builder">
         <TabsList
-          className="h-auto max-w-full flex-wrap bg-background p-0"
+          className="h-auto w-full max-w-full flex-wrap border-b bg-background p-0"
           aria-label={t("staffTitle")}
         >
           <TabsTrigger value="members">

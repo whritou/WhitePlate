@@ -20,6 +20,7 @@ export function EditorDialog({
   label,
   icon: Icon = Pencil,
   primary,
+  sourcePrimary,
   compact,
   disabled,
   children,
@@ -38,11 +39,19 @@ export function EditorDialog({
     >
       <DialogTrigger
         disabled={disabled}
-        aria-label={title}
+        aria-label={sourcePrimary ? label : title}
         render={
           <Button
             type="button"
-            variant={primary ? "default" : compact ? "ghost" : "outline"}
+            variant={
+              sourcePrimary
+                ? "source-primary"
+                : primary
+                  ? "default"
+                  : compact
+                    ? "ghost"
+                    : "outline"
+            }
             size={compact ? "icon" : "default"}
           />
         }

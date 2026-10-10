@@ -23,7 +23,7 @@ export function CustomerCheckoutSection3() {
   } = useCustomerCheckoutView()
 
   return (
-    <aside className="border-t pt-6 md:border-t-0 md:border-l md:pt-0 md:pl-8">
+    <aside className="customer-summary min-w-0 border-t pt-6">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-bold">
           <Copy>Your order</Copy>

@@ -90,7 +90,7 @@ export function CustomerTracking({
         </span>
       </div>
 
-      <div className="grid items-start gap-10 md:grid-cols-[1.15fr_1fr]">
+      <div className="customer-two-column grid min-w-0 items-start gap-10">
         <div>
           <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-accent text-accent-foreground">
             <Copy>{preview ? <ChefHat size={30} /> : <Check size={30} />}</Copy>
@@ -213,7 +213,7 @@ export function CustomerTracking({
           </section>
         </div>
 
-        <aside className="border-t pt-6 md:border-t-0 md:border-l md:pt-0 md:pl-8">
+        <aside className="customer-summary min-w-0 border-t pt-6">
           <h2 className="text-lg font-bold">
             <Copy>Order summary</Copy>
           </h2>

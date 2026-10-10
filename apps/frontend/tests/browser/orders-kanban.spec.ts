@@ -129,7 +129,7 @@ test("Escape cancels a drag without submitting an update", async ({ page }) => {
 test("touch dragging moves an order between stacked mobile lanes", async ({
   page,
 }) => {
-  await page.setViewportSize({ width: 375, height: 1400 })
+  await page.setViewportSize({ width: 375, height: 2200 })
   await page.goto("/en/orders-kanban-test")
 
   const surface = page.locator(

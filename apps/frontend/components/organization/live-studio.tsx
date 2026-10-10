@@ -4,7 +4,6 @@ import { useTranslations } from "next-intl"
 import { useSearchParams } from "next/navigation"
 import { StudioPage } from "@/components/lovable/pages/studio"
 import { Button } from "@/components/ui/button"
-import { MissingFeatureNotice } from "./missing-feature-notice"
 import { BrandAssetsWorkspace } from "./brand-assets-workspace"
 import type { BrandAssetsProps } from "@/types/brand-assets"
 export function LiveStudio(props: BrandAssetsProps) {
@@ -55,10 +54,8 @@ export function LiveStudio(props: BrandAssetsProps) {
         </div>
       ) : (
         <>
-          <div className="grid gap-3 p-6">
-            <MissingFeatureNotice />
-
-            <p className="text-sm text-muted-foreground">
+          <div className="border-b bg-secondary px-6 py-2">
+            <p className="text-xs text-muted-foreground">
               {t("studioPending")}
             </p>
           </div>

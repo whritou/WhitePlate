@@ -16,10 +16,12 @@ export function OrganizationSettingsForm({
   organizationId,
   organizationName,
   organizationActive,
+  showLifecycle = true,
 }: {
   organizationId: string
   organizationName: string
   organizationActive: boolean
+  showLifecycle?: boolean
 }) {
   const t = useTranslations("OrganizationSettings")
   const toast = useWorkspaceToast()
@@ -91,10 +93,12 @@ export function OrganizationSettingsForm({
 
       <ResultMessage state={state} message={message} hideSuccess />
 
-      <OrganizationArchiveAction
-        organizationId={organizationId}
-        active={organizationActive}
-      />
+      {showLifecycle && (
+        <OrganizationArchiveAction
+          organizationId={organizationId}
+          active={organizationActive}
+        />
+      )}
     </form>
   )
 }

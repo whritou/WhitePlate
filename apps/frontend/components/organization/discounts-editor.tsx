@@ -43,7 +43,11 @@ export function DiscountsEditor({
   const locale = useLocale()
 
   return (
-    <section aria-labelledby="discounts-heading" role="region">
+    <section
+      className="live-discounts"
+      aria-labelledby="discounts-heading"
+      role="region"
+    >
       <Card>
         <CardHeader className="flex flex-wrap items-start justify-between gap-4">
           <div>
@@ -57,7 +61,7 @@ export function DiscountsEditor({
           </div>
 
           <EditorDialog
-            primary
+            sourcePrimary
             icon={Plus}
             title={t("newDiscountCode")}
             label={t("newDiscountCode")}
@@ -77,12 +81,12 @@ export function DiscountsEditor({
           {discounts.length === 0 ? (
             <p className="py-6 text-muted-foreground">{t("noDiscounts")}</p>
           ) : (
-            <ul className="divide-y divide-border">
+            <ul className="grid gap-3">
               {discounts.map((discount) => (
                 <li
                   key={discount.id}
                   aria-label={`${discount.code} ${discount.name}`}
-                  className="flex flex-wrap items-center justify-between gap-4 py-5"
+                  className="flex flex-wrap items-center justify-between gap-4 border p-4"
                 >
                   <div className="flex min-w-0 items-start gap-3">
                     <TicketPercent

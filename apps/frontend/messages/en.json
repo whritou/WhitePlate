@@ -233,6 +233,7 @@
     "orderHistory": "Loading order history…"
   },
   "KitchenOrders": {
+    "total": "Total",
     "title": "Kitchen orders",
     "description": "Review incoming tickets and update each order as your team prepares it.",
     "backToOrganizations": "All organizations",
@@ -3199,9 +3200,13 @@
     "signInAction": "Log in",
     "namePlaceholder": "Your name",
     "passwordPlaceholder": "Enter your password",
-    "newPasswordPlaceholder": "At least 8 characters"
+    "newPasswordPlaceholder": "At least 8 characters",
+    "searchMembers": "Search email…",
+    "filterRole": "Filter by role",
+    "allRoles": "All roles"
   },
   "LiveParity": {
+    "inviteMember": "Invite member",
     "title": "Menu builder",
     "dishes": "Dishes",
     "allergens": "Allergens",

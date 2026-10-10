@@ -40,6 +40,7 @@ export function SourceInput(props: ComponentProps<"input">) {
 
   return (
     <Input
+      data-source-control="true"
       {...props}
       className={cn(
         "rounded-none",
@@ -59,6 +60,7 @@ export function SourceTextarea(props: ComponentProps<"textarea">) {
 
   return (
     <Textarea
+      data-source-control="true"
       {...props}
       className={cn("rounded-none", props.className)}
       placeholder={text(props.placeholder)}
@@ -87,6 +89,7 @@ export function SourceSelect({
 
   return (
     <NativeSelect
+      data-source-control="true"
       className="w-auto max-w-full"
       selectClassName={cn("rounded-none", className)}
       {...props}

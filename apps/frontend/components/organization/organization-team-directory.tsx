@@ -1,16 +1,9 @@
+import { TeamMembersTable } from "./team-members-table"
 import { TeamDirectoryTabs } from "./team-directory-tabs"
 import type { ReactNode } from "react"
 import { LovableRolePreview } from "./lovable-role-preview"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
-import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableRow,
-  TableHead,
-  TableCell,
-} from "@/components/ui/table"
 import type {
   OrganizationInvitationStatus,
   OrganizationTeamDirectoryProps,
@@ -62,64 +55,10 @@ export async function OrganizationTeamDirectory({
         ))}
       </div>
 
-      <section className="min-w-0 border">
-        <header className="border-b px-5 py-4">
-          <h2 className="font-display text-xl font-bold">
-            {t("teamRosterTitle")}
-          </h2>
+      <TeamMembersTable members={members} />
 
-          <p className="mt-1 text-sm text-muted-foreground">
-            {t("teamRosterDescription")}
-          </p>
-        </header>
-
-        {members === null ? (
-          <Alert variant="destructive" role="alert">
-            <AlertDescription>{t("serviceError")}</AlertDescription>
-          </Alert>
-        ) : members.length === 0 ? (
-          <p className="p-5 text-sm text-muted-foreground">
-            {t("teamRosterEmpty")}
-          </p>
-        ) : (
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-secondary">
-                <TableHead>{t("email")}</TableHead>
-
-                <TableHead>{v("role")}</TableHead>
-
-                <TableHead>{v("scope")}</TableHead>
-              </TableRow>
-            </TableHeader>
-
-            <TableBody>
-              {members.map((member, index) => (
-                <TableRow
-                  key={`${member.role}:${member.tenantId}:${member.email}:${index}`}
-                >
-                  <TableCell className="font-semibold">
-                    {member.email ?? t("teamMemberEmailUnavailable")}
-                  </TableCell>
-
-                  <TableCell>
-                    <Badge variant="secondary">
-                      {t(`teamRoles.${member.role}`)}
-                    </Badge>
-                  </TableCell>
-
-                  <TableCell>
-                    {member.tenantName ?? t("organizationScope")}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        )}
-      </section>
-
-      <section className="min-w-0 border">
-        <header className="border-b px-5 py-4">
+      <section className="min-w-0">
+        <header className="sr-only">
           <h2 className="font-display text-xl font-bold">
             {t("teamInvitationsTitle")}
           </h2>
@@ -138,63 +77,45 @@ export async function OrganizationTeamDirectory({
             {t("teamInvitationsEmpty")}
           </p>
         ) : (
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-secondary">
-                <TableHead>{t("email")}</TableHead>
+          <ul className="grid gap-3">
+            {invitations.map((invitation) => (
+              <li
+                key={invitation.id}
+                className="flex flex-wrap items-center justify-between gap-4 border p-4"
+              >
+                <div className="min-w-0">
+                  <p className="font-bold">{invitation.email}</p>
 
-                <TableHead>{v("role")}</TableHead>
-
-                <TableHead>{v("scope")}</TableHead>
-
-                <TableHead>{v("status")}</TableHead>
-
-                <TableHead>{v("expires")}</TableHead>
-
-                <TableHead>{v("actions")}</TableHead>
-              </TableRow>
-            </TableHeader>
-
-            <TableBody>
-              {invitations.map((invitation) => (
-                <TableRow key={invitation.id}>
-                  <TableCell className="font-semibold">
-                    {invitation.email}
-                  </TableCell>
-
-                  <TableCell>{t(`teamRoles.${invitation.role}`)}</TableCell>
-
-                  <TableCell>
+                  <p className="label-mono text-muted-foreground">
+                    {t(`teamRoles.${invitation.role}`)} ·{" "}
                     {invitation.tenantName ?? t("organizationScope")}
-                  </TableCell>
+                  </p>
 
-                  <TableCell>
-                    <Badge variant={statusVariant(invitation.status)}>
-                      {t(`invitationStatus.${invitation.status}`)}
-                    </Badge>
-                  </TableCell>
-
-                  <TableCell>
+                  <p className="mt-1 text-sm text-muted-foreground">
                     {t("invitationExpiresOn", {
                       date: new Intl.DateTimeFormat(locale, {
                         dateStyle: "medium",
                       }).format(new Date(invitation.expiresAt)),
                     })}
-                  </TableCell>
+                  </p>
+                </div>
 
-                  <TableCell>
-                    {invitation.status === "Pending" && (
-                      <RevokeInvitationButton
-                        organizationId={organizationId}
-                        invitationId={invitation.id}
-                        email={invitation.email}
-                      />
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+                <div className="flex flex-wrap items-center gap-3">
+                  <Badge variant={statusVariant(invitation.status)}>
+                    {t(`invitationStatus.${invitation.status}`)}
+                  </Badge>
+
+                  {invitation.status === "Pending" && (
+                    <RevokeInvitationButton
+                      organizationId={organizationId}
+                      invitationId={invitation.id}
+                      email={invitation.email}
+                    />
+                  )}
+                </div>
+              </li>
+            ))}
+          </ul>
         )}
       </section>
 
