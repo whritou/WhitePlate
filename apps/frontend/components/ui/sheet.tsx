@@ -2,6 +2,7 @@
 
 import { Dialog } from "@base-ui/react/dialog"
 import { cn } from "@/lib/utils"
+import { useVisualScope } from "./visual-scope"
 import type { SheetContentProps } from "@/types/ui"
 
 const Sheet = Dialog.Root
@@ -16,6 +17,8 @@ function SheetContent({
   className,
   ...props
 }: SheetContentProps) {
+  const scope = useVisualScope()
+
   return (
     <Dialog.Portal keepMounted={keepMounted}>
       <Dialog.Backdrop className="fixed inset-0 z-40 bg-black/40" />
@@ -28,9 +31,11 @@ function SheetContent({
           side === "left"
             ? "left-0 rounded-r-xl border-r"
             : "right-0 rounded-l-xl border-l",
-          className
+          className,
+          scope.className
         )}
         {...props}
+        style={{ ...scope.style, ...props.style }}
       />
     </Dialog.Portal>
   )

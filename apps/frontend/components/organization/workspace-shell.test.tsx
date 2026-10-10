@@ -142,8 +142,7 @@ it("renders verified workspace context, active links, and locale-preserving cont
   expect(html).toContain('data-testid="workspace-language"')
   expect(html).toContain('aria-haspopup="listbox"')
   expect(html).toContain('aria-label="Workspace navigation"')
-  expect(html).toContain('<h2 class="sr-only">Workspace navigation</h2>')
-  expect(html).toContain('aria-label="Open navigation"')
+  expect(html).toContain("lovable-surface lovable-live")
   expect(html).toContain('aria-label="Toggle theme"')
 
   const appBar = html.match(/<header[^>]*>([\s\S]*?)<\/header>/)?.[1] ?? ""
@@ -151,8 +150,8 @@ it("renders verified workspace context, active links, and locale-preserving cont
   expect(appBar).not.toContain(
     '<p class="text-sm font-medium">Owner Restaurant</p>'
   )
-  expect(html).toContain("md:flex")
-  expect(html).toContain("md:hidden")
+  expect(html).toContain("overflow-x-auto")
+  expect(html).toContain(`/organization/dashboard?tenantId=${tenantId}`)
   expect(html).toContain("Sign out")
 })
 
@@ -191,9 +190,7 @@ it("localizes the flag selector and marks the current locale", () => {
   expect(html).toContain('id="workspace-language-btn"')
   expect(html).not.toContain("🇬🇧")
   expect(html).not.toContain("🇫🇷")
-  expect(html).toContain(
-    '<h2 class="sr-only">Navigation de l’espace de travail</h2>'
-  )
+  expect(html).toContain('aria-label="Navigation de l’espace de travail"')
 })
 
 it("maps interface locales to the requested flag country codes", () => {

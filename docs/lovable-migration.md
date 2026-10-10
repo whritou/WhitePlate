@@ -1,6 +1,6 @@
 # Lovable visual migration
 
-9 October 2026. Scope: public landing and localized demonstration pages.
+9 October 2026. Initial scope: public landing and localized demonstration pages. The approved 10 October continuation is documented in [real workspace migration](lovable-live-workspace.md).
 
 ## Reference and routes
 
@@ -23,7 +23,7 @@ The four original demo URLs remain. Additional pages make the export's navigatio
 
 ## Design, assets and implementation
 
-The canonical [design system](design-system/README.md) now includes a scoped Lovable reference. `.lovable-surface` preserves Space Grotesk, kelp green/lime/ink, square backoffice borders, original hero overlay and source spacing/layout. Culinary Commerce remains the default for live screens. The source is light: these scoped pages stay light even when the application theme is dark; restaurant presets can supply their own dark palette.
+The canonical [design system](design-system/README.md) now includes a scoped Lovable reference. `.lovable-surface` preserves Space Grotesk, kelp green/lime/ink, square backoffice borders, original hero overlay and source spacing/layout. The real workspace/customer extension is documented separately; Culinary Commerce remains the default for authentication and unscoped screens. The source is light: these scoped pages stay light even when the application theme is dark; restaurant presets can supply their own dark palette.
 
 - `components/lovable/lovable.css`: scoped source tokens/component/customer CSS, plus explicit container widths to avoid existing Tailwind spacing alias collisions.
 - `components/lovable/fonts.css`: local font faces for all twelve original Studio families and presets. Google font binaries were recovered because the archive includes font URLs but no binaries. OFL licenses accompany them.
@@ -53,7 +53,7 @@ No demo action is an authoritative restaurant operation. Checkout saves a local 
 | Domains/DNS/TLS | Examples; verification unavailable | Ownership verification, real records and certificate provisioning |
 | Account links | Existing sign-in/signup | No auth migration |
 
-Browser tenant identity is never authorization. Live implementations remain separate and unchanged.
+Browser tenant identity is never authorization. Demo behavior remains separate; the real extension reuses existing contracts and explicitly identifies missing capabilities.
 
 ## Development and checks
 

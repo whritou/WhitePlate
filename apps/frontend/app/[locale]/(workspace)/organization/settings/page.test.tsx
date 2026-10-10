@@ -9,6 +9,14 @@ const { getSession, getOrganizations } = vi.hoisted(() => ({
 }))
 
 vi.mock("@/lib/auth", () => ({ auth: { api: { getSession } } }))
+vi.mock("@/components/organization/live-settings", async () => {
+  const React = await import("react")
+
+  return {
+    LiveSettings: ({ children }: { children: React.ReactNode }) =>
+      React.createElement("section", null, children),
+  }
+})
 vi.mock("@/actions/organization", () => ({
   renameOrganizationAction: vi.fn(),
 }))
@@ -82,7 +90,7 @@ it("renders settings only for an organization in the owner list", async () => {
   })
   const html = renderToStaticMarkup(createElement(() => page))
 
-  expect(html).toContain("Organization settings")
+  expect(html).toContain("Organization name")
   expect(html).toContain('value="White Plate Group"')
   expect(html).toContain(`value="${organizationId}"`)
 })

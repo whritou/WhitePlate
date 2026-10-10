@@ -112,9 +112,9 @@ export const FONT_LINK =
 
 const KEY = "whiteplate-lovable-demo-store-theme"
 
-export function loadTheme(): StoreTheme {
+export function loadTheme(storageKey = KEY): StoreTheme {
   try {
-    const raw = localStorage.getItem(KEY)
+    const raw = localStorage.getItem(storageKey)
 
     if (!raw) return DEFAULT_THEME
 
@@ -132,9 +132,9 @@ export function loadTheme(): StoreTheme {
   }
 }
 
-export function saveTheme(t: StoreTheme) {
+export function saveTheme(t: StoreTheme, storageKey = KEY) {
   try {
-    localStorage.setItem(KEY, JSON.stringify(t))
+    localStorage.setItem(storageKey, JSON.stringify(t))
 
     return true
   } catch {

@@ -1,5 +1,7 @@
 # Documentation index
 
+The approved Lovable design now also covers real workspaces and tenant customer shells. See [real routes, connected operations and explicit fictitious drafts](lovable-live-workspace.md). Existing backend contracts are retained; hosted acceptance remains separate.
+
 [Lovable migration](lovable-migration.md): current landing/demo routes, scoped design, assets, browser-only behavior and backend connections.
 
 M5 galleries are implemented in source: multiple ordered photos, cover selection, independent private drafts/save, guest cards/options gallery and T1 cleanup reuse. See [policies](architecture/decisions/0008-product-photo-gallery.md) and [verification](audits/product-photos.md). Shared migration, actual provider and hosted acceptance remain pending.

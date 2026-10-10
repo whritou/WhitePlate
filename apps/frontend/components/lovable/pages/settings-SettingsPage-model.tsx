@@ -4,17 +4,30 @@ import { useSearchParams } from "next/navigation"
 import type { Restaurant, State, Section } from "@/types/lovable/page-settings"
 import { useState } from "react"
 import { KEY, DEFAULT, PLANS } from "./settings-shared"
-export function useSettingsPageModel() {
+export function useSettingsPageModel(storageKey = KEY) {
   const { section } = Object.fromEntries(useSearchParams().entries())
   const [s, setS] = useDemoDraft<State>(DEFAULT, () => {
     try {
-      return { ...DEFAULT, ...JSON.parse(localStorage.getItem(KEY) || "null") }
+      return {
+        ...DEFAULT,
+        ...JSON.parse(localStorage.getItem(storageKey) || "null"),
+      }
     } catch {
       return DEFAULT
     }
   })
   const [sec, setSec] = useState<Section>(
-    section === "payments" ? "payments" : "org"
+    [
+      "org",
+      "restaurants",
+      "payments",
+      "billing",
+      "domains",
+      "notifications",
+      "danger",
+    ].includes(section)
+      ? (section as Section)
+      : "org"
   )
   const [dirty, setDirty] = useState(false)
   const [toast, setToast] = useState("")
@@ -33,14 +46,14 @@ export function useSettingsPageModel() {
   }
 
   const save = () => {
-    localStorage.setItem(KEY, JSON.stringify(s))
+    localStorage.setItem(storageKey, JSON.stringify(s))
     setDirty(false)
     flash("Settings saved")
   }
 
   const persist = (next: State, msg: string) => {
     setS(next)
-    localStorage.setItem(KEY, JSON.stringify(next))
+    localStorage.setItem(storageKey, JSON.stringify(next))
     flash(msg)
   }
 

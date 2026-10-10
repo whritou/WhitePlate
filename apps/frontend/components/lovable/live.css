@@ -1,0 +1,67 @@
+/* Lovable recipes applied to existing authenticated controls without changing their operations. */
+.lovable-live {
+  --primary-hover: oklch(0.44 0.14 152);
+  --color-primary-hover: var(--primary-hover);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-brand-text: var(--primary);
+  --brand-text: var(--primary);
+  --obsidian: var(--ink);
+  --color-obsidian: var(--ink);
+  --surface-variant: var(--secondary);
+  --surface-dim: var(--muted);
+  --color-surface-variant: var(--secondary);
+  --color-surface-dim: var(--muted);
+  --radius-sm: 0;
+  --radius-md: 0;
+  --radius-lg: 0;
+  --radius-xl: 0;
+  --radius-2xl: 0;
+  --radius-3xl: 0;
+  --radius-4xl: 0;
+  overflow-wrap: anywhere;
+}
+.lovable-live :is(h1,h2,h3,h4) { font-family: var(--font-display); }
+.lovable-live :is([data-slot="card"], [data-slot="sheet-content"], [data-slot="dialog-content"], [data-slot="alert-dialog-popup"]),
+.lovable-live:is([data-slot="sheet-content"], [data-slot="dialog-content"], [data-slot="alert-dialog-popup"]) {
+  border-radius: 0;
+  box-shadow: none;
+}
+.lovable-live [data-slot="card"] { border: 1px solid var(--border); background: var(--background); }
+.lovable-live [data-slot="button"]:not(.lovable-source-button):not(.lovable-button) {
+  border-radius: 0;
+  font-size: .875rem;
+  font-weight: 600;
+}
+.lovable-live :is([data-slot="input"], [data-slot="textarea"], [data-slot="native-select"], [data-slot="tabs-list"], [data-slot="tabs-trigger"], [data-slot="badge"]) { border-radius: 0; }
+.lovable-live.lovable-surface :is([data-slot="input"], [data-slot="textarea"], [data-slot="native-select"]) {
+  border: 1px solid var(--input);
+  background: var(--background);
+  color: var(--foreground);
+  font-size: .875rem;
+}
+.lovable-live [data-slot="tabs-list"] { border: 1px solid var(--border); background: var(--background); padding: 0; }
+.lovable-live [data-slot="tabs-trigger"][data-active] { background: var(--foreground); color: var(--background); box-shadow: none; }
+.lovable-live [data-slot="table-head"] { font-size: .75rem; text-transform: uppercase; letter-spacing: .04em; }
+.lovable-live [data-slot="table-row"] { border-color: var(--border); }
+.lovable-live [data-slot="table-cell"] { font-size: .875rem; }
+.lovable-live main > header h1 { font-size: 2.25rem; line-height: 1.15; font-weight: 700; }
+.lovable-live .workspace-language-select__button { border-radius: 0 !important; border-color: var(--border) !important; }
+.lovable-live .workspace-language-select ul { background: var(--background); color: var(--foreground); border-radius: 0; }
+.lovable-live .live-page { padding: 2rem 1.5rem; max-width: 90rem; margin-inline: auto; }
+.lovable-live .live-section { border: 1px solid var(--border); padding: 1.5rem; }
+.lovable-live .live-section-heading { font-size: 1.25rem; font-weight: 700; }
+.lovable-live [data-slot="toast"] { border-radius: 0; }
+.lovable-live [data-slot="alert"] { border-radius: 0; }
+.lovable-live.customer-page :is(h1,h2,h3) { font-family: var(--customer-heading-font); }
+.lovable-live.customer-page [data-slot="card"] { border-radius: var(--customer-radius); border-color: var(--border); }
+.lovable-live.customer-page :is([data-slot="input"], [data-slot="textarea"], [data-slot="native-select"]) { border-radius: var(--customer-radius); }
+.lovable-live.customer-page [data-slot="button"] { font-family: var(--customer-font); }
+.lovable-live.customer-page [data-slot="dialog-content"],
+.lovable-live.customer-page[data-slot="dialog-content"] { border-radius: var(--customer-radius); }
+@media (max-width: 40rem) {
+  .lovable-live .live-page { padding: 1.5rem 1rem; }
+  .lovable-live main > header h1 { font-size: 1.75rem; }
+}

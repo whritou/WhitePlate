@@ -1,13 +1,8 @@
+import { LiveSettings } from "@/components/organization/live-settings"
 import { OrganizationSettingsForm } from "@/components/organization/organization-settings-form"
-import { BackLink } from "@/components/organization/back-link"
+
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import { Card } from "@/components/ui/card"
 import { auth } from "@/lib/auth"
 import { isUuid } from "@/lib/validation/common"
 import { getOrganizations } from "@/services/organization-queries"
@@ -67,32 +62,18 @@ export default async function OrganizationSettingsPage({
   }
 
   return (
-    <main className="mx-auto min-h-[70vh] max-w-3xl p-4 sm:p-6 lg:p-8">
-      <BackLink label={t("backToOrganizations")} />
-
-      <Card className="mt-6 rounded-lg border border-border bg-card p-6 sm:p-10">
-        <CardHeader className="px-0">
-          <CardTitle>
-            <h1 className="text-2xl font-semibold tracking-tight">
-              {t("title")}
-            </h1>
-          </CardTitle>
-
-          <CardDescription className="mt-2 max-w-xl text-sm leading-6 text-muted-foreground">
-            {t("description")}
-          </CardDescription>
-        </CardHeader>
-
-        <CardContent className="px-0">
-          <OrganizationSettingsForm
-            key={`${organization.id}:${organization.name}`}
-            organizationId={organization.id}
-            organizationName={organization.name}
-            organizationActive={organization.isActive}
-          />
-        </CardContent>
-      </Card>
-    </main>
+    <LiveSettings
+      key={`${session.user.id}:${organization.id}`}
+      organization={organization}
+      userId={session.user.id}
+    >
+      <OrganizationSettingsForm
+        key={`${organization.id}:${organization.name}`}
+        organizationId={organization.id}
+        organizationName={organization.name}
+        organizationActive={organization.isActive}
+      />
+    </LiveSettings>
   )
 }
 

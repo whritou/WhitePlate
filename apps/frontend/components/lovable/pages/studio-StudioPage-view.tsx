@@ -1,11 +1,14 @@
 "use client"
 import { Copy } from "@/components/lovable/copy"
+import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/lovable-button"
 import { DnsModal } from "./studio-shared"
 import { useStudioPageView } from "./studio-StudioPage-context"
 import { StudioPageSection1 } from "./studio-StudioPage-section-1"
 export function StudioPageView() {
+  const live = useTranslations("LiveWorkspace")
   const {
+    isLive,
     t,
     device,
     setDevice,
@@ -64,7 +67,15 @@ export function StudioPageView() {
           </div>
 
           <Button onClick={publish}>
-            <Copy>{saved ? "Saved in this browser ✓" : "Save demo"}</Copy>
+            {isLive ? (
+              saved ? (
+                live("draftSaved")
+              ) : (
+                live("saveDraft")
+              )
+            ) : (
+              <Copy>{saved ? "Saved in this browser ✓" : "Save demo"}</Copy>
+            )}
           </Button>
         </div>
       </div>

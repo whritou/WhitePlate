@@ -33,26 +33,25 @@ export function MenuProductCard({
   return (
     <Card
       size="sm"
-      className="grid h-full grid-cols-[minmax(0,1fr)_5rem] grid-rows-[auto_1fr_auto] gap-x-3 gap-y-3 border-0 p-4 shadow-sm sm:grid-cols-[minmax(0,1fr)_6rem]"
+      className="grid h-full grid-cols-1 grid-rows-[auto_auto_1fr_auto] gap-0 overflow-hidden p-0 shadow-none"
     >
       <ProductPhotoImage
         key={product.photos?.[0]?.id ?? "fallback"}
         productId={product.id}
         photo={product.photos?.[0]}
-        size={320}
-        square
-        className="col-start-2 row-start-1 size-20 sm:size-24"
+        size={640}
+        className="col-start-1 row-start-1 aspect-[4/3] w-full"
       />
 
-      <CardHeader className="col-start-1 row-start-1 min-w-0 p-0 pb-0">
+      <CardHeader className="col-start-1 row-start-2 min-w-0 px-4 pt-4 pb-0">
         <CardTitle>
-          <h3 className="font-heading text-title-md leading-6 break-words">
+          <h3 className="font-heading text-base font-bold break-words">
             {product.name}
           </h3>
         </CardTitle>
       </CardHeader>
 
-      <CardContent className="col-start-1 row-start-2 flex min-w-0 flex-col gap-sm p-0 pt-0">
+      <CardContent className="col-start-1 row-start-3 flex min-w-0 flex-col gap-3 px-4 pt-2 pb-0">
         {product.description && (
           <p className="text-body-sm break-words text-muted-foreground">
             {product.description}
@@ -66,7 +65,7 @@ export function MenuProductCard({
         )}
       </CardContent>
 
-      <CardFooter className="col-span-2 row-start-3 flex-wrap justify-between gap-3 border-t-0 p-0 pt-1 pb-3">
+      <CardFooter className="col-start-1 row-start-4 flex-wrap justify-between gap-3 border-t-0 p-4">
         <span className="font-heading text-headline-sm tabular-nums">
           {price.format(product.basePrice)}
         </span>

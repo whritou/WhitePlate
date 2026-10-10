@@ -1,5 +1,7 @@
 # WhitePlate frontend
 
+The approved Lovable design now also covers real workspaces and tenant customer shells. See [real routes, connected operations and explicit fictitious drafts](../../docs/lovable-live-workspace.md). Existing backend contracts are retained; hosted acceptance remains separate.
+
 The public landing and localized demo routes use the supplied Lovable design. See [migration documentation](../../docs/lovable-migration.md) for route mapping, local fonts/assets and backend connections. Demo actions are browser simulations; they do not replace real tenant services. Run `npm run test:browser -- --project lovable-migration` against `WHITEPLATE_ACCEPTANCE_URL=http://localhost:3015` after starting a local server.
 
 Next.js App Router app with localized Better Auth and organization/team flows, tenant menu browsing, language/translation settings, and guest cart/checkout. Protected API operations use server-side Better Auth JWTs. Guest checkout uses a same-origin public BFF and an in-memory cart; server receipt pricing and retry safety are verified with a local API fixture. Kitchen tickets use TanStack Query reads/action mutations and SignalR invalidation hints. Live authenticated dashboard acceptance remains separately tracked.

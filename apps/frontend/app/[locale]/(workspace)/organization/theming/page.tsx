@@ -5,7 +5,7 @@ import { auth } from "@/lib/auth"
 import { isUuid } from "@/lib/validation/common"
 import { getRestaurantMemberships } from "@/services/orders"
 import { getBrandAssets } from "@/services/brand-assets"
-import { BrandAssetsWorkspace } from "@/components/organization/brand-assets-workspace"
+import { LiveStudio } from "@/components/organization/live-studio"
 import { MenuBuilderRetry } from "@/components/organization/menu-builder-retry"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import type { BrandPageProps } from "@/types/brand-assets"
@@ -31,9 +31,9 @@ export default async function ThemingPage({ searchParams }: BrandPageProps) {
   const initial = restaurant ? await getBrandAssets(restaurant.id) : undefined
 
   return (
-    <main className="mx-auto w-full max-w-[100rem] min-w-0 p-4 sm:p-6 lg:p-8">
+    <main className="w-full min-w-0">
       {restaurant ? (
-        <BrandAssetsWorkspace
+        <LiveStudio
           key={`${session.user.id}:${restaurant.id}`}
           userId={session.user.id}
           tenantId={restaurant.id}

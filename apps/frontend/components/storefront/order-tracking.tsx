@@ -1,6 +1,6 @@
 "use client"
 
-import { CustomerShell } from "@/components/redesign/customer-shell"
+import { LiveCustomerShell as CustomerShell } from "./live-customer-shell"
 import { TrackingProgress } from "@/components/redesign/tracking-progress"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"

@@ -9,15 +9,19 @@ import {
   saveTheme,
   type StoreTheme,
 } from "@/lib/lovable/storeTheme"
-export function useStudioPageModel() {
-  const [t, setT] = useDemoDraft<StoreTheme>(DEFAULT_THEME, loadTheme)
+export function useStudioPageModel(storageKey?: string) {
+  const [t, setT] = useDemoDraft<StoreTheme>(DEFAULT_THEME, () =>
+    loadTheme(storageKey)
+  )
   const [device, setDevice] = useState<"desktop" | "mobile">("desktop")
   const [page, setPage] = useState<"store" | "checkout" | "tracking">("store")
   const [previewCart, setPreviewCart] = useState(PREVIEW_CART)
   const [saved, setSaved] = useState(true)
   const [dnsOpen, setDnsOpen] = useState(false)
   const [panel, setPanel] = useState<"design" | "brand">("design")
-  const [menu, setMenu] = useDemoDraft<MenuData>(DEFAULT_MENU, loadMenu)
+  const [menu, setMenu] = useDemoDraft<MenuData>(DEFAULT_MENU, () =>
+    storageKey ? DEFAULT_MENU : loadMenu()
+  )
 
   const set = (p: Partial<StoreTheme>) => {
     setT((x) => ({ ...x, ...p }))
@@ -25,11 +29,12 @@ export function useStudioPageModel() {
   }
 
   const publish = () => {
-    if (saveTheme(t)) setSaved(true)
+    if (saveTheme(t, storageKey)) setSaved(true)
     else alert("Your images are too large to save. Try smaller image files.")
   }
 
   return {
+    isLive: Boolean(storageKey),
     t,
     setT,
     device,
