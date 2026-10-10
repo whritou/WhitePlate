@@ -1,3 +1,4 @@
+import { AuthFrame } from "@/components/auth/auth-frame"
 import { Button } from "@/components/ui/button"
 
 import { AcceptInvitationForm } from "@/components/auth/accept-invitation-form"
@@ -25,61 +26,69 @@ export default async function AcceptInvitationPage({
   const session = await auth.api.getSession({ headers: await headers() })
 
   return (
-    <main className="mx-auto grid min-h-[70vh] max-w-2xl content-center px-5 py-12">
-      <Card className="rounded-lg border border-border bg-card p-6 sm:p-10">
-        <CardHeader className="px-0">
-          <p className="mb-2 text-sm font-medium text-brand-text">WhitePlate</p>
-
-          <CardTitle>
-            <h1 className="text-2xl font-semibold tracking-tight sm:text-[2rem]">
-              {t("invitationTitle")}
-            </h1>
-          </CardTitle>
-
-          <CardDescription className="mt-2 text-sm leading-6 text-muted-foreground">
-            {validToken ? t("invitationDescription") : t("invalidInvitation")}
-          </CardDescription>
-        </CardHeader>
-
-        <CardContent className="px-0">
-          {validToken && session?.user.emailVerified ? (
-            <div className="mt-7">
-              <AcceptInvitationForm token={token} />
-            </div>
-          ) : null}
-
-          {validToken && !session && (
-            <div className="mt-7 flex flex-wrap gap-3">
-              <Button
-                size="lg"
-
-                render={
-                  <Link href={`/sign-in?invite=${encodeURIComponent(token)}`} />
-                }
-              >
-                {t("signInAction")}
-              </Button>
-
-              <Button
-                size="lg"
-                variant="outline"
-
-                render={
-                  <Link href={`/sign-up?invite=${encodeURIComponent(token)}`} />
-                }
-              >
-                {t("signUpAction")}
-              </Button>
-            </div>
-          )}
-
-          {validToken && session && !session.user.emailVerified && (
-            <p className="mt-5 text-sm text-muted-foreground">
-              {t("verifyBeforeAccept")}
+    <AuthFrame>
+      <section className="mx-auto grid min-h-[70vh] max-w-2xl content-center px-5 py-12">
+        <Card className="rounded-lg border border-border bg-card p-6 sm:p-10">
+          <CardHeader className="px-0">
+            <p className="mb-2 text-sm font-medium text-brand-text">
+              WhitePlate
             </p>
-          )}
-        </CardContent>
-      </Card>
-    </main>
+
+            <CardTitle>
+              <h1 className="text-2xl font-semibold tracking-tight sm:text-[2rem]">
+                {t("invitationTitle")}
+              </h1>
+            </CardTitle>
+
+            <CardDescription className="mt-2 text-sm leading-6 text-muted-foreground">
+              {validToken ? t("invitationDescription") : t("invalidInvitation")}
+            </CardDescription>
+          </CardHeader>
+
+          <CardContent className="px-0">
+            {validToken && session?.user.emailVerified ? (
+              <div className="mt-7">
+                <AcceptInvitationForm token={token} />
+              </div>
+            ) : null}
+
+            {validToken && !session && (
+              <div className="mt-7 flex flex-wrap gap-3">
+                <Button
+                  size="lg"
+
+                  render={
+                    <Link
+                      href={`/sign-in?invite=${encodeURIComponent(token)}`}
+                    />
+                  }
+                >
+                  {t("signInAction")}
+                </Button>
+
+                <Button
+                  size="lg"
+                  variant="outline"
+
+                  render={
+                    <Link
+                      href={`/sign-up?invite=${encodeURIComponent(token)}`}
+                    />
+                  }
+                >
+                  {t("signUpAction")}
+                </Button>
+              </div>
+            )}
+
+            {validToken && session && !session.user.emailVerified && (
+              <p className="mt-5 text-sm text-muted-foreground">
+                {t("verifyBeforeAccept")}
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      </section>
+    </AuthFrame>
   )
 }

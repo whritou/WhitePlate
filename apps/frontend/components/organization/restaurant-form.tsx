@@ -53,7 +53,7 @@ export function RestaurantForm({ organizationId }: RestaurantFormProps) {
   }
 
   return (
-    <form onSubmit={submit} className="grid gap-5">
+    <form onSubmit={submit} className="grid gap-5 border p-6">
       <input type="hidden" name="organizationId" value={organizationId} />
 
       <fieldset disabled={pending} className="grid gap-5">

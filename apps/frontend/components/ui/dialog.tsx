@@ -2,6 +2,7 @@
 
 import { Dialog as Primitive } from "@base-ui/react/dialog"
 import { cn } from "@/lib/utils"
+import { useVisualScope } from "./visual-scope"
 
 export const Dialog = Primitive.Root
 export const DialogTrigger = Primitive.Trigger
@@ -14,6 +15,8 @@ export function DialogContent({
   keepMounted,
   ...props
 }: Primitive.Popup.Props & { keepMounted?: boolean }) {
+  const scope = useVisualScope()
+
   return (
     <Primitive.Portal keepMounted={keepMounted}>
       <Primitive.Backdrop className="fixed inset-0 z-40 bg-black/50" />
@@ -21,9 +24,11 @@ export function DialogContent({
         data-slot="dialog-content"
         className={cn(
           "fixed start-1/2 top-1/2 z-40 flex max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-2xl -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-xl border border-border bg-popover text-popover-foreground shadow-lg outline-none [&[hidden]]:hidden",
-          className
+          className,
+          scope.className
         )}
         {...props}
+        style={{ ...scope.style, ...props.style }}
       />
     </Primitive.Portal>
   )

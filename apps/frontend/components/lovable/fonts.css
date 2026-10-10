@@ -1,0 +1,319 @@
+@font-face {
+  font-family: "Space Grotesk";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(/lovable/space-grotesk-400.ttf) format("truetype");
+}
+@font-face {
+  font-family: "Space Grotesk";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url(/lovable/space-grotesk-500.ttf) format("truetype");
+}
+@font-face {
+  font-family: "Space Grotesk";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url(/lovable/space-grotesk-600.ttf) format("truetype");
+}
+@font-face {
+  font-family: "Space Grotesk";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(/lovable/space-grotesk-700.ttf) format("truetype");
+}
+@font-face {
+  font-family: "DM Sans";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(/lovable/dm-sans-400.ttf) format("truetype");
+}
+@font-face {
+  font-family: "DM Sans";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url(/lovable/dm-sans-500.ttf) format("truetype");
+}
+@font-face {
+  font-family: "DM Sans";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url(/lovable/dm-sans-600.ttf) format("truetype");
+}
+@font-face {
+  font-family: "DM Sans";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(/lovable/dm-sans-700.ttf) format("truetype");
+}
+@font-face {
+  font-family: "Outfit";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(/lovable/outfit-400.ttf) format("truetype");
+}
+@font-face {
+  font-family: "Outfit";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url(/lovable/outfit-500.ttf) format("truetype");
+}
+@font-face {
+  font-family: "Outfit";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url(/lovable/outfit-600.ttf) format("truetype");
+}
+@font-face {
+  font-family: "Outfit";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(/lovable/outfit-700.ttf) format("truetype");
+}
+@font-face {
+  font-family: "Manrope";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(/lovable/manrope-400.ttf) format("truetype");
+}
+@font-face {
+  font-family: "Manrope";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url(/lovable/manrope-500.ttf) format("truetype");
+}
+@font-face {
+  font-family: "Manrope";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url(/lovable/manrope-600.ttf) format("truetype");
+}
+@font-face {
+  font-family: "Manrope";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(/lovable/manrope-700.ttf) format("truetype");
+}
+@font-face {
+  font-family: "Plus Jakarta Sans";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(/lovable/plus-jakarta-sans-400.ttf) format("truetype");
+}
+@font-face {
+  font-family: "Plus Jakarta Sans";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url(/lovable/plus-jakarta-sans-500.ttf) format("truetype");
+}
+@font-face {
+  font-family: "Plus Jakarta Sans";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url(/lovable/plus-jakarta-sans-600.ttf) format("truetype");
+}
+@font-face {
+  font-family: "Plus Jakarta Sans";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(/lovable/plus-jakarta-sans-700.ttf) format("truetype");
+}
+@font-face {
+  font-family: "Sora";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(/lovable/sora-400.ttf) format("truetype");
+}
+@font-face {
+  font-family: "Sora";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url(/lovable/sora-500.ttf) format("truetype");
+}
+@font-face {
+  font-family: "Sora";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url(/lovable/sora-600.ttf) format("truetype");
+}
+@font-face {
+  font-family: "Sora";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(/lovable/sora-700.ttf) format("truetype");
+}
+@font-face {
+  font-family: "Work Sans";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(/lovable/work-sans-400.ttf) format("truetype");
+}
+@font-face {
+  font-family: "Work Sans";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url(/lovable/work-sans-500.ttf) format("truetype");
+}
+@font-face {
+  font-family: "Work Sans";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url(/lovable/work-sans-600.ttf) format("truetype");
+}
+@font-face {
+  font-family: "Work Sans";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(/lovable/work-sans-700.ttf) format("truetype");
+}
+@font-face {
+  font-family: "Nunito Sans";
+  font-style: normal;
+  font-weight: 400;
+  font-stretch: normal;
+  font-display: swap;
+  src: url(/lovable/nunito-sans-400.ttf) format("truetype");
+}
+@font-face {
+  font-family: "Nunito Sans";
+  font-style: normal;
+  font-weight: 500;
+  font-stretch: normal;
+  font-display: swap;
+  src: url(/lovable/nunito-sans-500.ttf) format("truetype");
+}
+@font-face {
+  font-family: "Nunito Sans";
+  font-style: normal;
+  font-weight: 600;
+  font-stretch: normal;
+  font-display: swap;
+  src: url(/lovable/nunito-sans-600.ttf) format("truetype");
+}
+@font-face {
+  font-family: "Nunito Sans";
+  font-style: normal;
+  font-weight: 700;
+  font-stretch: normal;
+  font-display: swap;
+  src: url(/lovable/nunito-sans-700.ttf) format("truetype");
+}
+@font-face {
+  font-family: "Lora";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(/lovable/lora-400.ttf) format("truetype");
+}
+@font-face {
+  font-family: "Lora";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url(/lovable/lora-500.ttf) format("truetype");
+}
+@font-face {
+  font-family: "Lora";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url(/lovable/lora-600.ttf) format("truetype");
+}
+@font-face {
+  font-family: "Lora";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(/lovable/lora-700.ttf) format("truetype");
+}
+@font-face {
+  font-family: "Fraunces";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(/lovable/fraunces-400.ttf) format("truetype");
+}
+@font-face {
+  font-family: "Fraunces";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url(/lovable/fraunces-500.ttf) format("truetype");
+}
+@font-face {
+  font-family: "Fraunces";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url(/lovable/fraunces-600.ttf) format("truetype");
+}
+@font-face {
+  font-family: "Fraunces";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(/lovable/fraunces-700.ttf) format("truetype");
+}
+@font-face {
+  font-family: "Playfair Display";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(/lovable/playfair-display-400.ttf) format("truetype");
+}
+@font-face {
+  font-family: "Playfair Display";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url(/lovable/playfair-display-500.ttf) format("truetype");
+}
+@font-face {
+  font-family: "Playfair Display";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url(/lovable/playfair-display-600.ttf) format("truetype");
+}
+@font-face {
+  font-family: "Playfair Display";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(/lovable/playfair-display-700.ttf) format("truetype");
+}
+@font-face {
+  font-family: "Archivo Black";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(/lovable/archivo-black-400.ttf) format("truetype");
+}

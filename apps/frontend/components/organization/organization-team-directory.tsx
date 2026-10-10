@@ -1,23 +1,20 @@
+import { LovableRolePreview } from "./lovable-role-preview"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from "@/components/ui/table"
 import type {
   OrganizationInvitationStatus,
   OrganizationTeamDirectoryProps,
-  OrganizationTeamRole,
 } from "@/types/organization"
 import { getLocale, getTranslations } from "next-intl/server"
 import { RevokeInvitationButton } from "./revoke-invitation-button"
-
-function roleLabel(role: OrganizationTeamRole, t: (key: string) => string) {
-  return t(`teamRoles.${role}`)
-}
 
 function statusVariant(status: OrganizationInvitationStatus) {
   return status === "Pending"
@@ -32,106 +29,153 @@ export async function OrganizationTeamDirectory({
   members,
   invitations,
 }: OrganizationTeamDirectoryProps) {
-  const [locale, t] = await Promise.all([getLocale(), getTranslations("Auth")])
+  const [locale, t, v] = await Promise.all([
+    getLocale(),
+    getTranslations("Auth"),
+    getTranslations("LovableLive"),
+  ])
 
   return (
-    <div className="grid gap-5 lg:grid-cols-2">
-      <Card className="rounded-lg border border-border bg-card">
-        <CardHeader>
-          <CardTitle>
-            <h2 className="text-lg font-semibold">{t("teamRosterTitle")}</h2>
-          </CardTitle>
+    <div className="live-team-directory grid min-w-0 gap-6">
+      <div className="grid max-w-full grid-cols-3 border">
+        {[
+          [v("members"), members?.length ?? "—"],
+          [
+            v("pending"),
+            invitations?.filter((item) => item.status === "Pending").length ??
+              "—",
+          ],
+          [v("roles"), 3],
+        ].map(([label, value], index) => (
+          <div key={label} className={`px-5 py-3 ${index ? "border-l" : ""}`}>
+            <p className="label-mono text-muted-foreground">{label}</p>
 
-          <CardDescription>{t("teamRosterDescription")}</CardDescription>
-        </CardHeader>
+            <p className="font-display text-2xl font-bold">{value}</p>
+          </div>
+        ))}
+      </div>
 
-        <CardContent>
-          {members === null ? (
-            <Alert variant="destructive" role="alert">
-              <AlertDescription>{t("serviceError")}</AlertDescription>
-            </Alert>
-          ) : members.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              {t("teamRosterEmpty")}
-            </p>
-          ) : (
-            <ul className="grid gap-3">
+      <section className="min-w-0 border">
+        <header className="border-b px-5 py-4">
+          <h2 className="font-display text-xl font-bold">
+            {t("teamRosterTitle")}
+          </h2>
+
+          <p className="mt-1 text-sm text-muted-foreground">
+            {t("teamRosterDescription")}
+          </p>
+        </header>
+
+        {members === null ? (
+          <Alert variant="destructive" role="alert">
+            <AlertDescription>{t("serviceError")}</AlertDescription>
+          </Alert>
+        ) : members.length === 0 ? (
+          <p className="p-5 text-sm text-muted-foreground">
+            {t("teamRosterEmpty")}
+          </p>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-secondary">
+                <TableHead>{t("email")}</TableHead>
+
+                <TableHead>{v("role")}</TableHead>
+
+                <TableHead>{v("scope")}</TableHead>
+              </TableRow>
+            </TableHeader>
+
+            <TableBody>
               {members.map((member, index) => (
-                <li
-                  key={`${member.role}:${member.tenantId ?? "organization"}:${member.email ?? "unknown"}:${index}`}
-                  className="flex min-w-0 flex-wrap items-start justify-between gap-3 rounded-lg border border-border px-4 py-3"
+                <TableRow
+                  key={`${member.role}:${member.tenantId}:${member.email}:${index}`}
                 >
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-medium">
-                      {member.email ?? t("teamMemberEmailUnavailable")}
-                    </p>
+                  <TableCell className="font-semibold">
+                    {member.email ?? t("teamMemberEmailUnavailable")}
+                  </TableCell>
 
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      {member.tenantName ?? t("organizationScope")}
-                    </p>
-                  </div>
+                  <TableCell>
+                    <Badge variant="secondary">
+                      {t(`teamRoles.${member.role}`)}
+                    </Badge>
+                  </TableCell>
 
-                  <Badge variant="secondary">{roleLabel(member.role, t)}</Badge>
-                </li>
+                  <TableCell>
+                    {member.tenantName ?? t("organizationScope")}
+                  </TableCell>
+                </TableRow>
               ))}
-            </ul>
-          )}
-        </CardContent>
-      </Card>
+            </TableBody>
+          </Table>
+        )}
+      </section>
 
-      <Card className="rounded-lg border border-border bg-card">
-        <CardHeader>
-          <CardTitle>
-            <h2 className="text-lg font-semibold">
-              {t("teamInvitationsTitle")}
-            </h2>
-          </CardTitle>
+      <section className="min-w-0 border">
+        <header className="border-b px-5 py-4">
+          <h2 className="font-display text-xl font-bold">
+            {t("teamInvitationsTitle")}
+          </h2>
 
-          <CardDescription>{t("teamInvitationsDescription")}</CardDescription>
-        </CardHeader>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {t("teamInvitationsDescription")}
+          </p>
+        </header>
 
-        <CardContent>
-          {invitations === null ? (
-            <Alert variant="destructive" role="alert">
-              <AlertDescription>{t("serviceError")}</AlertDescription>
-            </Alert>
-          ) : invitations.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              {t("teamInvitationsEmpty")}
-            </p>
-          ) : (
-            <ul className="grid gap-3">
+        {invitations === null ? (
+          <Alert variant="destructive" role="alert">
+            <AlertDescription>{t("serviceError")}</AlertDescription>
+          </Alert>
+        ) : invitations.length === 0 ? (
+          <p className="p-5 text-sm text-muted-foreground">
+            {t("teamInvitationsEmpty")}
+          </p>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-secondary">
+                <TableHead>{t("email")}</TableHead>
+
+                <TableHead>{v("role")}</TableHead>
+
+                <TableHead>{v("scope")}</TableHead>
+
+                <TableHead>{v("status")}</TableHead>
+
+                <TableHead>{v("expires")}</TableHead>
+
+                <TableHead>{v("actions")}</TableHead>
+              </TableRow>
+            </TableHeader>
+
+            <TableBody>
               {invitations.map((invitation) => (
-                <li
-                  key={invitation.id}
-                  className="grid gap-3 rounded-lg border border-border px-4 py-3"
-                >
-                  <div className="flex min-w-0 flex-wrap items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-medium">
-                        {invitation.email}
-                      </p>
+                <TableRow key={invitation.id}>
+                  <TableCell className="font-semibold">
+                    {invitation.email}
+                  </TableCell>
 
-                      <p className="mt-1 text-sm text-muted-foreground">
-                        {roleLabel(invitation.role, t)} ·{" "}
-                        {invitation.tenantName ?? t("organizationScope")}
-                      </p>
-                    </div>
+                  <TableCell>{t(`teamRoles.${invitation.role}`)}</TableCell>
 
+                  <TableCell>
+                    {invitation.tenantName ?? t("organizationScope")}
+                  </TableCell>
+
+                  <TableCell>
                     <Badge variant={statusVariant(invitation.status)}>
                       {t(`invitationStatus.${invitation.status}`)}
                     </Badge>
-                  </div>
+                  </TableCell>
 
-                  <div className="flex flex-wrap items-center justify-between gap-3">
-                    <p className="text-sm text-muted-foreground">
-                      {t("invitationExpiresOn", {
-                        date: new Intl.DateTimeFormat(locale, {
-                          dateStyle: "medium",
-                        }).format(new Date(invitation.expiresAt)),
-                      })}
-                    </p>
+                  <TableCell>
+                    {t("invitationExpiresOn", {
+                      date: new Intl.DateTimeFormat(locale, {
+                        dateStyle: "medium",
+                      }).format(new Date(invitation.expiresAt)),
+                    })}
+                  </TableCell>
 
+                  <TableCell>
                     {invitation.status === "Pending" && (
                       <RevokeInvitationButton
                         organizationId={organizationId}
@@ -139,13 +183,15 @@ export async function OrganizationTeamDirectory({
                         email={invitation.email}
                       />
                     )}
-                  </div>
-                </li>
+                  </TableCell>
+                </TableRow>
               ))}
-            </ul>
-          )}
-        </CardContent>
-      </Card>
+            </TableBody>
+          </Table>
+        )}
+      </section>
+
+      <LovableRolePreview />
     </div>
   )
 }

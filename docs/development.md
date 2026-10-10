@@ -1,5 +1,9 @@
 # Development guide
 
+The approved Lovable design now also covers real workspaces and tenant customer shells. See [real routes, connected operations and explicit fictitious drafts](lovable-live-workspace.md). Existing backend contracts are retained; hosted acceptance remains separate.
+
+The public landing and `/[locale]/demo` pages follow the supplied Lovable export. See [migration routes, local state and backend connections](lovable-migration.md). Fonts are bundled locally under `public/lovable` and `public/design`. Run the `lovable-migration` Playwright project against a local server; these browser simulations do not prove real payment or DNS behavior.
+
 ## Product photo gallery rollout (M5)
 
 M5 reuses T1's private S3-compatible configuration. Review/apply `ProductPhotoGallery` after both T1 migrations, then deploy API before frontend. There are no new browser credentials or public bucket URLs. Missing bucket configuration produces an unavailable state. No shared migration was applied by this task.
@@ -13,7 +17,7 @@ This guide runs the frontend and .NET API. The frontend includes Better Auth ema
 
 - Supported toolchain: Node.js `^24.19.0` and npm `^11.17.0` (Node 24/npm 11 from those minimum versions, excluding new majors). `.nvmrc` pins Node `24.19.0` for local setup and GitHub Actions; `packageManager` records npm `11.17.0` as the reproducible reference.
 - .NET 10 SDK, with `10.0.100` as the minimum feature band and `latestFeature` roll-forward. Root `global.json` also selects Microsoft Testing Platform for `dotnet test`.
-- Network access on first install/restore. Frontend builds use system font stacks and do not fetch fonts from Google.
+- Network access on first install/restore. Frontend builds use bundled local fonts with system fallbacks and do not fetch fonts from Google.
 
 The frontend `.npmrc` keeps `engine-strict=true` to enforce the supported ranges and uses legacy peer resolution because the React plugin currently bundled by Next.js declares ESLint support only through v9. Exact engine pins are unsuitable for Vercel, which automatically rolls minor/patch releases forward within the selected Node major. The flat config wraps Next's plugin configs with ESLint's `@eslint/compat` utility, and lint runs against ESLint 10.
 - Docker is optional for the API-only container example. API persistence requires PostgreSQL. PostgreSQL/PgAdmin/Compose are not provisioned by the repository.
@@ -241,7 +245,7 @@ Vercel selects a Node major and manages its minor/patch releases. Configure the 
 | Typecheck mentions missing generated Next types | Run the installed Next type-generation command (`node node_modules/next/dist/bin/next typegen`) from the frontend, then re-run typecheck; do not edit `.next` types |
 | ESLint throws `contextOrFilename.getFilename is not a function` | Check that the lockfile is installed with `npm ci`; the flat config adapts the legacy React plugin rule context used by Next.js's current config |
 | Turbopack fails while spawning Node with Windows error 5 | The standard development and production scripts use Webpack because the local Windows environment denied Turbopack worker startup. If you opt into Turbopack, check runtime executable access and execution policy; a Webpack success rules out neither every bundler issue nor a Turbopack-specific defect. |
-| Font download failure | Builds use system font stacks and do not request remote font files; check other network-dependent build steps if this persists |
+| Font download failure | Builds use bundled local fonts with system fallbacks and do not request remote font files; check other network-dependent build steps if this persists |
 | `Failed to decrypt private key` | The current `BETTER_AUTH_SECRET` cannot decrypt the selected key in `auth.jwks`; restore the original secret or rotate keys only on a confirmed test database. Do not reset the whole database or disable private-key encryption as a quick fix. |
 | API bearer returns `401` after key rotation | Keep the frontend running so OIDC discovery and JWKS are available; retry after the API refreshes signing keys. Check issuer and audience if it persists. |
 | API HTTPS certificate error | Check the development certificate and selected launch profile; do not disable certificate validation globally |
@@ -265,7 +269,7 @@ With the frontend development server running locally, run `npm run test:browser 
 
 ### Full Stitch redesign previews
 
-The public marketing page is `/en` or `/fr` on the base host. Visit `/en/demo` or `/fr/demo` for the illustrated restaurant menu; append `/checkout`, `/tracking` or `/dashboard` for the other supplied designs. Demo state is memory-only and resets on refresh or locale change. These routes do not charge payments or modify restaurant records. See [the redesign handoff](redesign-handoff.md) for scope, verification and future backend work.
+The public marketing page is `/en` or `/fr` on the base host. `/[locale]/demo` contains the Lovable menu; checkout, tracking, dashboard, orders, history, analytics, menu, studio, staff and settings are corresponding subroutes. Demo cart/receipts use tab session storage; theme, menu, settings and roster use demo-prefixed local storage. These routes do not charge payments or modify real restaurant records. See [the migration handoff](lovable-migration.md) for scope, checks and backend connections.
 
 ## M1 Menu Builder rollout — 2026-10-08
 

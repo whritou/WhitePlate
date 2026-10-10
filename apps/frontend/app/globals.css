@@ -1,6 +1,8 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
+@import "../components/lovable/lovable.css";
+@import "../components/lovable/live.css";
 
 @custom-variant dark (&:is(.dark *));
 

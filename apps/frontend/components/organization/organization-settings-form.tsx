@@ -66,10 +66,13 @@ export function OrganizationSettingsForm({
       : t(`errors.${state.error ?? "unavailable"}`)
 
   return (
-    <form onSubmit={submit} aria-busy={pending} className="grid gap-4">
+    <form onSubmit={submit} aria-busy={pending} className="grid gap-5">
       <input type="hidden" name="organizationId" value={organizationId} />
 
-      <fieldset disabled={pending} className="grid gap-4">
+      <fieldset
+        disabled={pending}
+        className="grid gap-5 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end"
+      >
         <Label htmlFor="organization-name" className="grid gap-2">
           {t("name")}
 

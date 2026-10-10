@@ -14,11 +14,11 @@ import type { OrderKanbanProps } from "@/types/orders"
 import { OrderTicket } from "./order-ticket"
 
 const laneColors = {
-  Pending: "bg-warning-muted text-warning",
-  Preparing: "bg-info-muted text-info",
-  Ready: "bg-success-muted text-success",
-  Completed: "bg-muted text-muted-foreground",
-  Cancelled: "bg-destructive-muted text-destructive",
+  Pending: "bg-accent",
+  Preparing: "bg-primary",
+  Ready: "bg-foreground",
+  Completed: "bg-muted-foreground",
+  Cancelled: "bg-destructive",
 }
 
 export function OrderKanban(props: OrderKanbanProps) {
@@ -77,7 +77,7 @@ export function OrderKanban(props: OrderKanbanProps) {
     >
       <p className="text-sm text-muted-foreground">{t("boardHelp")}</p>
 
-      <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,18rem),1fr))] items-start gap-4">
+      <div className="grid items-stretch gap-4 md:grid-cols-2 xl:grid-cols-4">
         {ORDER_STATUSES.map((status) => {
           const items = orders.filter((order) => order.status === status)
           const allowed =
@@ -89,7 +89,7 @@ export function OrderKanban(props: OrderKanbanProps) {
               data-order-lane={status}
               aria-label={t(`statuses.${status}`)}
               className={cn(
-                "min-w-0 rounded-lg border border-border bg-secondary p-3",
+                "flex min-h-[60vh] min-w-0 flex-col border border-border bg-secondary",
                 allowed && "border-input",
                 allowed &&
                   drag?.destination === status &&
@@ -98,11 +98,15 @@ export function OrderKanban(props: OrderKanbanProps) {
             >
               <header
                 className={cn(
-                  "mb-4 flex min-h-12 items-center justify-between gap-2 rounded-md px-3 py-2",
-                  laneColors[status]
+                  "flex min-h-12 items-center justify-between gap-2 border-b bg-background px-4 py-3"
                 )}
               >
-                <h2 className="text-base font-semibold">
+                <h2 className="flex items-center gap-2 font-display text-lg font-bold">
+                  <span
+                    className={`size-3 ${laneColors[status]}`}
+                    aria-hidden="true"
+                  />
+
                   {t(`statuses.${status}`)}
                 </h2>
 
@@ -114,7 +118,7 @@ export function OrderKanban(props: OrderKanbanProps) {
                 </Badge>
               </header>
 
-              <ol className="grid min-h-24 gap-3">
+              <ol className="grid min-h-24 content-start gap-3 p-3">
                 {items.map((order) => (
                   <li
                     key={order.id}

@@ -61,13 +61,11 @@ export function OrderHistoryTable({
   }
 
   return (
-    <main className="mx-auto grid min-h-[70vh] w-full min-w-0 gap-5 p-4 sm:p-6 lg:p-8">
+    <main className="live-history mx-auto grid min-h-[70vh] w-full max-w-[1600px] min-w-0 gap-5 px-6 py-8">
       <header>
-        <p className="text-sm font-medium text-brand-text">{tenantName}</p>
+        <p className="label-mono text-muted-foreground">{tenantName}</p>
 
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight sm:text-[2rem]">
-          {t("title")}
-        </h1>
+        <h1 className="mt-1 font-display text-4xl font-bold">{t("title")}</h1>
 
         <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
           {t("description")}
@@ -76,12 +74,12 @@ export function OrderHistoryTable({
 
       <OrderHistoryFiltersPanel filters={filters} />
 
-      <Card>
+      <Card className="gap-0 border p-0">
         <CardHeader>
           <CardTitle>{t("resultsTitle", { count: page.totalCount })}</CardTitle>
         </CardHeader>
 
-        <CardContent>
+        <CardContent className="p-0">
           {page.items.length === 0 ? (
             <p className="rounded-md border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
               {t("noResults")}

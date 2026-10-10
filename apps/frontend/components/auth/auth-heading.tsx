@@ -1,5 +1,6 @@
 "use client"
 
+import { useTranslations } from "next-intl"
 import { CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
 export function AuthHeading({
@@ -9,17 +10,23 @@ export function AuthHeading({
   title: string
   description: string
 }) {
-  return (
-    <CardHeader className="mb-7 px-0">
-      <p className="mb-2 text-sm font-medium text-brand-text">WhitePlate</p>
+  const t = useTranslations("LovableLive")
 
-      <CardTitle className="text-2xl font-semibold tracking-tight text-foreground sm:text-[2rem]">
-        <h1>{title}</h1>
+  return (
+    <CardHeader className="mb-0 px-0">
+      <p className="mb-8 flex items-center gap-2 text-sm text-primary">
+        <span className="size-2 bg-primary" />
+
+        {t("restaurantWorkspace")}
+      </p>
+
+      <CardTitle className="font-display text-4xl leading-tight font-bold tracking-normal text-foreground">
+        <h1 className="font-display text-4xl leading-tight font-bold tracking-normal">
+          {title}
+        </h1>
       </CardTitle>
 
-      <CardDescription className="mt-2 text-sm leading-6">
-        {description}
-      </CardDescription>
+      <CardDescription className="mt-3 text-sm">{description}</CardDescription>
     </CardHeader>
   )
 }

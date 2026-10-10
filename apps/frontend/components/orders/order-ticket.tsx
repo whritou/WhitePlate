@@ -68,13 +68,11 @@ export function OrderTicket({
       lang={order.menuLocale ?? undefined}
       {...dragHandlers}
     >
-      <Card
-        className={`border-t-4 ${order.status === "Pending" ? "border-t-warning-solid" : order.status === "Preparing" ? "border-t-info-solid" : order.status === "Ready" ? "border-t-success-solid" : "border-t-border"}`}
-      >
-        <CardHeader className="flex flex-wrap items-start justify-between gap-4">
+      <Card className="card-hard gap-0 border bg-background p-0">
+        <CardHeader className="flex flex-wrap items-start justify-between gap-3 border-b px-4 py-3">
           <div>
             <div className="flex flex-wrap items-center gap-2">
-              <CardTitle className="text-lg font-semibold">
+              <CardTitle className="text-sm font-semibold">
                 <Heading>
                   {t("orderReference", { reference: order.id.slice(0, 8) })}
                 </Heading>
@@ -98,11 +96,11 @@ export function OrderTicket({
           {dragAffordance}
         </CardHeader>
 
-        <CardContent>
-          <ul className="grid gap-3 border-t border-border pt-4">
+        <CardContent className="px-4 py-3">
+          <ul className="grid gap-2">
             {order.lines.map((line, index) => (
               <li key={`${line.productId}:${index}`}>
-                <p className="text-lg font-semibold">
+                <p className="text-sm font-semibold">
                   {t("lineItem", {
                     quantity: line.quantity,
                     product: line.productName,
@@ -122,12 +120,13 @@ export function OrderTicket({
         </CardContent>
 
         {transitions.length > 0 && (
-          <CardFooter className="flex flex-wrap gap-2">
+          <CardFooter className="flex flex-wrap gap-2 border-t p-3">
             {transitions.map((status) => (
               <Button
                 key={status}
                 type="button"
-                size="lg"
+                size="sm"
+                className="min-h-12"
                 variant={status === "Cancelled" ? "destructive" : "default"}
                 aria-label={t("actionForOrder", {
                   action: t(`actions.${status}`),

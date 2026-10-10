@@ -137,170 +137,208 @@ export function MenuBuilderCatalog({
         </div>
       </div>
 
-      <fieldset
-        disabled={pending}
-        aria-label={t("products")}
-        aria-busy={pending}
-        className="grid min-w-0 gap-6"
-      >
-        <Card className="min-w-0">
-          <CardHeader>
-            <CardTitle>
-              <h2>{u("products")}</h2>
-            </CardTitle>
-          </CardHeader>
+      <div className="grid min-w-0 gap-0 border lg:grid-cols-[240px_1fr]">
+        <aside
+          className="flex gap-1 overflow-x-auto border-b bg-secondary p-3 lg:block lg:border-r lg:border-b-0"
+          aria-label={u("categories")}
+        >
+          <Button
+            variant="ghost"
+            disabled={pending}
+            aria-pressed={categoryId === "all"}
+            onClick={() => onCategoryChange("all")}
+            className={`shrink-0 justify-start lg:w-full ${categoryId === "all" ? "bg-foreground text-background hover:bg-foreground hover:text-background" : ""}`}
+          >
+            {u("allCategories")}
+          </Button>
 
-          <CardContent className="grid min-w-0 gap-4">
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-              <div className="grid gap-2">
-                <Label htmlFor="builder-product-search">{u("search")}</Label>
+          {categories.map((category) => (
+            <Button
+              key={category.id}
+              variant="ghost"
+              disabled={pending}
+              aria-pressed={categoryId === category.id}
+              onClick={() => onCategoryChange(category.id)}
+              className={`shrink-0 justify-start lg:w-full ${categoryId === category.id ? "bg-foreground text-background hover:bg-foreground hover:text-background" : ""}`}
+            >
+              {category.name}
+            </Button>
+          ))}
+        </aside>
 
-                <Input
-                  id="builder-product-search"
-                  value={search}
-                  onChange={(event) => setSearch(event.target.value)}
-                  placeholder={u("searchPlaceholder")}
-                />
-              </div>
+        <fieldset
+          disabled={pending}
+          aria-label={t("products")}
+          aria-busy={pending}
+          className="grid min-w-0 gap-6"
+        >
+          <Card className="min-w-0 gap-0 border-0 p-0">
+            <CardHeader>
+              <CardTitle>
+                <h2>{u("products")}</h2>
+              </CardTitle>
+            </CardHeader>
 
-              <div className="grid gap-2">
-                <Label htmlFor="builder-product-visibility">{u("show")}</Label>
+            <CardContent className="grid min-w-0 gap-4">
+              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                <div className="grid gap-2">
+                  <Label htmlFor="builder-product-search">{u("search")}</Label>
 
-                <NativeSelect
-                  id="builder-product-visibility"
-                  value={visibility}
-                  onChange={(event) => setVisibility(event.target.value)}
-                  selectClassName="w-full"
-                >
-                  <NativeSelectOption value="active">
-                    {u("activeProducts")}
-                  </NativeSelectOption>
+                  <Input
+                    id="builder-product-search"
+                    value={search}
+                    onChange={(event) => setSearch(event.target.value)}
+                    placeholder={u("searchPlaceholder")}
+                  />
+                </div>
 
-                  <NativeSelectOption value="archived">
-                    {c("archived")}
-                  </NativeSelectOption>
+                <div className="grid gap-2">
+                  <Label htmlFor="builder-product-visibility">
+                    {u("show")}
+                  </Label>
 
-                  <NativeSelectOption value="all">
-                    {u("allProducts")}
-                  </NativeSelectOption>
-                </NativeSelect>
-              </div>
-
-              <div className="grid gap-2">
-                <Label htmlFor="builder-category-filter">{c("category")}</Label>
-
-                <NativeSelect
-                  id="builder-category-filter"
-                  value={categoryId}
-                  onChange={(event) => onCategoryChange(event.target.value)}
-                  selectClassName="w-full"
-                >
-                  <NativeSelectOption value="all">
-                    {u("allCategories")}
-                  </NativeSelectOption>
-
-                  {categories.map((category) => (
-                    <NativeSelectOption key={category.id} value={category.id}>
-                      {category.name}
+                  <NativeSelect
+                    id="builder-product-visibility"
+                    value={visibility}
+                    onChange={(event) => setVisibility(event.target.value)}
+                    selectClassName="w-full"
+                  >
+                    <NativeSelectOption value="active">
+                      {u("activeProducts")}
                     </NativeSelectOption>
-                  ))}
-                </NativeSelect>
+
+                    <NativeSelectOption value="archived">
+                      {c("archived")}
+                    </NativeSelectOption>
+
+                    <NativeSelectOption value="all">
+                      {u("allProducts")}
+                    </NativeSelectOption>
+                  </NativeSelect>
+                </div>
+
+                <div className="grid gap-2">
+                  <Label htmlFor="builder-category-filter">
+                    {c("category")}
+                  </Label>
+
+                  <NativeSelect
+                    id="builder-category-filter"
+                    value={categoryId}
+                    onChange={(event) => onCategoryChange(event.target.value)}
+                    selectClassName="w-full"
+                  >
+                    <NativeSelectOption value="all">
+                      {u("allCategories")}
+                    </NativeSelectOption>
+
+                    {categories.map((category) => (
+                      <NativeSelectOption key={category.id} value={category.id}>
+                        {category.name}
+                      </NativeSelectOption>
+                    ))}
+                  </NativeSelect>
+                </div>
               </div>
-            </div>
 
-            <p role="status" className="text-sm text-muted-foreground">
-              {u("productCount", { count: products.length })}
-            </p>
+              <p role="status" className="text-sm text-muted-foreground">
+                {u("productCount", { count: products.length })}
+              </p>
 
-            <p className="text-xs text-muted-foreground">{t("orderingHelp")}</p>
+              <p className="text-xs text-muted-foreground">
+                {t("orderingHelp")}
+              </p>
 
-            <Table aria-label={u("products")}>
-              <TableHeader>
-                <TableRow>
-                  <TableHead scope="col">{c("name")}</TableHead>
+              <Table aria-label={u("products")}>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead scope="col">{c("name")}</TableHead>
 
-                  <TableHead scope="col">{c("category")}</TableHead>
+                    <TableHead scope="col">{c("category")}</TableHead>
 
-                  <TableHead scope="col">
-                    {c("price", { currency: catalog.currency })}
-                  </TableHead>
+                    <TableHead scope="col">
+                      {c("price", { currency: catalog.currency })}
+                    </TableHead>
 
-                  <TableHead scope="col">{t("status")}</TableHead>
+                    <TableHead scope="col">{t("status")}</TableHead>
 
-                  <TableHead scope="col">{c("sortOrder")}</TableHead>
-                </TableRow>
-              </TableHeader>
-
-              <TableBody>
-                {products.map((product) => (
-                  <TableRow key={product.id}>
-                    <TableCell className="min-w-48">
-                      <Button
-                        variant="ghost"
-                        className="h-auto justify-start px-0 text-left whitespace-normal"
-                        disabled={pending}
-                        aria-label={t("selectProduct", { name: product.name })}
-                        onClick={() => selectProduct(product.id)}
-                      >
-                        {product.name}
-                      </Button>
-                    </TableCell>
-
-                    <TableCell>
-                      {
-                        categories.find(
-                          (item) => item.id === product.categoryId
-                        )?.name
-                      }
-                    </TableCell>
-
-                    <TableCell className="whitespace-nowrap tabular-nums">
-                      {money.format(product.basePrice)}
-                    </TableCell>
-
-                    <TableCell>
-                      <Badge
-                        variant={
-                          isArchived(product)
-                            ? "neutral"
-                            : product.isAvailable
-                              ? "success"
-                              : "warning"
-                        }
-                      >
-                        {c(
-                          isArchived(product)
-                            ? "archived"
-                            : product.isAvailable
-                              ? "available"
-                              : "unavailable"
-                        )}
-                      </Badge>
-                    </TableCell>
-
-                    <TableCell>
-                      {isArchived(product) ? (
-                        product.sortOrder
-                      ) : (
-                        <CatalogOrderForm
-                          tenantId={catalog.tenantId}
-                          item={product}
-                          pending={pending}
-                          onPendingChange={onPendingChange}
-                        />
-                      )}
-                    </TableCell>
+                    <TableHead scope="col">{c("sortOrder")}</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
 
-            {products.length === 0 && (
-              <p className="py-4 text-muted-foreground">{u("noProducts")}</p>
-            )}
-          </CardContent>
-        </Card>
-      </fieldset>
+                <TableBody>
+                  {products.map((product) => (
+                    <TableRow key={product.id}>
+                      <TableCell className="min-w-48">
+                        <Button
+                          variant="ghost"
+                          className="h-auto justify-start px-0 text-left whitespace-normal"
+                          disabled={pending}
+                          aria-label={t("selectProduct", {
+                            name: product.name,
+                          })}
+                          onClick={() => selectProduct(product.id)}
+                        >
+                          {product.name}
+                        </Button>
+                      </TableCell>
+
+                      <TableCell>
+                        {
+                          categories.find(
+                            (item) => item.id === product.categoryId
+                          )?.name
+                        }
+                      </TableCell>
+
+                      <TableCell className="whitespace-nowrap tabular-nums">
+                        {money.format(product.basePrice)}
+                      </TableCell>
+
+                      <TableCell>
+                        <Badge
+                          variant={
+                            isArchived(product)
+                              ? "neutral"
+                              : product.isAvailable
+                                ? "success"
+                                : "warning"
+                          }
+                        >
+                          {c(
+                            isArchived(product)
+                              ? "archived"
+                              : product.isAvailable
+                                ? "available"
+                                : "unavailable"
+                          )}
+                        </Badge>
+                      </TableCell>
+
+                      <TableCell>
+                        {isArchived(product) ? (
+                          product.sortOrder
+                        ) : (
+                          <CatalogOrderForm
+                            tenantId={catalog.tenantId}
+                            item={product}
+                            pending={pending}
+                            onPendingChange={onPendingChange}
+                          />
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+
+              {products.length === 0 && (
+                <p className="py-4 text-muted-foreground">{u("noProducts")}</p>
+              )}
+            </CardContent>
+          </Card>
+        </fieldset>
+      </div>
 
       {catalog.products
         .filter((product) => visited.includes(product.id))

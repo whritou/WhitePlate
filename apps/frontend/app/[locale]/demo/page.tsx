@@ -1,5 +1,9 @@
-import { DemoMenu } from "@/components/redesign/demo-menu"
-
+import { Suspense } from "react"
+import { StorePage } from "@/components/lovable/pages/store"
 export default function Page() {
-  return <DemoMenu />
+  return (
+    <Suspense>
+      <StorePage />
+    </Suspense>
+  )
 }

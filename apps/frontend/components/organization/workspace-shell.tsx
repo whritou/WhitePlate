@@ -1,34 +1,25 @@
 "use client"
-
-import { Menu, Moon, Sun, X } from "lucide-react"
+import { Moon, Sun, CreditCard, Radio } from "lucide-react"
 import ReactFlagsSelect from "react-flags-select"
 import { useLocale, useTranslations } from "next-intl"
 import { useTheme } from "next-themes"
 import { useSearchParams } from "next/navigation"
-import { useState } from "react"
-import { Brand } from "@/components/ui/brand"
 import { WorkspaceLinkIcon } from "./workspace-link-icon"
 import { SignOutButton } from "@/components/auth/sign-out-button"
 import { Button } from "@/components/ui/button"
-import { Separator } from "@/components/ui/separator"
 import {
-  Sheet,
-  SheetClose,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet"
+  NativeSelect,
+  NativeSelectOption,
+  NativeSelectOptGroup,
+} from "@/components/ui/native-select"
+import { VisualScopeProvider } from "@/components/ui/visual-scope"
 import { Link, usePathname, useRouter } from "@/i18n/navigation"
+import { liveWorkspaceLinks } from "@/lib/live-workspace-navigation"
 import {
-  buildWorkspaceNavigation,
   isWorkspaceLinkActive,
   resolveWorkspaceContext,
 } from "@/lib/workspace-navigation"
-import type {
-  WorkspaceNavigationSection,
-  WorkspaceShellProps,
-} from "@/types/workspace-navigation"
+import type { WorkspaceShellProps } from "@/types/workspace-navigation"
 
 export function WorkspaceShell({
   organizations,
@@ -36,195 +27,202 @@ export function WorkspaceShell({
   children,
 }: WorkspaceShellProps) {
   const t = useTranslations("Workspace")
+  const v = useTranslations("LiveWorkspace")
   const locale = useLocale()
   const pathname = usePathname()
   const searchParams = useSearchParams()
+  const router = useRouter()
   const { resolvedTheme, setTheme } = useTheme()
-  const [mobileNavigationOpen, setMobileNavigationOpen] = useState(false)
-  const sections = buildWorkspaceNavigation(organizations, restaurants, (key) =>
-    t(key)
-  )
-  const currentSearchParams = new URLSearchParams(searchParams.toString())
-  const context = resolveWorkspaceContext(
-    currentSearchParams,
-    organizations,
-    restaurants
-  )
-  const contextName = context?.name ?? t("workspace")
-  const localeSearchParams = new URLSearchParams(currentSearchParams)
+  const search = new URLSearchParams(searchParams.toString())
+  const context = resolveWorkspaceContext(search, organizations, restaurants)
+  const links = liveWorkspaceLinks(search, organizations, restaurants)
+  const localeSearch = new URLSearchParams(search)
 
   if (!context) {
-    localeSearchParams.delete("organizationId")
-    localeSearchParams.delete("tenantId")
+    localeSearch.delete("tenantId")
+    localeSearch.delete("organizationId")
   }
 
-  const query = localeSearchParams.toString()
+  const query = localeSearch.toString()
   const currentHref = `${pathname}${query ? `?${query}` : ""}`
+  const settingsHref =
+    context?.type === "organization"
+      ? `/organization/settings?organizationId=${context.id}&section=payments`
+      : "/organization"
 
-  function toggleTheme() {
-    setTheme(resolvedTheme === "dark" ? "light" : "dark")
+  function changeContext(value: string) {
+    const [type, id] = value.split(":")
+
+    if (type === "restaurant" && restaurants.some((item) => item.id === id)) {
+      const role = restaurants.find((item) => item.id === id)!.role
+
+      router.push(
+        `/organization/${role === "Kitchen" ? "orders" : "dashboard"}?tenantId=${id}`
+      )
+    } else if (
+      type === "organization" &&
+      organizations.some((item) => item.id === id)
+    ) {
+      router.push(`/organization/settings?organizationId=${id}`)
+    } else if (!value) router.push("/organization")
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <Link
-        href="#workspace-content"
-        className="sr-only z-[60] rounded-md bg-background p-3 text-sm font-medium text-foreground focus:not-sr-only focus:fixed focus:top-4 focus:left-4"
-      >
-        {t("skipToContent")}
-      </Link>
+    <VisualScopeProvider value={{ className: "lovable-surface lovable-live" }}>
+      <div className="lovable-surface lovable-live min-h-screen bg-background text-foreground">
+        <Link
+          href="#workspace-content"
+          className="sr-only z-[60] bg-background p-3 text-sm font-medium focus:not-sr-only focus:fixed focus:top-4 focus:left-4"
+        >
+          {t("skipToContent")}
+        </Link>
 
-      <div className="flex min-h-screen">
-        <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col border-r border-sidebar-border bg-sidebar md:flex">
-          <div className="px-5 py-6">
-            <Link href="/organization" className="text-lg font-semibold">
-              <Brand />
-            </Link>
-
-            <p className="mt-5 truncate rounded-md bg-secondary p-3 text-sm font-medium text-foreground">
-              {contextName}
-            </p>
-          </div>
-
-          <Separator />
-
-          <WorkspaceNavigation
-            sections={sections}
-            pathname={pathname}
-            searchParams={currentSearchParams}
-            label={t("navigationLabel")}
-          />
-        </aside>
-
-        <div className="flex min-w-0 flex-1 flex-col">
-          <header className="sticky top-0 z-30 flex min-h-16 flex-wrap items-center gap-2 border-b border-border/50 bg-background/90 px-3 py-2 backdrop-blur-xl sm:px-6">
-            <div className="md:hidden">
-              <Sheet
-                open={mobileNavigationOpen}
-                onOpenChange={setMobileNavigationOpen}
+        <header className="border-b bg-background print:hidden">
+          <div className="flex flex-wrap items-center justify-between gap-3 px-6 py-4">
+            <div className="flex max-w-full flex-wrap items-center gap-5">
+              <Link
+                href="/organization"
+                className="font-display text-2xl font-bold"
               >
-                <SheetTrigger
+                White<span className="text-primary">Plate</span>
+              </Link>
+
+              <NativeSelect
+                aria-label={v("context")}
+                value={context ? `${context.type}:${context.id}` : ""}
+                className="w-72 max-w-full"
+                onChange={(event) => changeContext(event.target.value)}
+              >
+                <NativeSelectOption value="">
+                  {t("workspace")}
+                </NativeSelectOption>
+
+                <NativeSelectOptGroup label={v("organizations")}>
+                  {organizations.map((item) => (
+                    <NativeSelectOption
+                      key={item.id}
+                      value={`organization:${item.id}`}
+                    >
+                      {item.name}
+                    </NativeSelectOption>
+                  ))}
+                </NativeSelectOptGroup>
+
+                <NativeSelectOptGroup label={v("restaurants")}>
+                  {restaurants.map((item) => (
+                    <NativeSelectOption
+                      key={item.id}
+                      value={`restaurant:${item.id}`}
+                    >
+                      {item.name}
+                    </NativeSelectOption>
+                  ))}
+                </NativeSelectOptGroup>
+              </NativeSelect>
+            </div>
+
+            <div className="flex max-w-full flex-wrap items-center gap-2">
+              {context?.type === "organization" && (
+                <Button
+                  nativeButton={false}
+                  role="link"
+                  variant="ghost"
+                  render={<Link href={settingsHref} />}
+                >
+                  <CreditCard />
+
+                  {v("paymentsPending")}
+                </Button>
+              )}
+
+              {context?.type === "restaurant" && (
+                <Button
+                  nativeButton={false}
+                  role="link"
+                  variant="secondary"
                   render={
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      aria-label={t("openNavigation")}
+                    <Link
+                      href={`/organization/orders?tenantId=${context.id}`}
                     />
                   }
                 >
-                  <Menu aria-hidden="true" />
-                </SheetTrigger>
+                  <Radio />
 
-                <SheetContent
-                  side="left"
-                  className="w-[min(20rem,calc(100vw-2.5rem))]"
-                >
-                  <SheetHeader className="relative pr-12">
-                    <SheetTitle className="sr-only">
-                      {t("navigationLabel")}
-                    </SheetTitle>
+                  {v("realOrders")}
+                </Button>
+              )}
 
-                    <SheetClose
-                      aria-label={t("closeNavigation")}
-                      className="absolute top-0 right-0 inline-flex size-11 items-center justify-center rounded-md text-foreground hover:bg-surface-variant focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring active:bg-surface-dim"
-                    >
-                      <X aria-hidden="true" className="size-4" />
-                    </SheetClose>
-                  </SheetHeader>
+              <LocaleSelector currentHref={currentHref} locale={locale} />
 
-                  <WorkspaceNavigation
-                    sections={sections}
-                    pathname={pathname}
-                    searchParams={currentSearchParams}
-                    label={t("navigationLabel")}
-                    onNavigate={() => setMobileNavigationOpen(false)}
-                  />
-                </SheetContent>
-              </Sheet>
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label={t("toggleTheme")}
+                onClick={() =>
+                  setTheme(resolvedTheme === "dark" ? "light" : "dark")
+                }
+              >
+                <Sun aria-hidden="true" className="hidden dark:block" />
+
+                <Moon aria-hidden="true" className="dark:hidden" />
+              </Button>
+
+              <SignOutButton />
             </div>
+          </div>
 
-            <p className="mr-auto hidden font-heading text-sm font-semibold md:block">
-              {contextName}
-            </p>
-
-            <LocaleSelector currentHref={currentHref} locale={locale} />
-
-            <Separator orientation="vertical" className="hidden h-6 sm:block" />
-
+          <nav
+            aria-label={t("navigationLabel")}
+            className="flex min-w-0 gap-1 overflow-x-auto border-t px-4 py-2"
+          >
             <Button
-              variant="outline"
-              size="icon"
-              aria-label={t("toggleTheme")}
-              onClick={toggleTheme}
+              nativeButton={false}
+              role="link"
+              variant={pathname === "/organization" ? "secondary" : "ghost"}
+              className="shrink-0"
+              render={
+                <Link
+                  href="/organization"
+                  aria-current={
+                    pathname === "/organization" ? "page" : undefined
+                  }
+                />
+              }
             >
-              <Sun aria-hidden="true" className="hidden dark:block" />
-
-              <Moon aria-hidden="true" className="dark:hidden" />
+              {t("overview")}
             </Button>
 
-            <SignOutButton />
-          </header>
-
-          <div id="workspace-content" tabIndex={-1} className="min-w-0 flex-1">
-            {children}
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-function WorkspaceNavigation({
-  sections,
-  pathname,
-  searchParams,
-  label,
-  onNavigate,
-}: {
-  sections: WorkspaceNavigationSection[]
-  pathname: string
-  searchParams: URLSearchParams
-  label: string
-  onNavigate?: () => void
-}) {
-  return (
-    <nav
-      aria-label={label}
-      className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-3"
-    >
-      {sections.map((section) => (
-        <section key={section.id} className="mb-5 last:mb-0">
-          <h2 className="mb-2 px-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
-            {section.label}
-          </h2>
-
-          <ul className="grid gap-1">
-            {section.links.map((link) => {
-              const active = isWorkspaceLinkActive(
-                link.href,
-                pathname,
-                searchParams
-              )
+            {links.map(({ href, key }) => {
+              const active = isWorkspaceLinkActive(href, pathname, search)
 
               return (
-                <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    aria-current={active ? "page" : undefined}
-                    onClick={onNavigate}
-                    className={`flex min-h-12 items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring ${active ? "bg-obsidian font-semibold text-white hover:bg-obsidian/90" : "text-muted-foreground hover:bg-surface-variant hover:text-foreground active:bg-surface-dim"}`}
-                  >
-                    <WorkspaceLinkIcon href={link.href} />
+                <Button
+                  nativeButton={false}
+                  role="link"
+                  key={href}
+                  variant="ghost"
+                  className={`shrink-0 ${active ? "bg-foreground text-background hover:bg-foreground hover:text-background" : ""}`}
+                  render={
+                    <Link
+                      href={href}
+                      aria-current={active ? "page" : undefined}
+                    />
+                  }
+                >
+                  <WorkspaceLinkIcon href={href} />
 
-                    {link.label}
-                  </Link>
-                </li>
+                  {key === "dashboard" || key === "analytics" ? v(key) : t(key)}
+                </Button>
               )
             })}
-          </ul>
-        </section>
-      ))}
-    </nav>
+          </nav>
+        </header>
+
+        <div id="workspace-content" tabIndex={-1} className="min-w-0">
+          {children}
+        </div>
+      </div>
+    </VisualScopeProvider>
   )
 }
 

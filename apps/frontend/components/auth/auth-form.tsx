@@ -11,7 +11,7 @@ import { Separator } from "@/components/ui/separator"
 import { useAuthForm } from "@/hooks/use-auth-form"
 import { Link } from "@/i18n/navigation"
 import type { AuthFormProps } from "@/types/auth"
-import { ArrowRight, LoaderCircle, LockKeyhole, Mail } from "lucide-react"
+import { ArrowRight, LoaderCircle, ShieldCheck } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { PasswordField } from "./password-field"
 
@@ -24,6 +24,7 @@ export function AuthForm({
   resetInvalid = false,
 }: AuthFormProps) {
   const t = useTranslations("Auth")
+  const visual = useTranslations("LovableLive")
   const { error, success, pending, submit, signInSocial } = useAuthForm({
     mode,
     googleEnabled,
@@ -35,46 +36,22 @@ export function AuthForm({
 
   const heading =
     mode === "signIn"
-      ? [t("signInTitle"), t("signInDescription")]
+      ? [visual("signInTitle"), visual("signInDescription")]
       : mode === "signUp"
-        ? [t("signUpTitle"), t("signUpDescription")]
+        ? [visual("signUpTitle"), visual("signUpDescription")]
         : mode === "forgot"
           ? [t("forgotTitle"), t("forgotDescription")]
           : [t("resetTitle"), t("resetDescription")]
 
   return (
-    <AuthFrame
-      aside={
-        <>
-          <p className="mb-4 text-sm font-medium text-brand-text">
-            {t("asideEyebrow")}
-          </p>
-
-          <p className="max-w-[36rem] text-4xl leading-tight font-semibold tracking-tight text-foreground xl:text-5xl">
-            {t("asideTitle")}
-          </p>
-
-          <p className="mt-5 max-w-[28rem] text-base leading-7 text-muted-foreground">
-            {t("asideDescription")}
-          </p>
-
-          <div className="mt-10 flex items-center gap-3 text-sm text-muted-foreground">
-            <span className="flex size-9 items-center justify-center rounded-full bg-background text-brand-text">
-              <LockKeyhole className="size-4" />
-            </span>
-
-            {t("asideNote")}
-          </div>
-        </>
-      }
-    >
-      <Card className="gap-0 rounded-lg p-6 text-sm sm:p-8">
+    <AuthFrame aside={<span />}>
+      <Card className="gap-0 border-0 bg-transparent p-0 text-sm shadow-none">
         <AuthHeading title={heading[0]} description={heading[1]} />
 
         <CardContent className="px-0">
           {(mode === "signIn" || mode === "signUp") &&
             (googleEnabled || microsoftEnabled) && (
-              <div className="grid gap-3">
+              <div className="mt-8 grid gap-3">
                 {googleEnabled && (
                   <Button
                     type="button"
@@ -83,6 +60,10 @@ export function AuthForm({
                     className="w-full"
                     onClick={() => void signInSocial("google")}
                   >
+                    <span className="text-lg font-bold" aria-hidden="true">
+                      G
+                    </span>
+
                     {t("continueGoogle")}
                   </Button>
                 )}
@@ -103,12 +84,12 @@ export function AuthForm({
 
           {(mode === "signIn" || mode === "signUp") &&
             (googleEnabled || microsoftEnabled) && (
-              <div className="my-5 flex items-center gap-3 text-sm text-muted-foreground">
-                <Separator className="flex-1" />
+              <div className="my-6 flex items-center gap-4 text-xs text-muted-foreground">
+                <Separator className="flex-1 bg-border/20" />
 
                 {t("orEmail")}
 
-                <Separator className="flex-1" />
+                <Separator className="flex-1 bg-border/20" />
               </div>
             )}
 
@@ -126,9 +107,14 @@ export function AuthForm({
               </Link>
             </div>
           ) : (
-            <form className="grid gap-4" onSubmit={submit}>
+            <form className="mt-6 grid gap-5" onSubmit={submit}>
               {mode === "signUp" && (
-                <AuthField id="name" label={t("name")} autoComplete="name" />
+                <AuthField
+                  id="name"
+                  label={t("name")}
+                  autoComplete="name"
+                  placeholder={visual("namePlaceholder")}
+                />
               )}
 
               {mode !== "reset" && (
@@ -137,7 +123,7 @@ export function AuthForm({
                   label={t("email")}
                   type="email"
                   autoComplete="email"
-                  icon={<Mail className="size-4" />}
+                  placeholder="you@restaurant.com"
                 />
               )}
 
@@ -152,17 +138,6 @@ export function AuthForm({
                   type="password"
                   autoComplete="new-password"
                 />
-              )}
-
-              {mode === "signIn" && (
-                <div className="-mt-1 text-end">
-                  <Link
-                    href="/forgot-password"
-                    className="text-sm text-brand-text underline-offset-4 hover:underline"
-                  >
-                    {t("forgotLink")}
-                  </Link>
-                </div>
               )}
 
               {error && (
@@ -186,7 +161,7 @@ export function AuthForm({
                 ) : (
                   <>
                     {mode === "signIn"
-                      ? t("signInAction")
+                      ? visual("signInAction")
                       : mode === "signUp"
                         ? t("signUpAction")
                         : mode === "forgot"
@@ -222,6 +197,12 @@ export function AuthForm({
               </Link>
             </p>
           )}
+
+          <p className="mt-10 flex items-center justify-center gap-2 text-xs text-muted-foreground">
+            <ShieldCheck className="size-4" />
+
+            {visual("secureAccess")}
+          </p>
         </CardContent>
       </Card>
     </AuthFrame>

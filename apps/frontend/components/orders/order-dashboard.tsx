@@ -1,6 +1,5 @@
 "use client"
 
-import { OperationalMetrics } from "@/components/redesign/operational-metrics"
 import { Badge } from "@/components/ui/badge"
 import { BackLink } from "@/components/organization/back-link"
 import { useOrderDashboard } from "@/hooks/use-order-dashboard"
@@ -15,14 +14,14 @@ import { OrderRealtimeConnection } from "./order-realtime-connection"
 export function OrderDashboard(props: OrderDashboardProps) {
   const { tenantId, tenantName, role, selectedStatus, hubUrl } = props
   const t = useTranslations("KitchenOrders")
-  const design = useTranslations("Redesign")
+  const live = useTranslations("LiveWorkspace")
   const router = useRouter()
   const dashboard = useOrderDashboard(props)
   const { page, loadError, isInitialLoading, isFetching, refresh, pending } =
     dashboard
 
   return (
-    <div className="grid gap-5">
+    <div className="live-order-board grid gap-5">
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <div className="mb-1 flex flex-wrap items-center gap-2">
@@ -33,7 +32,7 @@ export function OrderDashboard(props: OrderDashboardProps) {
 
           <h1
             id="kitchen-orders-title"
-            className="text-2xl font-semibold tracking-tight sm:text-[2rem]"
+            className="font-display text-4xl font-bold"
           >
             {t("title")}
           </h1>
@@ -46,9 +45,26 @@ export function OrderDashboard(props: OrderDashboardProps) {
         <BackLink label={t("backToOrganizations")} className="self-start" />
       </header>
 
-      <OperationalMetrics />
+      <div className="grid max-w-full grid-cols-3 border">
+        {[
+          [live("loadedOrders"), page?.items.length ?? "—"],
+          [
+            t("statuses.Pending"),
+            page?.items.filter((item) => item.status === "Pending").length ??
+              "—",
+          ],
+          [
+            t("statuses.Ready"),
+            page?.items.filter((item) => item.status === "Ready").length ?? "—",
+          ],
+        ].map(([label, count], index) => (
+          <div key={label} className={`px-5 py-3 ${index ? "border-l" : ""}`}>
+            <p className="label-mono text-muted-foreground">{label}</p>
 
-      <p className="text-xs text-muted-foreground">{design("metricsNotice")}</p>
+            <p className="font-display text-2xl font-bold">{count}</p>
+          </div>
+        ))}
+      </div>
 
       <OrderRealtimeConnection
         tenantId={tenantId}

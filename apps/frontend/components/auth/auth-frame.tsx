@@ -1,9 +1,11 @@
 "use client"
 
-import { Card } from "@/components/ui/card"
-import { Brand } from "@/components/ui/brand"
-import { Link } from "@/i18n/navigation"
+import { ArrowLeft } from "lucide-react"
 import Image from "next/image"
+import { useTranslations } from "next-intl"
+import { Link } from "@/i18n/navigation"
+import { Button } from "@/components/ui/button"
+import { VisualScopeProvider } from "@/components/ui/visual-scope"
 
 export function AuthFrame({
   children,
@@ -12,31 +14,67 @@ export function AuthFrame({
   children: React.ReactNode
   aside?: React.ReactNode
 }) {
+  const t = useTranslations("LovableLive")
+
   return (
-    <main className="relative mx-auto min-h-svh max-w-7xl bg-background px-4 pt-28 pb-8 sm:px-6 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(24rem,30rem)] lg:items-center lg:gap-16 lg:px-12 lg:pb-14">
-      <Link href="/" className="absolute top-8 left-6 lg:left-12">
-        <Brand />
-      </Link>
+    <VisualScopeProvider value={{ className: "lovable-surface lovable-live" }}>
+      <div className="lovable-surface lovable-live lovable-auth min-h-screen bg-background text-foreground">
+        <header className="flex flex-wrap items-center justify-between gap-3 border-b px-6 py-5 md:px-10">
+          <Link href="/" className="font-display text-2xl font-bold">
+            White<span className="text-primary">Plate</span>
+          </Link>
 
-      <section className="mx-auto w-full max-w-[28rem] lg:order-2">
-        {children}
-      </section>
+          <Button
+            variant="ghost"
+            size="sm"
+            render={<Link href="/" />}
+            nativeButton={false}
+          >
+            <ArrowLeft />
 
-      <aside className="mx-auto mt-10 hidden w-full max-w-2xl lg:order-1 lg:block">
-        <Card className="relative min-h-[38rem] justify-end gap-0 overflow-hidden rounded-lg border-0 bg-obsidian px-10 py-12 text-white xl:px-14 xl:py-16 [&_.text-foreground]:text-white [&_.text-muted-foreground]:text-white/75">
-          <Image
-            src="/design/photo-13.webp"
-            alt=""
-            fill
-            sizes="50vw"
-            className="object-cover opacity-35"
-          />
+            {t("backHome")}
+          </Button>
+        </header>
 
-          <div className="absolute inset-0 bg-gradient-to-t from-obsidian via-obsidian/50 to-transparent" />
+        <main
+          className={`mx-auto grid min-h-[calc(100vh-81px)] ${aside ? "max-w-7xl lg:grid-cols-2" : "max-w-lg"}`}
+        >
+          <section className="flex min-w-0 items-center justify-center px-6 py-14 md:px-14">
+            <div className="w-full max-w-sm">{children}</div>
+          </section>
 
-          <div className="relative z-10">{aside}</div>
-        </Card>
-      </aside>
-    </main>
+          {aside && (
+            <aside className="relative hidden min-h-[660px] overflow-hidden border-l lg:block">
+              <Image
+                src="/lovable/hero.jpg"
+                alt={t("authImage")}
+                fill
+                sizes="50vw"
+                className="object-cover"
+                priority
+              />
+
+              <div className="absolute inset-x-0 bottom-0 border-t bg-ink p-10 text-ink-foreground">
+                <span className="inline-block bg-accent px-3 py-1 text-xs font-semibold text-accent-foreground">
+                  {t("authBrand")}
+                </span>
+
+                <h2 className="mt-5 font-display text-4xl leading-tight font-bold tracking-normal">
+                  {t("authFutureFirst")}
+
+                  <br />
+
+                  {t("authFutureSecond")}
+                </h2>
+
+                <p className="mt-4 max-w-sm text-sm text-ink-foreground/75">
+                  {t("authTagline")}
+                </p>
+              </div>
+            </aside>
+          )}
+        </main>
+      </div>
+    </VisualScopeProvider>
   )
 }

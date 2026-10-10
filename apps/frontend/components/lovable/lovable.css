@@ -1,0 +1,310 @@
+@import "./fonts.css";
+@theme inline {
+  --color-ink: var(--ink);
+  --color-ink-foreground: var(--ink-foreground);
+  --color-hero-primary-hover: var(--hero-primary-hover);
+  --font-display: var(--font-display);
+}
+
+.lovable-surface {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-brand-text: var(--primary);
+  --color-surface-variant: var(--accent);
+  --color-surface-dim: var(--secondary);
+  font-family: "Space Grotesk", system-ui, sans-serif;
+  --font-sans: "Space Grotesk", system-ui, sans-serif;
+  --font-heading: "Space Grotesk", system-ui, sans-serif;
+  --font-display: "Space Grotesk", system-ui, sans-serif;
+  --font-mono: "Space Grotesk", system-ui, sans-serif;
+  color-scheme: light;
+  --store-banner-foreground: oklch(0.99 0 0);
+  --store-banner-shade: oklch(0.13 0.01 155);
+  --landing-hero-overlay: linear-gradient(
+    90deg,
+    color-mix(in oklab, var(--ink) 97%, transparent) 0%,
+    color-mix(in oklab, var(--ink) 88%, transparent) 35%,
+    color-mix(in oklab, var(--ink) 24%, transparent) 100%
+  );
+  --radius: 0rem;
+  --background: oklch(0.985 0.004 155);
+  --foreground: oklch(0.17 0.02 160);
+  --card: oklch(0.985 0.004 155);
+  --card-foreground: oklch(0.17 0.02 160);
+  --popover: oklch(0.985 0.004 155);
+  --popover-foreground: oklch(0.17 0.02 160);
+  --primary: oklch(0.5 0.16 152); /* deep kelp green */
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.94 0.012 155);
+  --secondary-foreground: oklch(0.17 0.02 160);
+  --muted: oklch(0.94 0.012 155);
+  --muted-foreground: oklch(0.45 0.02 158);
+  --accent: oklch(0.88 0.19 122); /* acid lime highlight */
+  --hero-primary-hover: oklch(0.94 0.15 122);
+  --accent-foreground: oklch(0.17 0.02 160);
+  --ink: oklch(0.15 0.03 165); /* near-black, green cast */
+  --ink-foreground: oklch(0.96 0.008 155);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.17 0.02 160);
+  --input: oklch(0.17 0.02 160);
+  --ring: oklch(0.5 0.16 152);
+}
+
+@layer base {
+  .lovable-surface * {
+    border-color: var(--color-border);
+  }
+  .lovable-surface {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+  }
+
+  .lovable-surface ::selection {
+    background: var(--color-primary);
+    color: var(--color-primary-foreground);
+  }
+}
+
+.lovable-surface .btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.8rem 1.5rem;
+  font-weight: 600;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  background: var(--color-foreground);
+  color: var(--color-background);
+  border: 1px solid var(--color-foreground);
+  box-shadow: 4px 4px 0 0 var(--color-primary);
+  transition:
+    transform 0.15s,
+    box-shadow 0.15s;
+  &:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0 0 var(--color-primary);
+  }
+  &:active {
+    transform: translate(0, 0);
+    box-shadow: 2px 2px 0 0 var(--color-primary);
+  }
+}
+.lovable-surface .btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.8rem 1.5rem;
+  font-weight: 600;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  background: transparent;
+  color: var(--color-foreground);
+  border: 1px solid var(--color-foreground);
+  transition:
+    background 0.15s,
+    color 0.15s;
+  &:hover {
+    background: var(--color-foreground);
+    color: var(--color-background);
+  }
+}
+.lovable-surface .card-hard {
+  border: 1px solid var(--color-foreground);
+  box-shadow: 5px 5px 0 0
+    color-mix(in oklab, var(--foreground) 12%, transparent);
+}
+.lovable-surface .label-mono {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+}
+
+.customer-page {
+  font-family: var(--customer-font);
+  font-weight: var(--customer-body-weight);
+  line-height: var(--customer-line-height);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+}
+.customer-page h1,
+.customer-page h2,
+.customer-page h3 {
+  font-family: var(--customer-heading-font);
+  font-weight: var(--customer-heading-weight);
+  letter-spacing: 0;
+  overflow-wrap: anywhere;
+}
+.customer-page button,
+.customer-page input,
+.customer-page select,
+.customer-page textarea,
+.customer-page .customer-rounded {
+  border-radius: var(--customer-radius);
+}
+.customer-page button:not(.customer-product-image) {
+  border-radius: var(--customer-button-radius) !important;
+}
+.customer-page .text-xs {
+  font-size: calc(0.75rem * var(--customer-text-scale));
+}
+.customer-page .text-sm {
+  font-size: calc(0.875rem * var(--customer-text-scale));
+}
+.customer-page .text-lg {
+  font-size: calc(1.125rem * var(--customer-text-scale));
+}
+.customer-page .text-xl {
+  font-size: calc(1.25rem * var(--customer-text-scale));
+}
+.customer-page .text-2xl {
+  font-size: calc(1.5rem * var(--customer-text-scale));
+}
+.customer-page .text-3xl {
+  font-size: calc(1.875rem * var(--customer-text-scale));
+}
+.customer-page .text-4xl {
+  font-size: calc(2.25rem * var(--customer-text-scale));
+}
+@media (min-width: 768px) {
+  .customer-page .md\:text-5xl {
+    font-size: calc(3rem * var(--customer-text-scale));
+  }
+}
+.customer-page[data-button-style="outline"] button.bg-primary,
+.customer-page[data-button-style="outline"] a.bg-primary {
+  background: transparent;
+  border: 1px solid var(--primary);
+  color: var(--primary);
+}
+.storefront-page[data-button-style="outline"] > header button:last-child {
+  background: transparent !important;
+  border: 1px solid var(--primary);
+  color: var(--primary) !important;
+}
+.customer-cover {
+  height: calc(var(--customer-banner-height) * 0.48);
+}
+.customer-banner {
+  min-height: var(--customer-banner-height);
+  color: var(--store-banner-foreground);
+}
+.customer-banner-overlay {
+  background: var(--store-banner-shade);
+  opacity: var(--customer-banner-overlay);
+}
+.customer-products {
+  gap: var(--customer-gap);
+}
+.customer-product-details {
+  padding: var(--customer-padding);
+}
+.customer-image-ratio {
+  aspect-ratio: var(--customer-image-ratio);
+}
+.customer-image-ratio > img,
+.customer-image-ratio > div {
+  height: 100%;
+  aspect-ratio: auto;
+}
+.storefront-page select {
+  width: auto !important;
+}
+.customer-page input:not([type="radio"]):not([type="checkbox"]),
+.customer-page select,
+.customer-page textarea {
+  width: 100%;
+  min-width: 0;
+  background: var(--background);
+  color: var(--foreground);
+  border: 1px solid var(--border);
+  padding: 0.75rem;
+  font-size: 0.875rem;
+}
+.customer-page input[type="radio"],
+.customer-page input[type="checkbox"] {
+  accent-color: var(--primary);
+}
+.customer-page input:focus,
+.customer-page select:focus,
+.customer-page textarea:focus {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.landing-hero-shade {
+  background: var(--landing-hero-overlay);
+}
+.landing-product h1,
+.landing-product h2,
+.landing-product h3 {
+  letter-spacing: 0;
+  overflow-wrap: anywhere;
+}
+@media (prefers-reduced-motion: reduce) {
+  .landing-product * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+.lovable-surface [data-slot="button"] {
+  border-radius: 0;
+}
+.lovable-surface {
+  background: var(--background);
+  color: var(--foreground);
+}
+/* Tailwind's spacing names in the existing system shadow these container names. */
+.lovable-surface .max-w-sm {
+  max-width: 24rem;
+}
+.lovable-surface .max-w-md {
+  max-width: 28rem;
+}
+.lovable-surface .max-w-lg {
+  max-width: 32rem;
+}
+.lovable-surface .max-w-xl {
+  max-width: 36rem;
+}
+
+.lovable-surface :is(h1, h2, h3) {
+  overflow-wrap: anywhere;
+}
+
+.landing-product {
+  overflow-wrap: anywhere;
+}
+.landing-product .grid > *,
+.landing-product .flex > * {
+  min-width: 0;
+}
+.lovable-surface .grid > * {
+  min-width: 0;
+}

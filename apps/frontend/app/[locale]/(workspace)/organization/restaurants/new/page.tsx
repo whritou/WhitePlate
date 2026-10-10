@@ -36,14 +36,14 @@ export default async function NewRestaurantPage({
     : null
 
   return (
-    <main className="mx-auto min-h-[70vh] max-w-2xl p-4 sm:p-6 lg:p-8">
+    <main className="live-create-page mx-auto min-h-[70vh] max-w-3xl px-6 py-8">
       <BackLink label={t("back")} />
 
       {organization ? (
         <Card className="mt-6">
           <CardHeader>
             <CardTitle>
-              <h1>{t("title")}</h1>
+              <h1 className="font-display text-4xl font-bold">{t("title")}</h1>
             </CardTitle>
 
             <CardDescription>

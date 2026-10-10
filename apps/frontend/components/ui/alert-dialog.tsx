@@ -12,6 +12,7 @@ import type {
   AlertDialogTriggerProps,
 } from "@base-ui/react/alert-dialog"
 import { cn } from "@/lib/utils"
+import { useVisualScope } from "./visual-scope"
 
 function AlertDialog(props: AlertDialogRootProps) {
   return <AlertDialogPrimitive.Root {...props} />
@@ -44,14 +45,18 @@ function AlertDialogBackdrop({
 }
 
 function AlertDialogPopup({ className, ...props }: AlertDialogPopupProps) {
+  const scope = useVisualScope()
+
   return (
     <AlertDialogPrimitive.Popup
       data-slot="alert-dialog-popup"
       className={cn(
         "fixed start-1/2 top-1/2 z-40 grid max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 gap-5 overflow-y-auto rounded-xl border border-border bg-popover p-5 text-popover-foreground shadow-lg transition-[opacity,scale] duration-(--duration-overlay) outline-none data-ending-style:scale-95 data-ending-style:opacity-0 data-starting-style:scale-95 data-starting-style:opacity-0 motion-reduce:transition-none",
-        className
+        className,
+        scope.className
       )}
       {...props}
+      style={{ ...scope.style, ...props.style }}
     />
   )
 }

@@ -1,5 +1,9 @@
 # WhitePlate frontend architecture
 
+The approved Lovable design now also covers real workspaces, tenant customer shells and account screens. See [real routes, connected operations and explicit fictitious drafts](../lovable-live-workspace.md). Existing backend contracts are retained; hosted acceptance remains separate.
+
+Public marketing and `/[locale]/demo` routes now use the scoped Lovable components. Thin App Router entries render isolated client models/views; existing tenant-host routing and real authenticated/guest services remain unchanged. The demo layout uses its own sample BackofficeProvider, and browser storage is explicitly demo-prefixed. See [route mapping, design, assets and backend connections](../lovable-migration.md). Earlier Stitch landing/demo descriptions below are superseded only for those routes; retained shared components still serve real screens.
+
 M5 supplies a separate gallery editor beside product metadata. Ordered drafts remain local; interactive queries use account/tenant/locale/product keys. Server-only services use the shared token-aware HTTP factory and bounded binary BFF routes. Guest cards show the saved cover; the actual options dialog renders the saved gallery in its scrollable body. Delivery is same-origin and no-store, bypassing shared image optimization. Both catalogs contain photo states/errors. See [ADR 0008](decisions/0008-product-photo-gallery.md) and [M5 evidence](../audits/product-photos.md).
 
 
@@ -91,11 +95,11 @@ The orders page renders its empty state without empty Kanban lanes. Completed an
 
 Its `d` shortcut ignores repeated/prevented events, Ctrl/Alt/Meta combinations, events without a string key, and input, textarea, select, or contenteditable targets. Shift is not excluded. `suppressHydrationWarning` is applied on `<html>` to accommodate theme-class changes; it is not a general hydration-error workaround.
 
-The theme currently changes light/dark appearance only. There is no restaurant-specific branding source. The storefront uses the existing button for cart and checkout actions.
+The global preference controls unscoped light/dark appearance. Lovable workspaces use the source light palette; customer shells use the default Lovable customer theme. Actual tenant brand assets are served through the existing brand-media integration. Studio appearance remains a browser draft and is not published to the tenant storefront.
 
 ## Organization workspace shell
 
-`/[locale]/(workspace)/organization/layout.tsx` requires a signed-in, verified Better Auth session and reads the user's organizations and restaurant memberships through the existing server-only services. It passes only those display records to `WorkspaceShell`. The client shell shows role-appropriate links in a desktop sidebar and a mobile shadcn-compatible Sheet built on Base UI Dialog. The Sheet contains its own scrolling and uses Base UI's focus containment, Escape dismissal, and focus restoration. Locale links retain the current route and query only when organization or tenant selectors match those verified records; an unknown selector is removed from the locale-switch URL. Pages and API handlers still enforce access independently; layout navigation data is not an authorization grant. Organization signup is inside this shell because it requires the same verified session and shares the workspace navigation; its public URL remains `/[locale]/organization/sign-up`.
+`/[locale]/(workspace)/organization/layout.tsx` requires a signed-in, verified Better Auth session and reads the user's organizations and restaurant memberships through the existing server-only services. It passes only those display records to `WorkspaceShell`. The client shell shows role-appropriate links in the Lovable horizontal appbar/navigation, with a verified organization/restaurant context selector and responsive wrapping/scrolling. Shared editor overlays inherit scoped visual tokens through VisualScopeProvider while retaining Base UI focus containment, Escape dismissal and restoration. Locale links retain the current route and query only when organization or tenant selectors match those verified records; an unknown selector is removed from the locale-switch URL. Pages and API handlers still enforce access independently; layout navigation data is not an authorization grant. Organization signup is inside this shell because it requires the same verified session and shares the workspace navigation; its public URL remains `/[locale]/organization/sign-up`.
 
 ## Catalog management
 
@@ -139,7 +143,7 @@ The canonical [design system](../design-system/README.md) defines the Culinary C
 
 Shared controls use Base UI. `components.json` records the `base-lyra` style and aliases. UI modules use `@/lib/utils`, which re-exports `cn`. Inspect each component API before composing it; see [implementation conventions](frontend-conventions.md).
 
-The public landing is composed by `components/marketing/landing-page.tsx`. The illustrative menu uses `components/redesign/demo-menu.tsx` and its focused `demo-menu-cart.tsx` summary. Category controls scroll locally; below 1280px a fixed count/total link focuses and scrolls to the in-page order summary, with bottom space and safe-area padding. Desktop uses the sticky order sidebar. The [responsive audit](../audits/landing-demo-responsive.md) records scoped layout rules and verified EN/FR, light/dark and enlarged-text behavior. These demo controls do not call restaurant or payment mutations.
+The public landing is composed by `components/marketing/landing-page.tsx`, delegating to `components/lovable/landing-page.tsx`. The illustrative menu now uses Lovable Storefront and shared customer pages, with an accessible basket dialog and local checkout/tracking. Category controls scroll locally. Backoffice navigation targets localized demo subroutes; menu editor panels stack on narrow screens. The [Lovable migration](../lovable-migration.md) records current scope and checks; the earlier [responsive audit](../audits/landing-demo-responsive.md) is historical Stitch evidence. Demo controls do not call restaurant or payment mutations.
 
 ## Extending the frontend
 
@@ -172,3 +176,7 @@ Category visibility and ordering use the existing action/service/HTTP boundaries
 ## T1 brand asset workspace
 
 `/[locale]/organization/theming?tenantId=…` is a session-guarded owner/manager route in the existing organization shell. `components/organization/brand-assets-*` supplies the Stitch asset card and responsive brand preview; `hooks/use-brand-slot` keeps independent private drafts and retry state. TanStack keys include account, tenant and app locale. Services remain server-only behind `/api/brand-assets`; both translation catalogs include all UI states. Shared HTTP adapters now support bounded binary upload/image responses and real browser-to-BFF upload progress. They retain origin/path/token policy and safe status mapping. Public storefront branding uses `/api/public/brand-assets/{slot}`, whose upstream comes from the validated host and configured tenant template. The image component uses unoptimized same-origin requests so private previews never pass through a shared image optimizer. Development-only `/[locale]/brand-design-test` is a UI fixture and returns 404 in production.
+
+### Restored Lovable screen compositions
+
+`components/auth/auth-frame.tsx` adapts the recovered `AuthPage.tsx` composition while existing hooks/actions retain Better Auth. Real catalog/category navigation, Kanban lanes/tickets, history and team tables, Studio media sidebar, dashboard metrics/table and creation forms now follow source recipes. `live-checkout.tsx` uses the existing guest controller; `live-tracking-progress.tsx` consumes existing tracking status. Settings read restaurant records only after matching an authorized owner organization. No API contract was extended. Missing service-slot/contact/payment and custom-permission controls remain visibly illustrative. See [current mappings and verification](../lovable-live-workspace.md).

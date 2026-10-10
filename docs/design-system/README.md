@@ -1,6 +1,10 @@
 # WhitePlate design system
 
-Version **2.1.1**, 9 October 2026. Direction: **Culinary Commerce System**.
+Version **2.1.4**, 10 October 2026. Default direction: **Culinary Commerce System**.
+
+## Approved scoped Lovable reference
+
+The public landing and localized `/demo` family follow the supplied Lovable export as their primary visual reference. `.lovable-surface` preserves Space Grotesk, kelp green/lime/ink, square backoffice surfaces and original customer-theme recipes. The user-approved continuation extends this scoped reference to real organization/restaurant workspaces and tenant customer shells. The user-approved remaining-screen migration adapts catalog toolbars/category navigation, order lanes/tickets, history tables, team tables, creation forms and brand-media Studio compositions to the source while retaining their API behavior. Account pages now use the recovered AuthPage split composition with Better Auth operations. `components/lovable/lovable.css` contains scoped runtime values; `scopedSurfaces.lovable` in [tokens.json](tokens.json) records the palette. See [landing/demo migration](../lovable-migration.md) and [real workspace migration](../lovable-live-workspace.md) for routes, assets and backend connections. `components/lovable/live.css` maps existing shared control aliases within the real scope; portals receive it through VisualScopeProvider. The source is light; there is no global dark-theme change. FR/EN, keyboard, reduced motion and responsive rules still apply. The existing notice, locale controls and minimum 44px controls are intentional additions.
 
 This is WhitePlate's single canonical design reference, replacing the former Porcelaine, encre et sauge direction. The palette, font stacks, spacing, radius, breakpoints, and type scale are mirrored in shared frontend variables. That token migration does not mean every screen recipe or illustrative component in this document is implemented. Broader screen and component adoption is tracked separately in [issue #53](https://github.com/whritou/WhitePlate/issues/53); this replacement is tracked in [issue #52](https://github.com/whritou/WhitePlate/issues/52).
 

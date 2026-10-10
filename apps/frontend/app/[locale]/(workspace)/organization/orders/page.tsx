@@ -94,7 +94,7 @@ export default async function KitchenOrdersPage({
   }
 
   return (
-    <main className="mx-auto min-h-[70vh] w-full min-w-0 p-4 sm:p-6 lg:p-8">
+    <main className="mx-auto min-h-[70vh] w-full max-w-[1600px] min-w-0 px-6 py-8">
       <OrderDashboard
         key={`${session.user.id}:${membership.id}:${locale}`}
         userId={session.user.id}

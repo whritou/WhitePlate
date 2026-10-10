@@ -32,7 +32,7 @@ export function OrganizationForm() {
   }
 
   return (
-    <form onSubmit={submit} className="grid gap-5">
+    <form onSubmit={submit} className="grid gap-5 border p-6">
       <Label className="grid gap-2 font-medium" htmlFor="organization-name">
         {t("organizationName")}
 

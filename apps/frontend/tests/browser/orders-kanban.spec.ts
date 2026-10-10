@@ -243,16 +243,7 @@ for (const locale of ["en", "fr"]) {
         const firstRow = lanes.filter(
           (lane) => Math.abs(lane.top - lanes[0].top) < 2
         )
-        const expectedColumns =
-          width >= 1900
-            ? 5
-            : width >= 1280
-              ? 4
-              : width >= 1024
-                ? 3
-                : width >= 768
-                  ? 2
-                  : 1
+        const expectedColumns = width >= 1280 ? 4 : width >= 768 ? 2 : 1
 
         expect(firstRow).toHaveLength(expectedColumns)
         expect(

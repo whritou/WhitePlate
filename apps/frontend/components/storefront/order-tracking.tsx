@@ -1,7 +1,7 @@
 "use client"
 
-import { CustomerShell } from "@/components/redesign/customer-shell"
-import { TrackingProgress } from "@/components/redesign/tracking-progress"
+import { LiveCustomerShell as CustomerShell } from "./live-customer-shell"
+import { LiveTrackingProgress as TrackingProgress } from "./live-tracking-progress"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import {
@@ -67,7 +67,7 @@ export function OrderTracking({ orderId }: { orderId: string }) {
 
   return (
     <CustomerShell>
-      <main className="mx-auto min-h-[60vh] max-w-7xl px-4 py-10 sm:px-8">
+      <main className="mx-auto min-h-[60vh] max-w-[1120px] px-4 py-10 sm:px-8">
         <Card className="w-full gap-0 border-0 bg-transparent p-0 shadow-none">
           <CardHeader className="px-0">
             <p className="text-sm font-medium text-brand-text">
@@ -75,7 +75,7 @@ export function OrderTracking({ orderId }: { orderId: string }) {
             </p>
 
             <CardTitle>
-              <h1 className="max-w-3xl font-heading text-display-hero-mobile sm:text-display-hero">
+              <h1 className="max-w-3xl font-display text-3xl sm:text-4xl">
                 {t("title")}
               </h1>
             </CardTitle>
@@ -112,10 +112,7 @@ export function OrderTracking({ orderId }: { orderId: string }) {
                     </AlertDescription>
                   </Alert>
                 ) : (
-                  <TrackingProgress
-                    status={order.status}
-                    illustrative={false}
-                  />
+                  <TrackingProgress status={order.status} />
                 )}
 
                 <p aria-live="polite" className="text-sm text-muted-foreground">

@@ -3,7 +3,6 @@ import { BackLink } from "@/components/organization/back-link"
 import { Button } from "@/components/ui/button"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import {
-  Card,
   CardContent,
   CardDescription,
   CardHeader,
@@ -38,7 +37,7 @@ export default async function OrganizationTeamPage({
 
   if (!organizationsResponse.ok || !Array.isArray(organizationsResponse.data)) {
     return (
-      <main className="mx-auto min-h-[70vh] max-w-3xl p-4 sm:p-6 lg:p-8">
+      <main className="mx-auto min-h-[70vh] max-w-[1600px] px-6 py-8">
         <Alert variant="destructive" role="alert">
           <AlertDescription>{t("serviceError")}</AlertDescription>
         </Alert>
@@ -70,17 +69,17 @@ export default async function OrganizationTeamPage({
   })
 
   return (
-    <main className="mx-auto min-h-[70vh] max-w-3xl p-4 sm:p-6 lg:p-8">
+    <main className="mx-auto min-h-[70vh] max-w-[1600px] px-6 py-8">
       <BackLink label={t("backToOrganizations")} />
 
-      <Card className="mt-6 rounded-lg border border-border bg-card p-6 sm:p-10">
+      <div className="mt-6">
         <CardHeader className="px-0">
           <p className="mb-2 text-sm font-medium text-brand-text">
             {organization.name}
           </p>
 
           <CardTitle>
-            <h1 className="text-2xl font-semibold tracking-tight sm:text-[2rem]">
+            <h1 className="font-display text-4xl font-bold">
               {t("teamTitle")}
             </h1>
           </CardTitle>
@@ -163,7 +162,7 @@ export default async function OrganizationTeamPage({
             )}
           </div>
         </CardContent>
-      </Card>
+      </div>
     </main>
   )
 }
