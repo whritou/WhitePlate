@@ -57,7 +57,7 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
   }
 
   return (
-    <main className="mx-auto w-full max-w-[1600px] min-w-0">
+    <main className="w-full min-w-0">
       <MenuBuilderWorkspace
         userId={session.user.id}
         key={`${session.user.id}:${catalog.tenantId}`}
@@ -68,11 +68,17 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
           description?.ok ? (description.data ?? undefined) : undefined
         }
         initialView={
-          query.view === "categories"
-            ? "categories"
-            : query.view === "translations"
-              ? "translations"
-              : "products"
+          query.view === "allergens"
+            ? "allergens"
+            : query.view === "discounts"
+              ? "discounts"
+              : query.view === "languages"
+                ? "languages"
+                : query.view === "categories"
+                  ? "categories"
+                  : query.view === "translations"
+                    ? "translations"
+                    : "products"
         }
       />
     </main>

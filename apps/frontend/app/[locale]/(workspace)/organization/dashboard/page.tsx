@@ -1,3 +1,4 @@
+import { getManagedCatalog } from "@/services/catalog-management"
 import { getLocale, getTranslations } from "next-intl/server"
 import { getManagedWorkspaceRestaurant } from "@/services/live-workspace"
 import { getOrderPage } from "@/services/orders"
@@ -12,9 +13,12 @@ export default async function DashboardPage({
 }) {
   const query = await searchParams
   const restaurant = await getManagedWorkspaceRestaurant(query.tenantId)
-  const response = restaurant
-    ? await getOrderPage(restaurant.id, null, null)
-    : null
+  const [response, catalog] = restaurant
+    ? await Promise.all([
+        getOrderPage(restaurant.id, null, null),
+        getManagedCatalog(restaurant.id),
+      ])
+    : [null, null]
   const t = await getTranslations("LiveWorkspace")
 
   if (!restaurant || !response?.ok || !response.data)
@@ -32,6 +36,8 @@ export default async function DashboardPage({
 
   return (
     <LiveDashboard
+      userId={restaurant.userId}
+      catalog={catalog?.ok ? (catalog.data ?? undefined) : undefined}
       name={restaurant.name}
       tenantId={restaurant.id}
       page={response.data}

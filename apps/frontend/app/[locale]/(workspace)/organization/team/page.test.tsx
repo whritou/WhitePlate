@@ -159,12 +159,6 @@ it("renders the organization roster and invitation status beside the invitation 
   )
   expect(html).toContain("revokeInvitationAction")
   expect(html.match(/revokeInvitationAction/g)).toHaveLength(1)
-  expect(html).toContain("Invitation form")
-  expect(html).toContain('class="grid min-w-0 gap-2 sm:grid-cols-2"')
-  expect(html).toContain(
-    'class="grid min-w-0 gap-2 rounded-lg border border-border px-4 py-3"'
-  )
-  expect(html).toContain(`>${"Bistro".repeat(16)}</span>`)
-  expect(html).toContain("min-w-0 text-sm font-medium break-words")
-  expect(html).toContain("flex min-w-0 flex-wrap items-start gap-x-4 gap-y-2")
+  expect(html).toContain("teamInviteTitle")
+  expect(html).toContain("Roles &amp; permissions")
 })

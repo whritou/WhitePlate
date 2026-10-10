@@ -18,9 +18,9 @@ export async function getManagedWorkspaceRestaurant(tenantId: unknown) {
 
   if (!response.ok) return null
 
-  return (
-    response.data?.find(
-      (item) => item.id === tenantId && item.role !== "Kitchen"
-    ) ?? null
+  const restaurant = response.data?.find(
+    (item) => item.id === tenantId && item.role !== "Kitchen"
   )
+
+  return restaurant ? { ...restaurant, userId: session.user.id } : null
 }

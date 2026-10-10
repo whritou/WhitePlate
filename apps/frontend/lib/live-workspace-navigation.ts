@@ -38,8 +38,24 @@ export function liveWorkspaceLinks(
           ["restaurant-settings", "settings"],
         ] as const)
 
-  return pages.map(([path, key]) => ({
+  const links: LiveWorkspaceLink[] = pages.map(([path, key]) => ({
     href: `/organization/${path}?tenantId=${context.id}`,
     key,
   }))
+
+  if (
+    restaurant.role !== "Kitchen" &&
+    organizations.some((item) => item.id === restaurant.organizationId)
+  ) {
+    links[links.length - 1] = {
+      href: `/organization/settings?organizationId=${restaurant.organizationId}&tenantId=${restaurant.id}`,
+      key: "settings",
+    }
+    links.splice(links.length - 1, 0, {
+      href: `/organization/team?organizationId=${restaurant.organizationId}&tenantId=${restaurant.id}`,
+      key: "team",
+    })
+  }
+
+  return links
 }

@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label"
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
 import { useWorkspaceToast } from "@/components/ui/toast"
 import { useRouter } from "@/i18n/navigation"
+import type { EditorCallbacks } from "@/types/editor"
 import type { ActionState } from "@/types/organization"
 import { ArrowRight, LoaderCircle } from "lucide-react"
 import { useLocale, useTranslations } from "next-intl"
@@ -16,7 +17,9 @@ import { ResultMessage } from "./result-message"
 export function StaffInvitationForm({
   organizationId,
   restaurants,
-}: {
+  onPendingChange,
+  onSuccess,
+}: EditorCallbacks & {
   organizationId: string
   restaurants: { id: string; name: string }[]
 }) {
@@ -33,15 +36,18 @@ export function StaffInvitationForm({
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setState({ status: "pending" })
+    onPendingChange?.(true)
 
     const result = await sendStaffInvitationAction(
       new FormData(event.currentTarget)
     ).catch(() => ({ ok: false as const, message: "unavailable" as const }))
 
+    onPendingChange?.(false)
     if (result.ok) {
       toast.success(t("invitationSent"))
       router.refresh()
       setState({ status: "idle" })
+      onSuccess?.()
     } else setState({ status: "error", error: result.message })
   }
 

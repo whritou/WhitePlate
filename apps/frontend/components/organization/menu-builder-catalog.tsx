@@ -5,24 +5,17 @@ import { Plus } from "lucide-react"
 import { useLocale, useTranslations } from "next-intl"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
+
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
 import { EditorDialog } from "@/components/ui/editor-dialog"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
 import type { ManagedCatalog } from "@/types/catalog-management"
 import type { MenuLanguageSettings } from "@/types/catalog"
 import { MenuBuilderProduct } from "./menu-builder-product"
 import { ProductForm } from "./product-form"
 import { CategoryForm } from "./category-form"
+import { LiveProductCover } from "./live-product-cover"
 import { CatalogOrderForm } from "./catalog-order-form"
 
 export function MenuBuilderCatalog({
@@ -45,6 +38,7 @@ export function MenuBuilderCatalog({
   const t = useTranslations("MenuBuilder")
   const c = useTranslations("Catalog")
   const u = useTranslations("CatalogView")
+  const v = useTranslations("LiveParity")
   const locale = useLocale()
   const [search, setSearch] = useState("")
   const [visibility, setVisibility] = useState("active")
@@ -87,8 +81,8 @@ export function MenuBuilderCatalog({
   }
 
   return (
-    <div className="grid min-w-0 gap-6">
-      <div className="flex flex-wrap items-center justify-between gap-4">
+    <div className="grid min-w-0 gap-0">
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b px-6 py-3">
         <p className="max-w-[36rem] min-w-0 flex-1 basis-64 text-sm text-muted-foreground">
           {t("intro")}
         </p>
@@ -137,17 +131,26 @@ export function MenuBuilderCatalog({
         </div>
       </div>
 
-      <div className="grid min-w-0 gap-0 border lg:grid-cols-[240px_1fr]">
+      <div
+        className={`live-menu-layout grid min-w-0 ${selectedId ? "has-product" : ""}`}
+      >
         <aside
-          className="flex gap-1 overflow-x-auto border-b bg-secondary p-3 lg:block lg:border-r lg:border-b-0"
+          className="live-menu-categories flex gap-0 overflow-x-auto border-b lg:block lg:border-r lg:border-b-0"
           aria-label={u("categories")}
         >
+          <h2 className="label-mono border-b px-4 py-3 text-muted-foreground">
+            {u("categories")}
+          </h2>
+
           <Button
             variant="ghost"
             disabled={pending}
             aria-pressed={categoryId === "all"}
-            onClick={() => onCategoryChange("all")}
-            className={`shrink-0 justify-start lg:w-full ${categoryId === "all" ? "bg-foreground text-background hover:bg-foreground hover:text-background" : ""}`}
+            onClick={() => {
+              onCategoryChange("all")
+              setSelectedId("")
+            }}
+            className={`shrink-0 justify-between border-b px-4 py-3 text-left lg:w-full ${categoryId === "all" ? "bg-accent font-bold hover:bg-accent" : ""}`}
           >
             {u("allCategories")}
           </Button>
@@ -158,10 +161,22 @@ export function MenuBuilderCatalog({
               variant="ghost"
               disabled={pending}
               aria-pressed={categoryId === category.id}
-              onClick={() => onCategoryChange(category.id)}
-              className={`shrink-0 justify-start lg:w-full ${categoryId === category.id ? "bg-foreground text-background hover:bg-foreground hover:text-background" : ""}`}
+              onClick={() => {
+                onCategoryChange(category.id)
+                setSelectedId("")
+              }}
+              className={`shrink-0 justify-between border-b px-4 py-3 text-left lg:w-full ${categoryId === category.id ? "bg-accent font-bold hover:bg-accent" : ""}`}
             >
-              {category.name}
+              <span>{category.name}</span>
+
+              <span className="label-mono">
+                {
+                  catalog.products.filter(
+                    (item) =>
+                      item.categoryId === category.id && !item.isArchived
+                  ).length
+                }
+              </span>
             </Button>
           ))}
         </aside>
@@ -175,12 +190,15 @@ export function MenuBuilderCatalog({
           <Card className="min-w-0 gap-0 border-0 p-0">
             <CardHeader>
               <CardTitle>
-                <h2>{u("products")}</h2>
+                <h2 className="font-display text-2xl font-bold">
+                  {categories.find((item) => item.id === categoryId)?.name ??
+                    u("allCategories")}
+                </h2>
               </CardTitle>
             </CardHeader>
 
             <CardContent className="grid min-w-0 gap-4">
-              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              <div className="grid gap-3 sm:grid-cols-2">
                 <div className="grid gap-2">
                   <Label htmlFor="builder-product-search">{u("search")}</Label>
 
@@ -216,29 +234,6 @@ export function MenuBuilderCatalog({
                     </NativeSelectOption>
                   </NativeSelect>
                 </div>
-
-                <div className="grid gap-2">
-                  <Label htmlFor="builder-category-filter">
-                    {c("category")}
-                  </Label>
-
-                  <NativeSelect
-                    id="builder-category-filter"
-                    value={categoryId}
-                    onChange={(event) => onCategoryChange(event.target.value)}
-                    selectClassName="w-full"
-                  >
-                    <NativeSelectOption value="all">
-                      {u("allCategories")}
-                    </NativeSelectOption>
-
-                    {categories.map((category) => (
-                      <NativeSelectOption key={category.id} value={category.id}>
-                        {category.name}
-                      </NativeSelectOption>
-                    ))}
-                  </NativeSelect>
-                </div>
               </div>
 
               <p role="status" className="text-sm text-muted-foreground">
@@ -249,88 +244,67 @@ export function MenuBuilderCatalog({
                 {t("orderingHelp")}
               </p>
 
-              <Table aria-label={u("products")}>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead scope="col">{c("name")}</TableHead>
+              <ul aria-label={u("products")} className="grid min-w-0 gap-3">
+                {products.map((product) => (
+                  <li
+                    key={product.id}
+                    className={`live-dish-row border-t p-4 ${selectedId === product.id ? "bg-accent/20" : "hover:bg-secondary"}`}
+                  >
+                    <div className="flex min-w-0 flex-wrap items-center justify-between gap-3">
+                      <Button
+                        variant="unstyled"
+                        className="min-w-0 flex-1 justify-start p-0 text-left"
+                        disabled={pending}
+                        aria-label={t("selectProduct", { name: product.name })}
+                        aria-pressed={selectedId === product.id}
+                        data-product-selector={product.id}
+                        onClick={() => selectProduct(product.id)}
+                      >
+                        <LiveProductCover
+                          userId={userId}
+                          tenantId={catalog.tenantId}
+                          productId={product.id}
+                        />
 
-                    <TableHead scope="col">{c("category")}</TableHead>
+                        <span className="min-w-0">
+                          <span className="block font-bold">
+                            {product.name}
+                          </span>
 
-                    <TableHead scope="col">
-                      {c("price", { currency: catalog.currency })}
-                    </TableHead>
+                          <span className="mt-1 block text-xs font-normal text-muted-foreground">
+                            {product.description}
+                          </span>
+                        </span>
+                      </Button>
 
-                    <TableHead scope="col">{t("status")}</TableHead>
-
-                    <TableHead scope="col">{c("sortOrder")}</TableHead>
-                  </TableRow>
-                </TableHeader>
-
-                <TableBody>
-                  {products.map((product) => (
-                    <TableRow key={product.id}>
-                      <TableCell className="min-w-48">
-                        <Button
-                          variant="ghost"
-                          className="h-auto justify-start px-0 text-left whitespace-normal"
-                          disabled={pending}
-                          aria-label={t("selectProduct", {
-                            name: product.name,
-                          })}
-                          onClick={() => selectProduct(product.id)}
-                        >
-                          {product.name}
-                        </Button>
-                      </TableCell>
-
-                      <TableCell>
-                        {
-                          categories.find(
-                            (item) => item.id === product.categoryId
-                          )?.name
-                        }
-                      </TableCell>
-
-                      <TableCell className="whitespace-nowrap tabular-nums">
+                      <span className="text-sm tabular-nums">
                         {money.format(product.basePrice)}
-                      </TableCell>
+                      </span>
 
-                      <TableCell>
-                        <Badge
-                          variant={
-                            isArchived(product)
-                              ? "neutral"
-                              : product.isAvailable
-                                ? "success"
-                                : "warning"
-                          }
-                        >
-                          {c(
-                            isArchived(product)
-                              ? "archived"
-                              : product.isAvailable
-                                ? "available"
-                                : "unavailable"
-                          )}
-                        </Badge>
-                      </TableCell>
-
-                      <TableCell>
-                        {isArchived(product) ? (
-                          product.sortOrder
-                        ) : (
-                          <CatalogOrderForm
-                            tenantId={catalog.tenantId}
-                            item={product}
-                            pending={pending}
-                            onPendingChange={onPendingChange}
-                          />
+                      <span className="label-mono border px-2 py-1">
+                        {c(
+                          isArchived(product)
+                            ? "archived"
+                            : product.isAvailable
+                              ? "available"
+                              : "unavailable"
                         )}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                      </span>
+                    </div>
+
+                    {!isArchived(product) && (
+                      <div className="mt-2">
+                        <CatalogOrderForm
+                          tenantId={catalog.tenantId}
+                          item={product}
+                          pending={pending}
+                          onPendingChange={onPendingChange}
+                        />
+                      </div>
+                    )}
+                  </li>
+                ))}
+              </ul>
 
               {products.length === 0 && (
                 <p className="py-4 text-muted-foreground">{u("noProducts")}</p>
@@ -338,25 +312,42 @@ export function MenuBuilderCatalog({
             </CardContent>
           </Card>
         </fieldset>
-      </div>
 
-      {catalog.products
-        .filter((product) => visited.includes(product.id))
-        .map((product) => (
-          <MenuBuilderProduct
-            key={product.id}
-            userId={userId}
-            catalog={catalog}
-            settings={settings}
-            product={product}
-            open={selectedId === product.id}
-            onOpenChange={(value) => {
-              if (!value && !pending) setSelectedId("")
-            }}
-            pending={pending}
-            onPendingChange={onPendingChange}
-          />
-        ))}
+        {catalog.products
+          .filter((product) => visited.includes(product.id))
+          .map((product) => (
+            <MenuBuilderProduct
+              key={product.id}
+              userId={userId}
+              catalog={catalog}
+              settings={settings}
+              product={product}
+              open={selectedId === product.id}
+              onOpenChange={(value) => {
+                if (!value && !pending) {
+                  setSelectedId("")
+                  requestAnimationFrame(() =>
+                    document
+                      .querySelector<HTMLButtonElement>(
+                        `[data-product-selector="${product.id}"]`
+                      )
+                      ?.focus()
+                  )
+                }
+              }}
+              pending={pending}
+              onPendingChange={onPendingChange}
+            />
+          ))}
+
+        {!selectedId && (
+          <section className="live-product-placeholder hidden border-l p-8 text-center lg:grid lg:content-center">
+            <h2 className="font-display text-xl font-bold">
+              {v("selectDish")}
+            </h2>
+          </section>
+        )}
+      </div>
     </div>
   )
 }

@@ -4,7 +4,13 @@ import type {
   RestaurantDescriptionTranslations,
 } from "./catalog"
 
-export type MenuBuilderView = "products" | "categories" | "translations"
+export type MenuBuilderView =
+  | "products"
+  | "categories"
+  | "translations"
+  | "allergens"
+  | "discounts"
+  | "languages"
 export type MenuBuilderProps = {
   userId?: string
   catalog: ManagedCatalog

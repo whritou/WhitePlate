@@ -10,7 +10,7 @@ test("switching workspace tabs and products preserves an unsaved product draft",
     "data-ready",
     "true"
   )
-  await page.getByRole("tab", { name: "Menu", exact: true }).click()
+  await page.getByRole("tab", { name: "Dishes", exact: true }).click()
 
   await page
     .getByRole("button", { name: "Select Soupe du potager", exact: true })
@@ -40,17 +40,15 @@ test("switching workspace tabs and products preserves an unsaved product draft",
     "Unsaved seasonal soup"
   )
   await page.getByRole("button", { name: "Close", exact: true }).click()
-  await page
-    .getByRole("button", { name: "Translations & languages", exact: true })
-    .click()
+  await page.getByRole("tab", { name: "Languages", exact: true }).click()
   await expect(
     page.getByRole("button", { name: "Manage languages", exact: true })
   ).toBeVisible()
   await expect(page).toHaveURL(/context=keep/)
-  await expect(page).toHaveURL(/view=translations/)
+  await expect(page).toHaveURL(/view=languages/)
 
-  const translations = page.getByRole("dialog", {
-    name: "Translations & languages",
+  const translations = page.getByRole("tabpanel", {
+    name: "Languages",
     exact: true,
   })
 
@@ -60,7 +58,7 @@ test("switching workspace tabs and products preserves an unsaved product draft",
   await expect(
     translations.getByText("Garden soup", { exact: true })
   ).toBeVisible()
-  await translations.getByRole("button", { name: "Close", exact: true }).click()
+  await page.getByRole("tab", { name: "Dishes", exact: true }).click()
   await page
     .getByRole("button", { name: "Select Soupe du potager", exact: true })
     .click()
@@ -83,9 +81,12 @@ test("shared workspace keeps discounts and archived products reachable", async (
     "data-ready",
     "true"
   )
-  await page.getByRole("button", { name: "Discounts", exact: true }).click()
+  await page.getByRole("tab", { name: "Discount codes", exact: true }).click()
   await expect(page.getByText("BIENVENUE", { exact: true })).toBeVisible()
-  await page.keyboard.press("Escape")
+  await page.getByRole("tab", { name: "Dishes", exact: true }).click()
+  await page
+    .getByRole("button", { name: "All categories", exact: true })
+    .click()
   await page.getByLabel("Show", { exact: true }).selectOption("archived")
   await page
     .getByRole("button", { name: "Select Velouté d’hiver", exact: true })
@@ -119,13 +120,8 @@ test("restaurant description drafts survive menu-language switches", async ({
   await expect(
     page.getByRole("textbox", { name: "Description", exact: true })
   ).toHaveValue("Unsaved French description")
-  await page
-    .getByRole("dialog", { name: "Translations & languages", exact: true })
-    .getByRole("button", { name: "Close", exact: true })
-    .click()
-  await page
-    .getByRole("button", { name: "Translations & languages", exact: true })
-    .click()
+  await page.getByRole("tab", { name: "Dishes", exact: true }).click()
+  await page.getByRole("tab", { name: "Languages", exact: true }).click()
   await expect(
     page.getByRole("textbox", { name: "Description", exact: true })
   ).toHaveValue("Unsaved French description")
@@ -177,7 +173,7 @@ test("product save locks selection, rejects duplicate submissions and retains a 
   await form.getByRole("button", { name: "Save changes", exact: true }).click()
   await startedPromise
   await expect(
-    page.locator("button").filter({ hasText: "Translations & languages" })
+    page.getByRole("tab", { name: "Languages", exact: true })
   ).toBeDisabled()
   await expect(
     page.locator('[aria-label="Select Salade de tomates anciennes et burrata"]')
@@ -192,7 +188,7 @@ test("product save locks selection, rejects duplicate submissions and retains a 
   )
   expect(writes).toBe(1)
   await expect(
-    page.locator("button").filter({ hasText: "Translations & languages" })
+    page.getByRole("tab", { name: "Languages", exact: true })
   ).toBeEnabled()
   await page.unroute("**/catalog-design-test*")
   await page.route("**/catalog-design-test*", async (route) => {
@@ -228,7 +224,9 @@ test("category visibility errors preserve the saved state and recover controls",
     })
   })
 
-  await page.getByRole("tab", { name: "Categories", exact: true }).click()
+  await page
+    .getByRole("button", { name: "Manage categories", exact: true })
+    .click()
 
   const hide = page.getByRole("button", {
     name: "Hide category Les entrées",
@@ -238,13 +236,14 @@ test("category visibility errors preserve the saved state and recover controls",
   await hide.click()
   await expect(
     page
-      .getByRole("tabpanel", { name: "Categories", exact: true })
+      .getByRole("dialog", { name: "Manage categories", exact: true })
       .getByRole("alert")
   ).toBeVisible()
   await expect(hide).toBeEnabled()
   await expect(page.getByText("Visible online", { exact: true })).toBeVisible()
+  await page.keyboard.press("Escape")
   await expect(
-    page.getByRole("button", { name: "Translations & languages", exact: true })
+    page.getByRole("tab", { name: "Languages", exact: true })
   ).toBeEnabled()
 })
 
@@ -335,7 +334,7 @@ for (const locale of ["en", "fr"]) {
         .click()
 
       const tab = page.getByRole("tab", {
-        name: "Menu",
+        name: locale === "fr" ? "Plats" : "Dishes",
         exact: true,
       })
 
@@ -343,17 +342,14 @@ for (const locale of ["en", "fr"]) {
       await page.keyboard.press("ArrowRight")
       await page.keyboard.press("Enter")
       await expect(
-        page.getByRole("table", {
-          name: locale === "fr" ? "Catégories" : "Categories",
+        page.getByRole("tab", {
+          name: locale === "fr" ? "Allergènes" : "Allergens",
           exact: true,
         })
-      ).toBeVisible()
+      ).toHaveAttribute("aria-selected", "true")
       await page
-        .getByRole("button", {
-          name:
-            locale === "fr"
-              ? "Traductions & Langues"
-              : "Translations & languages",
+        .getByRole("tab", {
+          name: locale === "fr" ? "Langues" : "Languages",
           exact: true,
         })
         .click()

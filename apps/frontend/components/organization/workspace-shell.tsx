@@ -1,5 +1,5 @@
 "use client"
-import { CreditCard, Radio, Store } from "lucide-react"
+import { ArrowUpRight, CreditCard, Radio } from "lucide-react"
 import ReactFlagsSelect from "react-flags-select"
 import { useLocale, useTranslations } from "next-intl"
 import { useSearchParams } from "next/navigation"
@@ -43,25 +43,26 @@ export function WorkspaceShell({
 
   const query = localeSearch.toString()
   const currentHref = `${pathname}${query ? `?${query}` : ""}`
+  const restaurantOrganization =
+    context?.type === "restaurant"
+      ? organizations.find(
+          (item) =>
+            item.id ===
+            restaurants.find((item) => item.id === context.id)?.organizationId
+        )
+      : undefined
   const settingsHref =
     context?.type === "organization"
       ? `/organization/settings?organizationId=${context.id}&section=payments`
-      : "/organization"
+      : restaurantOrganization
+        ? `/organization/settings?organizationId=${restaurantOrganization.id}&tenantId=${context?.id}&section=payments`
+        : "/organization"
   const overviewHref =
     context?.type === "organization"
       ? `/organization?organizationId=${context.id}`
       : context?.type === "restaurant"
         ? `/organization/${restaurants.find((item) => item.id === context.id)?.role === "Kitchen" ? "orders" : "dashboard"}?tenantId=${context.id}`
         : "/organization"
-  const parentOrganization =
-    context?.type === "restaurant"
-      ? organizations.find(
-          (item) =>
-            item.id ===
-            restaurants.find((restaurant) => restaurant.id === context.id)
-              ?.organizationId
-        )
-      : null
 
   function changeContext(value: string) {
     const [type, id] = value.split(":")
@@ -90,46 +91,11 @@ export function WorkspaceShell({
           {t("skipToContent")}
         </Link>
 
-        <header className="border-b bg-background print:hidden">
-          <nav
-            aria-label={v("contextNavigation")}
-            className="flex flex-wrap items-center gap-2 border-b px-6 py-2 text-sm"
-          >
-            <Link
-              href="/organization"
-              className="inline-flex min-h-11 items-center font-medium hover:underline"
-            >
-              {v("organizations")}
-            </Link>
-
-            {parentOrganization && (
-              <>
-                <span aria-hidden="true">/</span>
-
-                <Link
-                  href={`/organization?organizationId=${parentOrganization.id}`}
-                  className="inline-flex min-h-11 items-center font-medium hover:underline"
-                >
-                  {parentOrganization.name}
-                </Link>
-              </>
-            )}
-
-            {context && (
-              <>
-                <span aria-hidden="true">/</span>
-
-                <span aria-current="page" className="min-w-0">
-                  {context.name}
-                </span>
-              </>
-            )}
-          </nav>
-
+        <header className="live-appbar shrink-0 border-b bg-background print:hidden">
           <div className="flex flex-wrap items-center justify-between gap-3 px-6 py-4">
             <div className="flex max-w-full flex-wrap items-center gap-5">
               <Link
-                href="/organization"
+                href={overviewHref}
                 className="font-display text-2xl font-bold"
               >
                 White<span className="text-primary">Plate</span>
@@ -138,7 +104,7 @@ export function WorkspaceShell({
               <NativeSelect
                 aria-label={v("context")}
                 value={context ? `${context.type}:${context.id}` : ""}
-                className="w-72 max-w-full"
+                className="w-60 max-w-full"
                 onChange={(event) => changeContext(event.target.value)}
               >
                 <NativeSelectOption value="">
@@ -170,7 +136,7 @@ export function WorkspaceShell({
             </div>
 
             <div className="flex max-w-full flex-wrap items-center gap-2">
-              {context?.type === "organization" && (
+              {(context?.type === "organization" || restaurantOrganization) && (
                 <Button
                   nativeButton={false}
                   role="link"
@@ -211,9 +177,9 @@ export function WorkspaceShell({
                     <Link href={`/organization/shop?tenantId=${context.id}`} />
                   }
                 >
-                  <Store />
-
                   {v("visitShop")}
+
+                  <ArrowUpRight />
                 </Button>
               )}
 
@@ -223,27 +189,36 @@ export function WorkspaceShell({
 
           <nav
             aria-label={t("navigationLabel")}
-            className="flex min-w-0 gap-1 overflow-x-auto border-t px-4 py-2"
+            className="live-appbar-navigation flex min-w-0 gap-1 overflow-x-auto border-t px-4 py-2"
           >
-            <Button
-              nativeButton={false}
-              role="link"
-              variant={pathname === "/organization" ? "secondary" : "ghost"}
-              className="shrink-0"
-              render={
-                <Link
-                  href={overviewHref}
-                  aria-current={
-                    pathname === "/organization" ? "page" : undefined
-                  }
-                />
-              }
-            >
-              {t("overview")}
-            </Button>
+            {context?.type !== "restaurant" && (
+              <Button
+                nativeButton={false}
+                role="link"
+                variant={pathname === "/organization" ? "secondary" : "ghost"}
+                className="shrink-0"
+                render={
+                  <Link
+                    href={overviewHref}
+                    aria-current={
+                      pathname === "/organization" ? "page" : undefined
+                    }
+                  />
+                }
+              >
+                {t("overview")}
+              </Button>
+            )}
 
             {links.map(({ href, key }) => {
-              const active = isWorkspaceLinkActive(href, pathname, search)
+              const active =
+                isWorkspaceLinkActive(href, pathname, search) ||
+                ((key === "team" || key === "settings") &&
+                  href.split("?")[0] === pathname &&
+                  new URLSearchParams(href.split("?")[1]).get(
+                    "organizationId"
+                  ) === search.get("organizationId") &&
+                  Boolean(search.get("tenantId")))
 
               return (
                 <Button
@@ -261,7 +236,7 @@ export function WorkspaceShell({
                 >
                   <WorkspaceLinkIcon href={href} />
 
-                  {key === "dashboard" || key === "analytics" ? v(key) : t(key)}
+                  {v(`navigation.${key}`)}
                 </Button>
               )
             })}
