@@ -18,6 +18,7 @@ import { SettingsPanel3 } from "@/components/lovable/pages/settings-panel-3"
 import { SettingsPanel4 } from "@/components/lovable/pages/settings-panel-4"
 import { SettingsPanel5 } from "@/components/lovable/pages/settings-panel-5"
 import { MissingFeatureNotice } from "./missing-feature-notice"
+import { OrganizationArchiveAction } from "./organization-archive-action"
 import type { LiveSettingsProps } from "@/types/live-workspace"
 
 export function LiveSettings({
@@ -49,7 +50,7 @@ export function LiveSettings({
 
   return (
     <SettingsPageProvider model={model}>
-      <main className="min-w-0 bg-background">
+      <main className="live-settings min-w-0 bg-background">
         <header className="flex flex-wrap items-end justify-between gap-6 px-6 pt-8 pb-6">
           <div>
             <p className="label-mono text-muted-foreground">
@@ -102,7 +103,7 @@ export function LiveSettings({
           <div className="min-w-0 space-y-6">
             {simulated && <MissingFeatureNotice />}
 
-            {(model.sec === "org" || model.sec === "danger") && (
+            {model.sec === "org" && (
               <Card title="Organization profile" sub={t("realOrganization")}>
                 <div className="mb-5 flex min-w-0 items-center gap-4 border-b pb-5">
                   <div className="grid size-16 shrink-0 place-items-center bg-primary font-display text-2xl font-bold text-primary-foreground">
@@ -121,6 +122,15 @@ export function LiveSettings({
                 </div>
 
                 {children}
+              </Card>
+            )}
+
+            {model.sec === "danger" && (
+              <Card title="Danger zone" sub={errorText("archiveDescription")}>
+                <OrganizationArchiveAction
+                  organizationId={organization.id}
+                  active={organization.isActive}
+                />
               </Card>
             )}
 

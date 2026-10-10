@@ -25,3 +25,14 @@ export type CategoryVisibilityInput = {
   id: string
   isVisible: boolean
 }
+
+export type MenuBuilderToolbarProps = {
+  catalog: ManagedCatalog
+  title: string
+  search: string
+  onSearch: (value: string) => void
+  visibility: string
+  onVisibility: (value: string) => void
+  pending: boolean
+  onPendingChange: (pending: boolean) => void
+}

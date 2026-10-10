@@ -55,7 +55,7 @@ export async function LiveDashboard({
       .join(" · ") || "—"
 
   return (
-    <main className="mx-auto max-w-[1600px] px-6 pb-12">
+    <main className="live-dashboard mx-auto max-w-[1600px] px-6 pb-12">
       <header className="flex flex-wrap items-end justify-between gap-5 py-8">
         <div>
           <p className="label-mono text-muted-foreground">{name}</p>

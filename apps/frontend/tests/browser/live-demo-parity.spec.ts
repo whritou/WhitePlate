@@ -1,5 +1,48 @@
 import { expect, test } from "@playwright/test"
 
+for (const locale of ["en", "fr"]) {
+  for (const surface of ["demo", "live"]) {
+    test(`${locale} ${surface}: mobile Studio checkout and tracking use readable full-width columns`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width: 1440, height: 1000 })
+      await page.goto(
+        surface === "demo"
+          ? `/${locale}/demo/studio`
+          : `/${locale}/live-workspace-test?view=studio`
+      )
+      await page.getByRole("button", { name: "mobile", exact: true }).click()
+      for (const name of [/^checkout$/i, /order tracking|suivi/i]) {
+        await page.getByRole("tab", { name, exact: true }).click()
+
+        const shell = page.locator(".customer-page")
+
+        await expect(shell).toBeVisible()
+
+        const bounds = await shell.locator("aside").evaluate((element) => {
+          const rect = element.getBoundingClientRect()
+          const first = element.previousElementSibling!.getBoundingClientRect()
+
+          return {
+            width: rect.width,
+            top: rect.top,
+            previousBottom: first.bottom,
+          }
+        })
+
+        expect(bounds.width).toBeGreaterThan(280)
+        expect(bounds.top).toBeGreaterThanOrEqual(bounds.previousBottom)
+        await expect(shell.locator("h1")).toBeVisible()
+        expect(
+          await shell.evaluate(
+            (element) => element.scrollWidth <= element.clientWidth
+          )
+        ).toBe(true)
+      }
+    })
+  }
+}
+
 test("dish thumbnails load actual saved covers using a supported media size", async ({
   page,
 }) => {
@@ -134,4 +177,55 @@ test("restaurant appbar includes authorized staff, demo hover and source dashboa
     path: ".acceptance/parity-dashboard.png",
     fullPage: true,
   })
+})
+
+test("Staff invite uses the demo recipe and real roster filters retain authorized data", async ({
+  page,
+}) => {
+  await page.goto("/en/demo/staff")
+
+  const reference = await page
+    .getByRole("button", { name: /invite member/i })
+    .evaluate((element) => {
+      const s = getComputedStyle(element)
+
+      return {
+        background: s.backgroundColor,
+        color: s.color,
+        font: s.fontSize,
+        weight: s.fontWeight,
+        shadow: s.boxShadow,
+        radius: s.borderRadius,
+      }
+    })
+
+  await page.goto(
+    "/en/live-workspace-test?view=team&tenantId=22222222-2222-4222-8222-222222222222"
+  )
+
+  const invite = page.getByRole("button", { name: /invite member/i })
+
+  await expect(invite).toBeVisible()
+  expect(
+    await invite.evaluate((element) => {
+      const s = getComputedStyle(element)
+
+      return {
+        background: s.backgroundColor,
+        color: s.color,
+        font: s.fontSize,
+        weight: s.fontWeight,
+        shadow: s.boxShadow,
+        radius: s.borderRadius,
+      }
+    })
+  ).toEqual(reference)
+  await page.getByRole("textbox", { name: "Search email…" }).fill("missing")
+  await expect(
+    page.getByText("manager@example.test", { exact: true })
+  ).toBeHidden()
+  await page.getByRole("textbox", { name: "Search email…" }).fill("manager")
+  await expect(
+    page.getByText("manager@example.test", { exact: true })
+  ).toBeVisible()
 })

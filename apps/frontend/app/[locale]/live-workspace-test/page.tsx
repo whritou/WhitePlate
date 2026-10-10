@@ -1,7 +1,9 @@
+import { OrderDashboard } from "@/components/orders/order-dashboard"
+import { StaffInviteDialog } from "@/components/organization/staff-invite-dialog"
 import { Link } from "@/i18n/navigation"
 import { OrganizationTeamDirectory } from "@/components/organization/organization-team-directory"
 import { notFound } from "next/navigation"
-import { getLocale } from "next-intl/server"
+import { getLocale, getTranslations } from "next-intl/server"
 import { WorkspaceShell } from "@/components/organization/workspace-shell"
 import { OrganizationOverview } from "@/components/organization/organization-overview"
 import { RestaurantSettings } from "@/components/organization/restaurant-settings"
@@ -30,6 +32,7 @@ export default async function LiveWorkspaceFixture({
   if (process.env.NODE_ENV === "production") notFound()
 
   const query = await searchParams
+  const parity = await getTranslations("LiveParity")
   const userId = query.user === "b" ? "fixture-b" : "fixture-a"
 
   if (query.view === "store")
@@ -120,11 +123,26 @@ export default async function LiveWorkspaceFixture({
           }}
         />
       ) : query.view === "team" ? (
-        <main className="live-page">
-          <h1 className="mb-6 font-display text-4xl font-bold">Maison Verte</h1>
-
+        <main className="min-w-0 bg-background px-6 pt-8 pb-12">
           {await OrganizationTeamDirectory({
             organizationId: organization.id,
+            heading: (
+              <div>
+                <p className="label-mono text-muted-foreground">
+                  {organization.name}
+                </p>
+
+                <h1 className="mt-1 font-display text-4xl font-bold">
+                  {parity("staffTitle")}
+                </h1>
+              </div>
+            ),
+            action: (
+              <StaffInviteDialog
+                organizationId={organization.id}
+                restaurants={[{ id: tenantId, name: organization.name }]}
+              />
+            ),
             members: [
               {
                 role: "RestaurantManager",
@@ -160,6 +178,43 @@ export default async function LiveWorkspaceFixture({
 
           <AnalyticsPage />
         </>
+      ) : query.view === "orders" ? (
+        <main className="mx-auto min-h-[70vh] w-full max-w-[1600px] min-w-0 px-6 py-8">
+          <OrderDashboard
+            userId={userId}
+            tenantId={tenantId}
+            tenantName={organization.name}
+            role="Manager"
+            locale={await getLocale()}
+            selectedStatus={null}
+            cursor={null}
+            loadError={null}
+            hubUrl={null}
+            page={{
+              nextCursor: null,
+              items: [
+                {
+                  id: "44444444-4444-4444-8444-444444444444",
+                  customerName: "Ada",
+                  currency: "EUR",
+                  menuLocale: "en",
+                  total: 19.25,
+                  status: "Pending",
+                  version: 1,
+                  createdAt: "2026-10-10T18:00:00Z",
+                  lines: [
+                    {
+                      productId: "33333333-3333-4333-8333-333333333333",
+                      productName: "Soupe du potager",
+                      quantity: 2,
+                      options: [],
+                    },
+                  ],
+                },
+              ],
+            }}
+          />
+        </main>
       ) : query.view === "dashboard" ? (
         await LiveDashboard({
           name: organization.name,
@@ -196,6 +251,7 @@ export default async function LiveWorkspaceFixture({
           organization={organization}
         >
           <OrganizationSettingsForm
+            showLifecycle={false}
             organizationId={organization.id}
             organizationName={organization.name}
             organizationActive

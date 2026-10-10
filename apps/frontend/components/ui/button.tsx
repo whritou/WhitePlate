@@ -7,6 +7,7 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
+        "source-primary": "btn-primary",
         unstyled: "",
         default:
           "bg-primary text-primary-foreground hover:bg-primary-hover active:bg-primary-hover active:brightness-90",
@@ -47,6 +48,8 @@ function Button({
   return (
     <ButtonPrimitive
       data-slot="button"
+      data-variant={variant}
+      data-size={size}
       className={cn(buttonVariants({ variant, size, className }))}
       {...props}
     />

@@ -233,6 +233,7 @@
     "orderHistory": "Chargement de l’historique des commandes…"
   },
   "KitchenOrders": {
+    "total": "Total",
     "title": "Commandes en cuisine",
     "description": "Consultez les tickets reçus et mettez à jour leur état au fil de la préparation.",
     "backToOrganizations": "Toutes les organisations",
@@ -3199,9 +3200,13 @@
     "signInAction": "Se connecter",
     "namePlaceholder": "Votre nom",
     "passwordPlaceholder": "Votre mot de passe",
-    "newPasswordPlaceholder": "Au moins 8 caractères"
+    "newPasswordPlaceholder": "Au moins 8 caractères",
+    "searchMembers": "Rechercher un e-mail…",
+    "filterRole": "Filtrer par rôle",
+    "allRoles": "Tous les rôles"
   },
   "LiveParity": {
+    "inviteMember": "Inviter un membre",
     "title": "Éditeur de menu",
     "dishes": "Plats",
     "allergens": "Allergènes",

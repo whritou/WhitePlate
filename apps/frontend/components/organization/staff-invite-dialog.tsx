@@ -12,13 +12,14 @@ export function StaffInviteDialog({
   restaurants: { id: string; name: string }[] | null
 }) {
   const t = useTranslations("Auth")
+  const v = useTranslations("LiveParity")
 
   return (
     <EditorDialog
-      primary
+      sourcePrimary
       icon={Plus}
       title={t("teamInviteTitle")}
-      label={t("teamInviteTitle")}
+      label={v("inviteMember")}
       description={t("teamInviteDescription")}
     >
       {(callbacks) =>

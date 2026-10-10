@@ -64,7 +64,7 @@ export function CustomerShell({
         )}
       </Copy>
 
-      <div className="mx-auto max-w-5xl px-5 py-8 sm:px-8">
+      <div className="customer-shell-content mx-auto max-w-5xl px-5 py-8">
         <Copy>{children}</Copy>
       </div>
 

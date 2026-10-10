@@ -20,7 +20,7 @@ export function CustomerCheckoutSection1() {
             total,
           })
       }}
-      className="grid items-start gap-10 md:grid-cols-[1.15fr_1fr]"
+      className="customer-two-column grid min-w-0 items-start gap-10"
     >
       <CustomerCheckoutSection2 />
 

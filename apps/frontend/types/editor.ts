@@ -12,6 +12,7 @@ export type EditorDialogProps = {
   label: string
   icon?: LucideIcon
   primary?: boolean
+  sourcePrimary?: boolean
   compact?: boolean
   disabled?: boolean
   children: (callbacks: EditorCallbacks) => ReactNode

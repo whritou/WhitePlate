@@ -135,6 +135,7 @@
 }
 
 .customer-page {
+  container: customer-shell / inline-size;
   font-family: var(--customer-font);
   font-weight: var(--customer-body-weight);
   line-height: var(--customer-line-height);
@@ -151,6 +152,16 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+}
+
+/* Studio previews and full pages respond to their own available width. */
+.customer-two-column > * { min-width: 0; }
+@container customer-shell (min-width: 40rem) {
+  .customer-shell-content { padding-inline: 2rem; }
+}
+@container customer-shell (min-width: 48rem) {
+  .customer-two-column { grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); }
+  .customer-summary { border-top: 0; border-left: 1px solid var(--border); padding-top: 0; padding-left: 2rem; }
 }
 .customer-page h1,
 .customer-page h2,

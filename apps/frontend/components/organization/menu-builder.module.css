@@ -17,7 +17,7 @@
   border-color: var(--ring);
 }
 
-@media (min-width: 40rem) {
+@media (min-width: 40rem) and (max-width: 63.99rem) {
   .workspace button,
   :global(body):has(.workspace) :global([data-slot="button"]),
   :global(body):has(.workspace) :global([data-slot="dialog-content"]) button,

@@ -159,6 +159,6 @@ it("renders the organization roster and invitation status beside the invitation 
   )
   expect(html).toContain("revokeInvitationAction")
   expect(html.match(/revokeInvitationAction/g)).toHaveLength(1)
-  expect(html).toContain("teamInviteTitle")
+  expect(html).toContain("inviteMember")
   expect(html).toContain("Roles &amp; permissions")
 })

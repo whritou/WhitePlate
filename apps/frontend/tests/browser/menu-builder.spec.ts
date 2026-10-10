@@ -300,7 +300,7 @@ for (const locale of ["en", "fr"]) {
               exact: true,
             })
         ).toBeVisible()
-        if (width >= 768) {
+        if (width >= 768 && width < 1024) {
           const target = await page
             .getByRole("form", { name: /Soupe du potager/ })
             .getByRole("button", {

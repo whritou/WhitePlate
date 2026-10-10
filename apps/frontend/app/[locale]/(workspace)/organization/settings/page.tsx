@@ -78,6 +78,7 @@ export default async function OrganizationSettingsPage({
         organizationId={organization.id}
         organizationName={organization.name}
         organizationActive={organization.isActive}
+        showLifecycle={false}
       />
     </LiveSettings>
   )
