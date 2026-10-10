@@ -2,7 +2,31 @@
 
 This is the runbook for the user-approved, single hosted development stack ([decision 0005](../architecture/decisions/0005-coolify-hosting.md)). Runtime credentials belong in Coolify/Vercel settings, never this file, client code or `NEXT_PUBLIC_*` variables. The migration is tracked in [issue #17](https://github.com/whritou/WhitePlate/issues/17).
 
-## Current verified state — 2026-10-08
+## Availability incident and recovery — 2026-10-10
+
+The public API returned HTTP 503 (`no available server`) on `/health/live`, `/health/ready` and `/api/v1/organizations`. Coolify reported the API as Degraded: its process was running, but PostgreSQL readiness failed repeatedly. Authentication on Vercel still worked. The workspace could not load organizations or restaurant memberships, so its context-dependent navigation links were absent.
+
+The API container `wqyrztj6uyuwlveq75qrl68t-20261009T092313` held a file bind mount of an older CA inode with mode `0700`, owned by UID 9999. The current host file `/data/coolify/ssl/coolify-ca.crt` had a different inode and mode `0644`. Both public certificates had identical SHA-256 fingerprints; the API's non-root user received `Permission denied` when reading its mounted copy. The earlier host permission check therefore did not establish container readability.
+
+Recovery changed only the mounted **public CA certificate** to mode `0644`, through an operator session:
+
+```sh
+docker exec -u 0 wqyrztj6uyuwlveq75qrl68t-20261009T092313 \
+  chmod 644 /etc/ssl/certs/coolify-ca.crt
+```
+
+The current host file remains `0644`. No private key, database credential, schema, application code or TLS verification setting was changed; the connection retains `SSL Mode=VerifyFull`. No restart or redeployment was required. Container names above identify the incident, not permanent command targets.
+
+Verification after recovery:
+
+- The actual non-root API container user could read the mounted CA, and internal `/health/ready` returned 200.
+- External HTTPS `/health/live` and `/health/ready` returned 200 `Healthy` with normal certificate verification. Anonymous `/api/v1/organizations` returned the expected 401.
+- The existing authenticated Vercel session loaded the organization and two restaurants at `/fr/organization` without the unavailable error.
+- Opening a real restaurant's orders page restored the appbar links for dashboard, orders, history, analytics, catalog and theming. The page showed the empty-order state and connected live updates. This verifies connection establishment, not delivery of a new order event.
+
+After replacing a CA file or changing its permissions, verify the **mounted file inside every affected container**, not only the host path. Check readability as the actual application user and compare public certificate fingerprints when host/container files differ. File bind mounts can retain the previous inode after an atomic replacement. If that happens, deliberately remount/recreate the affected container after validating the current certificate, or correct permissions on its identical mounted public CA as above. Never apply public certificate permissions to private keys or disable TLS verification to restore availability. The process that replaced the host inode has not been identified; automatic prevention/monitoring remains operational work.
+
+## Previous verified deployment state — 2026-10-08
 
 | Component | Evidence and remaining work |
 | --- | --- |
