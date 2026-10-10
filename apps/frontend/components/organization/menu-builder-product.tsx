@@ -81,7 +81,7 @@ export function MenuBuilderProduct({
         side="right"
         keepMounted
         aria-busy={pending}
-        className="w-full overflow-x-hidden [overflow-wrap:anywhere] sm:w-[min(52rem,calc(100vw-2rem))]"
+        className="w-full overflow-x-hidden [overflow-wrap:anywhere] sm:w-[min(64rem,calc(100vw-2rem))]"
       >
         <SheetHeader className="relative border-b border-border pr-14 pb-5">
           <SheetTitle className="font-heading text-2xl font-bold break-words">

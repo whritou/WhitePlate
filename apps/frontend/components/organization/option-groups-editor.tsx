@@ -135,7 +135,7 @@ function OptionGroupCard({
     <Card
       className={
         studio
-          ? "@container/option h-full border-transparent bg-muted shadow-none dark:bg-secondary"
+          ? "@container/option h-full border-transparent bg-muted shadow-none"
           : undefined
       }
     >

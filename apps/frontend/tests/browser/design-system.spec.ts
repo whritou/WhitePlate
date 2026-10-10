@@ -79,7 +79,7 @@ for (const locale of ["en", "fr"]) {
         theme
       )
       await page.goto(`/${locale}/design-system-test`)
-      await expect(page.locator("html")).toHaveClass(new RegExp(theme))
+      await expect(page.locator("html")).toHaveClass(/\blight\b/)
       await page.waitForTimeout(250)
       expect(hydrationErrors).toEqual([])
 
@@ -208,7 +208,7 @@ for (const locale of ["en", "fr"]) {
       )
       await page.goto(`/${locale}/sign-in`)
       await expect(page.locator("#email")).toBeVisible()
-      await expect(page.locator("html")).toHaveClass(new RegExp(theme))
+      await expect(page.locator("html")).toHaveClass(/\blight\b/)
       await page.waitForTimeout(250)
 
       for (const button of await page

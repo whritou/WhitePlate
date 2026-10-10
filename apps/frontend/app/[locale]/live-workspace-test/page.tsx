@@ -3,6 +3,8 @@ import { OrganizationTeamDirectory } from "@/components/organization/organizatio
 import { notFound } from "next/navigation"
 import { getLocale } from "next-intl/server"
 import { WorkspaceShell } from "@/components/organization/workspace-shell"
+import { OrganizationOverview } from "@/components/organization/organization-overview"
+import { RestaurantSettings } from "@/components/organization/restaurant-settings"
 import { LiveSettings } from "@/components/organization/live-settings"
 import { OrganizationSettingsForm } from "@/components/organization/organization-settings-form"
 import { LiveStudio } from "@/components/organization/live-studio"
@@ -58,8 +60,14 @@ export default async function LiveWorkspaceFixture({
                 products: [
                   {
                     id: "33333333-3333-4333-8333-333333333333",
-                    name: "Burrata & tomates anciennes",
-                    description: "Basilic et tomates",
+                    name:
+                      query.long === "1"
+                        ? "BurrataSuperLongProductName".repeat(6)
+                        : "Burrata & tomates anciennes",
+                    description:
+                      query.long === "1"
+                        ? "SeasonalIngredientsAndDescription".repeat(20)
+                        : "Basilic et tomates",
                     basePrice: 11,
                     isAvailable: true,
                     optionGroups: [],
@@ -75,13 +83,43 @@ export default async function LiveWorkspaceFixture({
   return (
     <WorkspaceShell
       organizations={[organization]}
-      restaurants={[{ id: tenantId, name: organization.name, role: "Manager" }]}
+      restaurants={[
+        {
+          id: tenantId,
+          name: organization.name,
+          role: "Manager",
+          organizationId: organization.id,
+          subdomain: "maisonverte",
+        },
+      ]}
     >
       <p className="border-b bg-secondary px-6 py-2 text-xs">
         Development fixture · No authentication bypass on production routes
       </p>
 
-      {query.view === "team" ? (
+      {query.view === "overview" ? (
+        <OrganizationOverview
+          organizations={[organization]}
+          organizationId={organization.id}
+          restaurants={[
+            {
+              id: tenantId,
+              name: "Maison Verte Restaurant",
+              role: "Manager",
+              organizationId: organization.id,
+            },
+          ]}
+        />
+      ) : query.view === "restaurant-settings" ? (
+        <RestaurantSettings
+          restaurant={{
+            id: tenantId,
+            name: "Maison Verte",
+            role: "Manager",
+            subdomain: "maisonverte",
+          }}
+        />
+      ) : query.view === "team" ? (
         <main className="live-page">
           <h1 className="mb-6 font-display text-4xl font-bold">Maison Verte</h1>
 

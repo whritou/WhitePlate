@@ -1,8 +1,8 @@
 "use client"
 
-import { Menu, Moon, Sun, X } from "lucide-react"
+import { Menu, X } from "lucide-react"
 import { useLocale, useTranslations } from "next-intl"
-import { useTheme } from "next-themes"
+
 import { useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Brand } from "@/components/ui/brand"
@@ -13,7 +13,7 @@ export function MarketingHeader() {
   const locale = useLocale()
   const pathname = usePathname()
   const router = useRouter()
-  const { resolvedTheme, setTheme } = useTheme()
+
   const [open, setOpen] = useState(false)
   const menuTrigger = useRef<HTMLButtonElement>(null)
   const sections = [
@@ -82,19 +82,6 @@ export function MarketingHeader() {
               </Link>
             ))}
           </div>
-
-          <Button
-            variant="ghost"
-            size="icon"
-            aria-label={t("toggleTheme")}
-            onClick={() =>
-              setTheme(resolvedTheme === "dark" ? "light" : "dark")
-            }
-          >
-            <Sun aria-hidden="true" className="hidden dark:block" />
-
-            <Moon aria-hidden="true" className="dark:hidden" />
-          </Button>
 
           <Button
             className="hidden text-sm lg:inline-flex"

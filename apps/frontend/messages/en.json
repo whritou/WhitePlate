@@ -206,7 +206,6 @@
     "navigationLabel": "Workspace navigation",
     "openNavigation": "Open navigation",
     "closeNavigation": "Close navigation",
-    "toggleTheme": "Toggle theme",
     "skipToContent": "Skip to content",
     "language": "Language",
     "english": "English",
@@ -331,7 +330,13 @@
     "accessDeniedTitle": "Order history unavailable",
     "accessDenied": "You do not have access to this restaurant’s order history.",
     "loadError": "We couldn’t load the order history. Try again in a moment.",
-    "invalidFilter": "A filter is invalid. Check your criteria and try again."
+    "invalidFilter": "A filter is invalid. Check your criteria and try again.",
+    "summary": "Order summary",
+    "loadedOrders": "Orders on this page",
+    "loadedTotal": "Order totals on this page",
+    "averageBasket": "Average basket on this page",
+    "summaryScope": "Figures and CSV cover this loaded page. Order totals do not indicate payment or revenue.",
+    "exportCsv": "Export page CSV"
   },
   "Checkout": {
     "cartTitle": "Your order",
@@ -816,7 +821,6 @@
     "pricing": "Pricing",
     "faq": "FAQ",
     "language": "Language",
-    "toggleTheme": "Toggle color mode",
     "menu": "Menu",
     "tryDemo": "Try Live Demo",
     "getStarted": "Get Started",
@@ -3142,7 +3146,18 @@
     "legalName": "Legal name",
     "vat": "VAT number",
     "siret": "SIRET",
-    "billingEmail": "Billing email"
+    "billingEmail": "Billing email",
+    "visitShop": "Visit shop",
+    "openOrganization": "Open organization",
+    "openRestaurant": "Open restaurant",
+    "noRestaurants": "No restaurants yet.",
+    "restaurantSettings": "Restaurant settings",
+    "restaurantIdentity": "Restaurant identity and menu",
+    "subdomain": "Shop subdomain",
+    "restaurantSettingsScope": "Manage menu languages, restaurant descriptions, catalog and brand assets using the tools below.",
+    "shopUnavailable": "The public shop domain is not configured yet. Contact your administrator to enable the restaurant storefront.",
+    "backToWorkspace": "Back to workspace",
+    "contextNavigation": "Workspace context"
   },
   "LovableLive": {
     "members": "Members",

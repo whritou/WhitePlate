@@ -1,8 +1,7 @@
 "use client"
-import { Moon, Sun, CreditCard, Radio } from "lucide-react"
+import { CreditCard, Radio, Store } from "lucide-react"
 import ReactFlagsSelect from "react-flags-select"
 import { useLocale, useTranslations } from "next-intl"
-import { useTheme } from "next-themes"
 import { useSearchParams } from "next/navigation"
 import { WorkspaceLinkIcon } from "./workspace-link-icon"
 import { SignOutButton } from "@/components/auth/sign-out-button"
@@ -32,7 +31,6 @@ export function WorkspaceShell({
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const router = useRouter()
-  const { resolvedTheme, setTheme } = useTheme()
   const search = new URLSearchParams(searchParams.toString())
   const context = resolveWorkspaceContext(search, organizations, restaurants)
   const links = liveWorkspaceLinks(search, organizations, restaurants)
@@ -49,6 +47,21 @@ export function WorkspaceShell({
     context?.type === "organization"
       ? `/organization/settings?organizationId=${context.id}&section=payments`
       : "/organization"
+  const overviewHref =
+    context?.type === "organization"
+      ? `/organization?organizationId=${context.id}`
+      : context?.type === "restaurant"
+        ? `/organization/${restaurants.find((item) => item.id === context.id)?.role === "Kitchen" ? "orders" : "dashboard"}?tenantId=${context.id}`
+        : "/organization"
+  const parentOrganization =
+    context?.type === "restaurant"
+      ? organizations.find(
+          (item) =>
+            item.id ===
+            restaurants.find((restaurant) => restaurant.id === context.id)
+              ?.organizationId
+        )
+      : null
 
   function changeContext(value: string) {
     const [type, id] = value.split(":")
@@ -63,7 +76,7 @@ export function WorkspaceShell({
       type === "organization" &&
       organizations.some((item) => item.id === id)
     ) {
-      router.push(`/organization/settings?organizationId=${id}`)
+      router.push(`/organization?organizationId=${id}`)
     } else if (!value) router.push("/organization")
   }
 
@@ -78,6 +91,41 @@ export function WorkspaceShell({
         </Link>
 
         <header className="border-b bg-background print:hidden">
+          <nav
+            aria-label={v("contextNavigation")}
+            className="flex flex-wrap items-center gap-2 border-b px-6 py-2 text-sm"
+          >
+            <Link
+              href="/organization"
+              className="inline-flex min-h-11 items-center font-medium hover:underline"
+            >
+              {v("organizations")}
+            </Link>
+
+            {parentOrganization && (
+              <>
+                <span aria-hidden="true">/</span>
+
+                <Link
+                  href={`/organization?organizationId=${parentOrganization.id}`}
+                  className="inline-flex min-h-11 items-center font-medium hover:underline"
+                >
+                  {parentOrganization.name}
+                </Link>
+              </>
+            )}
+
+            {context && (
+              <>
+                <span aria-hidden="true">/</span>
+
+                <span aria-current="page" className="min-w-0">
+                  {context.name}
+                </span>
+              </>
+            )}
+          </nav>
+
           <div className="flex flex-wrap items-center justify-between gap-3 px-6 py-4">
             <div className="flex max-w-full flex-wrap items-center gap-5">
               <Link
@@ -154,18 +202,20 @@ export function WorkspaceShell({
 
               <LocaleSelector currentHref={currentHref} locale={locale} />
 
-              <Button
-                variant="ghost"
-                size="icon"
-                aria-label={t("toggleTheme")}
-                onClick={() =>
-                  setTheme(resolvedTheme === "dark" ? "light" : "dark")
-                }
-              >
-                <Sun aria-hidden="true" className="hidden dark:block" />
+              {context?.type === "restaurant" && (
+                <Button
+                  nativeButton={false}
+                  role="link"
+                  variant="outline"
+                  render={
+                    <Link href={`/organization/shop?tenantId=${context.id}`} />
+                  }
+                >
+                  <Store />
 
-                <Moon aria-hidden="true" className="dark:hidden" />
-              </Button>
+                  {v("visitShop")}
+                </Button>
+              )}
 
               <SignOutButton />
             </div>
@@ -182,7 +232,7 @@ export function WorkspaceShell({
               className="shrink-0"
               render={
                 <Link
-                  href="/organization"
+                  href={overviewHref}
                   aria-current={
                     pathname === "/organization" ? "page" : undefined
                   }
@@ -201,7 +251,7 @@ export function WorkspaceShell({
                   role="link"
                   key={href}
                   variant="ghost"
-                  className={`shrink-0 ${active ? "bg-foreground text-background hover:bg-foreground hover:text-background" : ""}`}
+                  className={`shrink-0 ${active ? "lovable-selected" : ""}`}
                   render={
                     <Link
                       href={href}

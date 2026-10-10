@@ -41,6 +41,15 @@ it("limits kitchen navigation to operational orders", () => {
   expect(links.map((link) => link.key)).toEqual(["orders"])
 })
 
+it("offers restaurant settings without losing the verified tenant", () => {
+  expect(
+    liveWorkspaceLinks(new URLSearchParams({ tenantId: id }), [], restaurants)
+  ).toContainEqual({
+    href: `/organization/restaurant-settings?tenantId=${id}`,
+    key: "settings",
+  })
+})
+
 it("organization links preserve the authorized organization context", () => {
   const links = liveWorkspaceLinks(
     new URLSearchParams({ organizationId: id }),

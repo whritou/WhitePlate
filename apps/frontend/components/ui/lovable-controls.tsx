@@ -17,7 +17,7 @@ export function SourceButton({
 
   return (
     <Button
-      variant="ghost"
+      variant="unstyled"
       className={cn(
         "lovable-source-button inline-flex min-h-11 min-w-11 rounded-none border-0 p-0 text-inherit hover:bg-transparent",
         className
@@ -87,7 +87,7 @@ export function SourceSelect({
 
   return (
     <NativeSelect
-      className="w-auto"
+      className="w-auto max-w-full"
       selectClassName={cn("rounded-none", className)}
       {...props}
       aria-label={text(props["aria-label"])}

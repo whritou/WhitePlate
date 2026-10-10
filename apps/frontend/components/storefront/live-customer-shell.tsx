@@ -28,7 +28,7 @@ export function LiveCustomerShell({
         style={style}
       >
         <header className="flex flex-wrap items-center justify-between gap-3 border-b px-6 py-3">
-          <Link href="/" className="flex min-w-0 items-center gap-3">
+          <Link href="/" className="flex max-w-full min-w-0 items-center gap-3">
             {name && (
               <BrandAssetImage
                 src="/api/public/brand-assets/logo"
@@ -37,7 +37,7 @@ export function LiveCustomerShell({
               />
             )}
 
-            <span className="font-display text-xl font-bold">
+            <span className="min-w-0 font-display text-xl font-bold wrap-anywhere">
               {name ?? "WhitePlate"}
             </span>
           </Link>

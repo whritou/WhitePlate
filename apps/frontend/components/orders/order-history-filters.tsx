@@ -22,8 +22,10 @@ import type { OrderHistoryFilters } from "@/types/orders"
 
 export function OrderHistoryFilters({
   filters,
+  route = "/organization/order-history",
 }: {
   filters: OrderHistoryFilters
+  route?: string
 }) {
   const t = useTranslations("OrderHistory")
   const [mobileOpen, setMobileOpen] = useState(false)
@@ -40,7 +42,7 @@ export function OrderHistoryFilters({
           </CardHeader>
 
           <CardContent>
-            <FilterFields filters={filters} variant="desktop" />
+            <FilterFields filters={filters} variant="desktop" route={route} />
           </CardContent>
         </Card>
       </div>
@@ -82,6 +84,7 @@ export function OrderHistoryFilters({
 
             <div className="min-h-0 flex-1 overflow-y-auto p-5">
               <FilterFields
+                route={route}
                 filters={filters}
                 variant="mobile"
                 onApplied={() => setMobileOpen(false)}
@@ -95,10 +98,12 @@ export function OrderHistoryFilters({
 }
 
 function FilterFields({
+  route,
   filters,
   variant,
   onApplied,
 }: {
+  route: string
   filters: OrderHistoryFilters
   variant: "desktop" | "mobile"
   onApplied?: () => void
@@ -194,7 +199,7 @@ function FilterFields({
           role="link"
           render={
             <Link
-              href={`/organization/order-history?tenantId=${encodeURIComponent(filters.tenantId)}`}
+              href={`${route}?tenantId=${encodeURIComponent(filters.tenantId)}`}
               onClick={onApplied}
             />
           }

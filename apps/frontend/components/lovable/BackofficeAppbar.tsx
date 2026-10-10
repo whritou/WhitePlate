@@ -106,8 +106,7 @@ export function BackofficeAppbar() {
               <Link
                 to={to}
                 activeProps={{
-                  className:
-                    "bg-foreground text-background hover:bg-foreground hover:text-background",
+                  className: "lovable-selected",
                 }}
               >
                 <Icon />

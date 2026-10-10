@@ -113,6 +113,13 @@ export function parseRestaurantMemberships(
       !isRecord(candidate) ||
       !isUuid(candidate.id) ||
       typeof candidate.name !== "string" ||
+      (candidate.organizationId !== undefined &&
+        !isUuid(candidate.organizationId)) ||
+      (candidate.subdomain !== undefined &&
+        (typeof candidate.subdomain !== "string" ||
+          !/^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/.test(
+            candidate.subdomain
+          ))) ||
       !isRestaurantRole(candidate.role)
     )
       return null
@@ -120,6 +127,12 @@ export function parseRestaurantMemberships(
       id: candidate.id,
       name: candidate.name,
       role: candidate.role,
+      ...(candidate.organizationId
+        ? { organizationId: candidate.organizationId as string }
+        : {}),
+      ...(candidate.subdomain
+        ? { subdomain: candidate.subdomain as string }
+        : {}),
     })
   }
 

@@ -89,7 +89,7 @@ export function HistoryPageSection1() {
         >
           <Copy>
             {["All", "Collected", "Refunded", "Cancelled"].map((x) => (
-              <SourceOption key={x}>
+              <SourceOption key={x} value={x}>
                 <Copy>{x}</Copy>
               </SourceOption>
             ))}

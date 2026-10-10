@@ -308,3 +308,47 @@
 .lovable-surface .grid > * {
   min-width: 0;
 }
+
+/* Shop layout follows the available preview width, including Studio's mobile frame. */
+.storefront-page {
+  container-type: inline-size;
+}
+.customer-product-grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr));
+}
+.customer-product-details {
+  overflow-wrap: anywhere;
+}
+.customer-product-details > button:first-child {
+  display: block;
+  text-align: start;
+}
+@container (max-width: 30rem) {
+  .customer-product-list {
+    flex-direction: column;
+  }
+  .customer-product-list .customer-product-image {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+  }
+  .storefront-page .sm\:grid-cols-3 {
+    grid-template-columns: 1fr;
+  }
+}
+.lovable-surface .lovable-selected,
+.lovable-surface .lovable-selected:hover,
+.lovable-surface .lovable-selected:active {
+  background: var(--foreground);
+  color: var(--background);
+  border-color: var(--foreground);
+}
+.lovable-surface .lovable-source-button:active {
+  filter: brightness(0.94);
+}
+.lovable-surface [data-slot="native-select-wrapper"] {
+  max-width: 100%;
+}
+.lovable-surface [data-slot="native-select"] {
+  text-overflow: ellipsis;
+  padding-inline-end: 2.5rem;
+}

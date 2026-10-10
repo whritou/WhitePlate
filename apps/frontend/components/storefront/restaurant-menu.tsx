@@ -160,7 +160,7 @@ function RestaurantMenuContent({
                             {t("emptyCategory")}
                           </p>
                         ) : (
-                          <ul className="grid items-stretch gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                          <ul className="customer-product-grid grid items-stretch gap-4">
                             {category.products.map((product, imageIndex) => (
                               <li key={product.id} className="min-w-0">
                                 <MenuProductCard

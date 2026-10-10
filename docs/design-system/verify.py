@@ -177,15 +177,16 @@ def validate(data):
         errors.append("Typography tokens do not match the supplied YAML scale")
 
     runtime_css = (ROOT / "apps/frontend/app/globals.css").read_text(encoding="utf-8")
+    if data.get("runtimeThemes") != ["light"] or re.search(r"\.dark\s*\{|prefers-color-scheme:\s*dark", runtime_css):
+        errors.append("Runtime appearance must remain light-only")
     for selector, expected in (
         (":root, .design-reference", presentation.get("brand-text-light")),
-        (".dark", presentation.get("brand-text-dark")),
     ):
         declarations = re.findall(rf"{re.escape(selector)}\s*\{{([^}}]+)\}}", runtime_css)
         if not any(re.search(r"--presentation-brand-text:\s*" + re.escape(expected or ""), block)
                    for block in declarations):
             errors.append(f"Runtime {selector} brand text differs from canonical presentation tokens")
-    for mode, selector in (("light", ":root"), ("dark", ".dark")):
+    for mode, selector in (("light", ":root"),):
         actual = css_color_tokens(runtime_css, selector)
         if actual != themes.get(mode):
             errors.append(f"{selector} CSS colors differ from canonical {mode} tokens")
