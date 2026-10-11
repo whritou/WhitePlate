@@ -29,7 +29,11 @@ export default defineConfig({
     { name: "brand-assets", testMatch: "brand-assets.spec.ts" },
     {
       name: "menu-builder",
-      testMatch: ["menu-builder.spec.ts", "menu-manager.spec.ts"],
+      testMatch: [
+        "menu-builder.spec.ts",
+        "menu-manager.spec.ts",
+        "menu-workspace-usability.spec.ts",
+      ],
     },
     {
       name: "responsive-layout",

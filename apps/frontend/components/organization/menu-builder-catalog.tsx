@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 
 import { EditorDialog } from "@/components/ui/editor-dialog"
+import { MenuBuilderCategories } from "./menu-builder-categories"
 import type { ManagedCatalog } from "@/types/catalog-management"
 import type { MenuLanguageSettings } from "@/types/catalog"
 import { MenuBuilderProduct } from "./menu-builder-product"
@@ -83,69 +84,93 @@ export function MenuBuilderCatalog({
         className={`live-menu-layout grid min-w-0 ${selectedId ? "has-product" : ""}`}
       >
         <aside
-          className="live-menu-categories flex gap-0 overflow-x-auto border-b lg:block lg:border-r lg:border-b-0"
+          className="live-menu-categories border-b lg:border-r lg:border-b-0"
           aria-label={u("categories")}
         >
           <h2 className="label-mono border-b px-4 py-3 text-muted-foreground">
             {u("categories")}
           </h2>
 
-          <Button
-            variant="ghost"
-            disabled={pending}
-            aria-pressed={categoryId === "all"}
-            onClick={() => {
-              onCategoryChange("all")
-              setSelectedId("")
-            }}
-            className={`shrink-0 justify-between border-b px-4 py-3 text-left lg:w-full ${categoryId === "all" ? "bg-accent font-bold hover:bg-accent" : ""}`}
-          >
-            {u("allCategories")}
-          </Button>
-
-          {categories.map((category) => (
+          <div className="live-menu-category-list">
             <Button
-              key={category.id}
               variant="ghost"
               disabled={pending}
-              aria-pressed={categoryId === category.id}
+              aria-pressed={categoryId === "all"}
               onClick={() => {
-                onCategoryChange(category.id)
+                onCategoryChange("all")
                 setSelectedId("")
               }}
-              className={`shrink-0 justify-between border-b px-4 py-3 text-left lg:w-full ${categoryId === category.id ? "bg-accent font-bold hover:bg-accent" : ""}`}
+              className={`shrink-0 justify-between border-b px-4 py-3 text-left lg:w-full ${categoryId === "all" ? "bg-accent font-bold hover:bg-accent" : ""}`}
             >
-              <span>{category.name}</span>
-
-              <span className="label-mono">
-                {
-                  catalog.products.filter(
-                    (item) =>
-                      item.categoryId === category.id && !item.isArchived
-                  ).length
-                }
-              </span>
+              {u("allCategories")}
             </Button>
-          ))}
 
-          <EditorDialog
-            icon={Plus}
-            title={c("newCategory")}
-            label={c("newCategory")}
-            description={t("categoryHelp")}
-            disabled={pending}
-          >
-            {(callbacks) => (
-              <CategoryForm
-                tenantId={catalog.tenantId}
-                {...callbacks}
-                onPendingChange={(value) => {
-                  callbacks.onPendingChange?.(value)
-                  onPendingChange(value)
+            {categories.map((category) => (
+              <Button
+                key={category.id}
+                variant="ghost"
+                disabled={pending}
+                aria-pressed={categoryId === category.id}
+                onClick={() => {
+                  onCategoryChange(category.id)
+                  setSelectedId("")
                 }}
-              />
-            )}
-          </EditorDialog>
+                className={`shrink-0 justify-between border-b px-4 py-3 text-left lg:w-full ${categoryId === category.id ? "bg-accent font-bold hover:bg-accent" : ""}`}
+              >
+                <span>{category.name}</span>
+
+                <span className="label-mono">
+                  {
+                    catalog.products.filter(
+                      (item) =>
+                        item.categoryId === category.id && !item.isArchived
+                    ).length
+                  }
+                </span>
+              </Button>
+            ))}
+          </div>
+
+          <div className="live-menu-category-actions">
+            <EditorDialog
+              icon={Plus}
+              title={c("newCategory")}
+              label={c("newCategory")}
+              description={t("categoryHelp")}
+              disabled={pending}
+            >
+              {(callbacks) => (
+                <CategoryForm
+                  tenantId={catalog.tenantId}
+                  {...callbacks}
+                  onPendingChange={(value) => {
+                    callbacks.onPendingChange?.(value)
+                    onPendingChange(value)
+                  }}
+                />
+              )}
+            </EditorDialog>
+
+            <EditorDialog
+              title={v("manageCategories")}
+              label={v("manageCategories")}
+              description={t("categoryHelp")}
+              disabled={pending}
+            >
+              {(callbacks) => (
+                <MenuBuilderCategories
+                  catalog={catalog}
+                  selectedId={categoryId}
+                  onSelect={onCategoryChange}
+                  pending={pending}
+                  onPendingChange={(value) => {
+                    callbacks.onPendingChange?.(value)
+                    onPendingChange(value)
+                  }}
+                />
+              )}
+            </EditorDialog>
+          </div>
         </aside>
 
         <fieldset
@@ -200,12 +225,12 @@ export function MenuBuilderCatalog({
                           productId={product.id}
                         />
 
-                        <span className="min-w-0">
-                          <span className="block font-bold">
+                        <span className="min-w-0 flex-1 [overflow-wrap:break-word]">
+                          <span className="block font-bold [overflow-wrap:break-word]">
                             {product.name}
                           </span>
 
-                          <span className="mt-1 block text-sm font-normal text-muted-foreground">
+                          <span className="mt-1 block text-sm font-normal [overflow-wrap:break-word] text-muted-foreground">
                             {product.description}
                           </span>
                         </span>
@@ -277,7 +302,7 @@ export function MenuBuilderCatalog({
           ))}
 
         {!selectedId && (
-          <section className="live-product-placeholder hidden min-h-[60vh] border-l p-8 text-center lg:grid lg:content-center">
+          <section className="live-product-placeholder hidden border-l p-8 text-center lg:grid lg:content-center">
             <h2 className="font-display text-xl font-bold">
               {v("selectDish")}
             </h2>

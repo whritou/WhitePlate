@@ -13,7 +13,8 @@ test("demo tabs retain filters while category management stays reachable", async
   await expect(
     page.getByRole("link", { name: "Menu", exact: true })
   ).toBeVisible()
-  await expect(page.getByRole("tab")).toHaveCount(4)
+  await expect(page.getByRole("tab")).toHaveCount(3)
+  await expect(page.getByRole("tab", { name: "Allergens" })).toHaveCount(0)
   await page.getByLabel("Search products", { exact: true }).fill("Soupe")
   await page.getByRole("tab", { name: "Languages", exact: true }).click()
   await page.getByRole("tab", { name: "Dishes", exact: true }).click()

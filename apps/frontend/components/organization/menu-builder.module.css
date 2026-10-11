@@ -1,6 +1,6 @@
 /* Back-office tablet targets, scoped to this workspace and its portalled editors. */
 .workspace {
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 
 .workspace :global([data-slot="input"]),

@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { MultiSelectList } from "@/components/ui/multi-select-list"
 import type { CatalogProduct } from "@/types/catalog-management"
 
 const allergens = [
@@ -53,6 +54,7 @@ export function ProductMetadataFields({
           name="sku"
           defaultValue={product?.sku ?? ""}
           maxLength={64}
+          className="w-full min-w-0"
         />
 
         <span className="text-sm text-muted-foreground">{t("skuHelp")}</span>
@@ -60,34 +62,32 @@ export function ProductMetadataFields({
 
       <div className="grid gap-4 lg:grid-cols-2">
         {(["containsAllergens", "mayContainAllergens"] as const).map((kind) => (
-          <fieldset key={kind} className="grid gap-2">
-            <legend className="font-medium">{t(kind)}</legend>
+          <div key={kind} className="grid min-w-0 content-start gap-2">
+            <Label htmlFor={`${prefix}-${kind}`} className="font-medium">
+              {t(kind)}
+            </Label>
 
-            <div className="grid grid-cols-2 gap-x-4 gap-y-2 sm:grid-cols-3">
-              {allergens.map((code) => {
-                const label = t(`allergenNames.${code}`)
-                const id = `${prefix}-${kind}-${code}`
+            <MultiSelectList
+              id={`${prefix}-${kind}`}
+              name={kind}
+              multiple
+              size={7}
+              defaultValue={product?.[kind] ?? []}
+              aria-label={t(kind)}
+              aria-describedby={`${prefix}-${kind}-help`}
+              options={allergens.map((code) => ({
+                value: code,
+                label: t(`allergenNames.${code}`),
+              }))}
+            />
 
-                return (
-                  <Label
-                    key={code}
-                    htmlFor={id}
-                    className="flex min-h-11 items-center gap-2 text-sm md:min-h-12"
-                  >
-                    <Checkbox
-                      id={id}
-                      name={kind}
-                      value={code}
-                      defaultChecked={product?.[kind]?.includes(code)}
-                      aria-label={label}
-                    />
-
-                    {label}
-                  </Label>
-                )
-              })}
-            </div>
-          </fieldset>
+            <span
+              id={`${prefix}-${kind}-help`}
+              className="text-xs text-muted-foreground"
+            >
+              {t("multiSelectHelp")}
+            </span>
+          </div>
         ))}
       </div>
 

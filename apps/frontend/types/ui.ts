@@ -6,6 +6,14 @@ export type NativeSelectProps = Omit<ComponentProps<"select">, "size"> & {
   selectClassName?: string
 }
 
+export type MultiSelectOption = { value: string; label: string }
+export type MultiSelectListProps = Omit<
+  ComponentProps<"select">,
+  "children"
+> & {
+  options: readonly MultiSelectOption[]
+}
+
 export type SheetContentProps = Dialog.Popup.Props & {
   keepMounted?: boolean
   side?: "left" | "right"

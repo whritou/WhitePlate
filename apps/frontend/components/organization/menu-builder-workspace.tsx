@@ -5,16 +5,13 @@ import { useTranslations } from "next-intl"
 import { useRouter } from "@/i18n/navigation"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
-import { EditorDialog } from "@/components/ui/editor-dialog"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import type { MenuBuilderProps, MenuBuilderView } from "@/types/menu-builder"
 import { MenuBuilderCatalog } from "./menu-builder-catalog"
-import { MenuBuilderCategories } from "./menu-builder-categories"
 import { MenuLanguageSettings } from "./menu-language-settings"
 import { CatalogTranslationsEditor } from "./catalog-translations-editor"
 import { RestaurantDescriptionEditor } from "./restaurant-description-editor"
 import { DiscountsEditor } from "./discounts-editor"
-import { LiveAllergenReference } from "./live-allergen-reference"
 import styles from "./menu-builder.module.css"
 
 export function MenuBuilderWorkspace({
@@ -44,9 +41,7 @@ export function MenuBuilderWorkspace({
   function changeView(value: unknown) {
     if (
       pending ||
-      !["products", "allergens", "discounts", "languages"].includes(
-        String(value)
-      )
+      !["products", "discounts", "languages"].includes(String(value))
     )
       return
     setView(value as MenuBuilderView)
@@ -86,7 +81,6 @@ export function MenuBuilderWorkspace({
           {(
             [
               ["products", "dishes"],
-              ["allergens", "allergens"],
               ["discounts", "discounts"],
               ["languages", "languages"],
             ] as const
@@ -102,7 +96,7 @@ export function MenuBuilderWorkspace({
           ))}
         </TabsList>
 
-        {(view === "products" || view === "allergens") && settings && (
+        {view === "products" && settings && (
           <div className="flex flex-wrap items-center gap-2 py-2">
             <span className="label-mono text-muted-foreground">
               {v("editingIn")}
@@ -134,10 +128,6 @@ export function MenuBuilderWorkspace({
           categoryId={categoryId}
           onCategoryChange={setCategoryId}
         />
-      </TabsContent>
-
-      <TabsContent value="allergens" keepMounted>
-        <LiveAllergenReference />
       </TabsContent>
 
       <TabsContent value="discounts" keepMounted>
@@ -182,25 +172,6 @@ export function MenuBuilderWorkspace({
           )}
         </div>
       </TabsContent>
-
-      <div className="border-t px-6 py-3">
-        <EditorDialog
-          title={v("manageCategories")}
-          label={v("manageCategories")}
-          description={t("categoryHelp")}
-          disabled={pending}
-        >
-          {() => (
-            <MenuBuilderCategories
-              catalog={catalog}
-              selectedId={categoryId}
-              onSelect={setCategoryId}
-              pending={pending}
-              onPendingChange={setPending}
-            />
-          )}
-        </EditorDialog>
-      </div>
     </Tabs>
   )
 }

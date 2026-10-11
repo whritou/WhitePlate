@@ -68,17 +68,15 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
           description?.ok ? (description.data ?? undefined) : undefined
         }
         initialView={
-          query.view === "allergens"
-            ? "allergens"
-            : query.view === "discounts"
-              ? "discounts"
-              : query.view === "languages"
-                ? "languages"
-                : query.view === "categories"
-                  ? "categories"
-                  : query.view === "translations"
-                    ? "translations"
-                    : "products"
+          query.view === "discounts"
+            ? "discounts"
+            : query.view === "languages"
+              ? "languages"
+              : query.view === "categories"
+                ? "categories"
+                : query.view === "translations"
+                  ? "translations"
+                  : "products"
         }
       />
     </main>
