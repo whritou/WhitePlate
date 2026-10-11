@@ -51,7 +51,7 @@ function AlertDialogPopup({ className, ...props }: AlertDialogPopupProps) {
     <AlertDialogPrimitive.Popup
       data-slot="alert-dialog-popup"
       className={cn(
-        "fixed start-1/2 top-1/2 z-40 grid max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 gap-5 overflow-y-auto rounded-xl border border-border bg-popover p-5 text-popover-foreground shadow-lg transition-[opacity,scale] duration-(--duration-overlay) outline-none data-ending-style:scale-95 data-ending-style:opacity-0 data-starting-style:scale-95 data-starting-style:opacity-0 motion-reduce:transition-none",
+        "fixed start-1/2 top-1/2 z-40 grid max-h-[calc(100dvh_-_2rem)] w-[calc(100vw_-_2rem)] max-w-[32rem] -translate-x-1/2 -translate-y-1/2 gap-5 overflow-y-auto rounded-xl border border-border bg-popover p-5 text-popover-foreground shadow-lg transition-[opacity,scale] duration-(--duration-overlay) outline-none data-ending-style:scale-95 data-ending-style:opacity-0 data-starting-style:scale-95 data-starting-style:opacity-0 motion-reduce:transition-none",
         className,
         scope.className
       )}

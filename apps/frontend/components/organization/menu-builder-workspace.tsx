@@ -54,7 +54,7 @@ export function MenuBuilderWorkspace({
 
   return (
     <Tabs
-      className={`${styles.workspace} live-menu-builder @container`}
+      className={`${styles.workspace} live-menu-builder`}
       value={view}
       onValueChange={changeView}
     >

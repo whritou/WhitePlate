@@ -3,6 +3,35 @@ import { expect, test } from "@playwright/test"
 const fixture =
   "/en/catalog-design-test?view=builder&shell=1&tenantId=11111111-1111-4111-8111-111111111111"
 
+test("archive confirmation stays a usable width in the menu category manager", async ({
+  page,
+}) => {
+  for (const width of [1440, 390]) {
+    await page.setViewportSize({ width, height: 720 })
+    await page.goto(fixture)
+    await expect(page.getByTestId("fixture-ready")).toHaveAttribute(
+      "data-ready",
+      "true"
+    )
+    await page.getByRole("button", { name: "Manage categories" }).click()
+
+    const manager = page.getByRole("dialog", {
+      name: "Manage categories",
+    })
+
+    await expect(manager).toBeVisible()
+    await manager
+      .getByRole("button", { name: /^Archive / })
+      .first()
+      .click()
+
+    const popup = page.locator('[data-slot="alert-dialog-popup"]')
+
+    await expect(popup).toBeVisible()
+    await expect(popup).toHaveCSS("width", `${Math.min(width - 32, 512)}px`)
+  }
+})
+
 test("product metadata stays editable and readable while its form is scrolled", async ({
   page,
 }) => {
@@ -38,7 +67,9 @@ test("product metadata stays editable and readable while its form is scrolled", 
     name: "Edit product Soupe du potager",
   })
   const sku = form.getByLabel(/SKU \/ reference/)
+  const metadata = form.getByRole("heading", { name: "Product details" })
   const save = form.getByRole("button", { name: "Save changes", exact: true })
+  const cancel = form.getByRole("button", { name: "Cancel", exact: true })
   const createCategory = page.getByRole("button", {
     name: "New category",
     exact: true,
@@ -52,13 +83,27 @@ test("product metadata stays editable and readable while its form is scrolled", 
     await page.setViewportSize({ width, height: 720 })
     await sku.fill(`ESC-${width}`)
     await expect(sku).toHaveValue(`ESC-${width}`)
+
+    const skuBox = await sku.boundingBox()
+    const metadataBox = await metadata.locator("xpath=..").boundingBox()
+
+    expect(skuBox?.width).toBeGreaterThanOrEqual(
+      (metadataBox?.width ?? 0) * 0.9
+    )
     await panel.scrollIntoViewIfNeeded()
-    await panel.evaluate((element) => {
-      element.scrollTop = 800
-    })
+    if (width > 1024) {
+      await panel.evaluate((element) => {
+        element.scrollTop = 800
+      })
+    } else {
+      await save.scrollIntoViewIfNeeded()
+      await page.evaluate(() => window.scrollBy(0, 120))
+    }
+
     await expect(save).toBeInViewport()
 
     const saveBox = await save.boundingBox()
+    const cancelBox = await cancel.boundingBox()
     const panelBox = await panel.boundingBox()
 
     expect(saveBox?.y).toBeGreaterThanOrEqual(panelBox?.y ?? 0)
@@ -69,12 +114,34 @@ test("product metadata stays editable and readable while its form is scrolled", 
     if (width <= 1024) {
       await expect(createCategory).toBeInViewport()
       await expect(manageCategories).toBeInViewport()
+      await expect(cancel).toBeInViewport()
 
       const createBox = await createCategory.boundingBox()
 
       expect((saveBox?.y ?? 0) + (saveBox?.height ?? 0)).toBeLessThan(
         createBox?.y ?? 0
       )
+
+      expect(
+        (createBox?.y ?? 0) - ((saveBox?.y ?? 0) + (saveBox?.height ?? 0))
+      ).toBeLessThan(48)
+      expect(
+        (createBox?.y ?? 0) - ((saveBox?.y ?? 0) + (saveBox?.height ?? 0))
+      ).toBeGreaterThanOrEqual(0)
+      expect(Math.abs((cancelBox?.y ?? 0) - (saveBox?.y ?? 0))).toBeLessThan(2)
+    }
+
+    if (width === 1440) {
+      const preparationMinutes = await form
+        .locator('[name="preparationMinutes"]')
+        .boundingBox()
+      const preparationNote = await form
+        .locator('[name="preparationNote-en"]')
+        .boundingBox()
+
+      expect(
+        Math.abs((preparationMinutes?.y ?? 0) - (preparationNote?.y ?? 0))
+      ).toBeLessThan(2)
     }
   }
 })
@@ -136,7 +203,7 @@ test("category actions stay together at the bottom of the menu while scrolling",
   }
 })
 
-test("allergen declarations use multi-select lists and no separate allergen tab", async ({
+test("allergen declarations use click-to-toggle multi-select menus and no separate allergen tab", async ({
   page,
 }) => {
   await page.goto(fixture)
@@ -151,15 +218,81 @@ test("allergen declarations use multi-select lists and no separate allergen tab"
   await page.getByRole("button", { name: "Edit product", exact: true }).click()
 
   const form = page.getByRole("form", { name: "Edit product Soupe du potager" })
-  const contains = form.getByLabel("Contains", { exact: true })
-  const mayContain = form.getByLabel("May contain", { exact: true })
+  const contains = form.getByRole("button", { name: "Contains", exact: true })
+  const mayContain = form.getByRole("button", {
+    name: "May contain",
+    exact: true,
+  })
 
-  await expect(contains).toHaveAttribute("multiple", "")
-  await expect(mayContain).toHaveAttribute("multiple", "")
-  await contains.selectOption(["milk", "eggs"])
-  await mayContain.selectOption(["sesame", "peanuts"])
-  await expect(contains).toHaveValues(["eggs", "milk"])
-  await expect(mayContain).toHaveValues(["peanuts", "sesame"])
+  await contains.click()
+
+  const milk = page.getByRole("checkbox", { name: "Milk", exact: true })
+  const eggs = page.getByRole("checkbox", { name: "Eggs", exact: true })
+
+  await expect(milk).toHaveRole("checkbox")
+  await expect(milk).toHaveAccessibleName("Milk")
+  await milk.click()
+  await eggs.click()
+  await expect(
+    form.locator('input[type="hidden"][name="containsAllergens"][value="milk"]')
+  ).toHaveCount(1)
+  await expect(
+    form.locator('input[type="hidden"][name="containsAllergens"][value="eggs"]')
+  ).toHaveCount(1)
+
+  await mayContain.click()
+  await page.getByRole("checkbox", { name: "Sesame", exact: true }).click()
+  await page.getByRole("checkbox", { name: "Peanuts", exact: true }).click()
+  await expect(
+    form.locator(
+      'input[type="hidden"][name="mayContainAllergens"][value="sesame"]'
+    )
+  ).toHaveCount(1)
+  await expect(
+    form.locator(
+      'input[type="hidden"][name="mayContainAllergens"][value="peanuts"]'
+    )
+  ).toHaveCount(1)
+})
+
+test("mobile product details scroll with the page and end without a blank tail", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.goto(fixture)
+  await expect(page.getByTestId("fixture-ready")).toHaveAttribute(
+    "data-ready",
+    "true"
+  )
+
+  await page
+    .getByRole("button", { name: "Select Soupe du potager", exact: true })
+    .click()
+
+  const panel = page.locator(".live-product-panel").filter({ visible: true })
+
+  await expect(panel).toHaveCSS("overflow-y", "visible")
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
+
+  const geometry = await panel.evaluate((panelElement) => {
+    const panelBottom =
+      panelElement.getBoundingClientRect().bottom + window.scrollY
+
+    return {
+      scrollHeight: document.documentElement.scrollHeight,
+      panelBottom,
+    }
+  })
+
+  expect(geometry.scrollHeight - geometry.panelBottom).toBeLessThan(180)
+  await page.mouse.move(200, 200)
+
+  const beforeScroll = await page.evaluate(() => window.scrollY)
+
+  await page.mouse.wheel(0, -300)
+  await expect
+    .poll(() => page.evaluate(() => window.scrollY))
+    .toBeLessThan(beforeScroll)
 })
 
 test("desktop photo controls sit beside the preview and stack on small screens", async ({
