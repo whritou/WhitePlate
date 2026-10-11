@@ -51,6 +51,26 @@ public sealed class MenuEndpointTests
     }
 
     [Fact]
+    public async Task PublicMenuExposesExplicitDisclosuresAndPrepGuidanceButNotInternalSku()
+    {
+        using var factory = new MenuFactory();
+        await factory.SeedAsync();
+        using var client = factory.CreateClient();
+
+        using var response = await client.GetAsync("https://bistro.example.test/api/v1/menu?locale=fr",
+            TestContext.Current.CancellationToken);
+        using var json = JsonDocument.Parse(await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
+        var product = json.RootElement.GetProperty("categories")[0].GetProperty("products")[0];
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.False(product.TryGetProperty("sku", out _));
+        Assert.Equal("milk", Assert.Single(product.GetProperty("containsAllergens").EnumerateArray()).GetString());
+        Assert.Equal("sesame", Assert.Single(product.GetProperty("mayContainAllergens").EnumerateArray()).GetString());
+        Assert.Equal(15, product.GetProperty("preparationMinutes").GetInt32());
+        Assert.Equal("Préparation à la commande", product.GetProperty("preparationNotes").GetProperty("fr").GetString());
+    }
+
+    [Fact]
     public async Task PublicMenuReturnsOnlyAvailableDataForTheResolvedTenant()
     {
         using var factory = new MenuFactory();
@@ -126,6 +146,8 @@ public sealed class MenuEndpointTests
             var otherCategory = MenuCategory.Create(otherTenant.Id, "Other", 0);
             database.MenuCategories.AddRange(category, otherCategory);
             var product = Product.Create(tenant.Id, category.Id, "Soup", "Seasonal soup", 8.50m, 10m, 0);
+            product.SetMetadata("soup-01", ["milk"], ["sesame"], ["vegetarian"], 15,
+                new Dictionary<string, string> { ["fr"] = "Préparation à la commande" });
             var unavailable = Product.Create(otherTenant.Id, otherCategory.Id, "Hidden", null, 2m, 0m, 0);
             unavailable.SetAvailability(false);
             database.Products.AddRange(product, unavailable);

@@ -72,13 +72,22 @@ const catalog = {
   options: [],
   discounts: [],
 }
+const parsedProducts = catalog.products.map((product) => ({
+  ...product,
+  sku: null,
+  containsAllergens: [],
+  mayContainAllergens: [],
+  dietaryTags: [],
+  preparationMinutes: null,
+  preparationNotes: {},
+}))
 
 it("accepts the actual management contract and preserves price, tax, order and currency", () => {
   expect(parseManagedCatalog(catalog, tenantId)).toEqual({
     tenantId,
     currency: "GBP",
     categories: catalog.categories,
-    products: catalog.products,
+    products: parsedProducts,
     optionGroups: [],
     options: [],
     discounts: [],
@@ -165,7 +174,7 @@ it("parses option groups and options only when their parent relationships belong
     tenantId,
     currency: "GBP",
     categories: catalog.categories,
-    products: catalog.products,
+    products: parsedProducts,
     optionGroups: [optionGroup],
     options: [option],
     discounts: [],

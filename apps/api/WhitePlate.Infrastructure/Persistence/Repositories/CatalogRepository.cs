@@ -94,7 +94,10 @@ public sealed class CatalogRepository(WhitePlateDbContext database) : ICatalogRe
                 { IsVisible = item.IsVisible, Translations = CatalogTranslations.GetAll(item.TranslationsJson) }).ToArray(),
             products.Select(item => new CatalogProductAdminDto(item.Id, item.CategoryId, item.Name, item.Description,
                 item.BasePrice, item.TaxRatePercent, item.SortOrder, item.IsAvailable, item.IsArchived)
-                { Translations = CatalogTranslations.GetAll(item.TranslationsJson) }).ToArray(),
+                { Translations = CatalogTranslations.GetAll(item.TranslationsJson), Sku = item.Sku,
+                    ContainsAllergens = item.ContainsAllergens, MayContainAllergens = item.MayContainAllergens,
+                    DietaryTags = item.DietaryTags, PreparationMinutes = item.PreparationMinutes,
+                    PreparationNotes = item.PreparationNotes }).ToArray(),
             groups.Select(item => new CatalogOptionGroupAdminDto(item.Id, item.ProductId, item.Name,
                 item.MinimumSelections, item.MaximumSelections, item.SortOrder, item.IsArchived)
                 { Translations = CatalogTranslations.GetAll(item.TranslationsJson) }).ToArray(),
@@ -158,7 +161,10 @@ public sealed class CatalogRepository(WhitePlateDbContext database) : ICatalogRe
 
     public async Task<MenuProductDto?> UpdateProductAsync(Guid tenantId, Guid productId, string name,
         string? description, decimal basePrice, decimal taxRatePercent, int sortOrder, bool isAvailable,
-        CancellationToken cancellationToken, Guid? categoryId = null)
+        CancellationToken cancellationToken, Guid? categoryId = null, string? sku = null,
+        IReadOnlyList<string>? containsAllergens = null, IReadOnlyList<string>? mayContainAllergens = null,
+        IReadOnlyList<string>? dietaryTags = null, int? preparationMinutes = null,
+        IReadOnlyDictionary<string, string>? preparationNotes = null)
     {
         var product = await database.Products.SingleOrDefaultAsync(item => item.TenantId == tenantId &&
             item.Id == productId && !item.IsArchived, cancellationToken);
@@ -168,12 +174,26 @@ public sealed class CatalogRepository(WhitePlateDbContext database) : ICatalogRe
         var targetCategoryId = categoryId ?? product.CategoryId;
         if (!await database.MenuCategories.AsNoTracking().AnyAsync(item => item.TenantId == tenantId &&
             item.Id == targetCategoryId && !item.IsArchived, cancellationToken)) return null;
+        var normalizedSku = string.IsNullOrWhiteSpace(sku) ? null : sku.Trim().ToUpperInvariant();
+        if (normalizedSku is not null && await database.Products.AsNoTracking().AnyAsync(item =>
+                item.TenantId == tenantId && item.Id != productId && item.Sku == normalizedSku, cancellationToken))
+            throw new DomainRuleException("duplicate_sku", "sku", "SKU is already used by this restaurant.");
         product.Update(name, description, basePrice, taxRatePercent, sortOrder, isAvailable);
+        product.SetMetadata(sku, containsAllergens, mayContainAllergens, dietaryTags, preparationMinutes, preparationNotes);
         product.ChangeCategory(targetCategoryId);
         product.SetTranslation(await GetDefaultLocaleAsync(tenantId, cancellationToken), name, description);
-        await database.SaveChangesAsync(cancellationToken);
-        return new MenuProductDto(product.Id, product.Name, product.Description, product.BasePrice,
-            product.TaxRatePercent, product.SortOrder, []);
+        try
+        {
+            await database.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateException) when (normalizedSku is not null)
+        {
+            if (await database.Products.AsNoTracking().AnyAsync(item => item.TenantId == tenantId &&
+                    item.Id != productId && item.Sku == normalizedSku, cancellationToken))
+                throw new DomainRuleException("duplicate_sku", "sku", "SKU is already used by this restaurant.");
+            throw;
+        }
+        return ToMenuProductDto(product);
     }
 
     public async Task<MenuOptionGroupDto?> UpdateOptionGroupAsync(Guid tenantId, Guid groupId, string name,
@@ -315,8 +335,20 @@ public sealed class CatalogRepository(WhitePlateDbContext database) : ICatalogRe
     public async Task<bool> AddProductAsync(WhitePlate.Domain.Catalog.Product product,
         CancellationToken cancellationToken)
     {
+        if (product.Sku is not null && await database.Products.AsNoTracking().AnyAsync(item =>
+                item.TenantId == product.TenantId && item.Sku == product.Sku, cancellationToken)) return false;
         database.Products.Add(product);
-        await database.SaveChangesAsync(cancellationToken);
+        try
+        {
+            await database.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateException) when (product.Sku is not null)
+        {
+            database.Entry(product).State = EntityState.Detached;
+            if (await database.Products.AsNoTracking().AnyAsync(item => item.TenantId == product.TenantId &&
+                    item.Sku == product.Sku, cancellationToken)) return false;
+            throw;
+        }
         return true;
     }
 
@@ -344,7 +376,8 @@ public sealed class CatalogRepository(WhitePlateDbContext database) : ICatalogRe
             .OrderBy(product => product.SortOrder).ThenBy(product => product.Id)
             .Select(product => new { product.Id, product.CategoryId, product.Name, product.Description,
                 product.TranslationsJson, product.BasePrice, product.TaxRatePercent, product.SortOrder,
-                product.IsAvailable })
+                product.IsAvailable, product.Sku, product.ContainsAllergensJson, product.MayContainAllergensJson,
+                product.DietaryTagsJson, product.PreparationMinutes, product.PreparationNotesJson })
             .ToListAsync(cancellationToken);
         var productIds = products.Select(product => product.Id).ToArray();
         var photos = await database.MediaAssets.AsNoTracking().Where(asset => asset.TenantId == tenant.Id &&
@@ -379,6 +412,11 @@ public sealed class CatalogRepository(WhitePlateDbContext database) : ICatalogRe
                     item.Description).Description,
                 item.BasePrice, item.TaxRatePercent, item.SortOrder,
                 groupsByProduct.GetValueOrDefault(item.Id, [])) { IsAvailable = item.IsAvailable,
+                    ContainsAllergens = System.Text.Json.JsonSerializer.Deserialize<string[]>(item.ContainsAllergensJson) ?? [],
+                    MayContainAllergens = System.Text.Json.JsonSerializer.Deserialize<string[]>(item.MayContainAllergensJson) ?? [],
+                    DietaryTags = System.Text.Json.JsonSerializer.Deserialize<string[]>(item.DietaryTagsJson) ?? [],
+                    PreparationMinutes = item.PreparationMinutes,
+                    PreparationNotes = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(item.PreparationNotesJson) ?? new(),
                     Photos = photos.Where(asset => asset.ProductId == item.Id).Select(asset =>
                         new WhitePlate.Application.Media.ProductPhotoDto(asset.Id, asset.Width, asset.Height, asset.Bytes)).ToArray() }).ToArray());
         return new MenuDto(tenant.Id, tenant.Name, tenant.Currency, locale, tenant.DefaultMenuLocale,
@@ -460,4 +498,16 @@ public sealed class CatalogRepository(WhitePlateDbContext database) : ICatalogRe
 
     private static PromotionDiscountDto ToDto(WhitePlate.Domain.Catalog.PromotionDiscount discount) =>
         new(discount.Id, discount.Code, discount.Name, discount.Kind.ToString(), discount.Value, discount.IsActive);
+
+    private static MenuProductDto ToMenuProductDto(Product product) =>
+        new(product.Id, product.Name, product.Description, product.BasePrice, product.TaxRatePercent,
+            product.SortOrder, [])
+        {
+            IsAvailable = product.IsAvailable,
+            ContainsAllergens = product.ContainsAllergens,
+            MayContainAllergens = product.MayContainAllergens,
+            DietaryTags = product.DietaryTags,
+            PreparationMinutes = product.PreparationMinutes,
+            PreparationNotes = product.PreparationNotes
+        };
 }

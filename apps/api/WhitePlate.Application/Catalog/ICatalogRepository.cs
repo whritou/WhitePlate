@@ -29,7 +29,9 @@ public interface ICatalogRepository
     Task<MenuCategoryDto?> UpdateCategoryAsync(Guid tenantId, Guid categoryId, string name, int sortOrder, CancellationToken cancellationToken);
     Task<MenuProductDto?> UpdateProductAsync(Guid tenantId, Guid productId, string name, string? description,
         decimal basePrice, decimal taxRatePercent, int sortOrder, bool isAvailable, CancellationToken cancellationToken,
-        Guid? categoryId = null);
+        Guid? categoryId = null, string? sku = null, IReadOnlyList<string>? containsAllergens = null,
+        IReadOnlyList<string>? mayContainAllergens = null, IReadOnlyList<string>? dietaryTags = null,
+        int? preparationMinutes = null, IReadOnlyDictionary<string, string>? preparationNotes = null);
     Task<MenuOptionGroupDto?> UpdateOptionGroupAsync(Guid tenantId, Guid groupId, string name, int minimumSelections,
         int maximumSelections, int sortOrder, CancellationToken cancellationToken);
     Task<MenuOptionDto?> UpdateOptionAsync(Guid tenantId, Guid optionId, string name, decimal priceAdjustment,

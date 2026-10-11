@@ -1,5 +1,7 @@
 namespace WhitePlate.Domain.Orders;
 
+using System.Text.Json;
+
 public sealed class OrderLine
 {
     public Guid Id { get; private set; }
@@ -13,12 +15,27 @@ public sealed class OrderLine
     public decimal DiscountAmount { get; private set; }
     public decimal TaxAmount { get; private set; }
     public decimal Total { get; private set; }
+    public string ContainsAllergensJson { get; private set; } = "[]";
+    public string MayContainAllergensJson { get; private set; } = "[]";
+    public string DietaryTagsJson { get; private set; } = "[]";
+    public int? PreparationMinutes { get; private set; }
+    public string PreparationNotesJson { get; private set; } = "{}";
+    public IReadOnlyList<string> ContainsAllergens => JsonSerializer.Deserialize<string[]>(ContainsAllergensJson) ?? [];
+    public IReadOnlyList<string> MayContainAllergens => JsonSerializer.Deserialize<string[]>(MayContainAllergensJson) ?? [];
+    public IReadOnlyList<string> DietaryTags => JsonSerializer.Deserialize<string[]>(DietaryTagsJson) ?? [];
+    public IReadOnlyDictionary<string, string> PreparationNotes =>
+        JsonSerializer.Deserialize<Dictionary<string, string>>(PreparationNotesJson) ?? new();
     public List<OrderLineOption> Options { get; private set; } = [];
     private OrderLine() { }
     internal OrderLine(OrderLineSnapshot snapshot)
     {
         Id = Guid.NewGuid(); ProductId = snapshot.ProductId; ProductName = snapshot.ProductName;
         BaseUnitPrice = snapshot.BaseUnitPrice; TaxRatePercent = snapshot.TaxRatePercent; Quantity = snapshot.Quantity;
+        ContainsAllergensJson = JsonSerializer.Serialize(snapshot.ContainsAllergens);
+        MayContainAllergensJson = JsonSerializer.Serialize(snapshot.MayContainAllergens);
+        DietaryTagsJson = JsonSerializer.Serialize(snapshot.DietaryTags);
+        PreparationMinutes = snapshot.PreparationMinutes;
+        PreparationNotesJson = JsonSerializer.Serialize(snapshot.PreparationNotes);
         Options = snapshot.Options.Select(option => new OrderLineOption(option)).ToList();
         Subtotal = decimal.Round((BaseUnitPrice + Options.Sum(item => item.PriceAdjustment)) * Quantity, 2, MidpointRounding.AwayFromZero);
     }

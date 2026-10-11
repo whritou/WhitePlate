@@ -19,6 +19,31 @@ public sealed class CatalogTests
         Assert.True(product.IsAvailable);
     }
 
+    [Fact]
+    public void ProductMetadataNormalizesSkuAndKeepsExplicitDeclarations()
+    {
+        var product = Product.Create(Guid.NewGuid(), Guid.NewGuid(), "Soup", null, 8.50m, 10m, 0);
+
+        product.SetMetadata(" soup-01 ", ["milk", "cerealsWithGluten"], ["sesame"], ["vegetarian"],
+            15, new Dictionary<string, string> { ["fr"] = "Préparé à la commande" });
+
+        Assert.Equal("SOUP-01", product.Sku);
+        Assert.Equal(["cerealsWithGluten", "milk"], product.ContainsAllergens);
+        Assert.Equal(["sesame"], product.MayContainAllergens);
+        Assert.Equal(["vegetarian"], product.DietaryTags);
+        Assert.Equal(15, product.PreparationMinutes);
+        Assert.Equal("Préparé à la commande", product.PreparationNotes["fr"]);
+    }
+
+    [Fact]
+    public void ProductMetadataRejectsUnknownAllergensAndOverlappingDeclarations()
+    {
+        var product = Product.Create(Guid.NewGuid(), Guid.NewGuid(), "Soup", null, 8.50m, 10m, 0);
+
+        Assert.Throws<DomainRuleException>(() => product.SetMetadata(null, ["not-an-allergen"], [], [], null, null));
+        Assert.Throws<DomainRuleException>(() => product.SetMetadata(null, ["milk"], ["milk"], [], null, null));
+    }
+
     [Theory]
     [InlineData(-1, 0)]
     [InlineData(10, -0.01)]

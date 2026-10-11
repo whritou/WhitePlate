@@ -20,6 +20,29 @@ public sealed class OrderTests
     }
 
     [Fact]
+    public void OrderLineRetainsProductDeclarationsAndPreparationGuidanceFromCheckout()
+    {
+        var order = Order.Create(Guid.NewGuid(), "EUR", "Ada", [
+            new OrderLineSnapshot(Guid.NewGuid(), "Soup", 10m, 0m, 1, [])
+            {
+                ContainsAllergens = ["milk"],
+                MayContainAllergens = ["sesame"],
+                DietaryTags = ["vegetarian"],
+                PreparationMinutes = 15,
+                PreparationNotes = new Dictionary<string, string> { ["fr"] = "Préparé à la commande" }
+            }
+        ], null, 0m, DateTimeOffset.UtcNow);
+
+        var line = Assert.Single(order.Lines);
+
+        Assert.Equal(["milk"], line.ContainsAllergens);
+        Assert.Equal(["sesame"], line.MayContainAllergens);
+        Assert.Equal(["vegetarian"], line.DietaryTags);
+        Assert.Equal(15, line.PreparationMinutes);
+        Assert.Equal("Préparé à la commande", line.PreparationNotes["fr"]);
+    }
+
+    [Fact]
     public void LifecycleOnlyMovesForwardAndRepeatingCurrentStatusIsNoOp()
     {
         var order = Order.Create(Guid.NewGuid(), "EUR", "Ada", [

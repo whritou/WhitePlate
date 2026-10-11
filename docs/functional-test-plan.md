@@ -1,5 +1,9 @@
 # Functional test plan
 
+## M2 menu product metadata
+
+After applying the additive migration, verify owner/manager create/update/clear behavior and tenant isolation for SKU, allergen/dietary declarations and preparation fields. Cover duplicate SKU in the same restaurant (including archived products), allowed same SKU in another restaurant, invalid/overlapping allergen codes, invalid dietary codes, SKU normalization, and preparation bounds. Confirm public menu locale labels and explicit declarations, no SKU in guest output, empty declarations make no allergen-free claim, and preparation text is not presented as a pickup promise. Place an order, edit its product metadata, and confirm receipt/history snapshots preserve the submitted disclosures; verify kitchen tickets display saved prep guidance. Repeat the management and guest flows in EN/FR, keyboard navigation, 320/375/390/768/1024/1440 px and wide desktop, and at 200% text zoom. Fixtures and local source tests do not prove shared-database migration or hosted acceptance.
+
 ## M5 product photo acceptance
 
 [Local evidence](audits/product-photos.md) does not complete hosted storage acceptance.

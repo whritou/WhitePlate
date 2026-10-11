@@ -21,11 +21,18 @@ public sealed class ProductConfiguration : IEntityTypeConfiguration<Product>
         builder.Property(product => product.SortOrder).IsRequired();
         builder.Property(product => product.IsAvailable).IsRequired();
         builder.Property(product => product.IsArchived).IsRequired();
+        builder.Property(product => product.Sku).HasMaxLength(Product.MaxSkuLength);
+        builder.Property(product => product.ContainsAllergensJson).IsRequired();
+        builder.Property(product => product.MayContainAllergensJson).IsRequired();
+        builder.Property(product => product.DietaryTagsJson).IsRequired();
+        builder.Property(product => product.PreparationMinutes);
+        builder.Property(product => product.PreparationNotesJson).IsRequired();
         builder.HasAlternateKey(product => new { product.TenantId, product.Id });
         builder.HasOne<MenuCategory>().WithMany()
             .HasPrincipalKey(category => new { category.TenantId, category.Id })
             .HasForeignKey(product => new { product.TenantId, product.CategoryId })
             .OnDelete(DeleteBehavior.Restrict);
         builder.HasIndex(product => new { product.TenantId, product.CategoryId, product.SortOrder, product.Id });
+        builder.HasIndex(product => new { product.TenantId, product.Sku }).IsUnique().HasFilter("\"Sku\" IS NOT NULL");
     }
 }

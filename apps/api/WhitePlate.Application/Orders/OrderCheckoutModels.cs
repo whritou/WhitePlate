@@ -7,7 +7,14 @@ public sealed record CheckoutOptionDto(Guid Id, string Name, decimal PriceAdjust
 public sealed record CheckoutOptionGroupDto(Guid Id, int MinimumSelections, int MaximumSelections,
     IReadOnlyList<CheckoutOptionDto> Options);
 public sealed record CheckoutProductDto(Guid Id, string Name, decimal BasePrice, decimal TaxRatePercent,
-    IReadOnlyList<CheckoutOptionGroupDto> OptionGroups);
+    IReadOnlyList<CheckoutOptionGroupDto> OptionGroups)
+{
+    public IReadOnlyList<string> ContainsAllergens { get; init; } = [];
+    public IReadOnlyList<string> MayContainAllergens { get; init; } = [];
+    public IReadOnlyList<string> DietaryTags { get; init; } = [];
+    public int? PreparationMinutes { get; init; }
+    public IReadOnlyDictionary<string, string> PreparationNotes { get; init; } = new Dictionary<string, string>();
+}
 public sealed record CheckoutDiscountDto(string Code, DiscountKind Kind, decimal Value);
 public sealed record CheckoutLocaleDto(string Locale, string DefaultLocale);
 public sealed record CheckoutCatalogDto(string Currency, string Locale, IReadOnlyList<CheckoutProductDto> Products,
@@ -21,13 +28,23 @@ public sealed record CreateOrderCommand(Guid TenantId, string? CustomerName, str
 public sealed record OrderLineOptionDto(Guid OptionId, string Name, decimal PriceAdjustment);
 public sealed record OrderLineReceiptDto(Guid ProductId, string ProductName, decimal BaseUnitPrice,
     decimal TaxRatePercent, int Quantity, decimal Subtotal, decimal DiscountAmount, decimal TaxAmount,
-    decimal Total, IReadOnlyList<OrderLineOptionDto> Options);
+    decimal Total, IReadOnlyList<OrderLineOptionDto> Options)
+{
+    public IReadOnlyList<string> ContainsAllergens { get; init; } = [];
+    public IReadOnlyList<string> MayContainAllergens { get; init; } = [];
+    public IReadOnlyList<string> DietaryTags { get; init; } = [];
+    public int? PreparationMinutes { get; init; }
+    public IReadOnlyDictionary<string, string> PreparationNotes { get; init; } = new Dictionary<string, string>();
+}
 public sealed record OrderReceiptDto(Guid Id, Guid TenantId, string Currency, string CustomerName,
     string? MenuLocale, string? DiscountCode, decimal Subtotal, decimal DiscountAmount, decimal TaxAmount, decimal Total,
     string Status, int Version, DateTimeOffset CreatedAt, IReadOnlyList<OrderLineReceiptDto> Lines);
 public sealed record OrderSummaryOptionDto(Guid OptionId, string Name);
 public sealed record OrderSummaryLineDto(Guid ProductId, string ProductName, int Quantity,
-    IReadOnlyList<OrderSummaryOptionDto> Options);
+    IReadOnlyList<OrderSummaryOptionDto> Options)
+{
+    public int? PreparationMinutes { get; init; }
+}
 public sealed record OrderSummaryDto(Guid Id, string CustomerName, string Currency, string? MenuLocale, decimal Total,
     string Status, int Version, DateTimeOffset CreatedAt, IReadOnlyList<OrderSummaryLineDto> Lines);
 public sealed record OrderPageDto(IReadOnlyList<OrderSummaryDto> Items, string? NextCursor);
@@ -54,5 +71,12 @@ public static class OrderReceiptMapping
         order.Lines.Select(line => new OrderLineReceiptDto(line.ProductId, line.ProductName,
             line.BaseUnitPrice, line.TaxRatePercent, line.Quantity, line.Subtotal, line.DiscountAmount,
             line.TaxAmount, line.Total, line.Options.Select(option => new OrderLineOptionDto(
-                option.OptionId, option.Name, option.PriceAdjustment)).ToArray())).ToArray());
+                option.OptionId, option.Name, option.PriceAdjustment)).ToArray())
+            {
+                ContainsAllergens = line.ContainsAllergens,
+                MayContainAllergens = line.MayContainAllergens,
+                DietaryTags = line.DietaryTags,
+                PreparationMinutes = line.PreparationMinutes,
+                PreparationNotes = line.PreparationNotes
+            }).ToArray());
 }

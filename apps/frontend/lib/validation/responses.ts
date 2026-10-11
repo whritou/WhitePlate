@@ -1,6 +1,7 @@
 import { isRecord, isUuid } from "./common"
 import { parsePhotoList } from "@/lib/product-photos"
 import { parseMenuLanguages } from "./organization"
+import { isMenuProductMetadata } from "./menu-product"
 import type { StorefrontMenu, Product } from "@/types/storefront"
 import type {
   CatalogTranslationData,
@@ -280,6 +281,7 @@ function isProduct(value: unknown): value is Product {
     isDescription(value.description) &&
     isAmount(value.basePrice) &&
     typeof value.isAvailable === "boolean" &&
+    isMenuProductMetadata(value) &&
     (value.photos === undefined || parsePhotoList(value.photos) !== null) &&
     Array.isArray(value.optionGroups) &&
     value.optionGroups.every(isOptionGroup)
@@ -323,6 +325,18 @@ export function parseStorefrontMenu(value: unknown): StorefrontMenu | null {
     locale: value.locale,
     defaultLocale: value.defaultLocale,
     availableLocales: value.availableLocales,
-    categories: value.categories,
+    categories: (value.categories as StorefrontMenu["categories"]).map(
+      (category) => ({
+        ...category,
+        products: category.products.map((product) => ({
+          ...product,
+          containsAllergens: product.containsAllergens ?? [],
+          mayContainAllergens: product.mayContainAllergens ?? [],
+          dietaryTags: product.dietaryTags ?? [],
+          preparationMinutes: product.preparationMinutes ?? null,
+          preparationNotes: product.preparationNotes ?? {},
+        })),
+      })
+    ),
   } as StorefrontMenu
 }

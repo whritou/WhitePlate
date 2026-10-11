@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label"
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
 import { useCatalogForm } from "./use-catalog-form"
 import { ProductCategoryField } from "./product-category-field"
+import { ProductMetadataFields } from "./product-metadata-fields"
 import type { ProductFormProps } from "@/types/catalog-management"
 
 export function ProductForm({
@@ -185,6 +186,8 @@ export function ProductForm({
               </NativeSelect>
             </Label>
           )}
+
+          <ProductMetadataFields prefix={prefix} product={product} />
 
           <EditorFormActions
             className={studio ? "xl:col-span-4" : undefined}

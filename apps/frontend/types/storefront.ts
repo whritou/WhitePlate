@@ -16,6 +16,11 @@ export type StorefrontMenu = {
       description: string | null
       basePrice: number
       isAvailable: boolean
+      containsAllergens?: string[]
+      mayContainAllergens?: string[]
+      dietaryTags?: string[]
+      preparationMinutes?: number | null
+      preparationNotes?: Record<string, string>
       photos?: import("./product-photos").ProductPhoto[]
       optionGroups: {
         id: string

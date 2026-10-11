@@ -1,5 +1,11 @@
 # API contracts
 
+## M2 menu product metadata — 2026-10-11
+
+Owner/manager `POST /api/v1/tenants/{tenantId}/products` and `PUT /api/v1/tenants/{tenantId}/products/{productId}` accept the existing product fields plus optional `sku`, `containsAllergens`, `mayContainAllergens`, `dietaryTags`, `preparationMinutes` and `preparationNotes` (a locale-to-text object). Omitting metadata on create uses empty declarations; a full update replaces these values, including clearing them. SKU is optional, at most 64 ASCII letters/digits/dot/underscore/dash, normalized to uppercase and unique within the restaurant. Allergen codes are the controlled EU 14 identifiers; declarations cannot overlap. Dietary codes are `dairyFree`, `glutenFree`, `pescatarian`, `vegan` and `vegetarian`. Preparation minutes are null or 1–1,440, with localized notes up to 250 characters per locale. Invalid values return 400 `validation_failed`; duplicate SKU returns 409 `conflict`.
+
+Management catalog reads return all metadata. The tenant-host-resolved public menu returns explicit allergen/dietary declarations and localized preparation notes/estimate; it omits SKU. Order receipts and staff order summaries retain snapshots of declarations and preparation guidance taken at checkout. Empty declarations do not assert allergen-free status. Preparation guidance is not a pickup or ready-time promise. The generated migration must be applied before this API code is deployed; there is no startup migration. See [decision 0009](../architecture/decisions/0009-menu-product-metadata.md).
+
 ## M5 product photo galleries — 2026-10-09
 
 Source implementation; actual S3/PostgreSQL/hosted acceptance remains open. See [ADR 0008](../architecture/decisions/0008-product-photo-gallery.md).

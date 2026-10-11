@@ -93,7 +93,12 @@ public sealed class CatalogUseCaseTests
             return Task.FromResult(true);
         }
         public Task<MenuCategoryDto?> UpdateCategoryAsync(Guid tenantId, Guid categoryId, string name, int sortOrder, CancellationToken cancellationToken) => Task.FromResult<MenuCategoryDto?>(null);
-        public Task<MenuProductDto?> UpdateProductAsync(Guid tenantId, Guid productId, string name, string? description, decimal basePrice, decimal taxRatePercent, int sortOrder, bool isAvailable, CancellationToken cancellationToken, Guid? categoryId = null) => Task.FromResult<MenuProductDto?>(null);
+        public Task<MenuProductDto?> UpdateProductAsync(Guid tenantId, Guid productId, string name, string? description,
+            decimal basePrice, decimal taxRatePercent, int sortOrder, bool isAvailable, CancellationToken cancellationToken,
+            Guid? categoryId = null, string? sku = null, IReadOnlyList<string>? containsAllergens = null,
+            IReadOnlyList<string>? mayContainAllergens = null, IReadOnlyList<string>? dietaryTags = null,
+            int? preparationMinutes = null, IReadOnlyDictionary<string, string>? preparationNotes = null) =>
+            Task.FromResult<MenuProductDto?>(null);
         public Task<MenuOptionGroupDto?> UpdateOptionGroupAsync(Guid tenantId, Guid groupId, string name, int minimumSelections, int maximumSelections, int sortOrder, CancellationToken cancellationToken) => Task.FromResult<MenuOptionGroupDto?>(null);
         public Task<MenuOptionDto?> UpdateOptionAsync(Guid tenantId, Guid optionId, string name, decimal priceAdjustment, int sortOrder, CancellationToken cancellationToken) => Task.FromResult<MenuOptionDto?>(null);
         public Task<PromotionDiscountDto?> UpdateDiscountAsync(Guid tenantId, Guid discountId, string name, WhitePlate.Domain.Catalog.DiscountKind kind, decimal value, CancellationToken cancellationToken) => Task.FromResult<PromotionDiscountDto?>(null);

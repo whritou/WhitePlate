@@ -69,9 +69,17 @@ namespace WhitePlate.Infrastructure.Persistence.Migrations
                     b.Property<Guid>("CategoryId")
                         .HasColumnType("uuid");
 
+                    b.Property<string>("ContainsAllergensJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("Description")
                         .HasMaxLength(1000)
                         .HasColumnType("character varying(1000)");
+
+                    b.Property<string>("DietaryTagsJson")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<bool>("IsArchived")
                         .HasColumnType("boolean");
@@ -79,10 +87,25 @@ namespace WhitePlate.Infrastructure.Persistence.Migrations
                     b.Property<bool>("IsAvailable")
                         .HasColumnType("boolean");
 
+                    b.Property<string>("MayContainAllergensJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(160)
                         .HasColumnType("character varying(160)");
+
+                    b.Property<int?>("PreparationMinutes")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("PreparationNotesJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Sku")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
 
                     b.Property<int>("SortOrder")
                         .HasColumnType("integer");
@@ -99,6 +122,10 @@ namespace WhitePlate.Infrastructure.Persistence.Migrations
                         .HasColumnType("text");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "Sku")
+                        .IsUnique()
+                        .HasFilter("\"Sku\" IS NOT NULL");
 
                     b.HasIndex("TenantId", "CategoryId", "SortOrder", "Id");
 
@@ -431,12 +458,31 @@ namespace WhitePlate.Infrastructure.Persistence.Migrations
                         .HasPrecision(12, 2)
                         .HasColumnType("numeric(12,2)");
 
+                    b.Property<string>("ContainsAllergensJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("DietaryTagsJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<decimal>("DiscountAmount")
                         .HasPrecision(12, 2)
                         .HasColumnType("numeric(12,2)");
 
+                    b.Property<string>("MayContainAllergensJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<Guid>("OrderId")
                         .HasColumnType("uuid");
+
+                    b.Property<int?>("PreparationMinutes")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("PreparationNotesJson")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<Guid>("ProductId")
                         .HasColumnType("uuid");

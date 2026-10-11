@@ -26,6 +26,66 @@ const isSelectionBounds = (minimum: unknown, maximum: unknown): boolean =>
   maximum >= 1 &&
   maximum <= 20 &&
   minimum <= maximum
+const allergens = [
+  "celery",
+  "cerealsWithGluten",
+  "crustaceans",
+  "eggs",
+  "fish",
+  "lupin",
+  "milk",
+  "molluscs",
+  "mustard",
+  "nuts",
+  "peanuts",
+  "sesame",
+  "soybeans",
+  "sulphites",
+]
+const diets = ["dairyFree", "glutenFree", "pescatarian", "vegan", "vegetarian"]
+const isCodeList = (value: unknown, supported: string[]) =>
+  Array.isArray(value) &&
+  value.length <= supported.length &&
+  value.every((code) => typeof code === "string" && supported.includes(code))
+const isPreparationNotes = (value: unknown) =>
+  isRecord(value) &&
+  Object.entries(value).every(
+    ([locale, note]) =>
+      /^[a-z0-9-]{2,16}$/i.test(locale) &&
+      typeof note === "string" &&
+      note.length <= 250
+  )
+
+function isProductMetadata(product: Record<string, unknown>): boolean {
+  const contains = product.containsAllergens ?? []
+  const mayContain = product.mayContainAllergens ?? []
+  const minutes = product.preparationMinutes
+
+  return (
+    isCodeList(contains, allergens) &&
+    isCodeList(mayContain, allergens) &&
+    !(contains as string[]).some((code) =>
+      (mayContain as string[]).includes(code)
+    ) &&
+    isCodeList(product.dietaryTags ?? [], diets) &&
+    (minutes === undefined ||
+      minutes === null ||
+      (typeof minutes === "number" &&
+        Number.isInteger(minutes) &&
+        minutes >= 1 &&
+        minutes <= 1440)) &&
+    isPreparationNotes(product.preparationNotes ?? {})
+  )
+}
+
+function areDiscountsValid(value: unknown): value is CatalogDiscount[] {
+  return (
+    Array.isArray(value) &&
+    value.every(isDiscount) &&
+    new Set(value.map((discount) => discount.id)).size === value.length &&
+    new Set(value.map((discount) => discount.code)).size === value.length
+  )
+}
 
 function isDiscount(value: unknown): value is CatalogDiscount {
   if (
@@ -91,6 +151,11 @@ export function parseManagedCatalog(
         isAmount(product.basePrice, 9999999999.99) &&
         isAmount(product.taxRatePercent, 100) &&
         typeof product.isAvailable === "boolean" &&
+        (product.sku === undefined ||
+          product.sku === null ||
+          (typeof product.sku === "string" &&
+            /^[A-Z0-9._-]{1,64}$/.test(product.sku))) &&
+        isProductMetadata(product) &&
         categoryIds.has(product.categoryId as string)
     ) ||
     !optionGroups.every(
@@ -105,12 +170,7 @@ export function parseManagedCatalog(
         isAmount(option.priceAdjustment, 9999999999.99) &&
         isSortOrder(option.sortOrder)
     ) ||
-    !Array.isArray(discounts) ||
-    !discounts.every(isDiscount) ||
-    new Set(discounts.map((discount) => discount.id)).size !==
-      discounts.length ||
-    new Set(discounts.map((discount) => discount.code)).size !==
-      discounts.length
+    !areDiscountsValid(discounts)
   )
     return null
 
@@ -118,7 +178,15 @@ export function parseManagedCatalog(
     tenantId,
     currency: value.currency,
     categories,
-    products,
+    products: products.map((product) => ({
+      ...product,
+      sku: product.sku ?? null,
+      containsAllergens: product.containsAllergens ?? [],
+      mayContainAllergens: product.mayContainAllergens ?? [],
+      dietaryTags: product.dietaryTags ?? [],
+      preparationMinutes: product.preparationMinutes ?? null,
+      preparationNotes: product.preparationNotes ?? {},
+    })) as ManagedCatalog["products"],
     optionGroups,
     options,
     discounts,

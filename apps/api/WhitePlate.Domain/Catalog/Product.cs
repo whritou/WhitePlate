@@ -1,4 +1,5 @@
 using WhitePlate.Domain.Common;
+using System.Text.Json;
 
 namespace WhitePlate.Domain.Catalog;
 
@@ -6,6 +7,10 @@ public sealed class Product
 {
     public const int MaxNameLength = 160;
     public const int MaxDescriptionLength = 1000;
+    public const int MaxSkuLength = 64;
+    private static readonly HashSet<string> AllergenCodes = ["celery", "cerealsWithGluten", "crustaceans", "eggs",
+        "fish", "lupin", "milk", "molluscs", "mustard", "nuts", "peanuts", "sesame", "soybeans", "sulphites"];
+    private static readonly HashSet<string> DietaryCodes = ["dairyFree", "glutenFree", "pescatarian", "vegan", "vegetarian"];
     public Guid Id { get; private set; }
     public Guid TenantId { get; private set; }
     public Guid CategoryId { get; private set; }
@@ -17,6 +22,17 @@ public sealed class Product
     public int SortOrder { get; private set; }
     public bool IsAvailable { get; private set; }
     public bool IsArchived { get; private set; }
+    public string? Sku { get; private set; }
+    public string ContainsAllergensJson { get; private set; } = "[]";
+    public string MayContainAllergensJson { get; private set; } = "[]";
+    public string DietaryTagsJson { get; private set; } = "[]";
+    public int? PreparationMinutes { get; private set; }
+    public string PreparationNotesJson { get; private set; } = "{}";
+    public IReadOnlyList<string> ContainsAllergens => JsonSerializer.Deserialize<string[]>(ContainsAllergensJson) ?? [];
+    public IReadOnlyList<string> MayContainAllergens => JsonSerializer.Deserialize<string[]>(MayContainAllergensJson) ?? [];
+    public IReadOnlyList<string> DietaryTags => JsonSerializer.Deserialize<string[]>(DietaryTagsJson) ?? [];
+    public IReadOnlyDictionary<string, string> PreparationNotes =>
+        JsonSerializer.Deserialize<Dictionary<string, string>>(PreparationNotesJson) ?? new();
 
     private Product() { }
 
@@ -49,6 +65,44 @@ public sealed class Product
     public void SetTranslation(string? locale, string? name, string? description) =>
         TranslationsJson = CatalogTranslations.Set(TranslationsJson, locale, name, description,
             MaxNameLength, MaxDescriptionLength);
+
+    public void SetMetadata(string? sku, IReadOnlyCollection<string>? containsAllergens,
+        IReadOnlyCollection<string>? mayContainAllergens, IReadOnlyCollection<string>? dietaryTags,
+        int? preparationMinutes, IReadOnlyDictionary<string, string>? preparationNotes)
+    {
+        var normalizedSku = sku?.Trim().ToUpperInvariant();
+        if (normalizedSku?.Length > MaxSkuLength || normalizedSku?.Any(character =>
+                !char.IsAsciiLetterOrDigit(character) && character is not '-' and not '_' and not '.') == true)
+            throw new DomainRuleException("invalid_sku", "sku", "SKU must use up to 64 letters, numbers, dots, dashes or underscores.");
+
+        var contains = NormalizeCodes(containsAllergens, AllergenCodes, "containsAllergens");
+        var mayContain = NormalizeCodes(mayContainAllergens, AllergenCodes, "mayContainAllergens");
+        if (contains.Intersect(mayContain).Any())
+            throw new DomainRuleException("overlapping_allergens", "mayContainAllergens", "An allergen cannot be declared both as present and possibly present.");
+
+        var diets = NormalizeCodes(dietaryTags, DietaryCodes, "dietaryTags");
+        if (preparationMinutes is < 1 or > 1440)
+            throw new DomainRuleException("invalid_preparation_minutes", "preparationMinutes", "Preparation guidance must be from 1 to 1440 minutes.");
+
+        var notes = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var (locale, note) in preparationNotes ?? new Dictionary<string, string>())
+        {
+            if (locale is null || note is null)
+                throw new DomainRuleException("invalid_preparation_notes", "preparationNotes", "Preparation notes require text values.");
+            var key = locale.Trim().ToLowerInvariant();
+            var value = note.Trim();
+            if (key.Length is < 2 or > 16 || key.Any(character => !char.IsAsciiLetterOrDigit(character) && character != '-') || value.Length > 250)
+                throw new DomainRuleException("invalid_preparation_notes", "preparationNotes", "Preparation notes require a valid locale and at most 250 characters.");
+            if (value.Length > 0) notes[key] = value;
+        }
+
+        Sku = string.IsNullOrEmpty(normalizedSku) ? null : normalizedSku;
+        ContainsAllergensJson = JsonSerializer.Serialize(contains);
+        MayContainAllergensJson = JsonSerializer.Serialize(mayContain);
+        DietaryTagsJson = JsonSerializer.Serialize(diets);
+        PreparationMinutes = preparationMinutes;
+        PreparationNotesJson = JsonSerializer.Serialize(notes);
+    }
     public void Update(string? name, string? description, decimal basePrice, decimal taxRatePercent,
         int sortOrder, bool isAvailable)
     {
@@ -82,5 +136,15 @@ public sealed class Product
         if (value?.Length > MaxDescriptionLength)
             throw new DomainRuleException("invalid_description", "description", "Description cannot exceed 1000 characters.");
         return string.IsNullOrEmpty(value) ? null : value;
+    }
+
+    private static string[] NormalizeCodes(IReadOnlyCollection<string>? values, HashSet<string> supported, string field)
+    {
+        if (values?.Any(value => value is null) == true)
+            throw new DomainRuleException("invalid_metadata_code", field, "One or more declarations are not supported.");
+        var codes = (values ?? []).Select(value => value.Trim()).Distinct(StringComparer.Ordinal).Order().ToArray();
+        if (codes.Length > supported.Count || codes.Any(code => !supported.Contains(code)))
+            throw new DomainRuleException("invalid_metadata_code", field, "One or more declarations are not supported.");
+        return codes;
     }
 }

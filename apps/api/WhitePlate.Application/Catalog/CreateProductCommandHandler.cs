@@ -8,7 +8,10 @@ using WhitePlate.Domain.Identity;
 namespace WhitePlate.Application.Catalog;
 
 public sealed record CreateProductCommand(Guid TenantId, Guid CategoryId, string Name, string? Description,
-    decimal BasePrice, decimal TaxRatePercent, int SortOrder, ExternalIdentity Identity);
+    decimal BasePrice, decimal TaxRatePercent, int SortOrder, ExternalIdentity Identity,
+    string? Sku = null, IReadOnlyList<string>? ContainsAllergens = null,
+    IReadOnlyList<string>? MayContainAllergens = null, IReadOnlyList<string>? DietaryTags = null,
+    int? PreparationMinutes = null, IReadOnlyDictionary<string, string>? PreparationNotes = null);
 
 public sealed class CreateProductCommandHandler(IStaffMembershipRepository memberships, ICatalogRepository catalog)
 {
@@ -23,10 +26,19 @@ public sealed class CreateProductCommandHandler(IStaffMembershipRepository membe
         {
             var product = Product.Create(command.TenantId, command.CategoryId, command.Name, command.Description,
                 command.BasePrice, command.TaxRatePercent, command.SortOrder);
+            product.SetMetadata(command.Sku, command.ContainsAllergens, command.MayContainAllergens,
+                command.DietaryTags, command.PreparationMinutes, command.PreparationNotes);
             if (!await catalog.AddProductAsync(product, cancellationToken))
                 return Result<MenuProductDto>.Failure(new ApplicationError(ErrorCode.Conflict));
             return Result<MenuProductDto>.Success(new MenuProductDto(product.Id, product.Name, product.Description,
-                product.BasePrice, product.TaxRatePercent, product.SortOrder, []));
+                product.BasePrice, product.TaxRatePercent, product.SortOrder, [])
+            {
+                ContainsAllergens = product.ContainsAllergens,
+                MayContainAllergens = product.MayContainAllergens,
+                DietaryTags = product.DietaryTags,
+                PreparationMinutes = product.PreparationMinutes,
+                PreparationNotes = product.PreparationNotes
+            });
         }
         catch (DomainRuleException exception)
         {

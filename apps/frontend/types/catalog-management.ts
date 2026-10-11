@@ -11,6 +11,12 @@ export type CatalogProduct = CatalogTranslationData["products"][number] & {
   taxRatePercent: number
   sortOrder: number
   isAvailable: boolean
+  sku?: string | null
+  containsAllergens?: string[]
+  mayContainAllergens?: string[]
+  dietaryTags?: string[]
+  preparationMinutes?: number | null
+  preparationNotes?: Record<string, string>
 }
 export type CatalogOptionGroup =
   CatalogTranslationData["optionGroups"][number] & {
@@ -58,6 +64,12 @@ export type ProductInput = CategoryInput & {
   basePrice: number
   taxRatePercent: number
   isAvailable: boolean
+  sku: string | null
+  containsAllergens: string[]
+  mayContainAllergens: string[]
+  dietaryTags: string[]
+  preparationMinutes: number | null
+  preparationNotes: Record<string, string>
 }
 export type OptionGroupInput = {
   tenantId: string
