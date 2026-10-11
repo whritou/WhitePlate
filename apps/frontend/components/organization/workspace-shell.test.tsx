@@ -133,7 +133,7 @@ it("renders verified workspace context, active links, and locale-preserving cont
 
   expect(html).toContain("Owner Restaurant")
   expect(html).toContain('aria-current="page"')
-  expect(html).toContain(">Menu</a>")
+  expect(html).toContain(">Menu</span></a>")
   expect(html).not.toContain("Menu languages &amp; translations")
   expect(html).toContain('role="group" aria-label="Language"')
   expect(html).toContain('data-testid="workspace-language"')
