@@ -3,6 +3,35 @@ import { expect, test } from "@playwright/test"
 const fixture =
   "/en/catalog-design-test?view=builder&shell=1&tenantId=11111111-1111-4111-8111-111111111111"
 
+test("archive confirmation stays a usable width in the menu category manager", async ({
+  page,
+}) => {
+  for (const width of [1440, 390]) {
+    await page.setViewportSize({ width, height: 720 })
+    await page.goto(fixture)
+    await expect(page.getByTestId("fixture-ready")).toHaveAttribute(
+      "data-ready",
+      "true"
+    )
+    await page.getByRole("button", { name: "Manage categories" }).click()
+
+    const manager = page.getByRole("dialog", {
+      name: "Manage categories",
+    })
+
+    await expect(manager).toBeVisible()
+    await manager
+      .getByRole("button", { name: /^Archive / })
+      .first()
+      .click()
+
+    const popup = page.locator('[data-slot="alert-dialog-popup"]')
+
+    await expect(popup).toBeVisible()
+    await expect(popup).toHaveCSS("width", `${Math.min(width - 32, 512)}px`)
+  }
+})
+
 test("product metadata stays editable and readable while its form is scrolled", async ({
   page,
 }) => {

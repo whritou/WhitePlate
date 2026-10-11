@@ -10,6 +10,7 @@ Updated 11 October 2026. Metadata behavior is implemented in the real Menu Build
 - The unselected-product prompt no longer reserves `60vh`. At desktop widths, the category sidebar and product list fit the available menu viewport; the list scrolls independently, keeping **New category** and **Manage categories** together at the bottom of the category column. At narrower viewport widths, both actions stay in one fixed bottom row. The menu workspace no longer creates a container-query containing block for those viewport-fixed actions.
 - On narrow screens, the selected product panel follows the document scroll rather than trapping the page in a nested scroll region. Product editing keeps **Cancel** and **Save** sticky above the category action row. Preparation guidance and note inputs share the same label height so their controls align on desktop.
 - Product photography uses the available editor width: the preview/gallery sit to the left, and framing, image details, guidance and photo actions sit to the right on desktop. The two areas stack on narrow screens.
+- The category archive confirmation uses explicit responsive viewport sizing in the shared alert dialog. Keep spaces encoded in Tailwind `calc()` utilities so the popup does not collapse to its intrinsic content width.
 
 ## Verification
 
@@ -25,5 +26,6 @@ On 11 October 2026, from `apps/frontend`:
 - `py -3 docs/design-system/verify.py` passed contrast, token/palette parity and documentation-link scans.
 - `node node_modules/next/dist/bin/next build --webpack` passed after supplying temporary HTTPS values for `BETTER_AUTH_URL` and `API_BASE_URL`, because the local `.env` uses HTTP and production build configuration rejects it. Webpack emitted non-fatal cache-write `EPERM` warnings for ignored `.next` files; compilation, type-checking, page generation and final route tracing completed successfully.
 - Follow-up browser verification confirmed the SKU fills its metadata column, the allergen options are operable by role-labelled checkbox clicks without modifier keys, Cancel/Save stay above the viewport-fixed category actions at tablet and phone widths, preparation inputs align, and mobile page scrolling chains through the selected product without a blank tail below it. The latest checks used `--output` under the system temporary directory because Playwright could not remove an older workspace `test-results` directory under the local filesystem permissions.
+- A follow-up regression opened the category archive confirmation on the actual menu fixture and verified a 512px dialog at 1440px viewport width and a 358px dialog at 390px viewport width; all six menu usability browser checks passed.
 
 The app was exercised through the local browser fixtures, not against a hosted restaurant or the shared database. No migration, API contract or schema change was made for this UI follow-up.
