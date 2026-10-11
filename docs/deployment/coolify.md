@@ -26,6 +26,14 @@ Verification after recovery:
 
 After replacing a CA file or changing its permissions, verify the **mounted file inside every affected container**, not only the host path. Check readability as the actual application user and compare public certificate fingerprints when host/container files differ. File bind mounts can retain the previous inode after an atomic replacement. If that happens, deliberately remount/recreate the affected container after validating the current certificate, or correct permissions on its identical mounted public CA as above. Never apply public certificate permissions to private keys or disable TLS verification to restore availability. The process that replaced the host inode has not been identified; automatic prevention/monitoring remains operational work.
 
+## Production product-photo migration — 2026-10-11
+
+The production EF history initially contained the 15 migrations through `20261008210000_BrandMediaPublicationState`; both T1 brand-media migrations were already applied. The only pending migration present in the deployed API source was `20261009112850_ProductPhotoGallery`. The untracked `apps/api/brand-media-migrations.sql` is an initial business/auth bootstrap script through T1, not the incremental M5 migration; it was reviewed and left untouched/unpushed because it was not required.
+
+Before applying M5, the PostgreSQL terminal created `/tmp/whiteplate-before-product-photo-20261011.dump` with `pg_dump -Fc` (60.4 KiB). This was a temporary database-container copy, not an off-host backup or restore drill. The preflight found seven `MediaAssets` rows and zero active rows. The migration's operations were applied atomically in one transaction: add nullable `ProductId` and non-null `SortOrder` defaulting to zero, replace the active brand-slot index with its product-null predicate, add the tenant/product ordering index and composite restricted-delete foreign key, and record EF product version `10.0.12`.
+
+Post-checks confirmed the migration history row, both columns and their null/default rules, both expected indexes, and the foreign key. The production API `/health/ready` endpoint returned `Healthy`. Its deployed commit `0d51b91` already contains the M5 implementation, so no API redeploy or restart was needed. Real S3 gallery upload/read/delete and hosted gallery acceptance remain outstanding; the database still has no scheduled off-host backup or restore drill.
+
 ## Previous verified deployment state — 2026-10-08
 
 | Component | Evidence and remaining work |
