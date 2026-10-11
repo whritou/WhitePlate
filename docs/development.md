@@ -6,7 +6,7 @@ The public landing and `/[locale]/demo` pages follow the supplied Lovable export
 
 ## Product photo gallery rollout (M5)
 
-M5 reuses T1's private S3-compatible configuration. Review/apply `ProductPhotoGallery` after both T1 migrations, then deploy API before frontend. There are no new browser credentials or public bucket URLs. Missing bucket configuration produces an unavailable state. No shared migration was applied by this task.
+M5 reuses T1's private S3-compatible configuration. `ProductPhotoGallery` was applied to Coolify Production on 2026-10-11 after both T1 media migrations; the deployed API already contains the gallery code, so no API redeploy was needed. There are no new browser credentials or public bucket URLs. Missing bucket configuration produces an unavailable state. Real bucket operations and hosted gallery acceptance remain open; see the [Coolify runbook](deployment/coolify.md).
 
 From `apps/frontend`, with the dev server running, use `node node_modules/@playwright/test/cli.js test --project product-photos --project menu-builder`. Set `WHITEPLATE_ACCEPTANCE_URL=http://localhost:3012` for that port. `/[locale]/photo-design-test` renders the actual Menu Builder with a sample catalog; `/[locale]/photo-guest-design-test` renders the real guest cards/options dialog. These routes return 404 in production. Browser fixtures mock image/save responses and do not prove S3 or PostgreSQL acceptance. See [policies](architecture/decisions/0008-product-photo-gallery.md), [evidence](audits/product-photos.md) and [acceptance](functional-test-plan.md).
 
