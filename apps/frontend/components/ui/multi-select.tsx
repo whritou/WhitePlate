@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
 import { cn } from "@/lib/utils"
+import { useVisualScope } from "@/components/ui/visual-scope"
 import type { MultiSelectProps } from "@/types/ui"
 
 function MultiSelect({
@@ -21,6 +22,7 @@ function MultiSelect({
   disabled,
   describedBy,
 }: MultiSelectProps) {
+  const scope = useVisualScope()
   const [selectedValues, setSelectedValues] = useState<string[]>([
     ...defaultValue,
   ])
@@ -74,7 +76,13 @@ function MultiSelect({
             align="start"
             className="z-50 w-[var(--anchor-width)] min-w-56"
           >
-            <Popover.Popup className="max-h-72 overflow-y-auto rounded-md border border-border bg-popover p-2 text-popover-foreground shadow-lg outline-none">
+            <Popover.Popup
+              className={cn(
+                "max-h-72 overflow-y-auto rounded-md border border-border bg-popover p-2 text-popover-foreground shadow-lg outline-none",
+                scope.className
+              )}
+              style={scope.style}
+            >
               <div className="flex items-center justify-between gap-3 border-b border-border px-2 pb-2">
                 <span
                   className="text-sm text-muted-foreground"

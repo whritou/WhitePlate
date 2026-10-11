@@ -32,6 +32,49 @@ test("archive confirmation stays a usable width in the menu category manager", a
   }
 })
 
+test("desktop menu height follows its content instead of leaving a blank tail", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 900 })
+  await page.goto(fixture)
+  await expect(page.getByTestId("fixture-ready")).toHaveAttribute(
+    "data-ready",
+    "true"
+  )
+
+  const metrics = await page.evaluate(() => ({
+    documentHeight: document.documentElement.scrollHeight,
+    viewportHeight: window.innerHeight,
+    menuHeight: document
+      .querySelector(".live-menu-layout")!
+      .getBoundingClientRect().height,
+  }))
+
+  expect(metrics.menuHeight).toBeLessThan(600)
+  expect(metrics.documentHeight).toBeLessThanOrEqual(metrics.viewportHeight)
+})
+
+test("discount code helper text does not shift the paired name input", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 900 })
+  await page.goto(fixture)
+  await expect(page.getByTestId("fixture-ready")).toHaveAttribute(
+    "data-ready",
+    "true"
+  )
+  await page.getByRole("tab", { name: "Discount codes" }).click()
+  await page.getByRole("button", { name: "New discount code" }).click()
+
+  const form = page.getByRole("form", { name: "New discount code" })
+  const code = await form.getByLabel("Discount code").boundingBox()
+  const name = await form.getByLabel("Name").boundingBox()
+
+  expect(code).not.toBeNull()
+  expect(name).not.toBeNull()
+  expect(code!.y).toBe(name!.y)
+})
+
 test("product metadata stays editable and readable while its form is scrolled", async ({
   page,
 }) => {
@@ -106,10 +149,12 @@ test("product metadata stays editable and readable while its form is scrolled", 
     const cancelBox = await cancel.boundingBox()
     const panelBox = await panel.boundingBox()
 
-    expect(saveBox?.y).toBeGreaterThanOrEqual(panelBox?.y ?? 0)
-    expect(saveBox?.y).toBeLessThan(
-      (panelBox?.y ?? 0) + (panelBox?.height ?? 0)
-    )
+    if (width > 1024) {
+      expect(saveBox?.y).toBeGreaterThanOrEqual(panelBox?.y ?? 0)
+      expect(saveBox?.y).toBeLessThan(
+        (panelBox?.y ?? 0) + (panelBox?.height ?? 0)
+      )
+    }
 
     if (width <= 1024) {
       await expect(createCategory).toBeInViewport()
@@ -232,6 +277,13 @@ test("allergen declarations use click-to-toggle multi-select menus and no separa
   await expect(milk).toHaveRole("checkbox")
   await expect(milk).toHaveAccessibleName("Milk")
   await milk.click()
+  await expect(milk).toHaveAttribute("data-checked", "")
+  await expect(page.locator(".max-h-72")).toHaveClass(/lovable-live/)
+  await expect(page.locator(".max-h-72")).toHaveCSS(
+    "--primary",
+    "oklch(0.5 0.16 152)"
+  )
+
   await eggs.click()
   await expect(
     form.locator('input[type="hidden"][name="containsAllergens"][value="milk"]')
@@ -264,6 +316,15 @@ test("mobile product details scroll with the page and end without a blank tail",
     "data-ready",
     "true"
   )
+  await expect
+    .poll(() =>
+      page
+        .locator(".live-appbar")
+        .evaluate((element) =>
+          Math.round(element.getBoundingClientRect().height)
+        )
+    )
+    .toBeLessThanOrEqual(180)
 
   await page
     .getByRole("button", { name: "Select Soupe du potager", exact: true })

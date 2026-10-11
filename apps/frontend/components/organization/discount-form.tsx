@@ -61,8 +61,13 @@ export function DiscountForm({
 
       <fieldset disabled={pending} className="grid gap-4 sm:grid-cols-2">
         {!discount && (
-          <Label htmlFor={`${prefix}-code`} className="grid gap-2">
-            {t("discountCode")}
+          <div className="grid min-w-0 content-start gap-2">
+            <Label
+              htmlFor={`${prefix}-code`}
+              className="flex min-h-11 items-end pb-1"
+            >
+              {t("discountCode")}
+            </Label>
 
             <Input
               id={`${prefix}-code`}
@@ -78,11 +83,16 @@ export function DiscountForm({
             <span className="text-sm text-muted-foreground">
               {t("discountCodeHint")}
             </span>
-          </Label>
+          </div>
         )}
 
-        <Label htmlFor={`${prefix}-name`} className="grid gap-2">
-          {t("name")}
+        <div className="grid min-w-0 content-start gap-2">
+          <Label
+            htmlFor={`${prefix}-name`}
+            className="flex min-h-11 items-end pb-1"
+          >
+            {t("name")}
+          </Label>
 
           <Input
             id={`${prefix}-name`}
@@ -91,10 +101,15 @@ export function DiscountForm({
             required
             maxLength={120}
           />
-        </Label>
+        </div>
 
-        <Label htmlFor={`${prefix}-kind`} className="grid gap-2">
-          {t("discountType")}
+        <div className="grid min-w-0 content-start gap-2">
+          <Label
+            htmlFor={`${prefix}-kind`}
+            className="flex min-h-11 items-end pb-1"
+          >
+            {t("discountType")}
+          </Label>
 
           <NativeSelect
             id={`${prefix}-kind`}
@@ -115,12 +130,17 @@ export function DiscountForm({
               {t("percentage")}
             </NativeSelectOption>
           </NativeSelect>
-        </Label>
+        </div>
 
-        <Label htmlFor={`${prefix}-value`} className="grid gap-2">
-          {t(kind === "Percentage" ? "percentageValue" : "fixedValue", {
-            currency,
-          })}
+        <div className="grid min-w-0 content-start gap-2">
+          <Label
+            htmlFor={`${prefix}-value`}
+            className="flex min-h-11 items-end pb-1"
+          >
+            {t(kind === "Percentage" ? "percentageValue" : "fixedValue", {
+              currency,
+            })}
+          </Label>
 
           <Input
             id={`${prefix}-value`}
@@ -132,7 +152,7 @@ export function DiscountForm({
             defaultValue={discount?.value}
             required
           />
-        </Label>
+        </div>
 
         <EditorFormActions
           pending={pending}

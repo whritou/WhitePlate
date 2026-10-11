@@ -1,5 +1,5 @@
 "use client"
-import { ArrowUpRight, CreditCard, Radio } from "lucide-react"
+import { ArrowUpRight, CreditCard, LayoutDashboard, Radio } from "lucide-react"
 import ReactFlagsSelect from "react-flags-select"
 import { useLocale, useTranslations } from "next-intl"
 import { useSearchParams } from "next/navigation"
@@ -96,7 +96,7 @@ export function WorkspaceShell({
             <div className="flex max-w-full flex-wrap items-center gap-5">
               <Link
                 href={overviewHref}
-                className="font-display text-2xl font-bold"
+                className="font-display text-2xl font-bold max-[39.99rem]:text-lg"
               >
                 White<span className="text-primary">Plate</span>
               </Link>
@@ -104,7 +104,7 @@ export function WorkspaceShell({
               <NativeSelect
                 aria-label={v("context")}
                 value={context ? `${context.type}:${context.id}` : ""}
-                className="w-60 max-w-full"
+                className="w-60 max-w-full max-[39.99rem]:w-36"
                 onChange={(event) => changeContext(event.target.value)}
               >
                 <NativeSelectOption value="">
@@ -145,7 +145,9 @@ export function WorkspaceShell({
                 >
                   <CreditCard />
 
-                  {v("paymentsPending")}
+                  <span className="max-[39.99rem]:sr-only">
+                    {v("paymentsPending")}
+                  </span>
                 </Button>
               )}
 
@@ -162,7 +164,9 @@ export function WorkspaceShell({
                 >
                   <Radio />
 
-                  {v("realOrders")}
+                  <span className="max-[39.99rem]:sr-only">
+                    {v("realOrders")}
+                  </span>
                 </Button>
               )}
 
@@ -177,7 +181,9 @@ export function WorkspaceShell({
                     <Link href={`/organization/shop?tenantId=${context.id}`} />
                   }
                 >
-                  {v("visitShop")}
+                  <span className="max-[39.99rem]:sr-only">
+                    {v("visitShop")}
+                  </span>
 
                   <ArrowUpRight />
                 </Button>
@@ -206,7 +212,9 @@ export function WorkspaceShell({
                   />
                 }
               >
-                {t("overview")}
+                <LayoutDashboard aria-hidden="true" className="size-4" />
+
+                <span className="max-[39.99rem]:sr-only">{t("overview")}</span>
               </Button>
             )}
 
@@ -236,7 +244,9 @@ export function WorkspaceShell({
                 >
                   <WorkspaceLinkIcon href={href} />
 
-                  {v(`navigation.${key}`)}
+                  <span className="max-[39.99rem]:sr-only">
+                    {v(`navigation.${key}`)}
+                  </span>
                 </Button>
               )
             })}
