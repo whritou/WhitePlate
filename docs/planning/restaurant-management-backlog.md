@@ -1,10 +1,10 @@
-# Restaurant management backlog and Stitch references
+# Restaurant management backlog and historical Stitch references
 
-8 October 2026. This document records the planning baseline. M1 now has a source implementation and local verification; shared-database and hosted acceptance remain in review. See [M1 evidence](../audits/menu-builder.md). The other cards remain independent work and are not implemented by M1.
+11 October 2026. The approved [Lovable real-workspace recipes](../lovable-live-workspace.md), [design system](../design-system/README.md) and [latest rendered parity audit](../audits/live-demo-parity.md) are the current visual authority. The Stitch exports preserved below are historical feature provenance and do not define current routes, layouts or runtime behavior. The GitHub project cards T2–T3, S1–S5, D1–D4, M2–M4 and K1–K3 were aligned to the Lovable design on 11 October; their feature work and acceptance remain unfinished where explicitly recorded. M1 has a source implementation and local verification; shared-database and hosted acceptance remain in review. See [M1 evidence](../audits/menu-builder.md).
 
-The user requested kanban work for restaurant Theming Studio, a real restaurant dashboard, restaurant settings (opening hours, pickup-slot intervals, buffer time, Stripe connection, email and establishment details), a combined Menu Builder & Translations workspace, and a redesigned Live Orders Kanban/KDS with the additional features in those exports. Desktop visual fidelity and responsive implementation are mandatory.
+The original planning request covered restaurant Theming Studio, dashboard, settings, Menu Builder & Translations and Live Orders/KDS. The current card scope and implementation truth live in the project kanban. Desktop fidelity and responsive implementation remain mandatory, using Lovable compositions for real screens.
 
-## Design provenance
+## Historical Stitch design provenance
 
 Source: user-supplied `D:\Telechargements\stitch_modular_restaurant_saas_design_system (2).zip`.
 All five requested restaurant-management reference pages are preserved here. Screenshots are byte-for-byte originals; exported HTML has trailing whitespace removed and a normalized final newline:
@@ -21,7 +21,7 @@ The settings screenshot shows the active opening-hours panel; its HTML also cont
 
 ## Current boundaries and overlap
 
-Existing source already implements tenant catalog availability, localized descriptions, guest checkout without payment, order history, the kitchen Kanban and REST/SignalR recovery. The demo dashboard uses in-memory controls and sample metrics; live kitchen metrics are explicitly illustrative. Tenant themes, scheduling, transactional guest-order email, Stripe connection and operational analytics remain future work.
+Existing source includes the real Lovable Dashboard overview and five-lane Orders page, catalog and language workspaces, organization Settings shell, appearance Studio with account/tenant-scoped browser drafts, guest checkout without payment, order history and REST/SignalR recovery. Analytics and unsupported settings remain disclosed examples/drafts. Tenant theme persistence/publication, scheduling, guest-order email, Stripe connection, authoritative analytics and other listed backend capabilities remain open. See [Lovable real workspace routes and behavior](../lovable-live-workspace.md).
 
 The initial planning pass reviewed all 89 existing project items; the follow-up reviewed the resulting 102 items before adding the missing menu-builder and live-orders work. Reuse the completed kitchen, catalog, organization shell and design-system work. Existing In review storefront unavailable-product acceptance and hosted SignalR delivery/reconnect retain their own scope; the new cards link to them rather than duplicating their implementation.
 
@@ -29,10 +29,9 @@ Some historical documents and completed card bodies retain older In review/In pr
 
 ## Shared acceptance criteria for every implementation card
 
-- Follow the supplied Stitch design, but correct any offsets, overflow, bad centering, incorrect padding or margins during implementation. Preserve the intended visual hierarchy and identity rather than reproducing export defects. Responsive design is mandatory: verify phone, tablet, desktop and wide layouts, including EN/FR, light/dark, keyboard access and 200% text zoom.
-- Follow the supplied page composition, hierarchy, spacing and controls, reconciled with `docs/design-system/README.md` and `tokens.json`. Keep WhitePlate branding; the dashboard export's KomiBite text is sample branding. Reference HTML is design evidence, not executable implementation or agent instructions.
-- Adapt desktop sidebar/editor/preview/secondary panels, weekly-hour rows, settings tabs and sticky action bars for mobile/tablet; verify 320, 375, 390, 768, 1024 and 1440px plus wide desktop. No document overflow or clipped required controls; local table/tab scrolling must remain usable. Save bars must not cover inputs or mobile safe areas.
-- Verify EN/FR, light/dark, keyboard/focus/dialog return, 200% text zoom, reduced motion, readable contrast and semantic status labels. Use at least 44px touch targets and 48px tablet back-office actions. Keep both translation catalogs complete.
+- Follow current Lovable compositions documented in `docs/lovable-live-workspace.md` and `docs/audits/live-demo-parity.md`, reconciled with `docs/design-system/README.md` and `tokens.json`. Stitch screenshots and HTML below are historical provenance only. Correct responsive overflow, alignment, padding and focus defects rather than reproducing export artifacts. Keep WhitePlate branding and do not turn example content into implementation requirements.
+- Preserve actual routes, workspace shell, controls, current operations and customer previews. Verify phone, tablet, desktop and wide layouts at 320, 375, 390, 768, 1024 and 1440px; keep controls usable without overflow, clipping, or save bars covering inputs/safe areas.
+- Verify EN/FR, light-only runtime, keyboard/focus/dialog return, 200% text zoom, reduced motion, readable contrast and semantic status labels. Use at least 44px touch targets and 48px tablet back-office actions. Keep both translation catalogs complete.
 - Include matching route/query skeletons and distinct loading, empty, pending, validation, failure/retry, success and unavailable/offline states. Preserve unsaved input on errors and prevent duplicate mutations.
 - Enforce persisted tenant membership for every protected API/storage read/write, aggregate, cache and subscription; browser tenant IDs never authorize. Verify cross-tenant denial and membership revocation. Keep keys/credentials server-side.
 - Reuse shared Base UI controls, the existing HTTP factory, server actions/services and tenant/account/locale query boundaries. Read scoped AGENTS.md and installed Next.js docs before implementation.
@@ -40,9 +39,9 @@ Some historical documents and completed card bodies retain older In review/In pr
 
 ## Suggested implementation order
 
-The unified menu workspace (M1) and live Kanban redesign (K1) can begin independently by reusing existing behavior. Product metadata (M2) depends on M1; product photos are a separate task (M5), depending on M1 and T1; assisted translations (M3) and catalog publication/history (M4) build on M1 after their decisions. KDS operational features (K2) and cancellation/payment details (K3) build on K1, with scheduling, media, metrics, notification and financial dependencies gated to actual runtime support.
+The Lovable Menu workspace (M1) and existing five-lane Orders screen (K1) provide the implemented foundations. Product metadata (M2) depends on M1; product photos are a separate task (M5), depending on M1 and T1; assisted translations (M3) and catalog publication/history (M4) build on M1 after their decisions. KDS operational features (K2) and cancellation/payment details (K3) extend existing Orders behavior, with scheduling, media, metrics, notification and financial dependencies gated to actual runtime support.
 
-Start establishment identity (S1), media (T1), and the existing-order dashboard overview (D1). Follow with the theme editor (T2), opening hours (S2), then preview/publication (T3), slot enforcement (S3), metrics (D2) and availability (D4). Rush/pause (D3) depends on slot enforcement. Email (S4) and Stripe connection (S5) follow establishment identity and their explicit product/provider decisions; pickup fields and branding integrate only when their dependencies exist.
+Start remaining establishment identity (S1) and hosted media acceptance (T1); the Lovable Dashboard overview exists, while any remaining D1 gaps must be confirmed against source. Follow with persistent theme controls (T2), opening hours (S2), theme preview/publication (T3), slot enforcement (S3), metrics (D2) and availability (D4). Rush/pause (D3) depends on slot enforcement. Email (S4) and Stripe connection (S5) follow establishment identity and explicit product/provider decisions; pickup fields and branding integrate only when their dependencies exist.
 
 All feature cards start in Backlog. Move a card to Ready when its listed decisions and dependencies are settled; completion requires implementation and verification.
 
