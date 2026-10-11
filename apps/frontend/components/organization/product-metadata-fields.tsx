@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { MultiSelectList } from "@/components/ui/multi-select-list"
+import { MultiSelect } from "@/components/ui/multi-select"
 import type { CatalogProduct } from "@/types/catalog-management"
 
 const allergens = [
@@ -34,9 +34,11 @@ const diets = [
 export function ProductMetadataFields({
   prefix,
   product,
+  disabled,
 }: {
   prefix: string
   product?: CatalogProduct
+  disabled?: boolean
 }) {
   const t = useTranslations("Catalog")
 
@@ -46,7 +48,7 @@ export function ProductMetadataFields({
         {t("productMetadata")}
       </h3>
 
-      <Label htmlFor={`${prefix}-sku`} className="grid gap-2 sm:max-w-sm">
+      <Label htmlFor={`${prefix}-sku`} className="grid min-w-0 gap-2">
         {t("sku")}
 
         <Input
@@ -67,14 +69,18 @@ export function ProductMetadataFields({
               {t(kind)}
             </Label>
 
-            <MultiSelectList
+            <MultiSelect
               id={`${prefix}-${kind}`}
               name={kind}
-              multiple
-              size={7}
+              label={t(kind)}
+              disabled={disabled}
               defaultValue={product?.[kind] ?? []}
-              aria-label={t(kind)}
-              aria-describedby={`${prefix}-${kind}-help`}
+              placeholder={t("allergenSelectPlaceholder")}
+              selectedCountLabel={(count) =>
+                t("allergenSelectedCount", { count })
+              }
+              clearLabel={t("clearAllergenSelection")}
+              describedBy={`${prefix}-${kind}-help`}
               options={allergens.map((code) => ({
                 value: code,
                 label: t(`allergenNames.${code}`),
@@ -121,8 +127,13 @@ export function ProductMetadataFields({
       </fieldset>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <Label htmlFor={`${prefix}-preparation-minutes`} className="grid gap-2">
-          {t("preparationMinutes")}
+        <div className="grid min-w-0 content-start gap-2">
+          <Label
+            htmlFor={`${prefix}-preparation-minutes`}
+            className="flex min-h-12 items-end pb-1"
+          >
+            {t("preparationMinutes")}
+          </Label>
 
           <Input
             id={`${prefix}-preparation-minutes`}
@@ -137,15 +148,16 @@ export function ProductMetadataFields({
           <span className="text-sm text-muted-foreground">
             {t("preparationHelp")}
           </span>
-        </Label>
+        </div>
 
         {(["en", "fr"] as const).map((locale) => (
-          <Label
-            key={locale}
-            htmlFor={`${prefix}-preparation-${locale}`}
-            className="grid gap-2"
-          >
-            {t("preparationNote", { locale: locale.toUpperCase() })}
+          <div key={locale} className="grid min-w-0 content-start gap-2">
+            <Label
+              htmlFor={`${prefix}-preparation-${locale}`}
+              className="flex min-h-12 items-end pb-1"
+            >
+              {t("preparationNote", { locale: locale.toUpperCase() })}
+            </Label>
 
             <Input
               id={`${prefix}-preparation-${locale}`}
@@ -153,7 +165,7 @@ export function ProductMetadataFields({
               maxLength={250}
               defaultValue={product?.preparationNotes?.[locale] ?? ""}
             />
-          </Label>
+          </div>
         ))}
       </div>
     </div>

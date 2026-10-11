@@ -7,11 +7,17 @@ export type NativeSelectProps = Omit<ComponentProps<"select">, "size"> & {
 }
 
 export type MultiSelectOption = { value: string; label: string }
-export type MultiSelectListProps = Omit<
-  ComponentProps<"select">,
-  "children"
-> & {
+export type MultiSelectProps = {
+  id: string
+  name: string
+  label: string
   options: readonly MultiSelectOption[]
+  defaultValue?: readonly string[]
+  placeholder: string
+  selectedCountLabel: (count: number) => string
+  clearLabel: string
+  disabled?: boolean
+  describedBy?: string
 }
 
 export type SheetContentProps = Dialog.Popup.Props & {
