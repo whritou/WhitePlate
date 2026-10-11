@@ -54,6 +54,96 @@ export function parseCategoryInput(input: unknown): CategoryInput | null {
   return input instanceof FormData ? categoryFields(input, 120) : null
 }
 
+const supportedAllergens = [
+  "celery",
+  "cerealsWithGluten",
+  "crustaceans",
+  "eggs",
+  "fish",
+  "lupin",
+  "milk",
+  "molluscs",
+  "mustard",
+  "nuts",
+  "peanuts",
+  "sesame",
+  "soybeans",
+  "sulphites",
+]
+const supportedDiets = [
+  "dairyFree",
+  "glutenFree",
+  "pescatarian",
+  "vegan",
+  "vegetarian",
+]
+
+function productMetadataFields(
+  input: FormData
+): Pick<
+  ProductInput,
+  | "sku"
+  | "containsAllergens"
+  | "mayContainAllergens"
+  | "dietaryTags"
+  | "preparationMinutes"
+  | "preparationNotes"
+> | null {
+  const sku = input.get("sku") ?? ""
+  const rawMinutes = input.get("preparationMinutes") ?? ""
+  const preparationMinutes =
+    rawMinutes === "" ? null : integer(rawMinutes, 1, 1440)
+  const containsValues = input.getAll("containsAllergens")
+  const mayContainValues = input.getAll("mayContainAllergens")
+  const dietValues = input.getAll("dietaryTags")
+  const containsAllergens = containsValues.filter(
+    (value): value is string => typeof value === "string"
+  )
+  const mayContainAllergens = mayContainValues.filter(
+    (value): value is string => typeof value === "string"
+  )
+  const dietaryTags = dietValues.filter(
+    (value): value is string => typeof value === "string"
+  )
+  const preparationNotes = Object.fromEntries(
+    ["en", "fr"].flatMap((locale) => {
+      const note = input.get(`preparationNote-${locale}`)
+
+      return typeof note === "string" && note.trim()
+        ? [[locale, note.trim()]]
+        : []
+    })
+  )
+
+  if (
+    typeof sku !== "string" ||
+    (sku.trim() !== "" && !/^[a-zA-Z0-9._-]{1,64}$/.test(sku.trim())) ||
+    (rawMinutes !== "" && preparationMinutes === null) ||
+    containsValues.length !== containsAllergens.length ||
+    containsAllergens.some((code) => !supportedAllergens.includes(code)) ||
+    mayContainValues.length !== mayContainAllergens.length ||
+    mayContainAllergens.some((code) => !supportedAllergens.includes(code)) ||
+    containsAllergens.some((code) => mayContainAllergens.includes(code)) ||
+    dietValues.length !== dietaryTags.length ||
+    dietaryTags.some((code) => !supportedDiets.includes(code)) ||
+    ["en", "fr"].some((locale) => {
+      const note = input.get(`preparationNote-${locale}`)
+
+      return note !== null && (typeof note !== "string" || note.length > 250)
+    })
+  )
+    return null
+
+  return {
+    sku: sku.trim() || null,
+    containsAllergens: [...new Set(containsAllergens)],
+    mayContainAllergens: [...new Set(mayContainAllergens)],
+    dietaryTags: [...new Set(dietaryTags)],
+    preparationMinutes,
+    preparationNotes,
+  }
+}
+
 export function parseProductInput(input: unknown): ProductInput | null {
   if (!(input instanceof FormData)) return null
 
@@ -63,6 +153,7 @@ export function parseProductInput(input: unknown): ProductInput | null {
   const basePrice = decimal(input.get("basePrice"), 9999999999.99)
   const taxRatePercent = decimal(input.get("taxRatePercent"), 100)
   const availability = input.get("isAvailable")
+  const metadata = productMetadataFields(input)
 
   if (
     !category ||
@@ -71,6 +162,7 @@ export function parseProductInput(input: unknown): ProductInput | null {
     rawDescription.trim().length > 1000 ||
     basePrice === null ||
     taxRatePercent === null ||
+    !metadata ||
     (category.id !== null &&
       availability !== "true" &&
       availability !== "false")
@@ -79,6 +171,7 @@ export function parseProductInput(input: unknown): ProductInput | null {
 
   return {
     ...category,
+    ...metadata,
     categoryId,
     description: rawDescription.trim() || null,
     basePrice,

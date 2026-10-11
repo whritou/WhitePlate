@@ -108,9 +108,27 @@ export async function saveProduct(input: ProductInput): Promise<CatalogResult> {
     taxRatePercent,
     sortOrder,
     isAvailable,
+    sku,
+    containsAllergens,
+    mayContainAllergens,
+    dietaryTags,
+    preparationMinutes,
+    preparationNotes,
   } = input
   const path = `/api/v1/tenants/${tenantId}/products`
-  const fields = { name, description, basePrice, taxRatePercent, sortOrder }
+  const fields = {
+    name,
+    description,
+    basePrice,
+    taxRatePercent,
+    sortOrder,
+    sku,
+    containsAllergens,
+    mayContainAllergens,
+    dietaryTags,
+    preparationMinutes,
+    preparationNotes,
+  }
   const response = id
     ? await whitePlateApi.put(`${path}/${id}`, {
         categoryId,

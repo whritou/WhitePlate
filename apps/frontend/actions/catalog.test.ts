@@ -40,6 +40,10 @@ function product(overrides: Partial<Record<string, string>> = {}) {
     basePrice: "7.50",
     taxRatePercent: "5.50",
     sortOrder: "2",
+    sku: "",
+    preparationMinutes: "",
+    "preparationNote-en": "",
+    "preparationNote-fr": "",
     ...overrides,
   } as Record<string, string>)
 }
@@ -84,6 +88,12 @@ it("includes selected category in product updates", async () => {
       taxRatePercent: 5.5,
       sortOrder: 2,
       isAvailable: true,
+      sku: null,
+      containsAllergens: [],
+      mayContainAllergens: [],
+      dietaryTags: [],
+      preparationMinutes: null,
+      preparationNotes: {},
     }
   )
 })
@@ -183,6 +193,12 @@ it("creates products with normalized decimal amounts and no browser authorizatio
       basePrice: 7.5,
       taxRatePercent: 5.5,
       sortOrder: 2,
+      sku: null,
+      containsAllergens: [],
+      mayContainAllergens: [],
+      dietaryTags: [],
+      preparationMinutes: null,
+      preparationNotes: {},
     }
   )
 })
@@ -208,6 +224,12 @@ it("updates product availability with its selected category", async () => {
       taxRatePercent: 5.5,
       sortOrder: 2,
       isAvailable: false,
+      sku: null,
+      containsAllergens: [],
+      mayContainAllergens: [],
+      dietaryTags: [],
+      preparationMinutes: null,
+      preparationNotes: {},
     }
   )
 })

@@ -179,7 +179,9 @@ public sealed class TenantCatalogController(
         var identity = currentIdentity.Identity;
         if (identity is null) return Unauthorized();
         var result = await createProduct.HandleAsync(new CreateProductCommand(tenantId, request.CategoryId,
-            request.Name, request.Description, request.BasePrice, request.TaxRatePercent, request.SortOrder, identity),
+            request.Name, request.Description, request.BasePrice, request.TaxRatePercent, request.SortOrder, identity,
+            request.Sku, request.ContainsAllergens, request.MayContainAllergens, request.DietaryTags,
+            request.PreparationMinutes, request.PreparationNotes),
             cancellationToken);
         return result.IsSuccess ? StatusCode(StatusCodes.Status201Created, result.Value) :
             errors.ToActionResult(errors.Create(HttpContext, result.Error));
@@ -197,7 +199,9 @@ public sealed class TenantCatalogController(
         if (identity is null) return Unauthorized();
         var result = await manageCatalog.UpdateProductAsync(new UpdateProductCommand(tenantId, productId,
             request.Name, request.Description, request.BasePrice, request.TaxRatePercent, request.SortOrder,
-            request.IsAvailable, identity, request.CategoryId), cancellationToken);
+            request.IsAvailable, identity, request.CategoryId, request.Sku, request.ContainsAllergens,
+            request.MayContainAllergens, request.DietaryTags, request.PreparationMinutes,
+            request.PreparationNotes), cancellationToken);
         return result.IsSuccess ? Ok(result.Value) : errors.ToActionResult(errors.Create(HttpContext, result.Error));
     }
 

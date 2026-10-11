@@ -4,12 +4,14 @@ import {
   parseDiscountReferenceInput,
   parseOptionGroupInput,
   parseOptionInput,
+  parseProductInput,
 } from "./catalog-input"
 
 const tenantId = "11111111-1111-4111-8111-111111111111"
 const productId = "22222222-2222-4222-8222-222222222222"
 const groupId = "33333333-3333-4333-8333-333333333333"
 const optionId = "44444444-4444-4444-8444-444444444444"
+const categoryId = "66666666-6666-4666-8666-666666666666"
 const discountId = "55555555-5555-4555-8555-555555555555"
 
 function form(fields: Record<string, string>) {
@@ -19,6 +21,57 @@ function form(fields: Record<string, string>) {
 
   return input
 }
+
+it("parses explicit product declarations and localized preparation guidance", () => {
+  const input = form({
+    tenantId,
+    categoryId,
+    name: "Soup",
+    description: "",
+    basePrice: "8.50",
+    taxRatePercent: "5.5",
+    sortOrder: "0",
+    sku: " soup-01 ",
+    preparationMinutes: "15",
+    "preparationNote-en": "Prepared to order",
+    "preparationNote-fr": "Préparé à la commande",
+  })
+
+  input.append("containsAllergens", "milk")
+  input.append("mayContainAllergens", "sesame")
+  input.append("dietaryTags", "vegetarian")
+
+  expect(parseProductInput(input)).toMatchObject({
+    sku: "soup-01",
+    containsAllergens: ["milk"],
+    mayContainAllergens: ["sesame"],
+    dietaryTags: ["vegetarian"],
+    preparationMinutes: 15,
+    preparationNotes: {
+      en: "Prepared to order",
+      fr: "Préparé à la commande",
+    },
+  })
+})
+
+it("rejects overlapping and unsupported allergen declarations", () => {
+  const input = form({
+    tenantId,
+    categoryId,
+    name: "Soup",
+    description: "",
+    basePrice: "8.50",
+    taxRatePercent: "5.5",
+    sortOrder: "0",
+  })
+
+  input.append("containsAllergens", "milk")
+  input.append("mayContainAllergens", "milk")
+
+  expect(parseProductInput(input)).toBeNull()
+  input.set("mayContainAllergens", "unknown")
+  expect(parseProductInput(input)).toBeNull()
+})
 
 it("parses group create and update fields using the API selection bounds", () => {
   expect(

@@ -105,6 +105,14 @@ export function OrderTicket({
                   })}
                 </p>
 
+                {line.preparationMinutes && (
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {t("preparationGuide", {
+                      minutes: line.preparationMinutes,
+                    })}
+                  </p>
+                )}
+
                 {line.options.length > 0 && (
                   <ul className="mt-1 ml-5 list-disc text-muted-foreground">
                     {line.options.map((option) => (

@@ -280,6 +280,12 @@ function parseOrderSummary(value: unknown): OrderSummary | null {
       typeof candidate.quantity !== "number" ||
       !Number.isSafeInteger(candidate.quantity) ||
       candidate.quantity < 1 ||
+      (candidate.preparationMinutes !== undefined &&
+        candidate.preparationMinutes !== null &&
+        (typeof candidate.preparationMinutes !== "number" ||
+          !Number.isInteger(candidate.preparationMinutes) ||
+          candidate.preparationMinutes < 1 ||
+          candidate.preparationMinutes > 1440)) ||
       !Array.isArray(candidate.options)
     )
       return null
@@ -301,6 +307,9 @@ function parseOrderSummary(value: unknown): OrderSummary | null {
       productName: candidate.productName,
       quantity: candidate.quantity,
       options,
+      ...(candidate.preparationMinutes !== undefined
+        ? { preparationMinutes: candidate.preparationMinutes as number | null }
+        : {}),
     })
   }
 

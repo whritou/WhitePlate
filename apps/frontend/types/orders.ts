@@ -10,6 +10,7 @@ export type OrderSummaryLine = {
   productName: string
   quantity: number
   options: OrderSummaryOption[]
+  preparationMinutes?: number | null
 }
 
 export type OrderSummary = {

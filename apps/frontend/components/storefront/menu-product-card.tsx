@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/card"
 import type { CartItem } from "@/types/checkout"
 import type { Product } from "@/types/storefront"
-import { useTranslations } from "next-intl"
+import { useLocale, useTranslations } from "next-intl"
 import { ProductOrdering } from "./product-ordering"
 
 export function MenuProductCard({
@@ -29,6 +29,7 @@ export function MenuProductCard({
   onSave: (item: CartItem) => void
 }) {
   const t = useTranslations("Storefront")
+  const locale = useLocale()
 
   return (
     <Card
@@ -55,6 +56,62 @@ export function MenuProductCard({
         {product.description && (
           <p className="text-body-sm wrap-anywhere text-muted-foreground">
             {product.description}
+          </p>
+        )}
+
+        {((product.containsAllergens?.length ?? 0) > 0 ||
+          (product.mayContainAllergens?.length ?? 0) > 0) && (
+          <div className="grid gap-1 text-sm">
+            {(product.containsAllergens?.length ?? 0) > 0 && (
+              <p>
+                <span className="font-semibold">{t("containsAllergens")}:</span>{" "}
+                {product.containsAllergens
+                  ?.map((code) => t(`allergenNames.${code}`))
+                  .join(", ")}
+              </p>
+            )}
+
+            <p className="text-xs text-muted-foreground">
+              {t("allergenDisclaimer")}
+            </p>
+
+            {(product.mayContainAllergens?.length ?? 0) > 0 && (
+              <p>
+                <span className="font-semibold">
+                  {t("mayContainAllergens")}:
+                </span>{" "}
+                {product.mayContainAllergens
+                  ?.map((code) => t(`allergenNames.${code}`))
+                  .join(", ")}
+              </p>
+            )}
+          </div>
+        )}
+
+        {(product.dietaryTags?.length ?? 0) > 0 && (
+          <div
+            className="flex flex-wrap gap-1"
+            aria-label={t("dietaryDeclarations")}
+          >
+            {product.dietaryTags?.map((code) => (
+              <Badge key={code} variant="neutral">
+                {t(`dietaryNames.${code}`)}
+              </Badge>
+            ))}
+          </div>
+        )}
+
+        {product.preparationMinutes != null && (
+          <p className="text-sm text-muted-foreground">
+            {t("preparationEstimate", { minutes: product.preparationMinutes })}
+          </p>
+        )}
+
+        {(product.preparationNotes?.[locale] ??
+          product.preparationNotes?.[locale.split("-")[0]]) && (
+          <p className="text-sm text-muted-foreground">
+            {product.preparationNotes?.[locale] ??
+              product.preparationNotes?.[locale.split("-")[0]]}
           </p>
         )}
 

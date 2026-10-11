@@ -82,7 +82,14 @@ public sealed class CreateOrderCommandHandler(IOrderRepository orders, TimeProvi
             snapshots.Add(new OrderLineSnapshot(product.Id, product.Name, product.BasePrice,
                 product.TaxRatePercent, item.Quantity, selectedOptions.Select(selection =>
                     new OrderOptionSnapshot(selection.Option.Id, selection.Option.Name,
-                        selection.Option.PriceAdjustment)).ToArray()));
+                        selection.Option.PriceAdjustment)).ToArray())
+            {
+                ContainsAllergens = product.ContainsAllergens,
+                MayContainAllergens = product.MayContainAllergens,
+                DietaryTags = product.DietaryTags,
+                PreparationMinutes = product.PreparationMinutes,
+                PreparationNotes = product.PreparationNotes
+            });
         }
 
         if (normalizedCode is not null && catalog.Discount is null)

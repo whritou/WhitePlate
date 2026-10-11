@@ -50,7 +50,9 @@ public sealed class OrderRepository(WhitePlateDbContext database) : IOrderReposi
             .OrderBy(product => product.Id)
             .Select(product => new
             {
-                product.Id, product.Name, product.TranslationsJson, product.BasePrice, product.TaxRatePercent
+                product.Id, product.Name, product.TranslationsJson, product.BasePrice, product.TaxRatePercent,
+                product.ContainsAllergensJson, product.MayContainAllergensJson, product.DietaryTagsJson,
+                product.PreparationMinutes, product.PreparationNotesJson
             })
             .ToListAsync(cancellationToken);
         var ids = products.Select(product => product.Id).ToArray();
@@ -77,7 +79,14 @@ public sealed class OrderRepository(WhitePlateDbContext database) : IOrderReposi
                         .Select(option => new CheckoutOptionDto(option.Id,
                             WhitePlate.Domain.Catalog.CatalogTranslations.Get(option.TranslationsJson, locale,
                                 defaultLocale, option.Name).Name, option.PriceAdjustment)).ToArray()))
-                .ToArray())).ToArray();
+                .ToArray())
+        {
+            ContainsAllergens = System.Text.Json.JsonSerializer.Deserialize<string[]>(product.ContainsAllergensJson) ?? [],
+            MayContainAllergens = System.Text.Json.JsonSerializer.Deserialize<string[]>(product.MayContainAllergensJson) ?? [],
+            DietaryTags = System.Text.Json.JsonSerializer.Deserialize<string[]>(product.DietaryTagsJson) ?? [],
+            PreparationMinutes = product.PreparationMinutes,
+            PreparationNotes = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(product.PreparationNotesJson) ?? new()
+        }).ToArray();
 
         var discount = string.IsNullOrWhiteSpace(discountCode) ? null : await database.PromotionDiscounts.AsNoTracking()
             .Where(item => item.TenantId == tenantId && item.Code == discountCode && item.IsActive)
@@ -137,7 +146,7 @@ public sealed class OrderRepository(WhitePlateDbContext database) : IOrderReposi
                     order.Status.ToString(), order.Version, order.CreatedAt,
                     order.Lines.Select(line => new OrderSummaryLineDto(line.ProductId, line.ProductName,
                         line.Quantity, line.Options.Select(option => new OrderSummaryOptionDto(option.OptionId,
-                            option.Name)).ToArray())).ToArray()),
+                            option.Name)).ToArray()) { PreparationMinutes = line.PreparationMinutes }).ToArray()),
                 order.CreatedAtTicks
             })
             .ToListAsync(cancellationToken);
@@ -180,7 +189,7 @@ public sealed class OrderRepository(WhitePlateDbContext database) : IOrderReposi
                 order.Status.ToString(), order.Version, order.CreatedAt,
                 order.Lines.Select(line => new OrderSummaryLineDto(line.ProductId, line.ProductName,
                     line.Quantity, line.Options.Select(option => new OrderSummaryOptionDto(option.OptionId,
-                        option.Name)).ToArray())).ToArray())).ToListAsync(cancellationToken);
+                        option.Name)).ToArray()) { PreparationMinutes = line.PreparationMinutes }).ToArray())).ToListAsync(cancellationToken);
         return new OrderHistoryPageData(items, totalCount);
     }
 

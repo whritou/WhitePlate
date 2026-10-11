@@ -10,6 +10,11 @@ public sealed record MenuProductDto(Guid Id, string Name, string? Description, d
 {
     public bool IsAvailable { get; init; } = true;
     public IReadOnlyList<WhitePlate.Application.Media.ProductPhotoDto> Photos { get; init; } = [];
+    public IReadOnlyList<string> ContainsAllergens { get; init; } = [];
+    public IReadOnlyList<string> MayContainAllergens { get; init; } = [];
+    public IReadOnlyList<string> DietaryTags { get; init; } = [];
+    public int? PreparationMinutes { get; init; }
+    public IReadOnlyDictionary<string, string> PreparationNotes { get; init; } = new Dictionary<string, string>();
 }
 public sealed record MenuCategoryDto(Guid Id, string Name, int SortOrder, IReadOnlyList<MenuProductDto> Products);
 public sealed record PromotionDiscountDto(Guid Id, string Code, string Name, string Kind, decimal Value, bool IsActive);
@@ -22,6 +27,12 @@ public sealed record CatalogCategoryAdminDto(Guid Id, string Name, int SortOrder
 public sealed record CatalogProductAdminDto(Guid Id, Guid CategoryId, string Name, string? Description,
     decimal BasePrice, decimal TaxRatePercent, int SortOrder, bool IsAvailable, bool IsArchived)
 {
+    public string? Sku { get; init; }
+    public IReadOnlyList<string> ContainsAllergens { get; init; } = [];
+    public IReadOnlyList<string> MayContainAllergens { get; init; } = [];
+    public IReadOnlyList<string> DietaryTags { get; init; } = [];
+    public int? PreparationMinutes { get; init; }
+    public IReadOnlyDictionary<string, string> PreparationNotes { get; init; } = new Dictionary<string, string>();
     public IReadOnlyDictionary<string, CatalogLocalizedText> Translations { get; init; } =
         new Dictionary<string, CatalogLocalizedText>();
 }

@@ -70,6 +70,10 @@ The 9 October menu-manager follow-up replaces the picker/inline editor with a gr
 
 The combined catalog/language workspace and persisted category hiding are implemented in source. Local verification and separate remaining shared-database/hosted acceptance are in [M1 evidence](audits/menu-builder.md). The generated visibility migration is not applied to shared environments; other management roadmap cards remain separate.
 
+## M2 Menu Builder metadata — 2026-10-11
+
+Saved SKU, controlled allergen/dietary declarations and preparation guidance are implemented in source. See [decision 0009](architecture/decisions/0009-menu-product-metadata.md), [API contract](api/api-contracts.md#m2-menu-product-metadata--2026-10-11), [schema](database/database-schema.md#m2-product-metadata--2026-10-11), and [M2 verification](audits/menu-builder-metadata.md). The additive migration and hosted acceptance remain outstanding.
+
 ## T1 brand assets — 2026-10-08
 
 Tenant-owned logo, favicon and banner uploads are wired in source using private S3-compatible storage, normalized images, protected draft previews and explicit per-asset save/removal. The workspace is `/[locale]/organization/theming?tenantId=…`; saved assets reach the public storefront through host-resolved delivery. See the [storage decision](architecture/decisions/0007-brand-media-storage.md), [setup](development.md#brand-media-storage-t1), and [verification evidence](audits/brand-assets.md). Generated media migrations are not applied to shared environments. A real bucket and hosted two-tenant acceptance remain unverified; T2/T3 and product-photo workflows remain separate.

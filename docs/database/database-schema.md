@@ -1,5 +1,9 @@
 # Database schema and tenant model
 
+## M2 product metadata — 2026-10-11
+
+Migration `20261011125310_ProductMenuMetadata` adds nullable `Products.Sku`, JSON-backed `ContainsAllergensJson`, `MayContainAllergensJson`, `DietaryTagsJson`, `PreparationNotesJson`, and optional `PreparationMinutes`. A filtered unique index on `(TenantId, Sku)` normalizes SKU case in the domain and retains uniqueness for archived products. `OrderLines` receives matching declaration/note JSON and preparation minutes so saved disclosures survive catalog edits. Existing products and order lines migrate to empty arrays/objects. The schema change is generated and covered by source tests; it has not been applied to shared environments. See [decision 0009](../architecture/decisions/0009-menu-product-metadata.md) and [M2 evidence](../audits/menu-builder-metadata.md).
+
 ## Menu manager category reassignment — 2026-10-09
 
 The 9 October menu-manager refactor permits reassignment of the existing `Products.CategoryId` through product updates. Both categories are checked against the same tenant and archival state before persistence. Existing composite foreign keys remain authoritative; there are no added columns, schema changes or migrations for this refactor. See [menu-manager evidence](../audits/menu-manager.md).

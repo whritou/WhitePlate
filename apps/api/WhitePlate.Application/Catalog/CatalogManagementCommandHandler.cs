@@ -11,7 +11,9 @@ public sealed record UpdateCategoryCommand(Guid TenantId, Guid CategoryId, strin
     ExternalIdentity Identity);
 public sealed record UpdateProductCommand(Guid TenantId, Guid ProductId, string Name, string? Description,
     decimal BasePrice, decimal TaxRatePercent, int SortOrder, bool IsAvailable, ExternalIdentity Identity,
-    Guid? CategoryId = null);
+    Guid? CategoryId = null, string? Sku = null, IReadOnlyList<string>? ContainsAllergens = null,
+    IReadOnlyList<string>? MayContainAllergens = null, IReadOnlyList<string>? DietaryTags = null,
+    int? PreparationMinutes = null, IReadOnlyDictionary<string, string>? PreparationNotes = null);
 public sealed record UpdateOptionGroupCommand(Guid TenantId, Guid GroupId, string Name, int MinimumSelections,
     int MaximumSelections, int SortOrder, ExternalIdentity Identity);
 public sealed record UpdateOptionCommand(Guid TenantId, Guid OptionId, string Name, decimal PriceAdjustment,
@@ -44,9 +46,13 @@ public sealed class CatalogManagementCommandHandler(IStaffMembershipRepository m
         {
             var result = await catalog.UpdateProductAsync(command.TenantId, command.ProductId, command.Name,
                 command.Description, command.BasePrice, command.TaxRatePercent, command.SortOrder,
-                command.IsAvailable, cancellationToken, command.CategoryId);
+                command.IsAvailable, cancellationToken, command.CategoryId, command.Sku,
+                command.ContainsAllergens, command.MayContainAllergens, command.DietaryTags,
+                command.PreparationMinutes, command.PreparationNotes);
             return result is null ? NotFound<MenuProductDto>() : Result<MenuProductDto>.Success(result);
         }
+        catch (DomainRuleException exception) when (exception.Code == "duplicate_sku")
+        { return Result<MenuProductDto>.Failure(new ApplicationError(ErrorCode.Conflict)); }
         catch (DomainRuleException exception) { return Invalid<MenuProductDto>(exception); }
     }
 
