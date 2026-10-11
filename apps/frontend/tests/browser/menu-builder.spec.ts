@@ -343,7 +343,7 @@ for (const locale of ["en", "fr"]) {
       await page.keyboard.press("Enter")
       await expect(
         page.getByRole("tab", {
-          name: locale === "fr" ? "Allergènes" : "Allergens",
+          name: locale === "fr" ? "Codes de réduction" : "Discount codes",
           exact: true,
         })
       ).toHaveAttribute("aria-selected", "true")

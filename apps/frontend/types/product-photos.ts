@@ -6,6 +6,16 @@ export type ProductPhoto = {
   height: number
   bytes: number
 }
+export type ProductPhotoGalleryProps = {
+  productId: string
+  tenantId?: string
+  photos: ProductPhoto[]
+  current?: ProductPhoto
+  pending: boolean
+  error: boolean
+  busy: boolean
+  onSelect: (index: number) => void
+}
 export type ProductPhotos = {
   storageAvailable: boolean
   assets: ProductPhoto[]

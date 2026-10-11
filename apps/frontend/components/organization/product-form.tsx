@@ -190,7 +190,7 @@ export function ProductForm({
           <ProductMetadataFields prefix={prefix} product={product} />
 
           <EditorFormActions
-            className={studio ? "xl:col-span-4" : undefined}
+            className={`live-product-save-actions sticky bottom-0 z-10 bg-background pb-2 ${studio ? "xl:col-span-4" : ""}`}
             pending={pending || categoryPending || categoryAdding}
             onCancel={onCancel}
             label={
