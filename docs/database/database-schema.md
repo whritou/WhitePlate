@@ -171,7 +171,7 @@ The accepted design allows each restaurant to enable any number of menu language
 
 ## T1 media metadata — 2026-10-08
 
-`20261008205518_BrandMediaAssets` creates `MediaAssets`; `20261008210000_BrandMediaPublicationState` adds `WasPublished` (default false). Both are generated and unapplied to shared environments. Review the complete migration chain including M1 category visibility before rollout.
+`20261008205518_BrandMediaAssets` creates `MediaAssets`; `20261008210000_BrandMediaPublicationState` adds `WasPublished` (default false). Both are applied in Coolify Production. The checked-in `apps/api/brand-media-migrations.sql` contains the idempotent initial business/auth migration chain through these T1 migrations; it is for initializing an empty database, not for rerunning against the already migrated production database. Review the complete chain including M1 category visibility before using it on another target.
 
 Rows contain generated `Id`, required tenant foreign key with restricted deletion, `Slot`, generated private `ObjectKey` (unique), normalized `ContentType`, `Width`, `Height`, `Bytes`, `IsReady`, `IsActive`, `WasPublished`, UTC `CreatedAt` and nullable UTC `ExpiresAt`. A filtered unique index on `(TenantId, Slot)` where `IsActive = true` permits at most one active asset per slot. `ExpiresAt` is indexed for cleanup. Object keys contain server-assigned tenant and media IDs; filenames and bucket credentials are not persisted here.
 
