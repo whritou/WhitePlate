@@ -11,7 +11,8 @@ public static class MediaRegistration
         services.AddSingleton(new S3MediaOptions(configuration["Media:Endpoint"], configuration["Media:Region"],
             configuration["Media:Bucket"], configuration["Media:AccessKey"], configuration["Media:SecretKey"],
             configuration.GetValue("Media:ForcePathStyle", true), configuration.GetValue("Media:AllowLocalHttp", false),
-            configuration["Media:AccessServiceToken:ClientId"], configuration["Media:AccessServiceToken:ClientSecret"]));
+            configuration["Media:AccessServiceToken:ClientId"], configuration["Media:AccessServiceToken:ClientSecret"],
+            configuration.GetValue("Media:AllowPrivateHttp", false)));
         services.AddSingleton<IMediaStorage, S3MediaStorage>();
         services.AddSingleton<IMediaImageProcessor, BrandImageProcessor>();
         services.AddScoped<IMediaRepository, MediaRepository>();
