@@ -18,6 +18,7 @@ import type {
 } from "@/types/establishment-settings"
 import { CollectionInformation } from "@/components/storefront/collection-information"
 import { EstablishmentFields } from "./establishment-fields"
+import { OpeningHoursEditor } from "./opening-hours-editor"
 
 export function EstablishmentForm({
   tenantId,
@@ -37,6 +38,7 @@ export function EstablishmentForm({
   const [pending, setPending] = useState(false)
   const [savedNotice, setSavedNotice] = useState(false)
   const [confirmReload, setConfirmReload] = useState(false)
+  const [openingHoursReloadKey, setOpeningHoursReloadKey] = useState(0)
   const pendingRef = useRef(false)
   const saved = editing?.saved ?? value.settings
   const draft = editing?.draft ?? establishmentDraft(saved)
@@ -137,6 +139,7 @@ export function EstablishmentForm({
 
       if (fresh) {
         setEditing(null)
+        setOpeningHoursReloadKey((current) => current + 1)
         setError(null)
         setErrors({})
         setConfirmReload(false)
@@ -236,6 +239,18 @@ export function EstablishmentForm({
               </p>
             </div>
           </form>
+
+          <OpeningHoursEditor
+            key={openingHoursReloadKey}
+            tenantId={tenantId}
+            settings={saved}
+            onSaved={async (settings) => {
+              setEditing((current) =>
+                current ? { ...current, saved: settings } : null
+              )
+              await onSaved(settings)
+            }}
+          />
         </CardContent>
       </Card>
 

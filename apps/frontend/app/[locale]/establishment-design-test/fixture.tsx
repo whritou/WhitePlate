@@ -26,6 +26,7 @@ const initial: EstablishmentRead = {
     latitude: 0,
     longitude: 2.123456,
     timeZone: "Europe/Paris",
+    openingHours: null,
     pickupInstructions: {
       en: "Collect at the counter.",
       fr: "Retrait au comptoir.",

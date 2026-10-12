@@ -53,6 +53,29 @@ public sealed class EstablishmentSettingsHandler(IStaffMembershipRepository memb
         }
     }
 
+    public async Task<Result<EstablishmentSettingsDto>> SaveOpeningHoursAsync(Guid id, ExternalIdentity identity,
+        OpeningHoursSchedule? schedule, int? expectedVersion, bool clear, CancellationToken ct)
+    {
+        if (!await CatalogAccess.CanManageAsync(memberships, id, identity, ct)) return Missing();
+        var tenant = await repository.GetAsync(id, ct);
+        if (tenant is null) return Missing();
+        if (expectedVersion is null) return Invalid("establishmentVersion");
+        if (tenant.EstablishmentVersion != expectedVersion) return Conflict();
+        try
+        {
+            if (clear) tenant.ClearOpeningHours(); else if (schedule is not null) tenant.SetOpeningHours(schedule);
+            else return Invalid("openingHours");
+            if (!await repository.SaveAsync(tenant, identity, expectedVersion.Value, tenant.MenuLocalesJson, tenant.DefaultMenuLocale, ct))
+                return await CatalogAccess.CanManageAsync(memberships, id, identity, ct) ? Conflict() : Missing();
+            return Result<EstablishmentSettingsDto>.Success(EstablishmentSettingsDto.FromTenant(tenant));
+        }
+        catch (DomainRuleException exception)
+        {
+            return Result<EstablishmentSettingsDto>.Failure(new ApplicationError(ErrorCode.ValidationFailed,
+                new ValidationIssue(exception.Field, exception.Code, exception.Message)));
+        }
+    }
+
     private static Result<EstablishmentSettingsDto> Missing() => Result<EstablishmentSettingsDto>.Failure(new ApplicationError(ErrorCode.NotFound));
     private static Result<EstablishmentSettingsDto> Conflict() => Result<EstablishmentSettingsDto>.Failure(new ApplicationError(ErrorCode.PreconditionFailed));
     private static Result<EstablishmentSettingsDto> Invalid(string field) => Result<EstablishmentSettingsDto>.Failure(

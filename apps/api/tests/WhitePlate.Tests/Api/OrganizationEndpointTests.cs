@@ -669,6 +669,53 @@ public sealed class OrganizationEndpointTests
     }
 
     [Fact]
+    public async Task OpeningHoursPersistIndependentWeekdaysAndSurviveLegacySettingsUpdates()
+    {
+        using var factory = new OrganizationFactory();
+        var (organizationId, owner) = await factory.SeedOwnerAsync();
+        var tenantId = await factory.SeedRestaurantAsync(organizationId);
+        using var client = factory.CreateClient();
+        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", owner.Subject);
+        var path = $"/api/v1/tenants/{tenantId}/establishment-settings";
+        var schedule = new
+        {
+            days = Enumerable.Range(1, 7).Select(day => day switch
+            {
+                1 => new { dayOfWeek = day, isClosed = true, windows = Array.Empty<object>() },
+                2 => new { dayOfWeek = day, isClosed = false, windows = new object[] { new { start = "09:00", end = "12:00" }, new { start = "14:00", end = "18:00" } } },
+                _ => new { dayOfWeek = day, isClosed = false, windows = new object[] { new { start = "10:00", end = "16:00" } } }
+            }).ToArray()
+        };
+        client.DefaultRequestHeaders.TryAddWithoutValidation("If-Match", "\"1\"");
+        using var save = await client.PutAsJsonAsync(path + "/opening-hours", new { openingHours = schedule }, TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.OK, save.StatusCode);
+        using var savedJson = JsonDocument.Parse(await save.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
+        var savedHours = savedJson.RootElement.GetProperty("openingHours").GetProperty("days");
+        Assert.Equal(7, savedHours.GetArrayLength());
+        Assert.True(savedHours[0].GetProperty("isClosed").GetBoolean());
+        Assert.Equal(2, savedHours[1].GetProperty("windows").GetArrayLength());
+        Assert.Equal("10:00", savedHours[2].GetProperty("windows")[0].GetProperty("start").GetString());
+
+        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", "foreign");
+        using var denied = await client.GetAsync(path, TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.NotFound, denied.StatusCode);
+        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", owner.Subject);
+
+        client.DefaultRequestHeaders.Remove("If-Match");
+        client.DefaultRequestHeaders.TryAddWithoutValidation("If-Match", "\"2\"");
+        using var legacySave = await client.PutAsJsonAsync(path, new { name = "Changed", timeZone = "UTC" }, TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.OK, legacySave.StatusCode);
+        using var legacyJson = JsonDocument.Parse(await legacySave.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
+        Assert.Equal(2, legacyJson.RootElement.GetProperty("openingHours").GetProperty("days")[1].GetProperty("windows").GetArrayLength());
+        client.DefaultRequestHeaders.Remove("If-Match");
+        client.DefaultRequestHeaders.TryAddWithoutValidation("If-Match", "\"3\"");
+        using var clear = await client.DeleteAsync(path + "/opening-hours", TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.OK, clear.StatusCode);
+        using var clearedJson = JsonDocument.Parse(await clear.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
+        Assert.Equal(JsonValueKind.Null, clearedJson.RootElement.GetProperty("openingHours").ValueKind);
+    }
+
+    [Fact]
     public async Task EstablishmentOptionsAndSettingsRequireCurrentManagementMembership()
     {
         using var factory = new OrganizationFactory();

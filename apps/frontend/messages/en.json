@@ -3346,6 +3346,33 @@
       "unavailable": "Settings are unavailable. Your edits have been kept; try again."
     }
   },
+  "OpeningHours": {
+    "title": "Opening hours",
+    "description": "Set each day independently. Add more than one service period when needed.",
+    "notConfigured": "Opening hours have not been configured.",
+    "configure": "Set weekly hours",
+    "closed": "Closed",
+    "localTime": "Local time ({timeZone})",
+    "opens": "Opens",
+    "closes": "Closes",
+    "addService": "Add service period",
+    "copyTitle": "Copy one day to selected days",
+    "copySource": "Copy from",
+    "copyTargets": "Apply to",
+    "copyApply": "Copy to selected days",
+    "copyConfirm": "Replace the current draft for {days} with the selected day's hours? This affects unsaved changes only.",
+    "remove": "Remove period",
+    "cancel": "Cancel changes",
+    "invalid": "Check that each open day has valid, ordered, non-overlapping hours.",
+    "save": "Save hours",
+    "saving": "Saving…",
+    "clear": "Remove weekly hours",
+    "clearConfirm": "Remove the saved weekly schedule and return to not configured?",
+    "saved": "Opening hours saved.",
+    "saveError": "Opening hours could not be saved. Your edits are still here.",
+    "conflict": "These settings changed elsewhere. Reload the page before saving again.",
+    "days": { "monday": "Monday", "tuesday": "Tuesday", "wednesday": "Wednesday", "thursday": "Thursday", "friday": "Friday", "saturday": "Saturday", "sunday": "Sunday" }
+  },
   "CollectionInformation": {
     "title": "Collection information",
     "currentTitle": "Current collection information",

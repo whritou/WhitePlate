@@ -12,6 +12,7 @@ export function CollectionInformation({
   current?: boolean
 }) {
   const t = useTranslations("CollectionInformation")
+  const hours = useTranslations("OpeningHours")
   const locale = useLocale()
   const countries = new Intl.DisplayNames([locale], { type: "region" })
   const links = establishmentLinks(establishment)
@@ -59,6 +60,47 @@ export function CollectionInformation({
           {t("missingInstructions")}
         </p>
       )}
+
+      <div className="grid gap-2" aria-label={hours("title")}>
+        <h4 className="font-semibold">{hours("title")}</h4>
+
+        {!establishment.openingHours ? (
+          <p className="text-sm text-muted-foreground">
+            {hours("notConfigured")}
+          </p>
+        ) : (
+          <>
+            <p className="text-xs text-muted-foreground">
+              {hours("localTime", { timeZone: establishment.timeZone })}
+            </p>
+
+            <dl className="grid gap-1 text-sm">
+              {establishment.openingHours.days.map((day, index) => {
+                const weekday = new Intl.DateTimeFormat(locale, {
+                  weekday: "long",
+                  timeZone: "UTC",
+                }).format(new Date(Date.UTC(2024, 0, index + 1)))
+                const periods = day.isClosed
+                  ? hours("closed")
+                  : day.windows
+                      .map((window) => `${window.start}–${window.end}`)
+                      .join(", ")
+
+                return (
+                  <div
+                    key={day.dayOfWeek}
+                    className="flex justify-between gap-4"
+                  >
+                    <dt className="capitalize">{weekday}</dt>
+
+                    <dd className="text-right">{periods}</dd>
+                  </div>
+                )
+              })}
+            </dl>
+          </>
+        )}
+      </div>
 
       {links.phone && (
         <a

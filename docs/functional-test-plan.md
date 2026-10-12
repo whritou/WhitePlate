@@ -4,6 +4,10 @@
 
 See [S1 evidence](audits/establishment-settings.md) for commands/results and remaining hosted checks. Automated API coverage includes actual owner/manager membership, anonymous/kitchen/foreign/revoked/inactive denial, defaults/normalization, precondition parsing, rejected-input atomicity, independent concurrent settings and menu configuration, host-resolved public projection/fallback and saved tracking locale. Domain tests cover locale clearing/disable/re-enable, international addresses, phone/string/coordinate rules. Browser fixture coverage includes real form dirty/save/cancel, duplicate submission, conflict discard/reload, unavailable retry, revoked form hiding, independent receipt collection failure, EN/FR responsive matrix/keyboard/zoom.
 
+## S2 weekly opening hours — local implementation acceptance
+
+Automated Domain/API tests verify seven independently configured weekdays, a closed day, split services, persistence/read-back, legacy settings PUT preservation, stale versions and invalid overlap/overnight/missing-day/closed-with-window rejection. Verify owner/manager access, malformed or stale `If-Match`, clear back to not-configured, public host/menu projection, and all-closed versus unconfigured after migrating a local PostgreSQL database. In the real settings screen, change only Tuesday and confirm other days retain their values; add/remove split periods, close/reopen a day, cancel/reload, and save/reload in EN/FR. In guest collection details, check all seven days and the establishment local time zone. Check narrow layouts, keyboard operation, and validation/retry/conflict messages. The migration is generated but unapplied to shared environments; no hosted/database acceptance is claimed.
+
 Hosted acceptance remains: apply migration in approved PostgreSQL environment, deploy API/frontend, save/reload as owner and manager, deny foreign/kitchen/revoked accounts, and verify tenant-host menu/checkout/receipt/tracking current pickup information without changing confirmed order snapshots. No fixture result substitutes for these operational checks.
 
 ## M2 menu product metadata

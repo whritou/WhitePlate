@@ -60,7 +60,7 @@ For intended behavior, use the proposed contract, schema, and acceptance plan to
 
 ## Keeping documentation current
 
-S2 opening hours: the approved wall-clock schedule, independent weekday hours, overnight/DST policy, unconfigured legacy state, management concurrency and public menu contract are recorded in the [written design](superpowers/specs/2026-10-12-opening-hours-design.md). Implementation planning is in progress; no S2 application behavior is claimed yet.
+S2 opening hours: weekly hours are implemented in source with independent weekday entries, split services, closed days, copy/apply, versioned management writes and public schedule disclosure. The approved wall-clock, overnight/DST and legacy-state policy is in the [written design](superpowers/specs/2026-10-12-opening-hours-design.md); see the API/schema contracts and functional plan for actual source checks. The migration remains unapplied to shared environments.
 
 S1 establishment settings: identity/contact/address, IANA timezone and localized pickup information are implemented following the approved [design](superpowers/specs/2026-10-12-establishment-settings-design.md) and [plan](superpowers/specs/2026-10-12-establishment-settings-implementation-plan.md). The production migration and API deployment are complete; hosted acceptance for an active owner/manager establishment remains open. See [verification and rollout](audits/establishment-settings.md).
 

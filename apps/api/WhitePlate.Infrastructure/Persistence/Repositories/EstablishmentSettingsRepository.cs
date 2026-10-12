@@ -27,5 +27,6 @@ public sealed class EstablishmentSettingsRepository(WhitePlateDbContext database
                 .SetProperty(row => row.Region, tenant.Region).SetProperty(row => row.CountryCode, tenant.CountryCode)
                 .SetProperty(row => row.Latitude, tenant.Latitude).SetProperty(row => row.Longitude, tenant.Longitude)
                 .SetProperty(row => row.TimeZone, tenant.TimeZone).SetProperty(row => row.PickupInstructionsJson, tenant.PickupInstructionsJson)
+                .SetProperty(row => row.OpeningHoursJson, tenant.OpeningHoursJson)
                 .SetProperty(row => row.EstablishmentVersion, tenant.EstablishmentVersion), cancellationToken) == 1;
 }

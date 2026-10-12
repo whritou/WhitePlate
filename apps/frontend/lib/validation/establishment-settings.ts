@@ -4,6 +4,7 @@ import type {
   EstablishmentOptions,
   EstablishmentSettings,
   PublicEstablishment,
+  OpeningHoursSchedule,
 } from "@/types/establishment-settings"
 
 const limits = {
@@ -62,6 +63,64 @@ function scalarProjection(value: Record<string, unknown>) {
   }
 }
 
+export function parseOpeningHours(
+  value: unknown
+): OpeningHoursSchedule | null | undefined {
+  if (value === undefined) return null
+  if (value === null) return null
+  if (!isRecord(value) || !Array.isArray(value.days) || value.days.length !== 7)
+    return undefined
+
+  const days = value.days.map((day, index) => {
+    if (
+      !isRecord(day) ||
+      day.dayOfWeek !== index + 1 ||
+      typeof day.isClosed !== "boolean" ||
+      !Array.isArray(day.windows) ||
+      day.windows.length > 8 ||
+      (day.isClosed && day.windows.length !== 0) ||
+      (!day.isClosed && day.windows.length === 0)
+    )
+      return null
+
+    let priorEnd = -1
+    const windows = day.windows.map((window) => {
+      if (
+        !isRecord(window) ||
+        typeof window.start !== "string" ||
+        typeof window.end !== "string" ||
+        !/^([01]\d|2[0-3]):[0-5]\d$/.test(window.start) ||
+        !/^([01]\d|2[0-3]):[0-5]\d$|^24:00$/.test(window.end)
+      )
+        return null
+
+      const start =
+        Number(window.start.slice(0, 2)) * 60 + Number(window.start.slice(3))
+      const end =
+        window.end === "24:00"
+          ? 1440
+          : Number(window.end.slice(0, 2)) * 60 + Number(window.end.slice(3))
+
+      if (start >= end || start < priorEnd) return null
+      priorEnd = end
+
+      return { start: window.start, end: window.end }
+    })
+
+    return windows.some((window) => window === null)
+      ? null
+      : {
+          dayOfWeek: day.dayOfWeek as number,
+          isClosed: day.isClosed,
+          windows: windows as { start: string; end: string }[],
+        }
+  })
+
+  return days.some((day) => day === null)
+    ? undefined
+    : { days: days as NonNullable<OpeningHoursSchedule["days"]> }
+}
+
 export function parsePublicEstablishment(
   value: unknown
 ): PublicEstablishment | null {
@@ -77,7 +136,8 @@ export function parsePublicEstablishment(
       value.pickupLocale === null ||
       (typeof value.pickupLocale === "string" &&
         value.pickupLocale.length <= 128)
-    )
+    ) ||
+    parseOpeningHours(value.openingHours) === undefined
   )
     return null
   try {
@@ -90,6 +150,7 @@ export function parsePublicEstablishment(
     ...scalarProjection(value),
     pickupInstruction: value.pickupInstruction,
     pickupLocale: value.pickupLocale,
+    openingHours: parseOpeningHours(value.openingHours) ?? null,
   } as PublicEstablishment
 }
 
@@ -109,6 +170,7 @@ export function parseEstablishmentSettings(
     ) ||
     !value.locales.includes(value.defaultLocale) ||
     !isRecord(value.pickupInstructions) ||
+    parseOpeningHours(value.openingHours) === undefined ||
     !Object.entries(value.pickupInstructions).every(
       ([locale, text]) =>
         value.locales instanceof Array &&
@@ -125,6 +187,7 @@ export function parseEstablishmentSettings(
     locales: [...value.locales],
     defaultLocale: value.defaultLocale,
     pickupInstructions: { ...value.pickupInstructions },
+    openingHours: parseOpeningHours(value.openingHours) ?? null,
   } as EstablishmentSettings
 }
 
