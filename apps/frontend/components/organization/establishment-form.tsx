@@ -22,6 +22,7 @@ import { OpeningHoursEditor } from "./opening-hours-editor"
 
 export function EstablishmentForm({
   tenantId,
+  section = "establishment",
   value,
   save,
   reload,
@@ -154,121 +155,128 @@ export function EstablishmentForm({
     <div className="grid min-w-0 gap-6 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] md:[&_[data-slot=input]]:min-h-12 md:[&_[data-slot=native-select]]:min-h-12 md:[&_button]:min-h-12">
       <Card>
         <CardContent className="p-4 sm:p-6">
-          <form
-            aria-busy={pending}
-            onSubmit={(event) => {
-              event.preventDefault()
-              submit()
-            }}
-            className="grid gap-6"
-          >
-            <fieldset disabled={pending} className="min-w-0">
-              <EstablishmentFields
-                draft={draft}
-                options={value.options}
-                locales={saved.locales}
-                defaultLocale={saved.defaultLocale}
-                errors={errors}
-                change={change}
-              />
-            </fieldset>
+          {section === "establishment" && (
+            <form
+              aria-busy={pending}
+              onSubmit={(event) => {
+                event.preventDefault()
+                submit()
+              }}
+              className="grid gap-6"
+            >
+              <fieldset disabled={pending} className="min-w-0">
+                <EstablishmentFields
+                  draft={draft}
+                  options={value.options}
+                  locales={saved.locales}
+                  defaultLocale={saved.defaultLocale}
+                  errors={errors}
+                  change={change}
+                />
+              </fieldset>
 
-            {error && (
-              <Alert variant="destructive" role="alert">
-                <AlertDescription>{t(`errors.${error}`)}</AlertDescription>
-              </Alert>
-            )}
+              {error && (
+                <Alert variant="destructive" role="alert">
+                  <AlertDescription>{t(`errors.${error}`)}</AlertDescription>
+                </Alert>
+              )}
 
-            {error === "conflict" && (
-              <div className="grid gap-3">
+              {error === "conflict" && (
+                <div className="grid gap-3">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={pending}
+                    onClick={() => setConfirmReload(true)}
+                  >
+                    {t("reload")}
+                  </Button>
+
+                  {confirmReload && (
+                    <div className="grid gap-3">
+                      <p>{t("discardWarning")}</p>
+
+                      <Button
+                        type="button"
+                        disabled={pending}
+                        onClick={() => void discardAndReload()}
+                      >
+                        {t("confirmReload")}
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <div className="flex flex-wrap gap-3 border-t pt-5">
+                <Button type="submit" disabled={pending || !dirty}>
+                  {t(pending ? "saving" : "save")}
+                </Button>
+
                 <Button
                   type="button"
                   variant="outline"
-                  disabled={pending}
-                  onClick={() => setConfirmReload(true)}
+                  disabled={pending || !dirty}
+                  onClick={() => {
+                    setEditing(null)
+                    setErrors({})
+                    setError(null)
+                    setConfirmReload(false)
+                  }}
                 >
-                  {t("reload")}
+                  {t("cancel")}
                 </Button>
 
-                {confirmReload && (
-                  <div className="grid gap-3">
-                    <p>{t("discardWarning")}</p>
-
-                    <Button
-                      type="button"
-                      disabled={pending}
-                      onClick={() => void discardAndReload()}
-                    >
-                      {t("confirmReload")}
-                    </Button>
-                  </div>
-                )}
+                <p
+                  role="status"
+                  className="self-center text-sm text-muted-foreground"
+                >
+                  {pending
+                    ? t("saving")
+                    : savedNotice
+                      ? t("saved")
+                      : dirty
+                        ? t("unsaved")
+                        : t("upToDate")}
+                </p>
               </div>
-            )}
+            </form>
+          )}
 
-            <div className="flex flex-wrap gap-3 border-t pt-5">
-              <Button type="submit" disabled={pending || !dirty}>
-                {t(pending ? "saving" : "save")}
-              </Button>
-
-              <Button
-                type="button"
-                variant="outline"
-                disabled={pending || !dirty}
-                onClick={() => {
-                  setEditing(null)
-                  setErrors({})
-                  setError(null)
-                  setConfirmReload(false)
-                }}
-              >
-                {t("cancel")}
-              </Button>
-
-              <p
-                role="status"
-                className="self-center text-sm text-muted-foreground"
-              >
-                {pending
-                  ? t("saving")
-                  : savedNotice
-                    ? t("saved")
-                    : dirty
-                      ? t("unsaved")
-                      : t("upToDate")}
-              </p>
-            </div>
-          </form>
-
-          <OpeningHoursEditor
-            key={openingHoursReloadKey}
-            tenantId={tenantId}
-            settings={saved}
-            onSaved={async (settings) => {
-              setEditing((current) =>
-                current ? { ...current, saved: settings } : null
-              )
-              await onSaved(settings)
-            }}
-          />
+          {section === "hours" && (
+            <OpeningHoursEditor
+              key={openingHoursReloadKey}
+              tenantId={tenantId}
+              settings={saved}
+              onSaved={async (settings) => {
+                setEditing((current) =>
+                  current ? { ...current, saved: settings } : null
+                )
+                await onSaved(settings)
+              }}
+            />
+          )}
         </CardContent>
       </Card>
 
-      <aside className="grid h-fit gap-3 border p-4 sm:p-6">
-        <h2 className="font-display text-xl font-bold">{t("preview")}</h2>
+      {section === "establishment" && (
+        <aside className="grid h-fit gap-3 border p-4 sm:p-6">
+          <h2 className="font-display text-xl font-bold">{t("preview")}</h2>
 
-        <p className="text-sm text-muted-foreground">{t("previewHelp")}</p>
+          <p className="text-sm text-muted-foreground">{t("previewHelp")}</p>
 
-        <CollectionInformation
-          establishment={{
-            ...value.settings,
-            pickupInstruction:
-              value.settings.pickupInstructions[value.settings.defaultLocale] ??
-              null,
-            pickupLocale: value.settings.defaultLocale,
-          }}
-        />
-      </aside>
+          <CollectionInformation
+            establishment={{
+              ...value.settings,
+              pickupInstruction:
+                value.settings.pickupInstructions[
+                  value.settings.defaultLocale
+                ] ?? null,
+              pickupLocale: value.settings.defaultLocale,
+            }}
+          />
+        </aside>
+      )}
     </div>
   )
 }

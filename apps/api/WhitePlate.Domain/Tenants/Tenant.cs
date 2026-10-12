@@ -1,5 +1,6 @@
 using WhitePlate.Domain.Common;
 using System.Text.Json;
+using WhitePlate.Domain.Organizations;
 
 namespace WhitePlate.Domain.Tenants;
 
@@ -21,6 +22,12 @@ public sealed partial class Tenant
     public string DefaultMenuLocale { get; private set; } = "en";
     public string MenuLocalesJson { get; private set; } = "[\"en\"]";
     public string DescriptionTranslationsJson { get; private set; } = "{}";
+    public string LegalProfileMode { get; private set; } = "inherit";
+    public string? LegalCountryCode { get; private set; }
+    public string? LegalName { get; private set; }
+    public string? LegalRegistrationNumber { get; private set; }
+    public string? TaxIdentifier { get; private set; }
+    public int LegalProfileVersion { get; private set; } = 1;
 
     private Tenant() { }
 
@@ -55,6 +62,32 @@ public sealed partial class Tenant
     }
 
     public void Deactivate() => IsActive = false;
+
+    public void SetCustomLegalProfile(string? country, string? name, string? registration, string? tax)
+    {
+        if (LegalProfileVersion == int.MaxValue)
+            throw new DomainRuleException("invalid_legal_profile", "legalProfileVersion", "The legal profile version is invalid.");
+        var normalized = LegalProfileRules.Normalize(country, name, registration, tax, null, restaurant: true);
+        LegalProfileMode = "custom";
+        LegalCountryCode = normalized.Country;
+        LegalName = normalized.Name;
+        LegalRegistrationNumber = normalized.Registration;
+        TaxIdentifier = normalized.Tax;
+        LegalProfileVersion++;
+    }
+
+    public void InheritLegalProfile()
+    {
+        if (LegalProfileMode == "inherit") return;
+        if (LegalProfileVersion == int.MaxValue)
+            throw new DomainRuleException("invalid_legal_profile", "legalProfileVersion", "The legal profile version is invalid.");
+        LegalProfileMode = "inherit";
+        LegalCountryCode = null;
+        LegalName = null;
+        LegalRegistrationNumber = null;
+        TaxIdentifier = null;
+        LegalProfileVersion++;
+    }
 
     public IReadOnlyList<string> GetMenuLocales() =>
         JsonSerializer.Deserialize<string[]>(MenuLocalesJson) ?? [DefaultMenuLocale];

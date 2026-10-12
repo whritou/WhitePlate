@@ -25,6 +25,47 @@ public sealed class EstablishmentSettingsHandler(IStaffMembershipRepository memb
         return Result<EstablishmentOptionsDto>.Success(options.Get());
     }
 
+    public async Task<Result<TenantLegalProfileDto>> GetLegalProfileAsync(Guid id, ExternalIdentity identity,
+        CancellationToken ct)
+    {
+        if (!await CatalogAccess.CanManageAsync(memberships, id, identity, ct))
+            return Result<TenantLegalProfileDto>.Failure(new ApplicationError(ErrorCode.NotFound));
+        var tenant = await repository.GetAsync(id, ct);
+        if (tenant is null) return Result<TenantLegalProfileDto>.Failure(new ApplicationError(ErrorCode.NotFound));
+        var organization = await repository.GetOrganizationAsync(tenant.OrganizationId, ct);
+        return Result<TenantLegalProfileDto>.Success(TenantLegalProfileDto.From(tenant, organization));
+    }
+
+    public async Task<Result<TenantLegalProfileDto>> SaveLegalProfileAsync(Guid id, ExternalIdentity identity,
+        UpdateTenantLegalProfileInput input, int? expectedVersion, CancellationToken ct)
+    {
+        if (!await CatalogAccess.CanManageAsync(memberships, id, identity, ct))
+            return Result<TenantLegalProfileDto>.Failure(new ApplicationError(ErrorCode.NotFound));
+        var tenant = await repository.GetAsync(id, ct);
+        if (tenant is null) return Result<TenantLegalProfileDto>.Failure(new ApplicationError(ErrorCode.NotFound));
+        if (expectedVersion is null) return InvalidLegal("legalProfileVersion");
+        if (tenant.LegalProfileVersion != expectedVersion)
+            return Result<TenantLegalProfileDto>.Failure(new ApplicationError(ErrorCode.PreconditionFailed));
+        try
+        {
+            if (input.Mode == "inherit") tenant.InheritLegalProfile();
+            else if (input.Mode == "custom") tenant.SetCustomLegalProfile(input.CountryCode, input.Name,
+                input.RegistrationNumber, input.TaxIdentifier);
+            else return InvalidLegal("mode");
+            if (!await repository.SaveLegalProfileAsync(tenant, identity, expectedVersion.Value, ct))
+                return await CatalogAccess.CanManageAsync(memberships, id, identity, ct)
+                    ? Result<TenantLegalProfileDto>.Failure(new ApplicationError(ErrorCode.PreconditionFailed))
+                    : Result<TenantLegalProfileDto>.Failure(new ApplicationError(ErrorCode.NotFound));
+            var organization = await repository.GetOrganizationAsync(tenant.OrganizationId, ct);
+            return Result<TenantLegalProfileDto>.Success(TenantLegalProfileDto.From(tenant, organization));
+        }
+        catch (DomainRuleException exception)
+        {
+            return Result<TenantLegalProfileDto>.Failure(new ApplicationError(ErrorCode.ValidationFailed,
+                new ValidationIssue(exception.Field, exception.Code, exception.Message)));
+        }
+    }
+
     public async Task<Result<EstablishmentSettingsDto>> SaveAsync(Guid id, ExternalIdentity identity,
         EstablishmentInput input, int? expectedVersion, CancellationToken ct)
     {
@@ -80,4 +121,6 @@ public sealed class EstablishmentSettingsHandler(IStaffMembershipRepository memb
     private static Result<EstablishmentSettingsDto> Conflict() => Result<EstablishmentSettingsDto>.Failure(new ApplicationError(ErrorCode.PreconditionFailed));
     private static Result<EstablishmentSettingsDto> Invalid(string field) => Result<EstablishmentSettingsDto>.Failure(
         new ApplicationError(ErrorCode.ValidationFailed, new ValidationIssue(field, "invalid_establishment", "The establishment field is invalid.")));
+    private static Result<TenantLegalProfileDto> InvalidLegal(string field) => Result<TenantLegalProfileDto>.Failure(
+        new ApplicationError(ErrorCode.ValidationFailed, new ValidationIssue(field, "invalid_legal_profile", "The legal profile field is invalid.")));
 }

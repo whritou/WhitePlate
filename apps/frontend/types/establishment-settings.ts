@@ -36,6 +36,19 @@ export type EstablishmentSettings = Omit<
 }
 
 export type EstablishmentOptions = { timeZones: string[]; countries: string[] }
+export type LegalProfileValues = {
+  countryCode: string | null
+  name: string | null
+  registrationNumber: string | null
+  taxIdentifier: string | null
+}
+export type TenantLegalProfile = {
+  mode: "inherit" | "custom"
+  organizationProfile: LegalProfileValues
+  effectiveProfile: LegalProfileValues
+  version: number
+}
+export type RestaurantSettingsSection = "establishment" | "legal" | "hours"
 export type EstablishmentRead = {
   settings: EstablishmentSettings
   options: EstablishmentOptions
@@ -62,6 +75,7 @@ export type EstablishmentEditorProps = {
   tenantId: string
   userId: string
   initial: EstablishmentRead | null
+  section?: "establishment" | "hours"
 }
 export type EstablishmentSave = (
   input: unknown
@@ -74,6 +88,7 @@ export type EstablishmentTextField = {
 }
 export type EstablishmentFormProps = {
   tenantId: string
+  section?: "establishment" | "hours"
   value: EstablishmentRead
   save: EstablishmentSave
   reload: () => Promise<EstablishmentRead | null>

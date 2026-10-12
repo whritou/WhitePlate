@@ -8,6 +8,7 @@ using WhitePlate.Application.Common.Errors;
 using WhitePlate.Application.Staff;
 using WhitePlate.Application.Tenants;
 using WhitePlate.Domain.Identity;
+using WhitePlate.Domain.Common;
 
 namespace WhitePlate.Api.Controllers;
 
@@ -34,7 +35,8 @@ public sealed class OrganizationsController(
     {
         var identity = currentIdentity.Identity;
         if (identity is null) return Unauthorized();
-        var result = await createOrganization.HandleAsync(request.Name, identity, cancellationToken);
+        var result = await createOrganization.HandleAsync(request.Name, request.LegalCountryCode, request.LegalName,
+            request.LegalRegistrationNumber, request.TaxIdentifier, identity, cancellationToken);
         if (!result.IsSuccess) return errors.ToActionResult(errors.Create(HttpContext, result.Error));
         return StatusCode(StatusCodes.Status201Created, result.Value);
     }
@@ -106,6 +108,56 @@ public sealed class OrganizationsController(
         return result.IsSuccess ? Ok(result.Value) : errors.ToActionResult(errors.Create(HttpContext, result.Error));
     }
 
+    [HttpGet("{organizationId:guid}/legal-profile")]
+    [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+    public async Task<ActionResult<OrganizationDto>> GetLegalProfile(Guid organizationId,
+        CancellationToken cancellationToken)
+    {
+        var identity = currentIdentity.Identity;
+        if (identity is null) return Unauthorized();
+        var organization = await organizations.FindOwnedAsync(organizationId, identity, cancellationToken);
+        if (organization is null) return NotFound();
+        Response.Headers.ETag = $"\"{organization.LegalProfileVersion}\"";
+        Response.Headers.CacheControl = "no-store";
+        return Ok(OrganizationDto.FromDomain(organization));
+    }
+
+    [HttpPut("{organizationId:guid}/legal-profile")]
+    [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+    public async Task<ActionResult<OrganizationDto>> UpdateLegalProfile(Guid organizationId,
+        UpdateLegalProfileRequest request, CancellationToken cancellationToken)
+    {
+        var identity = currentIdentity.Identity;
+        if (identity is null) return Unauthorized();
+        var organization = await organizations.FindOwnedAsync(organizationId, identity, cancellationToken);
+        if (organization is null) return NotFound();
+        var expected = ParseVersion(Request.Headers.IfMatch.ToString());
+        if (expected is null) return errors.ToActionResult(errors.Create(HttpContext,
+            new ApplicationError(ErrorCode.ValidationFailed, new ValidationIssue("legalProfileVersion", "invalid_etag", "A legal profile version is required."))));
+        if (organization.LegalProfileVersion != expected) return StatusCode(StatusCodes.Status412PreconditionFailed);
+        try
+        {
+            organization.SetLegalProfile(request.LegalCountryCode, request.LegalName,
+                request.LegalRegistrationNumber, request.TaxIdentifier, null);
+            await organizations.SaveChangesAsync(cancellationToken);
+            Response.Headers.ETag = $"\"{organization.LegalProfileVersion}\"";
+            Response.Headers.CacheControl = "no-store";
+            return Ok(OrganizationDto.FromDomain(organization));
+        }
+        catch (DomainRuleException exception)
+        {
+            return errors.ToActionResult(errors.Create(HttpContext, new ApplicationError(ErrorCode.ValidationFailed,
+                new ValidationIssue(exception.Field, exception.Code, exception.Message))));
+        }
+        catch (Microsoft.EntityFrameworkCore.DbUpdateConcurrencyException)
+        {
+            return StatusCode(StatusCodes.Status412PreconditionFailed);
+        }
+    }
+
+    private static int? ParseVersion(string header) => header.Length >= 3 && header.StartsWith('"') &&
+        header.EndsWith('"') && int.TryParse(header[1..^1], out var value) && value > 0 ? value : null;
+
     [HttpPost("{organizationId:guid}/archive")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status401Unauthorized, "application/problem+json")]
@@ -140,7 +192,8 @@ public sealed class OrganizationsController(
         var identity = currentIdentity.Identity;
         if (identity is null) return Unauthorized();
         var result = await createRestaurant.HandleAsync(new CreateRestaurantCommand(organizationId,
-            request.Name, request.Subdomain, request.Currency, identity), cancellationToken);
+            request.Name, request.Subdomain, request.Currency, identity, request.LegalProfileMode,
+            request.LegalCountryCode, request.LegalName, request.LegalRegistrationNumber, request.TaxIdentifier), cancellationToken);
         if (!result.IsSuccess) return errors.ToActionResult(errors.Create(HttpContext, result.Error));
         var tenant = result.Value;
         return StatusCode(StatusCodes.Status201Created,

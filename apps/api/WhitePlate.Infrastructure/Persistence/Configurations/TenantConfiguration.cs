@@ -39,5 +39,11 @@ public sealed class TenantConfiguration : IEntityTypeConfiguration<Tenant>
         builder.Property(tenant => tenant.EstablishmentVersion).IsRequired().HasDefaultValue(1);
         builder.HasIndex(tenant => tenant.Subdomain).IsUnique().HasDatabaseName(SubdomainIndex);
         builder.Property(tenant => tenant.IsActive).IsRequired();
+        builder.Property(tenant => tenant.LegalProfileMode).HasMaxLength(8).IsRequired().HasDefaultValue("inherit");
+        builder.Property(tenant => tenant.LegalCountryCode).HasMaxLength(2);
+        builder.Property(tenant => tenant.LegalName).HasMaxLength(200);
+        builder.Property(tenant => tenant.LegalRegistrationNumber).HasMaxLength(32);
+        builder.Property(tenant => tenant.TaxIdentifier).HasMaxLength(32);
+        builder.Property(tenant => tenant.LegalProfileVersion).IsRequired().HasDefaultValue(1);
     }
 }

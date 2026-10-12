@@ -5,6 +5,11 @@ export type RestaurantInput = {
   name: string
   subdomain: string
   currency: "EUR" | "USD" | "GBP"
+  legalProfileMode: "inherit" | "custom"
+  legalCountryCode: string | null
+  legalName: string | null
+  legalRegistrationNumber: string | null
+  taxIdentifier: string | null
 }
 
 export type RestaurantError =
@@ -13,7 +18,15 @@ export type RestaurantError =
 export type RestaurantResult =
   { ok: true; restaurant: Restaurant } | { ok: false; message: RestaurantError }
 
-export type RestaurantFormProps = { organizationId: string }
+export type RestaurantFormProps = {
+  organizationId: string
+  organizationProfile: {
+    legalCountryCode?: string | null
+    legalName?: string | null
+    legalRegistrationNumber?: string | null
+    taxIdentifier?: string | null
+  }
+}
 
 export type RestaurantPageProps = {
   searchParams: Promise<{ organizationId?: string }>

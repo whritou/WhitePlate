@@ -43,6 +43,19 @@ export function parseOrganizations(value: unknown): Organization[] | null {
     id: item.id,
     name: item.name,
     isActive: item.isActive,
+    legalCountryCode:
+      typeof item.legalCountryCode === "string" ? item.legalCountryCode : null,
+    legalName: typeof item.legalName === "string" ? item.legalName : null,
+    legalRegistrationNumber:
+      typeof item.legalRegistrationNumber === "string"
+        ? item.legalRegistrationNumber
+        : null,
+    taxIdentifier:
+      typeof item.taxIdentifier === "string" ? item.taxIdentifier : null,
+    legalProfileVersion:
+      typeof item.legalProfileVersion === "number"
+        ? item.legalProfileVersion
+        : 1,
   }))
 }
 

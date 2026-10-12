@@ -8,7 +8,8 @@ namespace WhitePlate.Application.Organizations;
 
 public sealed class CreateOrganizationCommandHandler(IOrganizationProvisioningRepository repository)
 {
-    public async Task<Result<OrganizationDto>> HandleAsync(string name, ExternalIdentity identity,
+    public async Task<Result<OrganizationDto>> HandleAsync(string name, string? legalCountryCode, string? legalName,
+        string? legalRegistrationNumber, string? taxIdentifier, ExternalIdentity identity,
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(identity);
@@ -18,6 +19,7 @@ public sealed class CreateOrganizationCommandHandler(IOrganizationProvisioningRe
         try
         {
             var organization = Organization.Create(name);
+            organization.SetLegalProfile(legalCountryCode, legalName, legalRegistrationNumber, taxIdentifier, null);
             var owner = OrganizationOwnerMembership.Create(organization.Id, identity);
             await repository.CreateAsync(organization, owner, cancellationToken);
             return Result<OrganizationDto>.Success(OrganizationDto.FromDomain(organization));

@@ -94,6 +94,51 @@ export function parseOrganizationName(form: unknown): string | null {
     : null
 }
 
+export function parseOrganizationLegalProfile(form: unknown) {
+  if (!(form instanceof FormData)) return null
+
+  const values = Object.fromEntries(
+    [
+      "name",
+      "legalCountryCode",
+      "legalName",
+      "legalRegistrationNumber",
+      "taxIdentifier",
+    ].map((key) => [key, form.get(key)])
+  )
+
+  if (
+    typeof values.name !== "string" ||
+    !values.name.trim() ||
+    values.name.trim().length > 200 ||
+    typeof values.legalCountryCode !== "string" ||
+    !["FR", "DE", "GB", "US"].includes(values.legalCountryCode) ||
+    ["legalName", "legalRegistrationNumber", "taxIdentifier"].some((key) => {
+      const value = values[key]
+
+      return value !== null && (typeof value !== "string" || value.length > 200)
+    })
+  )
+    return null
+
+  return {
+    name: values.name.trim(),
+    legalCountryCode: values.legalCountryCode,
+    legalName:
+      typeof values.legalName === "string"
+        ? values.legalName.trim() || null
+        : null,
+    legalRegistrationNumber:
+      typeof values.legalRegistrationNumber === "string"
+        ? values.legalRegistrationNumber.trim() || null
+        : null,
+    taxIdentifier:
+      typeof values.taxIdentifier === "string"
+        ? values.taxIdentifier.trim() || null
+        : null,
+  }
+}
+
 export function parseOrganizationRename(
   form: unknown
 ): OrganizationRenameInput | null {

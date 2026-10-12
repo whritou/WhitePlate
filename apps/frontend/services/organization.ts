@@ -68,9 +68,37 @@ export async function saveCatalogTranslation({
   )
 }
 
-export async function createOrganization(name: string): Promise<ActionResult> {
+export async function createOrganization(profile: {
+  name: string
+  legalCountryCode: string
+  legalName: string | null
+  legalRegistrationNumber: string | null
+  taxIdentifier: string | null
+}): Promise<ActionResult> {
   return actionResult(
-    await whitePlateApi.post("/api/v1/organizations", { name })
+    await whitePlateApi.post("/api/v1/organizations", profile)
+  )
+}
+
+export async function saveOrganizationLegalProfile(input: {
+  organizationId: string
+  version: number
+  legalCountryCode: string
+  legalName: string | null
+  legalRegistrationNumber: string | null
+  taxIdentifier: string | null
+}): Promise<ActionResult> {
+  return actionResult(
+    await whitePlateApi.put(
+      `/api/v1/organizations/${input.organizationId}/legal-profile`,
+      {
+        legalCountryCode: input.legalCountryCode,
+        legalName: input.legalName,
+        legalRegistrationNumber: input.legalRegistrationNumber,
+        taxIdentifier: input.taxIdentifier,
+      },
+      { ifMatch: `"${input.version}"` }
+    )
   )
 }
 

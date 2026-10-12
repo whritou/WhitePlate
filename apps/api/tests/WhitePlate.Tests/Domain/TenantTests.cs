@@ -46,6 +46,23 @@ public sealed class TenantTests
     }
 
     [Fact]
+    public void UsesOrganizationLegalProfileByDefaultAndCanStoreAnIndependentRestaurantProfile()
+    {
+        var tenant = Tenant.Create(Guid.NewGuid(), "Bistro", "bistro", "EUR");
+
+        Assert.Equal("inherit", tenant.LegalProfileMode);
+        Assert.Null(tenant.LegalCountryCode);
+
+        tenant.SetCustomLegalProfile("FR", "Bistro Paris", "73282932000074", "FR88732829320");
+        Assert.Equal("custom", tenant.LegalProfileMode);
+        Assert.Equal("73282932000074", tenant.LegalRegistrationNumber);
+
+        tenant.InheritLegalProfile();
+        Assert.Equal("inherit", tenant.LegalProfileMode);
+        Assert.Null(tenant.LegalCountryCode);
+    }
+
+    [Fact]
     public void ResolvesDescriptionByMenuLocaleThenDefault()
     {
         var tenant = Tenant.Create(Guid.NewGuid(), "Bistro", "bistro", "EUR");

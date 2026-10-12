@@ -5,7 +5,7 @@ import {
   parseMenuLanguages,
   parseRestaurantDescriptionTranslation,
   parseCatalogTranslation,
-  parseOrganizationName,
+  parseOrganizationLegalProfile,
   parseOrganizationRename,
   parseStaffInvitation,
 } from "@/lib/validation/organization"
@@ -53,9 +53,44 @@ export async function saveCatalogTranslationAction(
 export async function createOrganizationAction(
   form: unknown
 ): Promise<ActionResult> {
-  const name = parseOrganizationName(form)
+  const profile = parseOrganizationLegalProfile(form)
 
-  return name ? createOrganization(name) : { ok: false, message: "invalid" }
+  return profile
+    ? createOrganization(profile)
+    : { ok: false, message: "invalid" }
+}
+
+export async function saveOrganizationLegalProfileAction(
+  input: unknown
+): Promise<ActionResult> {
+  if (
+    !isRecord(input) ||
+    !isUuid(input.organizationId) ||
+    !Number.isSafeInteger(input.version) ||
+    typeof input.version !== "number" ||
+    input.version < 1 ||
+    typeof input.legalCountryCode !== "string" ||
+    !["FR", "DE", "GB", "US"].includes(input.legalCountryCode) ||
+    [input.legalName, input.legalRegistrationNumber, input.taxIdentifier].some(
+      (value) =>
+        value !== null && (typeof value !== "string" || value.length > 200)
+    )
+  )
+    return { ok: false, message: "invalid" }
+
+  const { saveOrganizationLegalProfile } =
+    await import("@/services/organization")
+
+  return saveOrganizationLegalProfile(
+    input as {
+      organizationId: string
+      version: number
+      legalCountryCode: string
+      legalName: string | null
+      legalRegistrationNumber: string | null
+      taxIdentifier: string | null
+    }
+  )
 }
 
 export async function renameOrganizationAction(

@@ -1,5 +1,6 @@
 using WhitePlate.Domain.Tenants;
 using WhitePlate.Domain.Identity;
+using WhitePlate.Domain.Organizations;
 
 namespace WhitePlate.Application.Tenants;
 
@@ -29,6 +30,27 @@ public sealed record EstablishmentSettingsDto(string Name, string? Phone, string
 
 public sealed record EstablishmentOptionsDto(IReadOnlyList<string> TimeZones, IReadOnlyList<string> Countries);
 
+public sealed record LegalProfileValuesDto(string? CountryCode, string? Name, string? RegistrationNumber,
+    string? TaxIdentifier);
+
+public sealed record TenantLegalProfileDto(string Mode, LegalProfileValuesDto OrganizationProfile,
+    LegalProfileValuesDto EffectiveProfile, int Version)
+{
+    public static TenantLegalProfileDto From(Tenant tenant, Organization? organization)
+    {
+        var parent = new LegalProfileValuesDto(organization?.LegalCountryCode, organization?.LegalName,
+            organization?.LegalRegistrationNumber, organization?.TaxIdentifier);
+        var effective = tenant.LegalProfileMode == "custom"
+            ? new LegalProfileValuesDto(tenant.LegalCountryCode, tenant.LegalName,
+                tenant.LegalRegistrationNumber, tenant.TaxIdentifier)
+            : parent;
+        return new(tenant.LegalProfileMode, parent, effective, tenant.LegalProfileVersion);
+    }
+}
+
+public sealed record UpdateTenantLegalProfileInput(string Mode, string? CountryCode, string? Name,
+    string? RegistrationNumber, string? TaxIdentifier);
+
 public interface IEstablishmentOptions
 {
     EstablishmentOptionsDto Get();
@@ -37,6 +59,9 @@ public interface IEstablishmentOptions
 public interface IEstablishmentSettingsRepository
 {
     Task<Tenant?> GetAsync(Guid tenantId, CancellationToken cancellationToken);
+    Task<Organization?> GetOrganizationAsync(Guid organizationId, CancellationToken cancellationToken);
     Task<bool> SaveAsync(Tenant tenant, ExternalIdentity identity, int expectedVersion, string expectedLocales, string expectedDefaultLocale,
+        CancellationToken cancellationToken);
+    Task<bool> SaveLegalProfileAsync(Tenant tenant, ExternalIdentity identity, int expectedVersion,
         CancellationToken cancellationToken);
 }

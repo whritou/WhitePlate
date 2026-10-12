@@ -1,5 +1,13 @@
 # API contracts
 
+## S1 organization and restaurant legal profiles — 2026-10-12
+
+Organization creation now requires `legalCountryCode` (`FR`, `DE`, `GB`, or `US`) and accepts optional `legalName`, `legalRegistrationNumber`, and `taxIdentifier`. `GET /api/v1/organizations/{organizationId}/legal-profile` and `PUT` manage the profile for persisted organization owners. PUT requires a quoted `If-Match` legal-profile version; stale writes return 412. The organization response includes the current profile and `legalProfileVersion`.
+
+`POST /api/v1/organizations/{organizationId}/restaurants` defaults `legalProfileMode` to `inherit`. `custom` accepts the same profile fields and stores an independent restaurant profile. Owner/manager `GET` and `PUT /api/v1/tenants/{tenantId}/establishment-settings/legal-profile` return `{mode, organizationProfile, effectiveProfile, version}`; PUT requires a quoted version ETag. `inherit` clears the override and resolves the current organization profile on read. `custom` requires a supported legal country. Organization edits are immediately visible to inheriting restaurants and do not change custom profiles.
+
+Identifiers are optional and checked for supported syntax/checksum only (French SIREN at organization level, SIRET at restaurant level); no external registry status is asserted. The establishment address `countryCode` remains distinct from legal country. No default tax percentage is stored. Product tax rates remain authoritative and order amounts/snapshots remain unchanged. Additive migration `20261012190104_LegalProfileSettings` adds nullable identity fields and inherit/version defaults; it is generated and reviewed, but not yet applied to a shared environment. See [legal profile design](../superpowers/specs/2026-10-12-legal-settings-design.md).
+
 ## S1 establishment settings — 2026-10-12
 
 Implemented and deployed to Coolify Production; hosted acceptance on an active owner/manager establishment remains open. `/api/v1/me` omits inactive restaurants so workspace navigation does not offer a tenant that protected operations correctly hide. [Verification and rollout](../audits/establishment-settings.md).

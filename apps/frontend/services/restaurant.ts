@@ -8,10 +8,24 @@ export async function createRestaurant({
   name,
   subdomain,
   currency,
+  legalProfileMode,
+  legalCountryCode,
+  legalName,
+  legalRegistrationNumber,
+  taxIdentifier,
 }: RestaurantInput): Promise<RestaurantResult> {
   const response = await whitePlateApi.post<unknown>(
     `/api/v1/organizations/${organizationId}/restaurants`,
-    { name, subdomain, currency }
+    {
+      name,
+      subdomain,
+      currency,
+      legalProfileMode,
+      legalCountryCode,
+      legalName,
+      legalRegistrationNumber,
+      taxIdentifier,
+    }
   )
 
   if (!response.ok) {

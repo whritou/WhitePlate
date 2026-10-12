@@ -51,7 +51,45 @@ it("creates a normalized restaurant with only contract fields", async () => {
   })
   expect(whitePlateApi.post).toHaveBeenCalledWith(
     `/api/v1/organizations/${organizationId}/restaurants`,
-    { name: "Bistro", subdomain: "my-bistro", currency: "EUR" }
+    {
+      name: "Bistro",
+      subdomain: "my-bistro",
+      currency: "EUR",
+      legalProfileMode: "inherit",
+      legalCountryCode: null,
+      legalName: null,
+      legalRegistrationNumber: null,
+      taxIdentifier: null,
+    }
+  )
+})
+
+it("sends an explicitly customized restaurant legal profile", async () => {
+  vi.mocked(whitePlateApi.post).mockResolvedValue({
+    ok: true,
+    status: 201,
+    data: {
+      id: restaurantId,
+      name: "Bistro",
+      subdomain: "my-bistro",
+      currency: "EUR",
+    },
+  })
+
+  const input = form({
+    legalProfileMode: "custom",
+    legalCountryCode: "FR",
+    legalName: "Bistro Paris",
+  })
+
+  await createRestaurantAction(input)
+  expect(whitePlateApi.post).toHaveBeenCalledWith(
+    `/api/v1/organizations/${organizationId}/restaurants`,
+    expect.objectContaining({
+      legalProfileMode: "custom",
+      legalCountryCode: "FR",
+      legalName: "Bistro Paris",
+    })
   )
 })
 

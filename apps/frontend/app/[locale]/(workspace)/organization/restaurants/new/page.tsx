@@ -52,7 +52,10 @@ export default async function NewRestaurantPage({
           </CardHeader>
 
           <CardContent>
-            <RestaurantForm organizationId={organization.id} />
+            <RestaurantForm
+              organizationId={organization.id}
+              organizationProfile={organization}
+            />
           </CardContent>
         </Card>
       ) : (

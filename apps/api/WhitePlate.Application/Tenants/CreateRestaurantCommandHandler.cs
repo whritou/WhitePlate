@@ -26,6 +26,11 @@ public sealed class CreateRestaurantCommandHandler(IStaffMembershipRepository me
         try
         {
             tenant = Tenant.Create(command.OrganizationId, command.Name, command.Subdomain, command.Currency);
+            if (command.LegalProfileMode == "custom")
+                tenant.SetCustomLegalProfile(command.LegalCountryCode, command.LegalName,
+                    command.LegalRegistrationNumber, command.TaxIdentifier);
+            else if (command.LegalProfileMode != "inherit")
+                throw new DomainRuleException("invalid_legal_profile", "legalProfileMode", "The legal profile mode is invalid.");
         }
         catch (DomainRuleException exception)
         {

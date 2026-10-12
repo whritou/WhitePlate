@@ -105,3 +105,27 @@ test("mobile organization settings reveal the chosen section and keep hover cont
   )
   await expect(organization).toHaveCSS("color", themeColors.hoverText)
 })
+
+test("restaurant settings mobile category selector updates the URL and selected panel", async ({
+  page,
+}) => {
+  const tenantId = "22222222-2222-4222-8222-222222222222"
+
+  await page.setViewportSize({ width: 390, height: 700 })
+  await page.goto(
+    `/en/live-workspace-test?view=restaurant-settings&tenantId=${tenantId}&section=legal`
+  )
+
+  const category = page.getByRole("combobox", {
+    name: "Restaurant settings categories",
+  })
+
+  await expect(category).toHaveValue("legal")
+  await expect(
+    page.getByRole("heading", { name: "Legal and tax profile" })
+  ).toBeVisible()
+
+  await category.selectOption("hours")
+  await expect(page).toHaveURL(/section=hours/)
+  await expect(category).toHaveValue("hours")
+})

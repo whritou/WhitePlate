@@ -36,4 +36,46 @@ public sealed class OrganizationTests
         Assert.Equal("New Name", organization.Name);
         Assert.Throws<DomainRuleException>(() => organization.Rename(" "));
     }
+
+    [Fact]
+    public void SavesAValidFrenchLegalProfileWithoutChangingOrganizationName()
+    {
+        var organization = Organization.Create("Bistro");
+
+        organization.SetLegalProfile("fr", "  Bistro SAS  ", "732829320", "FR88732829320", null);
+
+        Assert.Equal("Bistro", organization.Name);
+        Assert.Equal("FR", organization.LegalCountryCode);
+        Assert.Equal("Bistro SAS", organization.LegalName);
+        Assert.Equal("732829320", organization.LegalRegistrationNumber);
+        Assert.Equal("FR88732829320", organization.TaxIdentifier);
+    }
+
+    [Theory]
+    [InlineData("CA", null, null)]
+    [InlineData("FR", "12345678", null)]
+    [InlineData("FR", null, "FR12")]
+    [InlineData("US", null, "12345678")]
+    public void RejectsUnsupportedJurisdictionOrMalformedLegalIdentifiers(string country, string? registration,
+        string? taxIdentifier)
+    {
+        var organization = Organization.Create("Bistro");
+
+        Assert.Throws<DomainRuleException>(() => organization.SetLegalProfile(country, null, registration,
+            taxIdentifier, null));
+    }
+
+    [Theory]
+    [InlineData("DE", "HRB 12345", "DE123456789")]
+    [InlineData("GB", "01234567", "GB123456789")]
+    [InlineData("GB", "SC123456", "GBGD123")]
+    [InlineData("US", "12-3456789", "12-3456789")]
+    public void AcceptsSyntacticallyValidCountrySpecificIdentifiers(string country, string registration, string tax)
+    {
+        var organization = Organization.Create("Bistro");
+
+        organization.SetLegalProfile(country, null, registration, tax, null);
+
+        Assert.Equal(country, organization.LegalCountryCode);
+    }
 }
