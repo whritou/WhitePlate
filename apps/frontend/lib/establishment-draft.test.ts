@@ -20,6 +20,7 @@ export const settings: EstablishmentSettings = {
   latitude: null,
   longitude: null,
   timeZone: "UTC",
+  pickupScheduling: { intervalMinutes: 15, minimumLeadMinutes: 20, capacity: 8 },
   openingHours: null,
   establishmentVersion: 1,
   locales: ["en", "fr"],

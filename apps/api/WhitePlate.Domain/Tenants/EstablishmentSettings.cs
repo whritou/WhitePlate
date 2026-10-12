@@ -12,6 +12,9 @@ public sealed record EstablishmentInput(string? Name, string? Phone = null, stri
 public sealed record OpeningHoursWindow(string Start, string End);
 public sealed record OpeningHoursDay(int DayOfWeek, bool IsClosed, IReadOnlyList<OpeningHoursWindow> Windows);
 public sealed record OpeningHoursSchedule(IReadOnlyList<OpeningHoursDay> Days);
+public sealed record PickupSchedulingSettings(int IntervalMinutes, int MinimumLeadMinutes, int Capacity);
+public sealed record PickupSlot(DateTimeOffset StartsAt, DateTimeOffset EndsAt, int RemainingCapacity,
+    string TimeZone);
 
 public sealed partial class Tenant
 {
@@ -27,6 +30,7 @@ public sealed partial class Tenant
     public string TimeZone { get; private set; } = "UTC";
     public string PickupInstructionsJson { get; private set; } = "{}";
     public string? OpeningHoursJson { get; private set; }
+    public string PickupSchedulingJson { get; private set; } = "{\"IntervalMinutes\":15,\"MinimumLeadMinutes\":20,\"Capacity\":8}";
     public int EstablishmentVersion { get; private set; } = 1;
 
     public void UpdateEstablishment(EstablishmentInput input)
@@ -84,6 +88,56 @@ public sealed partial class Tenant
 
     public OpeningHoursSchedule? GetOpeningHours() => OpeningHoursJson is null ? null :
         JsonSerializer.Deserialize<OpeningHoursSchedule>(OpeningHoursJson);
+
+    public PickupSchedulingSettings GetPickupScheduling() => JsonSerializer.Deserialize<PickupSchedulingSettings>(PickupSchedulingJson)
+        ?? new PickupSchedulingSettings(15, 20, 8);
+
+    public void SetPickupScheduling(PickupSchedulingSettings settings)
+    {
+        if (settings is null || settings.IntervalMinutes is not (10 or 15 or 20 or 30) ||
+            settings.MinimumLeadMinutes is < 0 or > 1440 || settings.Capacity is < 1 or > 50)
+            Invalid("pickupScheduling");
+        if (EstablishmentVersion == int.MaxValue) Invalid("establishmentVersion");
+        PickupSchedulingJson = JsonSerializer.Serialize(settings);
+        EstablishmentVersion++;
+    }
+
+    public IReadOnlyList<PickupSlot> GeneratePickupSlots(DateTimeOffset now, int horizonDays = 7)
+    {
+        if (horizonDays is < 1 or > 7 || GetOpeningHours() is not { } hours) return [];
+        TimeZoneInfo zone;
+        try { zone = TimeZoneInfo.FindSystemTimeZoneById(TimeZone); }
+        catch (TimeZoneNotFoundException) { return []; }
+        catch (InvalidTimeZoneException) { return []; }
+        var settings = GetPickupScheduling();
+        var firstLocalDate = DateOnly.FromDateTime(TimeZoneInfo.ConvertTime(now, zone).DateTime);
+        var result = new List<PickupSlot>();
+        var earliest = now.AddMinutes(settings.MinimumLeadMinutes);
+        for (var dayOffset = 0; dayOffset < horizonDays; dayOffset++)
+        {
+            var date = firstLocalDate.AddDays(dayOffset);
+            var day = hours.Days[date.DayOfWeek == DayOfWeek.Sunday ? 6 : (int)date.DayOfWeek - 1];
+            foreach (var window in day.Windows)
+            {
+                var start = TimeOnly.ParseExact(window.Start, "HH:mm");
+                var end = window.End == "24:00" ? TimeOnly.MinValue : TimeOnly.ParseExact(window.End, "HH:mm");
+                var startDateTime = date.ToDateTime(start);
+                var endDateTime = window.End == "24:00" ? date.AddDays(1).ToDateTime(TimeOnly.MinValue) : date.ToDateTime(end);
+                for (var wall = startDateTime; wall.AddMinutes(settings.IntervalMinutes) <= endDateTime; wall = wall.AddMinutes(settings.IntervalMinutes))
+                {
+                    if (zone.IsInvalidTime(wall)) continue;
+                    var offsets = zone.IsAmbiguousTime(wall) ? zone.GetAmbiguousTimeOffsets(wall) : [zone.GetUtcOffset(wall)];
+                    foreach (var offset in offsets)
+                    {
+                        var slotStart = new DateTimeOffset(wall, offset);
+                        var slotEnd = slotStart.AddMinutes(settings.IntervalMinutes);
+                        if (slotStart >= earliest) result.Add(new PickupSlot(slotStart, slotEnd, settings.Capacity, TimeZone));
+                    }
+                }
+            }
+        }
+        return result.OrderBy(slot => slot.StartsAt).ToArray();
+    }
 
     public void SetOpeningHours(OpeningHoursSchedule schedule)
     {

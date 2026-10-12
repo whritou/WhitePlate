@@ -3,10 +3,12 @@
 import {
   parseEstablishmentInput,
   parseOpeningHours,
+  parsePickupSchedulingSettings,
 } from "@/lib/validation/establishment-settings"
 import {
   updateEstablishmentSettings,
   updateOpeningHours,
+  updatePickupScheduling,
   updateTenantLegalProfile,
 } from "@/services/establishment-settings"
 import type { ApiResult } from "@/types/api"
@@ -33,6 +35,19 @@ export async function saveOpeningHoursAction(
     value.establishmentVersion as number,
     schedule
   )
+}
+
+export async function savePickupSchedulingAction(input: unknown): Promise<ApiResult<EstablishmentSettings>> {
+  if (!input || typeof input !== "object") return { ok: false, status: 400, error: "invalid" }
+
+  const value = input as Record<string, unknown>
+  const pickupScheduling = parsePickupSchedulingSettings(value.pickupScheduling)
+
+  if (typeof value.tenantId !== "string" || !/^[0-9a-f-]{36}$/i.test(value.tenantId) ||
+      !Number.isSafeInteger(value.establishmentVersion) || !pickupScheduling)
+    return { ok: false, status: 400, error: "invalid" }
+
+  return updatePickupScheduling(value.tenantId, value.establishmentVersion as number, pickupScheduling)
 }
 
 export async function saveEstablishmentSettingsAction(

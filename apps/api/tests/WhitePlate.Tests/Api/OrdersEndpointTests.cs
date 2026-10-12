@@ -62,6 +62,8 @@ public sealed partial class OrdersEndpointTests
         var orderId = receipt.GetProperty("id").GetGuid();
         Assert.Equal("EUR", receipt.GetProperty("currency").GetString());
         Assert.Equal("Pending", receipt.GetProperty("status").GetString());
+        Assert.Equal(new DateTimeOffset(2026, 1, 1, 0, 30, 0, TimeSpan.Zero),
+            receipt.GetProperty("pickupAt").GetDateTimeOffset());
         Assert.Equal(19.50m, receipt.GetProperty("subtotal").GetDecimal());
         Assert.Equal(2m, receipt.GetProperty("discountAmount").GetDecimal());
         Assert.Equal(1.75m, receipt.GetProperty("taxAmount").GetDecimal());
@@ -85,7 +87,115 @@ public sealed partial class OrdersEndpointTests
         using var scope = factory.Services.CreateScope();
         var database = scope.ServiceProvider.GetRequiredService<WhitePlateDbContext>();
         Assert.Equal(1, await database.Orders.CountAsync(TestContext.Current.CancellationToken));
+        Assert.Equal(1, await database.PickupSlotReservations.CountAsync(TestContext.Current.CancellationToken));
+        Assert.Equal(1, await database.PickupSlotUsages.SumAsync(usage => usage.ReservedCount,
+            TestContext.Current.CancellationToken));
         Assert.Equal(1, await database.OrderOutboxMessages.CountAsync(TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
+    public async Task PublicCheckoutRequiresConfiguredOpeningHours()
+    {
+        using var factory = new OrdersFactory();
+        var seeded = await factory.SeedAsync(includeOpeningHours: false);
+        using var client = factory.CreateClient();
+        client.DefaultRequestHeaders.Add("Idempotency-Key", "checkout-no-hours");
+
+        using var response = await client.PostAsJsonAsync("https://bistro.example.test/api/v1/orders", new
+        {
+            customerName = "Ada",
+            items = new[] { new { productId = seeded.ProductId, quantity = 1, optionIds = new[] { seeded.OptionId } } }
+        }, TestContext.Current.CancellationToken);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task PickupCapacityStopsOrdersAtTheConfiguredLimit()
+    {
+        using var factory = new OrdersFactory();
+        var seeded = await factory.SeedAsync();
+        using var client = factory.CreateClient();
+        using var slotsResponse = await client.GetAsync("https://bistro.example.test/api/v1/pickup-slots",
+            TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.OK, slotsResponse.StatusCode);
+        using var slotsJson = JsonDocument.Parse(await slotsResponse.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
+        Assert.Equal("available", slotsJson.RootElement.GetProperty("state").GetString());
+        var slot = slotsJson.RootElement.GetProperty("slots")[0].GetProperty("startsAt").GetDateTimeOffset();
+        var results = new List<HttpStatusCode>();
+
+        for (var index = 0; index < 9; index++)
+        {
+            using var request = new HttpRequestMessage(HttpMethod.Post, "https://bistro.example.test/api/v1/orders")
+            {
+                Content = JsonContent.Create(new
+                {
+                    customerName = $"Guest {index}", pickupAt = slot,
+                    items = new[] { new { productId = seeded.ProductId, quantity = 1, optionIds = new[] { seeded.OptionId } } }
+                })
+            };
+            request.Headers.Add("Idempotency-Key", $"capacity-order-{index:00}");
+            using var response = await client.SendAsync(request, TestContext.Current.CancellationToken);
+            results.Add(response.StatusCode);
+        }
+
+        Assert.Equal(8, results.Count(code => code == HttpStatusCode.Created));
+        Assert.Single(results, code => code != HttpStatusCode.Created);
+    }
+
+    [Fact]
+    public async Task EarlyCancellationReleasesOnePersistedPickupReservation()
+    {
+        using var factory = new OrdersFactory();
+        var seeded = await factory.SeedAsync();
+        await factory.SeedMembershipAsync(seeded.TenantId, "manager", RestaurantRole.Manager);
+        using (var scope = factory.Services.CreateScope())
+        {
+            var database = scope.ServiceProvider.GetRequiredService<WhitePlateDbContext>();
+            var tenant = await database.Tenants.SingleAsync(item => item.Id == seeded.TenantId,
+                TestContext.Current.CancellationToken);
+            tenant.SetPickupScheduling(new(15, 20, 1));
+            await database.SaveChangesAsync(TestContext.Current.CancellationToken);
+        }
+        using var client = factory.CreateClient();
+        using var slotsResponse = await client.GetAsync("https://bistro.example.test/api/v1/pickup-slots",
+            TestContext.Current.CancellationToken);
+        using var slotsJson = JsonDocument.Parse(await slotsResponse.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
+        var slot = slotsJson.RootElement.GetProperty("slots")[0].GetProperty("startsAt").GetDateTimeOffset();
+        client.DefaultRequestHeaders.Add("Idempotency-Key", "release-first-order");
+        using var created = await client.PostAsJsonAsync("https://bistro.example.test/api/v1/orders", new
+        {
+            customerName = "Ada", pickupAt = slot,
+            items = new[] { new { productId = seeded.ProductId, quantity = 1, optionIds = new[] { seeded.OptionId } } }
+        }, TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.Created, created.StatusCode);
+        using var createdJson = JsonDocument.Parse(await created.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
+        var orderId = createdJson.RootElement.GetProperty("id").GetGuid();
+
+        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", "manager");
+        using var cancel = new HttpRequestMessage(HttpMethod.Patch,
+            $"/api/v1/tenants/{seeded.TenantId}/orders/{orderId}/status") { Content = JsonContent.Create(new { status = "Cancelled" }) };
+        cancel.Headers.TryAddWithoutValidation("If-Match", "\"1\"");
+        using var cancelled = await client.SendAsync(cancel, TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.OK, cancelled.StatusCode);
+
+        client.DefaultRequestHeaders.Authorization = null;
+        client.DefaultRequestHeaders.Remove("Idempotency-Key");
+        client.DefaultRequestHeaders.Add("Idempotency-Key", "release-second-order");
+        using var second = await client.PostAsJsonAsync("https://bistro.example.test/api/v1/orders", new
+        {
+            customerName = "Grace", pickupAt = slot,
+            items = new[] { new { productId = seeded.ProductId, quantity = 1, optionIds = new[] { seeded.OptionId } } }
+        }, TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.Created, second.StatusCode);
+
+        using var verification = factory.Services.CreateScope();
+        var verificationDb = verification.ServiceProvider.GetRequiredService<WhitePlateDbContext>();
+        Assert.Equal(2, await verificationDb.PickupSlotReservations.CountAsync(TestContext.Current.CancellationToken));
+        Assert.Equal(1, await verificationDb.PickupSlotUsages.Select(usage => usage.ReservedCount)
+            .SingleAsync(TestContext.Current.CancellationToken));
+        Assert.Equal(1, await verificationDb.PickupSlotReservations.CountAsync(reservation =>
+            reservation.OrderId == orderId && reservation.ReleasedAt != null, TestContext.Current.CancellationToken));
     }
 
     [Fact]
@@ -777,7 +887,7 @@ public sealed partial class OrdersEndpointTests
             });
         }
 
-        public async Task<(Guid TenantId, Guid ProductId, Guid OptionId, Guid OtherProductId, Guid OrganizationId)> SeedAsync()
+        public async Task<(Guid TenantId, Guid ProductId, Guid OptionId, Guid OtherProductId, Guid OrganizationId)> SeedAsync(bool includeOpeningHours = true)
         {
             using var scope = Services.CreateScope();
             var database = scope.ServiceProvider.GetRequiredService<WhitePlateDbContext>();
@@ -785,7 +895,15 @@ public sealed partial class OrdersEndpointTests
             var organization = Organization.Create("Orders Test");
             database.Organizations.Add(organization);
             var tenant = Tenant.Create(organization.Id, "Bistro", "bistro", "EUR");
+            if (includeOpeningHours)
+            {
+                tenant.SetOpeningHours(new OpeningHoursSchedule(Enumerable.Range(1, 7)
+                    .Select(day => new OpeningHoursDay(day, false, [new("00:00", "24:00")])).ToArray()));
+            }
             var otherTenant = Tenant.Create(organization.Id, "Other Bistro", "other", "USD");
+            if (includeOpeningHours)
+                otherTenant.SetOpeningHours(new OpeningHoursSchedule(Enumerable.Range(1, 7)
+                    .Select(day => new OpeningHoursDay(day, false, [new("00:00", "24:00")])).ToArray()));
             database.Tenants.AddRange(tenant, otherTenant);
             var category = MenuCategory.Create(tenant.Id, "Mains", 0);
             var otherCategory = MenuCategory.Create(otherTenant.Id, "Mains", 0);

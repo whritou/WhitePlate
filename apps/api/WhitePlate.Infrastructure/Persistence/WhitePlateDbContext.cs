@@ -23,6 +23,8 @@ public sealed class WhitePlateDbContext(DbContextOptions<WhitePlateDbContext> op
     public DbSet<Order> Orders => Set<Order>();
     public DbSet<IdempotencyRecord> OrderIdempotencyRecords => Set<IdempotencyRecord>();
     public DbSet<OutboxMessage> OrderOutboxMessages => Set<OutboxMessage>();
+    public DbSet<PickupSlotUsage> PickupSlotUsages => Set<PickupSlotUsage>();
+    public DbSet<PickupSlotReservation> PickupSlotReservations => Set<PickupSlotReservation>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder) =>
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(WhitePlateDbContext).Assembly);

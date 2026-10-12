@@ -256,6 +256,7 @@
   },
   "KitchenOrders": {
     "preparationGuide": "Préparation indicative : environ {minutes} min",
+    "pickupTime": "Retrait : {time}",
     "total": "Total",
     "title": "Commandes en cuisine",
     "description": "Consultez les tickets reçus et mettez à jour leur état au fil de la préparation.",
@@ -385,6 +386,11 @@
     "priceNote": "Les prix du menu sont hors taxes et réductions. Votre reçu indiquera le montant final calculé par le restaurant.",
     "estimatedSubtotal": "Sous-total estimé",
     "customerName": "Votre nom",
+    "pickupTime": "Heure de retrait",
+    "asapPickup": "Dès que possible — premier créneau disponible",
+    "noPickupSlots": "Le retrait en ligne est indisponible pour le moment. Réessayez plus tard.",
+    "scheduleNotConfigured": "Ce restaurant n’a pas encore défini ses horaires pour les commandes en ligne.",
+    "pickupAt": "Retrait : {time}",
     "discountCode": "Code promo (facultatif)",
     "placeOrder": "Passer la commande",
     "placingOrder": "Envoi de votre commande…",
@@ -408,9 +414,9 @@
       "Cancelled": "Annulée"
     },
     "errors": {
-      "invalid": "Vérifiez votre nom, les quantités, les options et le code promo, puis réessayez.",
+      "invalid": "Vérifiez votre nom, les quantités, les options, le code promo et le créneau de retrait, puis réessayez.",
       "not_found": "Un article ou une option n’est plus disponible. Vérifiez votre commande avant de réessayer.",
-      "conflict": "Cette requête a déjà été utilisée avec d’autres détails de commande. Vérifiez et modifiez votre commande avant de réessayer.",
+      "conflict": "Ce créneau vient peut-être d’être complet, ou cette clé a déjà servi avec une autre commande. Choisissez un autre horaire et réessayez.",
       "rate_limited": "Trop de commandes ont été envoyées récemment. Patientez un instant avant de réessayer.",
       "unavailable": "Nous ne pouvons pas confirmer la réception de votre commande. Gardez cette page ouverte et réessayez la même commande pour éviter un doublon.",
       "forbidden": "Cette page ne peut pas envoyer de commande. Ouvrez le menu sur le site du restaurant et réessayez.",
@@ -3258,6 +3264,7 @@
     "establishmentSettingsCategory": "Établissement",
     "legalSettingsCategory": "Juridique et fiscal",
     "openingHoursCategory": "Heures d’ouverture",
+    "pickupSchedulingCategory": "Créneaux de retrait",
     "context": "Contexte de travail",
     "organizations": "Organisations",
     "restaurants": "Restaurants",
@@ -3465,5 +3472,25 @@
     "loading": "Chargement des informations de retrait actuelles…",
     "unavailable": "Les informations de retrait actuelles sont indisponibles. Les détails de votre commande restent accessibles.",
     "retry": "Réessayer les informations de retrait"
+  },
+  "PickupScheduling": {
+    "title": "Créneaux de retrait",
+    "description": "Définissez l’intervalle entre les retraits, le délai minimum et le nombre de commandes accepté par créneau.",
+    "interval": "Intervalle de retrait",
+    "minimumLead": "Délai minimum (minutes)",
+    "capacity": "Commandes par créneau",
+    "minutes": "{count} minutes",
+    "openingHoursNote": "Les clients peuvent choisir un créneau uniquement pendant les heures d’ouverture enregistrées. Les modifications s’appliquent aux prochaines commandes.",
+    "settingsUnavailable": "Impossible de charger les paramètres de retrait. Rechargez la page avant toute modification.",
+    "save": "Enregistrer les créneaux",
+    "saving": "Enregistrement des créneaux…",
+    "saved": "Paramètres de retrait enregistrés.",
+    "errors": {
+      "invalid": "Vérifiez l’intervalle, le délai et la capacité.",
+      "conflict": "Ces paramètres ont changé ailleurs. Rechargez la page avant de réessayer.",
+      "unavailable": "Impossible d’enregistrer les paramètres. Vos modifications sont conservées.",
+      "forbidden": "Vous n’avez pas l’autorisation de modifier les paramètres de retrait.",
+      "unauthorized": "Votre session a expiré. Reconnectez-vous pour continuer."
+    }
   }
 }

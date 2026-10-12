@@ -7,6 +7,11 @@ export type OpeningHoursDay = {
   windows: OpeningHoursWindow[]
 }
 export type OpeningHoursSchedule = { days: OpeningHoursDay[] }
+export type PickupSchedulingSettings = {
+  intervalMinutes: 10 | 15 | 20 | 30
+  minimumLeadMinutes: number
+  capacity: number
+}
 
 export type PublicEstablishment = {
   name: string
@@ -33,6 +38,7 @@ export type EstablishmentSettings = Omit<
   establishmentVersion: number
   locales: string[]
   defaultLocale: string
+  pickupScheduling: PickupSchedulingSettings
 }
 
 export type EstablishmentOptions = { timeZones: string[]; countries: string[] }
@@ -48,14 +54,14 @@ export type TenantLegalProfile = {
   effectiveProfile: LegalProfileValues
   version: number
 }
-export type RestaurantSettingsSection = "establishment" | "legal" | "hours"
+export type RestaurantSettingsSection = "establishment" | "legal" | "hours" | "pickup"
 export type EstablishmentRead = {
   settings: EstablishmentSettings
   options: EstablishmentOptions
 }
 export type EstablishmentInput = Omit<
   EstablishmentSettings,
-  "locales" | "defaultLocale" | "openingHours"
+  "locales" | "defaultLocale" | "openingHours" | "pickupScheduling"
 > & { tenantId: string }
 export type EstablishmentDraft = Record<
   | "name"

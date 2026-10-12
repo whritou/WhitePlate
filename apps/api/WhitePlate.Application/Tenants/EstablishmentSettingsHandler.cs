@@ -117,6 +117,29 @@ public sealed class EstablishmentSettingsHandler(IStaffMembershipRepository memb
         }
     }
 
+    public async Task<Result<EstablishmentSettingsDto>> SavePickupSchedulingAsync(Guid id, ExternalIdentity identity,
+        PickupSchedulingSettings settings, int? expectedVersion, CancellationToken ct)
+    {
+        if (!await CatalogAccess.CanManageAsync(memberships, id, identity, ct)) return Missing();
+        var tenant = await repository.GetAsync(id, ct);
+        if (tenant is null) return Missing();
+        if (expectedVersion is null) return Invalid("establishmentVersion");
+        if (tenant.EstablishmentVersion != expectedVersion) return Conflict();
+        try
+        {
+            tenant.SetPickupScheduling(settings);
+            if (!await repository.SaveAsync(tenant, identity, expectedVersion.Value, tenant.MenuLocalesJson,
+                    tenant.DefaultMenuLocale, ct))
+                return await CatalogAccess.CanManageAsync(memberships, id, identity, ct) ? Conflict() : Missing();
+            return Result<EstablishmentSettingsDto>.Success(EstablishmentSettingsDto.FromTenant(tenant));
+        }
+        catch (DomainRuleException exception)
+        {
+            return Result<EstablishmentSettingsDto>.Failure(new ApplicationError(ErrorCode.ValidationFailed,
+                new ValidationIssue(exception.Field, exception.Code, exception.Message)));
+        }
+    }
+
     private static Result<EstablishmentSettingsDto> Missing() => Result<EstablishmentSettingsDto>.Failure(new ApplicationError(ErrorCode.NotFound));
     private static Result<EstablishmentSettingsDto> Conflict() => Result<EstablishmentSettingsDto>.Failure(new ApplicationError(ErrorCode.PreconditionFailed));
     private static Result<EstablishmentSettingsDto> Invalid(string field) => Result<EstablishmentSettingsDto>.Failure(

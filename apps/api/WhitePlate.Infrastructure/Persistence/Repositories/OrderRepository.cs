@@ -5,6 +5,7 @@ using WhitePlate.Application.Common.Errors;
 using WhitePlate.Application.Common.Results;
 using WhitePlate.Application.Orders;
 using WhitePlate.Domain.Catalog;
+using WhitePlate.Domain.Orders;
 using WhitePlate.Infrastructure.Persistence;
 
 namespace WhitePlate.Infrastructure.Persistence.Repositories;
@@ -32,6 +33,29 @@ public sealed class OrderRepository(WhitePlateDbContext database) : IOrderReposi
         var locale = tenant.SupportsMenuLocale(requestedLocale) ?
             WhitePlate.Domain.Tenants.MenuLocale.Create(requestedLocale).Value : tenant.DefaultMenuLocale;
         return new CheckoutLocaleDto(locale, tenant.DefaultMenuLocale);
+    }
+
+    public async Task<PickupAvailabilityDto> GetPickupSlotsAsync(Guid tenantId,
+        DateTimeOffset now, CancellationToken cancellationToken)
+    {
+        var tenant = await database.Tenants.AsNoTracking().SingleOrDefaultAsync(item => item.Id == tenantId &&
+            item.IsActive && database.Organizations.Any(organization => organization.Id == item.OrganizationId && organization.IsActive),
+            cancellationToken);
+        if (tenant is null) return new PickupAvailabilityDto("schedule_not_configured", null, []);
+        if (tenant.GetOpeningHours() is null)
+            return new PickupAvailabilityDto("schedule_not_configured", tenant.TimeZone, []);
+        var slots = tenant.GeneratePickupSlots(now);
+        if (slots.Count == 0) return new PickupAvailabilityDto("no_slots_available", tenant.TimeZone, []);
+        var slotTicks = slots.Select(slot => slot.StartsAt.UtcDateTime.Ticks).ToArray();
+        var counts = await database.PickupSlotUsages.AsNoTracking().Where(usage => usage.TenantId == tenantId &&
+                slotTicks.Contains(usage.SlotStartTicks))
+            .ToDictionaryAsync(usage => usage.SlotStartTicks, usage => usage.ReservedCount, cancellationToken);
+        var capacity = tenant.GetPickupScheduling().Capacity;
+        var available = slots.Select(slot => slot with
+                { RemainingCapacity = Math.Max(0, capacity - counts.GetValueOrDefault(slot.StartsAt.UtcDateTime.Ticks)) })
+            .Where(slot => slot.RemainingCapacity > 0).ToArray();
+        return new PickupAvailabilityDto(available.Length > 0 ? "available" : "no_slots_available",
+            tenant.TimeZone, available);
     }
 
     public async Task<CheckoutCatalogDto> GetCheckoutCatalogAsync(Guid tenantId,
@@ -110,7 +134,31 @@ public sealed class OrderRepository(WhitePlateDbContext database) : IOrderReposi
         }
         if (existing is not null) database.OrderIdempotencyRecords.Remove(existing);
 
+        var tenant = await database.Tenants.AsNoTracking().SingleAsync(item => item.Id == order.TenantId, cancellationToken);
+        var capacity = tenant.GetPickupScheduling().Capacity;
+        if (order.PickupAtTicks is null)
+        {
+            await transaction.RollbackAsync(cancellationToken);
+            return new IdempotencyResult(IdempotencyOutcome.Conflict);
+        }
+        await database.Database.ExecuteSqlInterpolatedAsync($"""
+            INSERT INTO "PickupSlotUsages" ("TenantId", "SlotStartTicks", "ReservedCount")
+            VALUES ({order.TenantId}, {order.PickupAtTicks.Value}, 0)
+            ON CONFLICT ("TenantId", "SlotStartTicks") DO NOTHING
+            """, cancellationToken);
+        var reserved = await database.PickupSlotUsages.Where(usage => usage.TenantId == order.TenantId &&
+                usage.SlotStartTicks == order.PickupAtTicks.Value && usage.ReservedCount < capacity)
+            .ExecuteUpdateAsync(update => update.SetProperty(usage => usage.ReservedCount,
+                usage => usage.ReservedCount + 1), cancellationToken);
+        if (reserved != 1)
+        {
+            await transaction.RollbackAsync(cancellationToken);
+            return new IdempotencyResult(IdempotencyOutcome.Conflict);
+        }
+
         database.Orders.Add(order);
+        database.PickupSlotReservations.Add(PickupSlotReservation.Create(order.Id, order.TenantId,
+            order.PickupAtTicks.Value));
         database.OrderIdempotencyRecords.Add(IdempotencyRecord.Create(order.TenantId, keyHash, requestHash,
             JsonSerializer.Serialize(receipt, ReceiptJson), now));
         AddOrderEvent(order, "order.created", now);
@@ -146,7 +194,8 @@ public sealed class OrderRepository(WhitePlateDbContext database) : IOrderReposi
                     order.Status.ToString(), order.Version, order.CreatedAt,
                     order.Lines.Select(line => new OrderSummaryLineDto(line.ProductId, line.ProductName,
                         line.Quantity, line.Options.Select(option => new OrderSummaryOptionDto(option.OptionId,
-                            option.Name)).ToArray()) { PreparationMinutes = line.PreparationMinutes }).ToArray()),
+                            option.Name)).ToArray()) { PreparationMinutes = line.PreparationMinutes }).ToArray())
+                    { PickupAt = order.PickupAt, PickupTimeZone = order.PickupTimeZone },
                 order.CreatedAtTicks
             })
             .ToListAsync(cancellationToken);
@@ -189,7 +238,8 @@ public sealed class OrderRepository(WhitePlateDbContext database) : IOrderReposi
                 order.Status.ToString(), order.Version, order.CreatedAt,
                 order.Lines.Select(line => new OrderSummaryLineDto(line.ProductId, line.ProductName,
                     line.Quantity, line.Options.Select(option => new OrderSummaryOptionDto(option.OptionId,
-                        option.Name)).ToArray()) { PreparationMinutes = line.PreparationMinutes }).ToArray())).ToListAsync(cancellationToken);
+                        option.Name)).ToArray()) { PreparationMinutes = line.PreparationMinutes }).ToArray())
+            { PickupAt = order.PickupAt, PickupTimeZone = order.PickupTimeZone }).ToListAsync(cancellationToken);
         return new OrderHistoryPageData(items, totalCount);
     }
 
@@ -200,13 +250,14 @@ public sealed class OrderRepository(WhitePlateDbContext database) : IOrderReposi
                 item.Id == orderId && item.TrackingTokenHash != null)
             .Select(item => new
             {
-                item.TrackingTokenHash, item.TrackingTokenExpiresAt, item.Id, item.Status, item.Version, item.CreatedAt, item.MenuLocale
+                item.TrackingTokenHash, item.TrackingTokenExpiresAt, item.Id, item.Status, item.Version, item.CreatedAt, item.MenuLocale, item.PickupAt, item.PickupTimeZone
             }).SingleOrDefaultAsync(cancellationToken);
         if (order is null || order.TrackingTokenExpiresAt <= now || !CryptographicOperations.FixedTimeEquals(
                 Convert.FromHexString(order.TrackingTokenHash!), Convert.FromHexString(tokenHash)))
             return null;
 
-        return new PublicOrderTrackingDto(order.Id, order.Status.ToString(), order.Version, order.CreatedAt, order.MenuLocale);
+        return new PublicOrderTrackingDto(order.Id, order.Status.ToString(), order.Version, order.CreatedAt, order.MenuLocale)
+            { PickupAt = order.PickupAt, PickupTimeZone = order.PickupTimeZone };
     }
 
     public Task<int> ArchiveClosedOrdersBeforeAsync(DateTimeOffset cutoff, CancellationToken cancellationToken)
@@ -246,6 +297,21 @@ public sealed class OrderRepository(WhitePlateDbContext database) : IOrderReposi
             {
                 await transaction.RollbackAsync(cancellationToken);
                 return Result<OrderReceiptDto>.Success(order.ToReceipt());
+            }
+            if (status == WhitePlate.Domain.Orders.OrderStatus.Cancelled &&
+                order.PickupAtTicks is { } pickupTicks && pickupTicks > now.UtcDateTime.Ticks)
+            {
+                var reservation = await database.PickupSlotReservations.SingleOrDefaultAsync(item =>
+                    item.OrderId == order.Id && item.TenantId == tenantId, cancellationToken);
+                if (reservation is not null && reservation.Release(now))
+                {
+                    var decremented = await database.PickupSlotUsages.Where(usage => usage.TenantId == tenantId &&
+                            usage.SlotStartTicks == reservation.SlotStartTicks && usage.ReservedCount > 0)
+                        .ExecuteUpdateAsync(update => update.SetProperty(usage => usage.ReservedCount,
+                            usage => usage.ReservedCount - 1), cancellationToken);
+                    if (decremented != 1)
+                        throw new InvalidOperationException("The pickup slot reservation counter is inconsistent.");
+                }
             }
             AddOrderEvent(order, status == WhitePlate.Domain.Orders.OrderStatus.Cancelled
                 ? "order.cancelled"

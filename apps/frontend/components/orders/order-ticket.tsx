@@ -95,6 +95,10 @@ export function OrderTicket({
             <time dateTime={order.createdAt}>{date}</time>
           </p>
 
+          {order.pickupAt && <p className="mb-3 text-sm font-semibold">
+            {t("pickupTime", { time: new Intl.DateTimeFormat(locale, { year: "numeric", month: "short", day: "numeric", hour: "numeric", minute: "2-digit", timeZone: order.pickupTimeZone ?? undefined, timeZoneName: "shortOffset" }).format(new Date(order.pickupAt)) })}
+          </p>}
+
           <ul className="grid gap-2">
             {order.lines.map((line, index) => (
               <li key={`${line.productId}:${index}`}>

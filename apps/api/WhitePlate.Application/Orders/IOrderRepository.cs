@@ -11,6 +11,9 @@ public interface IOrderRepository
     Task<CheckoutLocaleDto?> ResolveCheckoutLocaleAsync(Guid tenantId, string? requestedLocale,
         CancellationToken cancellationToken);
 
+    Task<PickupAvailabilityDto> GetPickupSlotsAsync(Guid tenantId,
+        DateTimeOffset now, CancellationToken cancellationToken);
+
     Task<CheckoutCatalogDto> GetCheckoutCatalogAsync(Guid tenantId, string locale, string defaultLocale,
         IReadOnlyCollection<Guid> productIds, string? discountCode, CancellationToken cancellationToken);
 

@@ -407,6 +407,16 @@ namespace WhitePlate.Infrastructure.Persistence.Migrations
                         .HasMaxLength(128)
                         .HasColumnType("character varying(128)");
 
+                    b.Property<DateTimeOffset?>("PickupAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long?>("PickupAtTicks")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("PickupTimeZone")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(16)
@@ -543,6 +553,43 @@ namespace WhitePlate.Infrastructure.Persistence.Migrations
                     b.HasIndex("OrderLineId");
 
                     b.ToTable("OrderLineOptions", (string)null);
+                });
+
+            modelBuilder.Entity("WhitePlate.Domain.Orders.PickupSlotReservation", b =>
+                {
+                    b.Property<Guid>("OrderId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("ReleasedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long>("SlotStartTicks")
+                        .HasColumnType("bigint");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("OrderId");
+
+                    b.HasIndex("TenantId", "SlotStartTicks", "ReleasedAt");
+
+                    b.ToTable("PickupSlotReservations", (string)null);
+                });
+
+            modelBuilder.Entity("WhitePlate.Domain.Orders.PickupSlotUsage", b =>
+                {
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<long>("SlotStartTicks")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("ReservedCount")
+                        .HasColumnType("integer");
+
+                    b.HasKey("TenantId", "SlotStartTicks");
+
+                    b.ToTable("PickupSlotUsages", (string)null);
                 });
 
             modelBuilder.Entity("WhitePlate.Domain.Organizations.Organization", b =>
@@ -727,6 +774,12 @@ namespace WhitePlate.Infrastructure.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("text")
                         .HasDefaultValue("{}");
+
+                    b.Property<string>("PickupSchedulingJson")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("jsonb")
+                        .HasDefaultValue("{\"IntervalMinutes\":15,\"MinimumLeadMinutes\":20,\"Capacity\":8}");
 
                     b.Property<string>("PostalCode")
                         .HasMaxLength(20)
@@ -933,6 +986,24 @@ namespace WhitePlate.Infrastructure.Persistence.Migrations
                     b.HasOne("WhitePlate.Domain.Orders.OrderLine", null)
                         .WithMany("Options")
                         .HasForeignKey("OrderLineId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("WhitePlate.Domain.Orders.PickupSlotReservation", b =>
+                {
+                    b.HasOne("WhitePlate.Domain.Orders.Order", null)
+                        .WithOne()
+                        .HasForeignKey("WhitePlate.Domain.Orders.PickupSlotReservation", "OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("WhitePlate.Domain.Orders.PickupSlotUsage", b =>
+                {
+                    b.HasOne("WhitePlate.Domain.Tenants.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

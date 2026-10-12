@@ -18,6 +18,9 @@ public sealed class Order
     public OrderStatus Status { get; private set; }
     public int Version { get; private set; }
     public DateTimeOffset CreatedAt { get; private set; }
+    public DateTimeOffset? PickupAt { get; private set; }
+    public long? PickupAtTicks { get; private set; }
+    public string? PickupTimeZone { get; private set; }
     public long CreatedAtTicks { get; private set; }
     public DateTimeOffset? ClosedAt { get; private set; }
     public long? ClosedAtTicks { get; private set; }
@@ -30,7 +33,8 @@ public sealed class Order
     public static Order Create(Guid tenantId, string? currency, string? customerName,
         IReadOnlyList<OrderLineSnapshot>? lines, string? discountCode, decimal discountAmount,
         DateTimeOffset createdAt, string? menuLocale = null, string? trackingTokenHash = null,
-        DateTimeOffset? trackingTokenExpiresAt = null)
+        DateTimeOffset? trackingTokenExpiresAt = null, DateTimeOffset? pickupAt = null,
+        string? pickupTimeZone = null)
     {
         var normalizedCurrency = currency?.ToUpperInvariant();
         var normalizedName = customerName?.Trim();
@@ -74,7 +78,9 @@ public sealed class Order
             DiscountCode = string.IsNullOrWhiteSpace(discountCode) ? null : discountCode.Trim().ToUpperInvariant(),
             Subtotal = subtotal, DiscountAmount = discountAmount, TaxAmount = orderLines.Sum(line => line.TaxAmount),
             Total = orderLines.Sum(line => line.Total), Status = OrderStatus.Pending, Version = 1,
-            CreatedAt = createdAt, CreatedAtTicks = createdAt.UtcDateTime.Ticks,
+            CreatedAt = createdAt, CreatedAtTicks = createdAt.UtcDateTime.Ticks, PickupAt = pickupAt,
+            PickupAtTicks = pickupAt?.UtcDateTime.Ticks,
+            PickupTimeZone = pickupTimeZone,
             TrackingTokenHash = trackingTokenHash?.ToLowerInvariant(), TrackingTokenExpiresAt = trackingTokenExpiresAt,
             Lines = orderLines
         };

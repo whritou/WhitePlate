@@ -24,6 +24,9 @@ public sealed class OrderConfiguration : IEntityTypeConfiguration<Order>
         builder.Property(order => order.Version).IsConcurrencyToken();
         builder.Property(order => order.CreatedAt).IsRequired();
         builder.Property(order => order.CreatedAtTicks).IsRequired();
+        builder.Property(order => order.PickupAt);
+        builder.Property(order => order.PickupAtTicks);
+        builder.Property(order => order.PickupTimeZone).HasMaxLength(100);
         builder.Property(order => order.ClosedAt);
         builder.Property(order => order.ClosedAtTicks);
         builder.Property(order => order.ArchivedAt);
