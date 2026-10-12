@@ -17,7 +17,8 @@ public sealed class StaffDirectoryRepository(WhitePlateDbContext database) : ISt
             .Select(organization => new OrganizationMembershipDto(organization.Id, organization.Name, "OrganizationOwner"))
             .ToListAsync(cancellationToken);
         var ownedIds = organizations.Select(organization => organization.Id).ToArray();
-        var restaurants = await database.Tenants.AsNoTracking().Where(tenant => ownedIds.Contains(tenant.OrganizationId))
+        var restaurants = await database.Tenants.AsNoTracking().Where(tenant =>
+                ownedIds.Contains(tenant.OrganizationId) && tenant.IsActive)
             .Select(tenant => new RestaurantMembershipDto(tenant.Id, tenant.OrganizationId, tenant.Name,
                 tenant.Subdomain.Value, tenant.Currency, "OrganizationOwner")).ToListAsync(cancellationToken);
         var directRoles = await database.RestaurantMemberships.AsNoTracking()

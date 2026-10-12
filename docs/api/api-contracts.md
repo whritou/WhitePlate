@@ -2,7 +2,7 @@
 
 ## S1 establishment settings — 2026-10-12
 
-Source implementation; migration execution and hosted acceptance remain open. [Verification and rollout](../audits/establishment-settings.md).
+Implemented and deployed to Coolify Production; hosted acceptance on an active owner/manager establishment remains open. `/api/v1/me` omits inactive restaurants so workspace navigation does not offer a tenant that protected operations correctly hide. [Verification and rollout](../audits/establishment-settings.md).
 
 | Method and route | Access and behavior |
 | --- | --- |
@@ -97,7 +97,7 @@ All paths are rooted at `/api/v1`. Success responses contain the resource direct
 
 The app interface supports `/en` and `/fr`; restaurant menu locales are independent and restaurant-configurable without a fixed count limit. Menu locale is requested with `GET /menu?locale=<tag>`. Names for categories, products, option groups, options, product descriptions, and the short restaurant description can be translated. Missing text falls back to the default menu language; the public menu reports its effective locale and includes `restaurantDescription` as a string or `null`. Omitted or unsupported request locales resolve to the default. Restaurant descriptions are saved per enabled locale, trimmed, limited to 500 characters, and an empty value clears that locale. Owners and restaurant managers edit menu languages and descriptions in the localized organization area. First-release tenant addressing uses one-label subdomains; custom domains are deferred. See [decision 0003](../architecture/decisions/0003-catalog-localization-and-tenant-domain-policy.md).
 
-The tenant ID in a protected route selects a resource. Every catalog/order query and mutation checks the authenticated issuer/subject membership for that tenant. Foreign or missing resource IDs return the same `404`. Kitchen staff can read/progress orders but cannot cancel them; owner/manager cancellation is allowed for incomplete orders. Restaurant entries from `GET /me` currently use role values `Manager` and `Kitchen`; organization-owned restaurants use `OrganizationOwner`. Invitation role values `RestaurantManager` and `KitchenStaff` map to those persisted membership values.
+The tenant ID in a protected route selects a resource. Every catalog/order query and mutation checks the authenticated issuer/subject membership for that tenant. Foreign or missing resource IDs return the same `404`. Kitchen staff can read/progress orders but cannot cancel them; owner/manager cancellation is allowed for incomplete orders. `GET /me` lists active restaurants only; restaurant entries use role values `Manager` and `Kitchen`, while organization-owned restaurants use `OrganizationOwner`. Invitation role values `RestaurantManager` and `KitchenStaff` map to those persisted membership values.
 
 `GET /tenants/{tenantId}/orders` returns each summary's `lines` array with `productId`, saved `productName`, `quantity`, and selected `options` (`optionId`, saved `name`). These labels come from persisted order snapshots and are not re-read or re-translated from the current catalog. The default page size is 50, the maximum is 100, and `nextCursor` is opaque.
 
