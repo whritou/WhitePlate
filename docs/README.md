@@ -60,7 +60,7 @@ For intended behavior, use the proposed contract, schema, and acceptance plan to
 
 ## Keeping documentation current
 
-S1 establishment settings: the [12 October design specification](superpowers/specs/2026-10-12-establishment-settings-design.md) covers identity/contact/address, IANA timezone and localized pickup information. Its conversational scope is approved; written-specification review and implementation remain pending. This is proposed behavior, not a deployed settings capability.
+S1 establishment settings: the approved [12 October design specification](superpowers/specs/2026-10-12-establishment-settings-design.md) covers identity/contact/address, IANA timezone and localized pickup information. The [implementation plan](superpowers/specs/2026-10-12-establishment-settings-implementation-plan.md) awaits review and execution selection. This is proposed behavior, not a deployed settings capability.
 
 Update the relevant documents with changes to commands, routes, ports, dependencies, environment variables, trust boundaries, or data models. Link to one canonical explanation rather than copying it into every guide. Keep examples valid, fence code blocks, and use relative links within repository Markdown.
 

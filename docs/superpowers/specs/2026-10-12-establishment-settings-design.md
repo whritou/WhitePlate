@@ -1,6 +1,6 @@
 # S1 establishment settings design
 
-12 October 2026. Status: conversational design approved; written specification awaiting review. This document describes proposed behavior, not an available feature or an applied migration.
+12 October 2026. Status: conversational design and written specification approved by the user. The user also authorized writing the implementation plan directly despite the missing `writing-plans` skill. Implementation-plan review remains pending. This document describes proposed behavior, not an available feature or an applied migration.
 
 ## Intent and approved scope
 

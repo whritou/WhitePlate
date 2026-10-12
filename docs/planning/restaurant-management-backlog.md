@@ -108,7 +108,7 @@ Decisions and limits:
 
 Reference: settings. Dependencies: none.
 
-Design update (12 October 2026): the user approved the conversational S1 scope including a validated IANA timezone with UTC for existing restaurants. The [written establishment-settings specification](../superpowers/specs/2026-10-12-establishment-settings-design.md) is awaiting review before implementation. Legal identifiers and default-tax changes remain separate decisions; no settings API, persistence or migration is implemented by this design document.
+Design update (12 October 2026): the user approved the [written establishment-settings specification](../superpowers/specs/2026-10-12-establishment-settings-design.md), including a validated IANA timezone with UTC for existing restaurants, and authorized direct planning despite the missing `writing-plans` skill. The [implementation plan](../superpowers/specs/2026-10-12-establishment-settings-implementation-plan.md) awaits review/execution selection. Legal identifiers and default-tax changes remain separate decisions; no settings API, persistence or migration is implemented by these documents.
 
 Add the establishment-information settings section with public/legal identity, address, phone, pickup instructions and location links from the reference.
 
