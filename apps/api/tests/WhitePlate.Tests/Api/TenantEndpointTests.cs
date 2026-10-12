@@ -89,6 +89,42 @@ public sealed class TenantEndpointTests
         Assert.Equal(HttpStatusCode.MethodNotAllowed, response.StatusCode);
     }
 
+    [Fact]
+    public async Task PublicEstablishmentUsesHostAndExcludesManagementFields()
+    {
+        using var factory = new TenantFactory();
+        using var client = factory.CreateClient();
+        await factory.SeedAsync();
+        using (var scope = factory.Services.CreateScope())
+        {
+            var database = scope.ServiceProvider.GetRequiredService<WhitePlateDbContext>();
+            var tenant = await database.Tenants.SingleAsync(row => row.Name == "First", TestContext.Current.CancellationToken);
+            tenant.UpdateMenuLocales(["en", "fr"], "en");
+            tenant.UpdateEstablishment(new EstablishmentInput("First", TimeZone: "Europe/Paris",
+                PickupInstructions: new Dictionary<string, string?> { ["en"] = "Counter" }));
+            await database.SaveChangesAsync(TestContext.Current.CancellationToken);
+        }
+        using var response = await client.GetAsync("https://first.example.test/api/v1/tenant/establishment?locale=fr", TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        using var json = System.Text.Json.JsonDocument.Parse(await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
+        Assert.Equal("Counter", json.RootElement.GetProperty("pickupInstruction").GetString());
+        Assert.Equal("en", json.RootElement.GetProperty("pickupLocale").GetString());
+        Assert.False(json.RootElement.TryGetProperty("establishmentVersion", out _));
+        Assert.False(json.RootElement.TryGetProperty("pickupInstructions", out _));
+        using var second = await client.GetAsync("https://second.example.test/api/v1/tenant/establishment?tenantId=first", TestContext.Current.CancellationToken);
+        using var secondJson = System.Text.Json.JsonDocument.Parse(await second.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
+        Assert.Equal("Second", secondJson.RootElement.GetProperty("name").GetString());
+        Assert.Equal(System.Text.Json.JsonValueKind.Null, secondJson.RootElement.GetProperty("pickupInstruction").ValueKind);
+        using var menu = await client.GetAsync("https://first.example.test/api/v1/menu?locale=fr", TestContext.Current.CancellationToken);
+        using var menuJson = System.Text.Json.JsonDocument.Parse(await menu.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
+        Assert.Equal("Counter", menuJson.RootElement.GetProperty("establishment").GetProperty("pickupInstruction").GetString());
+        foreach (var host in new[] { "inactive", "unknown" })
+        {
+            using var unavailable = await client.GetAsync($"https://{host}.example.test/api/v1/tenant/establishment", TestContext.Current.CancellationToken);
+            Assert.Equal(HttpStatusCode.NotFound, unavailable.StatusCode);
+        }
+    }
+
     private sealed class TenantFactory : WebApplicationFactory<Program>
     {
         private readonly SqliteConnection connection = new("Data Source=:memory:");

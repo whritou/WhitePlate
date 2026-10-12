@@ -177,6 +177,13 @@ export function LiveSettings({
 
                       <Link
                         className="btn-outline"
+                        href={`/organization/restaurant-settings?tenantId=${restaurant.id}`}
+                      >
+                        {t("restaurantSettings")}
+                      </Link>
+
+                      <Link
+                        className="btn-outline"
                         href={`/organization/catalog?tenantId=${restaurant.id}`}
                       >
                         {t("openMenu")}

@@ -115,6 +115,8 @@ export default async function LiveWorkspaceFixture({
         />
       ) : query.view === "restaurant-settings" ? (
         <RestaurantSettings
+          userId={userId}
+          initial={null}
           restaurant={{
             id: tenantId,
             name: "Maison Verte",

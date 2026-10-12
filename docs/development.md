@@ -284,3 +284,7 @@ With the local frontend running, run `node node_modules/@playwright/test/cli.js 
 ## Workspace UI regression rollout — 2026-10-10
 
 This frontend-only follow-up removes dark mode and adds organization overview context, restaurant settings entry points and a Visit shop redirect. The existing `/api/v1/me` membership fields provide organization ID and subdomain; no API migration is needed. Set `STOREFRONT_BASE_DOMAIN` and configure tenant DNS/HTTPS before using the live shop shortcut. Restaurant settings expose existing catalog/language/Studio actions; S1–S5 business-setting APIs and T3 appearance publication remain separate. [Verification and limitations](audits/workspace-regressions.md).
+
+## S1 establishment settings rollout — 2026-10-12
+
+S1 now implements identity/contact/address, coordinates, IANA timezone and localized pickup settings plus current guest collection details. Review/apply `EstablishmentSettings` through the operator process, then deploy API before frontend. No shared/production migration or deployment was performed by this change. Archival still uses UTC; S2–S5 remain separate. Use `npm run test:browser -- --project=establishment-settings` against the local development server; the EN/FR fixture `/[locale]/establishment-design-test` returns 404 in production. Optional `WHITEPLATE_DESIGN_SCREENSHOTS` records review images. [Verification and remaining hosted acceptance](audits/establishment-settings.md).

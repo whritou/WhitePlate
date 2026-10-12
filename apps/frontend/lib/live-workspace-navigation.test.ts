@@ -62,6 +62,9 @@ it("includes organization staff in restaurant navigation only for an authorized 
   expect(links.find((link) => link.key === "team")?.href).toBe(
     `/organization/team?organizationId=${organizationId}&tenantId=${id}`
   )
+  expect(links.find((link) => link.key === "settings")?.href).toBe(
+    `/organization/restaurant-settings?tenantId=${id}`
+  )
   expect(
     liveWorkspaceLinks(
       new URLSearchParams({ tenantId: id }),

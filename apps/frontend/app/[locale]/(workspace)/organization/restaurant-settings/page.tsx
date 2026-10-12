@@ -3,6 +3,7 @@ import { getManagedWorkspaceRestaurant } from "@/services/live-workspace"
 import { RestaurantSettings } from "@/components/organization/restaurant-settings"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import type { SearchParams } from "@/types/navigation"
+import { getEstablishmentSettings } from "@/services/establishment-settings"
 
 export default async function RestaurantSettingsPage({
   searchParams,
@@ -24,5 +25,13 @@ export default async function RestaurantSettingsPage({
     )
   }
 
-  return <RestaurantSettings restaurant={restaurant} />
+  const settings = await getEstablishmentSettings(restaurant.id)
+
+  return (
+    <RestaurantSettings
+      restaurant={restaurant}
+      userId={restaurant.userId}
+      initial={settings.ok ? settings.data : null}
+    />
+  )
 }

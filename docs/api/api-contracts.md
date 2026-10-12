@@ -1,5 +1,22 @@
 # API contracts
 
+## S1 establishment settings — 2026-10-12
+
+Source implementation; migration execution and hosted acceptance remain open. [Verification and rollout](../audits/establishment-settings.md).
+
+| Method and route | Access and behavior |
+| --- | --- |
+| `GET /api/v1/tenants/{tenantId}/establishment-settings` | Persisted owner/manager, active establishment; scalar settings, enabled pickup map, `locales`, `defaultLocale`, `establishmentVersion`; quoted version ETag and no-store |
+| `GET …/establishment-settings/options` | Same access; `{timeZones: IANA IDs including UTC, countries: ISO alpha-2 codes}` |
+| `PUT …/establishment-settings` | Full scalar replacement and explicit pickup translation merge; requires quoted positive integer If-Match; normalized settings and new ETag |
+| `GET /api/v1/tenant/establishment?locale=…` | Public host-resolved current collection details; resolved pickup text/actual locale, no version or translation map |
+
+PUT accepts required `name` (≤200), nullable `phone` (≤40; telephone characters, 3–20 ASCII digits), nullable `addressLine1`/`addressLine2` (≤200), `postalCode` (≤20), `city`/`region` (≤100), `countryCode` (ISO alpha-2), nullable paired `latitude`/`longitude` (bounds ±90/±180 before six-decimal rounding), required supported `timeZone` (≤100), and optional `pickupInstructions` locale-to-nullable-text map (≤1000 per enabled locale). Strings trim; empty optional fields clear. Empty address is valid; any address requires line 1, city and country. Only explicitly supplied pickup languages change; blank/null text clears, omitted and disabled stored translations survive. Invalid input or missing/malformed If-Match returns 400; stale saves return 412; anonymous access 401; kitchen/foreign/revoked/inactive access 404. Existing safe problem responses apply.
+
+Public `/menu` adds `establishment`: name, optional phone/address/coordinates, timezone and `pickupInstruction`/`pickupLocale`. Missing requested text falls back to the default; no text makes both pickup fields null. Tracking adds nullable `menuLocale` from the saved order. Receipt/tracking collection details are independently loaded current information, preserving historical order snapshots. Older additive-field-free APIs remain usable.
+
+Protected frontend GET `/api/establishment-settings?tenantId=…` uses the authenticated server factory and private no-store/Vary Cookie. The validated save Server Action forwards the saved version as If-Match. Public GET `/api/public/establishment?locale=…` uses host routing without bearer credentials, bounded timeout/cancellation and no-store/Vary Host. Browser tenant selectors cannot choose another public establishment.
+
 ## M2 menu product metadata — 2026-10-11
 
 Owner/manager `POST /api/v1/tenants/{tenantId}/products` and `PUT /api/v1/tenants/{tenantId}/products/{productId}` accept the existing product fields plus optional `sku`, `containsAllergens`, `mayContainAllergens`, `dietaryTags`, `preparationMinutes` and `preparationNotes` (a locale-to-text object). Omitting metadata on create uses empty declarations; a full update replaces these values, including clearing them. SKU is optional, at most 64 ASCII letters/digits/dot/underscore/dash, normalized to uppercase and unique within the restaurant. Allergen codes are the controlled EU 14 identifiers; declarations cannot overlap. Dietary codes are `dairyFree`, `glutenFree`, `pescatarian`, `vegan` and `vegetarian`. Preparation minutes are null or 1–1,440, with localized notes up to 250 characters per locale. Invalid values return 400 `validation_failed`; duplicate SKU returns 409 `conflict`.

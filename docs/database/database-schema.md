@@ -1,5 +1,23 @@
 # Database schema and tenant model
 
+## S1 establishment fields — 2026-10-12
+
+Generated `20261012113559_EstablishmentSettings` is reviewed but unapplied to shared/production PostgreSQL. Existing `Tenants.Name` remains the trade name. [Rollout evidence](../audits/establishment-settings.md).
+
+| New Tenants columns | PostgreSQL type | Rules/defaults |
+| --- | --- | --- |
+| `Phone` | `varchar(40)` | Nullable |
+| `AddressLine1`, `AddressLine2` | `varchar(200)` | Nullable; supplied address requires line 1, city and country via Domain |
+| `PostalCode` | `varchar(20)` | Nullable international text |
+| `City`, `Region` | `varchar(100)` | Nullable |
+| `CountryCode` | `varchar(2)` | Nullable ISO alpha-2 |
+| `Latitude`, `Longitude` | `numeric(9,6)` | Nullable paired coordinates; bounds before rounding |
+| `TimeZone` | `varchar(100)` | Required, default `UTC` |
+| `PickupInstructionsJson` | `text` | Required locale/text object, default `{}`; disabled languages retained |
+| `EstablishmentVersion` | `integer` | Positive conditional-write version, default `1` |
+
+Conditional persistence checks the expected establishment version and menu configuration, updating only establishment columns. No new index/table/order column is introduced; tracking uses existing nullable `Orders.MenuLocale`. Runtime membership and active-organization/tenant checks remain mandatory; schema alone cannot authorize tenant access.
+
 ## M2 product metadata — 2026-10-11
 
 Migration `20261011125310_ProductMenuMetadata` adds nullable `Products.Sku`, JSON-backed `ContainsAllergensJson`, `MayContainAllergensJson`, `DietaryTagsJson`, `PreparationNotesJson`, and optional `PreparationMinutes`. A filtered unique index on `(TenantId, Sku)` normalizes SKU case in the domain and retains uniqueness for archived products. `OrderLines` receives matching declaration/note JSON and preparation minutes so saved disclosures survive catalog edits. Existing products and order lines migrate to empty arrays/objects. The schema change is generated and covered by source tests; it has not been applied to shared environments. See [decision 0009](../architecture/decisions/0009-menu-product-metadata.md) and [M2 evidence](../audits/menu-builder-metadata.md).

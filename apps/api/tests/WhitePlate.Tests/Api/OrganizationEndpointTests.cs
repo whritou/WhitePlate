@@ -605,6 +605,166 @@ public sealed class OrganizationEndpointTests
         Assert.False(product.GetProperty("isAvailable").GetBoolean());
     }
 
+    [Fact]
+    public async Task EstablishmentSettingsPersistNormalizeAndRejectStaleOrForeignWrites()
+    {
+        using var factory = new OrganizationFactory();
+        var (organizationId, owner) = await factory.SeedOwnerAsync();
+        var tenantId = await factory.SeedRestaurantAsync(organizationId);
+        using var client = factory.CreateClient();
+        var path = $"/api/v1/tenants/{tenantId}/establishment-settings";
+        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", owner.Subject);
+        using var initial = await client.GetAsync(path, TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.OK, initial.StatusCode);
+        using var initialJson = JsonDocument.Parse(await initial.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
+        Assert.Equal("UTC", initialJson.RootElement.GetProperty("timeZone").GetString());
+        var body = new { name = " New Bistro ", phone = "+33 1 23 45 67 89", addressLine1 = " 12 Rue Test ",
+            addressLine2 = "", city = "Paris", postalCode = "75001", region = (string?)null, countryCode = "fr",
+            latitude = 0m, longitude = 2.1234567m, timeZone = "Europe/Paris",
+            pickupInstructions = new Dictionary<string, string> { ["en"] = " Collect at counter ", ["fr"] = "Au comptoir" } };
+        client.DefaultRequestHeaders.TryAddWithoutValidation("If-Match", "\"1\"");
+        using var saved = await client.PutAsJsonAsync(path, body, TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.OK, saved.StatusCode);
+        using var json = JsonDocument.Parse(await saved.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
+        Assert.Equal("New Bistro", json.RootElement.GetProperty("name").GetString());
+        Assert.Equal("FR", json.RootElement.GetProperty("countryCode").GetString());
+        Assert.Equal(2.123457m, json.RootElement.GetProperty("longitude").GetDecimal());
+        Assert.Equal("Collect at counter", json.RootElement.GetProperty("pickupInstructions").GetProperty("en").GetString());
+        using var stale = await client.PutAsJsonAsync(path, body, TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.PreconditionFailed, stale.StatusCode);
+        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", "foreign");
+        using var denied = await client.GetAsync(path, TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.NotFound, denied.StatusCode);
+        using var deniedSave = await client.PutAsJsonAsync(path, body, TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.NotFound, deniedSave.StatusCode);
+        using var scope = factory.Services.CreateScope();
+        var tenant = await scope.ServiceProvider.GetRequiredService<WhitePlateDbContext>().Tenants
+            .AsNoTracking().SingleAsync(row => row.Id == tenantId, TestContext.Current.CancellationToken);
+        Assert.Equal("New Bistro", tenant.Name);
+        Assert.Equal("EUR", tenant.Currency);
+        Assert.Equal("bistro", tenant.Subdomain.Value);
+    }
+
+    [Fact]
+    public async Task EstablishmentOptionsAndSettingsRequireCurrentManagementMembership()
+    {
+        using var factory = new OrganizationFactory();
+        var (organizationId, _) = await factory.SeedOwnerAsync();
+        var tenantId = await factory.SeedRestaurantAsync(organizationId);
+        await factory.AddRestaurantMemberAsync(tenantId, "manager", RestaurantRole.Manager);
+        await factory.AddRestaurantMemberAsync(tenantId, "kitchen", RestaurantRole.Kitchen);
+        using var client = factory.CreateClient();
+        var path = $"/api/v1/tenants/{tenantId}/establishment-settings";
+        using var anonymous = await client.GetAsync(path, TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.Unauthorized, anonymous.StatusCode);
+        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", "kitchen");
+        using var kitchen = await client.GetAsync(path + "/options", TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.NotFound, kitchen.StatusCode);
+        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", "manager");
+        using var manager = await client.GetAsync(path + "/options", TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.OK, manager.StatusCode);
+        using var json = JsonDocument.Parse(await manager.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
+        Assert.Contains(json.RootElement.GetProperty("timeZones").EnumerateArray(), zone => zone.GetString() == "Europe/Paris");
+        Assert.Contains(json.RootElement.GetProperty("countries").EnumerateArray(), country => country.GetString() == "FR");
+        using var scope = factory.Services.CreateScope();
+        var database = scope.ServiceProvider.GetRequiredService<WhitePlateDbContext>();
+        await database.RestaurantMemberships.Where(row => row.TenantId == tenantId).ExecuteDeleteAsync(TestContext.Current.CancellationToken);
+        using var revoked = await client.GetAsync(path, TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.NotFound, revoked.StatusCode);
+    }
+
+    [Fact]
+    public async Task EstablishmentValidationAndPreconditionsNeverPartiallySave()
+    {
+        using var factory = new OrganizationFactory();
+        var (organizationId, owner) = await factory.SeedOwnerAsync();
+        var tenantId = await factory.SeedRestaurantAsync(organizationId);
+        using var client = factory.CreateClient();
+        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", owner.Subject);
+        var path = $"/api/v1/tenants/{tenantId}/establishment-settings";
+        foreach (var header in new string?[] { null, "1", "*", "W/\"1\"", "\"0\"", "\"1\",\"2\"" })
+        {
+            client.DefaultRequestHeaders.Remove("If-Match");
+            if (header is not null) client.DefaultRequestHeaders.TryAddWithoutValidation("If-Match", header);
+            using var response = await client.PutAsJsonAsync(path, new { name = "Changed", timeZone = "UTC" }, TestContext.Current.CancellationToken);
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        }
+        client.DefaultRequestHeaders.Remove("If-Match");
+        client.DefaultRequestHeaders.TryAddWithoutValidation("If-Match", "\"1\"");
+        object[] invalid = [
+            new { name = "Changed", timeZone = "Romance Standard Time" },
+            new { name = "Changed", timeZone = "+02:00" },
+            new { name = "Changed", timeZone = "Invalid/Zone" },
+            new { name = "Changed", timeZone = "UTC", countryCode = "ZZ", addressLine1 = "1 Test", city = "Test" },
+            new { name = "Changed", timeZone = "UTC", addressLine2 = "Floor 2" },
+            new { name = "Changed", timeZone = "UTC", latitude = 0m },
+            new { name = "Changed", timeZone = "UTC", latitude = 90.0000001m, longitude = 0m },
+            new { name = "Changed", timeZone = "UTC", pickupInstructions = new Dictionary<string, string> { ["de"] = "Counter" } },
+            new { name = "Changed", timeZone = "UTC", pickupInstructions = new Dictionary<string, string> { ["en"] = new string('x', 1001) } }
+        ];
+        foreach (var body in invalid)
+        {
+            using var response = await client.PutAsJsonAsync(path, body, TestContext.Current.CancellationToken);
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        }
+        using var unchanged = await client.GetAsync(path, TestContext.Current.CancellationToken);
+        Assert.Equal("\"1\"", unchanged.Headers.ETag!.Tag);
+        using var json = JsonDocument.Parse(await unchanged.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
+        Assert.Equal("Bistro", json.RootElement.GetProperty("name").GetString());
+    }
+
+    [Fact]
+    public async Task EstablishmentConditionalPersistenceRejectsConcurrentSettingsAndLocaleChanges()
+    {
+        using var factory = new OrganizationFactory();
+        var (organizationId, owner) = await factory.SeedOwnerAsync();
+        var tenantId = await factory.SeedRestaurantAsync(organizationId);
+        using var scope = factory.Services.CreateScope();
+        var repository = scope.ServiceProvider.GetRequiredService<WhitePlate.Application.Tenants.IEstablishmentSettingsRepository>();
+        var database = scope.ServiceProvider.GetRequiredService<WhitePlateDbContext>();
+        var first = (await repository.GetAsync(tenantId, TestContext.Current.CancellationToken))!;
+        var second = (await repository.GetAsync(tenantId, TestContext.Current.CancellationToken))!;
+        first.UpdateEstablishment(new WhitePlate.Domain.Tenants.EstablishmentInput("First saved"));
+        second.UpdateEstablishment(new WhitePlate.Domain.Tenants.EstablishmentInput("Stale save"));
+        Assert.True(await repository.SaveAsync(first, owner, 1, first.MenuLocalesJson, first.DefaultMenuLocale, TestContext.Current.CancellationToken));
+        Assert.False(await repository.SaveAsync(second, owner, 1, second.MenuLocalesJson, second.DefaultMenuLocale, TestContext.Current.CancellationToken));
+        var localeDraft = (await repository.GetAsync(tenantId, TestContext.Current.CancellationToken))!;
+        var locales = localeDraft.MenuLocalesJson;
+        localeDraft.UpdateEstablishment(new WhitePlate.Domain.Tenants.EstablishmentInput("Stale locales"));
+        var current = await database.Tenants.SingleAsync(row => row.Id == tenantId, TestContext.Current.CancellationToken);
+        current.UpdateMenuLocales(["en"], "en");
+        await database.SaveChangesAsync(TestContext.Current.CancellationToken);
+        Assert.False(await repository.SaveAsync(localeDraft, owner, 2, locales, "en", TestContext.Current.CancellationToken));
+        await factory.AddRestaurantMemberAsync(tenantId, "revoked-manager", RestaurantRole.Manager);
+        var revoked = (await repository.GetAsync(tenantId, TestContext.Current.CancellationToken))!;
+        revoked.UpdateEstablishment(new WhitePlate.Domain.Tenants.EstablishmentInput("Revoked write"));
+        await database.RestaurantMemberships.Where(row => row.TenantId == tenantId).ExecuteDeleteAsync(TestContext.Current.CancellationToken);
+        Assert.False(await repository.SaveAsync(revoked, ExternalIdentity.Create("https://identity.example.test/", "revoked-manager"),
+            2, revoked.MenuLocalesJson, revoked.DefaultMenuLocale, TestContext.Current.CancellationToken));
+        Assert.Equal("First saved", (await repository.GetAsync(tenantId, TestContext.Current.CancellationToken))!.Name);
+    }
+
+    [Fact]
+    public async Task ArchivedEstablishmentSettingsAndOptionsAreNotVisibleToManagers()
+    {
+        using var factory = new OrganizationFactory();
+        var (organizationId, _) = await factory.SeedOwnerAsync();
+        var tenantId = await factory.SeedRestaurantAsync(organizationId);
+        await factory.AddRestaurantMemberAsync(tenantId, "manager", RestaurantRole.Manager);
+        using var scope = factory.Services.CreateScope();
+        var database = scope.ServiceProvider.GetRequiredService<WhitePlateDbContext>();
+        var tenant = await database.Tenants.SingleAsync(row => row.Id == tenantId, TestContext.Current.CancellationToken);
+        tenant.Deactivate();
+        await database.SaveChangesAsync(TestContext.Current.CancellationToken);
+        using var client = factory.CreateClient();
+        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", "manager");
+        foreach (var suffix in new[] { "", "/options" })
+        {
+            using var response = await client.GetAsync($"/api/v1/tenants/{tenantId}/establishment-settings{suffix}", TestContext.Current.CancellationToken);
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        }
+    }
+
     private sealed class OrganizationFactory : WebApplicationFactory<Program>
     {
         private readonly SqliteConnection connection = new("Data Source=:memory:");

@@ -60,6 +60,8 @@ For intended behavior, use the proposed contract, schema, and acceptance plan to
 
 ## Keeping documentation current
 
+S1 establishment settings: identity/contact/address, IANA timezone and localized pickup information are implemented in source following the approved [design](superpowers/specs/2026-10-12-establishment-settings-design.md) and [plan](superpowers/specs/2026-10-12-establishment-settings-implementation-plan.md). See [verification and rollout](audits/establishment-settings.md). Migration execution, deployment and hosted acceptance remain open.
+
 Update the relevant documents with changes to commands, routes, ports, dependencies, environment variables, trust boundaries, or data models. Link to one canonical explanation rather than copying it into every guide. Keep examples valid, fence code blocks, and use relative links within repository Markdown.
 
 When settling an open architecture decision, record its date, status, context, choice, alternatives, consequences, and affected documents in a new decision note under `docs/architecture/decisions/` (create that directory when the first decision is made). Until then, use the [open-decision register](development-roadmap.md).

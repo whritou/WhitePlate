@@ -52,6 +52,30 @@ test("desktop menu height follows its content instead of leaving a blank tail", 
 
   expect(metrics.menuHeight).toBeLessThan(600)
   expect(metrics.documentHeight).toBeLessThanOrEqual(metrics.viewportHeight)
+
+  await page
+    .getByRole("button", { name: "Select Soupe du potager", exact: true })
+    .click()
+
+  const panel = page.locator(".live-product-panel").filter({ visible: true })
+
+  await panel.evaluate((element) => {
+    element.scrollTop = element.scrollHeight
+  })
+
+  const selectedMetrics = await page.evaluate(() => {
+    const shell = document.querySelector(".lovable-live")!
+
+    return {
+      documentHeight: document.documentElement.scrollHeight,
+      shellBottom: shell.getBoundingClientRect().bottom + window.scrollY,
+      viewportHeight: window.innerHeight,
+    }
+  })
+
+  expect(selectedMetrics.documentHeight).toBeLessThanOrEqual(
+    Math.max(selectedMetrics.viewportHeight, selectedMetrics.shellBottom) + 16
+  )
 })
 
 test("discount code helper text does not shift the paired name input", async ({
@@ -169,7 +193,7 @@ test("product metadata stays editable and readable while its form is scrolled", 
 
       expect(
         (createBox?.y ?? 0) - ((saveBox?.y ?? 0) + (saveBox?.height ?? 0))
-      ).toBeLessThan(48)
+      ).toBeLessThanOrEqual(8)
       expect(
         (createBox?.y ?? 0) - ((saveBox?.y ?? 0) + (saveBox?.height ?? 0))
       ).toBeGreaterThanOrEqual(0)

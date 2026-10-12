@@ -9,7 +9,7 @@ export type ApiError =
 
 export type ApiResult<T> =
   | { ok: true; status: number; data: T | null }
-  | { ok: false; status: number; error: ApiError }
+  | { ok: false; status: number; error: ApiError; validationFields?: string[] }
 
 export type ApiDiagnostic = {
   method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE"

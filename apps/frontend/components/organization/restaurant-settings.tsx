@@ -3,11 +3,17 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Link } from "@/i18n/navigation"
 import type { RestaurantMembership } from "@/types/orders"
+import type { EstablishmentRead } from "@/types/establishment-settings"
+import { EstablishmentEditor } from "./establishment-editor"
 
 export function RestaurantSettings({
   restaurant,
+  userId,
+  initial,
 }: {
   restaurant: RestaurantMembership
+  userId: string
+  initial: EstablishmentRead | null
 }) {
   const t = useTranslations("LiveWorkspace")
   const a = useTranslations("Auth")
@@ -21,6 +27,12 @@ export function RestaurantSettings({
           {t("restaurantSettings")}
         </h1>
       </header>
+
+      <EstablishmentEditor
+        tenantId={restaurant.id}
+        userId={userId}
+        initial={initial}
+      />
 
       <Card>
         <CardHeader>
@@ -43,10 +55,6 @@ export function RestaurantSettings({
               <dd className="font-semibold">{restaurant.subdomain ?? "—"}</dd>
             </div>
           </dl>
-
-          <p className="text-sm text-muted-foreground">
-            {t("restaurantSettingsScope")}
-          </p>
 
           <div className="flex flex-wrap gap-3">
             <Button

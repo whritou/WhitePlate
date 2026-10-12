@@ -19,6 +19,7 @@ import {
 import { useQuery } from "@tanstack/react-query"
 import { useLocale, useTranslations } from "next-intl"
 import { useSyncExternalStore } from "react"
+import { CurrentCollectionInformation } from "./current-collection-information"
 
 function subscribeToHash(onChange: () => void) {
   window.addEventListener("hashchange", onChange)
@@ -142,6 +143,10 @@ export function OrderTracking({ orderId }: { orderId: string }) {
                     {t("backToMenu")}
                   </Button>
                 </div>
+
+                <CurrentCollectionInformation
+                  locale={order.menuLocale ?? locale}
+                />
               </div>
             ) : null}
           </CardContent>

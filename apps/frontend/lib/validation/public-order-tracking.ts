@@ -32,5 +32,9 @@ export function parsePublicOrderTracking(
     status: value.status as PublicOrderTracking["status"],
     version: value.version as number,
     createdAt: value.createdAt,
+    ...(value.menuLocale === null ||
+    (typeof value.menuLocale === "string" && value.menuLocale.length <= 128)
+      ? { menuLocale: value.menuLocale }
+      : {}),
   }
 }

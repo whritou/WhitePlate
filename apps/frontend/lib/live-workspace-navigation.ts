@@ -47,10 +47,6 @@ export function liveWorkspaceLinks(
     restaurant.role !== "Kitchen" &&
     organizations.some((item) => item.id === restaurant.organizationId)
   ) {
-    links[links.length - 1] = {
-      href: `/organization/settings?organizationId=${restaurant.organizationId}&tenantId=${restaurant.id}`,
-      key: "settings",
-    }
     links.splice(links.length - 1, 0, {
       href: `/organization/team?organizationId=${restaurant.organizationId}&tenantId=${restaurant.id}`,
       key: "team",

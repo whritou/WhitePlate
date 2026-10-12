@@ -19,6 +19,7 @@ import { useLocale, useTranslations } from "next-intl"
 import { CheckoutPanel } from "./checkout-panel"
 import { GuestCheckoutProvider } from "./guest-checkout-provider"
 import { MenuProductCard } from "./menu-product-card"
+import { CollectionInformation } from "./collection-information"
 
 export function RestaurantMenu({
   menu,
@@ -91,6 +92,7 @@ function RestaurantMenuContent({
               <LiveCheckout
                 state={checkoutState}
                 name={menu.restaurantName}
+                establishment={menu.establishment}
                 price={price}
                 estimate={price.format(estimate)}
                 onNewOrder={() => {
@@ -109,6 +111,12 @@ function RestaurantMenuContent({
               />
             ) : (
               <>
+                {menu.establishment && (
+                  <div className="mx-auto my-6 max-w-[1120px] border p-4">
+                    <CollectionInformation establishment={menu.establishment} />
+                  </div>
+                )}
+
                 {menu.categories.length > 0 && (
                   <nav
                     aria-label={t("menuSections")}
