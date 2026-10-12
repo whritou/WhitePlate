@@ -19,11 +19,12 @@ public sealed record CheckoutDiscountDto(string Code, DiscountKind Kind, decimal
 public sealed record CheckoutLocaleDto(string Locale, string DefaultLocale);
 public sealed record CheckoutCatalogDto(string Currency, string Locale, IReadOnlyList<CheckoutProductDto> Products,
     CheckoutDiscountDto? Discount);
+public sealed record PickupAvailabilityDto(string State, string? TimeZone, IReadOnlyList<WhitePlate.Domain.Tenants.PickupSlot> Slots);
 
 public sealed record CreateOrderItem(Guid ProductId, int Quantity, IReadOnlyList<Guid>? OptionIds);
 public sealed record CreateOrderCommand(Guid TenantId, string? CustomerName, string? DiscountCode,
     string? MenuLocale, IReadOnlyList<CreateOrderItem>? Items, string? IdempotencyKey,
-    string? TrackingToken = null);
+    string? TrackingToken = null, DateTimeOffset? PickupAt = null);
 
 public sealed record OrderLineOptionDto(Guid OptionId, string Name, decimal PriceAdjustment);
 public sealed record OrderLineReceiptDto(Guid ProductId, string ProductName, decimal BaseUnitPrice,
@@ -38,7 +39,11 @@ public sealed record OrderLineReceiptDto(Guid ProductId, string ProductName, dec
 }
 public sealed record OrderReceiptDto(Guid Id, Guid TenantId, string Currency, string CustomerName,
     string? MenuLocale, string? DiscountCode, decimal Subtotal, decimal DiscountAmount, decimal TaxAmount, decimal Total,
-    string Status, int Version, DateTimeOffset CreatedAt, IReadOnlyList<OrderLineReceiptDto> Lines);
+    string Status, int Version, DateTimeOffset CreatedAt, IReadOnlyList<OrderLineReceiptDto> Lines)
+{
+    public DateTimeOffset? PickupAt { get; init; }
+    public string? PickupTimeZone { get; init; }
+}
 public sealed record OrderSummaryOptionDto(Guid OptionId, string Name);
 public sealed record OrderSummaryLineDto(Guid ProductId, string ProductName, int Quantity,
     IReadOnlyList<OrderSummaryOptionDto> Options)
@@ -46,12 +51,20 @@ public sealed record OrderSummaryLineDto(Guid ProductId, string ProductName, int
     public int? PreparationMinutes { get; init; }
 }
 public sealed record OrderSummaryDto(Guid Id, string CustomerName, string Currency, string? MenuLocale, decimal Total,
-    string Status, int Version, DateTimeOffset CreatedAt, IReadOnlyList<OrderSummaryLineDto> Lines);
+    string Status, int Version, DateTimeOffset CreatedAt, IReadOnlyList<OrderSummaryLineDto> Lines)
+{
+    public DateTimeOffset? PickupAt { get; init; }
+    public string? PickupTimeZone { get; init; }
+}
 public sealed record OrderPageDto(IReadOnlyList<OrderSummaryDto> Items, string? NextCursor);
 public sealed record OrderPageData(IReadOnlyList<OrderSummaryDto> Items, OrderPageCursor? NextCursor);
 public sealed record OrderHistoryPageDto(IReadOnlyList<OrderSummaryDto> Items, int Page, int PageSize, int TotalCount);
 public sealed record OrderHistoryPageData(IReadOnlyList<OrderSummaryDto> Items, int TotalCount);
-public sealed record PublicOrderTrackingDto(Guid Id, string Status, int Version, DateTimeOffset CreatedAt, string? MenuLocale = null);
+public sealed record PublicOrderTrackingDto(Guid Id, string Status, int Version, DateTimeOffset CreatedAt, string? MenuLocale = null)
+{
+    public DateTimeOffset? PickupAt { get; init; }
+    public string? PickupTimeZone { get; init; }
+}
 public sealed record OrderPageCursor(long CreatedAtTicks, Guid Id);
 public sealed record ListOrdersQuery(Guid TenantId, OrderStatus? Status, string? Cursor, int? PageSize);
 public sealed record ListOrderHistoryQuery(Guid TenantId, OrderStatus? Status, string? Search, DateOnly? From,
@@ -78,5 +91,5 @@ public static class OrderReceiptMapping
                 DietaryTags = line.DietaryTags,
                 PreparationMinutes = line.PreparationMinutes,
                 PreparationNotes = line.PreparationNotes
-            }).ToArray());
+            }).ToArray()) { PickupAt = order.PickupAt, PickupTimeZone = order.PickupTimeZone };
 }

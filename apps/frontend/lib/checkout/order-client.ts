@@ -80,6 +80,8 @@ function isOrderReceipt(value: unknown): value is OrderReceipt {
     Number(value.version) < 1 ||
     typeof value.createdAt !== "string" ||
     !Number.isFinite(Date.parse(value.createdAt)) ||
+    typeof value.pickupAt !== "string" ||
+    !Number.isFinite(Date.parse(value.pickupAt)) ||
     ![value.subtotal, value.discountAmount, value.taxAmount, value.total].every(
       isAmount
     ) ||

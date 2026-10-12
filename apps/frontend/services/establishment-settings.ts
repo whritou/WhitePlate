@@ -10,6 +10,7 @@ import type {
   EstablishmentRead,
   EstablishmentSettings,
   OpeningHoursSchedule,
+  PickupSchedulingSettings,
   TenantLegalProfile,
 } from "@/types/establishment-settings"
 import { parseTenantLegalProfile } from "@/lib/validation/legal-profile"
@@ -121,6 +122,26 @@ export async function updateOpeningHours(
         { ifMatch: `"${establishmentVersion}"` }
       )
     : await whitePlateApi.delete(path, { ifMatch: `"${establishmentVersion}"` })
+
+  if (!response.ok) return response
+
+  const data = parseEstablishmentSettings(response.data)
+
+  return data
+    ? { ok: true, status: 200, data }
+    : { ok: false, status: 502, error: "unavailable" }
+}
+
+export async function updatePickupScheduling(
+  tenantId: string,
+  establishmentVersion: number,
+  pickupScheduling: PickupSchedulingSettings
+): Promise<ApiResult<EstablishmentSettings>> {
+  const response = await whitePlateApi.put(
+    `/api/v1/tenants/${tenantId}/establishment-settings/pickup-scheduling`,
+    pickupScheduling,
+    { ifMatch: `"${establishmentVersion}"` }
+  )
 
   if (!response.ok) return response
 

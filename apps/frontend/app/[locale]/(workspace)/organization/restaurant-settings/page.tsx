@@ -34,8 +34,8 @@ export default async function RestaurantSettingsPage({
   ])
   const section =
     typeof params.section === "string" &&
-    ["establishment", "legal", "hours"].includes(params.section)
-      ? (params.section as "establishment" | "legal" | "hours")
+    ["establishment", "legal", "hours", "pickup"].includes(params.section)
+      ? (params.section as "establishment" | "legal" | "hours" | "pickup")
       : "establishment"
 
   return (

@@ -94,6 +94,17 @@ public sealed class EstablishmentSettingsController(ICurrentIdentity currentIden
         return Settings(await handler.SaveOpeningHoursAsync(tenantId, identity, null, ParseVersion(), true, ct));
     }
 
+    [HttpPut("pickup-scheduling")]
+    [RequestSizeLimit(65536)]
+    [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+    public async Task<IActionResult> PutPickupScheduling(Guid tenantId, UpdatePickupSchedulingRequest request, CancellationToken ct)
+    {
+        if (currentIdentity.Identity is not { } identity) return Unauthorized();
+        return Settings(await handler.SavePickupSchedulingAsync(tenantId, identity,
+            new PickupSchedulingSettings(request.IntervalMinutes, request.MinimumLeadMinutes, request.Capacity),
+            ParseVersion(), ct));
+    }
+
     private int? ParseVersion()
     {
         var header = Request.Headers.IfMatch.ToString();

@@ -6,6 +6,58 @@ namespace WhitePlate.Tests.Domain;
 public sealed class EstablishmentSettingsTests
 {
     [Fact]
+    public void PickupSlotsUseOpeningWindowStartsAndLeadTime()
+    {
+        var tenant = Tenant.Create(Guid.NewGuid(), "Bistro", "bistro", "EUR");
+        tenant.SetOpeningHours(new OpeningHoursSchedule(Enumerable.Range(1, 7)
+            .Select(day => new OpeningHoursDay(day, day != 4, day == 4 ? [new("09:00", "10:00")] : [])).ToArray()));
+
+        var slots = tenant.GeneratePickupSlots(new DateTimeOffset(2026, 1, 1, 8, 45, 0, TimeSpan.Zero));
+
+        Assert.Equal(3, slots.Count);
+        Assert.Equal(new DateTimeOffset(2026, 1, 1, 9, 15, 0, TimeSpan.Zero), slots[0].StartsAt);
+        Assert.Equal(new DateTimeOffset(2026, 1, 1, 9, 30, 0, TimeSpan.Zero), slots[1].StartsAt);
+        Assert.Equal(new DateTimeOffset(2026, 1, 1, 9, 45, 0, TimeSpan.Zero), slots[2].StartsAt);
+        Assert.All(slots, slot => Assert.Equal(8, slot.RemainingCapacity));
+    }
+
+    [Fact]
+    public void PickupSettingsRejectUnsupportedValuesWithoutChangingVersion()
+    {
+        var tenant = Tenant.Create(Guid.NewGuid(), "Bistro", "bistro", "EUR");
+
+        Assert.Throws<DomainRuleException>(() => tenant.SetPickupScheduling(new(12, 20, 8)));
+        Assert.Equal(new PickupSchedulingSettings(15, 20, 8), tenant.GetPickupScheduling());
+        Assert.Equal(1, tenant.EstablishmentVersion);
+    }
+
+    [Fact]
+    public void RepeatedDstWallTimesProduceSeparateInstantsAndInvalidTimesAreSkipped()
+    {
+        var tenant = Tenant.Create(Guid.NewGuid(), "Bistro", "bistro", "EUR");
+        tenant.UpdateEstablishment(new("Bistro", TimeZone: "Europe/Paris"));
+        tenant.SetPickupScheduling(new(30, 0, 8));
+        var closed = Enumerable.Range(1, 7).Select(day => new OpeningHoursDay(day, true, [])).ToArray();
+        var fallBack = closed.ToArray();
+        fallBack[6] = new OpeningHoursDay(7, false, [new("02:00", "03:00")]);
+        tenant.SetOpeningHours(new OpeningHoursSchedule(fallBack));
+
+        var repeated = tenant.GeneratePickupSlots(new DateTimeOffset(2026, 10, 25, 0, 0, 0, TimeSpan.Zero));
+
+        Assert.Equal(4, repeated.Count);
+        Assert.Equal(new[] { 120, 120, 60, 60 }, repeated.Select(slot => (int)slot.StartsAt.Offset.TotalMinutes));
+
+        var springForward = closed.ToArray();
+        springForward[6] = new OpeningHoursDay(7, false, [new("02:00", "04:00")]);
+        tenant.SetOpeningHours(new OpeningHoursSchedule(springForward));
+        var skipped = tenant.GeneratePickupSlots(new DateTimeOffset(2026, 3, 29, 0, 0, 0, TimeSpan.Zero));
+
+        Assert.Equal(2, skipped.Count);
+        Assert.DoesNotContain(skipped, slot => TimeZoneInfo.ConvertTime(slot.StartsAt,
+            TimeZoneInfo.FindSystemTimeZoneById("Europe/Paris")).Hour == 2);
+    }
+
+    [Fact]
     public void OpeningHoursAllowIndependentWeekdaysAndSplitServices()
     {
         var tenant = Tenant.Create(Guid.NewGuid(), "Bistro", "bistro", "EUR");

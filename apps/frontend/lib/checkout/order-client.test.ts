@@ -28,6 +28,8 @@ const receipt: OrderReceipt = {
   status: "Pending",
   version: 1,
   createdAt: "2026-10-01T12:00:00Z",
+  pickupAt: "2026-10-01T12:30:00Z",
+  pickupTimeZone: "UTC",
   lines: [
     {
       productId,

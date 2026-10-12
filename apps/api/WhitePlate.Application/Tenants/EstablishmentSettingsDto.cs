@@ -20,12 +20,13 @@ public sealed record PublicEstablishmentDto(string Name, string? Phone, string? 
 public sealed record EstablishmentSettingsDto(string Name, string? Phone, string? AddressLine1, string? AddressLine2,
     string? PostalCode, string? City, string? Region, string? CountryCode, decimal? Latitude, decimal? Longitude,
     string TimeZone, IReadOnlyDictionary<string, string> PickupInstructions, int EstablishmentVersion,
-    IReadOnlyList<string> Locales, string DefaultLocale, OpeningHoursSchedule? OpeningHours)
+    IReadOnlyList<string> Locales, string DefaultLocale, OpeningHoursSchedule? OpeningHours,
+    PickupSchedulingSettings PickupScheduling)
 {
     public static EstablishmentSettingsDto FromTenant(Tenant tenant) => new(tenant.Name, tenant.Phone,
         tenant.AddressLine1, tenant.AddressLine2, tenant.PostalCode, tenant.City, tenant.Region, tenant.CountryCode,
         tenant.Latitude, tenant.Longitude, tenant.TimeZone, tenant.GetPickupInstructions(), tenant.EstablishmentVersion,
-        tenant.GetMenuLocales(), tenant.DefaultMenuLocale, tenant.GetOpeningHours());
+        tenant.GetMenuLocales(), tenant.DefaultMenuLocale, tenant.GetOpeningHours(), tenant.GetPickupScheduling());
 }
 
 public sealed record EstablishmentOptionsDto(IReadOnlyList<string> TimeZones, IReadOnlyList<string> Countries);

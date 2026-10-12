@@ -14,6 +14,7 @@ import type {
 } from "@/types/establishment-settings"
 import { EstablishmentEditor } from "./establishment-editor"
 import { RestaurantLegalProfileEditor } from "./restaurant-legal-profile-editor"
+import { PickupSchedulingEditor } from "./pickup-scheduling-editor"
 
 export function RestaurantSettings({
   restaurant,
@@ -36,6 +37,7 @@ export function RestaurantSettings({
     { id: "establishment", label: t("establishmentSettingsCategory") },
     { id: "legal", label: t("legalSettingsCategory") },
     { id: "hours", label: t("openingHoursCategory") },
+    { id: "pickup", label: t("pickupSchedulingCategory") },
   ]
 
   function navigate(next: RestaurantSettingsSection) {
@@ -212,6 +214,16 @@ export function RestaurantSettings({
               userId={userId}
               initial={initial}
               section="hours"
+            />
+          )}
+
+          {section === "pickup" && (
+            <PickupSchedulingEditor
+              tenantId={restaurant.id}
+              initial={initial?.settings ?? null}
+              onSaved={async () => {
+                router.refresh()
+              }}
             />
           )}
         </div>

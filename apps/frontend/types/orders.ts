@@ -22,6 +22,8 @@ export type OrderSummary = {
   status: OrderStatus
   version: number
   createdAt: string
+  pickupAt?: string | null
+  pickupTimeZone?: string | null
   lines: OrderSummaryLine[]
 }
 

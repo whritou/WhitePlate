@@ -63,6 +63,7 @@ export function prepareCheckout(
     customerName: input.customerName.trim(),
     discountCode: input.discountCode?.trim().toUpperCase() || null,
     menuLocale: input.menuLocale,
+    ...(input.pickupAt ? { pickupAt: input.pickupAt } : {}),
     items: input.items
       .map((item) => ({
         productId: item.productId,
@@ -76,6 +77,9 @@ export function prepareCheckout(
         customerName: previous.input.customerName,
         discountCode: previous.input.discountCode,
         menuLocale: previous.input.menuLocale,
+        ...(previous.input.pickupAt
+          ? { pickupAt: previous.input.pickupAt }
+          : {}),
         items: previous.input.items,
       }
     : null
@@ -111,6 +115,10 @@ export function validateOrderInput(input: unknown): input is OrderInput {
     (value.trackingToken !== undefined &&
       (typeof value.trackingToken !== "string" ||
         !/^[A-Za-z0-9_-]{43}$/.test(value.trackingToken))) ||
+    (value.pickupAt !== undefined &&
+      value.pickupAt !== null &&
+      (typeof value.pickupAt !== "string" ||
+        !Number.isFinite(Date.parse(value.pickupAt)))) ||
     !Array.isArray(value.items) ||
     value.items.length < 1 ||
     value.items.length > 50

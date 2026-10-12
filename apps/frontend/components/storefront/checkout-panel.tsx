@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
 import type { CheckoutPanelProps } from "@/types/checkout"
 import { useTranslations } from "next-intl"
 import { Receipt } from "./receipt"
@@ -39,6 +40,11 @@ export function CheckoutPanel({
     checkout,
     changeCustomerName,
     changeDiscountCode,
+    pickupSlots,
+    pickupSlotsLoading,
+    pickupAvailabilityState,
+    selectedPickupAt,
+    changePickupAt,
   } = checkoutState
   const quantity = cart.reduce((sum, item) => sum + item.quantity, 0)
   const uncertain = error === "unavailable"
@@ -225,6 +231,58 @@ export function CheckoutPanel({
 
                     <Label
                       className="grid gap-1.5 font-medium"
+                      htmlFor="pickup-time"
+                    >
+                      {c("pickupTime")}
+
+                      <NativeSelect
+                        id="pickup-time"
+                        value={selectedPickupAt}
+                        onChange={(event) =>
+                          changePickupAt(event.currentTarget.value)
+                        }
+                        disabled={
+                          pickupSlotsLoading || pickupSlots.length === 0
+                        }
+                      >
+                        <NativeSelectOption value="asap">
+                          {c("asapPickup")}
+                        </NativeSelectOption>
+
+                        {pickupSlots.map((slot) => (
+                          <NativeSelectOption
+                            key={slot.startsAt}
+                            value={slot.startsAt}
+                          >
+                            {new Intl.DateTimeFormat(undefined, {
+                              weekday: "short",
+                              month: "short",
+                              day: "numeric",
+                              hour: "numeric",
+                              minute: "2-digit",
+                              timeZone: slot.timeZone,
+                              timeZoneName: "shortOffset",
+                            }).format(new Date(slot.startsAt))}
+                          </NativeSelectOption>
+                        ))}
+                      </NativeSelect>
+                    </Label>
+
+                    {pickupSlots.length === 0 && !pickupSlotsLoading && (
+                      <p
+                        role="status"
+                        className="text-sm text-muted-foreground"
+                      >
+                        {c(
+                          pickupAvailabilityState === "schedule_not_configured"
+                            ? "scheduleNotConfigured"
+                            : "noPickupSlots"
+                        )}
+                      </p>
+                    )}
+
+                    <Label
+                      className="grid gap-1.5 font-medium"
                       htmlFor="discount-code"
                     >
                       {c("discountCode")}
@@ -254,7 +312,11 @@ export function CheckoutPanel({
                     size="lg"
                     className="w-full"
                     disabled={
-                      submitting || changingLanguage || cart.length === 0
+                      submitting ||
+                      changingLanguage ||
+                      cart.length === 0 ||
+                      pickupSlotsLoading ||
+                      pickupSlots.length === 0
                     }
                   >
                     {submitting

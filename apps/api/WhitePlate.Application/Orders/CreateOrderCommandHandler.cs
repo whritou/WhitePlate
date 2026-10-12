@@ -31,14 +31,23 @@ public sealed class CreateOrderCommandHandler(IOrderRepository orders, TimeProvi
             cancellationToken);
         if (locale is null) return Result<OrderReceiptDto>.Failure(new ApplicationError(ErrorCode.NotFound));
 
+        var now = timeProvider.GetUtcNow();
         var keyHash = Hash(key);
         var requestHash = Hash(CreateFingerprint(command, locale.Locale, trackingTokenHash));
-        var now = timeProvider.GetUtcNow();
         var existing = await orders.FindIdempotentOrderAsync(command.TenantId, keyHash, requestHash, now,
             cancellationToken);
         if (existing.Outcome == IdempotencyOutcome.Replayed)
             return Result<OrderReceiptDto>.Success(existing.Receipt!);
         if (existing.Outcome == IdempotencyOutcome.Conflict)
+            return Result<OrderReceiptDto>.Failure(new ApplicationError(ErrorCode.Conflict));
+
+        var availability = await orders.GetPickupSlotsAsync(command.TenantId, now, cancellationToken);
+        if (availability.State == "schedule_not_configured")
+            return Validation("pickupAt", "schedule_unavailable", "Pickup scheduling is unavailable until opening hours are configured.");
+        var selectedSlot = command.PickupAt is null ? availability.Slots.FirstOrDefault() : availability.Slots.FirstOrDefault(slot =>
+            slot.RemainingCapacity > 0 &&
+            slot.StartsAt.UtcDateTime.Ticks == command.PickupAt.Value.UtcDateTime.Ticks);
+        if (selectedSlot is null)
             return Result<OrderReceiptDto>.Failure(new ApplicationError(ErrorCode.Conflict));
 
         if (command.Items is null || command.Items.Count is < 1 or > 50)
@@ -108,7 +117,7 @@ public sealed class CreateOrderCommandHandler(IOrderRepository orders, TimeProvi
             };
             var order = Order.Create(command.TenantId, catalog.Currency, command.CustomerName, snapshots,
                 normalizedCode, discountAmount, now, catalog.Locale, trackingTokenHash,
-                trackingTokenHash is null ? null : now.AddDays(30));
+                trackingTokenHash is null ? null : now.AddDays(30), selectedSlot.StartsAt, selectedSlot.TimeZone);
             var receipt = order.ToReceipt();
             var result = await orders.CreateOrderAsync(order, receipt, keyHash, requestHash, now,
                 cancellationToken);
@@ -137,6 +146,7 @@ public sealed class CreateOrderCommandHandler(IOrderRepository orders, TimeProvi
             customerName = command.CustomerName?.Trim(),
             menuLocale = effectiveLocale,
             trackingTokenHash,
+            pickupAt = command.PickupAt?.UtcDateTime,
             discountCode = string.IsNullOrWhiteSpace(command.DiscountCode)
                 ? null
                 : command.DiscountCode.Trim().ToUpperInvariant(),

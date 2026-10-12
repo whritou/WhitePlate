@@ -11,7 +11,20 @@ export type OrderInput = {
   discountCode: string | null
   menuLocale: string
   trackingToken?: string
+  pickupAt?: string | null
   items: CartItem[]
+}
+
+export type PickupSlot = {
+  startsAt: string
+  endsAt: string
+  remainingCapacity: number
+  timeZone: string
+}
+export type PickupAvailability = {
+  state: "available" | "schedule_not_configured" | "no_slots_available"
+  timeZone: string | null
+  slots: PickupSlot[]
 }
 
 export type PublicOrderTracking = {
@@ -20,6 +33,8 @@ export type PublicOrderTracking = {
   status: "Pending" | "Preparing" | "Ready" | "Completed" | "Cancelled"
   version: number
   createdAt: string
+  pickupAt?: string | null
+  pickupTimeZone?: string | null
 }
 
 export type CheckoutAttempt = { key: string; input: OrderInput }
@@ -47,6 +62,8 @@ export type OrderReceipt = {
   status: string
   version: number
   createdAt: string
+  pickupAt: string | null
+  pickupTimeZone: string | null
   lines: {
     productId: string
     productName: string

@@ -85,6 +85,8 @@ public sealed class OrderOutboxDispatcherTests
         public Task<IdempotencyResult> FindIdempotentOrderAsync(Guid tenantId, string keyHash, string requestHash, DateTimeOffset now, CancellationToken cancellationToken) => throw new NotSupportedException();
         public Task<CheckoutLocaleDto?> ResolveCheckoutLocaleAsync(Guid tenantId, string? requestedLocale,
             CancellationToken cancellationToken) => throw new NotSupportedException();
+        public Task<PickupAvailabilityDto> GetPickupSlotsAsync(Guid tenantId, DateTimeOffset now,
+            CancellationToken cancellationToken) => throw new NotSupportedException();
         public Task<CheckoutCatalogDto> GetCheckoutCatalogAsync(Guid tenantId, string locale, string defaultLocale,
             IReadOnlyCollection<Guid> productIds, string? discountCode, CancellationToken cancellationToken) =>
             throw new NotSupportedException();

@@ -26,6 +26,11 @@ const initial: EstablishmentRead = {
     latitude: 0,
     longitude: 2.123456,
     timeZone: "Europe/Paris",
+    pickupScheduling: {
+      intervalMinutes: 15,
+      minimumLeadMinutes: 20,
+      capacity: 8,
+    },
     openingHours: null,
     pickupInstructions: {
       en: "Collect at the counter.",
@@ -90,6 +95,8 @@ export function EstablishmentFixture({ mode }: { mode: string }) {
             status: "Ready",
             version: 1,
             createdAt: "2026-10-12T12:00:00Z",
+            pickupAt: "2026-10-12T12:30:00+02:00",
+            pickupTimeZone: "Europe/Paris",
             lines: [],
           }}
         />

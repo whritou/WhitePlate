@@ -36,6 +36,8 @@ public sealed class TenantConfiguration : IEntityTypeConfiguration<Tenant>
         builder.Property(tenant => tenant.TimeZone).HasMaxLength(100).IsRequired().HasDefaultValue("UTC");
         builder.Property(tenant => tenant.PickupInstructionsJson).IsRequired().HasDefaultValue("{}");
         builder.Property(tenant => tenant.OpeningHoursJson).HasColumnType("jsonb");
+        builder.Property(tenant => tenant.PickupSchedulingJson).HasColumnType("jsonb").IsRequired()
+            .HasDefaultValue("{\"IntervalMinutes\":15,\"MinimumLeadMinutes\":20,\"Capacity\":8}");
         builder.Property(tenant => tenant.EstablishmentVersion).IsRequired().HasDefaultValue(1);
         builder.HasIndex(tenant => tenant.Subdomain).IsUnique().HasDatabaseName(SubdomainIndex);
         builder.Property(tenant => tenant.IsActive).IsRequired();
