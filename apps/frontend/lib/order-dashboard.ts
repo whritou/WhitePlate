@@ -9,6 +9,7 @@ import type {
   RestaurantMembership,
   RestaurantRole,
 } from "@/types/orders"
+import { parsePickupSnapshot } from "@/lib/order-pickup-snapshot"
 
 export const ORDER_STATUSES = [
   "Pending",
@@ -248,8 +249,12 @@ export function isOrderStatus(value: unknown): value is OrderStatus {
 }
 
 function parseOrderSummary(value: unknown): OrderSummary | null {
+  if (!isRecord(value)) return null
+
+  const pickupSnapshot = parsePickupSnapshot(value)
+
   if (
-    !isRecord(value) ||
+    pickupSnapshot === null ||
     !isUuid(value.id) ||
     typeof value.customerName !== "string" ||
     typeof value.currency !== "string" ||
@@ -266,13 +271,6 @@ function parseOrderSummary(value: unknown): OrderSummary | null {
     value.version < 1 ||
     typeof value.createdAt !== "string" ||
     Number.isNaN(Date.parse(value.createdAt)) ||
-    (value.pickupAt !== undefined &&
-      value.pickupAt !== null &&
-      (typeof value.pickupAt !== "string" ||
-        Number.isNaN(Date.parse(value.pickupAt)))) ||
-    (value.pickupTimeZone !== undefined &&
-      value.pickupTimeZone !== null &&
-      typeof value.pickupTimeZone !== "string") ||
     !Array.isArray(value.lines)
   )
     return null
@@ -329,24 +327,8 @@ function parseOrderSummary(value: unknown): OrderSummary | null {
     status: value.status,
     version: value.version,
     createdAt: value.createdAt,
-    ...pickupSnapshotProjection(value),
+    ...pickupSnapshot,
     lines,
-  }
-}
-
-function pickupSnapshotProjection(value: Record<string, unknown>) {
-  return {
-    ...(value.pickupAt !== undefined
-      ? { pickupAt: typeof value.pickupAt === "string" ? value.pickupAt : null }
-      : {}),
-    ...(value.pickupTimeZone !== undefined
-      ? {
-          pickupTimeZone:
-            typeof value.pickupTimeZone === "string"
-              ? value.pickupTimeZone
-              : null,
-        }
-      : {}),
   }
 }
 
