@@ -283,19 +283,47 @@ export function LiveCheckout({
           <Label className="mt-4 grid gap-2 text-sm" htmlFor="pickup-time">
             {c("pickupTime")}
 
-            <NativeSelect id="pickup-time" value={state.selectedPickupAt}
-              onChange={(event) => state.changePickupAt(event.currentTarget.value)}
-              disabled={state.locked || state.pickupSlotsLoading || state.pickupSlots.length === 0}>
-              <NativeSelectOption value="asap">{c("asapPickup")}</NativeSelectOption>
+            <NativeSelect
+              id="pickup-time"
+              value={state.selectedPickupAt}
+              onChange={(event) =>
+                state.changePickupAt(event.currentTarget.value)
+              }
+              disabled={
+                state.locked ||
+                state.pickupSlotsLoading ||
+                state.pickupSlots.length === 0
+              }
+            >
+              <NativeSelectOption value="asap">
+                {c("asapPickup")}
+              </NativeSelectOption>
 
-              {state.pickupSlots.map((slot) => <NativeSelectOption key={slot.startsAt} value={slot.startsAt}>
-                {new Intl.DateTimeFormat(undefined, { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit", timeZone: slot.timeZone, timeZoneName: "shortOffset" }).format(new Date(slot.startsAt))}
-              </NativeSelectOption>)}
+              {state.pickupSlots.map((slot) => (
+                <NativeSelectOption key={slot.startsAt} value={slot.startsAt}>
+                  {new Intl.DateTimeFormat(undefined, {
+                    weekday: "short",
+                    month: "short",
+                    day: "numeric",
+                    hour: "numeric",
+                    minute: "2-digit",
+                    timeZone: slot.timeZone,
+                    timeZoneName: "shortOffset",
+                  }).format(new Date(slot.startsAt))}
+                </NativeSelectOption>
+              ))}
             </NativeSelect>
           </Label>
 
-          {state.pickupSlots.length === 0 && !state.pickupSlotsLoading &&
-            <p role="status" className="mt-2 text-sm text-muted-foreground">{c(state.pickupAvailabilityState === "schedule_not_configured" ? "scheduleNotConfigured" : "noPickupSlots")}</p>}
+          {state.pickupSlots.length === 0 && !state.pickupSlotsLoading && (
+            <p role="status" className="mt-2 text-sm text-muted-foreground">
+              {c(
+                state.pickupAvailabilityState === "schedule_not_configured"
+                  ? "scheduleNotConfigured"
+                  : "noPickupSlots"
+              )}
+            </p>
+          )}
 
           <div className="mt-5 flex justify-between border-t pt-5 font-bold">
             <span>{c("estimatedSubtotal")}</span>

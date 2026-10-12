@@ -24,8 +24,10 @@ export function parsePublicOrderTracking(
     Number(value.version) < 1 ||
     typeof value.createdAt !== "string" ||
     !Number.isFinite(Date.parse(value.createdAt)) ||
-    (value.pickupAt !== undefined && value.pickupAt !== null &&
-      (typeof value.pickupAt !== "string" || !Number.isFinite(Date.parse(value.pickupAt))))
+    (value.pickupAt !== undefined &&
+      value.pickupAt !== null &&
+      (typeof value.pickupAt !== "string" ||
+        !Number.isFinite(Date.parse(value.pickupAt))))
   )
     return null
 
@@ -38,7 +40,12 @@ export function parsePublicOrderTracking(
       ? { pickupAt: typeof value.pickupAt === "string" ? value.pickupAt : null }
       : {}),
     ...(value.pickupTimeZone !== undefined
-      ? { pickupTimeZone: typeof value.pickupTimeZone === "string" ? value.pickupTimeZone : null }
+      ? {
+          pickupTimeZone:
+            typeof value.pickupTimeZone === "string"
+              ? value.pickupTimeZone
+              : null,
+        }
       : {}),
     ...(value.menuLocale === null ||
     (typeof value.menuLocale === "string" && value.menuLocale.length <= 128)

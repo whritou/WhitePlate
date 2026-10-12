@@ -170,7 +170,8 @@ export function parseEstablishmentSettings(
     ) ||
     !value.locales.includes(value.defaultLocale) ||
     !isRecord(value.pickupInstructions) ||
-    (value.pickupScheduling !== undefined && parsePickupSchedulingSettings(value.pickupScheduling) === null) ||
+    (value.pickupScheduling !== undefined &&
+      parsePickupSchedulingSettings(value.pickupScheduling) === null) ||
     parseOpeningHours(value.openingHours) === undefined ||
     !Object.entries(value.pickupInstructions).every(
       ([locale, text]) =>
@@ -190,16 +191,25 @@ export function parseEstablishmentSettings(
     pickupInstructions: { ...value.pickupInstructions },
     openingHours: parseOpeningHours(value.openingHours) ?? null,
     pickupScheduling: parsePickupSchedulingSettings(value.pickupScheduling) ?? {
-      intervalMinutes: 15, minimumLeadMinutes: 20, capacity: 8,
+      intervalMinutes: 15,
+      minimumLeadMinutes: 20,
+      capacity: 8,
     },
   } as EstablishmentSettings
 }
 
 export function parsePickupSchedulingSettings(value: unknown) {
-  if (!isRecord(value) || ![10, 15, 20, 30].includes(Number(value.intervalMinutes)) ||
-      !Number.isInteger(value.minimumLeadMinutes) || Number(value.minimumLeadMinutes) < 0 ||
-      Number(value.minimumLeadMinutes) > 1440 || !Number.isInteger(value.capacity) ||
-      Number(value.capacity) < 1 || Number(value.capacity) > 50) return null
+  if (
+    !isRecord(value) ||
+    ![10, 15, 20, 30].includes(Number(value.intervalMinutes)) ||
+    !Number.isInteger(value.minimumLeadMinutes) ||
+    Number(value.minimumLeadMinutes) < 0 ||
+    Number(value.minimumLeadMinutes) > 1440 ||
+    !Number.isInteger(value.capacity) ||
+    Number(value.capacity) < 1 ||
+    Number(value.capacity) > 50
+  )
+    return null
 
   return {
     intervalMinutes: Number(value.intervalMinutes) as 10 | 15 | 20 | 30,

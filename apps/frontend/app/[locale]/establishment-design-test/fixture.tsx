@@ -26,7 +26,11 @@ const initial: EstablishmentRead = {
     latitude: 0,
     longitude: 2.123456,
     timeZone: "Europe/Paris",
-    pickupScheduling: { intervalMinutes: 15, minimumLeadMinutes: 20, capacity: 8 },
+    pickupScheduling: {
+      intervalMinutes: 15,
+      minimumLeadMinutes: 20,
+      capacity: 8,
+    },
     openingHours: null,
     pickupInstructions: {
       en: "Collect at the counter.",

@@ -218,8 +218,13 @@ export function RestaurantSettings({
           )}
 
           {section === "pickup" && (
-            <PickupSchedulingEditor tenantId={restaurant.id} initial={initial?.settings ?? null}
-              onSaved={async () => { router.refresh() }} />
+            <PickupSchedulingEditor
+              tenantId={restaurant.id}
+              initial={initial?.settings ?? null}
+              onSaved={async () => {
+                router.refresh()
+              }}
+            />
           )}
         </div>
       </div>

@@ -47,9 +47,21 @@ export function Receipt({
           {t(`status.${receipt.status}`)}
         </p>
 
-        {receipt.pickupAt && <p className="mt-2 text-sm font-medium">
-          {t("pickupAt", { time: new Intl.DateTimeFormat(locale, { year: "numeric", month: "short", day: "numeric", hour: "numeric", minute: "2-digit", timeZone: receipt.pickupTimeZone ?? undefined, timeZoneName: "shortOffset" }).format(new Date(receipt.pickupAt)) })}
-        </p>}
+        {receipt.pickupAt && (
+          <p className="mt-2 text-sm font-medium">
+            {t("pickupAt", {
+              time: new Intl.DateTimeFormat(locale, {
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+                hour: "numeric",
+                minute: "2-digit",
+                timeZone: receipt.pickupTimeZone ?? undefined,
+                timeZoneName: "shortOffset",
+              }).format(new Date(receipt.pickupAt)),
+            })}
+          </p>
+        )}
       </CardHeader>
 
       <CardContent className="px-0">

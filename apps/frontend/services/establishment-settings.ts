@@ -147,5 +147,7 @@ export async function updatePickupScheduling(
 
   const data = parseEstablishmentSettings(response.data)
 
-  return data ? { ok: true, status: 200, data } : { ok: false, status: 502, error: "unavailable" }
+  return data
+    ? { ok: true, status: 200, data }
+    : { ok: false, status: 502, error: "unavailable" }
 }

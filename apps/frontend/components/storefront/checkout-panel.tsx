@@ -229,21 +229,57 @@ export function CheckoutPanel({
                       />
                     </Label>
 
-                    <Label className="grid gap-1.5 font-medium" htmlFor="pickup-time">
+                    <Label
+                      className="grid gap-1.5 font-medium"
+                      htmlFor="pickup-time"
+                    >
                       {c("pickupTime")}
 
-                      <NativeSelect id="pickup-time" value={selectedPickupAt}
-                        onChange={(event) => changePickupAt(event.currentTarget.value)}
-                        disabled={pickupSlotsLoading || pickupSlots.length === 0}>
-                        <NativeSelectOption value="asap">{c("asapPickup")}</NativeSelectOption>
+                      <NativeSelect
+                        id="pickup-time"
+                        value={selectedPickupAt}
+                        onChange={(event) =>
+                          changePickupAt(event.currentTarget.value)
+                        }
+                        disabled={
+                          pickupSlotsLoading || pickupSlots.length === 0
+                        }
+                      >
+                        <NativeSelectOption value="asap">
+                          {c("asapPickup")}
+                        </NativeSelectOption>
 
-                        {pickupSlots.map((slot) => <NativeSelectOption key={slot.startsAt} value={slot.startsAt}>
-                          {new Intl.DateTimeFormat(undefined, { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit", timeZone: slot.timeZone, timeZoneName: "shortOffset" }).format(new Date(slot.startsAt))}
-                        </NativeSelectOption>)}
+                        {pickupSlots.map((slot) => (
+                          <NativeSelectOption
+                            key={slot.startsAt}
+                            value={slot.startsAt}
+                          >
+                            {new Intl.DateTimeFormat(undefined, {
+                              weekday: "short",
+                              month: "short",
+                              day: "numeric",
+                              hour: "numeric",
+                              minute: "2-digit",
+                              timeZone: slot.timeZone,
+                              timeZoneName: "shortOffset",
+                            }).format(new Date(slot.startsAt))}
+                          </NativeSelectOption>
+                        ))}
                       </NativeSelect>
                     </Label>
 
-                    {pickupSlots.length === 0 && !pickupSlotsLoading && <p role="status" className="text-sm text-muted-foreground">{c(pickupAvailabilityState === "schedule_not_configured" ? "scheduleNotConfigured" : "noPickupSlots")}</p>}
+                    {pickupSlots.length === 0 && !pickupSlotsLoading && (
+                      <p
+                        role="status"
+                        className="text-sm text-muted-foreground"
+                      >
+                        {c(
+                          pickupAvailabilityState === "schedule_not_configured"
+                            ? "scheduleNotConfigured"
+                            : "noPickupSlots"
+                        )}
+                      </p>
+                    )}
 
                     <Label
                       className="grid gap-1.5 font-medium"
@@ -276,7 +312,11 @@ export function CheckoutPanel({
                     size="lg"
                     className="w-full"
                     disabled={
-                      submitting || changingLanguage || cart.length === 0 || pickupSlotsLoading || pickupSlots.length === 0
+                      submitting ||
+                      changingLanguage ||
+                      cart.length === 0 ||
+                      pickupSlotsLoading ||
+                      pickupSlots.length === 0
                     }
                   >
                     {submitting

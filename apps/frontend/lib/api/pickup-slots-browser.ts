@@ -2,7 +2,9 @@ import { browserRequest } from "./browser-request"
 import type { PickupAvailability, PickupSlot } from "@/types/checkout"
 
 export async function loadPublicPickupSlots(signal: AbortSignal) {
-  const response = await browserRequest<unknown>("/api/public/pickup-slots", { signal })
+  const response = await browserRequest<unknown>("/api/public/pickup-slots", {
+    signal,
+  })
 
   if (!response.ok) return { ok: false as const, error: response.error }
   if (!isAvailability(response.data))
@@ -16,9 +18,15 @@ function isAvailability(value: unknown): value is PickupAvailability {
 
   const availability = value as Record<string, unknown>
 
-  return ["available", "schedule_not_configured", "no_slots_available"].includes(String(availability.state)) &&
-    (availability.timeZone === null || typeof availability.timeZone === "string") &&
-    Array.isArray(availability.slots) && availability.slots.every(isPickupSlot)
+  return (
+    ["available", "schedule_not_configured", "no_slots_available"].includes(
+      String(availability.state)
+    ) &&
+    (availability.timeZone === null ||
+      typeof availability.timeZone === "string") &&
+    Array.isArray(availability.slots) &&
+    availability.slots.every(isPickupSlot)
+  )
 }
 
 function isPickupSlot(value: unknown): value is PickupSlot {
@@ -26,8 +34,14 @@ function isPickupSlot(value: unknown): value is PickupSlot {
 
   const slot = value as Record<string, unknown>
 
-  return typeof slot.startsAt === "string" && Number.isFinite(Date.parse(slot.startsAt)) &&
-    typeof slot.endsAt === "string" && Number.isFinite(Date.parse(slot.endsAt)) &&
-    Number.isInteger(slot.remainingCapacity) && Number(slot.remainingCapacity) >= 0 &&
-    typeof slot.timeZone === "string" && slot.timeZone.length > 0
+  return (
+    typeof slot.startsAt === "string" &&
+    Number.isFinite(Date.parse(slot.startsAt)) &&
+    typeof slot.endsAt === "string" &&
+    Number.isFinite(Date.parse(slot.endsAt)) &&
+    Number.isInteger(slot.remainingCapacity) &&
+    Number(slot.remainingCapacity) >= 0 &&
+    typeof slot.timeZone === "string" &&
+    slot.timeZone.length > 0
+  )
 }

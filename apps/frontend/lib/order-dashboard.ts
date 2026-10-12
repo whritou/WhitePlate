@@ -266,9 +266,12 @@ function parseOrderSummary(value: unknown): OrderSummary | null {
     value.version < 1 ||
     typeof value.createdAt !== "string" ||
     Number.isNaN(Date.parse(value.createdAt)) ||
-    (value.pickupAt !== undefined && value.pickupAt !== null &&
-      (typeof value.pickupAt !== "string" || Number.isNaN(Date.parse(value.pickupAt)))) ||
-    (value.pickupTimeZone !== undefined && value.pickupTimeZone !== null &&
+    (value.pickupAt !== undefined &&
+      value.pickupAt !== null &&
+      (typeof value.pickupAt !== "string" ||
+        Number.isNaN(Date.parse(value.pickupAt)))) ||
+    (value.pickupTimeZone !== undefined &&
+      value.pickupTimeZone !== null &&
       typeof value.pickupTimeZone !== "string") ||
     !Array.isArray(value.lines)
   )
@@ -337,7 +340,12 @@ function pickupSnapshotProjection(value: Record<string, unknown>) {
       ? { pickupAt: typeof value.pickupAt === "string" ? value.pickupAt : null }
       : {}),
     ...(value.pickupTimeZone !== undefined
-      ? { pickupTimeZone: typeof value.pickupTimeZone === "string" ? value.pickupTimeZone : null }
+      ? {
+          pickupTimeZone:
+            typeof value.pickupTimeZone === "string"
+              ? value.pickupTimeZone
+              : null,
+        }
       : {}),
   }
 }

@@ -21,20 +21,26 @@ export function useGuestCheckout(menu: StorefrontMenu) {
     availability: PickupAvailability | null
   } | null>(null)
   const pickupSlotsLoading = pickupSlotState?.tenantId !== menu.tenantId
-  const pickupAvailability = pickupSlotState?.tenantId === menu.tenantId
-    ? pickupSlotState.availability
-    : null
-  const pickupSlots = pickupAvailability
-    ? pickupAvailability.slots
-    : []
+  const pickupAvailability =
+    pickupSlotState?.tenantId === menu.tenantId
+      ? pickupSlotState.availability
+      : null
+  const pickupSlots = pickupAvailability ? pickupAvailability.slots : []
   const [selectedPickupAt, setSelectedPickupAt] = useState("asap")
 
   useEffect(() => {
     const controller = new AbortController()
 
     loadPublicPickupSlots(controller.signal)
-      .then((result) => setPickupSlotState({ tenantId: menu.tenantId, availability: result.ok ? result.data : null }))
-      .catch(() => setPickupSlotState({ tenantId: menu.tenantId, availability: null }))
+      .then((result) =>
+        setPickupSlotState({
+          tenantId: menu.tenantId,
+          availability: result.ok ? result.data : null,
+        })
+      )
+      .catch(() =>
+        setPickupSlotState({ tenantId: menu.tenantId, availability: null })
+      )
 
     return () => controller.abort()
   }, [menu.tenantId])

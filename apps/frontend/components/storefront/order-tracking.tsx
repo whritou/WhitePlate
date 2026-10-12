@@ -125,9 +125,21 @@ export function OrderTracking({ orderId }: { orderId: string }) {
                   })}
                 </p>
 
-                {order.pickupAt && <p className="text-sm font-medium">
-                  {checkout("pickupAt", { time: new Intl.DateTimeFormat(locale, { year: "numeric", month: "short", day: "numeric", hour: "numeric", minute: "2-digit", timeZone: order.pickupTimeZone ?? undefined, timeZoneName: "shortOffset" }).format(new Date(order.pickupAt)) })}
-                </p>}
+                {order.pickupAt && (
+                  <p className="text-sm font-medium">
+                    {checkout("pickupAt", {
+                      time: new Intl.DateTimeFormat(locale, {
+                        year: "numeric",
+                        month: "short",
+                        day: "numeric",
+                        hour: "numeric",
+                        minute: "2-digit",
+                        timeZone: order.pickupTimeZone ?? undefined,
+                        timeZoneName: "shortOffset",
+                      }).format(new Date(order.pickupAt)),
+                    })}
+                  </p>
+                )}
 
                 <div className="flex flex-wrap gap-3">
                   <Button
