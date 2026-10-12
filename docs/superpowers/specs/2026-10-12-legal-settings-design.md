@@ -1,6 +1,6 @@
 # S1 legal and tax profile settings design
 
-12 October 2026. Status: design approved in conversation; implementation in progress.
+12 October 2026. Status: design approved and implemented; production migration and API deployment complete. Hosted legal-profile acceptance remains open.
 
 ## Goal and approved scope
 
@@ -49,7 +49,7 @@ Persist organization profile fields on `Organizations` and restaurant override f
 
 Add domain validation tests for all supported identifiers, HTTP tests for owner/manager authorization, organization creation/update, inherited/custom restaurant behavior, concurrent stale writes, cross-tenant denial and migration compatibility. Frontend tests cover country-conditioned fields, inheritance toggle, localized validation, category URL navigation, responsive sidebar/selector and unsaved changes. Run API solution tests and frontend lint, typecheck and build.
 
-Deploy only after the additive migration has been reviewed and applied in the target environment. Verify organization creation/edit, default inheritance, custom restaurant creation/edit, organization changes propagating only to inherited restaurants, and unchanged order/tax snapshots. Update the S1 planning card and audit/API documentation with actual results; hosted behavior remains In review until acceptance is verified.
+The additive migration was reviewed, applied to Coolify Production, and followed by API merge `53ad791` on 2026-10-12. Coolify reports that the replacement container passed `/health/ready`. A direct browser health probe was blocked locally; hosted organization and restaurant legal-profile acceptance is still outstanding. Verify organization creation/edit, default inheritance, custom restaurant creation/edit, organization changes propagating only to inherited restaurants, and unchanged order/tax snapshots before closing the S1 card. See [rollout evidence](../../audits/establishment-settings.md#legal-profile-rollout--2026-10-12).
 
 ## Decisions
 

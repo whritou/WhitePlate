@@ -49,3 +49,11 @@ The production owner workspace listed the inactive `test` restaurant in `/api/v1
 ## Remaining acceptance
 
 Verify hosted owner/manager save/reload, tenant-host menu/checkout and receipt/tracking details, and revoked/inactive denial. Frontend production deployment and real hosted acceptance remain to be verified. Jurisdiction-specific legal/default-tax questions remain independent backlog decisions.
+
+## Legal profile rollout — 12 October 2026
+
+The approved [legal-profile design](../superpowers/specs/2026-10-12-legal-settings-design.md) is implemented in [PR #83](https://github.com/whritou/WhitePlate/pull/83), merged as `53ad79132da8d7f95b42198f2afdfb5837cd40c6`. Migration `20261012190104_LegalProfileSettings` was applied to the Coolify Production PostgreSQL database through its terminal. The migration history recorded the new migration after `20261012171223_OpeningHours`; all eleven legal-profile columns were visible across `Organizations` and `Tenants`. The migration only adds nullable legal fields and `inherit`/version defaults; it does not touch product tax rates or order amounts.
+
+Coolify redeployed API commit `53ad791` from `main` in deployment `aajxfocqw8upwmljwj1pe2ty`. The new container passed the configured `GET /health/ready` probe before the old container was removed. A local browser request to the public health URL was blocked by `ERR_BLOCKED_BY_CLIENT`; this is not treated as an independent public probe. Organization onboarding/settings and restaurant inherit/custom save/read behavior still need hosted acceptance. The frontend production deployment has not been verified.
+
+Feature verification before merge: API 245/245; frontend 77 files / 484 tests; typecheck, lint (0 errors, 19 existing `<img>` warnings), production build, `git diff --check`, and EF model snapshot check passed. Browser E2E was not run.
