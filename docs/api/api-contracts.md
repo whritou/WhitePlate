@@ -17,6 +17,17 @@ Public `/menu` adds `establishment`: name, optional phone/address/coordinates, t
 
 Protected frontend GET `/api/establishment-settings?tenantId=…` uses the authenticated server factory and private no-store/Vary Cookie. The validated save Server Action forwards the saved version as If-Match. Public GET `/api/public/establishment?locale=…` uses host routing without bearer credentials, bounded timeout/cancellation and no-store/Vary Host. Browser tenant selectors cannot choose another public establishment.
 
+## S2 weekly opening hours — 2026-10-12
+
+`OpeningHoursJson` is nullable: null means the schedule is not configured; an explicit seven-day schedule can mark every day closed. Weekdays use ISO numbering (Monday 1 through Sunday 7), and each day has its own `isClosed` state and `windows` list, so weekday hours are independent. A day can have up to eight sorted, non-overlapping local-time windows (`HH:mm`); windows use `[start,end)`, allow adjacency and `24:00` only as an end, and cannot span midnight. The saved S1 IANA time zone defines wall-clock interpretation.
+
+| Method and route | Access and behavior |
+| --- | --- |
+| `PUT /api/v1/tenants/{tenantId}/establishment-settings/opening-hours` | Owner/manager; `{openingHours: schedule}`; quoted `If-Match`; validates all seven days and saves atomically with the establishment version |
+| `DELETE /api/v1/tenants/{tenantId}/establishment-settings/opening-hours` | Owner/manager; clears the schedule back to not configured; quoted `If-Match` |
+
+The management settings GET includes nullable `openingHours`; its existing scalar PUT preserves it. The public host-resolved establishment and `/menu` projection include the weekly schedule and time zone without management versions. Existing restaurants remain not configured until an owner or manager saves hours. Public output does not calculate open-now state or enforce checkout availability. The generated additive `20261012171223_OpeningHours` migration is not applied to shared or production databases.
+
 ## M2 menu product metadata — 2026-10-11
 
 Owner/manager `POST /api/v1/tenants/{tenantId}/products` and `PUT /api/v1/tenants/{tenantId}/products/{productId}` accept the existing product fields plus optional `sku`, `containsAllergens`, `mayContainAllergens`, `dietaryTags`, `preparationMinutes` and `preparationNotes` (a locale-to-text object). Omitting metadata on create uses empty declarations; a full update replaces these values, including clearing them. SKU is optional, at most 64 ASCII letters/digits/dot/underscore/dash, normalized to uppercase and unique within the restaurant. Allergen codes are the controlled EU 14 identifiers; declarations cannot overlap. Dietary codes are `dairyFree`, `glutenFree`, `pescatarian`, `vegan` and `vegetarian`. Preparation minutes are null or 1–1,440, with localized notes up to 250 characters per locale. Invalid values return 400 `validation_failed`; duplicate SKU returns 409 `conflict`.

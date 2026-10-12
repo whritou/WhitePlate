@@ -6,6 +6,7 @@ using WhitePlate.Api.Errors;
 using WhitePlate.Application.Common.Results;
 using WhitePlate.Application.Identity;
 using WhitePlate.Application.Tenants;
+using WhitePlate.Domain.Tenants;
 
 namespace WhitePlate.Api.Controllers;
 
@@ -45,6 +46,31 @@ public sealed class EstablishmentSettingsController(ICurrentIdentity currentIden
         int? version = header.Length >= 3 && header.StartsWith('"') && header.EndsWith('"') &&
             int.TryParse(header[1..^1], NumberStyles.None, CultureInfo.InvariantCulture, out var parsed) && parsed > 0 ? parsed : null;
         return Settings(await handler.SaveAsync(tenantId, identity, request.ToInput(), version, ct));
+    }
+
+    [HttpPut("opening-hours")]
+    [RequestSizeLimit(65536)]
+    [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+    public async Task<IActionResult> PutOpeningHours(Guid tenantId, UpdateOpeningHoursRequest request, CancellationToken ct)
+    {
+        if (currentIdentity.Identity is not { } identity) return Unauthorized();
+        return Settings(await handler.SaveOpeningHoursAsync(tenantId, identity, request.OpeningHours,
+            ParseVersion(), false, ct));
+    }
+
+    [HttpDelete("opening-hours")]
+    [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+    public async Task<IActionResult> DeleteOpeningHours(Guid tenantId, CancellationToken ct)
+    {
+        if (currentIdentity.Identity is not { } identity) return Unauthorized();
+        return Settings(await handler.SaveOpeningHoursAsync(tenantId, identity, null, ParseVersion(), true, ct));
+    }
+
+    private int? ParseVersion()
+    {
+        var header = Request.Headers.IfMatch.ToString();
+        return header.Length >= 3 && header.StartsWith('"') && header.EndsWith('"') &&
+            int.TryParse(header[1..^1], NumberStyles.None, CultureInfo.InvariantCulture, out var parsed) && parsed > 0 ? parsed : null;
     }
 
     private IActionResult Settings(Result<EstablishmentSettingsDto> result)

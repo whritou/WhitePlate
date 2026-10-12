@@ -1,5 +1,13 @@
 import type { ApiResult } from "./api"
 
+export type OpeningHoursWindow = { start: string; end: string }
+export type OpeningHoursDay = {
+  dayOfWeek: number
+  isClosed: boolean
+  windows: OpeningHoursWindow[]
+}
+export type OpeningHoursSchedule = { days: OpeningHoursDay[] }
+
 export type PublicEstablishment = {
   name: string
   phone: string | null
@@ -14,6 +22,7 @@ export type PublicEstablishment = {
   timeZone: string
   pickupInstruction: string | null
   pickupLocale: string | null
+  openingHours: OpeningHoursSchedule | null
 }
 
 export type EstablishmentSettings = Omit<
@@ -33,7 +42,7 @@ export type EstablishmentRead = {
 }
 export type EstablishmentInput = Omit<
   EstablishmentSettings,
-  "locales" | "defaultLocale"
+  "locales" | "defaultLocale" | "openingHours"
 > & { tenantId: string }
 export type EstablishmentDraft = Record<
   | "name"

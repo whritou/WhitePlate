@@ -20,6 +20,7 @@ export const settings: EstablishmentSettings = {
   latitude: null,
   longitude: null,
   timeZone: "UTC",
+  openingHours: null,
   establishmentVersion: 1,
   locales: ["en", "fr"],
   defaultLocale: "en",

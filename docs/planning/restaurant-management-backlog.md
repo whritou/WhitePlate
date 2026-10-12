@@ -126,21 +126,23 @@ Decisions and limits:
 
 ### S2 — Restaurant Settings: weekly opening hours and service windows
 
+Design, written specification and implementation plan approved 2026-10-12: [S2 weekly opening hours design](../superpowers/specs/2026-10-12-opening-hours-design.md), [implementation plan](../superpowers/specs/2026-10-12-opening-hours-implementation-plan.md). Source implementation is complete; local full verification and board acceptance are in progress. The additive migration is not applied to shared environments.
+
 Reference: settings. Dependencies: S1.
 
 Build the opening-hours editor with seven days, closed-day toggles, lunch/evening or continuous service and copy-day-to-week controls.
 
 Acceptance criteria:
 
-- [ ] Support multiple opening windows per day, continuous service, closed days and explicit copy/apply behavior that does not silently overwrite unsaved work.
-- [ ] Validate time formats, ordering and overlapping windows server-side; store the restaurant time zone and handle DST and midnight boundaries according to a recorded policy.
-- [ ] Persist hours with localized feedback, recoverable failures and concurrency protection; expose authoritative public opening information.
-- [ ] Match the settings tab/navigation and sticky save/cancel pattern; reflow weekly rows into readable mobile cards without hiding required controls.
-- [ ] Verify closed days, split shifts, copy behavior, boundary times and two-tenant authorization. Distinguish saved hours from enforced checkout scheduling until S3 is complete.
+- [x] Support multiple opening windows per day, continuous service, closed days and explicit copy/apply behavior that does not silently overwrite unsaved work.
+- [x] Validate time formats, ordering and overlapping windows server-side; store the restaurant time zone and handle DST and midnight boundaries according to a recorded policy.
+- [x] Persist hours with localized feedback, recoverable failures and concurrency protection; expose authoritative public opening information.
+- [x] Match the current settings editor and reflow weekly rows into readable mobile cards.
+- [ ] Verify hosted persistence and two-tenant authorization. Distinguish saved hours from enforced checkout scheduling until S3 is complete.
 
 Decisions and limits:
 
-- Choose time-zone defaults, overnight-window semantics and first-release holiday/exception scope. Do not infer these rules from the example Paris schedule.
+- Approved: use the saved S1 IANA timezone (UTC fallback), disallow overnight windows, and exclude holidays/date exceptions. See the written design for DST and midnight boundaries. Do not infer these rules from the example Paris schedule.
 
 ### S3 — Restaurant Settings: pickup slots, buffer time and capacity
 

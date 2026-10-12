@@ -3346,6 +3346,33 @@
       "unavailable": "Les paramètres sont indisponibles. Vos modifications sont conservées ; réessayez."
     }
   },
+  "OpeningHours": {
+    "title": "Heures d’ouverture",
+    "description": "Configurez chaque jour séparément. Ajoutez plusieurs périodes de service si nécessaire.",
+    "notConfigured": "Les heures d’ouverture ne sont pas configurées.",
+    "configure": "Définir les horaires hebdomadaires",
+    "closed": "Fermé",
+    "localTime": "Heure locale ({timeZone})",
+    "opens": "Ouverture",
+    "closes": "Fermeture",
+    "addService": "Ajouter une période de service",
+    "copyTitle": "Copier un jour vers les jours sélectionnés",
+    "copySource": "Copier depuis",
+    "copyTargets": "Appliquer à",
+    "copyApply": "Copier vers les jours sélectionnés",
+    "copyConfirm": "Remplacer les horaires provisoires de {days} par ceux du jour choisi ? Seules les modifications non enregistrées seront concernées.",
+    "remove": "Supprimer la période",
+    "cancel": "Annuler les modifications",
+    "invalid": "Vérifiez que chaque jour ouvert a des horaires valides, ordonnés et sans chevauchement.",
+    "save": "Enregistrer les horaires",
+    "saving": "Enregistrement…",
+    "clear": "Supprimer les horaires hebdomadaires",
+    "clearConfirm": "Supprimer les horaires enregistrés et rétablir l’état non configuré ?",
+    "saved": "Les heures d’ouverture sont enregistrées.",
+    "saveError": "Impossible d’enregistrer les horaires. Vos modifications sont conservées.",
+    "conflict": "Ces paramètres ont changé ailleurs. Rechargez la page avant de réessayer.",
+    "days": { "monday": "Lundi", "tuesday": "Mardi", "wednesday": "Mercredi", "thursday": "Jeudi", "friday": "Vendredi", "saturday": "Samedi", "sunday": "Dimanche" }
+  },
   "CollectionInformation": {
     "title": "Informations de retrait",
     "currentTitle": "Informations de retrait actuelles",

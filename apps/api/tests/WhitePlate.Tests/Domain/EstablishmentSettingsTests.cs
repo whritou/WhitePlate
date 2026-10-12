@@ -6,6 +6,67 @@ namespace WhitePlate.Tests.Domain;
 public sealed class EstablishmentSettingsTests
 {
     [Fact]
+    public void OpeningHoursAllowIndependentWeekdaysAndSplitServices()
+    {
+        var tenant = Tenant.Create(Guid.NewGuid(), "Bistro", "bistro", "EUR");
+        var schedule = new OpeningHoursSchedule(Enumerable.Range(1, 7).Select(day => day switch
+        {
+            1 => new OpeningHoursDay(day, true, []),
+            2 => new OpeningHoursDay(day, false, [new("09:00", "12:00"), new("14:00", "18:00")]),
+            _ => new OpeningHoursDay(day, false, [new("10:00", "16:00")])
+        }).ToArray());
+
+        tenant.SetOpeningHours(schedule);
+
+        Assert.Null(Tenant.Create(Guid.NewGuid(), "Legacy", "legacy", "EUR").GetOpeningHours());
+        Assert.True(tenant.GetOpeningHours()!.Days[0].IsClosed);
+        Assert.Equal([new OpeningHoursWindow("09:00", "12:00"), new("14:00", "18:00")], tenant.GetOpeningHours()!.Days[1].Windows);
+        Assert.Equal(2, tenant.EstablishmentVersion);
+    }
+
+    [Fact]
+    public void OpeningHoursAllowMidnightOnlyAsTheEndBoundary()
+    {
+        var tenant = Tenant.Create(Guid.NewGuid(), "Bistro", "bistro", "EUR");
+        var days = Enumerable.Range(1, 7).Select(day => day == 7
+            ? new OpeningHoursDay(day, false, [new("22:00", "24:00")])
+            : new OpeningHoursDay(day, true, [])).ToArray();
+
+        tenant.SetOpeningHours(new OpeningHoursSchedule(days));
+
+        Assert.Equal("24:00", tenant.GetOpeningHours()!.Days[6].Windows[0].End);
+    }
+
+    [Theory]
+    [InlineData("overlap")]
+    [InlineData("overnight")]
+    [InlineData("closed-with-window")]
+    [InlineData("missing-day")]
+    [InlineData("unordered-days")]
+    public void InvalidOpeningHoursAreRejectedAtomically(string example)
+    {
+        var days = Enumerable.Range(1, 7).Select(day => new OpeningHoursDay(day, true, [])).ToArray();
+        days[1] = example switch
+        {
+            "overlap" => new(2, false, [new("09:00", "12:00"), new("11:30", "14:00")]),
+            "overnight" => new(2, false, [new("22:00", "24:00"), new("00:00", "02:00")]),
+            "closed-with-window" => new(2, true, [new("09:00", "10:00")]),
+            _ => new(2, false, [new("09:00", "10:00")])
+        };
+        var schedule = example switch
+        {
+            "missing-day" => new OpeningHoursSchedule(days[..^1]),
+            "unordered-days" => new OpeningHoursSchedule(days.Reverse().ToArray()),
+            _ => new OpeningHoursSchedule(days)
+        };
+        var tenant = Tenant.Create(Guid.NewGuid(), "Bistro", "bistro", "EUR");
+
+        Assert.Throws<DomainRuleException>(() => tenant.SetOpeningHours(schedule));
+        Assert.Null(tenant.GetOpeningHours());
+        Assert.Equal(1, tenant.EstablishmentVersion);
+    }
+
+    [Fact]
     public void NormalizesInternationalIdentityAndOptionalClearing()
     {
         var tenant = Tenant.Create(Guid.NewGuid(), "Bistro", "bistro", "EUR");

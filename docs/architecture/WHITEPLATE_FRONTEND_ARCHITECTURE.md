@@ -13,6 +13,8 @@ Status: localized Better Auth flows, server-only API BFF, responsive organizatio
 
 The public tenant storefront reads its restaurant description from the localized menu DTO, displays product cards with a confirmation dialog for option selection, and keeps a desktop cart panel plus a mobile cart entry that opens the same cart and checkout flow. Owners/managers edit the 500-character description by enabled menu locale in the restaurant language workspace. The API resolves description fallback from selected menu locale to default menu locale.
 
+Restaurant settings include a versioned weekly-hours editor. Each weekday can be open or closed independently and can contain multiple service periods; unsaved values remain local until saved. Public collection details display the weekly schedule in the establishment time zone, or explain when hours are not configured. EN/FR copy is kept in both catalogs. S2 does not add an open-now indicator or checkout gating.
+
 Next.js 16.3.4, React 19.2.8, strict TypeScript, Tailwind CSS 4, `next-intl` are wired into the application. shadcn Base UI components implement shared controls, cards and feedback. TanStack Query manages kitchen order reads and mutations. The [implementation conventions](frontend-conventions.md) define module ownership and enforced boundaries. Exact dependencies are recorded in the package manifest and lockfile.
 
 ```text

@@ -9,6 +9,7 @@ import type {
   EstablishmentInput,
   EstablishmentRead,
   EstablishmentSettings,
+  OpeningHoursSchedule,
 } from "@/types/establishment-settings"
 
 export async function getEstablishmentSettings(
@@ -48,6 +49,29 @@ export async function updateEstablishmentSettings(
     body,
     { ifMatch: `"${establishmentVersion}"` }
   )
+
+  if (!response.ok) return response
+
+  const data = parseEstablishmentSettings(response.data)
+
+  return data
+    ? { ok: true, status: 200, data }
+    : { ok: false, status: 502, error: "unavailable" }
+}
+
+export async function updateOpeningHours(
+  tenantId: string,
+  establishmentVersion: number,
+  openingHours: OpeningHoursSchedule | null
+): Promise<ApiResult<EstablishmentSettings>> {
+  const path = `/api/v1/tenants/${tenantId}/establishment-settings/opening-hours`
+  const response = openingHours
+    ? await whitePlateApi.put(
+        path,
+        { openingHours },
+        { ifMatch: `"${establishmentVersion}"` }
+      )
+    : await whitePlateApi.delete(path, { ifMatch: `"${establishmentVersion}"` })
 
   if (!response.ok) return response
 

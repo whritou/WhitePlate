@@ -18,6 +18,10 @@ Generated `20261012113559_EstablishmentSettings` is reviewed but unapplied to sh
 
 Conditional persistence checks the expected establishment version and menu configuration, updating only establishment columns. No new index/table/order column is introduced; tracking uses existing nullable `Orders.MenuLocale`. Runtime membership and active-organization/tenant checks remain mandatory; schema alone cannot authorize tenant access.
 
+## S2 weekly opening hours — 2026-10-12
+
+Generated migration `20261012171223_OpeningHours` adds nullable `Tenants.OpeningHoursJson` (`jsonb`). Null preserves the distinction between an existing tenant with no configured hours and a saved all-closed week. The JSON stores seven ISO weekdays independently, each with a closed flag and up to eight same-day local-time service windows. Conditional establishment writes use the existing version and persist hours with the scalar settings. Migration remains unapplied to shared or production PostgreSQL.
+
 ## M2 product metadata — 2026-10-11
 
 Migration `20261011125310_ProductMenuMetadata` adds nullable `Products.Sku`, JSON-backed `ContainsAllergensJson`, `MayContainAllergensJson`, `DietaryTagsJson`, `PreparationNotesJson`, and optional `PreparationMinutes`. A filtered unique index on `(TenantId, Sku)` normalizes SKU case in the domain and retains uniqueness for archived products. `OrderLines` receives matching declaration/note JSON and preparation minutes so saved disclosures survive catalog edits. Existing products and order lines migrate to empty arrays/objects. The schema change is generated and covered by source tests; it has not been applied to shared environments. See [decision 0009](../architecture/decisions/0009-menu-product-metadata.md) and [M2 evidence](../audits/menu-builder-metadata.md).

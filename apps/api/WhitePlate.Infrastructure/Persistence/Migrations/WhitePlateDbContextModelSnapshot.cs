@@ -666,6 +666,9 @@ namespace WhitePlate.Infrastructure.Persistence.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
 
+                    b.Property<string>("OpeningHoursJson")
+                        .HasColumnType("jsonb");
+
                     b.Property<Guid>("OrganizationId")
                         .HasColumnType("uuid");
 
