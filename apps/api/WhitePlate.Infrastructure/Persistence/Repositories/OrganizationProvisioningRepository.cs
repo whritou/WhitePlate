@@ -11,12 +11,11 @@ namespace WhitePlate.Infrastructure.Persistence.Repositories;
 public sealed class OrganizationProvisioningRepository(WhitePlateDbContext database) : IOrganizationProvisioningRepository, IOrganizationRepository
 {
     public async Task<IReadOnlyList<OrganizationDto>> ListOwnedAsync(ExternalIdentity identity,
-        CancellationToken cancellationToken) => await database.OrganizationOwnerMemberships.AsNoTracking()
+        CancellationToken cancellationToken) => (await database.OrganizationOwnerMemberships.AsNoTracking()
         .Where(membership => membership.Issuer == identity.Issuer && membership.Subject == identity.Subject)
         .Join(database.Organizations.AsNoTracking(), membership => membership.OrganizationId,
-            organization => organization.Id, (membership, organization) =>
-                new OrganizationDto(organization.Id, organization.Name, organization.IsActive))
-        .ToListAsync(cancellationToken);
+            organization => organization.Id, (membership, organization) => organization)
+        .ToListAsync(cancellationToken)).Select(OrganizationDto.FromDomain).ToArray();
 
     public async Task<Organization?> FindOwnedAsync(Guid organizationId, ExternalIdentity identity,
         CancellationToken cancellationToken)

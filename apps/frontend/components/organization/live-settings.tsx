@@ -2,17 +2,9 @@
 import { useRef } from "react"
 import { useTranslations } from "next-intl"
 import { Link } from "@/i18n/navigation"
-import {
-  SourceButton,
-  SourceInput,
-  SourceLabel,
-} from "@/components/ui/lovable-controls"
+import { SourceButton } from "@/components/ui/lovable-controls"
 import { Copy } from "@/components/lovable/copy"
-import {
-  Card,
-  SECTIONS,
-  input,
-} from "@/components/lovable/pages/settings-shared"
+import { Card, SECTIONS } from "@/components/lovable/pages/settings-shared"
 import { SettingsPageProvider } from "@/components/lovable/pages/settings-SettingsPage-context"
 import { useSettingsPageModel } from "@/components/lovable/pages/settings-SettingsPage-model"
 import { SettingsPanel3 } from "@/components/lovable/pages/settings-panel-3"
@@ -21,6 +13,7 @@ import { SettingsPanel5 } from "@/components/lovable/pages/settings-panel-5"
 import { MissingFeatureNotice } from "./missing-feature-notice"
 import { OrganizationArchiveAction } from "./organization-archive-action"
 import type { LiveSettingsProps } from "@/types/live-workspace"
+import { OrganizationLegalProfileForm } from "./organization-legal-profile-form"
 
 export function LiveSettings({
   organization,
@@ -154,24 +147,7 @@ export function LiveSettings({
 
             {model.sec === "org" && (
               <Card title="Company & legal" sub={t("legalPending")}>
-                <MissingFeatureNotice />
-
-                <fieldset className="mt-5 grid gap-4 md:grid-cols-2" disabled>
-                  {(
-                    [
-                      [t("legalName"), model.s.org.legal],
-                      [t("vat"), model.s.org.vat],
-                      [t("siret"), model.s.org.siret],
-                      [t("billingEmail"), model.s.org.email],
-                    ] as const
-                  ).map(([label, value]) => (
-                    <SourceLabel key={label} className="grid gap-2 text-sm">
-                      {label}
-
-                      <SourceInput className={input} value={value} readOnly />
-                    </SourceLabel>
-                  ))}
-                </fieldset>
+                <OrganizationLegalProfileForm organization={organization} />
               </Card>
             )}
 

@@ -3,7 +3,10 @@ import { getManagedWorkspaceRestaurant } from "@/services/live-workspace"
 import { RestaurantSettings } from "@/components/organization/restaurant-settings"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import type { SearchParams } from "@/types/navigation"
-import { getEstablishmentSettings } from "@/services/establishment-settings"
+import {
+  getEstablishmentSettings,
+  getTenantLegalProfile,
+} from "@/services/establishment-settings"
 
 export default async function RestaurantSettingsPage({
   searchParams,
@@ -25,13 +28,23 @@ export default async function RestaurantSettingsPage({
     )
   }
 
-  const settings = await getEstablishmentSettings(restaurant.id)
+  const [settings, legalProfile] = await Promise.all([
+    getEstablishmentSettings(restaurant.id),
+    getTenantLegalProfile(restaurant.id),
+  ])
+  const section =
+    typeof params.section === "string" &&
+    ["establishment", "legal", "hours"].includes(params.section)
+      ? (params.section as "establishment" | "legal" | "hours")
+      : "establishment"
 
   return (
     <RestaurantSettings
       restaurant={restaurant}
       userId={restaurant.userId}
       initial={settings.ok ? settings.data : null}
+      legalProfile={legalProfile.ok ? legalProfile.data : null}
+      section={section}
     />
   )
 }

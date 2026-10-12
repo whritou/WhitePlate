@@ -553,10 +553,32 @@ namespace WhitePlate.Infrastructure.Persistence.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean");
 
+                    b.Property<string>("LegalCountryCode")
+                        .HasMaxLength(2)
+                        .HasColumnType("character varying(2)");
+
+                    b.Property<string>("LegalName")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<int>("LegalProfileVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(1);
+
+                    b.Property<string>("LegalRegistrationNumber")
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
+
+                    b.Property<string>("TaxIdentifier")
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
 
                     b.HasKey("Id");
 
@@ -653,6 +675,30 @@ namespace WhitePlate.Infrastructure.Persistence.Migrations
                         .HasPrecision(9, 6)
                         .HasColumnType("numeric(9,6)");
 
+                    b.Property<string>("LegalCountryCode")
+                        .HasMaxLength(2)
+                        .HasColumnType("character varying(2)");
+
+                    b.Property<string>("LegalName")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("LegalProfileMode")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(8)
+                        .HasColumnType("character varying(8)")
+                        .HasDefaultValue("inherit");
+
+                    b.Property<int>("LegalProfileVersion")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(1);
+
+                    b.Property<string>("LegalRegistrationNumber")
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
                     b.Property<decimal?>("Longitude")
                         .HasPrecision(9, 6)
                         .HasColumnType("numeric(9,6)");
@@ -694,6 +740,10 @@ namespace WhitePlate.Infrastructure.Persistence.Migrations
                         .IsRequired()
                         .HasMaxLength(63)
                         .HasColumnType("character varying(63)");
+
+                    b.Property<string>("TaxIdentifier")
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
 
                     b.Property<string>("TimeZone")
                         .IsRequired()

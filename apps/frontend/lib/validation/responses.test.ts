@@ -56,7 +56,16 @@ it("validates restaurant description translation settings before rendering", () 
 
 it("rejects malformed organization IDs rather than using them in API paths", () => {
   expect(parseOrganizations([{ id, name: "Group", isActive: true }])).toEqual([
-    { id, name: "Group", isActive: true },
+    {
+      id,
+      name: "Group",
+      isActive: true,
+      legalCountryCode: null,
+      legalName: null,
+      legalRegistrationNumber: null,
+      taxIdentifier: null,
+      legalProfileVersion: 1,
+    },
   ])
   expect(
     parseOrganizations([{ id, name: "Group", isActive: "yes" }])

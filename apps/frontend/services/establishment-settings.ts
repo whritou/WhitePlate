@@ -10,7 +10,9 @@ import type {
   EstablishmentRead,
   EstablishmentSettings,
   OpeningHoursSchedule,
+  TenantLegalProfile,
 } from "@/types/establishment-settings"
+import { parseTenantLegalProfile } from "@/lib/validation/legal-profile"
 
 export async function getEstablishmentSettings(
   tenantId: string,
@@ -37,6 +39,53 @@ export async function getEstablishmentSettings(
         status: 200,
         data: { settings: parsedSettings, options: parsedOptions },
       }
+    : { ok: false, status: 502, error: "unavailable" }
+}
+
+export async function getTenantLegalProfile(
+  tenantId: string
+): Promise<ApiResult<TenantLegalProfile>> {
+  const response = await whitePlateApi.get<unknown>(
+    `/api/v1/tenants/${tenantId}/establishment-settings/legal-profile`,
+    { signal: AbortSignal.timeout(10_000) }
+  )
+
+  if (!response.ok) return response
+
+  const data = parseTenantLegalProfile(response.data)
+
+  return data
+    ? { ok: true, status: 200, data }
+    : { ok: false, status: 502, error: "unavailable" }
+}
+
+export async function updateTenantLegalProfile(input: {
+  tenantId: string
+  version: number
+  mode: "inherit" | "custom"
+  countryCode: string | null
+  name: string | null
+  registrationNumber: string | null
+  taxIdentifier: string | null
+}): Promise<ApiResult<TenantLegalProfile>> {
+  const response = await whitePlateApi.put<unknown>(
+    `/api/v1/tenants/${input.tenantId}/establishment-settings/legal-profile`,
+    {
+      mode: input.mode,
+      legalCountryCode: input.countryCode,
+      legalName: input.name,
+      legalRegistrationNumber: input.registrationNumber,
+      taxIdentifier: input.taxIdentifier,
+    },
+    { ifMatch: `"${input.version}"` }
+  )
+
+  if (!response.ok) return response
+
+  const data = parseTenantLegalProfile(response.data)
+
+  return data
+    ? { ok: true, status: 200, data }
     : { ok: false, status: 502, error: "unavailable" }
 }
 

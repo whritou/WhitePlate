@@ -1,6 +1,6 @@
 # S1 legal and tax profile settings design
 
-12 October 2026. Status: design approved in conversation; implementation not started.
+12 October 2026. Status: design approved in conversation; implementation in progress.
 
 ## Goal and approved scope
 

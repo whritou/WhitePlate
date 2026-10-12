@@ -12,7 +12,7 @@ The editor uses account/tenant/interface-locale query keys, explicit Save/Cancel
 
 The public menu adds a minimal establishment projection. A host-resolved public read supplies independent current receipt/tracking information using the saved menu locale. Requested-language text falls back to the default and declares its actual locale. Independent failure/retry leaves order/status/totals visible. Google Maps and Waze use fixed HTTPS origins; Waze requires coordinates, Google accepts a complete address or coordinates, and phone links use validated telephone syntax. Directions never include the tracking capability.
 
-UTC initializes existing/new establishments. This does not change UTC archival or order snapshots, nor promise pickup timing. Legal/SIRET/default tax, currency/subdomain changes, hours/slots, email, Stripe and S2–S5 remain outside S1.
+UTC initializes existing/new establishments. This does not change UTC archival or order snapshots, nor promise pickup timing. Legal profiles were added as a follow-up: FR/DE/UK/US organization and restaurant profiles, inherited by default with explicit restaurant overrides; no default tax rate is introduced. Product rates and historical order snapshots are unchanged. See the [legal profile specification](../superpowers/specs/2026-10-12-legal-settings-design.md). Currency/subdomain changes, email and Stripe remain outside S1. Opening hours are implemented separately under S2.
 
 ## Schema and rollout
 

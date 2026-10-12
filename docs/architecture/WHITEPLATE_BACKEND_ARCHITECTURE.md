@@ -1,5 +1,7 @@
 # Backend architecture
 
+S1 legal profiles use optional jurisdiction-specific organization identifiers with restaurant-level inherit/custom mode. Domain validates France, Germany, UK and US formats; organization and tenant APIs authorize every read/write and use conditional versions. No default tax rate exists; product rates and order snapshots remain the tax source. Migration `20261012190104_LegalProfileSettings` is generated; shared database rollout and hosted acceptance remain pending.
+
 M5 extends T1 with `ProductPhotoService`, `IProductPhotoRepository` and `IProductImageProcessor`. Domain media records carry product ownership/order; Infrastructure owns EF gallery transactions, normalization variants and S3 cleanup; host controllers map protected gallery operations and public tenant-host delivery. Catalog projections include saved photo descriptors. The generated migration is unapplied to shared databases. Actual provider/PostgreSQL/hosted checks remain pending. See [ADR 0008](decisions/0008-product-photo-gallery.md) and [M5 evidence](../audits/product-photos.md).
 
 

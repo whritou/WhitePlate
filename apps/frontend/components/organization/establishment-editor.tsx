@@ -19,6 +19,7 @@ export function EstablishmentEditor({
   tenantId,
   userId,
   initial,
+  section = "establishment",
 }: EstablishmentEditorProps) {
   const t = useTranslations("EstablishmentSettings")
   const locale = useLocale()
@@ -107,6 +108,7 @@ export function EstablishmentEditor({
       <EstablishmentForm
         key={`${userId}:${tenantId}:${locale}`}
         tenantId={tenantId}
+        section={section}
         value={query.data}
         save={saveEstablishmentSettingsAction}
         onSaved={async (settings) => {

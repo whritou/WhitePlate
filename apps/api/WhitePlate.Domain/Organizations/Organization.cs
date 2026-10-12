@@ -9,6 +9,11 @@ public sealed class Organization
     public Guid Id { get; private set; }
     public string Name { get; private set; } = null!;
     public bool IsActive { get; private set; }
+    public string? LegalCountryCode { get; private set; }
+    public string? LegalName { get; private set; }
+    public string? LegalRegistrationNumber { get; private set; }
+    public string? TaxIdentifier { get; private set; }
+    public int LegalProfileVersion { get; private set; } = 1;
 
     private Organization() { }
 
@@ -23,6 +28,19 @@ public sealed class Organization
     }
 
     public void Rename(string? name) => Name = NormalizeName(name);
+
+    public void SetLegalProfile(string? country, string? name, string? registration, string? tax,
+        string? establishmentRegistration)
+    {
+        if (LegalProfileVersion == int.MaxValue)
+            throw new DomainRuleException("invalid_legal_profile", "legalProfileVersion", "The legal profile version is invalid.");
+        var normalized = LegalProfileRules.Normalize(country, name, registration, tax, establishmentRegistration);
+        LegalCountryCode = normalized.Country;
+        LegalName = normalized.Name;
+        LegalRegistrationNumber = normalized.Registration;
+        TaxIdentifier = normalized.Tax;
+        LegalProfileVersion++;
+    }
 
     public void Deactivate() => IsActive = false;
 

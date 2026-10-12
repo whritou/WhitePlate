@@ -184,7 +184,10 @@ public sealed class OrganizationEndpointTests
                 TestContext.Current.CancellationToken);
         client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", "new-owner");
 
-        using var response = await client.PostAsJsonAsync("/api/v1/organizations", new { name = "  New Restaurant Group  " },
+        using var response = await client.PostAsJsonAsync("/api/v1/organizations", new {
+            name = "  New Restaurant Group  ", legalCountryCode = "FR", legalName = "New Group",
+            legalRegistrationNumber = "732829320", taxIdentifier = "FR88732829320"
+        },
             TestContext.Current.CancellationToken);
 
         Assert.True(response.StatusCode == HttpStatusCode.Created,
@@ -192,6 +195,76 @@ public sealed class OrganizationEndpointTests
         using var json = JsonDocument.Parse(await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
         var organizationId = json.RootElement.GetProperty("id").GetGuid();
         Assert.Equal("New Restaurant Group", json.RootElement.GetProperty("name").GetString());
+        Assert.Equal("FR", json.RootElement.GetProperty("legalCountryCode").GetString());
+        Assert.Equal("732829320", json.RootElement.GetProperty("legalRegistrationNumber").GetString());
+
+        using var restaurantResponse = await client.PostAsJsonAsync($"/api/v1/organizations/{organizationId}/restaurants",
+            new { name = "Bistro", subdomain = "bistro", currency = "EUR" }, TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.Created, restaurantResponse.StatusCode);
+        using var restaurantJson = JsonDocument.Parse(await restaurantResponse.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
+        var tenantId = restaurantJson.RootElement.GetProperty("id").GetGuid();
+        using var inherited = await client.GetAsync($"/api/v1/tenants/{tenantId}/establishment-settings/legal-profile",
+            TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.OK, inherited.StatusCode);
+        using var inheritedJson = JsonDocument.Parse(await inherited.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
+        Assert.Equal("inherit", inheritedJson.RootElement.GetProperty("mode").GetString());
+        Assert.Equal("New Group", inheritedJson.RootElement.GetProperty("effectiveProfile").GetProperty("name").GetString());
+
+        using var organizationUpdate = new HttpRequestMessage(HttpMethod.Put,
+            $"/api/v1/organizations/{organizationId}/legal-profile")
+        {
+            Content = JsonContent.Create(new { legalCountryCode = "FR", legalName = "Updated Group",
+                legalRegistrationNumber = "732829320", taxIdentifier = "FR88732829320" })
+        };
+        organizationUpdate.Headers.TryAddWithoutValidation("If-Match", "\"2\"");
+        using var updatedOrganization = await client.SendAsync(organizationUpdate, TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.OK, updatedOrganization.StatusCode);
+        using var staleOrganizationUpdate = new HttpRequestMessage(HttpMethod.Put,
+            $"/api/v1/organizations/{organizationId}/legal-profile")
+        {
+            Content = JsonContent.Create(new { legalCountryCode = "FR", legalName = "Stale Name",
+                legalRegistrationNumber = "732829320", taxIdentifier = "FR88732829320" })
+        };
+        staleOrganizationUpdate.Headers.TryAddWithoutValidation("If-Match", "\"2\"");
+        using var staleOrganization = await client.SendAsync(staleOrganizationUpdate, TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.PreconditionFailed, staleOrganization.StatusCode);
+        using var inheritedAfterUpdate = await client.GetAsync($"/api/v1/tenants/{tenantId}/establishment-settings/legal-profile",
+            TestContext.Current.CancellationToken);
+        using var inheritedAfterUpdateJson = JsonDocument.Parse(await inheritedAfterUpdate.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
+        Assert.Equal("Updated Group", inheritedAfterUpdateJson.RootElement.GetProperty("effectiveProfile").GetProperty("name").GetString());
+
+        using var customUpdate = new HttpRequestMessage(HttpMethod.Put,
+            $"/api/v1/tenants/{tenantId}/establishment-settings/legal-profile")
+        {
+            Content = JsonContent.Create(new { mode = "custom", legalCountryCode = "FR", legalName = "Bistro Paris",
+                legalRegistrationNumber = "73282932000074", taxIdentifier = "FR88732829320" })
+        };
+        customUpdate.Headers.TryAddWithoutValidation("If-Match", "\"1\"");
+        using var custom = await client.SendAsync(customUpdate, TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.OK, custom.StatusCode);
+        using var customJson = JsonDocument.Parse(await custom.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
+        Assert.Equal("custom", customJson.RootElement.GetProperty("mode").GetString());
+        Assert.Equal("Bistro Paris", customJson.RootElement.GetProperty("effectiveProfile").GetProperty("name").GetString());
+
+        using var laterOrganizationUpdate = new HttpRequestMessage(HttpMethod.Put,
+            $"/api/v1/organizations/{organizationId}/legal-profile")
+        {
+            Content = JsonContent.Create(new { legalCountryCode = "FR", legalName = "Later Group Change",
+                legalRegistrationNumber = "732829320", taxIdentifier = "FR88732829320" })
+        };
+        laterOrganizationUpdate.Headers.TryAddWithoutValidation("If-Match", "\"3\"");
+        using var laterUpdate = await client.SendAsync(laterOrganizationUpdate, TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.OK, laterUpdate.StatusCode);
+        using var customAfterParentUpdate = await client.GetAsync($"/api/v1/tenants/{tenantId}/establishment-settings/legal-profile",
+            TestContext.Current.CancellationToken);
+        using var customAfterParentUpdateJson = JsonDocument.Parse(await customAfterParentUpdate.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
+        Assert.Equal("Bistro Paris", customAfterParentUpdateJson.RootElement.GetProperty("effectiveProfile").GetProperty("name").GetString());
+
+        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", "unrelated-user");
+        using var deniedProfile = await client.GetAsync($"/api/v1/tenants/{tenantId}/establishment-settings/legal-profile",
+            TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.NotFound, deniedProfile.StatusCode);
+
         using var scope = factory.Services.CreateScope();
         var database = scope.ServiceProvider.GetRequiredService<WhitePlateDbContext>();
         Assert.True(await database.OrganizationOwnerMemberships.AnyAsync(member => member.OrganizationId == organizationId &&
@@ -208,7 +281,7 @@ public sealed class OrganizationEndpointTests
                 TestContext.Current.CancellationToken);
         client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", "unverified");
 
-        using var response = await client.PostAsJsonAsync("/api/v1/organizations", new { name = "Nope" },
+        using var response = await client.PostAsJsonAsync("/api/v1/organizations", new { name = "Nope", legalCountryCode = "FR" },
             TestContext.Current.CancellationToken);
 
         Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);

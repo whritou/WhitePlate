@@ -15,6 +15,8 @@ The public tenant storefront reads its restaurant description from the localized
 
 Restaurant settings include a versioned weekly-hours editor. Each weekday can be open or closed independently and can contain multiple service periods; unsaved values remain local until saved. Public collection details display the weekly schedule in the establishment time zone, or explain when hours are not configured. EN/FR copy is kept in both catalogs. S2 does not add an open-now indicator or checkout gating.
 
+S1 legal settings collect an organization profile during setup and support later owner edits. Restaurants inherit it by default or keep a versioned country-specific override. Restaurant settings are URL-addressable Establishment, Legal and tax, and Opening hours categories, with desktop sidebar and mobile selector navigation. Legal fields support France, Germany, UK and US; no default tax rate is introduced.
+
 Next.js 16.3.4, React 19.2.8, strict TypeScript, Tailwind CSS 4, `next-intl` are wired into the application. shadcn Base UI components implement shared controls, cards and feedback. TanStack Query manages kitchen order reads and mutations. The [implementation conventions](frontend-conventions.md) define module ownership and enforced boundaries. Exact dependencies are recorded in the package manifest and lockfile.
 
 ```text

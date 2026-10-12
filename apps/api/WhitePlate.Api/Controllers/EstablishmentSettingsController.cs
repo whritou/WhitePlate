@@ -36,6 +36,34 @@ public sealed class EstablishmentSettingsController(ICurrentIdentity currentIden
             : errors.ToActionResult(errors.Create(HttpContext, result.Error));
     }
 
+    [HttpGet("legal-profile")]
+    [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+    public async Task<IActionResult> GetLegalProfile(Guid tenantId, CancellationToken ct)
+    {
+        if (currentIdentity.Identity is not { } identity) return Unauthorized();
+        var result = await handler.GetLegalProfileAsync(tenantId, identity, ct);
+        if (!result.IsSuccess) return errors.ToActionResult(errors.Create(HttpContext, result.Error));
+        Response.Headers.CacheControl = "no-store";
+        Response.Headers.ETag = $"\"{result.Value.Version}\"";
+        return Ok(result.Value);
+    }
+
+    [HttpPut("legal-profile")]
+    [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+    [RequestSizeLimit(65536)]
+    public async Task<IActionResult> PutLegalProfile(Guid tenantId, UpdateTenantLegalProfileRequest request,
+        CancellationToken ct)
+    {
+        if (currentIdentity.Identity is not { } identity) return Unauthorized();
+        var result = await handler.SaveLegalProfileAsync(tenantId, identity,
+            new UpdateTenantLegalProfileInput(request.Mode, request.LegalCountryCode, request.LegalName,
+                request.LegalRegistrationNumber, request.TaxIdentifier), ParseVersion(), ct);
+        if (!result.IsSuccess) return errors.ToActionResult(errors.Create(HttpContext, result.Error));
+        Response.Headers.CacheControl = "no-store";
+        Response.Headers.ETag = $"\"{result.Value.Version}\"";
+        return Ok(result.Value);
+    }
+
     [HttpPut]
     [ProducesResponseType<EstablishmentSettingsResponse>(StatusCodes.Status200OK)]
     [RequestSizeLimit(65536)]

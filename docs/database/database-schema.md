@@ -1,5 +1,9 @@
 # Database schema and tenant model
 
+## S1 organization and restaurant legal profiles — 2026-10-12
+
+Generated migration `20261012190104_LegalProfileSettings` adds nullable `Organizations.LegalCountryCode`, `LegalName`, `LegalRegistrationNumber`, and `TaxIdentifier`; `Organizations.LegalProfileVersion` is a concurrency token defaulting to 1. `Tenants` receives corresponding nullable custom-profile fields plus `LegalProfileMode` (`inherit` by default) and `LegalProfileVersion` (default 1). Existing rows receive no fabricated country or identifier. In inherited mode tenant profile fields are null and the effective values are read from the owning organization. Tax rates and order records are unchanged. The migration has not been applied to shared/production databases.
+
 ## S1 establishment fields — 2026-10-12
 
 Generated `20261012113559_EstablishmentSettings` is reviewed but unapplied to shared/production PostgreSQL. Existing `Tenants.Name` remains the trade name. [Rollout evidence](../audits/establishment-settings.md).

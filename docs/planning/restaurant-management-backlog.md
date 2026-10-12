@@ -108,7 +108,7 @@ Decisions and limits:
 
 Reference: settings. Dependencies: none.
 
-Implementation update (12 October 2026): the user approved the [specification](../superpowers/specs/2026-10-12-establishment-settings-design.md) and [plan](../superpowers/specs/2026-10-12-establishment-settings-implementation-plan.md). Identity, address, IANA timezone, localized pickup details, safe directions and authorized versioned persistence are implemented in source. [Verification/rollout evidence](../audits/establishment-settings.md); shared PostgreSQL migration, deployment and hosted acceptance remain In review. Legal/default-tax questions and email delivery remain separate backlog scope.
+Implementation update (12 October 2026): identity, address, IANA timezone, localized pickup details and safe directions are implemented. The legal profile follow-up has an approved [specification](../superpowers/specs/2026-10-12-legal-settings-design.md); source implementation and verification are in progress. S1 migration, deployment and hosted acceptance remain In review. Email delivery remains separate backlog scope.
 
 Add the establishment-information settings section with public/legal identity, address, phone, pickup instructions and location links from the reference.
 
@@ -117,7 +117,7 @@ Acceptance criteria:
 - [x] Implement trade name, phone, address, coordinates, IANA timezone and localized pickup instructions with validation and authorized persistence; local relational/UI verification complete, hosted acceptance pending.
 - [x] Reuse existing description/language management and fallback; integrate current pickup details into storefront/checkout/receipt/tracking. Email integration stays S4.
 - [x] Generate saved-data Google Maps/Waze directions and handle missing coordinates/address.
-- [ ] Decide required jurisdiction-specific legal identifiers, SIRET validation and whether a default tax rate is actually needed; preserve existing per-product tax rules and historical order amounts.
+- [x] Support France, Germany, UK and US legal profiles; validate identifier syntax/checksums without registry claims. France uses organization SIREN and restaurant SIRET. Do not add a default tax rate; retain product rates and historical order amounts.
 - [x] Keep organization/restaurant settings separate and independently authorize reads/mutations; local HTTP membership/role/active/revocation coverage.
 
 Decisions and limits:
