@@ -126,7 +126,7 @@ Decisions and limits:
 
 ### S2 — Restaurant Settings: weekly opening hours and service windows
 
-Design approved 2026-10-12; the written specification is pending review: [S2 weekly opening hours design](../superpowers/specs/2026-10-12-opening-hours-design.md).
+Design and written specification approved 2026-10-12; implementation plan review is pending: [S2 weekly opening hours design](../superpowers/specs/2026-10-12-opening-hours-design.md).
 
 Reference: settings. Dependencies: S1.
 

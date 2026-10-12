@@ -1,6 +1,6 @@
 # S2 weekly opening hours design
 
-12 October 2026. Status: design approved in chat; written-spec review pending.
+12 October 2026. Status: design and written specification approved; implementation plan review pending.
 
 ## Intent and approved scope
 
@@ -23,7 +23,7 @@ An optional schedule distinguishes unconfigured legacy restaurants from an expli
 
 ## Stored model and validation
 
-`OpeningHoursJson` is nullable on `Tenants`. Null means no weekly schedule has been saved. A configured value contains exactly seven unique ISO weekdays (`1` Monday through `7` Sunday); every day is either closed with no windows or open with one or more windows. No migration backfill fabricates business hours.
+`OpeningHoursJson` is nullable on `Tenants`. Null means no weekly schedule has been saved. A configured value contains exactly seven unique ISO weekdays (`1` Monday through `7` Sunday); each day has its own independently editable closed/open state and its own windows. Monday's windows do not determine Tuesday's hours. Copying is an optional draft convenience, never a weekly default. A closed day has no windows and an open day has one or more windows. No migration backfill fabricates business hours.
 
 Each window has a start and an end in 24-hour `HH:mm` wall-clock format. Start accepts `00:00` through `23:59`; end accepts `00:01` through `24:00`. Each window must start before it ends. A day accepts at most eight windows. Windows must be supplied in ascending start order and must not overlap; adjacent windows are allowed. Windows are half-open (`start` inclusive, `end` exclusive), so adjacent services such as `11:00–14:00` and `14:00–17:00` do not overlap. `24:00` is a closing boundary only. A day ending at `24:00` does not continue into the next day; the next day must explicitly contain its own hours. The request limit is 64 KiB and the API enforces the same structural and temporal rules as the Domain.
 
@@ -41,7 +41,7 @@ Extend `PublicEstablishmentDto` in the host-resolved `GET /api/v1/menu` response
 
 Add an Opening hours section/tab to the existing restaurant settings route and retain the verified restaurant context and query parameters. Use the current Lovable workspace recipe, canonical light tokens, shared Base UI controls, semantic headings, visible focus, and EN/FR translations. Keep the seven weekday labels and closed/open state visible. Desktop rows may use the current workspace grid; at phone widths each day becomes a readable card with its status and all window controls available without horizontal scrolling.
 
-The editor keeps a local draft based on the last acknowledged server value. Closed-day toggles clear that day's draft windows; reopening begins with one blank editable window. Add/remove controls support up to eight windows. Continuous service uses a single window. Copy/apply requires a source day, explicit target days, and confirmation listing those targets; it copies the current unsaved source draft into the selected unsaved target drafts. Cancel restores the last saved schedule. Save submits the complete seven-day schedule and the loaded establishment version. Pending, validation, transient failure/retry, success, authorization and stale-version conflict states use existing localized feedback patterns. A conflict preserves edits and requires an explicit reload before replacing them.
+The editor keeps a local draft based on the last acknowledged server value. Every weekday can have a different closed/open state and different windows. Closed-day toggles clear that day's draft windows; reopening begins with one blank editable window. Add/remove controls support up to eight windows. Continuous service uses a single window. Copy/apply requires a source day, explicit target days, and confirmation listing those targets; it copies the current unsaved source draft into the selected unsaved target drafts. Cancel restores the last saved schedule. Save submits the complete seven-day schedule and the loaded establishment version. Pending, validation, transient failure/retry, success, authorization and stale-version conflict states use existing localized feedback patterns. A conflict preserves edits and requires an explicit reload before replacing them.
 
 Time inputs use accessible labels and 24-hour controls; client validation provides prompt feedback while the API and Domain remain authoritative. Use a visible `24:00` closing option, never an opening option. A null saved schedule is shown as not configured, with a distinct editable draft state.
 
@@ -52,6 +52,8 @@ Generate an additive EF migration that adds nullable `Tenants.OpeningHoursJson` 
 Update API contracts, database schema, backend/frontend architecture, restaurant settings docs, functional acceptance scenarios, and an S2 audit with actual commands/results. Update the roadmap to show implemented source only after implementation is complete and keep hosted acceptance separate. S3 remains responsible for slot generation and server-side checkout enforcement.
 
 ## Acceptance criteria
+
+The user approved this written specification on 12 October 2026 and clarified that opening hours must be independently configurable for each weekday. The implementation and acceptance plan preserve that requirement directly.
 
 - Save/read-back handles all seven days, explicit closed days, continuous windows, split shifts, adjacent boundaries and an explicit fully closed week.
 - Validation rejects malformed, unordered, zero/negative, overlapping and closed-day windows without partial mutation; `24:00` is accepted as an end only.
