@@ -83,6 +83,9 @@ public static class ServiceRegistration
         services.AddHealthChecks().AddCheck<DatabaseReadinessHealthCheck>(
             "database", timeout: TimeSpan.FromSeconds(3));
         services.AddScoped<ITenantRepository, TenantRepository>();
+        services.AddScoped<IEstablishmentSettingsRepository, EstablishmentSettingsRepository>();
+        services.AddSingleton<IEstablishmentOptions, WhitePlate.Infrastructure.Tenants.EstablishmentOptions>();
+        services.AddScoped<EstablishmentSettingsHandler>();
         services.AddScoped<ICatalogRepository, CatalogRepository>();
         services.AddScoped<IOrderRepository, OrderRepository>();
         services.AddScoped<CreateOrderCommandHandler>();

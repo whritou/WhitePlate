@@ -9,6 +9,7 @@ import {
 import type { OrderReceipt } from "@/types/checkout"
 import { Link } from "@/i18n/navigation"
 import { useLocale, useTranslations } from "next-intl"
+import { CurrentCollectionInformation } from "./current-collection-information"
 
 export function Receipt({
   receipt,
@@ -101,6 +102,8 @@ export function Receipt({
             </div>
           ))}
         </dl>
+
+        <CurrentCollectionInformation locale={receipt.menuLocale ?? locale} />
       </CardContent>
     </section>
   )

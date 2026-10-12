@@ -14,6 +14,10 @@ export default defineConfig({
   timeout: 120_000,
   expect: { timeout: 20_000 },
   projects: [
+    {
+      name: "establishment-settings",
+      testMatch: "establishment-settings.spec.ts",
+    },
     { name: "live-demo-parity", testMatch: "live-demo-parity.spec.ts" },
     {
       name: "workspace-regressions",

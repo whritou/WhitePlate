@@ -200,13 +200,13 @@ public sealed class OrderRepository(WhitePlateDbContext database) : IOrderReposi
                 item.Id == orderId && item.TrackingTokenHash != null)
             .Select(item => new
             {
-                item.TrackingTokenHash, item.TrackingTokenExpiresAt, item.Id, item.Status, item.Version, item.CreatedAt
+                item.TrackingTokenHash, item.TrackingTokenExpiresAt, item.Id, item.Status, item.Version, item.CreatedAt, item.MenuLocale
             }).SingleOrDefaultAsync(cancellationToken);
         if (order is null || order.TrackingTokenExpiresAt <= now || !CryptographicOperations.FixedTimeEquals(
                 Convert.FromHexString(order.TrackingTokenHash!), Convert.FromHexString(tokenHash)))
             return null;
 
-        return new PublicOrderTrackingDto(order.Id, order.Status.ToString(), order.Version, order.CreatedAt);
+        return new PublicOrderTrackingDto(order.Id, order.Status.ToString(), order.Version, order.CreatedAt, order.MenuLocale);
     }
 
     public Task<int> ArchiveClosedOrdersBeforeAsync(DateTimeOffset cutoff, CancellationToken cancellationToken)

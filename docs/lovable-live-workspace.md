@@ -1,5 +1,7 @@
 # Lovable design on real application routes
 
+S1 update (12 October 2026): `/organization/restaurant-settings?tenantId=…` now implements authorized identity/contact/address, timezone and pickup settings. Owners and managers use this restaurant route; Staff and the separate organization settings shell remain available. Public shop/checkout and independent receipt/tracking reads show saved/current collection information. The earlier navigation/placeholder baselines below are historical; [S1 verification and rollout](audits/establishment-settings.md) records the actual API/schema changes and unapplied migration.
+
 10 October 2026. This extends the user-approved [Lovable migration](lovable-migration.md) from the landing/demo to real workspaces and tenant storefronts. It preserves the existing App Router, Better Auth, authorized C# contracts, request adapters, query lifecycle and guest checkout. No API, schema or backend project was changed: existing contracts cover the connected operations. Missing features use clearly identified fictitious data or local drafts, as requested; API failures do not silently become sample data.
 
 ## Route mapping and implemented behavior

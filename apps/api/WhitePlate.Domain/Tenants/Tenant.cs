@@ -3,7 +3,7 @@ using System.Text.Json;
 
 namespace WhitePlate.Domain.Tenants;
 
-public sealed class Tenant
+public sealed partial class Tenant
 {
     public const int MaxNameLength = 200;
     public const int MaxDescriptionLength = 500;

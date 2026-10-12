@@ -426,7 +426,8 @@ public sealed class CatalogRepository(WhitePlateDbContext database) : ICatalogRe
                 category.SortOrder,
                 productsByCategory.GetValueOrDefault(category.Id, []))).ToArray())
         {
-            RestaurantDescription = restaurant?.ResolveDescription(locale)
+            RestaurantDescription = restaurant?.ResolveDescription(locale),
+            Establishment = restaurant is null ? null : PublicEstablishmentDto.FromTenant(restaurant, locale)
         };
     }
 

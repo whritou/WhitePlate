@@ -1,4 +1,5 @@
 export type StorefrontMenu = {
+  establishment?: import("./establishment-settings").PublicEstablishment | null
   tenantId: string
   restaurantName: string
   restaurantDescription: string | null

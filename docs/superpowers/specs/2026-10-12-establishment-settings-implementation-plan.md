@@ -1,12 +1,12 @@
 # S1 establishment settings implementation plan
 
-12 October 2026. Status: specification approved; plan awaiting review and execution selection. Written directly with the user's authorization because `writing-plans` is unavailable. Application implementation has not started.
+12 October 2026. Status: plan approved and executed sequentially in this chat. Written directly with the user's authorization because `writing-plans` is unavailable. See [actual implementation/verification](../../audits/establishment-settings.md), including file-organization differences and remaining operational acceptance.
 
 ## Goal and execution
 
 Implement the [approved specification](2026-10-12-establishment-settings-design.md) on `feat/establishment-settings`. Establishment identity, contact, address, timezone and pickup instructions become persisted, tenant-authorized settings; guests see current saved collection details. Existing taxes, order snapshots, descriptions, menu-language operations, UTC archival and other roadmap cards retain their defined boundaries.
 
-Recommended execution: carry out the following tasks sequentially in this chat, with failing behavior tests before each implementation, focused verification after each step, then complete-suite and browser verification. No subagents or separate chats are required. Use the current checkout and preserve `.cloudflare/` and any new user changes discovered before editing. This plan is an execution proposal; review/selection precedes product code.
+Approved execution: sequentially in this chat, with initial failing endpoint/parser/error-propagation tests, focused checks, then complete-suite and browser verification. No subagents or separate chats were used. The checkout and pre-existing `.cloudflare/` were preserved. Tasks below retain the approved plan as reference; the audit records actual implementation and remaining operational acceptance.
 
 ## Task 1: Domain fields and validation
 

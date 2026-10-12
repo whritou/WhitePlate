@@ -54,7 +54,7 @@ export async function parseJsonResponse<T>(
   responseType: "json" | "none" | "image" = "json"
 ): Promise<ApiResult<T>> {
   if (!response.ok) {
-    return requestFailure(
+    const failure = requestFailure(
       response.status,
       {
         ...diagnostic,
@@ -66,6 +66,14 @@ export async function parseJsonResponse<T>(
       },
       onDiagnostic
     )
+
+    const fields =
+      response.status === 400 &&
+      response.headers.get("content-type")?.includes("json")
+        ? await safeValidationFields(response)
+        : []
+
+    return fields.length ? { ...failure, validationFields: fields } : failure
   }
 
   if (responseType === "image") {
@@ -113,4 +121,31 @@ function mapHttpStatus(status: number): ApiError {
 
 function safeHeader(value: string | null): string | undefined {
   return value && /^[a-zA-Z0-9._:-]{1,100}$/.test(value) ? value : undefined
+}
+
+async function safeValidationFields(response: Response): Promise<string[]> {
+  try {
+    const value: unknown = await response.json()
+
+    if (
+      !value ||
+      typeof value !== "object" ||
+      !("errors" in value) ||
+      !Array.isArray(value.errors)
+    )
+      return []
+
+    return value.errors
+      .slice(0, 20)
+      .flatMap((issue) =>
+        issue &&
+        typeof issue === "object" &&
+        typeof issue.field === "string" &&
+        /^[A-Za-z][A-Za-z0-9.[\]-]{0,127}$/.test(issue.field)
+          ? [issue.field]
+          : []
+      )
+  } catch {
+    return []
+  }
 }

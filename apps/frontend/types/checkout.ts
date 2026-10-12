@@ -15,6 +15,7 @@ export type OrderInput = {
 }
 
 export type PublicOrderTracking = {
+  menuLocale?: string | null
   id: string
   status: "Pending" | "Preparing" | "Ready" | "Completed" | "Cancelled"
   version: number

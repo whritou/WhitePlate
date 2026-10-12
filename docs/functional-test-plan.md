@@ -1,5 +1,11 @@
 # Functional test plan
 
+## S1 establishment settings — local implementation acceptance
+
+See [S1 evidence](audits/establishment-settings.md) for commands/results and remaining hosted checks. Automated API coverage includes actual owner/manager membership, anonymous/kitchen/foreign/revoked/inactive denial, defaults/normalization, precondition parsing, rejected-input atomicity, independent concurrent settings and menu configuration, host-resolved public projection/fallback and saved tracking locale. Domain tests cover locale clearing/disable/re-enable, international addresses, phone/string/coordinate rules. Browser fixture coverage includes real form dirty/save/cancel, duplicate submission, conflict discard/reload, unavailable retry, revoked form hiding, independent receipt collection failure, EN/FR responsive matrix/keyboard/zoom.
+
+Hosted acceptance remains: apply migration in approved PostgreSQL environment, deploy API/frontend, save/reload as owner and manager, deny foreign/kitchen/revoked accounts, and verify tenant-host menu/checkout/receipt/tracking current pickup information without changing confirmed order snapshots. No fixture result substitutes for these operational checks.
+
 ## M2 menu product metadata
 
 After applying the additive migration, verify owner/manager create/update/clear behavior and tenant isolation for SKU, allergen/dietary declarations and preparation fields. Cover duplicate SKU in the same restaurant (including archived products), allowed same SKU in another restaurant, invalid/overlapping allergen codes, invalid dietary codes, SKU normalization, and preparation bounds. Confirm public menu locale labels and explicit declarations, no SKU in guest output, empty declarations make no allergen-free claim, and preparation text is not presented as a pickup promise. Place an order, edit its product metadata, and confirm receipt/history snapshots preserve the submitted disclosures; verify kitchen tickets display saved prep guidance. Repeat the management and guest flows in EN/FR, keyboard navigation, 320/375/390/768/1024/1440 px and wide desktop, and at 200% text zoom. Fixtures and local source tests do not prove shared-database migration or hosted acceptance.

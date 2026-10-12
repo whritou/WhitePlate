@@ -108,17 +108,17 @@ Decisions and limits:
 
 Reference: settings. Dependencies: none.
 
-Design update (12 October 2026): the user approved the [written establishment-settings specification](../superpowers/specs/2026-10-12-establishment-settings-design.md), including a validated IANA timezone with UTC for existing restaurants, and authorized direct planning despite the missing `writing-plans` skill. The [implementation plan](../superpowers/specs/2026-10-12-establishment-settings-implementation-plan.md) awaits review/execution selection. Legal identifiers and default-tax changes remain separate decisions; no settings API, persistence or migration is implemented by these documents.
+Implementation update (12 October 2026): the user approved the [specification](../superpowers/specs/2026-10-12-establishment-settings-design.md) and [plan](../superpowers/specs/2026-10-12-establishment-settings-implementation-plan.md). Identity, address, IANA timezone, localized pickup details, safe directions and authorized versioned persistence are implemented in source. [Verification/rollout evidence](../audits/establishment-settings.md); shared PostgreSQL migration, deployment and hosted acceptance remain In review. Legal/default-tax questions and email delivery remain separate backlog scope.
 
 Add the establishment-information settings section with public/legal identity, address, phone, pickup instructions and location links from the reference.
 
 Acceptance criteria:
 
-- [ ] Provide trade name, phone, postal address, optional GPS coordinates and localized pickup instructions; validate and persist tenant-owned fields with dirty-state save/cancel behavior.
-- [ ] Reuse existing restaurant description/menu-language management and its locale fallback; do not duplicate or silently replace it. Apply appropriate localized pickup details to storefront, receipt/tracking and email only through their approved contracts.
-- [ ] Generate safe Google Maps/Waze directions from saved location data with an optional test-link action; handle missing or invalid coordinates.
+- [x] Implement trade name, phone, address, coordinates, IANA timezone and localized pickup instructions with validation and authorized persistence; local relational/UI verification complete, hosted acceptance pending.
+- [x] Reuse existing description/language management and fallback; integrate current pickup details into storefront/checkout/receipt/tracking. Email integration stays S4.
+- [x] Generate saved-data Google Maps/Waze directions and handle missing coordinates/address.
 - [ ] Decide required jurisdiction-specific legal identifiers, SIRET validation and whether a default tax rate is actually needed; preserve existing per-product tax rules and historical order amounts.
-- [ ] Keep organization settings separate from restaurant settings; independently authorize every server/API read and mutation.
+- [x] Keep organization/restaurant settings separate and independently authorize reads/mutations; local HTTP membership/role/active/revocation coverage.
 
 Decisions and limits:
 

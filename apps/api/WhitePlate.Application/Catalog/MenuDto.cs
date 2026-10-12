@@ -57,4 +57,5 @@ public sealed record MenuDto(Guid TenantId, string RestaurantName, string Curren
     IReadOnlyList<MenuCategoryDto> Categories)
 {
     public string? RestaurantDescription { get; init; }
+    public WhitePlate.Application.Tenants.PublicEstablishmentDto? Establishment { get; init; }
 }

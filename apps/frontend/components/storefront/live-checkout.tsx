@@ -8,13 +8,15 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { DEFAULT_THEME } from "@/lib/lovable/storeTheme"
+import type { PublicEstablishment } from "@/types/establishment-settings"
+import { CollectionInformation } from "./collection-information"
 import type { GuestCheckoutController } from "@/types/checkout"
 import { Receipt } from "./receipt"
 
 export function LiveCheckout({
   state,
   name,
+  establishment,
   price,
   estimate,
   onBack,
@@ -22,6 +24,7 @@ export function LiveCheckout({
 }: {
   state: GuestCheckoutController
   name: string
+  establishment?: PublicEstablishment | null
   price: Intl.NumberFormat
   estimate: string
   onBack: () => void
@@ -61,9 +64,13 @@ export function LiveCheckout({
               <Copy>Collect at</Copy> {name}
             </h3>
 
-            <p className="text-sm text-muted-foreground">
-              {v("checkoutUnavailable")}
-            </p>
+            {establishment ? (
+              <CollectionInformation establishment={establishment} />
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                {v("checkoutUnavailable")}
+              </p>
+            )}
           </section>
 
           <section className="border-t pt-6">
@@ -85,7 +92,7 @@ export function LiveCheckout({
                 <span>
                   <Copy>As soon as possible</Copy>
                   <span className="mt-1 block text-xs text-muted-foreground">
-                    <Copy>Usually ready in</Copy> {DEFAULT_THEME.prepTime}
+                    {v("checkoutUnavailable")}
                   </span>
                 </span>
               </Label>

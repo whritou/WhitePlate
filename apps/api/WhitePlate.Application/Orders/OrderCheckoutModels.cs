@@ -51,7 +51,7 @@ public sealed record OrderPageDto(IReadOnlyList<OrderSummaryDto> Items, string? 
 public sealed record OrderPageData(IReadOnlyList<OrderSummaryDto> Items, OrderPageCursor? NextCursor);
 public sealed record OrderHistoryPageDto(IReadOnlyList<OrderSummaryDto> Items, int Page, int PageSize, int TotalCount);
 public sealed record OrderHistoryPageData(IReadOnlyList<OrderSummaryDto> Items, int TotalCount);
-public sealed record PublicOrderTrackingDto(Guid Id, string Status, int Version, DateTimeOffset CreatedAt);
+public sealed record PublicOrderTrackingDto(Guid Id, string Status, int Version, DateTimeOffset CreatedAt, string? MenuLocale = null);
 public sealed record OrderPageCursor(long CreatedAtTicks, Guid Id);
 public sealed record ListOrdersQuery(Guid TenantId, OrderStatus? Status, string? Cursor, int? PageSize);
 public sealed record ListOrderHistoryQuery(Guid TenantId, OrderStatus? Status, string? Search, DateOnly? From,

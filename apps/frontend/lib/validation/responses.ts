@@ -1,4 +1,5 @@
 import { isRecord, isUuid } from "./common"
+import { parsePublicEstablishment } from "./establishment-settings"
 import { parsePhotoList } from "@/lib/product-photos"
 import { parseMenuLanguages } from "./organization"
 import { isMenuProductMetadata } from "./menu-product"
@@ -321,6 +322,9 @@ export function parseStorefrontMenu(value: unknown): StorefrontMenu | null {
     tenantId: value.tenantId,
     restaurantName: value.restaurantName,
     restaurantDescription: value.restaurantDescription,
+    ...(value.establishment !== undefined
+      ? { establishment: parsePublicEstablishment(value.establishment) }
+      : {}),
     currency: value.currency,
     locale: value.locale,
     defaultLocale: value.defaultLocale,

@@ -8,8 +8,16 @@ namespace WhitePlate.Api.Controllers;
 [ApiController]
 [Route("api/v1/tenant")]
 [RequireTenant]
-public sealed class TenantsController(ICurrentTenant currentTenant) : ControllerBase
+public sealed class TenantsController(ICurrentTenant currentTenant, IEstablishmentSettingsRepository establishments) : ControllerBase
 {
+    [HttpGet("establishment")]
+    [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+    public async Task<ActionResult<PublicEstablishmentResponse>> GetEstablishment([FromQuery] string? locale, CancellationToken ct)
+    {
+        var tenant = await establishments.GetAsync(currentTenant.Tenant!.Id, ct);
+        return tenant is null ? NotFound() : PublicEstablishmentResponse.FromDto(PublicEstablishmentDto.FromTenant(tenant, locale));
+    }
+
     [HttpGet]
     [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
     [ProducesResponseType<TenantResponse>(StatusCodes.Status200OK)]

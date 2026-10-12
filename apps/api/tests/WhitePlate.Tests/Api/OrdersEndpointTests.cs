@@ -116,6 +116,7 @@ public sealed partial class OrdersEndpointTests
         using var trackingJson = JsonDocument.Parse(await tracking.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
         Assert.Equal(orderId, trackingJson.RootElement.GetProperty("id").GetGuid());
         Assert.Equal("Pending", trackingJson.RootElement.GetProperty("status").GetString());
+        Assert.Equal("en", trackingJson.RootElement.GetProperty("menuLocale").GetString());
         Assert.False(trackingJson.RootElement.TryGetProperty("customerName", out _));
         Assert.False(trackingJson.RootElement.TryGetProperty("total", out _));
 
