@@ -34,6 +34,12 @@ Before applying M5, the PostgreSQL terminal created `/tmp/whiteplate-before-prod
 
 Post-checks confirmed the migration history row, both columns and their null/default rules, both expected indexes, and the foreign key. The production API `/health/ready` endpoint returned `Healthy`. Its deployed commit `0d51b91` already contains the M5 implementation, so no API redeploy or restart was needed. Real S3 gallery upload/read/delete and hosted gallery acceptance remain outstanding; the database still has no scheduled off-host backup or restore drill.
 
+## Production establishment-settings rollout — 2026-10-12
+
+After PR #77 merged to `main` as `a17d0346175bf5f13eaff7bd47d60fbddd53fc06`, the production PostgreSQL resource `whiteplate-postgresql-main` was backed up to `/tmp/whiteplate-before-establishment-settings-20261012.dump` with `pg_dump -Fc` (62.6 KiB). This is a temporary copy inside the database container, not an off-host backup or restore drill. Preflight found two tenant rows, latest migration `20261011125310_ProductMenuMetadata`, no S1 migration-history row and none of the twelve S1 tenant columns.
+
+Applied the reviewed `20261012113559_EstablishmentSettings` SQL through the Coolify database terminal in one transaction. Post-checks confirmed the migration history row with EF product version `10.0.12` and all twelve columns with the expected types, nullability and defaults. The API resource `white-plate:main-wqyrztj6uyuwlveq75qrl68t` then deployed merge commit `a17d034` through Coolify. The new container passed its internal `/health/ready` healthcheck and the rolling update completed at 2026-10-12 14:19 UTC. A local public probe was blocked by the browser and failed before connecting in PowerShell's Schannel client; rely on the verified Coolify healthcheck until external probing is available. Hosted owner/manager settings and tenant-host storefront acceptance remain open, as does off-host backup retention and a restore drill.
+
 ## Previous verified deployment state — 2026-10-08
 
 | Component | Evidence and remaining work |
