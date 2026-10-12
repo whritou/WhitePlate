@@ -1,6 +1,6 @@
 # S1 establishment settings — 12 October 2026
 
-Source implementation on `feat/establishment-settings`, following the approved [design](../superpowers/specs/2026-10-12-establishment-settings-design.md) and [plan](../superpowers/specs/2026-10-12-establishment-settings-implementation-plan.md). Shared PostgreSQL migration execution, deployment and hosted acceptance remain open; the project card stays In review for those operational checks.
+Implemented on `feat/establishment-settings`, merged through [PR #77](https://github.com/whritou/WhitePlate/pull/77), and rolled out to the production API from merge commit `a17d0346175bf5f13eaff7bd47d60fbddd53fc06`. The approved [design](../superpowers/specs/2026-10-12-establishment-settings-design.md) and [plan](../superpowers/specs/2026-10-12-establishment-settings-implementation-plan.md) define the delivered scope. Production migration and API deployment are complete; real hosted owner/manager and storefront acceptance remain open, so the project card stays In review.
 
 ## Implemented behavior
 
@@ -18,7 +18,7 @@ UTC initializes existing/new establishments. This does not change UTC archival o
 
 EF generated `20261012113559_EstablishmentSettings`: optional bounded contact/address, `numeric(9,6)` coordinates, constant defaults `UTC`, `{}` and version `1`. Tracking uses existing nullable `Orders.MenuLocale`; no order column is added. Reviewed SQL contains additive Tenants ALTER statements and migration history in one transaction, with no destructive Up operation, unrelated change, dynamic backfill or new index. EF reports no pending model changes.
 
-Apply reviewed migrations through the operator process before deploying API, then frontend. No startup migration was added; no shared/production database was changed. Actual PostgreSQL migration/hosted acceptance remains separate from SQLite relational API tests. The approved plan's repository/options interfaces share the DTO file; query lifecycle stays in the focused editor instead of an additional hook. API tests use existing real relational HTTP fixtures rather than duplicating them in a new application test harness.
+The production migration `20261012113559_EstablishmentSettings` was applied by the operator through the Coolify PostgreSQL terminal before deploying the API. No startup migration was added. The migration history row, EF product version, twelve tenant columns, defaults and nullability were verified in PostgreSQL. The API deployment from `main` commit `a17d034` completed successfully; Coolify's new container passed its `/health/ready` healthcheck before the old container was removed. A local public probe could not be completed because the browser blocked the host and local PowerShell Schannel failed before connecting. Hosted owner/manager save/reload and guest storefront acceptance remain unverified; this deployment evidence is separate from SQLite relational API tests. The approved plan's repository/options interfaces share the DTO file; query lifecycle stays in the focused editor instead of an additional hook. API tests use existing real relational HTTP fixtures rather than duplicating them in a new application test harness.
 
 ## Verification
 
@@ -44,4 +44,4 @@ Scoped light Lovable surface, semantic tokens, shared Base UI controls/cards, ke
 
 ## Remaining acceptance
 
-After explicit user authorization to create and merge the PR, review/apply the migration in the approved production environment; deploy API then frontend; verify real owner/manager save/reload, tenant-host menu/checkout and receipt/tracking details, revoked/inactive denial. Jurisdiction-specific legal/default-tax questions remain independent backlog decisions.
+Verify hosted owner/manager save/reload, tenant-host menu/checkout and receipt/tracking details, and revoked/inactive denial. Frontend production deployment and real hosted acceptance remain to be verified. Jurisdiction-specific legal/default-tax questions remain independent backlog decisions.
