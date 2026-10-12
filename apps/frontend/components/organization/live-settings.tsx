@@ -1,4 +1,5 @@
 "use client"
+import { useRef } from "react"
 import { useTranslations } from "next-intl"
 import { Link } from "@/i18n/navigation"
 import {
@@ -32,6 +33,7 @@ export function LiveSettings({
   const model = useSettingsPageModel(
     `whiteplate-live-draft:${userId}:${organization.id}:settings`
   )
+  const contentRef = useRef<HTMLDivElement>(null)
   const simulated = [
     "payments",
     "billing",
@@ -46,6 +48,19 @@ export function LiveSettings({
 
     url.searchParams.set("section", section)
     window.history.replaceState(null, "", url.pathname + url.search + url.hash)
+    requestAnimationFrame(() => {
+      const behavior = window.matchMedia("(prefers-reduced-motion: reduce)")
+        .matches
+        ? "instant"
+        : "smooth"
+
+      document
+        .querySelector<HTMLButtonElement>(
+          `.live-settings-sections [aria-current="page"]`
+        )
+        ?.scrollIntoView({ block: "nearest", inline: "center" })
+      contentRef.current?.scrollIntoView({ block: "start", behavior })
+    })
   }
 
   return (
@@ -75,7 +90,7 @@ export function LiveSettings({
 
         <div className="grid gap-6 px-6 pb-12 lg:grid-cols-[240px_1fr]">
           <aside
-            className="h-fit border lg:sticky lg:top-6"
+            className="live-settings-sections h-fit border lg:sticky lg:top-6"
             aria-label={t("settingsSections")}
           >
             {SECTIONS.map(([section, label, description], index) => (
@@ -83,7 +98,7 @@ export function LiveSettings({
                 key={section}
                 onClick={() => select(section)}
                 aria-current={model.sec === section ? "page" : undefined}
-                className={`block w-full px-4 py-3 text-left ${index ? "border-t" : ""} ${model.sec === section ? "bg-foreground text-background" : "hover:bg-secondary"}`}
+                className={`block shrink-0 px-3 py-2 text-left text-sm lg:w-full lg:px-4 lg:py-3 ${index ? "border-t lg:border-t" : ""} ${model.sec === section ? "bg-foreground text-background" : "hover:bg-secondary hover:text-secondary-foreground"}`}
               >
                 <span
                   className={`block font-display font-bold ${section === "danger" && model.sec !== section ? "text-destructive" : ""}`}
@@ -92,7 +107,7 @@ export function LiveSettings({
                 </span>
 
                 <span
-                  className={`label-mono ${model.sec === section ? "opacity-70" : "text-muted-foreground"}`}
+                  className={`label-mono hidden lg:block ${model.sec === section ? "opacity-70" : "text-muted-foreground"}`}
                 >
                   <Copy>{description}</Copy>
                 </span>
@@ -100,7 +115,10 @@ export function LiveSettings({
             ))}
           </aside>
 
-          <div className="min-w-0 space-y-6">
+          <div
+            ref={contentRef}
+            className="live-settings-content min-w-0 space-y-6"
+          >
             {simulated && <MissingFeatureNotice />}
 
             {model.sec === "org" && (

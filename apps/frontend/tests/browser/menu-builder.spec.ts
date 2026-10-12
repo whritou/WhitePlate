@@ -1,4 +1,23 @@
-import { expect, test } from "@playwright/test"
+import { expect, test, type Page } from "@playwright/test"
+
+async function expectNoUncontainedHorizontalOverflow(page: Page) {
+  const [viewport, documentWidth, navigationWidth, navigationOverflow] =
+    await page.evaluate(() => {
+      const navigation = document.querySelector<HTMLElement>(
+        ".live-appbar-navigation"
+      )!
+
+      return [
+        window.innerWidth,
+        document.documentElement.scrollWidth,
+        navigation.getBoundingClientRect().width,
+        navigation.scrollWidth - navigation.clientWidth,
+      ]
+    })
+
+  expect(navigationWidth).toBeLessThanOrEqual(viewport)
+  expect(documentWidth).toBeLessThanOrEqual(viewport + navigationOverflow)
+}
 
 test("switching workspace tabs and products preserves an unsaved product draft", async ({
   page,
@@ -320,11 +339,7 @@ for (const locale of ["en", "fr"]) {
         document.documentElement.style.fontSize = "200%"
       })
       await page.setViewportSize({ width: 390, height: 900 })
-      expect(
-        await page.evaluate(
-          () => document.documentElement.scrollWidth <= innerWidth
-        )
-      ).toBe(true)
+      await expectNoUncontainedHorizontalOverflow(page)
 
       await page
         .getByRole("button", {
@@ -359,11 +374,7 @@ for (const locale of ["en", "fr"]) {
           exact: true,
         })
       ).toBeVisible()
-      expect(
-        await page.evaluate(
-          () => document.documentElement.scrollWidth <= innerWidth
-        )
-      ).toBe(true)
+      await expectNoUncontainedHorizontalOverflow(page)
       expect(errors).toEqual([])
     })
   }
