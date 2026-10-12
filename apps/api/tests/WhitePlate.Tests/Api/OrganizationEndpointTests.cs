@@ -296,6 +296,29 @@ public sealed class OrganizationEndpointTests
     }
 
     [Fact]
+    public async Task MeOmitsInactiveRestaurantsFromOrganizationOwnerMemberships()
+    {
+        using var factory = new OrganizationFactory();
+        var (organizationId, identity) = await factory.SeedOwnerAsync();
+        var tenantId = await factory.SeedRestaurantAsync(organizationId);
+        using (var scope = factory.Services.CreateScope())
+        {
+            var database = scope.ServiceProvider.GetRequiredService<WhitePlateDbContext>();
+            var tenant = await database.Tenants.SingleAsync(row => row.Id == tenantId, TestContext.Current.CancellationToken);
+            tenant.Deactivate();
+            await database.SaveChangesAsync(TestContext.Current.CancellationToken);
+        }
+
+        using var client = factory.CreateClient();
+        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", identity.Subject);
+        using var response = await client.GetAsync("/api/v1/me", TestContext.Current.CancellationToken);
+        using var json = JsonDocument.Parse(await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Empty(json.RootElement.GetProperty("restaurants").EnumerateArray());
+    }
+
+    [Fact]
     public async Task OrganizationOwnerCanReadTeamMembersAndRedactedInvitationStatuses()
     {
         using var factory = new OrganizationFactory();

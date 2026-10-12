@@ -42,6 +42,10 @@ Development-only `/[locale]/establishment-design-test` exercises the real form/s
 
 Scoped light Lovable surface, semantic tokens, shared Base UI controls/cards, keyboard-operable native selectors, EN/FR labels, semantic heading/alert/status regions. No global token/style changes. Form targets are ≥44px desktop and ≥48px from tablet sizes. Browser matrix: 320, 375, 390, 768, 1024, 1440, 1920px, keyboard Tab, 200% CSS zoom and no horizontal document overflow. Global reduced-motion rules apply; no new animation. Final screenshot review/checks below.
 
+## Production access follow-up — 12 October 2026
+
+The production owner workspace listed the inactive `test` restaurant in `/api/v1/me`; opening its settings then returned `404` from the API's active-establishment read and displayed the access-lost alert. This was a stale workspace entry, not a missing owner grant. `StaffDirectoryRepository` now excludes inactive owner restaurants from `/api/v1/me`, matching the existing filter for direct manager/staff memberships. A regression test covers the owner case. Protected settings continue to reject inactive tenants. After this API fix is deployed, verify that the inactive restaurant no longer appears and separately verify settings for an active owner/manager restaurant.
+
 ## Remaining acceptance
 
 Verify hosted owner/manager save/reload, tenant-host menu/checkout and receipt/tracking details, and revoked/inactive denial. Frontend production deployment and real hosted acceptance remain to be verified. Jurisdiction-specific legal/default-tax questions remain independent backlog decisions.
