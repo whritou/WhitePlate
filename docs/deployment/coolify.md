@@ -40,6 +40,14 @@ After PR #77 merged to `main` as `a17d0346175bf5f13eaff7bd47d60fbddd53fc06`, the
 
 Applied the reviewed `20261012113559_EstablishmentSettings` SQL through the Coolify database terminal in one transaction. Post-checks confirmed the migration history row with EF product version `10.0.12` and all twelve columns with the expected types, nullability and defaults. The API resource `white-plate:main-wqyrztj6uyuwlveq75qrl68t` then deployed merge commit `a17d034` through Coolify. The new container passed its internal `/health/ready` healthcheck and the rolling update completed at 2026-10-12 14:19 UTC. A local public probe was blocked by the browser and failed before connecting in PowerShell's Schannel client; rely on the verified Coolify healthcheck until external probing is available. Hosted owner/manager settings and tenant-host storefront acceptance remain open, as does off-host backup retention and a restore drill.
 
+## Production opening-hours rollout — 2026-10-12
+
+After PR #81 merged to `main` as `0732e79325b10487a8d763af12b385415b10e191`, the production PostgreSQL resource `whiteplate-postgresql-main` was backed up to `/tmp/whiteplate-before-opening-hours-20261012.dump` with `pg_dump -Fc` (63.8 KiB). This was a temporary copy inside the database container, not an off-host backup or restore drill. Preflight confirmed the S1 migration `20261012113559_EstablishmentSettings` was latest and `OpeningHoursJson` was absent.
+
+Applied `20261012171223_OpeningHours` transactionally: added nullable `Tenants.OpeningHoursJson` as `jsonb` and recorded EF product version `10.0.12` in `__EFMigrationsHistory`. Post-checks confirmed the migration history row, nullable JSONB column and zero existing schedules; no opening hours were fabricated for existing tenants.
+
+Coolify deployed the merged `main` commit through API resource `white-plate:main-wqyrztj6uyuwlveq75qrl68t` as deployment `hrakmdnqubktj7ox4itq2b23`. The build imported commit `0732e79`; both `/health/ready` checks returned Healthy and the rolling update completed at 2026-10-12 17:54 UTC. The resource reports Running. Automated source checks passed before merge (235 API tests, 481 frontend tests, typecheck, lint and production build; all four PR checks passed). Hosted owner/manager save/read, tenant-host public projection, cross-tenant denial and responsive browser acceptance remain open; frontend deployment remains outstanding. No open-now calculation or checkout enforcement is included in S2. Off-host backup retention and a restore drill remain operational work.
+
 ## Previous verified deployment state — 2026-10-08
 
 | Component | Evidence and remaining work |

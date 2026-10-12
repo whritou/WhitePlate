@@ -26,7 +26,7 @@ Protected frontend GET `/api/establishment-settings?tenantId=…` uses the authe
 | `PUT /api/v1/tenants/{tenantId}/establishment-settings/opening-hours` | Owner/manager; `{openingHours: schedule}`; quoted `If-Match`; validates all seven days and saves atomically with the establishment version |
 | `DELETE /api/v1/tenants/{tenantId}/establishment-settings/opening-hours` | Owner/manager; clears the schedule back to not configured; quoted `If-Match` |
 
-The management settings GET includes nullable `openingHours`; its existing scalar PUT preserves it. The public host-resolved establishment and `/menu` projection include the weekly schedule and time zone without management versions. Existing restaurants remain not configured until an owner or manager saves hours. Public output does not calculate open-now state or enforce checkout availability. The generated additive `20261012171223_OpeningHours` migration is not applied to shared or production databases.
+The management settings GET includes nullable `openingHours`; its existing scalar PUT preserves it. The public host-resolved establishment and `/menu` projection include the weekly schedule and time zone without management versions. Existing restaurants remain not configured until an owner or manager saves hours. Public output does not calculate open-now state or enforce checkout availability. Migration `20261012171223_OpeningHours` is applied to production; hosted owner/manager acceptance remains open. See [rollout evidence](../deployment/coolify.md#production-opening-hours-rollout--2026-10-12).
 
 ## M2 menu product metadata — 2026-10-11
 

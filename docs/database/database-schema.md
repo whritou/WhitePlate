@@ -20,7 +20,7 @@ Conditional persistence checks the expected establishment version and menu confi
 
 ## S2 weekly opening hours — 2026-10-12
 
-Generated migration `20261012171223_OpeningHours` adds nullable `Tenants.OpeningHoursJson` (`jsonb`). Null preserves the distinction between an existing tenant with no configured hours and a saved all-closed week. The JSON stores seven ISO weekdays independently, each with a closed flag and up to eight same-day local-time service windows. Conditional establishment writes use the existing version and persist hours with the scalar settings. Migration remains unapplied to shared or production PostgreSQL.
+Generated migration `20261012171223_OpeningHours` adds nullable `Tenants.OpeningHoursJson` (`jsonb`). Null preserves the distinction between an existing tenant with no configured hours and a saved all-closed week. The JSON stores seven ISO weekdays independently, each with a closed flag and up to eight same-day local-time service windows. Conditional establishment writes use the existing version and persist hours with the scalar settings. The migration is applied to production PostgreSQL; see [rollout evidence](../deployment/coolify.md#production-opening-hours-rollout--2026-10-12).
 
 ## M2 product metadata — 2026-10-11
 
