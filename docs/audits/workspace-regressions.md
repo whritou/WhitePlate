@@ -39,3 +39,9 @@ Logs and a visually inspected mobile Studio capture are in ignored `apps/fronten
 ## Remaining acceptance and boundaries
 
 After deployment, check the supplied live organization/restaurant accounts, configured public shop DNS/HTTPS, empty/filled real history and both configured OAuth buttons. No production data was modified for these checks. Shop links cannot assert DNS readiness. The settings page exposes existing operations; S1–S5 restaurant business settings and T3 theme publication remain separate kanban work. Analytics across the entire filtered history require an API aggregate/export contract. Backend code is unchanged, so `dotnet test` was not rerun. The pre-existing untracked `apps/api/brand-media-migrations.sql` was preserved and excluded from the change.
+
+## Mobile menu and organization settings — 12 October 2026
+
+Mobile menu-builder actions use compact, separated bottom bars with safe-area spacing and sit below dialogs in the stacking order. Product selection scrolls the selected item into view and respects reduced-motion preferences. Organization settings use a sticky, horizontally scrollable section strip on small screens; selecting a section brings its content into view. Desktop hover states explicitly pair foreground and background tokens. The shared Lovable appbar's intentionally scrollable navigation remains contained within its viewport at 200% text sizing.
+
+Verification for this follow-up: Playwright `menu-builder` passed 24/24, `mobile-workspace-settings` passed 2/2, and `live-workspace` passed 7/7, including the EN/FR responsive matrix. Frontend Vitest passed 76 files / 480 tests; TypeScript and full ESLint passed (0 errors, 19 pre-existing `<img>` warnings); changed-file Prettier passed. `next build --webpack` passed with process-only HTTPS placeholders and emitted existing PostgreSQL SSL-mode warnings. The initial sandbox build hit a denied `.next` webpack-cache write; the elevated retry succeeded.

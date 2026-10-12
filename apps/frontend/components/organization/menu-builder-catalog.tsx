@@ -76,6 +76,16 @@ export function MenuBuilderCatalog({
     if (pending) return
     setSelectedId(id)
     setVisited((current) => (current.includes(id) ? current : [...current, id]))
+    requestAnimationFrame(() => {
+      const behavior = window.matchMedia("(prefers-reduced-motion: reduce)")
+        .matches
+        ? "instant"
+        : "smooth"
+
+      document
+        .querySelector<HTMLButtonElement>(`[data-product-selector="${id}"]`)
+        ?.scrollIntoView({ block: "center", behavior })
+    })
   }
 
   return (
