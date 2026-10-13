@@ -31,14 +31,14 @@ it("keeps real tenant URLs and never grants navigation from an unknown selector"
   ).toEqual([])
 })
 
-it("limits kitchen navigation to operational orders", () => {
+it("limits kitchen navigation to its dashboard and operational orders", () => {
   const links = liveWorkspaceLinks(
     new URLSearchParams({ tenantId: id }),
     [],
     [{ ...restaurants[0], role: "Kitchen" }]
   )
 
-  expect(links.map((link) => link.key)).toEqual(["orders"])
+  expect(links.map((link) => link.key)).toEqual(["dashboard", "orders"])
 })
 
 it("includes organization staff in restaurant navigation only for an authorized organization", () => {
