@@ -1,6 +1,6 @@
 # S3 pickup scheduling verification
 
-**Status:** implemented in source; shared database rollout and hosted acceptance remain open.
+**Status:** implemented in source and the three S3 migrations are recorded in Coolify Production; hosted acceptance remains open.
 
 ## Implemented
 
@@ -11,7 +11,7 @@
 - K1 adds a nullable pickup-mode snapshot to new orders and staff order summaries. Checkout omission is recorded as `Asap`, an explicit slot as `Scheduled`, and legacy orders remain null; `PickupAt` alone cannot distinguish those choices.
 - Restaurant settings expose interval, lead time, and per-slot capacity with the approved defaults and bounds.
 
-The additive `20261013191310_OrderPickupMode` migration was generated for the K1 Live Orders filters and is not applied to shared PostgreSQL. See [K1 Live Orders evidence](live-orders.md) for the API build result and remaining rollout checks.
+The three S3 migrations were confirmed in Coolify Production's EF migration history on 2026-10-13. K1's additive `20261013191310_OrderPickupMode` migration was applied in the same environment; the production API redeploy is pending PR merge. See [K1 Live Orders evidence](live-orders.md) for rollout details and remaining acceptance checks.
 
 ## Verification
 
@@ -24,4 +24,4 @@ The additive `20261013191310_OrderPickupMode` migration was generated for the K1
 
 ## Rollout and acceptance still required
 
-Three additive EF migrations have been generated and reviewed but not applied to shared PostgreSQL. Apply them through the normal reviewed deployment process, then verify the migration against the deployed schema. Exercise concurrent checkout requests against PostgreSQL to confirm the conditional capacity increment prevents overselling. Run hosted browser acceptance for saved-hours enforcement, slot selection, receipts/tracking, and owner/manager scheduling settings. These checks are not represented by the local unit suite or frontend build.
+The three additive EF migrations are applied in Coolify Production; K1 migration evidence is recorded in [Live Orders](live-orders.md). Exercise concurrent checkout requests against PostgreSQL to confirm the conditional capacity increment prevents overselling. Run hosted browser acceptance for saved-hours enforcement, slot selection, receipts/tracking, and owner/manager scheduling settings. These checks are not represented by the local unit suite or frontend build.
