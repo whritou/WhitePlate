@@ -214,7 +214,8 @@ Acceptance criteria:
 
 Decisions and limits:
 
-- Provide a dedicated dashboard overview while retaining the distinct Live Orders page tracked by K1; define financial-metric visibility by role before implementation.
+- Resolved 13 October 2026: keep the dedicated responsive overview separate from the Live Orders Kanban; show loaded-page aggregate order value to owners/managers only, while Kitchen still sees operational counts and existing per-ticket totals. No full-tenant aggregate is implied.
+- Remaining verification: confirm owner/manager/Kitchen visibility, foreign-tenant denial, revoked membership, keyboard/touch behavior and persistence against authenticated runtime fixtures. Coordinate hosted SignalR checks with K1 rather than duplicating that scope.
 
 ### D2 — Restaurant Dashboard: authoritative metrics, rush pacing and top sellers
 

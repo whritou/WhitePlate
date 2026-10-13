@@ -10,7 +10,7 @@ Paths retain `/en` or `/fr`. Organization context uses `organizationId`; restaur
 
 | Lovable screen | Real route | Data and operations |
 | --- | --- | --- |
-| Dashboard | `/organization/dashboard?tenantId=…` | Authorized current order page, up to 50 unarchived orders. Counts and amounts describe the loaded page, not today's revenue or settled payments. Amounts remain grouped by currency. |
+| Dashboard | `/organization/dashboard?tenantId=…` | Current authorized page of up to 50 unarchived orders, live through the shared TanStack query, 30-second polling and SignalR refresh hints. The overview reuses `OrderTicket` actions and filters all five statuses locally; counts and owner/manager aggregate amounts describe only the loaded page, not revenue or payment settlement. Kitchen roles see order counts and tickets but not the aggregate amount. |
 | Orders | `/organization/orders?tenantId=…` | Five real status lanes with REST transitions, SignalR hints and recovery; loaded-page search and saved pickup-mode filters use the current Lovable recipe. |
 | History | `/organization/order-history?tenantId=…` | Existing archived order history, filters and pagination; operational layout retained. |
 | Analytics | `/organization/analytics?tenantId=…` | Original Lovable charts and fictitious figures, explicitly marked. Owner/manager authorization required. |
@@ -21,17 +21,17 @@ Paths retain `/en` or `/fr`. Organization context uses `organizationId`; restaur
 | Store / checkout | Tenant-host `/` and `/?step=checkout&menuLocale=…` | Real catalog and uploaded assets, source customer header/hero/product grid/basket. Original guest controller, cart validation, authoritative checkout, discounts and idempotency retained. |
 | Tracking | Existing tenant-host localized `/order/[orderId]#<trackingToken>` route | Customer shell updated; existing capability token, REST status recovery and order snapshots retained. |
 
-Creation, invitation acceptance and authentication URLs remain available. Auth screens now follow the recovered Lovable split composition, while retaining Better Auth. The horizontal workspace shell replaces the old sidebar, retaining authorized context selection, FR/EN, theme preference, sign-out and skip link. Organization and restaurant menus use actual authorized contexts; kitchen membership only exposes orders. It never navigates to demo pages.
+Creation, invitation acceptance and authentication URLs remain available. Auth screens now follow the recovered Lovable split composition, while retaining Better Auth. The horizontal workspace shell replaces the old sidebar, retaining authorized context selection, FR/EN, theme preference, sign-out and skip link. Organization and restaurant menus use actual authorized contexts; Kitchen sees Dashboard and Orders, with Orders remaining its default landing page. It never navigates to demo pages.
 
 ## Design and component ownership
 
 - `components/lovable/lovable.css` and `fonts.css` remain the recovered source reference; local assets/fonts/licenses remain under `public/lovable`.
 - `components/lovable/live.css` maps existing shared control aliases onto source tokens within `.lovable-surface.lovable-live`. No global Culinary Commerce palette is replaced. Backoffice surfaces stay light and square; customer scope uses the source default customer theme, including rounded cards.
 - `components/organization/workspace-shell.tsx` owns the real horizontal navigation. `lib/live-workspace-navigation.ts` is its pure context-aware URL mapping.
-- `components/organization/live-settings.tsx`, `live-studio.tsx`, `live-dashboard.tsx` reuse or adapt recovered source recipes to actual contracts. `missing-feature-notice.tsx` discloses fictitious behavior in both catalogs.
+- `components/organization/live-settings.tsx`, `live-studio.tsx`, `live-dashboard.tsx` reuse or adapt recovered source recipes to actual contracts. `components/orders/order-overview.tsx` composes the shared order query, connection status and ticket actions without duplicating the Orders Kanban. `missing-feature-notice.tsx` discloses fictitious behavior in both catalogs.
 - `components/storefront/live-customer-shell.tsx`, `live-restaurant-identity.tsx` and `live-store-actions.tsx` adapt customer recipes around existing guest controls. Uploaded restaurant/product images remain authoritative; missing assets show neutral fallbacks.
 - `components/ui/visual-scope.tsx` carries scoped classes/theme variables through shared Dialog, Sheet and AlertDialog portals. Base UI continues to manage keyboard focus and Escape.
-- `services/live-workspace.ts` gates the added dashboard/analytics pages on verified sessions and authorized restaurant memberships. Browser context is never authorization.
+- The dashboard route checks a verified session and current restaurant membership before reading orders; Kitchen does not receive catalog data. Analytics remains owner/manager-only. Browser context is never authorization.
 
 Appearance/settings drafts are isolated by account and context: `whiteplate-live-draft:<userId>:<tenantId>:appearance` and `whiteplate-live-draft:<userId>:<organizationId>:settings`. They never publish a restaurant theme and do not reuse demo storage. Drafts remain on the local browser after sign-out but are not loaded for another account/context. Demo storage and routes remain separate.
 
@@ -98,7 +98,7 @@ The supplied `C:\Users\whrit\Desktop\whiteplate.zip` is the current visual refer
 | Orders | Source lane headers, status markers, compact ticket bands and responsive auto-fit columns. All five real statuses remain, including Cancelled absent from the four-lane source. Search covers loaded order references, customers, saved items and modifiers; pickup filters use the persisted `Asap`/`Scheduled` intent, with a separate unrecorded state for legacy orders. Drag/keyboard transitions, version checking and SignalR recovery remain. Counts describe the loaded page, without invented revenue. |
 | History | Source heading, table surface and density; existing real filters, mobile Sheet, paging and receipt snapshots retained. |
 | Staff | Actual member/invitation tables and summary cells; only pending invitations can be revoked. Source permission matrix is an explicitly fictitious, read-only preview and grants no authorization. |
-| Dashboard | Source contiguous metrics strip and recent-order table populated with actual loaded orders. No paid-order claim is inferred from order totals. |
+| Dashboard | Responsive page-scoped summary and recent shared order tickets with five status filters. It uses the existing order query, SignalR/REST recovery and role-derived status transitions; the full Kanban remains on Orders. Aggregate page order value is limited to owners/managers while per-ticket totals follow the existing shared ticket. No paid-order claim is inferred. |
 | Studio | Actual logo/favicon/banner editor sidebar and adjacent preview using real media; storage/save/removal remain unchanged. |
 | Settings | Actual organization rename/archive form and restaurant cards from the authorized existing restaurant read; original settings navigation and illustrative missing-service panels retained. |
 | Organizations/creation | Source square surfaces, spacing, display headings and bordered creation forms, preserving actual creation/archive links and actions. These flows have no exact source counterpart. |
@@ -132,3 +132,16 @@ These runs use local fixtures and mocked network requests where applicable; they
 The [#65 handoff](audits/workspace-regressions.md) supersedes theme-toggle and duplicated organization-overview behavior described in earlier baselines. Demo and real history now use one table/filter/summary/export implementation. Category creation stays inside the product editor, and Studio cards respond to their available container width. Restaurant settings are entry points to existing actions; theme publication and new settings APIs remain separate roadmap work.
 
 The subsequent user request explicitly targets real pages only. The [real/demo parity audit](audits/live-demo-parity.md) supersedes the earlier two-tab catalog/table/Sheet recipe: the live menu has Dishes, Allergens, Discount codes and Languages, a category sidebar and adjacent product editor with actual covers. Authorized restaurant contexts include Staff and their own settings categories; organization settings retain the seven-section shell. The dashboard and Staff tab compositions follow the supplied reference, while keeping unsupported business behavior disclosed. Demo code is unchanged.
+
+## D1 restaurant dashboard — 13 October 2026
+
+The restaurant dashboard now uses a responsive page-scoped order overview, all five status filters and the shared `OrderTicket` lifecycle. Its initial page is seeded from the authorized server read and then uses the existing TanStack Query polling, SignalR refresh hints, REST recovery, If-Match actions, stale/error feedback and revoked-membership behavior. The full Kanban remains on Orders. Kitchen membership adds Dashboard to navigation while Orders remains its default; Kitchen receives operational counts/tickets and shop access, but not the aggregate loaded-page order value or catalog editing links. Individual ticket totals remain as in the shared ticket. The dashboard loading fallback follows the same responsive structure. Both locales explain that counts and amounts describe only the loaded page and are not payment or sales metrics.
+
+| Command/check | Result |
+| --- | --- |
+| Bundled Node + `node_modules/eslint/bin/eslint.js .` | Passed: 0 errors, 20 existing warnings (19 image-element warnings and one unused import in the existing Orders component). |
+| Bundled Node + `node_modules/typescript/bin/tsc --noEmit` | Passed. |
+| Bundled Node + `node_modules/next/dist/bin/next build --webpack` | Passed with process-only `BETTER_AUTH_URL=https://auth.build.invalid` and `API_BASE_URL=https://api.build.invalid`; 96 static pages generated. Existing PostgreSQL SSL-mode notices remain. No environment file was edited. |
+| Targeted Prettier check for changed TS/TSX/JSON; `git diff --check` | Passed. Prettier reports the three touched Markdown files as unformatted on the pre-change `HEAD` as well; they were not bulk-reformatted. |
+| Package-runner entrypoints | `npm run lint` and `npm run typecheck` could not start because the system npm shim targets a missing global `npm-cli.js`. The bundled pnpm runner could not fetch registry metadata in the network-restricted environment. The installed local CLIs above were run directly instead. |
+| Automated/browser tests and hosted SignalR acceptance | Not run. Authenticated owner/manager/Kitchen visibility, foreign-tenant denial, revocation, keyboard/touch persistence and hosted SignalR remain review acceptance work; SignalR coordination stays with K1. |

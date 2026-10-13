@@ -27,7 +27,10 @@ export function liveWorkspaceLinks(
   const restaurant = restaurants.find((item) => item.id === context.id)!
   const pages =
     restaurant.role === "Kitchen"
-      ? ([["orders", "orders"]] as const)
+      ? ([
+          ["dashboard", "dashboard"],
+          ["orders", "orders"],
+        ] as const)
       : ([
           ["dashboard", "dashboard"],
           ["orders", "orders"],

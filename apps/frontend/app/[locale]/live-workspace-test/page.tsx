@@ -221,9 +221,13 @@ export default async function LiveWorkspaceFixture({
         </main>
       ) : query.view === "dashboard" ? (
         await LiveDashboard({
-          name: organization.name,
+          userId,
           tenantId,
+          tenantName: organization.name,
+          role: "OrganizationOwner",
           locale: await getLocale(),
+          selectedStatus: null,
+          cursor: null,
           page: {
             nextCursor: null,
             items: [
@@ -247,6 +251,8 @@ export default async function LiveWorkspaceFixture({
               },
             ],
           },
+          loadError: null,
+          hubUrl: null,
         })
       ) : (
         <LiveSettings

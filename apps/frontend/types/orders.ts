@@ -1,5 +1,6 @@
 export type OrderStatus =
   "Pending" | "Preparing" | "Ready" | "Completed" | "Cancelled"
+export type OrderOverviewFilter = OrderStatus | "all"
 
 export type OrderPickupMode = "Asap" | "Scheduled"
 export type OrderPickupModeFilter = "all" | "asap" | "scheduled" | "unrecorded"
