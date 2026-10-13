@@ -3,6 +3,7 @@
 import { RotateCcw, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import type { OrderFilterToolbarProps } from "@/types/orders"
 import { useTranslations } from "next-intl"
 
@@ -24,12 +25,12 @@ export function OrderFilterToolbar({
     <div className="grid min-w-0 gap-3">
       <div className="flex min-w-0 flex-col gap-3 xl:flex-row xl:items-end xl:justify-between">
         <div className="min-w-0 flex-1">
-          <label
+          <Label
             htmlFor="order-search"
             className="label-mono mb-1 block text-muted-foreground"
           >
             {t("searchLoadedOrders")}
-          </label>
+          </Label>
 
           <div className="relative min-w-0">
             <Search
@@ -82,6 +83,7 @@ export function OrderFilterToolbar({
             onClick={onClear}
           >
             <RotateCcw aria-hidden="true" />
+
             {t("clearFilters")}
           </Button>
         )}
