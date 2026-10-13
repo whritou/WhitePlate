@@ -1,9 +1,26 @@
+using WhitePlate.Domain.Common;
 using WhitePlate.Domain.Orders;
 
 namespace WhitePlate.Tests.Domain;
 
 public sealed class OrderTests
 {
+    [Fact]
+    public void CreateRejectsPickupModeWithoutResolvedPickupTime()
+    {
+        Assert.Throws<DomainRuleException>(() => Order.Create(Guid.NewGuid(), "EUR", "Ada", [
+            new OrderLineSnapshot(Guid.NewGuid(), "Soup", 10m, 0m, 1, [])
+        ], null, 0m, DateTimeOffset.UtcNow, pickupMode: PickupMode.Asap));
+    }
+
+    [Fact]
+    public void CreateRejectsUndefinedPickupMode()
+    {
+        Assert.Throws<DomainRuleException>(() => Order.Create(Guid.NewGuid(), "EUR", "Ada", [
+            new OrderLineSnapshot(Guid.NewGuid(), "Soup", 10m, 0m, 1, [])
+        ], null, 0m, DateTimeOffset.UtcNow, pickupAt: DateTimeOffset.UtcNow, pickupMode: (PickupMode)99));
+    }
+
     [Fact]
     public void CreateSnapshotsLinePricingAndRoundsTaxToTwoDecimals()
     {
