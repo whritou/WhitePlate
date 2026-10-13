@@ -1,6 +1,6 @@
 # K1 Live Orders verification and rollout
 
-**Status:** implementation is in source and the nullable pickup-mode migration is applied to Coolify Production. PR deployment/restart and hosted acceptance remain open.
+**Status:** implementation is merged and deployed to Coolify Production at `299b29d`; the nullable pickup-mode migration is applied. Hosted acceptance remains open.
 
 ## Implemented
 
@@ -21,15 +21,14 @@
 
 - `dotnet build apps/api/WhitePlate.Api/WhitePlate.Api.csproj --no-restore` — passed with 0 warnings and 0 errors. An earlier build attempt caught expression-tree null-propagation errors in the new summary projection; those were fixed before the successful build.
 - `dotnet ef migrations add OrderPickupMode --project apps/api/WhitePlate.Infrastructure/WhitePlate.Infrastructure.csproj --startup-project apps/api/WhitePlate.Api/WhitePlate.Api.csproj --output-dir Persistence/Migrations` — passed and generated `20261013191310_OrderPickupMode` plus the updated model snapshot.
-- GitHub Actions on the PR passed the API test job and frontend tests before the final lint correction; checks for the latest commit are pending. The latest lint failure was caused by synchronous filter-state updates in effects; the follow-up replaces those effects with prop-aware local drafts.
+- GitHub Actions `push` and `pull_request` workflows passed on `82a4b85`: 77 frontend test files and 484 tests passed, lint/typecheck/format/build passed, and API tests passed. CI caught synchronous filter-state updates in effects; `e526f7f` replaced them with prop-aware local drafts. ESLint reported 10 existing `<img>` performance warnings in Lovable components outside this feature.
 - A second local API build after adding the pickup-mode invariant tests could not write a generated `obj` cache (access denied); the original feature build succeeded. No generated files were edited.
 - On 2026-10-13, production migration history confirmed the three S3 pickup migrations were already applied and `Orders` had zero rows. A 68.5 KiB in-container `pg_dump -Fc` snapshot was created at `/tmp/whiteplate-before-order-pickup-mode-20261013.dump`, then `20261013191310_OrderPickupMode` was applied transactionally. The nullable `Orders.PickupMode` column and EF migration history row were verified.
 - This shared-database rollout followed the user's explicit request. A disposable PostgreSQL migration test and off-host backup/restore check were not available in this rollout; the in-container snapshot is not a restore test.
-- The production API has not yet been redeployed/restarted. No order rows existed when the migration was applied.
+- Coolify deployed merged commit `299b29d` on 2026-10-13. The image build completed, `/health/ready` passed on the new container, and the rolling update removed the old container. No order rows existed when the migration was applied.
 
 ## Remaining rollout work
 
-- Deploy/restart the API after PR merge so it runs code compatible with the already-applied `PickupMode` column.
 - Verify the migration on a disposable PostgreSQL branch, old-row null compatibility, new ASAP and explicit-slot round trips, and authorized cross-tenant summary reads.
 - Complete localized frontend tests and responsive/browser acceptance for search, pickup filters, pagination preservation, keyboard controls, 200% zoom and the 320–wide-desktop viewport matrix.
 - Complete hosted SignalR delivery and reconnect acceptance tracked by its existing project card.

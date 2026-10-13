@@ -11,7 +11,7 @@
 - K1 adds a nullable pickup-mode snapshot to new orders and staff order summaries. Checkout omission is recorded as `Asap`, an explicit slot as `Scheduled`, and legacy orders remain null; `PickupAt` alone cannot distinguish those choices.
 - Restaurant settings expose interval, lead time, and per-slot capacity with the approved defaults and bounds.
 
-The three S3 migrations were confirmed in Coolify Production's EF migration history on 2026-10-13. K1's additive `20261013191310_OrderPickupMode` migration was applied in the same environment; the production API redeploy is pending PR merge. See [K1 Live Orders evidence](live-orders.md) for rollout details and remaining acceptance checks.
+The three S3 migrations were confirmed in Coolify Production's EF migration history on 2026-10-13. K1's additive `20261013191310_OrderPickupMode` migration was applied in the same environment, and API commit `299b29d` was deployed with a passing `/health/ready` check. See [K1 Live Orders evidence](live-orders.md) for rollout details and remaining acceptance checks.
 
 ## Verification
 
