@@ -22,10 +22,21 @@ export function OrderDashboard(props: OrderDashboardProps) {
   const dashboard = useOrderDashboard(props)
   const { page, loadError, isInitialLoading, isFetching, refresh, pending } =
     dashboard
-  const [search, setSearch] = useState(props.search ?? "")
-  const [pickupModeFilter, setPickupModeFilter] = useState(
-    props.pickupModeFilter ?? "all"
-  )
+  const propSearch = props.search ?? ""
+  const propPickupMode = props.pickupModeFilter ?? "all"
+  const [draftFilters, setDraftFilters] = useState({
+    sourceSearch: propSearch,
+    sourcePickupMode: propPickupMode,
+    search: propSearch,
+    pickupMode: propPickupMode,
+  })
+  const draftMatchesProps =
+    draftFilters.sourceSearch === propSearch &&
+    draftFilters.sourcePickupMode === propPickupMode
+  const search = draftMatchesProps ? draftFilters.search : propSearch
+  const pickupModeFilter = draftMatchesProps
+    ? draftFilters.pickupMode
+    : propPickupMode
   const filters = useMemo(
     () => ({ search, pickupMode: pickupModeFilter }),
     [pickupModeFilter, search]
@@ -35,13 +46,6 @@ export function OrderDashboard(props: OrderDashboardProps) {
     [page?.items, pickupModeFilter, search]
   )
   const filtersActive = search.trim().length > 0 || pickupModeFilter !== "all"
-
-  useEffect(() => setSearch(props.search ?? ""), [props.search])
-
-  useEffect(
-    () => setPickupModeFilter(props.pickupModeFilter ?? "all"),
-    [props.pickupModeFilter]
-  )
 
   return (
     <div className="live-order-board grid gap-5">
@@ -141,11 +145,29 @@ export function OrderDashboard(props: OrderDashboardProps) {
                 pickupMode={pickupModeFilter}
                 visibleCount={visibleOrders.length}
                 loadedCount={page.items.length}
-                onSearchChange={setSearch}
-                onPickupModeChange={setPickupModeFilter}
+                onSearchChange={(value) =>
+                  setDraftFilters({
+                    sourceSearch: propSearch,
+                    sourcePickupMode: propPickupMode,
+                    search: value,
+                    pickupMode: pickupModeFilter,
+                  })
+                }
+                onPickupModeChange={(value) =>
+                  setDraftFilters({
+                    sourceSearch: propSearch,
+                    sourcePickupMode: propPickupMode,
+                    search,
+                    pickupMode: value,
+                  })
+                }
                 onClear={() => {
-                  setSearch("")
-                  setPickupModeFilter("all")
+                  setDraftFilters({
+                    sourceSearch: propSearch,
+                    sourcePickupMode: propPickupMode,
+                    search: "",
+                    pickupMode: "all",
+                  })
                   router.replace(
                     buildOrdersHref(tenantId, selectedStatus, props.cursor, {
                       search: "",
