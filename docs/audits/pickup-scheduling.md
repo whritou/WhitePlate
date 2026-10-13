@@ -8,7 +8,10 @@
 - Public availability is resolved from the request host and is not cached. Checkout requires saved opening hours, resolves ASAP to the earliest available slot, and rejects unavailable or full selections.
 - Successful order creation reserves slot capacity transactionally with the order, idempotency record, and outbox event. Replayed checkout does not reserve twice. Cancellation releases capacity only when committed before pickup starts.
 - New orders carry the pickup instant and timezone snapshot through receipts, tracking, and staff views. Older orders retain an unknown pickup time.
+- K1 adds a nullable pickup-mode snapshot to new orders and staff order summaries. Checkout omission is recorded as `Asap`, an explicit slot as `Scheduled`, and legacy orders remain null; `PickupAt` alone cannot distinguish those choices.
 - Restaurant settings expose interval, lead time, and per-slot capacity with the approved defaults and bounds.
+
+The additive `20261013191310_OrderPickupMode` migration was generated for the K1 Live Orders filters and is not applied to shared PostgreSQL. See [K1 Live Orders evidence](live-orders.md) for the API build result and remaining rollout checks.
 
 ## Verification
 

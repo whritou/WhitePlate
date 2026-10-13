@@ -55,6 +55,7 @@ public sealed record OrderSummaryDto(Guid Id, string CustomerName, string Curren
 {
     public DateTimeOffset? PickupAt { get; init; }
     public string? PickupTimeZone { get; init; }
+    public string? PickupMode { get; init; }
 }
 public sealed record OrderPageDto(IReadOnlyList<OrderSummaryDto> Items, string? NextCursor);
 public sealed record OrderPageData(IReadOnlyList<OrderSummaryDto> Items, OrderPageCursor? NextCursor);

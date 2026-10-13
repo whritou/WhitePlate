@@ -195,7 +195,13 @@ public sealed class OrderRepository(WhitePlateDbContext database) : IOrderReposi
                     order.Lines.Select(line => new OrderSummaryLineDto(line.ProductId, line.ProductName,
                         line.Quantity, line.Options.Select(option => new OrderSummaryOptionDto(option.OptionId,
                             option.Name)).ToArray()) { PreparationMinutes = line.PreparationMinutes }).ToArray())
-                    { PickupAt = order.PickupAt, PickupTimeZone = order.PickupTimeZone },
+                    {
+                        PickupAt = order.PickupAt,
+                        PickupTimeZone = order.PickupTimeZone,
+                        PickupMode = order.PickupMode.HasValue
+                            ? order.PickupMode.Value.ToString()
+                            : null
+                    },
                 order.CreatedAtTicks
             })
             .ToListAsync(cancellationToken);
@@ -239,7 +245,13 @@ public sealed class OrderRepository(WhitePlateDbContext database) : IOrderReposi
                 order.Lines.Select(line => new OrderSummaryLineDto(line.ProductId, line.ProductName,
                     line.Quantity, line.Options.Select(option => new OrderSummaryOptionDto(option.OptionId,
                         option.Name)).ToArray()) { PreparationMinutes = line.PreparationMinutes }).ToArray())
-            { PickupAt = order.PickupAt, PickupTimeZone = order.PickupTimeZone }).ToListAsync(cancellationToken);
+            {
+                PickupAt = order.PickupAt,
+                PickupTimeZone = order.PickupTimeZone,
+                PickupMode = order.PickupMode.HasValue
+                    ? order.PickupMode.Value.ToString()
+                    : null
+            }).ToListAsync(cancellationToken);
         return new OrderHistoryPageData(items, totalCount);
     }
 

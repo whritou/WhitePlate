@@ -27,6 +27,7 @@ public sealed class OrderConfiguration : IEntityTypeConfiguration<Order>
         builder.Property(order => order.PickupAt);
         builder.Property(order => order.PickupAtTicks);
         builder.Property(order => order.PickupTimeZone).HasMaxLength(100);
+        builder.Property(order => order.PickupMode).HasConversion<string>().HasMaxLength(16);
         builder.Property(order => order.ClosedAt);
         builder.Property(order => order.ClosedAtTicks);
         builder.Property(order => order.ArchivedAt);

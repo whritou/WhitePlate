@@ -1,8 +1,10 @@
-import type { OrderSummary } from "@/types/orders"
+import type { OrderPickupMode, OrderSummary } from "@/types/orders"
 
 export function parsePickupSnapshot(
   value: Record<string, unknown>
-): Pick<OrderSummary, "pickupAt" | "pickupTimeZone"> | null {
+): Pick<OrderSummary, "pickupAt" | "pickupTimeZone" | "pickupMode"> | null {
+  const pickupMode = value.pickupMode
+
   if (
     (value.pickupAt !== undefined &&
       value.pickupAt !== null &&
@@ -10,7 +12,11 @@ export function parsePickupSnapshot(
         Number.isNaN(Date.parse(value.pickupAt)))) ||
     (value.pickupTimeZone !== undefined &&
       value.pickupTimeZone !== null &&
-      typeof value.pickupTimeZone !== "string")
+      typeof value.pickupTimeZone !== "string") ||
+    (pickupMode !== undefined &&
+      pickupMode !== null &&
+      pickupMode !== "Asap" &&
+      pickupMode !== "Scheduled")
   )
     return null
 
@@ -26,5 +32,6 @@ export function parsePickupSnapshot(
               : null,
         }
       : {}),
+    pickupMode: (pickupMode as OrderPickupMode | null | undefined) ?? null,
   }
 }

@@ -413,6 +413,10 @@ namespace WhitePlate.Infrastructure.Persistence.Migrations
                     b.Property<long?>("PickupAtTicks")
                         .HasColumnType("bigint");
 
+                    b.Property<string>("PickupMode")
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)");
+
                     b.Property<string>("PickupTimeZone")
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");

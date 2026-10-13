@@ -362,23 +362,24 @@ Decisions and limits:
 
 - Decide storage variants, crop/focal-point behavior, accessible image-description policy and retention using T1 infrastructure. This task adds product photos, not order attachments or a numeric inventory system.
 
-### K1 — Live Orders: redesign the real five-lane Kanban/KDS from Stitch
+### K1 — Live Orders: extend the Lovable five-lane Kanban
 
-Reference: live-orders. Dependencies: none.
+Reference: current `/[locale]/organization/orders` screen and [Lovable real-workspace notes](../lovable-live-workspace.md). The older live-orders screenshot is historical provenance; the current Lovable screen and WhitePlate design tokens are authoritative.
 
-Redesign the real Live Orders page using the supplied five-lane KDS reference, distinct from the restaurant dashboard overview.
+Implementation update (2026-10-13): the real five-lane page now searches the current loaded order page by reference, customer, saved item or modifier, and filters by saved ASAP/scheduled intent. A nullable `Orders.PickupMode` snapshot distinguishes the guest's original checkout choice from the concrete slot assigned to ASAP; legacy orders with no saved intent remain unrecorded. Ticket badges show recorded intent, filters survive status/cursor navigation, and lane tracks auto-fit the available workspace width at the documented 18rem minimum. Existing REST status writes, If-Match guards, role checks, drag/keyboard actions, SignalR refresh/reconnect, stale/offline feedback and history archival remain the source of truth. See [K1 evidence](../audits/live-orders.md).
 
-Acceptance criteria:
+Resolved presentation decisions:
 
-- [ ] Match the KDS service header, filter/action toolbar and Pending/New, Preparing, Ready, Completed and Cancelled lane/ticket hierarchy, including references, saved item/modifier details, status labels and next-step actions.
-- [ ] Preserve existing mouse/touch drag behavior, keyboard button alternatives, role-valid transitions/cancellation, If-Match/version conflicts, pending guards, pagination, loaded-page count labels and focus restoration.
-- [ ] Reuse existing REST authority, SignalR refresh/reconnect recovery, stale/offline feedback and revoked-membership cache removal; coordinate hosted delivery acceptance with its existing card.
-- [ ] Use readable responsive lane layouts with contained scrolling or stacking; fix the supplied screenshot's clipped toolbar action and lane/header/ticket alignment, spacing and overflow instead of copying them.
-- [ ] Wire ASAP/scheduled filters and pickup information to S3 only when available; use K2–K3 for operational metadata and cancellation/payment behaviors; manual/phone order entry is explicitly excluded by the user. Preserve the order-history boundary and don't display mock sent/refunded claims as real state.
+- Start with all pickup modes selected; group orders by their persisted lifecycle status across Pending, Preparing, Ready, Completed and Cancelled lanes.
+- Keep Completed and Cancelled in the live list until the existing daily archival moves them to order history.
+- Search and pickup filters apply to the current REST page. The UI labels the result count as loaded-page data and preserves filters when the user changes status or loads an older cursor page.
+- Treat old orders without recorded intent as unrecorded. Do not infer ASAP from `PickupAt`, since ASAP resolves to a real pickup instant.
 
-Decisions and limits:
+Remaining acceptance and limits:
 
-- Define initial filter/default grouping and completed/cancelled retention presentation consistently with existing archival. The distinct dashboard D1 may reuse components but does not replace this live Kanban.
+- The additive `20261013191310_OrderPickupMode` migration is generated but has not been applied to shared PostgreSQL. Existing orders therefore remain unrecorded until rollout; no migration is applied automatically at startup.
+- Local browser coverage for the new controls, full EN/FR responsive/keyboard/zoom acceptance, API tests, and hosted migration/SignalR acceptance remain open. Keep the K1 project card in review until that evidence is recorded.
+- K2 timers/sound/stations and K3 cancellation reasons/payment/refund state remain separate. Manual/phone entry, mock payment claims and fabricated notification state are excluded.
 
 ### K2 — Live Orders: KDS timers, urgency, sound and preparation metadata
 

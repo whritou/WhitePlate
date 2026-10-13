@@ -6,7 +6,10 @@ import { Card, CardHeader, CardTitle } from "@/components/ui/card"
 import { Link, useRouter } from "@/i18n/navigation"
 import { buildOrdersHref } from "@/lib/orders/navigation"
 import type { useOrderDashboard } from "@/hooks/use-order-dashboard"
-import type { OrderDashboardProps } from "@/types/orders"
+import type {
+  OrderDashboardContentViewProps,
+  OrderDashboardProps,
+} from "@/types/orders"
 import { useTranslations } from "next-intl"
 import { OrderKanban } from "./order-kanban"
 import { OrderKanbanSkeleton } from "./order-kanban-skeleton"
@@ -14,10 +17,13 @@ import { OrderKanbanSkeleton } from "./order-kanban-skeleton"
 export function OrderDashboardContent({
   props,
   dashboard,
+  orders,
+  filters,
+  filtersActive,
 }: {
   props: OrderDashboardProps
   dashboard: ReturnType<typeof useOrderDashboard>
-}) {
+} & OrderDashboardContentViewProps) {
   const t = useTranslations("KitchenOrders")
   const router = useRouter()
   const {
@@ -64,19 +70,22 @@ export function OrderDashboardContent({
       ) : (
         page && (
           <>
-            {page.items.length === 0 && (
+            {(page.items.length === 0 ||
+              (filtersActive && orders.length === 0)) && (
               <Card className="border-dashed text-center">
                 <CardHeader>
                   <CardTitle>
-                    <h2>{t("emptyTitle")}</h2>
+                    <h2>
+                      {t(filtersActive ? "noFilterResults" : "emptyTitle")}
+                    </h2>
                   </CardTitle>
                 </CardHeader>
               </Card>
             )}
 
-            {page.items.length > 0 && (
+            {orders.length > 0 && (
               <OrderKanban
-                orders={page.items}
+                orders={orders}
                 role={props.role}
                 locale={props.locale}
                 pending={pending}
@@ -94,7 +103,8 @@ export function OrderDashboardContent({
                       href={buildOrdersHref(
                         props.tenantId,
                         props.selectedStatus,
-                        page.nextCursor
+                        page.nextCursor,
+                        filters
                       )}
                     />
                   }

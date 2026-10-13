@@ -77,7 +77,7 @@ export function OrderKanban(props: OrderKanbanProps) {
     >
       <p className="text-sm text-muted-foreground">{t("boardHelp")}</p>
 
-      <div className="grid items-stretch gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <div className="grid min-w-0 [grid-template-columns:repeat(auto-fit,minmax(min(100%,18rem),1fr))] items-stretch gap-4">
         {ORDER_STATUSES.map((status) => {
           const items = orders.filter((order) => order.status === status)
           const allowed =

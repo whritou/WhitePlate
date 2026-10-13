@@ -21,6 +21,7 @@ public sealed class Order
     public DateTimeOffset? PickupAt { get; private set; }
     public long? PickupAtTicks { get; private set; }
     public string? PickupTimeZone { get; private set; }
+    public PickupMode? PickupMode { get; private set; }
     public long CreatedAtTicks { get; private set; }
     public DateTimeOffset? ClosedAt { get; private set; }
     public long? ClosedAtTicks { get; private set; }
@@ -34,7 +35,7 @@ public sealed class Order
         IReadOnlyList<OrderLineSnapshot>? lines, string? discountCode, decimal discountAmount,
         DateTimeOffset createdAt, string? menuLocale = null, string? trackingTokenHash = null,
         DateTimeOffset? trackingTokenExpiresAt = null, DateTimeOffset? pickupAt = null,
-        string? pickupTimeZone = null)
+        string? pickupTimeZone = null, PickupMode? pickupMode = null)
     {
         var normalizedCurrency = currency?.ToUpperInvariant();
         var normalizedName = customerName?.Trim();
@@ -81,6 +82,7 @@ public sealed class Order
             CreatedAt = createdAt, CreatedAtTicks = createdAt.UtcDateTime.Ticks, PickupAt = pickupAt,
             PickupAtTicks = pickupAt?.UtcDateTime.Ticks,
             PickupTimeZone = pickupTimeZone,
+            PickupMode = pickupMode,
             TrackingTokenHash = trackingTokenHash?.ToLowerInvariant(), TrackingTokenExpiresAt = trackingTokenExpiresAt,
             Lines = orderLines
         };

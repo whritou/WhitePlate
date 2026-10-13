@@ -25,7 +25,7 @@ vi.mock("./order-ticket", () => ({
   OrderTicket: () => null,
 }))
 
-it("renders all five lanes with desktop-sized responsive columns", () => {
+it("renders all five lanes with auto-fit 18rem responsive tracks", () => {
   const html = renderToStaticMarkup(
     createElement(OrderKanban, {
       orders: [],
@@ -37,5 +37,7 @@ it("renders all five lanes with desktop-sized responsive columns", () => {
   )
 
   expect(html.match(/data-order-lane=/g)).toHaveLength(5)
-  expect(html).toContain("md:grid-cols-2 xl:grid-cols-4")
+  expect(html).toContain(
+    "[grid-template-columns:repeat(auto-fit,minmax(min(100%,18rem),1fr))]"
+  )
 })

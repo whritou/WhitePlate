@@ -5,6 +5,7 @@ import type {
   OrderSummaryLine,
   OrderSummary,
   OrderPage,
+  OrderPickupModeFilter,
   OrderHistoryPage,
   RestaurantMembership,
   RestaurantRole,
@@ -100,6 +101,26 @@ export function parseOrderCursor(
   if (!isValidOrderCursor(value, false)) return { ok: false }
 
   return { ok: true, cursor: value }
+}
+
+export function parseOrderSearch(
+  value: unknown
+): { ok: true; search: string } | { ok: false } {
+  if (value === undefined) return { ok: true, search: "" }
+  if (typeof value !== "string" || value.length > 120) return { ok: false }
+
+  return { ok: true, search: value.trim() }
+}
+
+export function parseOrderPickupModeFilter(
+  value: unknown
+): { ok: true; filter: OrderPickupModeFilter } | { ok: false } {
+  if (value === undefined || value === "all") return { ok: true, filter: "all" }
+
+  if (value === "asap" || value === "scheduled" || value === "unrecorded")
+    return { ok: true, filter: value }
+
+  return { ok: false }
 }
 
 export function parseRestaurantMemberships(

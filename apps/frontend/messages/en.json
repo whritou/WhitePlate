@@ -261,6 +261,20 @@
     "title": "Kitchen orders",
     "description": "Review incoming tickets and update each order as your team prepares it.",
     "backToOrganizations": "All organizations",
+    "searchLoadedOrders": "Search loaded orders",
+    "searchLoadedPlaceholder": "Reference, customer, item or modifier",
+    "pickupFilterLabel": "Pickup timing",
+    "pickupModes": {
+      "all": "All pickups",
+      "asap": "ASAP",
+      "scheduled": "Scheduled",
+      "unrecorded": "Not recorded",
+      "Asap": "ASAP",
+      "Scheduled": "Scheduled"
+    },
+    "showingLoadedOrders": "Showing {visibleCount} of {loadedCount} loaded orders. Filters apply to this page; load older orders to continue.",
+    "noFilterResults": "No loaded orders match these filters.",
+    "clearFilters": "Clear filters",
     "filterLabel": "Filter orders by status",
     "statuses": {
       "all": "All orders",
@@ -3458,7 +3472,15 @@
     "saved": "Opening hours saved.",
     "saveError": "Opening hours could not be saved. Your edits are still here.",
     "conflict": "These settings changed elsewhere. Reload the page before saving again.",
-    "days": { "monday": "Monday", "tuesday": "Tuesday", "wednesday": "Wednesday", "thursday": "Thursday", "friday": "Friday", "saturday": "Saturday", "sunday": "Sunday" }
+    "days": {
+      "monday": "Monday",
+      "tuesday": "Tuesday",
+      "wednesday": "Wednesday",
+      "thursday": "Thursday",
+      "friday": "Friday",
+      "saturday": "Saturday",
+      "sunday": "Sunday"
+    }
   },
   "CollectionInformation": {
     "title": "Collection information",
