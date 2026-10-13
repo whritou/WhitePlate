@@ -43,6 +43,8 @@ public sealed class Order
         if (normalizedCurrency is not ("EUR" or "USD" or "GBP")) throw new DomainRuleException("invalid_currency", "currency", "Currency must be EUR, USD, or GBP.");
         if (string.IsNullOrWhiteSpace(normalizedName) || normalizedName.Length > 160) throw new DomainRuleException("invalid_customer_name", "customerName", "Customer name must contain 1 to 160 characters.");
         if (lines is null || lines.Count is 0 or > 50) throw new DomainRuleException("invalid_lines", "items", "An order must contain 1 to 50 items.");
+        if (pickupMode.HasValue && (!pickupAt.HasValue || !Enum.IsDefined(pickupMode.Value)))
+            throw new DomainRuleException("invalid_pickup", "pickupAt", "A pickup mode requires a resolved pickup time and a valid mode.");
         if (lines.GroupBy(line => line.ProductId).Any(group => group.Count() > 1)) throw new DomainRuleException("duplicate_product", "items", "Product lines must be unique.");
         if (lines.Any(line => line.ProductId == Guid.Empty || string.IsNullOrWhiteSpace(line.ProductName) || line.Quantity is < 1 or > 99 ||
             line.BaseUnitPrice < 0 || decimal.Round(line.BaseUnitPrice, 2) != line.BaseUnitPrice ||
