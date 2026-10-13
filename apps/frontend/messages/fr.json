@@ -261,6 +261,20 @@
     "title": "Commandes en cuisine",
     "description": "Consultez les tickets reçus et mettez à jour leur état au fil de la préparation.",
     "backToOrganizations": "Toutes les organisations",
+    "searchLoadedOrders": "Rechercher parmi les commandes chargées",
+    "searchLoadedPlaceholder": "Référence, client, article ou option",
+    "pickupFilterLabel": "Heure de retrait",
+    "pickupModes": {
+      "all": "Tous les retraits",
+      "asap": "Dès que possible",
+      "scheduled": "Planifié",
+      "unrecorded": "Non enregistré",
+      "Asap": "Dès que possible",
+      "Scheduled": "Planifié"
+    },
+    "showingLoadedOrders": "{visibleCount} sur {loadedCount} commandes chargées affichées. Les filtres s’appliquent à cette page ; chargez les commandes plus anciennes pour poursuivre.",
+    "noFilterResults": "Aucune commande chargée ne correspond à ces filtres.",
+    "clearFilters": "Effacer les filtres",
     "filterLabel": "Filtrer les commandes par état",
     "statuses": {
       "all": "Toutes les commandes",
@@ -3458,7 +3472,15 @@
     "saved": "Les heures d’ouverture sont enregistrées.",
     "saveError": "Impossible d’enregistrer les horaires. Vos modifications sont conservées.",
     "conflict": "Ces paramètres ont changé ailleurs. Rechargez la page avant de réessayer.",
-    "days": { "monday": "Lundi", "tuesday": "Mardi", "wednesday": "Mercredi", "thursday": "Jeudi", "friday": "Vendredi", "saturday": "Samedi", "sunday": "Dimanche" }
+    "days": {
+      "monday": "Lundi",
+      "tuesday": "Mardi",
+      "wednesday": "Mercredi",
+      "thursday": "Jeudi",
+      "friday": "Vendredi",
+      "saturday": "Samedi",
+      "sunday": "Dimanche"
+    }
   },
   "CollectionInformation": {
     "title": "Informations de retrait",

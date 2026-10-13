@@ -5,6 +5,8 @@ import { auth } from "@/lib/auth"
 import {
   isValidTenantId,
   parseOrderCursor,
+  parseOrderPickupModeFilter,
+  parseOrderSearch,
   parseOrderStatusFilter,
   resolveOrderHubUrl,
 } from "@/lib/order-dashboard"
@@ -65,10 +67,21 @@ export default async function KitchenOrdersPage({
   const cursorResult = parseOrderCursor(
     singleValue(params.cursor, params.cursor !== undefined)
   )
+  const searchResult = parseOrderSearch(
+    singleValue(params.q, params.q !== undefined)
+  )
+  const pickupModeResult = parseOrderPickupModeFilter(
+    singleValue(params.pickup, params.pickup !== undefined)
+  )
   let page: OrderPage | null = null
   let loadError: "forbidden" | "invalid" | "unavailable" | null = null
 
-  if (!statusResult.ok || !cursorResult.ok) {
+  if (
+    !statusResult.ok ||
+    !cursorResult.ok ||
+    !searchResult.ok ||
+    !pickupModeResult.ok
+  ) {
     loadError = "invalid"
   } else {
     const response = await getOrderPage(
@@ -104,6 +117,8 @@ export default async function KitchenOrdersPage({
         locale={locale}
         selectedStatus={statusResult.ok ? statusResult.status : null}
         cursor={cursorResult.ok ? cursorResult.cursor : null}
+        search={searchResult.ok ? searchResult.search : ""}
+        pickupModeFilter={pickupModeResult.ok ? pickupModeResult.filter : "all"}
         page={page}
         loadError={loadError}
         hubUrl={resolveOrderHubUrl(

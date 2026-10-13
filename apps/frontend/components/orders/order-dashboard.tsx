@@ -2,11 +2,14 @@
 
 import { Badge } from "@/components/ui/badge"
 import { BackLink } from "@/components/organization/back-link"
+import { useEffect, useMemo, useState } from "react"
 import { useOrderDashboard } from "@/hooks/use-order-dashboard"
 import { useRouter } from "@/i18n/navigation"
 import { OrderStatusTabs } from "./order-status-tabs"
 import { OrderDashboardContent } from "./order-dashboard-content"
+import { OrderFilterToolbar } from "./order-filter-toolbar"
 import { buildOrdersHref } from "@/lib/orders/navigation"
+import { filterOrders } from "@/lib/orders/filter"
 import type { OrderDashboardProps } from "@/types/orders"
 import { useTranslations } from "next-intl"
 import { OrderRealtimeConnection } from "./order-realtime-connection"
@@ -19,6 +22,30 @@ export function OrderDashboard(props: OrderDashboardProps) {
   const dashboard = useOrderDashboard(props)
   const { page, loadError, isInitialLoading, isFetching, refresh, pending } =
     dashboard
+  const propSearch = props.search ?? ""
+  const propPickupMode = props.pickupModeFilter ?? "all"
+  const [draftFilters, setDraftFilters] = useState({
+    sourceSearch: propSearch,
+    sourcePickupMode: propPickupMode,
+    search: propSearch,
+    pickupMode: propPickupMode,
+  })
+  const draftMatchesProps =
+    draftFilters.sourceSearch === propSearch &&
+    draftFilters.sourcePickupMode === propPickupMode
+  const search = draftMatchesProps ? draftFilters.search : propSearch
+  const pickupModeFilter = draftMatchesProps
+    ? draftFilters.pickupMode
+    : propPickupMode
+  const filters = useMemo(
+    () => ({ search, pickupMode: pickupModeFilter }),
+    [pickupModeFilter, search]
+  )
+  const visibleOrders = useMemo(
+    () => filterOrders(page?.items ?? [], search, pickupModeFilter),
+    [page?.items, pickupModeFilter, search]
+  )
+  const filtersActive = search.trim().length > 0 || pickupModeFilter !== "all"
 
   return (
     <div className="live-order-board grid gap-5">
@@ -97,16 +124,67 @@ export function OrderDashboard(props: OrderDashboardProps) {
         className="grid gap-5"
       >
         {loadError === "forbidden" || loadError === "unauthorized" ? (
-          <OrderDashboardContent props={props} dashboard={dashboard} />
+          <OrderDashboardContent
+            props={props}
+            dashboard={dashboard}
+            orders={visibleOrders}
+            filters={filters}
+            filtersActive={filtersActive}
+          />
         ) : (
           <OrderStatusTabs
             selectedStatus={selectedStatus}
             disabled={pending !== null}
             onStatusChange={(status) =>
-              router.push(buildOrdersHref(tenantId, status, null))
+              router.push(buildOrdersHref(tenantId, status, null, filters))
             }
           >
-            <OrderDashboardContent props={props} dashboard={dashboard} />
+            {page && (
+              <OrderFilterToolbar
+                search={search}
+                pickupMode={pickupModeFilter}
+                visibleCount={visibleOrders.length}
+                loadedCount={page.items.length}
+                onSearchChange={(value) =>
+                  setDraftFilters({
+                    sourceSearch: propSearch,
+                    sourcePickupMode: propPickupMode,
+                    search: value,
+                    pickupMode: pickupModeFilter,
+                  })
+                }
+                onPickupModeChange={(value) =>
+                  setDraftFilters({
+                    sourceSearch: propSearch,
+                    sourcePickupMode: propPickupMode,
+                    search,
+                    pickupMode: value,
+                  })
+                }
+                onClear={() => {
+                  setDraftFilters({
+                    sourceSearch: propSearch,
+                    sourcePickupMode: propPickupMode,
+                    search: "",
+                    pickupMode: "all",
+                  })
+                  router.replace(
+                    buildOrdersHref(tenantId, selectedStatus, props.cursor, {
+                      search: "",
+                      pickupMode: "all",
+                    })
+                  )
+                }}
+              />
+            )}
+
+            <OrderDashboardContent
+              props={props}
+              dashboard={dashboard}
+              orders={visibleOrders}
+              filters={filters}
+              filtersActive={filtersActive}
+            />
           </OrderStatusTabs>
         )}
       </section>

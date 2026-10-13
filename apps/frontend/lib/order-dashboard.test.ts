@@ -74,6 +74,7 @@ const page = {
       customerName: "Ada",
       currency: "EUR",
       menuLocale: "fr",
+      pickupMode: null,
       total: 19.25,
       status: "Pending",
       version: 1,

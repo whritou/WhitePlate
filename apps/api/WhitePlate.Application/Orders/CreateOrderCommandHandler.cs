@@ -117,7 +117,8 @@ public sealed class CreateOrderCommandHandler(IOrderRepository orders, TimeProvi
             };
             var order = Order.Create(command.TenantId, catalog.Currency, command.CustomerName, snapshots,
                 normalizedCode, discountAmount, now, catalog.Locale, trackingTokenHash,
-                trackingTokenHash is null ? null : now.AddDays(30), selectedSlot.StartsAt, selectedSlot.TimeZone);
+                trackingTokenHash is null ? null : now.AddDays(30), selectedSlot.StartsAt, selectedSlot.TimeZone,
+                command.PickupAt is null ? PickupMode.Asap : PickupMode.Scheduled);
             var receipt = order.ToReceipt();
             var result = await orders.CreateOrderAsync(order, receipt, keyHash, requestHash, now,
                 cancellationToken);

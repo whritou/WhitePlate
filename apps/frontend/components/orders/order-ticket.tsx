@@ -82,6 +82,12 @@ export function OrderTicket({
 
                 {t(`statuses.${order.status}`)}
               </Badge>
+
+              {order.pickupMode && (
+                <Badge variant="outline">
+                  {t(`pickupModes.${order.pickupMode}`)}
+                </Badge>
+              )}
             </div>
           </div>
 

@@ -2,7 +2,7 @@
 
 S1 update (12 October 2026): `/organization/restaurant-settings?tenantId=…` implements authorized establishment details and opening hours, plus `section=legal` for inherited or customized France/Germany/UK/US legal profiles. Organization settings collect and edit the parent profile; organization creation requires its legal country, and new restaurants inherit by default with an option to prefill a custom profile. No default tax rate exists. Desktop restaurant settings use a category sidebar and mobile uses a category selector; both preserve the section in the URL. [S1 legal profile design](superpowers/specs/2026-10-12-legal-settings-design.md) and [verification/rollout](audits/establishment-settings.md) track migration and deployment status.
 
-10 October 2026. This extends the user-approved [Lovable migration](lovable-migration.md) from the landing/demo to real workspaces and tenant storefronts. It preserves the existing App Router, Better Auth, authorized C# contracts, request adapters, query lifecycle and guest checkout. No API, schema or backend project was changed: existing contracts cover the connected operations. Missing features use clearly identified fictitious data or local drafts, as requested; API failures do not silently become sample data.
+10 October 2026. This extends the user-approved [Lovable migration](lovable-migration.md) from the landing/demo to real workspaces and tenant storefronts. The initial migration preserved the existing App Router, Better Auth, authorized C# contracts, request adapters, query lifecycle and guest checkout without API/schema changes. The 13 October K1 follow-up adds the missing persisted pickup intent to staff order summaries so ASAP and explicitly scheduled orders can be filtered without guessing from a resolved pickup time. Other missing features use clearly identified fictitious data or local drafts; API failures do not silently become sample data.
 
 ## Route mapping and implemented behavior
 
@@ -11,7 +11,7 @@ Paths retain `/en` or `/fr`. Organization context uses `organizationId`; restaur
 | Lovable screen | Real route | Data and operations |
 | --- | --- | --- |
 | Dashboard | `/organization/dashboard?tenantId=…` | Authorized current order page, up to 50 unarchived orders. Counts and amounts describe the loaded page, not today's revenue or settled payments. Amounts remain grouped by currency. |
-| Orders | `/organization/orders?tenantId=…` | Existing kitchen Kanban, REST transitions, SignalR hints and recovery; operational layout retained with Lovable tokens. |
+| Orders | `/organization/orders?tenantId=…` | Five real status lanes with REST transitions, SignalR hints and recovery; loaded-page search and saved pickup-mode filters use the current Lovable recipe. |
 | History | `/organization/order-history?tenantId=…` | Existing archived order history, filters and pagination; operational layout retained. |
 | Analytics | `/organization/analytics?tenantId=…` | Original Lovable charts and fictitious figures, explicitly marked. Owner/manager authorization required. |
 | Menu | `/organization/catalog?tenantId=…` | Existing real catalog, categories, extras, translations, discounts, stock and galleries. Editor/table behavior retained with source fonts, borders, colors and scoped overlays. |
@@ -95,7 +95,7 @@ The supplied `C:\Users\whrit\Desktop\whiteplate.zip` is the current visual refer
 | --- | --- |
 | `AuthPage.tsx`, login/register | `/sign-in`, `/sign-up`, `/forgot-password`, `/reset-password`; source left form/right hero/bottom ink caption, local hero, account header, Space Grotesk, green actions. Verification, unauthorized and invitation acceptance reuse the account frame. Better Auth, actual configured providers, validation and tokens remain authoritative. |
 | Menu | Actual catalog toolbar, underline tab strip, category navigation and square editor controls; category/product/extras/translations/photos and ordering saves retained. |
-| Orders | Source lane headers, status markers, compact ticket bands and responsive columns. All five real statuses remain, including Cancelled absent from the four-lane source. Drag/keyboard transitions, version checking and SignalR recovery retained. Counts describe loaded real orders, without invented revenue. |
+| Orders | Source lane headers, status markers, compact ticket bands and responsive auto-fit columns. All five real statuses remain, including Cancelled absent from the four-lane source. Search covers loaded order references, customers, saved items and modifiers; pickup filters use the persisted `Asap`/`Scheduled` intent, with a separate unrecorded state for legacy orders. Drag/keyboard transitions, version checking and SignalR recovery remain. Counts describe the loaded page, without invented revenue. |
 | History | Source heading, table surface and density; existing real filters, mobile Sheet, paging and receipt snapshots retained. |
 | Staff | Actual member/invitation tables and summary cells; only pending invitations can be revoked. Source permission matrix is an explicitly fictitious, read-only preview and grants no authorization. |
 | Dashboard | Source contiguous metrics strip and recent-order table populated with actual loaded orders. No paid-order claim is inferred from order totals. |

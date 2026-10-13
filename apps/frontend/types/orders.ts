@@ -1,6 +1,20 @@
 export type OrderStatus =
   "Pending" | "Preparing" | "Ready" | "Completed" | "Cancelled"
 
+export type OrderPickupMode = "Asap" | "Scheduled"
+export type OrderPickupModeFilter = "all" | "asap" | "scheduled" | "unrecorded"
+export type OrderDashboardViewFilters = {
+  search: string
+  pickupMode: OrderPickupModeFilter
+}
+export type OrderFilterToolbarProps = OrderDashboardViewFilters & {
+  visibleCount: number
+  loadedCount: number
+  onSearchChange: (search: string) => void
+  onPickupModeChange: (filter: OrderPickupModeFilter) => void
+  onClear: () => void
+}
+
 export type UpdateableOrderStatus = Exclude<OrderStatus, "Pending">
 
 export type OrderSummaryOption = { optionId: string; name: string }
@@ -24,6 +38,7 @@ export type OrderSummary = {
   createdAt: string
   pickupAt?: string | null
   pickupTimeZone?: string | null
+  pickupMode?: OrderPickupMode | null
   lines: OrderSummaryLine[]
 }
 
@@ -82,9 +97,17 @@ export type OrderDashboardProps = {
   locale: string
   selectedStatus: OrderStatus | null
   cursor: string | null
+  search?: string
+  pickupModeFilter?: OrderPickupModeFilter
   page: OrderPage | null
   loadError: OrderLoadError | null
   hubUrl: string | null
+}
+
+export type OrderDashboardContentViewProps = {
+  orders: OrderSummary[]
+  filters: OrderDashboardViewFilters
+  filtersActive: boolean
 }
 
 export type OrderRealtimeStatus =
