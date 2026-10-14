@@ -4,8 +4,10 @@ import type { Restaurant } from "./organization"
 import type { Organization } from "./organization"
 import type { ManagedCatalog, ProductAvailability } from "./catalog-management"
 import type { OrderDashboardProps } from "./orders"
+import type { DashboardMetrics } from "./dashboard-metrics"
 
 export type LiveDashboardProps = OrderDashboardProps & {
+  initialDashboardMetrics?: DashboardMetrics | null
   catalog?: ManagedCatalog
   productAvailability?: ProductAvailability[]
   availabilityLoadError?: boolean

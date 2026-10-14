@@ -421,6 +421,18 @@ namespace WhitePlate.Infrastructure.Persistence.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
+                    b.Property<DateTimeOffset?>("PreparingAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long?>("PreparingAtTicks")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTimeOffset?>("ReadyAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long?>("ReadyAtTicks")
+                        .HasColumnType("bigint");
+
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(16)
@@ -453,6 +465,10 @@ namespace WhitePlate.Infrastructure.Persistence.Migrations
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "ReadyAtTicks");
+
+                    b.HasIndex("TenantId", "Status");
 
                     b.HasIndex("Status", "ClosedAtTicks", "ArchivedAt");
 

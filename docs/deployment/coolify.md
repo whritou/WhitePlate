@@ -2,6 +2,10 @@
 
 This is the runbook for the user-approved, single hosted development stack ([decision 0005](../architecture/decisions/0005-coolify-hosting.md)). Runtime credentials belong in Coolify/Vercel settings, never this file, client code or `NEXT_PUBLIC_*` variables. The migration is tracked in [issue #17](https://github.com/whritou/WhitePlate/issues/17).
 
+## D2 dashboard-metrics schema rollout — 2026-10-14
+
+Applied `20261014122001_DashboardMetricsPreparationTimestamps` and `20261014122436_DashboardMetricsTenantStatusIndex` transactionally to `whiteplate-postgresql-main` before merging the dashboard API change, keeping the additive schema ready before code deployment. Preflight found `20261013191310_OrderPickupMode` as the latest EF migration and no D2 columns or indexes. A 68.7 KB `pg_dump -Fc` was created at `/tmp/whiteplate-before-dashboard-metrics-20261014.dump` inside the database container before applying the change. Post-checks confirmed both EF history rows at version `10.0.12`, all four nullable `Orders` columns with their expected types, and both tenant indexes. No existing orders were backfilled or modified. This temporary container-local dump is not an off-host backup or restore drill. Hosted metrics against real order data and query-plan checks remain open; see [D2 evidence](../audits/dashboard-metrics.md).
+
 ## Availability incident and recovery — 2026-10-10
 
 The public API returned HTTP 503 (`no available server`) on `/health/live`, `/health/ready` and `/api/v1/organizations`. Coolify reported the API as Degraded: its process was running, but PostgreSQL readiness failed repeatedly. Authentication on Vercel still worked. The workspace could not load organizations or restaurant memberships, so its context-dependent navigation links were absent.

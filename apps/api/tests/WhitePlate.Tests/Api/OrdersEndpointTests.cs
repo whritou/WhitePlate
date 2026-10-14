@@ -900,7 +900,7 @@ public sealed partial class OrdersEndpointTests
             });
         }
 
-        public async Task<(Guid TenantId, Guid ProductId, Guid OptionId, Guid OtherProductId, Guid OrganizationId)> SeedAsync(bool includeOpeningHours = true)
+        public async Task<(Guid TenantId, Guid ProductId, Guid OptionId, Guid OtherTenantId, Guid OtherProductId, Guid OrganizationId)> SeedAsync(bool includeOpeningHours = true, string timeZone = "UTC")
         {
             using var scope = Services.CreateScope();
             var database = scope.ServiceProvider.GetRequiredService<WhitePlateDbContext>();
@@ -908,6 +908,7 @@ public sealed partial class OrdersEndpointTests
             var organization = Organization.Create("Orders Test");
             database.Organizations.Add(organization);
             var tenant = Tenant.Create(organization.Id, "Bistro", "bistro", "EUR");
+            if (timeZone != "UTC") tenant.UpdateEstablishment(new EstablishmentInput(tenant.Name, TimeZone: timeZone));
             if (includeOpeningHours)
             {
                 tenant.SetOpeningHours(new OpeningHoursSchedule(Enumerable.Range(1, 7)
@@ -930,7 +931,7 @@ public sealed partial class OrdersEndpointTests
             database.ProductOptions.Add(option);
             database.PromotionDiscounts.Add(PromotionDiscount.Create(tenant.Id, "SAVE", "Save two", DiscountKind.FixedAmount, 2m));
             await database.SaveChangesAsync(TestContext.Current.CancellationToken);
-            return (tenant.Id, product.Id, option.Id, otherProduct.Id, organization.Id);
+            return (tenant.Id, product.Id, option.Id, otherTenant.Id, otherProduct.Id, organization.Id);
         }
 
         public async Task SeedOwnerAsync(Guid organizationId, string subject)

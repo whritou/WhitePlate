@@ -2,6 +2,7 @@ import { ArrowRight, ArrowUpRight, CreditCard, Store } from "lucide-react"
 import { getTranslations } from "next-intl/server"
 import { Link } from "@/i18n/navigation"
 import { OrderOverview } from "@/components/orders/order-overview"
+import { DashboardMetricsPanel } from "@/components/organization/dashboard-metrics-panel"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { LiveProductCover } from "./live-product-cover"
@@ -23,6 +24,7 @@ export async function LiveDashboard({
   productAvailability,
   availabilityLoadError,
   storefrontUrl,
+  initialDashboardMetrics = null,
 }: LiveDashboardProps) {
   const t = await getTranslations("LiveWorkspace")
   const v = await getTranslations("LiveParity")
@@ -58,6 +60,14 @@ export async function LiveDashboard({
           <ArrowUpRight aria-hidden="true" />
         </Button>
       </header>
+
+      <DashboardMetricsPanel
+        userId={userId}
+        tenantId={tenantId}
+        locale={locale}
+        role={role}
+        initialMetrics={initialDashboardMetrics}
+      />
 
       <OrderOverview
         userId={userId}

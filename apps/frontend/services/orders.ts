@@ -4,6 +4,7 @@ import {
   parseOrderHistoryPage,
   parseRestaurantMemberships,
 } from "@/lib/order-dashboard"
+import { parseDashboardMetrics } from "@/lib/dashboard-metrics"
 import { whitePlateApi } from "@/lib/api"
 import type { ApiResult } from "@/types/api"
 import type {
@@ -15,6 +16,7 @@ import type {
   UpdateOrderStatusInput,
   UpdateOrderStatusResult,
 } from "@/types/orders"
+import type { DashboardMetrics } from "@/types/dashboard-metrics"
 
 export async function getRestaurantMemberships(): Promise<
   ApiResult<RestaurantMembership[]>
@@ -49,6 +51,24 @@ export async function getOrderPage(
   if (!response.ok) return response
 
   const data = parseOrderPage(response.data)
+
+  return data
+    ? { ok: true, status: 200, data }
+    : { ok: false, status: 502, error: "unavailable" }
+}
+
+export async function getDashboardMetrics(
+  tenantId: string,
+  signal?: AbortSignal
+): Promise<ApiResult<DashboardMetrics>> {
+  const response = await whitePlateApi.get<unknown>(
+    `/api/v1/tenants/${tenantId}/dashboard/metrics`,
+    { signal }
+  )
+
+  if (!response.ok) return response
+
+  const data = parseDashboardMetrics(response.data)
 
   return data
     ? { ok: true, status: 200, data }

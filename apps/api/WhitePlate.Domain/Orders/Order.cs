@@ -23,6 +23,10 @@ public sealed class Order
     public string? PickupTimeZone { get; private set; }
     public PickupMode? PickupMode { get; private set; }
     public long CreatedAtTicks { get; private set; }
+    public DateTimeOffset? PreparingAt { get; private set; }
+    public long? PreparingAtTicks { get; private set; }
+    public DateTimeOffset? ReadyAt { get; private set; }
+    public long? ReadyAtTicks { get; private set; }
     public DateTimeOffset? ClosedAt { get; private set; }
     public long? ClosedAtTicks { get; private set; }
     public DateTimeOffset? ArchivedAt { get; private set; }
@@ -96,6 +100,16 @@ public sealed class Order
         if (Status == OrderStatus.Cancelled || Status == OrderStatus.Completed || (int)status != (int)Status + 1)
             throw new InvalidOrderTransitionException();
         Status = status;
+        if (status == OrderStatus.Preparing)
+        {
+            PreparingAt = occurredAt;
+            PreparingAtTicks = occurredAt.UtcDateTime.Ticks;
+        }
+        if (status == OrderStatus.Ready)
+        {
+            ReadyAt = occurredAt;
+            ReadyAtTicks = occurredAt.UtcDateTime.Ticks;
+        }
         if (status == OrderStatus.Completed)
         {
             ClosedAt = occurredAt;

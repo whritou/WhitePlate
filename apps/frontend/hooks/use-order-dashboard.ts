@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { fetchOrderPage, OrderRequestError } from "@/lib/api/order-browser"
 import { orderQueryKeys } from "@/lib/query/order-query"
+import { dashboardMetricsQueryKeys } from "@/lib/query/dashboard-metrics-query"
 import { updateOrderStatusAction } from "@/actions/orders"
 import { useWorkspaceToast } from "@/components/ui/toast"
 import { useRouter } from "@/i18n/navigation"
@@ -14,8 +15,16 @@ import type {
 } from "@/types/orders"
 
 export function useOrderDashboard(props: OrderDashboardProps) {
-  const { userId, tenantId, locale, selectedStatus, cursor, page, loadError } =
-    props
+  const {
+    userId,
+    tenantId,
+    locale,
+    role,
+    selectedStatus,
+    cursor,
+    page,
+    loadError,
+  } = props
   const scope = { userId, tenantId, locale }
   const client = useQueryClient()
   const router = useRouter()
@@ -38,13 +47,21 @@ export function useOrderDashboard(props: OrderDashboardProps) {
     refetchInterval: 30_000,
     retry: false,
   })
-  const refresh = useCallback(
-    () =>
+  const refresh = useCallback(async () => {
+    await Promise.all([
       client.invalidateQueries({
         queryKey: orderQueryKeys.tenant({ userId, tenantId, locale }),
       }),
-    [client, userId, tenantId, locale]
-  )
+      client.invalidateQueries({
+        queryKey: dashboardMetricsQueryKeys.tenant({
+          userId,
+          tenantId,
+          locale,
+          role,
+        }),
+      }),
+    ])
+  }, [client, userId, tenantId, locale, role])
   const mutation = useMutation({
     mutationFn: async (input: UpdateOrderStatusInput) => {
       const result = await updateOrderStatusAction(input)
