@@ -3321,6 +3321,8 @@
     "dashboardScope": "Restaurant-wide operational totals for today and yesterday, using the restaurant’s saved time zone. Order values are not captured payments.",
     "activeOrders": "Active orders",
     "dashboardLoadedScope": "Counts below reflect the {count} orders currently loaded. Statistics above include all retained orders for these dates.",
+    "kitchen": "In the kitchen",
+    "snapshotHelp": "Loaded from the real order API. Live updates are available on the order board.",
     "orderState": "Order status",
     "rushHoldOff": "Rush · off",
     "pauseOff": "Emergency pause · off",

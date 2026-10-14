@@ -3321,6 +3321,8 @@
     "dashboardScope": "Statistiques opérationnelles de tout le restaurant pour aujourd’hui et hier, selon son fuseau horaire enregistré. Les montants ne sont pas des paiements encaissés.",
     "activeOrders": "Commandes en cours",
     "dashboardLoadedScope": "Les compteurs ci-dessous portent sur les {count} commandes actuellement chargées. Les statistiques ci-dessus couvrent toutes les commandes conservées pour ces dates.",
+    "kitchen": "En cuisine",
+    "snapshotHelp": "Chargées depuis l’API réelle. Les mises à jour en direct sont disponibles sur le tableau des commandes.",
     "orderState": "État des commandes",
     "rushHoldOff": "Pic d’activité · inactif",
     "pauseOff": "Pause d’urgence · inactive",
