@@ -31,3 +31,13 @@ export type MenuBuilderToolbarProps = {
   pending: boolean
   onPendingChange: (pending: boolean) => void
 }
+
+export type MenuBuilderDraggedItem = {
+  kind: "category" | "product"
+  id: string
+}
+
+export type ProductExtrasDraggedItem = {
+  type: "option-groups" | "options"
+  id: string
+}

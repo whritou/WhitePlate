@@ -1,5 +1,15 @@
 # M1 — Combined Menu Builder & Translations
 
+## Follow-up — 2026-10-14: demo parity for catalog management
+
+The live `/organization/catalog` workspace now adopts the approved `/demo/menu` layout for categories, products, discounts, product metadata, options and photo management, while retaining the existing catalog API behavior. Category, product, option-group and option ordering use drag-and-drop; the numeric order controls and Manage Categories action are removed. The category rail provides archive confirmation and explicit category restore. Product rows have an X archive action with confirmation, and the product filter can show archived products for explicit restore. Restoring a category, product, group or option affects only that entity; parent entities must be restored before their children.
+
+Product photos use the demo square gallery pattern with multiple-file upload, drag ordering, first-photo cover, remove confirmation and replacement. The existing aspect framing, upload progress/retry, save/discard and conflict handling remain. Product SKU, archive action, allergen multi-selects, dietary declarations, indicative declarations and preparation details remain available; product translation editing is removed while the workspace language tab remains. Options and extras adopt the demo card/list treatment while preserving selection rules, price adjustments, edit/archive flows and separate restoration. Discount management presents code, type, value, minimum order and expiration, while retaining the real discount name. The minimum is enforced against the product-and-option subtotal before tax/discount; expiry is inclusive through the restaurant-local date.
+
+The demo product availability and discount status hover states now keep readable foreground/background contrast. Shared design-system tokens were not changed.
+
+**Verification:** the API project built successfully with output redirected to the allowed temporary workspace. Frontend TypeScript checking passed with a temporary config excluding a stale `.next` generated reference, and ESLint passed on changed frontend TypeScript files. The production frontend build could not write its Webpack cache under `.next` (`EPERM`); the regular npm launcher is also unavailable. Prettier could not load the missing `prettier-plugin-tailwindcss`. No tests or browser/hosted acceptance were run. The additive discount migration is source-only and has not been applied to a shared database. The Kanban card was moved to In review with the implementation and verification summary; hosted and database acceptance remain open.
+
 8 October 2026. Source implementation with local verification; shared-database and hosted acceptance remain open. The project card stays In review until those checks complete.
 
 ## Implemented behavior and decisions

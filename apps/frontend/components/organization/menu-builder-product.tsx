@@ -6,10 +6,8 @@ import { useLocale, useTranslations } from "next-intl"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import type { CatalogProduct, ManagedCatalog } from "@/types/catalog-management"
-import type { MenuLanguageSettings } from "@/types/catalog"
 import { ProductForm } from "./product-form"
 import { ProductExtrasTable } from "./product-extras-table"
-import { CatalogTranslationsEditor } from "./catalog-translations-editor"
 import { ArchiveCatalogButton } from "./archive-catalog-button"
 import { RestoreProductButton } from "./restore-product-button"
 import { ProductPhotosEditor } from "./product-photos-editor"
@@ -17,7 +15,6 @@ import { ProductPhotosEditor } from "./product-photos-editor"
 export function MenuBuilderProduct({
   userId,
   catalog,
-  settings,
   product,
   open,
   onOpenChange,
@@ -26,7 +23,6 @@ export function MenuBuilderProduct({
 }: {
   userId?: string
   catalog: ManagedCatalog
-  settings?: MenuLanguageSettings
   product: CatalogProduct
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -45,9 +41,6 @@ export function MenuBuilderProduct({
   const [dirty, setDirty] = useState(false)
   const [revision, setRevision] = useState(0)
   const editor = useRef<HTMLDivElement>(null)
-  const groups = catalog.optionGroups.filter(
-    (group) => group.productId === product.id
-  )
   const money = new Intl.NumberFormat(locale, {
     style: "currency",
     currency: catalog.currency,
@@ -243,27 +236,6 @@ export function MenuBuilderProduct({
           pending={pending}
           onPendingChange={onPendingChange}
         />
-
-        {settings ? (
-          <CatalogTranslationsEditor
-            {...settings}
-            readOnly={archived}
-            includeArchived
-            onPendingChange={onPendingChange}
-            catalog={{
-              categories: [],
-              products: [product],
-              optionGroups: groups,
-              options: catalog.options.filter((option) =>
-                groups.some((group) => group.id === option.groupId)
-              ),
-            }}
-          />
-        ) : (
-          <p role="status" className="text-sm text-muted-foreground">
-            {t("languagesUnavailable")}
-          </p>
-        )}
       </fieldset>
     </section>
   )

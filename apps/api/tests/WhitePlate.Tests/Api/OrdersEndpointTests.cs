@@ -94,6 +94,66 @@ public sealed partial class OrdersEndpointTests
     }
 
     [Fact]
+    public async Task PublicCheckoutRejectsDiscountWhenSubtotalIsBelowItsMinimum()
+    {
+        using var factory = new OrdersFactory();
+        var seeded = await factory.SeedAsync(discountMinimumOrderAmount: 10m);
+        using var client = factory.CreateClient();
+        client.DefaultRequestHeaders.Add("Idempotency-Key", "checkout-discount-minimum");
+
+        using var response = await client.PostAsJsonAsync("https://bistro.example.test/api/v1/orders", new
+        {
+            customerName = "Ada",
+            discountCode = "save",
+            items = new[] { new { productId = seeded.ProductId, quantity = 1, optionIds = new[] { seeded.OptionId } } }
+        }, TestContext.Current.CancellationToken);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        using var scope = factory.Services.CreateScope();
+        var database = scope.ServiceProvider.GetRequiredService<WhitePlateDbContext>();
+        Assert.Empty(await database.Orders.ToListAsync(TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
+    public async Task PublicCheckoutRejectsDiscountAfterItsRestaurantLocalExpiryDate()
+    {
+        using var factory = new OrdersFactory();
+        var seeded = await factory.SeedAsync(discountExpiresOn: new DateOnly(2025, 12, 31));
+        using var client = factory.CreateClient();
+        client.DefaultRequestHeaders.Add("Idempotency-Key", "checkout-discount-expired");
+
+        using var response = await client.PostAsJsonAsync("https://bistro.example.test/api/v1/orders", new
+        {
+            customerName = "Ada",
+            discountCode = "save",
+            items = new[] { new { productId = seeded.ProductId, quantity = 1, optionIds = new[] { seeded.OptionId } } }
+        }, TestContext.Current.CancellationToken);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        using var scope = factory.Services.CreateScope();
+        var database = scope.ServiceProvider.GetRequiredService<WhitePlateDbContext>();
+        Assert.Empty(await database.Orders.ToListAsync(TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
+    public async Task PublicCheckoutAcceptsDiscountOnItsExpiryDate()
+    {
+        using var factory = new OrdersFactory();
+        var seeded = await factory.SeedAsync(discountExpiresOn: new DateOnly(2026, 1, 1));
+        using var client = factory.CreateClient();
+        client.DefaultRequestHeaders.Add("Idempotency-Key", "checkout-discount-expires-today");
+
+        using var response = await client.PostAsJsonAsync("https://bistro.example.test/api/v1/orders", new
+        {
+            customerName = "Ada",
+            discountCode = "save",
+            items = new[] { new { productId = seeded.ProductId, quantity = 1, optionIds = new[] { seeded.OptionId } } }
+        }, TestContext.Current.CancellationToken);
+
+        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+    }
+
+    [Fact]
     public async Task PublicCheckoutRequiresConfiguredOpeningHours()
     {
         using var factory = new OrdersFactory();
@@ -900,7 +960,9 @@ public sealed partial class OrdersEndpointTests
             });
         }
 
-        public async Task<(Guid TenantId, Guid ProductId, Guid OptionId, Guid OtherTenantId, Guid OtherProductId, Guid OrganizationId)> SeedAsync(bool includeOpeningHours = true, string timeZone = "UTC")
+        public async Task<(Guid TenantId, Guid ProductId, Guid OptionId, Guid OtherTenantId, Guid OtherProductId, Guid OrganizationId)> SeedAsync(
+            bool includeOpeningHours = true, string timeZone = "UTC", decimal discountMinimumOrderAmount = 0m,
+            DateOnly? discountExpiresOn = null)
         {
             using var scope = Services.CreateScope();
             var database = scope.ServiceProvider.GetRequiredService<WhitePlateDbContext>();
@@ -929,7 +991,8 @@ public sealed partial class OrdersEndpointTests
             database.ProductOptionGroups.Add(group);
             var option = ProductOption.Create(tenant.Id, group.Id, "Large", 1.25m, 0);
             database.ProductOptions.Add(option);
-            database.PromotionDiscounts.Add(PromotionDiscount.Create(tenant.Id, "SAVE", "Save two", DiscountKind.FixedAmount, 2m));
+            database.PromotionDiscounts.Add(PromotionDiscount.Create(tenant.Id, "SAVE", "Save two",
+                DiscountKind.FixedAmount, 2m, discountMinimumOrderAmount, discountExpiresOn));
             await database.SaveChangesAsync(TestContext.Current.CancellationToken);
             return (tenant.Id, product.Id, option.Id, otherTenant.Id, otherProduct.Id, organization.Id);
         }

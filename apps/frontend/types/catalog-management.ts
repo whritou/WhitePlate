@@ -59,6 +59,8 @@ export type CatalogDiscount = {
   name: string
   kind: "FixedAmount" | "Percentage"
   value: number
+  minimumOrderAmount: number
+  expiresOn: string | null
   isActive: boolean
 }
 export type ManagedCatalog = {
@@ -125,6 +127,15 @@ export type DiscountInput = {
   name: string
   kind: CatalogDiscount["kind"]
   value: number
+  minimumOrderAmount: number
+  expiresOn: string | null
+}
+export type CatalogReorderInput = {
+  tenantId: string
+  entityType: CatalogEntityType
+  parentId?: string | null
+  categoryId?: string | null
+  orderedIds: string[]
 }
 export type DiscountReferenceInput = { tenantId: string; id: string }
 export type CatalogEntityType =
@@ -185,6 +196,7 @@ export type DiscountsEditorProps = {
 export type ArchiveButtonProps = ArchiveInput & {
   name: string
   compact?: boolean
+  removeIcon?: boolean
   onPendingChange?: (pending: boolean) => void
 }
 export type CatalogSubmit = (event: FormEvent<HTMLFormElement>) => void

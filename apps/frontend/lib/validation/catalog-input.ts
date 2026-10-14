@@ -1,14 +1,15 @@
 import { isRecord, isUuid } from "./common"
 import type {
   ArchiveInput,
+  CatalogReorderInput,
   CategoryInput,
-  DiscountInput,
   DiscountReferenceInput,
   OptionGroupInput,
   OptionInput,
   ProductAvailabilityInput,
   ProductInput,
 } from "@/types/catalog-management"
+export { parseDiscountInput } from "./discount-input"
 
 function decimal(
   value: FormDataEntryValue | null,
@@ -270,40 +271,38 @@ export function parseOptionInput(input: unknown): OptionInput | null {
   return { tenantId, id, groupId, name, priceAdjustment, sortOrder }
 }
 
-export function parseDiscountInput(input: unknown): DiscountInput | null {
+export function parseCatalogReorderInput(
+  input: unknown
+): CatalogReorderInput | null {
   if (!(input instanceof FormData)) return null
 
   const tenantId = input.get("tenantId")
-  const id = input.get("id")
-  const rawCode = input.get("code")
-  const rawName = input.get("name")
-  const rawKind = input.get("kind")
-  const kind =
-    rawKind === "FixedAmount" || rawKind === "Percentage" ? rawKind : null
-  const maximum = kind === "Percentage" ? 100 : 9999999999.99
-  const value = decimal(input.get("value"), maximum)
-  const name = typeof rawName === "string" ? rawName.trim() : ""
-  const code =
-    id !== null
-      ? null
-      : typeof rawCode === "string" &&
-          /^[A-Za-z0-9-]{1,32}$/.test(rawCode.trim())
-        ? rawCode.trim().toUpperCase()
-        : null
+  const entityType = input.get("entityType")
+  const parentId = input.get("parentId")
+  const categoryId = input.get("categoryId")
+  const rawIds = input.getAll("orderedIds")
+  const allowed = ["categories", "products", "option-groups", "options"]
 
   if (
     !isUuid(tenantId) ||
-    (id !== null && !isUuid(id)) ||
-    (!id && !code) ||
-    !name ||
-    name.length > 120 ||
-    !kind ||
-    value === null ||
-    value <= 0
+    typeof entityType !== "string" ||
+    !allowed.includes(entityType) ||
+    (parentId !== null && !isUuid(parentId)) ||
+    (categoryId !== null && !isUuid(categoryId)) ||
+    rawIds.length < 1 ||
+    rawIds.length > 500 ||
+    !rawIds.every(isUuid) ||
+    new Set(rawIds).size !== rawIds.length
   )
     return null
 
-  return { tenantId, id, code, name, kind, value }
+  return {
+    tenantId,
+    entityType: entityType as CatalogReorderInput["entityType"],
+    parentId: typeof parentId === "string" ? parentId : null,
+    categoryId: typeof categoryId === "string" ? categoryId : null,
+    orderedIds: rawIds as string[],
+  }
 }
 
 export function parseDiscountReferenceInput(

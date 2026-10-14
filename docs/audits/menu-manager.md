@@ -1,5 +1,11 @@
 # Menu manager — 9 October 2026
 
+## Follow-up — 2026-10-14: live workspace parity
+
+The current `/organization/catalog` route now uses the approved demo-style menu builder. This supersedes the earlier description of explicit numeric display-order saves: categories and products reorder by drag-and-drop, as do option groups and options. Product photos use the square tile gallery with multi-add, remove confirmation, drag ordering and first-photo cover, while preserving live upload, framing, save/discard and conflict behavior. Product translations are no longer edited in the product panel; the separate restaurant-language workspace remains unchanged.
+
+Archive actions for categories, products, option groups, options, discounts and photos require confirmation. Archived products can be filtered and restored explicitly. Category, product, group and option restoration is separate, and the API requires an active parent before restoring a child. Demo status/availability hover colors were corrected for readable contrast. See the [M1 menu-builder audit](menu-builder.md) for the full scope and verification status.
+
 User-approved scope: one-page table management of products, categories, extras and translations. The user explicitly removed WYSIWYG and selected a right-side product sheet because navigation occupies the left. Source implementation; hosted acceptance remains separate.
 
 ## Behavior

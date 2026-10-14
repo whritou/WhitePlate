@@ -8,6 +8,7 @@ import {
   saveOptionAction,
   saveOptionGroupAction,
   saveProductAction,
+  reorderCatalogAction,
   setCategoryVisibilityAction,
   setProductAvailabilityAction,
 } from "./catalog"
@@ -156,6 +157,48 @@ it.each([
     expect(whitePlateApi.put).not.toHaveBeenCalled()
   }
 )
+
+it("sends category-scoped drag order to the catalog API", async () => {
+  vi.mocked(whitePlateApi.put).mockResolvedValue({
+    ok: true,
+    status: 204,
+    data: null,
+  })
+
+  const input = new FormData()
+
+  input.set("tenantId", tenantId)
+  input.set("entityType", "products")
+  input.set("categoryId", categoryId)
+  input.append("orderedIds", productId)
+  input.append("orderedIds", optionGroupId)
+
+  expect(await reorderCatalogAction(input)).toEqual({ ok: true })
+  expect(whitePlateApi.put).toHaveBeenCalledWith(
+    `/api/v1/tenants/${tenantId}/catalog/reorder`,
+    {
+      entityType: "products",
+      parentId: null,
+      categoryId,
+      orderedIds: [productId, optionGroupId],
+    }
+  )
+})
+
+it("rejects duplicate drag-order IDs without calling the catalog API", async () => {
+  const input = new FormData()
+
+  input.set("tenantId", tenantId)
+  input.set("entityType", "categories")
+  input.append("orderedIds", categoryId)
+  input.append("orderedIds", categoryId)
+
+  expect(await reorderCatalogAction(input)).toEqual({
+    ok: false,
+    error: "invalid",
+  })
+  expect(whitePlateApi.put).not.toHaveBeenCalled()
+})
 
 it.each([
   { tenantId, id: categoryId, isVisible: "0" },
@@ -391,7 +434,14 @@ it("creates a normalized discount with only the API create fields", async () => 
   ).toEqual({ ok: true })
   expect(whitePlateApi.post).toHaveBeenCalledWith(
     `/api/v1/tenants/${tenantId}/discounts`,
-    { code: "LUNCH-10", name: "Lunch offer", kind: "FixedAmount", value: 5.25 }
+    {
+      code: "LUNCH-10",
+      name: "Lunch offer",
+      kind: "FixedAmount",
+      value: 5.25,
+      minimumOrderAmount: 0,
+      expiresOn: null,
+    }
   )
 })
 
@@ -416,7 +466,13 @@ it("updates discount details without sending a replacement code or active flag",
   ).toEqual({ ok: true })
   expect(whitePlateApi.put).toHaveBeenCalledWith(
     `/api/v1/tenants/${tenantId}/discounts/${discountId}`,
-    { name: "New name", kind: "Percentage", value: 15 }
+    {
+      name: "New name",
+      kind: "Percentage",
+      value: 15,
+      minimumOrderAmount: 0,
+      expiresOn: null,
+    }
   )
 })
 

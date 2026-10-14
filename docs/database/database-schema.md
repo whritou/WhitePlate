@@ -1,5 +1,9 @@
 # Database schema and tenant model
 
+## Menu discount eligibility — 2026-10-14
+
+Generated migration `20261014211126_DiscountMinimumAndExpiration` adds required `PromotionDiscounts.MinimumOrderAmount` (`numeric(12,2)`, default `0`) and nullable `PromotionDiscounts.ExpiresOn` (`date`). Existing discounts therefore remain eligible without a minimum or expiry. Checkout compares the minimum with the saved-price subtotal of product and option quantities before taxes and discount, and accepts a code through the expiration date in the tenant's saved time zone. The migration is source-only; no shared or production database was changed, and the API does not migrate on startup.
+
 ## S1 organization and restaurant legal profiles — 2026-10-12
 
 Generated migration `20261012190104_LegalProfileSettings` adds nullable `Organizations.LegalCountryCode`, `LegalName`, `LegalRegistrationNumber`, and `TaxIdentifier`; `Organizations.LegalProfileVersion` is a concurrency token defaulting to 1. `Tenants` receives corresponding nullable custom-profile fields plus `LegalProfileMode` (`inherit` by default) and `LegalProfileVersion` (default 1). Existing rows receive no fabricated country or identifier. In inherited mode tenant profile fields are null and the effective values are read from the owning organization. Tax rates and order records are unchanged. It is applied to Coolify Production and was also applied to Neon `test` on 2026-10-14; hosted acceptance remains open.

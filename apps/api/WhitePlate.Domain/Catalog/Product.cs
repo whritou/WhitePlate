@@ -121,6 +121,11 @@ public sealed class Product
     public void Archive() { IsArchived = true; IsAvailable = false; }
 
     public void Restore() => IsArchived = false;
+    public void SetSortOrder(int sortOrder)
+    {
+        if (sortOrder < 0) throw new DomainRuleException("invalid_sort_order", "sortOrder", "Sort order cannot be negative.");
+        SortOrder = sortOrder;
+    }
 
     private static string NormalizeName(string? name)
     {

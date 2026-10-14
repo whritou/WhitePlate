@@ -39,6 +39,7 @@ export default defineConfig({
       name: "menu-builder",
       testMatch: [
         "menu-builder.spec.ts",
+        "menu-builder-catalog.spec.ts",
         "menu-manager.spec.ts",
         "menu-workspace-usability.spec.ts",
       ],

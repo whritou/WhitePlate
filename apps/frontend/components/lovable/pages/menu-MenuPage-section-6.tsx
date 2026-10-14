@@ -166,7 +166,7 @@ export function MenuPageSection6() {
                       if (x) x.available = x.available === false
                     })
                   }}
-                  className={`label-mono w-24 border px-2 py-1.5 ${i.available === false ? "text-destructive" : "bg-primary text-primary-foreground"}`}
+                  className={`label-mono w-24 border px-2 py-1.5 ${i.available === false ? "bg-destructive text-destructive-foreground hover:bg-destructive hover:text-destructive-foreground" : "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground"}`}
                 >
                   <Copy>
                     {i.available === false ? "Sold out" : "Available"}

@@ -1,6 +1,6 @@
 "use client"
 
-import { Archive } from "lucide-react"
+import { Archive, X } from "lucide-react"
 
 import { useState } from "react"
 import { useTranslations } from "next-intl"
@@ -36,6 +36,7 @@ export function ArchiveCatalogButton({
   entityType,
   name,
   compact,
+  removeIcon,
   onPendingChange,
 }: ArchiveButtonProps) {
   const t = useTranslations("Catalog")
@@ -63,15 +64,26 @@ export function ArchiveCatalogButton({
         render={
           <Button
             type="button"
-            variant={compact ? "ghost" : "outline"}
-            size={compact ? "icon" : "default"}
+            variant={removeIcon ? "ghost" : compact ? "ghost" : "outline"}
+            size={compact || removeIcon ? "icon" : "default"}
+            className={
+              removeIcon
+                ? "text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                : undefined
+            }
           />
         }
         aria-label={t("archiveName", { name })}
       >
-        <Archive aria-hidden="true" className="size-4" />
+        {removeIcon ? (
+          <X aria-hidden="true" className="size-4" />
+        ) : (
+          <Archive aria-hidden="true" className="size-4" />
+        )}
 
-        <span className={compact ? "sr-only" : undefined}>{t("archive")}</span>
+        <span className={compact || removeIcon ? "sr-only" : undefined}>
+          {t("archive")}
+        </span>
       </AlertDialogTrigger>
 
       <AlertDialogPortal>

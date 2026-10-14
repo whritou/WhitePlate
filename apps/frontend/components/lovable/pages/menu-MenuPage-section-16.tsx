@@ -139,7 +139,7 @@ export function MenuPageSection16() {
 
               <SourceButton
                 onClick={() => set({ active: !c.active })}
-                className={`label-mono border px-2 py-2 ${expired ? "text-destructive" : c.active ? "bg-primary text-primary-foreground" : ""}`}
+                className={`label-mono border px-2 py-2 ${expired ? "bg-destructive text-destructive-foreground hover:bg-destructive hover:text-destructive-foreground" : c.active ? "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground" : "bg-muted text-foreground hover:bg-muted hover:text-foreground"}`}
               >
                 <Copy>
                   {expired ? "Expired" : c.active ? "Active" : "Paused"}

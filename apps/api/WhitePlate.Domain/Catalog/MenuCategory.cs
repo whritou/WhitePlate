@@ -32,7 +32,13 @@ public sealed class MenuCategory
         SortOrder = sortOrder;
     }
     public void Archive() => IsArchived = true;
+    public void Restore() => IsArchived = false;
     public void SetVisibility(bool isVisible) => IsVisible = isVisible;
+    public void SetSortOrder(int sortOrder)
+    {
+        if (sortOrder < 0) throw new DomainRuleException("invalid_sort_order", "sortOrder", "Sort order cannot be negative.");
+        SortOrder = sortOrder;
+    }
 
     private static string NormalizeName(string? name)
     {

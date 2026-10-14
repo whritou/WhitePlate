@@ -19,7 +19,9 @@ public sealed record UpdateOptionGroupCommand(Guid TenantId, Guid GroupId, strin
 public sealed record UpdateOptionCommand(Guid TenantId, Guid OptionId, string Name, decimal PriceAdjustment,
     int SortOrder, ExternalIdentity Identity);
 public sealed record UpdateDiscountCommand(Guid TenantId, Guid DiscountId, string Name, DiscountKind Kind,
-    decimal Value, ExternalIdentity Identity);
+    decimal Value, ExternalIdentity Identity, decimal MinimumOrderAmount = 0m, DateOnly? ExpiresOn = null);
+public sealed record ReorderCatalogCommand(Guid TenantId, string EntityType, Guid? ParentId,
+    Guid? CategoryId, IReadOnlyList<Guid> OrderedIds, ExternalIdentity Identity);
 
 public sealed class CatalogManagementCommandHandler(IStaffMembershipRepository memberships, ICatalogRepository catalog)
 {
@@ -103,7 +105,7 @@ public sealed class CatalogManagementCommandHandler(IStaffMembershipRepository m
         try
         {
             var result = await catalog.UpdateDiscountAsync(command.TenantId, command.DiscountId, command.Name,
-                command.Kind, command.Value, cancellationToken);
+                command.Kind, command.Value, command.MinimumOrderAmount, command.ExpiresOn, cancellationToken);
             return result is null ? NotFound<PromotionDiscountDto>() : Result<PromotionDiscountDto>.Success(result);
         }
         catch (DomainRuleException exception) { return Invalid<PromotionDiscountDto>(exception); }
@@ -117,6 +119,10 @@ public sealed class CatalogManagementCommandHandler(IStaffMembershipRepository m
         CancellationToken cancellationToken) => ArchiveAsync(tenantId, categoryId, identity,
         catalog.ArchiveCategoryAsync, cancellationToken);
 
+    public Task<Result<bool>> RestoreCategoryAsync(Guid tenantId, Guid categoryId, ExternalIdentity identity,
+        CancellationToken cancellationToken) => ArchiveAsync(tenantId, categoryId, identity,
+        catalog.RestoreCategoryAsync, cancellationToken);
+
     public Task<Result<bool>> ArchiveProductAsync(Guid tenantId, Guid productId, ExternalIdentity identity,
         CancellationToken cancellationToken) => ArchiveAsync(tenantId, productId, identity,
         catalog.ArchiveProductAsync, cancellationToken);
@@ -129,9 +135,39 @@ public sealed class CatalogManagementCommandHandler(IStaffMembershipRepository m
         CancellationToken cancellationToken) => ArchiveAsync(tenantId, groupId, identity,
         catalog.ArchiveOptionGroupAsync, cancellationToken);
 
+    public Task<Result<bool>> RestoreOptionGroupAsync(Guid tenantId, Guid groupId, ExternalIdentity identity,
+        CancellationToken cancellationToken) => ArchiveAsync(tenantId, groupId, identity,
+        catalog.RestoreOptionGroupAsync, cancellationToken);
+
     public Task<Result<bool>> ArchiveOptionAsync(Guid tenantId, Guid optionId, ExternalIdentity identity,
         CancellationToken cancellationToken) => ArchiveAsync(tenantId, optionId, identity,
         catalog.ArchiveOptionAsync, cancellationToken);
+
+    public Task<Result<bool>> RestoreOptionAsync(Guid tenantId, Guid optionId, ExternalIdentity identity,
+        CancellationToken cancellationToken) => ArchiveAsync(tenantId, optionId, identity,
+        catalog.RestoreOptionAsync, cancellationToken);
+
+    public async Task<Result<bool>> ReorderAsync(ReorderCatalogCommand command,
+        CancellationToken cancellationToken)
+    {
+        if (!await CanManageAsync(command.TenantId, command.Identity, cancellationToken))
+            return Result<bool>.Failure(new ApplicationError(ErrorCode.NotFound));
+        if (command.OrderedIds.Count is < 1 or > 500 || command.OrderedIds.Any(id => id == Guid.Empty) ||
+            command.OrderedIds.Distinct().Count() != command.OrderedIds.Count)
+            return Result<bool>.Failure(new ApplicationError(ErrorCode.ValidationFailed,
+                new ValidationIssue("orderedIds", "invalid_order", "The ordered item list is invalid.")));
+        if (!new[] { "categories", "products", "option-groups", "options" }.Contains(command.EntityType) ||
+            (command.EntityType == "categories" && (command.ParentId.HasValue || command.CategoryId.HasValue)) ||
+            (command.EntityType == "products" && (!command.CategoryId.HasValue || command.ParentId.HasValue)) ||
+            (command.EntityType == "option-groups" && (!command.ParentId.HasValue || command.CategoryId.HasValue)) ||
+            (command.EntityType == "options" && (!command.ParentId.HasValue || command.CategoryId.HasValue)))
+            return Result<bool>.Failure(new ApplicationError(ErrorCode.ValidationFailed,
+                new ValidationIssue("entityType", "invalid_order", "The ordering target is invalid.")));
+
+        var updated = await catalog.ReorderCatalogAsync(command.TenantId, command.EntityType,
+            command.ParentId, command.CategoryId, command.OrderedIds, cancellationToken);
+        return updated ? Result<bool>.Success(true) : Result<bool>.Failure(new ApplicationError(ErrorCode.NotFound));
+    }
 
     public Task<Result<bool>> DeactivateDiscountAsync(Guid tenantId, Guid discountId, ExternalIdentity identity,
         CancellationToken cancellationToken) => ArchiveAsync(tenantId, discountId, identity,

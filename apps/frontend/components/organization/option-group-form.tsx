@@ -44,6 +44,12 @@ export function OptionGroupForm({
 
       {group && <input type="hidden" name="id" value={group.id} />}
 
+      <input
+        type="hidden"
+        name="sortOrder"
+        value={group?.sortOrder ?? 2147483647}
+      />
+
       <fieldset disabled={pending} className="grid gap-3 sm:grid-cols-2">
         <Label htmlFor={`${prefix}-group-name`} className="grid gap-2">
           {t("name")}
@@ -87,22 +93,6 @@ export function OptionGroupForm({
             step={1}
             aria-describedby={`${prefix}-selection-bounds-hint`}
             defaultValue={group?.maximumSelections ?? 1}
-            autoComplete="off"
-            required
-          />
-        </Label>
-
-        <Label htmlFor={`${prefix}-group-sort`} className="grid gap-2">
-          {t("sortOrder")}
-
-          <Input
-            id={`${prefix}-group-sort`}
-            name="sortOrder"
-            type="number"
-            min={0}
-            max={2147483647}
-            step={1}
-            defaultValue={group?.sortOrder ?? 0}
             autoComplete="off"
             required
           />

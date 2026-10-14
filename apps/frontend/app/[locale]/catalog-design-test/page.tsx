@@ -130,6 +130,8 @@ const catalog: ManagedCatalog = {
       name: "Première commande",
       kind: "Percentage",
       value: 10,
+      minimumOrderAmount: 0,
+      expiresOn: null,
       isActive: true,
     },
     {
@@ -138,6 +140,8 @@ const catalog: ManagedCatalog = {
       name: "Ancienne offre",
       kind: "FixedAmount",
       value: 2.5,
+      minimumOrderAmount: 25,
+      expiresOn: "2026-12-31",
       isActive: false,
     },
   ],

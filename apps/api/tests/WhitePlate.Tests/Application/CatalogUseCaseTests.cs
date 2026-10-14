@@ -105,7 +105,9 @@ public sealed class CatalogUseCaseTests
             Task.FromResult<MenuProductDto?>(null);
         public Task<MenuOptionGroupDto?> UpdateOptionGroupAsync(Guid tenantId, Guid groupId, string name, int minimumSelections, int maximumSelections, int sortOrder, CancellationToken cancellationToken) => Task.FromResult<MenuOptionGroupDto?>(null);
         public Task<MenuOptionDto?> UpdateOptionAsync(Guid tenantId, Guid optionId, string name, decimal priceAdjustment, int sortOrder, CancellationToken cancellationToken) => Task.FromResult<MenuOptionDto?>(null);
-        public Task<PromotionDiscountDto?> UpdateDiscountAsync(Guid tenantId, Guid discountId, string name, WhitePlate.Domain.Catalog.DiscountKind kind, decimal value, CancellationToken cancellationToken) => Task.FromResult<PromotionDiscountDto?>(null);
+        public Task<PromotionDiscountDto?> UpdateDiscountAsync(Guid tenantId, Guid discountId, string name,
+            WhitePlate.Domain.Catalog.DiscountKind kind, decimal value, decimal minimumOrderAmount,
+            DateOnly? expiresOn, CancellationToken cancellationToken) => Task.FromResult<PromotionDiscountDto?>(null);
         public Task<bool> ArchiveCategoryAsync(Guid tenantId, Guid categoryId, CancellationToken cancellationToken) => Task.FromResult(false);
         public Task<bool> ArchiveProductAsync(Guid tenantId, Guid productId, CancellationToken cancellationToken) => Task.FromResult(false);
         public Task<bool> ArchiveOptionGroupAsync(Guid tenantId, Guid groupId, CancellationToken cancellationToken) => Task.FromResult(false);

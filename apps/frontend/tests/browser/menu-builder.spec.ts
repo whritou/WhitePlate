@@ -92,30 +92,6 @@ test("switching workspace tabs and products preserves an unsaved product draft",
   )
 })
 
-test("shared workspace keeps discounts and archived products reachable", async ({
-  page,
-}) => {
-  await page.goto("/en/catalog-design-test?view=builder")
-  await expect(page.getByTestId("fixture-ready")).toHaveAttribute(
-    "data-ready",
-    "true"
-  )
-  await page.getByRole("tab", { name: "Discount codes", exact: true }).click()
-  await expect(page.getByText("BIENVENUE", { exact: true })).toBeVisible()
-  await page.getByRole("tab", { name: "Dishes", exact: true }).click()
-  await page
-    .getByRole("button", { name: "All categories", exact: true })
-    .click()
-  await page.getByLabel("Show", { exact: true }).selectOption("archived")
-  await page
-    .getByRole("button", { name: "Select Velouté d’hiver", exact: true })
-    .click()
-  await expect(
-    page.getByRole("button", { name: "Restore product", exact: true })
-  ).toBeVisible()
-  await expect(page.getByRole("form", { name: /Edit product/ })).toBeHidden()
-})
-
 test("restaurant description drafts survive menu-language switches", async ({
   page,
 }) => {

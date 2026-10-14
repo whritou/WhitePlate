@@ -15,10 +15,11 @@ public sealed record CheckoutProductDto(Guid Id, string Name, decimal BasePrice,
     public int? PreparationMinutes { get; init; }
     public IReadOnlyDictionary<string, string> PreparationNotes { get; init; } = new Dictionary<string, string>();
 }
-public sealed record CheckoutDiscountDto(string Code, DiscountKind Kind, decimal Value);
+public sealed record CheckoutDiscountDto(string Code, DiscountKind Kind, decimal Value,
+    decimal MinimumOrderAmount = 0m, DateOnly? ExpiresOn = null);
 public sealed record CheckoutLocaleDto(string Locale, string DefaultLocale);
 public sealed record CheckoutCatalogDto(string Currency, string Locale, IReadOnlyList<CheckoutProductDto> Products,
-    CheckoutDiscountDto? Discount);
+    CheckoutDiscountDto? Discount, string TimeZone = "UTC");
 public sealed record PickupAvailabilityDto(string State, string? TimeZone, IReadOnlyList<WhitePlate.Domain.Tenants.PickupSlot> Slots)
 {
     public bool AcceptingOrders { get; init; } = true;

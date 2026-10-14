@@ -9,6 +9,8 @@ import type { ApiResult } from "@/types/api"
 import type { CategoryVisibilityInput } from "@/types/menu-builder"
 import type {
   ArchiveInput,
+  CatalogReorderInput,
+  CatalogEntityType,
   CategoryInput,
   CatalogResult,
   DiscountInput,
@@ -220,9 +222,11 @@ export async function saveDiscount({
   name,
   kind,
   value,
+  minimumOrderAmount,
+  expiresOn,
 }: DiscountInput): Promise<CatalogResult> {
   const path = `/api/v1/tenants/${tenantId}/discounts`
-  const fields = { name, kind, value }
+  const fields = { name, kind, value, minimumOrderAmount, expiresOn }
 
   if (id)
     return mutationResult(await whitePlateApi.put(`${path}/${id}`, fields))
@@ -230,6 +234,40 @@ export async function saveDiscount({
   if (!code) return { ok: false, error: "invalid" }
 
   return mutationResult(await whitePlateApi.post(path, { code, ...fields }))
+}
+
+export async function reorderCatalog({
+  tenantId,
+  entityType,
+  parentId,
+  categoryId,
+  orderedIds,
+}: CatalogReorderInput): Promise<CatalogResult> {
+  return mutationResult(
+    await whitePlateApi.put(`/api/v1/tenants/${tenantId}/catalog/reorder`, {
+      entityType,
+      parentId: parentId ?? null,
+      categoryId: categoryId ?? null,
+      orderedIds,
+    })
+  )
+}
+
+export async function restoreCatalogItem({
+  tenantId,
+  id,
+  entityType,
+}: {
+  tenantId: string
+  id: string
+  entityType: Exclude<CatalogEntityType, "products">
+}): Promise<CatalogResult> {
+  return mutationResult(
+    await whitePlateApi.post(
+      `/api/v1/tenants/${tenantId}/${entityType}/${id}/restore`,
+      {}
+    )
+  )
 }
 
 export async function deactivateDiscount({

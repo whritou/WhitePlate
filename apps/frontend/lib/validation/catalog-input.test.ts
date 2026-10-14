@@ -2,6 +2,7 @@ import { expect, it } from "vitest"
 import {
   parseDiscountInput,
   parseDiscountReferenceInput,
+  parseCatalogReorderInput,
   parseOptionGroupInput,
   parseOptionInput,
   parseProductInput,
@@ -154,6 +155,8 @@ it("normalizes new discount codes and preserves only supported create fields", (
     name: "Lunch offer",
     kind: "FixedAmount",
     value: 5.25,
+    minimumOrderAmount: 0,
+    expiresOn: null,
   })
 })
 
@@ -176,7 +179,57 @@ it("drops browser-supplied discount codes on update because codes are immutable"
     name: "Welcome",
     kind: "Percentage",
     value: 15,
+    minimumOrderAmount: 0,
+    expiresOn: null,
   })
+})
+
+it("parses an explicit discount minimum and calendar expiry date", () => {
+  expect(
+    parseDiscountInput(
+      form({
+        tenantId,
+        code: "LUNCH-25",
+        name: "Lunch offer",
+        kind: "FixedAmount",
+        value: "5.00",
+        minimumOrderAmount: "25.50",
+        expiresOn: "2026-12-31",
+      })
+    )
+  ).toEqual({
+    tenantId,
+    id: null,
+    code: "LUNCH-25",
+    name: "Lunch offer",
+    kind: "FixedAmount",
+    value: 5,
+    minimumOrderAmount: 25.5,
+    expiresOn: "2026-12-31",
+  })
+})
+
+it.each([
+  { minimumOrderAmount: "-0.01" },
+  { minimumOrderAmount: "25.501" },
+  { minimumOrderAmount: "10000000000" },
+  { expiresOn: "2026-02-30" },
+  { expiresOn: "31-12-2026" },
+])("rejects invalid discount minimum or expiry fields: %o", (fields) => {
+  expect(
+    parseDiscountInput(
+      form({
+        tenantId,
+        code: "LUNCH-25",
+        name: "Lunch offer",
+        kind: "FixedAmount",
+        value: "5.00",
+        minimumOrderAmount: "25.00",
+        expiresOn: "2026-12-31",
+        ...fields,
+      })
+    )
+  ).toBeNull()
 })
 
 const invalidDiscountFields: Array<Record<string, string>> = [
@@ -285,3 +338,27 @@ it.each([{ tenantId: "../foreign" }, { id: "invalid" }])(
     ).toBeNull()
   }
 )
+
+it("preserves a drag reorder's submitted product sequence", () => {
+  const input = form({ tenantId, entityType: "products", categoryId })
+
+  input.append("orderedIds", productId)
+  input.append("orderedIds", optionId)
+
+  expect(parseCatalogReorderInput(input)).toEqual({
+    tenantId,
+    entityType: "products",
+    parentId: null,
+    categoryId,
+    orderedIds: [productId, optionId],
+  })
+})
+
+it("rejects a drag reorder that repeats the same catalog item", () => {
+  const input = form({ tenantId, entityType: "categories" })
+
+  input.append("orderedIds", categoryId)
+  input.append("orderedIds", categoryId)
+
+  expect(parseCatalogReorderInput(input)).toBeNull()
+})

@@ -12,7 +12,7 @@ public sealed record CreateOptionGroupCommand(Guid TenantId, Guid ProductId, str
 public sealed record CreateOptionCommand(Guid TenantId, Guid GroupId, string Name, decimal PriceAdjustment,
     int SortOrder, ExternalIdentity Identity);
 public sealed record CreateDiscountCommand(Guid TenantId, string Code, string Name, DiscountKind Kind,
-    decimal Value, ExternalIdentity Identity);
+    decimal Value, ExternalIdentity Identity, decimal MinimumOrderAmount = 0m, DateOnly? ExpiresOn = null);
 
 public sealed class CreateOptionGroupCommandHandler(IStaffMembershipRepository memberships, ICatalogRepository catalog)
 {
@@ -56,7 +56,8 @@ public sealed class CreateDiscountCommandHandler(IStaffMembershipRepository memb
             return Result<Guid>.Failure(new ApplicationError(ErrorCode.NotFound));
         try
         {
-            var discount = PromotionDiscount.Create(command.TenantId, command.Code, command.Name, command.Kind, command.Value);
+            var discount = PromotionDiscount.Create(command.TenantId, command.Code, command.Name, command.Kind,
+                command.Value, command.MinimumOrderAmount, command.ExpiresOn);
             return await catalog.AddDiscountAsync(discount, cancellationToken)
                 ? Result<Guid>.Success(discount.Id)
                 : Result<Guid>.Failure(new ApplicationError(ErrorCode.Conflict));

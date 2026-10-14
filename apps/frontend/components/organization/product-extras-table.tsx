@@ -1,22 +1,15 @@
 "use client"
 
+import { useState, useTransition } from "react"
 import { Plus } from "lucide-react"
-import { Fragment } from "react"
 import { useLocale, useTranslations } from "next-intl"
-import { Badge } from "@/components/ui/badge"
+import { useRouter } from "@/i18n/navigation"
+import { reorderCatalogAction } from "@/actions/catalog"
 import { EditorDialog } from "@/components/ui/editor-dialog"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
 import type { CatalogProduct, ManagedCatalog } from "@/types/catalog-management"
+import type { ProductExtrasDraggedItem } from "@/types/menu-builder"
 import { OptionGroupForm } from "./option-group-form"
-import { OptionForm } from "./option-form"
-import { ArchiveCatalogButton } from "./archive-catalog-button"
+import { ProductOptionGroupCard } from "./product-option-group-card"
 
 export function ProductExtrasTable({
   catalog,
@@ -34,7 +27,11 @@ export function ProductExtrasTable({
   const t = useTranslations("Catalog")
   const u = useTranslations("CatalogView")
   const m = useTranslations("MenuBuilder")
+  const router = useRouter()
   const locale = useLocale()
+  const [dragged, setDragged] = useState<ProductExtrasDraggedItem | null>(null)
+  const [orderError, setOrderError] = useState<string | null>(null)
+  const [saving, startTransition] = useTransition()
   const groups = catalog.optionGroups
     .filter((group) => group.productId === product.id)
     .sort((a, b) => a.sortOrder - b.sortOrder || a.id.localeCompare(b.id))
@@ -43,13 +40,118 @@ export function ProductExtrasTable({
     currency: catalog.currency,
   })
 
+  function reorder(
+    entityType: "option-groups" | "options",
+    parentId: string,
+    orderedIds: string[]
+  ) {
+    if (pending || saving || orderedIds.length === 0) return
+
+    const input = new FormData()
+
+    input.set("tenantId", catalog.tenantId)
+    input.set("entityType", entityType)
+    input.set("parentId", parentId)
+    orderedIds.forEach((id) => input.append("orderedIds", id))
+    setOrderError(null)
+    onPendingChange(true)
+    startTransition(async () => {
+      try {
+        const result = await reorderCatalogAction(input)
+
+        if (!result.ok) {
+          setOrderError(result.error)
+
+          return
+        }
+
+        router.refresh()
+      } catch {
+        setOrderError("unavailable")
+      } finally {
+        onPendingChange(false)
+        setDragged(null)
+      }
+    })
+  }
+
+  function dropGroup(targetId: string) {
+    if (
+      !dragged ||
+      dragged.type !== "option-groups" ||
+      dragged.id === targetId ||
+      archived
+    )
+      return
+
+    const active = groups.filter((group) => !group.isArchived)
+    const from = active.findIndex((group) => group.id === dragged.id)
+    const to = active.findIndex((group) => group.id === targetId)
+
+    if (from < 0 || to < 0) return
+
+    const ordered = [...active]
+    const [item] = ordered.splice(from, 1)
+
+    if (!item) return
+    ordered.splice(to, 0, item)
+    reorder(
+      "option-groups",
+      product.id,
+      ordered.map((group) => group.id)
+    )
+  }
+
+  function moveGroupWithKeyboard(id: string, offset: number) {
+    if (archived) return
+
+    const active = groups.filter((group) => !group.isArchived)
+    const from = active.findIndex((group) => group.id === id)
+    const to = from + offset
+
+    if (from < 0 || to < 0 || to >= active.length) return
+
+    const ordered = [...active]
+    const [item] = ordered.splice(from, 1)
+
+    if (!item) return
+    ordered.splice(to, 0, item)
+    reorder(
+      "option-groups",
+      product.id,
+      ordered.map((group) => group.id)
+    )
+  }
+
+  function moveOptionWithKeyboard(groupId: string, id: string, offset: number) {
+    const active = catalog.options
+      .filter((option) => option.groupId === groupId && !option.isArchived)
+      .sort((a, b) => a.sortOrder - b.sortOrder || a.id.localeCompare(b.id))
+    const from = active.findIndex((option) => option.id === id)
+    const to = from + offset
+
+    if (from < 0 || to < 0 || to >= active.length) return
+
+    const ordered = [...active]
+    const [item] = ordered.splice(from, 1)
+
+    if (!item) return
+    ordered.splice(to, 0, item)
+    reorder(
+      "options",
+      groupId,
+      ordered.map((option) => option.id)
+    )
+  }
+
   return (
     <section aria-label={m("extras")} className="grid min-w-0 gap-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="font-semibold">{m("extras")}</h2>
+        <h2 className="font-display text-xl font-bold">{m("extras")}</h2>
 
         {!archived && (
           <EditorDialog
+            sourcePrimary
             icon={Plus}
             title={t("newOptionGroupFor", { name: product.name })}
             label={u("addGroup")}
@@ -72,22 +174,23 @@ export function ProductExtrasTable({
         )}
       </div>
 
-      <Table aria-label={m("extras")}>
-        <TableHeader>
-          <TableRow>
-            <TableHead scope="col">{t("name")}</TableHead>
+      <p className="text-sm text-muted-foreground">
+        {t("optionGroupsDescription")}
+      </p>
 
-            <TableHead scope="col">{m("selectionPrice")}</TableHead>
+      {orderError && (
+        <p role="alert" className="text-sm text-destructive">
+          {t(`errors.${orderError}`)}
+        </p>
+      )}
 
-            <TableHead scope="col">{t("sortOrder")}</TableHead>
-
-            <TableHead scope="col">{m("actions")}</TableHead>
-          </TableRow>
-        </TableHeader>
-
-        <TableBody>
+      {groups.length === 0 ? (
+        <p className="py-4 text-sm text-muted-foreground">
+          {t("noOptionGroups")}
+        </p>
+      ) : (
+        <ul className="grid gap-3">
           {groups.map((group) => {
-            const locked = archived || group.isArchived
             const options = catalog.options
               .filter((option) => option.groupId === group.id)
               .sort(
@@ -95,158 +198,26 @@ export function ProductExtrasTable({
               )
 
             return (
-              <Fragment key={group.id}>
-                <TableRow className="bg-muted">
-                  <TableCell className="min-w-40 font-semibold">
-                    {group.name}
-
-                    {locked && (
-                      <Badge variant="neutral" className="ml-2">
-                        {t("archived")}
-                      </Badge>
-                    )}
-                  </TableCell>
-
-                  <TableCell>
-                    {t("selectionRule", {
-                      min: group.minimumSelections,
-                      max: group.maximumSelections,
-                    })}
-                  </TableCell>
-
-                  <TableCell>{group.sortOrder}</TableCell>
-
-                  <TableCell>
-                    {!locked && (
-                      <div className="flex flex-wrap gap-2">
-                        <EditorDialog
-                          compact
-                          title={t("editOptionGroup", { name: group.name })}
-                          label={u("edit")}
-                          description={u("groupEditorHelp")}
-                          disabled={pending}
-                        >
-                          {(callbacks) => (
-                            <OptionGroupForm
-                              tenantId={catalog.tenantId}
-                              productId={product.id}
-                              productName={product.name}
-                              group={group}
-                              {...callbacks}
-                              onPendingChange={(value) => {
-                                callbacks.onPendingChange?.(value)
-                                onPendingChange(value)
-                              }}
-                            />
-                          )}
-                        </EditorDialog>
-
-                        <EditorDialog
-                          icon={Plus}
-                          title={t("newOptionFor", { name: group.name })}
-                          label={u("addOption")}
-                          description={u("optionEditorHelp")}
-                          disabled={pending}
-                        >
-                          {(callbacks) => (
-                            <OptionForm
-                              tenantId={catalog.tenantId}
-                              currency={catalog.currency}
-                              group={group}
-                              {...callbacks}
-                              onPendingChange={(value) => {
-                                callbacks.onPendingChange?.(value)
-                                onPendingChange(value)
-                              }}
-                            />
-                          )}
-                        </EditorDialog>
-
-                        <ArchiveCatalogButton
-                          compact
-                          tenantId={catalog.tenantId}
-                          id={group.id}
-                          entityType="option-groups"
-                          name={group.name}
-                          onPendingChange={onPendingChange}
-                        />
-                      </div>
-                    )}
-                  </TableCell>
-                </TableRow>
-
-                {options.map((option) => (
-                  <TableRow key={option.id}>
-                    <TableCell className="pl-6">
-                      {option.name}
-
-                      {(locked || option.isArchived) && (
-                        <Badge variant="neutral" className="ml-2">
-                          {t("archived")}
-                        </Badge>
-                      )}
-                    </TableCell>
-
-                    <TableCell className="whitespace-nowrap tabular-nums">
-                      +{money.format(option.priceAdjustment)}
-                    </TableCell>
-
-                    <TableCell>{option.sortOrder}</TableCell>
-
-                    <TableCell>
-                      {!locked && !option.isArchived && (
-                        <div className="flex gap-2">
-                          <EditorDialog
-                            compact
-                            title={t("editOption", { name: option.name })}
-                            label={u("edit")}
-                            description={u("optionEditorHelp")}
-                            disabled={pending}
-                          >
-                            {(callbacks) => (
-                              <OptionForm
-                                tenantId={catalog.tenantId}
-                                currency={catalog.currency}
-                                group={group}
-                                option={option}
-                                {...callbacks}
-                                onPendingChange={(value) => {
-                                  callbacks.onPendingChange?.(value)
-                                  onPendingChange(value)
-                                }}
-                              />
-                            )}
-                          </EditorDialog>
-
-                          <ArchiveCatalogButton
-                            compact
-                            tenantId={catalog.tenantId}
-                            id={option.id}
-                            entityType="options"
-                            name={option.name}
-                            onPendingChange={onPendingChange}
-                          />
-                        </div>
-                      )}
-                    </TableCell>
-                  </TableRow>
-                ))}
-
-                {options.length === 0 && (
-                  <TableRow>
-                    <TableCell colSpan={4} className="text-muted-foreground">
-                      {t("noOptions")}
-                    </TableCell>
-                  </TableRow>
-                )}
-              </Fragment>
+              <ProductOptionGroupCard
+                key={group.id}
+                group={group}
+                options={options}
+                catalog={catalog}
+                product={product}
+                archived={archived}
+                pending={pending}
+                dragged={dragged}
+                money={money}
+                setDragged={setDragged}
+                onDropGroup={dropGroup}
+                moveGroupWithKeyboard={moveGroupWithKeyboard}
+                moveOptionWithKeyboard={moveOptionWithKeyboard}
+                reorder={reorder}
+                onPendingChange={onPendingChange}
+              />
             )
           })}
-        </TableBody>
-      </Table>
-
-      {groups.length === 0 && (
-        <p className="text-sm text-muted-foreground">{t("noOptionGroups")}</p>
+        </ul>
       )}
     </section>
   )

@@ -6,6 +6,7 @@ import type {
   DiscountsEditorProps,
 } from "@/types/catalog-management"
 import { DiscountsEditor } from "./discounts-editor"
+import { DiscountForm } from "./discount-form"
 
 vi.mock("@/actions/catalog", () => ({
   deactivateDiscountAction: vi.fn(),
@@ -33,6 +34,8 @@ vi.mock("next-intl", () => ({
       discountCodeHint: "Use letters, numbers, or hyphens; saved in uppercase.",
       name: "Name",
       discountType: "Discount type",
+      minimumOrderAmount: "Minimum order amount ({currency})",
+      discountExpiresOn: "Expires on",
       fixedAmount: "Fixed amount",
       percentage: "Percentage",
       fixedValue: "Value ({currency})",
@@ -67,6 +70,8 @@ const fixedDiscount: CatalogDiscount = {
   name: "Lunch offer",
   kind: "FixedAmount",
   value: 5.5,
+  minimumOrderAmount: 20,
+  expiresOn: "2026-12-31",
   isActive: true,
 }
 
@@ -76,6 +81,8 @@ const inactiveDiscount: CatalogDiscount = {
   name: "Welcome offer",
   kind: "Percentage",
   value: 15,
+  minimumOrderAmount: 0,
+  expiresOn: null,
   isActive: false,
 }
 const props: DiscountsEditorProps = {
@@ -117,4 +124,20 @@ it("shows a localized empty state while keeping the create form available", () =
 
   expect(html).toContain("No discount codes yet.")
   expect(html).toContain('aria-label="New discount code"')
+})
+
+it("renders the minimum order and expiry controls with saved discount values", () => {
+  const html = renderToStaticMarkup(
+    createElement(DiscountForm, {
+      tenantId: props.tenantId,
+      currency: props.currency,
+      discount: fixedDiscount,
+    })
+  )
+
+  expect(html).toContain('name="minimumOrderAmount"')
+  expect(html).toContain('value="20.00"')
+  expect(html).toContain('name="expiresOn"')
+  expect(html).toContain('type="date"')
+  expect(html).toContain('value="2026-12-31"')
 })

@@ -108,6 +108,29 @@ public sealed class CreateOrderCommandHandler(IOrderRepository orders, TimeProvi
         {
             var subtotal = snapshots.Sum(line =>
                 (line.BaseUnitPrice + line.Options.Sum(option => option.PriceAdjustment)) * line.Quantity);
+            if (catalog.Discount is { } eligibleDiscount)
+            {
+                DateOnly restaurantDate;
+                try
+                {
+                    var timeZone = TimeZoneInfo.FindSystemTimeZoneById(catalog.TimeZone);
+                    restaurantDate = DateOnly.FromDateTime(TimeZoneInfo.ConvertTime(now, timeZone).DateTime);
+                }
+                catch (TimeZoneNotFoundException)
+                {
+                    return Result<OrderReceiptDto>.Failure(new ApplicationError(ErrorCode.NotFound));
+                }
+                catch (InvalidTimeZoneException)
+                {
+                    return Result<OrderReceiptDto>.Failure(new ApplicationError(ErrorCode.NotFound));
+                }
+
+                if (eligibleDiscount.ExpiresOn is { } expiresOn && restaurantDate > expiresOn)
+                    return Validation("discountCode", "discount_expired", "This discount code has expired.");
+                if (subtotal < eligibleDiscount.MinimumOrderAmount)
+                    return Validation("discountCode", "discount_minimum_not_met",
+                        "The order subtotal does not meet this discount's minimum order amount.");
+            }
             var discountAmount = catalog.Discount switch
             {
                 { Kind: DiscountKind.FixedAmount } discount => Math.Min(subtotal, discount.Value),

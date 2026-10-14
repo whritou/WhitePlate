@@ -154,6 +154,42 @@ export function DiscountForm({
           />
         </div>
 
+        <div className="grid min-w-0 content-start gap-2">
+          <Label
+            htmlFor={`${prefix}-minimum-order`}
+            className="flex min-h-11 items-end pb-1"
+          >
+            {t("minimumOrderAmount", { currency })}
+          </Label>
+
+          <Input
+            id={`${prefix}-minimum-order`}
+            name="minimumOrderAmount"
+            type="number"
+            min="0"
+            max="9999999999.99"
+            step="0.01"
+            defaultValue={discount?.minimumOrderAmount.toFixed(2) ?? "0.00"}
+            required
+          />
+        </div>
+
+        <div className="grid min-w-0 content-start gap-2">
+          <Label
+            htmlFor={`${prefix}-expires-on`}
+            className="flex min-h-11 items-end pb-1"
+          >
+            {t("discountExpiresOn")}
+          </Label>
+
+          <Input
+            id={`${prefix}-expires-on`}
+            name="expiresOn"
+            type="date"
+            defaultValue={discount?.expiresOn ?? ""}
+          />
+        </div>
+
         <EditorFormActions
           pending={pending}
           onCancel={onCancel}
