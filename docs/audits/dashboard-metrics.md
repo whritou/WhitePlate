@@ -10,6 +10,10 @@ Owners and managers receive the two order-value aggregates. Kitchen responses co
 
 The API lifecycle now records nullable `PreparingAt` and `ReadyAt` fields on transitions. Generated migrations `20261014122001_DashboardMetricsPreparationTimestamps` and `20261014122436_DashboardMetricsTenantStatusIndex` add those fields and the aggregate indexes. Existing orders are not backfilled, and the app does not apply migrations at startup.
 
+## PostgreSQL migration rollout — 2026-10-14
+
+The two migrations were applied transactionally to Coolify's `whiteplate-postgresql-main` database before the API change was merged, so the schema is ready before deployment. Preflight confirmed the latest migration was `20261013191310_OrderPickupMode`, with no D2 history rows, columns, or indexes. A 68.7 KB `pg_dump -Fc` was saved at `/tmp/whiteplate-before-dashboard-metrics-20261014.dump` inside the database container before the change; this temporary copy is not an off-host backup. Post-checks confirmed both EF history rows at product version `10.0.12`, all four nullable columns with the expected PostgreSQL types, and both tenant indexes. Existing orders were not backfilled or otherwise changed.
+
 ## Verification evidence
 
 Commands were run from `apps/frontend` unless stated otherwise.
@@ -30,4 +34,4 @@ The API endpoint tests use deterministic SQLite integration fixtures for local-d
 
 ## Deferred acceptance
 
-Both migrations are generated but have not been applied to shared or production PostgreSQL. Migration review/rollout, representative-volume query-plan checks, real PostgreSQL behavior, hosted real-data checks, and responsive browser/accessibility acceptance remain open. The user explicitly deferred real-data validation of D1 and asked to proceed with D2; D2 real-data acceptance is likewise left for the application's later real-data acceptance phase. No production or hosted data was modified for this implementation.
+Representative-volume query-plan checks, real PostgreSQL behavior beyond the schema migration, hosted metrics against real orders, and responsive browser/accessibility acceptance remain open. The user explicitly deferred real-data validation of D1 and asked to proceed with D2; D2 real-data acceptance is likewise left for the application's later real-data acceptance phase. The rollout changed schema only; existing business rows were not modified.
