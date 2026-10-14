@@ -291,6 +291,7 @@
       "Completed": "Completed",
       "Cancelled": "Cancelled"
     },
+    "statusCount": "{status}: {count}",
     "actions": {
       "Preparing": "Start preparing",
       "Ready": "Mark ready",
@@ -3319,8 +3320,7 @@
     "loadedTotal": "Total of loaded orders",
     "dashboardScope": "Restaurant-wide operational totals for today and yesterday, using the restaurant’s saved time zone. Order values are not captured payments.",
     "activeOrders": "Active orders",
-    "dashboardLoadedScope": "The order list and its status filters show up to 50 loaded orders. The statistics above include all retained orders for these dates.",
-    "showingDashboardOrders": "Showing the latest {visibleCount} of {loadedCount} loaded orders.",
+    "dashboardLoadedScope": "Counts below reflect the {count} orders currently loaded. Statistics above include all retained orders for these dates.",
     "metricsTitle": "Today at a glance",
     "metricsPeriod": "Business date {date} ({timeZone}), compared with {comparisonDate}.",
     "metricsHelp": "Restaurant-wide operational statistics are grouped by the saved restaurant time zone.",
@@ -3405,6 +3405,7 @@
     "openOrders": "Open order board",
     "quickAvailability": "Quick availability",
     "quickAvailabilityHelp": "Update which products guests can order. Changes apply to new orders; existing orders keep their saved items.",
+    "quickAvailabilityReadOnlyHelp": "View which products guests can order. Owners and managers can change availability.",
     "availabilityLoadError": "Product availability could not be loaded.",
     "availabilityEmpty": "No active products to manage.",
     "productAvailable": "Available",

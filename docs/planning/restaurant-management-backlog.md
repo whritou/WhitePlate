@@ -206,8 +206,8 @@ Build the real restaurant back-office dashboard using the supplied overview desi
 
 Acceptance criteria:
 
-- [ ] Provide restaurant context, role-aware navigation, live storefront link and operational order summary/ticket list with status filters and responsive secondary panels.
-- [ ] Reuse authoritative Pending/Preparing/Ready/Completed/Cancelled actions and existing If-Match, pending, conflict, cancellation-role and revocation behavior; do not create a second incompatible workflow.
+- [ ] Provide restaurant context, role-aware navigation, live storefront link and a compact responsive summary of Pending/Preparing/Ready/Completed/Cancelled counts from the currently loaded order page.
+- [ ] Keep ticket details and authoritative status actions on the dedicated Orders board; preserve its existing If-Match, pending, conflict, cancellation-role and revocation behavior without creating a second workflow.
 - [ ] Distinguish full-tenant server counts from loaded-page counts; show refresh/offline/stale/empty/error states and recover through REST after reconnect.
 - [ ] Show paid, pickup countdown, email-delivered, station or shelf labels only when their supporting data exists; preserve the separate demo route and clearly mark unavailable future widgets.
 - [ ] Test owner/manager/kitchen visibility, foreign-tenant denial, revoked membership, keyboard/touch actions and actual server persistence. Coordinate hosted SignalR checks with the existing In review card rather than duplicating that scope.
@@ -264,7 +264,7 @@ Add the Quick 86 availability panel and live storefront copy/open/QR shortcuts w
 
 Acceptance criteria:
 
-- [ ] Reuse existing owner/manager product availability operations and catalog validation; show pending state, rollback/failure feedback and correct authorization for kitchen users.
+- [ ] Reuse existing owner/manager product availability operations and catalog validation; show real saved product covers to photo-authorized owners/managers, pending/rollback feedback for mutations, and a read-only availability view for Kitchen.
 - [ ] Reflect saved availability in the dashboard and tenant storefront; checkout must revalidate unavailable items while preserving existing order snapshots.
 - [ ] Prevent archived products/categories from being reactivated through the shortcut; handle concurrent changes and stale cached menu data safely.
 - [ ] Create public storefront links/QR codes from the validated tenant domain and locale policy; do not include auth/session/tracking secrets.
@@ -272,7 +272,7 @@ Acceptance criteria:
 
 Decisions and limits:
 
-- Confirm whether kitchen staff may toggle availability; existing management rights must not silently expand. Numerical stock, station/shelf assignments, printer/POS integrations and kiosk/NFC mode remain separate optional work.
+- Resolved 14 October 2026: Kitchen can view saved product availability but remains read-only, matching the API's existing authorization; product photos use a neutral fallback because the private photo endpoint is restricted to owners/managers. Numerical stock, station/shelf assignments, printer/POS integrations and kiosk/NFC mode remain separate optional work.
 
 ### M1 — Menu Builder & Translations: unify catalog, pricing and menu languages in Stitch workspace
 

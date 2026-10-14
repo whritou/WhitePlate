@@ -5,6 +5,8 @@ import { useState } from "react"
 import { setProductAvailabilityAction } from "@/actions/catalog"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Card } from "@/components/ui/card"
+import { LiveProductCover } from "./live-product-cover"
 import type {
   ProductAvailability,
   ProductAvailabilityControlLabels,
@@ -12,10 +14,14 @@ import type {
 
 export function ProductAvailabilityControls({
   tenantId,
+  userId,
+  canManageAvailability,
   products: initialProducts,
   labels,
 }: {
   tenantId: string
+  userId?: string
+  canManageAvailability: boolean
   products: ProductAvailability[]
   labels: ProductAvailabilityControlLabels
 }) {
@@ -86,52 +92,71 @@ export function ProductAvailabilityControls({
         const label = `${labels.availabilityFor}: ${product.name}`
 
         return (
-          <li
-            key={product.id}
-            className="grid min-w-0 gap-3 border-y py-3 sm:border sm:px-4"
-          >
-            <div className="flex min-w-0 items-start justify-between gap-3">
-              <p className="min-w-0 truncate text-sm font-semibold">
-                {product.name}
-              </p>
+          <li key={product.id} className="min-w-0">
+            <Card className="h-full">
+              <div className="grid gap-3 p-3 sm:p-4">
+                <div className="flex min-w-0 items-center gap-3">
+                  <LiveProductCover
+                    className="size-20 shrink-0 border sm:size-24"
+                    userId={userId}
+                    tenantId={tenantId}
+                    productId={product.id}
+                  />
 
-              <Badge variant={product.isAvailable ? "success" : "warning"}>
-                {product.isAvailable ? (
-                  <Check aria-hidden="true" />
-                ) : (
-                  <CircleSlash aria-hidden="true" />
+                  <div className="grid min-w-0 gap-2">
+                    <p
+                      title={product.name}
+                      className="min-w-0 text-sm font-semibold break-words"
+                    >
+                      {product.name}
+                    </p>
+
+                    <Badge
+                      variant={product.isAvailable ? "success" : "warning"}
+                    >
+                      {product.isAvailable ? (
+                        <Check aria-hidden="true" />
+                      ) : (
+                        <CircleSlash aria-hidden="true" />
+                      )}
+
+                      {product.isAvailable
+                        ? labels.available
+                        : labels.unavailable}
+                    </Badge>
+                  </div>
+                </div>
+
+                {canManageAvailability && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="min-h-11 w-full md:min-h-12"
+                    disabled={pendingProductId !== null}
+                    aria-label={label}
+                    aria-pressed={product.isAvailable}
+                    aria-busy={isPending}
+                    onClick={() => void toggleAvailability(product.id)}
+                  >
+                    {isPending
+                      ? labels.updating
+                      : product.isAvailable
+                        ? labels.markUnavailable
+                        : labels.markAvailable}
+                  </Button>
                 )}
 
-                {product.isAvailable ? labels.available : labels.unavailable}
-              </Badge>
-            </div>
-
-            <Button
-              type="button"
-              variant="outline"
-              className="min-h-11 w-full sm:w-fit md:min-h-12"
-              disabled={pendingProductId !== null}
-              aria-label={label}
-              aria-pressed={product.isAvailable}
-              aria-busy={isPending}
-              onClick={() => void toggleAvailability(product.id)}
-            >
-              {isPending
-                ? labels.updating
-                : product.isAvailable
-                  ? labels.markUnavailable
-                  : labels.markAvailable}
-            </Button>
-
-            {feedback?.productId === product.id && (
-              <p
-                role={feedback.error ? "alert" : "status"}
-                aria-live={feedback.error ? "assertive" : "polite"}
-                className="text-sm text-muted-foreground"
-              >
-                {feedback.message}
-              </p>
-            )}
+                {feedback?.productId === product.id && (
+                  <p
+                    role={feedback.error ? "alert" : "status"}
+                    aria-live={feedback.error ? "assertive" : "polite"}
+                    className="text-sm text-muted-foreground"
+                  >
+                    {feedback.message}
+                  </p>
+                )}
+              </div>
+            </Card>
           </li>
         )
       })}
