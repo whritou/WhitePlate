@@ -122,7 +122,6 @@ export function MenuBuilderWorkspace({
         <MenuBuilderCatalog
           userId={userId}
           catalog={catalog}
-          settings={settings}
           pending={pending}
           onPendingChange={setPending}
           categoryId={categoryId}

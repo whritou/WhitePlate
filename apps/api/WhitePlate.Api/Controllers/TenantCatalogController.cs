@@ -110,6 +110,22 @@ public sealed class TenantCatalogController(
         return result.IsSuccess ? Ok(result.Value) : errors.ToActionResult(errors.Create(HttpContext, result.Error));
     }
 
+    [HttpPut("catalog/reorder")]
+    [RequestSizeLimit(65536)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status400BadRequest, "application/problem+json")]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status401Unauthorized, "application/problem+json")]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status404NotFound, "application/problem+json")]
+    public async Task<IActionResult> ReorderCatalog(Guid tenantId, ReorderCatalogRequest request,
+        CancellationToken cancellationToken)
+    {
+        var identity = currentIdentity.Identity;
+        if (identity is null) return Unauthorized();
+        var result = await manageCatalog.ReorderAsync(new ReorderCatalogCommand(tenantId,
+            request.EntityType, request.ParentId, request.CategoryId, request.OrderedIds, identity), cancellationToken);
+        return result.IsSuccess ? NoContent() : errors.ToActionResult(errors.Create(HttpContext, result.Error));
+    }
+
     [HttpGet("products/availability")]
     [ProducesResponseType<IReadOnlyList<ProductAvailabilityDto>>(StatusCodes.Status200OK)]
     [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status401Unauthorized, "application/problem+json")]
@@ -180,6 +196,18 @@ public sealed class TenantCatalogController(
         var identity = currentIdentity.Identity;
         if (identity is null) return Unauthorized();
         var result = await manageCatalog.ArchiveCategoryAsync(tenantId, categoryId, identity, cancellationToken);
+        return result.IsSuccess ? NoContent() : errors.ToActionResult(errors.Create(HttpContext, result.Error));
+    }
+
+    [HttpPost("categories/{categoryId:guid}/restore")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status401Unauthorized, "application/problem+json")]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status404NotFound, "application/problem+json")]
+    public async Task<IActionResult> RestoreCategory(Guid tenantId, Guid categoryId, CancellationToken cancellationToken)
+    {
+        var identity = currentIdentity.Identity;
+        if (identity is null) return Unauthorized();
+        var result = await manageCatalog.RestoreCategoryAsync(tenantId, categoryId, identity, cancellationToken);
         return result.IsSuccess ? NoContent() : errors.ToActionResult(errors.Create(HttpContext, result.Error));
     }
 
@@ -303,6 +331,18 @@ public sealed class TenantCatalogController(
         return result.IsSuccess ? NoContent() : errors.ToActionResult(errors.Create(HttpContext, result.Error));
     }
 
+    [HttpPost("option-groups/{groupId:guid}/restore")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status401Unauthorized, "application/problem+json")]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status404NotFound, "application/problem+json")]
+    public async Task<IActionResult> RestoreOptionGroup(Guid tenantId, Guid groupId, CancellationToken cancellationToken)
+    {
+        var identity = currentIdentity.Identity;
+        if (identity is null) return Unauthorized();
+        var result = await manageCatalog.RestoreOptionGroupAsync(tenantId, groupId, identity, cancellationToken);
+        return result.IsSuccess ? NoContent() : errors.ToActionResult(errors.Create(HttpContext, result.Error));
+    }
+
     [HttpPost("option-groups/{groupId:guid}/options")]
     [ProducesResponseType<MenuOptionDto>(StatusCodes.Status201Created)]
     [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status400BadRequest, "application/problem+json")]
@@ -346,6 +386,18 @@ public sealed class TenantCatalogController(
         return result.IsSuccess ? NoContent() : errors.ToActionResult(errors.Create(HttpContext, result.Error));
     }
 
+    [HttpPost("options/{optionId:guid}/restore")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status401Unauthorized, "application/problem+json")]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status404NotFound, "application/problem+json")]
+    public async Task<IActionResult> RestoreOption(Guid tenantId, Guid optionId, CancellationToken cancellationToken)
+    {
+        var identity = currentIdentity.Identity;
+        if (identity is null) return Unauthorized();
+        var result = await manageCatalog.RestoreOptionAsync(tenantId, optionId, identity, cancellationToken);
+        return result.IsSuccess ? NoContent() : errors.ToActionResult(errors.Create(HttpContext, result.Error));
+    }
+
     [HttpPost("discounts")]
     [ProducesResponseType<DiscountResponse>(StatusCodes.Status201Created)]
     [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status400BadRequest, "application/problem+json")]
@@ -364,10 +416,11 @@ public sealed class TenantCatalogController(
             _ => (WhitePlate.Domain.Catalog.DiscountKind)0
         };
         var result = await createDiscount.HandleAsync(new CreateDiscountCommand(tenantId, request.Code,
-            request.Name, kind, request.Value, identity), cancellationToken);
+            request.Name, kind, request.Value, identity, request.MinimumOrderAmount, request.ExpiresOn), cancellationToken);
         return result.IsSuccess
             ? StatusCode(StatusCodes.Status201Created, new DiscountResponse(result.Value,
-                request.Code.Trim().ToUpperInvariant(), request.Name.Trim(), request.Kind, request.Value))
+                request.Code.Trim().ToUpperInvariant(), request.Name.Trim(), request.Kind, request.Value,
+                request.MinimumOrderAmount, request.ExpiresOn))
             : errors.ToActionResult(errors.Create(HttpContext, result.Error));
     }
 
@@ -383,9 +436,10 @@ public sealed class TenantCatalogController(
         if (identity is null) return Unauthorized();
         var kind = ParseDiscountKind(request.Kind);
         var result = await manageCatalog.UpdateDiscountAsync(new UpdateDiscountCommand(tenantId, discountId,
-            request.Name, kind, request.Value, identity), cancellationToken);
+            request.Name, kind, request.Value, identity, request.MinimumOrderAmount, request.ExpiresOn), cancellationToken);
         return result.IsSuccess ? Ok(new DiscountResponse(result.Value.Id, result.Value.Code, result.Value.Name,
-            result.Value.Kind, result.Value.Value)) : errors.ToActionResult(errors.Create(HttpContext, result.Error));
+            result.Value.Kind, result.Value.Value, result.Value.MinimumOrderAmount, result.Value.ExpiresOn)) :
+            errors.ToActionResult(errors.Create(HttpContext, result.Error));
     }
 
     [HttpDelete("discounts/{discountId:guid}")]

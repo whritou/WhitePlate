@@ -82,20 +82,18 @@ export function useProductPhotos({
     void query.refetch()
   }
 
-  async function upload(file: File, aspect: string, target?: string) {
-    if (gate.current || !available) return
-    setRetryFile({ file, aspect, target })
-    setError(null)
-    setSaved(false)
-    if (!validatePhotoFile(file) || (!target && photos.length >= 8)) {
+  async function uploadMany(files: File[], aspect: string, target?: string) {
+    if (gate.current || !available || files.length === 0) return
+    if (
+      files.some((file) => !validatePhotoFile(file)) ||
+      (target && files.length !== 1) ||
+      (!target && photos.length + files.length > 8)
+    ) {
       setError("invalid")
-
       return
     }
-
     if (!navigator.onLine) {
       setError("offline")
-
       return
     }
 
@@ -103,30 +101,42 @@ export function useProductPhotos({
     setBusy("upload")
     onPendingChange?.(true)
     setProgress(0)
-    controller.current = new AbortController()
+    setError(null)
+    setSaved(false)
+    let workingPhotos = [...photos]
     try {
-      const photo = await uploadProductFile(
-        tenantId,
-        productId,
-        aspect,
-        file,
-        setProgress,
-        controller.current.signal
-      )
-
-      change(
-        target
-          ? photos.map((item) => (item.id === target ? photo : item))
-          : [...photos, photo]
-      )
-      setRetryFile(null)
-    } catch (reason) {
-      failure(reason)
+      for (const file of files) {
+        const attempt = { file, aspect, target }
+        setRetryFile(attempt)
+        controller.current = new AbortController()
+        try {
+          const photo = await uploadProductFile(
+            tenantId,
+            productId,
+            aspect,
+            file,
+            setProgress,
+            controller.current.signal
+          )
+          workingPhotos = target
+            ? workingPhotos.map((item) => (item.id === target ? photo : item))
+            : [...workingPhotos, photo]
+          change(workingPhotos)
+          setRetryFile(null)
+        } catch (reason) {
+          failure(reason)
+          break
+        }
+      }
     } finally {
       gate.current = false
       setBusy(null)
       onPendingChange?.(false)
     }
+  }
+
+  async function upload(file: File, aspect: string, target?: string) {
+    await uploadMany([file], aspect, target)
   }
 
   async function save() {
@@ -180,6 +190,7 @@ export function useProductPhotos({
     change,
     discard,
     upload,
+    uploadMany,
     save,
     retryUpload,
     canRetryUpload: Boolean(retryFile),

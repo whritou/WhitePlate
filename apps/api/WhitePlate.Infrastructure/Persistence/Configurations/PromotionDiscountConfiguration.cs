@@ -17,6 +17,8 @@ public sealed class PromotionDiscountConfiguration : IEntityTypeConfiguration<Pr
         builder.Property(discount => discount.Name).IsRequired().HasMaxLength(120);
         builder.Property(discount => discount.Kind).HasConversion<string>().HasMaxLength(32).IsRequired();
         builder.Property(discount => discount.Value).HasPrecision(12, 2).IsRequired();
+        builder.Property(discount => discount.MinimumOrderAmount).HasPrecision(12, 2).HasDefaultValue(0m).IsRequired();
+        builder.Property(discount => discount.ExpiresOn).HasColumnType("date");
         builder.Property(discount => discount.IsActive).IsRequired();
         builder.HasOne<Tenant>().WithMany().HasForeignKey(discount => discount.TenantId).OnDelete(DeleteBehavior.Cascade);
         builder.HasIndex(discount => new { discount.TenantId, discount.Code }).IsUnique();

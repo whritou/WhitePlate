@@ -1,6 +1,7 @@
 import { isRecord, isUuid } from "./common"
 import type {
   ArchiveInput,
+  CatalogReorderInput,
   CategoryInput,
   DiscountInput,
   DiscountReferenceInput,
@@ -282,6 +283,21 @@ export function parseDiscountInput(input: unknown): DiscountInput | null {
     rawKind === "FixedAmount" || rawKind === "Percentage" ? rawKind : null
   const maximum = kind === "Percentage" ? 100 : 9999999999.99
   const value = decimal(input.get("value"), maximum)
+  const minimumOrderAmount = decimal(
+    input.get("minimumOrderAmount") ?? "0",
+    9999999999.99
+  )
+  const rawExpiresOn = input.get("expiresOn")
+  const expiresOn =
+    rawExpiresOn === "" || rawExpiresOn === null
+      ? null
+      : typeof rawExpiresOn === "string" &&
+          /^\d{4}-\d{2}-\d{2}$/.test(rawExpiresOn) &&
+          !Number.isNaN(Date.parse(`${rawExpiresOn}T00:00:00.000Z`)) &&
+          new Date(`${rawExpiresOn}T00:00:00.000Z`).toISOString().slice(0, 10) ===
+            rawExpiresOn
+        ? rawExpiresOn
+        : undefined
   const name = typeof rawName === "string" ? rawName.trim() : ""
   const code =
     id !== null
@@ -299,11 +315,46 @@ export function parseDiscountInput(input: unknown): DiscountInput | null {
     name.length > 120 ||
     !kind ||
     value === null ||
-    value <= 0
+    value <= 0 ||
+    minimumOrderAmount === null ||
+    expiresOn === undefined
   )
     return null
 
-  return { tenantId, id, code, name, kind, value }
+  return { tenantId, id, code, name, kind, value, minimumOrderAmount, expiresOn }
+}
+
+export function parseCatalogReorderInput(
+  input: unknown
+): CatalogReorderInput | null {
+  if (!(input instanceof FormData)) return null
+  const tenantId = input.get("tenantId")
+  const entityType = input.get("entityType")
+  const parentId = input.get("parentId")
+  const categoryId = input.get("categoryId")
+  const rawIds = input.getAll("orderedIds")
+  const allowed = ["categories", "products", "option-groups", "options"]
+
+  if (
+    !isUuid(tenantId) ||
+    typeof entityType !== "string" ||
+    !allowed.includes(entityType) ||
+    (parentId !== null && !isUuid(parentId)) ||
+    (categoryId !== null && !isUuid(categoryId)) ||
+    rawIds.length < 1 ||
+    rawIds.length > 500 ||
+    !rawIds.every(isUuid) ||
+    new Set(rawIds).size !== rawIds.length
+  )
+    return null
+
+  return {
+    tenantId,
+    entityType: entityType as CatalogReorderInput["entityType"],
+    parentId: typeof parentId === "string" ? parentId : null,
+    categoryId: typeof categoryId === "string" ? categoryId : null,
+    orderedIds: rawIds as string[],
+  }
 }
 
 export function parseDiscountReferenceInput(

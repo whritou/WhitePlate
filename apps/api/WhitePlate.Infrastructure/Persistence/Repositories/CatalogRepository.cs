@@ -245,12 +245,13 @@ public sealed class CatalogRepository(WhitePlateDbContext database) : ICatalogRe
     }
 
     public async Task<PromotionDiscountDto?> UpdateDiscountAsync(Guid tenantId, Guid discountId, string name,
-        WhitePlate.Domain.Catalog.DiscountKind kind, decimal value, CancellationToken cancellationToken)
+        WhitePlate.Domain.Catalog.DiscountKind kind, decimal value, decimal minimumOrderAmount,
+        DateOnly? expiresOn, CancellationToken cancellationToken)
     {
         var discount = await database.PromotionDiscounts.SingleOrDefaultAsync(item => item.TenantId == tenantId &&
             item.Id == discountId && item.IsActive, cancellationToken);
         if (discount is null) return null;
-        discount.Update(name, kind, value);
+        discount.Update(name, kind, value, minimumOrderAmount, expiresOn);
         await database.SaveChangesAsync(cancellationToken);
         return ToDto(discount);
     }
@@ -296,6 +297,16 @@ public sealed class CatalogRepository(WhitePlateDbContext database) : ICatalogRe
         return true;
     }
 
+    public async Task<bool> RestoreCategoryAsync(Guid tenantId, Guid categoryId, CancellationToken cancellationToken)
+    {
+        var category = await database.MenuCategories.SingleOrDefaultAsync(item => item.TenantId == tenantId &&
+            item.Id == categoryId && item.IsArchived, cancellationToken);
+        if (category is null) return false;
+        category.Restore();
+        await database.SaveChangesAsync(cancellationToken);
+        return true;
+    }
+
     public async Task<bool> ArchiveOptionGroupAsync(Guid tenantId, Guid groupId, CancellationToken cancellationToken)
     {
         var group = await database.ProductOptionGroups.SingleOrDefaultAsync(item => item.TenantId == tenantId &&
@@ -303,6 +314,19 @@ public sealed class CatalogRepository(WhitePlateDbContext database) : ICatalogRe
         if (group is null) return false;
         await ArchiveOptionsAsync(tenantId, [groupId], cancellationToken);
         group.Archive();
+        await database.SaveChangesAsync(cancellationToken);
+        return true;
+    }
+
+    public async Task<bool> RestoreOptionGroupAsync(Guid tenantId, Guid groupId, CancellationToken cancellationToken)
+    {
+        var group = await database.ProductOptionGroups.SingleOrDefaultAsync(item => item.TenantId == tenantId &&
+            item.Id == groupId && item.IsArchived && database.Products.Any(product =>
+                product.TenantId == tenantId && product.Id == item.ProductId && !product.IsArchived &&
+                database.MenuCategories.Any(category => category.TenantId == tenantId &&
+                    category.Id == product.CategoryId && !category.IsArchived)), cancellationToken);
+        if (group is null) return false;
+        group.Restore();
         await database.SaveChangesAsync(cancellationToken);
         return true;
     }
@@ -315,6 +339,108 @@ public sealed class CatalogRepository(WhitePlateDbContext database) : ICatalogRe
         option.Archive();
         await database.SaveChangesAsync(cancellationToken);
         return true;
+    }
+
+    public async Task<bool> RestoreOptionAsync(Guid tenantId, Guid optionId, CancellationToken cancellationToken)
+    {
+        var option = await database.ProductOptions.SingleOrDefaultAsync(item => item.TenantId == tenantId &&
+            item.Id == optionId && item.IsArchived && database.ProductOptionGroups.Any(group =>
+                group.TenantId == tenantId && group.Id == item.GroupId && !group.IsArchived &&
+                database.Products.Any(product => product.TenantId == tenantId && product.Id == group.ProductId &&
+                    !product.IsArchived && database.MenuCategories.Any(category => category.TenantId == tenantId &&
+                        category.Id == product.CategoryId && !category.IsArchived))), cancellationToken);
+        if (option is null) return false;
+        option.Restore();
+        await database.SaveChangesAsync(cancellationToken);
+        return true;
+    }
+
+    public async Task<bool> ReorderCatalogAsync(Guid tenantId, string entityType, Guid? parentId,
+        Guid? categoryId, IReadOnlyList<Guid> orderedIds, CancellationToken cancellationToken)
+    {
+        await using var transaction = await database.Database.BeginTransactionAsync(cancellationToken);
+        switch (entityType)
+        {
+            case "categories":
+            {
+                var items = await database.MenuCategories.Where(item => item.TenantId == tenantId && !item.IsArchived)
+                    .ToListAsync(cancellationToken);
+                if (!HasSameIds(items.Select(item => item.Id), orderedIds)) return false;
+                for (var index = 0; index < orderedIds.Count; index++)
+                    items.Single(item => item.Id == orderedIds[index]).SetSortOrder(index);
+                break;
+            }
+            case "products":
+            {
+                var targetCategoryId = categoryId!.Value;
+                if (!await database.MenuCategories.AnyAsync(item => item.TenantId == tenantId &&
+                        item.Id == targetCategoryId && !item.IsArchived, cancellationToken)) return false;
+                var targetItems = await database.Products.Where(item => item.TenantId == tenantId &&
+                    item.CategoryId == targetCategoryId && !item.IsArchived).ToListAsync(cancellationToken);
+                var requestedItems = await database.Products.Where(item => item.TenantId == tenantId &&
+                    orderedIds.Contains(item.Id) && !item.IsArchived && database.MenuCategories.Any(category =>
+                        category.TenantId == tenantId && category.Id == item.CategoryId && !category.IsArchived))
+                    .ToListAsync(cancellationToken);
+                if (!targetItems.All(item => orderedIds.Contains(item.Id)) || requestedItems.Count != orderedIds.Count)
+                    return false;
+                var moved = requestedItems.Where(item => item.CategoryId != targetCategoryId).ToArray();
+                var sourceCategoryIds = moved.Select(item => item.CategoryId).Distinct().ToArray();
+                foreach (var (item, index) in orderedIds.Select((id, index) =>
+                             (requestedItems.Single(item => item.Id == id), index)))
+                {
+                    item.ChangeCategory(targetCategoryId);
+                    item.SetSortOrder(index);
+                }
+                var movedIds = moved.Select(item => item.Id).ToArray();
+                foreach (var sourceCategoryId in sourceCategoryIds)
+                {
+                    var sourceItems = await database.Products.Where(item => item.TenantId == tenantId &&
+                            item.CategoryId == sourceCategoryId && !item.IsArchived && !movedIds.Contains(item.Id))
+                        .OrderBy(item => item.SortOrder).ThenBy(item => item.Id).ToListAsync(cancellationToken);
+                    for (var index = 0; index < sourceItems.Count; index++) sourceItems[index].SetSortOrder(index);
+                }
+                break;
+            }
+            case "option-groups":
+            {
+                var productId = parentId!.Value;
+                if (!await database.Products.AnyAsync(item => item.TenantId == tenantId && item.Id == productId &&
+                        !item.IsArchived && database.MenuCategories.Any(category => category.TenantId == tenantId &&
+                            category.Id == item.CategoryId && !category.IsArchived), cancellationToken)) return false;
+                var items = await database.ProductOptionGroups.Where(item => item.TenantId == tenantId &&
+                    item.ProductId == productId && !item.IsArchived).ToListAsync(cancellationToken);
+                if (!HasSameIds(items.Select(item => item.Id), orderedIds)) return false;
+                for (var index = 0; index < orderedIds.Count; index++)
+                    items.Single(item => item.Id == orderedIds[index]).SetSortOrder(index);
+                break;
+            }
+            case "options":
+            {
+                var groupId = parentId!.Value;
+                if (!await database.ProductOptionGroups.AnyAsync(group => group.TenantId == tenantId &&
+                        group.Id == groupId && !group.IsArchived && database.Products.Any(product =>
+                            product.TenantId == tenantId && product.Id == group.ProductId && !product.IsArchived &&
+                            database.MenuCategories.Any(category => category.TenantId == tenantId &&
+                                category.Id == product.CategoryId && !category.IsArchived)), cancellationToken)) return false;
+                var items = await database.ProductOptions.Where(item => item.TenantId == tenantId &&
+                    item.GroupId == groupId && !item.IsArchived).ToListAsync(cancellationToken);
+                if (!HasSameIds(items.Select(item => item.Id), orderedIds)) return false;
+                for (var index = 0; index < orderedIds.Count; index++)
+                    items.Single(item => item.Id == orderedIds[index]).SetSortOrder(index);
+                break;
+            }
+            default:
+                return false;
+        }
+        await database.SaveChangesAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
+        return true;
+    }
+
+    private static bool HasSameIds(IEnumerable<Guid> existing, IReadOnlyCollection<Guid> requested)
+    {
+        var ids = existing.ToArray();
+        return ids.Length == requested.Count && ids.All(requested.Contains);
     }
 
     public async Task<bool> DeactivateDiscountAsync(Guid tenantId, Guid discountId,
@@ -521,7 +647,8 @@ public sealed class CatalogRepository(WhitePlateDbContext database) : ICatalogRe
     }
 
     private static PromotionDiscountDto ToDto(WhitePlate.Domain.Catalog.PromotionDiscount discount) =>
-        new(discount.Id, discount.Code, discount.Name, discount.Kind.ToString(), discount.Value, discount.IsActive);
+        new(discount.Id, discount.Code, discount.Name, discount.Kind.ToString(), discount.Value, discount.IsActive,
+            discount.MinimumOrderAmount, discount.ExpiresOn);
 
     private static MenuProductDto ToMenuProductDto(Product product) =>
         new(product.Id, product.Name, product.Description, product.BasePrice, product.TaxRatePercent,

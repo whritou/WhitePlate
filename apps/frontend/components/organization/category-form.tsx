@@ -41,6 +41,11 @@ export function CategoryForm({
       <input type="hidden" name="tenantId" value={tenantId} />
 
       {category && <input type="hidden" name="id" value={category.id} />}
+      <input
+        type="hidden"
+        name="sortOrder"
+        value={category?.sortOrder ?? 2147483647}
+      />
 
       <fieldset disabled={pending} className="grid gap-4 sm:grid-cols-2">
         <Label htmlFor={`${prefix}-name`} className="grid gap-2">
@@ -52,21 +57,6 @@ export function CategoryForm({
             defaultValue={category?.name}
             required
             maxLength={120}
-          />
-        </Label>
-
-        <Label htmlFor={`${prefix}-sort`} className="grid gap-2">
-          {t("sortOrder")}
-
-          <Input
-            id={`${prefix}-sort`}
-            name="sortOrder"
-            type="number"
-            min={0}
-            max={2147483647}
-            step={1}
-            defaultValue={category?.sortOrder ?? 0}
-            required
           />
         </Label>
 

@@ -66,10 +66,10 @@ public sealed class OrderRepository(WhitePlateDbContext database) : IOrderReposi
         string locale, string defaultLocale, IReadOnlyCollection<Guid> productIds, string? discountCode,
         CancellationToken cancellationToken)
     {
-        var currency = await database.Tenants.AsNoTracking().Where(tenant => tenant.Id == tenantId && tenant.IsActive &&
+        var tenant = await database.Tenants.AsNoTracking().Where(tenant => tenant.Id == tenantId && tenant.IsActive &&
                 database.Organizations.Any(organization => organization.Id == tenant.OrganizationId && organization.IsActive))
-            .Select(tenant => tenant.Currency).SingleOrDefaultAsync(cancellationToken);
-        if (currency is null) return new CheckoutCatalogDto(string.Empty, locale, [], null);
+            .Select(tenant => new { tenant.Currency, tenant.TimeZone }).SingleOrDefaultAsync(cancellationToken);
+        if (tenant is null) return new CheckoutCatalogDto(string.Empty, locale, [], null);
 
         var products = await database.Products.AsNoTracking().Where(product => product.TenantId == tenantId &&
                 productIds.Contains(product.Id) && product.IsAvailable && !product.IsArchived &&
@@ -118,9 +118,10 @@ public sealed class OrderRepository(WhitePlateDbContext database) : IOrderReposi
 
         var discount = string.IsNullOrWhiteSpace(discountCode) ? null : await database.PromotionDiscounts.AsNoTracking()
             .Where(item => item.TenantId == tenantId && item.Code == discountCode && item.IsActive)
-            .Select(item => new CheckoutDiscountDto(item.Code, item.Kind, item.Value))
+            .Select(item => new CheckoutDiscountDto(item.Code, item.Kind, item.Value,
+                item.MinimumOrderAmount, item.ExpiresOn))
             .SingleOrDefaultAsync(cancellationToken);
-        return new CheckoutCatalogDto(currency, locale, checkoutProducts, discount);
+        return new CheckoutCatalogDto(tenant.Currency, locale, checkoutProducts, discount, tenant.TimeZone);
     }
 
     public async Task<IdempotencyResult> CreateOrderAsync(WhitePlate.Domain.Orders.Order order,

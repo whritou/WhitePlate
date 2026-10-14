@@ -18,7 +18,8 @@ public sealed record MenuProductDto(Guid Id, string Name, string? Description, d
 }
 public sealed record ProductAvailabilityDto(Guid Id, string Name, bool IsAvailable);
 public sealed record MenuCategoryDto(Guid Id, string Name, int SortOrder, IReadOnlyList<MenuProductDto> Products);
-public sealed record PromotionDiscountDto(Guid Id, string Code, string Name, string Kind, decimal Value, bool IsActive);
+public sealed record PromotionDiscountDto(Guid Id, string Code, string Name, string Kind, decimal Value,
+    bool IsActive, decimal MinimumOrderAmount = 0m, DateOnly? ExpiresOn = null);
 public sealed record CatalogCategoryAdminDto(Guid Id, string Name, int SortOrder, bool IsArchived)
 {
     public bool IsVisible { get; init; } = true;

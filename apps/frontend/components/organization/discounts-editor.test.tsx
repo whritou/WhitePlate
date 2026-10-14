@@ -67,6 +67,8 @@ const fixedDiscount: CatalogDiscount = {
   name: "Lunch offer",
   kind: "FixedAmount",
   value: 5.5,
+  minimumOrderAmount: 20,
+  expiresOn: "2026-12-31",
   isActive: true,
 }
 
@@ -76,6 +78,8 @@ const inactiveDiscount: CatalogDiscount = {
   name: "Welcome offer",
   kind: "Percentage",
   value: 15,
+  minimumOrderAmount: 0,
+  expiresOn: null,
   isActive: false,
 }
 const props: DiscountsEditorProps = {

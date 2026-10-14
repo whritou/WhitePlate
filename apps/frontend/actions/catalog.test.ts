@@ -391,7 +391,14 @@ it("creates a normalized discount with only the API create fields", async () => 
   ).toEqual({ ok: true })
   expect(whitePlateApi.post).toHaveBeenCalledWith(
     `/api/v1/tenants/${tenantId}/discounts`,
-    { code: "LUNCH-10", name: "Lunch offer", kind: "FixedAmount", value: 5.25 }
+    {
+      code: "LUNCH-10",
+      name: "Lunch offer",
+      kind: "FixedAmount",
+      value: 5.25,
+      minimumOrderAmount: 0,
+      expiresOn: null,
+    }
   )
 })
 
@@ -416,7 +423,13 @@ it("updates discount details without sending a replacement code or active flag",
   ).toEqual({ ok: true })
   expect(whitePlateApi.put).toHaveBeenCalledWith(
     `/api/v1/tenants/${tenantId}/discounts/${discountId}`,
-    { name: "New name", kind: "Percentage", value: 15 }
+    {
+      name: "New name",
+      kind: "Percentage",
+      value: 15,
+      minimumOrderAmount: 0,
+      expiresOn: null,
+    }
   )
 })
 

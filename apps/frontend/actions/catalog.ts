@@ -6,6 +6,7 @@ import {
   parseCategoryInput,
   parseDiscountInput,
   parseDiscountReferenceInput,
+  parseCatalogReorderInput,
   parseOptionGroupInput,
   parseOptionInput,
   parseProductInput,
@@ -20,6 +21,8 @@ import {
   saveOptionGroup,
   saveProduct,
   restoreProduct,
+  restoreCatalogItem,
+  reorderCatalog,
   setCategoryVisibility,
   setProductAvailability,
 } from "@/services/catalog-management"
@@ -112,4 +115,29 @@ export async function restoreProductAction(
   return isUuid(tenantId) && isUuid(id)
     ? restoreProduct(tenantId, id)
     : { ok: false, error: "invalid" }
+}
+
+export async function restoreCatalogItemAction(
+  input: unknown
+): Promise<CatalogResult> {
+  if (!(input instanceof FormData)) return { ok: false, error: "invalid" }
+  const tenantId = input.get("tenantId")
+  const id = input.get("id")
+  const entityType = input.get("entityType")
+
+  return isUuid(tenantId) &&
+    isUuid(id) &&
+    (entityType === "categories" ||
+      entityType === "option-groups" ||
+      entityType === "options")
+    ? restoreCatalogItem({ tenantId, id, entityType })
+    : { ok: false, error: "invalid" }
+}
+
+export async function reorderCatalogAction(
+  input: unknown
+): Promise<CatalogResult> {
+  const parsed = parseCatalogReorderInput(input)
+
+  return parsed ? reorderCatalog(parsed) : { ok: false, error: "invalid" }
 }

@@ -154,6 +154,8 @@ it("normalizes new discount codes and preserves only supported create fields", (
     name: "Lunch offer",
     kind: "FixedAmount",
     value: 5.25,
+    minimumOrderAmount: 0,
+    expiresOn: null,
   })
 })
 
@@ -176,6 +178,8 @@ it("drops browser-supplied discount codes on update because codes are immutable"
     name: "Welcome",
     kind: "Percentage",
     value: 15,
+    minimumOrderAmount: 0,
+    expiresOn: null,
   })
 })
 

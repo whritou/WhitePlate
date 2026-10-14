@@ -12,10 +12,12 @@ export function RestoreProductButton({
   tenantId,
   id,
   onPendingChange,
+  compact = false,
 }: {
   tenantId: string
   id: string
   onPendingChange?: (pending: boolean) => void
+  compact?: boolean
 }) {
   const t = useTranslations("Catalog")
   const { pending, state, submit } = useCatalogForm(
@@ -32,21 +34,29 @@ export function RestoreProductButton({
 
       <input type="hidden" name="id" value={id} />
 
-      <Button type="submit" variant="outline" disabled={pending}>
+      <Button
+        type="submit"
+        variant={compact ? "ghost" : "outline"}
+        size={compact ? "icon" : "default"}
+        disabled={pending}
+        aria-label={t("restoreProduct")}
+      >
         <RotateCcw aria-hidden="true" className="size-4" />
 
-        {pending ? t("restoringProduct") : t("restoreProduct")}
+        {!compact && (pending ? t("restoringProduct") : t("restoreProduct"))}
       </Button>
 
-      <ResultMessage
-        state={state}
-        hideSuccess
-        message={
-          state.status === "success"
-            ? t("productRestored")
-            : t(`errors.${state.error ?? "unavailable"}`)
-        }
-      />
+      {!compact && (
+        <ResultMessage
+          state={state}
+          hideSuccess
+          message={
+            state.status === "success"
+              ? t("productRestored")
+              : t(`errors.${state.error ?? "unavailable"}`)
+          }
+        />
+      )}
     </form>
   )
 }

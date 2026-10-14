@@ -34,6 +34,8 @@ const fixedDiscount = {
   name: "Lunch discount",
   kind: "FixedAmount",
   value: 10,
+  minimumOrderAmount: 0,
+  expiresOn: null,
   isActive: true,
 }
 const percentageDiscount = {
@@ -42,6 +44,8 @@ const percentageDiscount = {
   name: "Welcome",
   kind: "Percentage",
   value: 15,
+  minimumOrderAmount: 0,
+  expiresOn: null,
   isActive: false,
 }
 const catalog = {

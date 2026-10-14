@@ -106,6 +106,19 @@ function isDiscount(value: unknown): value is CatalogDiscount {
   )
     return false
 
+  const minimumOrderAmount = value.minimumOrderAmount ?? 0
+  const expiresOn = value.expiresOn ?? null
+  if (
+    !isAmount(minimumOrderAmount, 9999999999.99) ||
+    (expiresOn !== null &&
+      (typeof expiresOn !== "string" ||
+        !/^\d{4}-\d{2}-\d{2}$/.test(expiresOn) ||
+        Number.isNaN(Date.parse(`${expiresOn}T00:00:00.000Z`)) ||
+        new Date(`${expiresOn}T00:00:00.000Z`).toISOString().slice(0, 10) !==
+          expiresOn))
+  )
+    return false
+
   return value.kind === "Percentage"
     ? value.value <= 100
     : value.value <= 9999999999.99
@@ -190,7 +203,11 @@ export function parseManagedCatalog(
     })) as ManagedCatalog["products"],
     optionGroups,
     options,
-    discounts,
+    discounts: discounts.map((discount) => ({
+      ...discount,
+      minimumOrderAmount: discount.minimumOrderAmount ?? 0,
+      expiresOn: discount.expiresOn ?? null,
+    })),
   } as ManagedCatalog
 }
 

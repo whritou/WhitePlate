@@ -1,5 +1,13 @@
 # API contracts
 
+## Menu catalog demo parity — 2026-10-14
+
+Owner/manager catalog mutations continue to require persisted membership for the addressed tenant. `PUT /api/v1/tenants/{tenantId}/catalog/reorder` accepts `{entityType, parentId, categoryId, orderedIds}`. `entityType` is `categories`, `products`, `option-groups`, or `options`; `categoryId` selects the destination product category, while `parentId` selects the product for option groups or the group for options. `orderedIds` must contain the complete active sibling list (up to 500 distinct IDs). Product ordering may move active products from another active category into the destination list; source ordering is compacted in the same transaction. Archived entities are not reordered.
+
+`POST /api/v1/tenants/{tenantId}/categories/{categoryId}/restore`, `POST …/option-groups/{groupId}/restore`, and `POST …/options/{optionId}/restore` restore only the addressed entity. A group requires an active product in an active category; an option requires an active group, product, and category. The existing product restore also requires its category to be active, leaves the product unavailable, and does not restore its option descendants. Category, product, group, and option archive operations remain retained/soft archive operations.
+
+Discount create/update requests and management reads now include `minimumOrderAmount` (decimal, 0–9,999,999,999.99; defaults to 0) and nullable `expiresOn` (`YYYY-MM-DD`). Checkout applies the minimum to the products-plus-options subtotal before tax and discount. Expiration is inclusive through that calendar date in the restaurant's saved IANA time zone. The additive migration `20261014211126_DiscountMinimumAndExpiration` adds a defaulted `numeric(12,2)` minimum and nullable `date`; it is source-only and has not been applied to a shared database. No startup migration is configured.
+
 ## S1 organization and restaurant legal profiles — 2026-10-12
 
 Organization creation now requires `legalCountryCode` (`FR`, `DE`, `GB`, or `US`) and accepts optional `legalName`, `legalRegistrationNumber`, and `taxIdentifier`. `GET /api/v1/organizations/{organizationId}/legal-profile` and `PUT` manage the profile for persisted organization owners. PUT requires a quoted `If-Match` legal-profile version; stale writes return 412. The organization response includes the current profile and `legalProfileVersion`.
