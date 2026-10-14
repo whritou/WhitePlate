@@ -9,6 +9,7 @@ import {
   saveOptionGroupAction,
   saveProductAction,
   setCategoryVisibilityAction,
+  setProductAvailabilityAction,
 } from "./catalog"
 
 vi.mock("server-only", () => ({}))
@@ -116,6 +117,43 @@ it.each(["true", "false"])(
       `/api/v1/tenants/${tenantId}/categories/${categoryId}/visibility`,
       { isVisible: isVisible === "true" }
     )
+  }
+)
+
+it.each(["true", "false"])(
+  "sends explicit product availability %s to the narrow tenant endpoint",
+  async (isAvailable) => {
+    vi.mocked(whitePlateApi.put).mockResolvedValue({
+      ok: true,
+      status: 204,
+      data: null,
+    })
+
+    expect(
+      await setProductAvailabilityAction(
+        form({ tenantId, id: productId, isAvailable, role: "Kitchen" })
+      )
+    ).toEqual({ ok: true })
+    expect(whitePlateApi.put).toHaveBeenCalledWith(
+      `/api/v1/tenants/${tenantId}/products/${productId}/availability`,
+      { isAvailable: isAvailable === "true" }
+    )
+  }
+)
+
+it.each([
+  { tenantId, id: productId, isAvailable: "0" },
+  { tenantId, id: productId, isAvailable: "" },
+  { tenantId: "foreign", id: productId, isAvailable: "false" },
+  { tenantId, id: "bad", isAvailable: "true" },
+])(
+  "rejects malformed product availability without making a request: %o",
+  async (fields) => {
+    expect(await setProductAvailabilityAction(form(fields))).toEqual({
+      ok: false,
+      error: "invalid",
+    })
+    expect(whitePlateApi.put).not.toHaveBeenCalled()
   }
 )
 

@@ -18,6 +18,10 @@ public interface ICatalogRepository
     Task<bool> SetRestaurantDescriptionTranslationAsync(Guid tenantId, string locale, string? description,
         CancellationToken cancellationToken) => Task.FromResult(false);
     Task<CatalogManagementDto?> GetManagementCatalogAsync(Guid tenantId, CancellationToken cancellationToken);
+    Task<IReadOnlyList<ProductAvailabilityDto>> GetProductAvailabilityAsync(Guid tenantId,
+        CancellationToken cancellationToken);
+    Task<bool> SetProductAvailabilityAsync(Guid tenantId, Guid productId, bool isAvailable,
+        CancellationToken cancellationToken);
     Task<bool> CategoryBelongsToTenantAsync(Guid tenantId, Guid categoryId, CancellationToken cancellationToken);
     Task<MenuCategoryDto> AddCategoryAsync(WhitePlate.Domain.Catalog.MenuCategory category, CancellationToken cancellationToken);
     Task<bool> AddProductAsync(WhitePlate.Domain.Catalog.Product product, CancellationToken cancellationToken);

@@ -60,6 +60,10 @@ public sealed class CatalogUseCaseTests
         public Task<MenuDto> GetMenuAsync(WhitePlate.Application.Tenants.TenantDto tenant, CancellationToken cancellationToken) =>
             throw new NotImplementedException();
         public Task<CatalogManagementDto?> GetManagementCatalogAsync(Guid tenantId, CancellationToken cancellationToken) => Task.FromResult<CatalogManagementDto?>(null);
+        public Task<IReadOnlyList<ProductAvailabilityDto>> GetProductAvailabilityAsync(Guid tenantId,
+            CancellationToken cancellationToken) => Task.FromResult<IReadOnlyList<ProductAvailabilityDto>>([]);
+        public Task<bool> SetProductAvailabilityAsync(Guid tenantId, Guid productId, bool isAvailable,
+            CancellationToken cancellationToken) => Task.FromResult(false);
         public Task<bool> CategoryBelongsToTenantAsync(Guid tenantId, Guid categoryId, CancellationToken cancellationToken) =>
             Task.FromResult(tenantId == categoryTenantId);
         public Task<MenuCategoryDto> AddCategoryAsync(WhitePlate.Domain.Catalog.MenuCategory category, CancellationToken cancellationToken)

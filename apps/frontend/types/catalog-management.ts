@@ -18,6 +18,31 @@ export type CatalogProduct = CatalogTranslationData["products"][number] & {
   preparationMinutes?: number | null
   preparationNotes?: Record<string, string>
 }
+export type ProductAvailability = {
+  id: string
+  name: string
+  isAvailable: boolean
+}
+export type ProductAvailabilityControlLabels = {
+  available: string
+  unavailable: string
+  markAvailable: string
+  markUnavailable: string
+  availabilityFor: string
+  updating: string
+  updated: string
+  updateFailed: string
+}
+export type StorefrontShortcutLabels = {
+  visitShop: string
+  copyShopUrl: string
+  copiedShopUrl: string
+  copyShopUrlFailed: string
+  showShopQr: string
+  hideShopQr: string
+  shopQrLabel: string
+  shopUnavailable: string
+}
 export type CatalogOptionGroup =
   CatalogTranslationData["optionGroups"][number] & {
     minimumSelections: number
@@ -70,6 +95,11 @@ export type ProductInput = CategoryInput & {
   dietaryTags: string[]
   preparationMinutes: number | null
   preparationNotes: Record<string, string>
+}
+export type ProductAvailabilityInput = {
+  tenantId: string
+  id: string
+  isAvailable: boolean
 }
 export type OptionGroupInput = {
   tenantId: string

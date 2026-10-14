@@ -1,7 +1,10 @@
 import "server-only"
 import { isUuid } from "@/lib/validation/common"
 import { whitePlateApi } from "@/lib/api"
-import { parseManagedCatalog } from "@/lib/validation/catalog-management"
+import {
+  parseManagedCatalog,
+  parseProductAvailability,
+} from "@/lib/validation/catalog-management"
 import type { ApiResult } from "@/types/api"
 import type { CategoryVisibilityInput } from "@/types/menu-builder"
 import type {
@@ -14,6 +17,8 @@ import type {
   OptionGroupInput,
   OptionInput,
   ProductInput,
+  ProductAvailability,
+  ProductAvailabilityInput,
 } from "@/types/catalog-management"
 
 export async function getManagedCatalog(
@@ -26,6 +31,22 @@ export async function getManagedCatalog(
   if (!response.ok) return response
 
   const data = parseManagedCatalog(response.data, tenantId)
+
+  return data
+    ? { ok: true, status: 200, data }
+    : { ok: false, status: 502, error: "unavailable" }
+}
+
+export async function getProductAvailability(
+  tenantId: string
+): Promise<ApiResult<ProductAvailability[]>> {
+  const response = await whitePlateApi.get<unknown>(
+    `/api/v1/tenants/${tenantId}/products/availability`
+  )
+
+  if (!response.ok) return response
+
+  const data = parseProductAvailability(response.data)
 
   return data
     ? { ok: true, status: 200, data }
@@ -58,6 +79,19 @@ export async function setCategoryVisibility({
     await whitePlateApi.put(
       `/api/v1/tenants/${tenantId}/categories/${id}/visibility`,
       { isVisible }
+    )
+  )
+}
+
+export async function setProductAvailability({
+  tenantId,
+  id,
+  isAvailable,
+}: ProductAvailabilityInput): Promise<CatalogResult> {
+  return mutationResult(
+    await whitePlateApi.put(
+      `/api/v1/tenants/${tenantId}/products/${id}/availability`,
+      { isAvailable }
     )
   )
 }

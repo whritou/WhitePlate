@@ -9,6 +9,29 @@ namespace WhitePlate.Infrastructure.Persistence.Repositories;
 
 public sealed class CatalogRepository(WhitePlateDbContext database) : ICatalogRepository
 {
+    public async Task<IReadOnlyList<ProductAvailabilityDto>> GetProductAvailabilityAsync(Guid tenantId,
+        CancellationToken cancellationToken) => await database.Products.AsNoTracking()
+        .Where(product => product.TenantId == tenantId && !product.IsArchived &&
+            database.MenuCategories.Any(category => category.TenantId == tenantId &&
+                category.Id == product.CategoryId && !category.IsArchived && category.IsVisible))
+        .OrderBy(product => product.SortOrder)
+        .ThenBy(product => product.Name)
+        .Select(product => new ProductAvailabilityDto(product.Id, product.Name, product.IsAvailable))
+        .ToListAsync(cancellationToken);
+
+    public async Task<bool> SetProductAvailabilityAsync(Guid tenantId, Guid productId, bool isAvailable,
+        CancellationToken cancellationToken)
+    {
+        var product = await database.Products.SingleOrDefaultAsync(item => item.TenantId == tenantId &&
+            item.Id == productId && !item.IsArchived &&
+            database.MenuCategories.Any(category => category.TenantId == tenantId &&
+                category.Id == item.CategoryId && !category.IsArchived && category.IsVisible), cancellationToken);
+        if (product is null) return false;
+        product.SetAvailability(isAvailable);
+        await database.SaveChangesAsync(cancellationToken);
+        return true;
+    }
+
     public async Task<MenuLanguageSettingsDto?> GetMenuLanguageSettingsAsync(Guid tenantId,
         CancellationToken cancellationToken)
     {

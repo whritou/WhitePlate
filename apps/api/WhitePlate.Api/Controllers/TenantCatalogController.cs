@@ -20,6 +20,7 @@ public sealed class TenantCatalogController(
     CreateDiscountCommandHandler createDiscount,
     CatalogManagementCommandHandler manageCatalog,
     GetManagementCatalogQueryHandler getManagementCatalog,
+    GetProductAvailabilityQueryHandler getProductAvailability,
     MenuLanguageSettingsHandler menuLanguageSettings,
     ApiErrorMapper errors) : ControllerBase
 {
@@ -106,6 +107,20 @@ public sealed class TenantCatalogController(
         var identity = currentIdentity.Identity;
         if (identity is null) return Unauthorized();
         var result = await getManagementCatalog.HandleAsync(new GetManagementCatalogQuery(tenantId, identity), cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : errors.ToActionResult(errors.Create(HttpContext, result.Error));
+    }
+
+    [HttpGet("products/availability")]
+    [ProducesResponseType<IReadOnlyList<ProductAvailabilityDto>>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status401Unauthorized, "application/problem+json")]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status404NotFound, "application/problem+json")]
+    public async Task<ActionResult<IReadOnlyList<ProductAvailabilityDto>>> GetProductAvailability(Guid tenantId,
+        CancellationToken cancellationToken)
+    {
+        var identity = currentIdentity.Identity;
+        if (identity is null) return Unauthorized();
+        var result = await getProductAvailability.HandleAsync(
+            new GetProductAvailabilityQuery(tenantId, identity), cancellationToken);
         return result.IsSuccess ? Ok(result.Value) : errors.ToActionResult(errors.Create(HttpContext, result.Error));
     }
 
@@ -203,6 +218,22 @@ public sealed class TenantCatalogController(
             request.MayContainAllergens, request.DietaryTags, request.PreparationMinutes,
             request.PreparationNotes), cancellationToken);
         return result.IsSuccess ? Ok(result.Value) : errors.ToActionResult(errors.Create(HttpContext, result.Error));
+    }
+
+    [HttpPut("products/{productId:guid}/availability")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status400BadRequest, "application/problem+json")]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status401Unauthorized, "application/problem+json")]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status404NotFound, "application/problem+json")]
+    public async Task<IActionResult> UpdateProductAvailability(Guid tenantId, Guid productId,
+        UpdateProductAvailabilityRequest request, CancellationToken cancellationToken)
+    {
+        var identity = currentIdentity.Identity;
+        if (identity is null) return Unauthorized();
+        if (request.IsAvailable is null) return BadRequest();
+        var result = await manageCatalog.SetProductAvailabilityAsync(tenantId, productId,
+            request.IsAvailable.Value, identity, cancellationToken);
+        return result.IsSuccess ? NoContent() : errors.ToActionResult(errors.Create(HttpContext, result.Error));
     }
 
     [HttpDelete("products/{productId:guid}")]

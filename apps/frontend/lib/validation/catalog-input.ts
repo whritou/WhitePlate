@@ -1,4 +1,4 @@
-import { isUuid } from "./common"
+import { isRecord, isUuid } from "./common"
 import type {
   ArchiveInput,
   CategoryInput,
@@ -6,6 +6,7 @@ import type {
   DiscountReferenceInput,
   OptionGroupInput,
   OptionInput,
+  ProductAvailabilityInput,
   ProductInput,
 } from "@/types/catalog-management"
 
@@ -178,6 +179,34 @@ export function parseProductInput(input: unknown): ProductInput | null {
     taxRatePercent,
     isAvailable: category.id === null || availability === "true",
   }
+}
+
+export function parseProductAvailabilityInput(
+  input: unknown
+): ProductAvailabilityInput | null {
+  const fields =
+    input instanceof FormData
+      ? {
+          tenantId: input.get("tenantId"),
+          id: input.get("id"),
+          isAvailable: input.get("isAvailable"),
+        }
+      : isRecord(input)
+        ? input
+        : null
+
+  if (!fields || !isUuid(fields.tenantId) || !isUuid(fields.id)) return null
+
+  const isAvailable =
+    fields.isAvailable === true || fields.isAvailable === "true"
+      ? true
+      : fields.isAvailable === false || fields.isAvailable === "false"
+        ? false
+        : null
+
+  return isAvailable === null
+    ? null
+    : { tenantId: fields.tenantId, id: fields.id, isAvailable }
 }
 
 export function parseOptionGroupInput(input: unknown): OptionGroupInput | null {

@@ -37,4 +37,9 @@ internal static class CatalogAccess
         ExternalIdentity identity, CancellationToken cancellationToken) =>
         await memberships.IsOrganizationOwnerOfTenantAsync(tenantId, identity, cancellationToken) ||
         await memberships.HasRestaurantRoleAsync(tenantId, identity, RestaurantRole.Manager, cancellationToken);
+
+    public static async Task<bool> CanManageAvailabilityAsync(IStaffMembershipRepository memberships, Guid tenantId,
+        ExternalIdentity identity, CancellationToken cancellationToken) =>
+        await CanManageAsync(memberships, tenantId, identity, cancellationToken) ||
+        await memberships.HasRestaurantRoleAsync(tenantId, identity, RestaurantRole.Kitchen, cancellationToken);
 }

@@ -1,7 +1,11 @@
 import { auth } from "@/lib/auth"
 import { isValidTenantId, resolveOrderHubUrl } from "@/lib/order-dashboard"
-import { getManagedCatalog } from "@/services/catalog-management"
+import {
+  getManagedCatalog,
+  getProductAvailability,
+} from "@/services/catalog-management"
 import { getOrderPage, getRestaurantMemberships } from "@/services/orders"
+import { restaurantShopUrl } from "@/lib/restaurant-shop-url"
 import { LiveDashboard } from "@/components/organization/live-dashboard"
 import { BackLink } from "@/components/organization/back-link"
 import { MenuBuilderRetry } from "@/components/organization/menu-builder-retry"
@@ -65,14 +69,18 @@ export default async function DashboardPage({
       />
     )
 
-  const [orderResponse, catalogResponse] = await Promise.all([
-    getOrderPage(restaurant.id, null, null),
-    restaurant.role === "Kitchen"
-      ? Promise.resolve(null)
-      : getManagedCatalog(restaurant.id),
-  ])
+  const [orderResponse, catalogResponse, availabilityResponse] =
+    await Promise.all([
+      getOrderPage(restaurant.id, null, null),
+      restaurant.role === "Kitchen"
+        ? Promise.resolve(null)
+        : getManagedCatalog(restaurant.id),
+      getProductAvailability(restaurant.id),
+    ])
 
   if (!orderResponse.ok && orderResponse.status === 401)
+    redirect(`/${locale}/sign-in`)
+  if (!availabilityResponse.ok && availabilityResponse.status === 401)
     redirect(`/${locale}/sign-in`)
 
   let page: OrderPage | null = null
@@ -113,6 +121,17 @@ export default async function DashboardPage({
       catalog={
         catalogResponse?.ok ? (catalogResponse.data ?? undefined) : undefined
       }
+      productAvailability={
+        availabilityResponse.ok
+          ? (availabilityResponse.data ?? undefined)
+          : undefined
+      }
+      availabilityLoadError={!availabilityResponse.ok}
+      storefrontUrl={restaurantShopUrl(
+        restaurant.subdomain,
+        process.env.STOREFRONT_BASE_DOMAIN,
+        locale
+      )}
     />
   )
 }
