@@ -10,11 +10,11 @@ Add a separate product availability update that accepts one explicit boolean. Re
 
 The existing availability field remains authoritative for new storefront menus and checkout. Checkout still revalidates the catalog on the server, and saved order lines remain unchanged. No table or migration is needed.
 
-The dashboard uses the narrow read for every role and the narrow update for quick toggles. It applies the requested value optimistically, then restores the previous value and reports an error if the server rejects the request. Storefront open, copy and QR actions use the existing validated tenant subdomain and locale URL policy.
+The availability-only API read and update remain available under the authorization rules above. On 14 October 2026, the user directed that quick availability be removed from the dashboard as part of matching the reviewed dashboard composition. The dashboard no longer requests availability data or renders quick toggles. Storefront open, copy and QR actions remain in the dashboard and use the existing validated tenant subdomain and locale URL policy.
 
 ## Consequences
 
 - Role and tenant checks stay in the API; browser tenant IDs only select the resource.
-- Archived or hidden products cannot be reactivated through the quick action.
+- Archived or hidden products cannot be reactivated through the availability API.
 - Product availability is immediately visible to new storefront reads and checkout validation; realtime availability push is outside D4.
 - The frontend and API contracts remain localized at the user interface; product names retain the catalog's saved base name.
