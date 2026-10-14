@@ -157,6 +157,7 @@ export function DesignSystemTestHarness() {
               <OrderTicket
                 key={status}
                 locale={locale}
+                now={Date.parse("2026-10-06T10:42:00Z")}
                 role="OrganizationOwner"
                 pending={null}
                 onUpdate={async () => {}}

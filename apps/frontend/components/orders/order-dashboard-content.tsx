@@ -88,6 +88,7 @@ export function OrderDashboardContent({
                 orders={orders}
                 role={props.role}
                 locale={props.locale}
+                serverTime={page.serverTime}
                 pending={pending}
                 onUpdate={updateStatus}
               />

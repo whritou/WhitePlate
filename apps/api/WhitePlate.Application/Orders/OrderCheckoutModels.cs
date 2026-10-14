@@ -49,6 +49,7 @@ public sealed record OrderSummaryLineDto(Guid ProductId, string ProductName, int
     IReadOnlyList<OrderSummaryOptionDto> Options)
 {
     public int? PreparationMinutes { get; init; }
+    public IReadOnlyDictionary<string, string> PreparationNotes { get; init; } = new Dictionary<string, string>();
 }
 public sealed record OrderSummaryDto(Guid Id, string CustomerName, string Currency, string? MenuLocale, decimal Total,
     string Status, int Version, DateTimeOffset CreatedAt, IReadOnlyList<OrderSummaryLineDto> Lines)
@@ -57,7 +58,7 @@ public sealed record OrderSummaryDto(Guid Id, string CustomerName, string Curren
     public string? PickupTimeZone { get; init; }
     public string? PickupMode { get; init; }
 }
-public sealed record OrderPageDto(IReadOnlyList<OrderSummaryDto> Items, string? NextCursor);
+public sealed record OrderPageDto(IReadOnlyList<OrderSummaryDto> Items, string? NextCursor, DateTimeOffset ServerTime);
 public sealed record OrderPageData(IReadOnlyList<OrderSummaryDto> Items, OrderPageCursor? NextCursor);
 public sealed record OrderHistoryPageDto(IReadOnlyList<OrderSummaryDto> Items, int Page, int PageSize, int TotalCount);
 public sealed record OrderHistoryPageData(IReadOnlyList<OrderSummaryDto> Items, int TotalCount);

@@ -83,6 +83,7 @@ const orderPage: OrderPage = {
     },
   ],
   nextCursor: null,
+  serverTime: "2026-10-01T18:00:00Z",
 }
 
 const props: OrderDashboardProps = {

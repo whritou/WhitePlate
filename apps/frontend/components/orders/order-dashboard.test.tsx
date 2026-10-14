@@ -90,7 +90,11 @@ const props: OrderDashboardProps = {
   locale: "en",
   selectedStatus: null,
   cursor: null,
-  page: { items: [order], nextCursor: null },
+  page: {
+    items: [order],
+    nextCursor: null,
+    serverTime: "2026-10-01T18:00:00Z",
+  },
   loadError: null,
   hubUrl: "https://api.example.test/hubs/orders",
 }
@@ -179,7 +183,11 @@ it("keeps the last order snapshot visible with its stale-data warning", () => {
 
 it("shows only the empty state when the current view has no orders", () => {
   useDashboard.mockReturnValue({
-    page: { items: [], nextCursor: null },
+    page: {
+      items: [],
+      nextCursor: null,
+      serverTime: "2026-10-01T18:00:00Z",
+    },
     loadError: null,
     isStale: false,
     isInitialLoading: false,

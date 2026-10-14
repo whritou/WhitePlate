@@ -26,17 +26,16 @@ const nextStatus: Partial<Record<OrderStatus, UpdateableOrderStatus>> = {
   Preparing: "Ready",
   Ready: "Completed",
 }
-const eventTypes = new Set([
-  "order.created",
-  "order.status_changed",
-  "order.cancelled",
-])
+
+export { OrderEventTracker } from "@/lib/orders/order-event-tracker"
 
 export function parseOrderPage(value: unknown): OrderPage | null {
   if (
     !isRecord(value) ||
     !Array.isArray(value.items) ||
-    !isValidOrderCursor(value.nextCursor, true)
+    !isValidOrderCursor(value.nextCursor, true) ||
+    typeof value.serverTime !== "string" ||
+    Number.isNaN(Date.parse(value.serverTime))
   )
     return null
 
@@ -49,7 +48,7 @@ export function parseOrderPage(value: unknown): OrderPage | null {
     items.push(order)
   }
 
-  return { items, nextCursor: value.nextCursor }
+  return { items, nextCursor: value.nextCursor, serverTime: value.serverTime }
 }
 
 export function parseOrderHistoryPage(value: unknown): OrderHistoryPage | null {
@@ -208,61 +207,6 @@ export function getAvailableOrderTransitions(
   return result
 }
 
-export class OrderEventTracker {
-  private readonly eventIds = new Set<string>()
-  private readonly versions = new Map<string, number>()
-
-  constructor(
-    private readonly tenantId: string,
-    orders: Array<Pick<OrderSummary, "id" | "version">> = []
-  ) {
-    this.observeOrders(orders)
-  }
-
-  observeOrders(orders: Array<Pick<OrderSummary, "id" | "version">>): void {
-    for (const order of orders) {
-      const current = this.versions.get(order.id)
-
-      if (current === undefined || order.version > current)
-        this.versions.set(order.id, order.version)
-    }
-
-    this.trim(this.versions, 512)
-  }
-
-  shouldRefresh(value: unknown): boolean {
-    const event = parseKitchenOrderEvent(value)
-
-    if (
-      !event ||
-      event.tenantId !== this.tenantId ||
-      this.eventIds.has(event.eventId)
-    )
-      return false
-
-    this.eventIds.add(event.eventId)
-    this.trim(this.eventIds, 512)
-
-    const currentVersion = this.versions.get(event.orderId)
-
-    if (currentVersion !== undefined && event.version <= currentVersion)
-      return false
-    this.versions.set(event.orderId, event.version)
-    this.trim(this.versions, 512)
-
-    return true
-  }
-
-  private trim<T>(values: Set<T> | Map<T, unknown>, limit: number): void {
-    while (values.size > limit) {
-      const oldest = values.keys().next().value as T | undefined
-
-      if (oldest === undefined) return
-      values.delete(oldest)
-    }
-  }
-}
-
 export function isOrderStatus(value: unknown): value is OrderStatus {
   return (
     typeof value === "string" && ORDER_STATUSES.includes(value as OrderStatus)
@@ -299,8 +243,11 @@ function parseOrderSummary(value: unknown): OrderSummary | null {
   const lines: OrderSummaryLine[] = []
 
   for (const candidate of value.lines) {
+    if (!isRecord(candidate)) return null
+
+    const preparationNotes = parsePreparationNotes(candidate.preparationNotes)
+
     if (
-      !isRecord(candidate) ||
       !isUuid(candidate.productId) ||
       typeof candidate.productName !== "string" ||
       typeof candidate.quantity !== "number" ||
@@ -312,7 +259,8 @@ function parseOrderSummary(value: unknown): OrderSummary | null {
           !Number.isInteger(candidate.preparationMinutes) ||
           candidate.preparationMinutes < 1 ||
           candidate.preparationMinutes > 1440)) ||
-      !Array.isArray(candidate.options)
+      !Array.isArray(candidate.options) ||
+      preparationNotes === null
     )
       return null
 
@@ -336,6 +284,7 @@ function parseOrderSummary(value: unknown): OrderSummary | null {
       ...(candidate.preparationMinutes !== undefined
         ? { preparationMinutes: candidate.preparationMinutes as number | null }
         : {}),
+      preparationNotes,
     })
   }
 
@@ -353,34 +302,19 @@ function parseOrderSummary(value: unknown): OrderSummary | null {
   }
 }
 
-function parseKitchenOrderEvent(value: unknown): {
-  eventId: string
-  tenantId: string
-  orderId: string
-  version: number
-} | null {
-  if (
-    !isRecord(value) ||
-    !isUuid(value.eventId) ||
-    typeof value.tenantId !== "string" ||
-    !isUuid(value.orderId) ||
-    typeof value.eventType !== "string" ||
-    !eventTypes.has(value.eventType) ||
-    !isOrderStatus(value.status) ||
-    typeof value.version !== "number" ||
-    !Number.isSafeInteger(value.version) ||
-    value.version < 1 ||
-    typeof value.occurredAt !== "string" ||
-    Number.isNaN(Date.parse(value.occurredAt))
-  )
-    return null
+function parsePreparationNotes(value: unknown): Record<string, string> | null {
+  if (value === undefined || value === null) return {}
+  if (!isRecord(value)) return null
 
-  return {
-    eventId: value.eventId,
-    tenantId: value.tenantId,
-    orderId: value.orderId,
-    version: value.version,
+  const notes: Record<string, string> = {}
+
+  for (const [locale, note] of Object.entries(value)) {
+    if (locale.length > 16 || typeof note !== "string" || note.length > 250)
+      return null
+    notes[locale] = note
   }
+
+  return notes
 }
 
 function isUuid(value: unknown): value is string {

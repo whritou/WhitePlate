@@ -79,11 +79,17 @@ const page = {
       status: "Pending",
       version: 1,
       createdAt: "2026-10-01T18:00:00Z",
+      pickupAt: "2026-10-01T18:30:00Z",
       lines: [
         {
           productId: "11111111-1111-4111-8111-111111111111",
           productName: "Soup",
           quantity: 2,
+          preparationMinutes: 8,
+          preparationNotes: {
+            en: "Finish to order.",
+            fr: "Terminer à la commande.",
+          },
           options: [
             {
               optionId: "33333333-3333-4333-8333-333333333333",
@@ -95,6 +101,7 @@ const page = {
     },
   ],
   nextCursor: "opaque-cursor",
+  serverTime: "2026-10-01T18:00:00Z",
 }
 
 it("accepts a paginated order history response and rejects invalid page metadata", () => {
@@ -128,6 +135,20 @@ it("rejects malformed order snapshots at the API boundary", () => {
     })
   ).toBeNull()
   expect(parseOrderPage({ ...page, nextCursor: "not/a/cursor" })).toBeNull()
+  expect(parseOrderPage({ ...page, serverTime: "not-a-timestamp" })).toBeNull()
+  expect(
+    parseOrderPage({
+      ...page,
+      items: [
+        {
+          ...page.items[0],
+          lines: [
+            { ...page.items[0]!.lines[0]!, preparationNotes: { en: 42 } },
+          ],
+        },
+      ],
+    })
+  ).toBeNull()
 })
 
 it.each([
@@ -208,6 +229,68 @@ it("refreshes only for new, newer events from the selected tenant", () => {
       version: 3,
     })
   ).toBe(true)
+})
+
+it("alerts once for a new order created after the latest API snapshot", () => {
+  const tracker = new OrderEventTracker("tenant-a")
+
+  tracker.observeOrders([], "2026-10-01T18:00:00Z")
+
+  const event = {
+    eventId: "77777777-7777-4777-8777-777777777777",
+    tenantId: "tenant-a",
+    orderId: "88888888-8888-4888-8888-888888888888",
+    eventType: "order.created",
+    status: "Pending",
+    version: 1,
+    occurredAt: "2026-10-01T18:00:01Z",
+  }
+
+  expect(tracker.processEvent(event)).toEqual({ refresh: true, newOrder: true })
+  expect(tracker.processEvent(event)).toEqual({
+    refresh: false,
+    newOrder: false,
+  })
+})
+
+it("does not alert for other tenants, status changes, or events covered by the API snapshot", () => {
+  const tracker = new OrderEventTracker("tenant-a")
+
+  tracker.observeOrders([], "2026-10-01T18:00:00Z")
+
+  expect(
+    tracker.processEvent({
+      eventId: "77777777-7777-4777-8777-777777777777",
+      tenantId: "tenant-b",
+      orderId: "88888888-8888-4888-8888-888888888888",
+      eventType: "order.created",
+      status: "Pending",
+      version: 1,
+      occurredAt: "2026-10-01T18:00:01Z",
+    })
+  ).toEqual({ refresh: false, newOrder: false })
+  expect(
+    tracker.processEvent({
+      eventId: "99999999-9999-4999-8999-999999999999",
+      tenantId: "tenant-a",
+      orderId: "88888888-8888-4888-8888-888888888888",
+      eventType: "order.status_changed",
+      status: "Preparing",
+      version: 2,
+      occurredAt: "2026-10-01T18:00:01Z",
+    })
+  ).toEqual({ refresh: true, newOrder: false })
+  expect(
+    tracker.processEvent({
+      eventId: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+      tenantId: "tenant-a",
+      orderId: "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+      eventType: "order.created",
+      status: "Pending",
+      version: 1,
+      occurredAt: "2026-10-01T17:59:59Z",
+    })
+  ).toEqual({ refresh: true, newOrder: false })
 })
 
 it("validates the restaurant membership response before offering tenant navigation", () => {

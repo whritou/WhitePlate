@@ -256,6 +256,13 @@
   },
   "KitchenOrders": {
     "preparationGuide": "Prep guidance: about {minutes} min",
+    "preparationNotesLabel": "Preparation note",
+    "elapsedTimer": "Elapsed {time}",
+    "pickupIn": "Pickup in {time}",
+    "pickupDueSoon": "Pickup due soon · {time}",
+    "pickupDueNow": "Pickup is due now",
+    "pickupOverdue": "Pickup overdue by {time}",
+    "newOrderAlert": "New order received: {reference}",
     "pickupTime": "Pickup: {time}",
     "total": "Total",
     "title": "Kitchen orders",
@@ -319,6 +326,11 @@
       "connected": "Live updates connected",
       "reconnecting": "Reconnecting to live updates…",
       "offline": "Live updates unavailable; orders can still be refreshed"
+    },
+    "sound": {
+      "enable": "Enable order sound",
+      "mute": "Mute order sound",
+      "unavailable": "Browser audio could not be enabled. New orders are still announced on screen."
     },
     "boardHelp": "Drag an order by any clear area of its card. On touch screens, press and hold, then drag; use an action button to move it with the keyboard. Counts show orders on this page.",
     "loadedCount": "{count, plural, one {# loaded order} other {# loaded orders}}",

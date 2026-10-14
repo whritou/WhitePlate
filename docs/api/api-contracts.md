@@ -52,6 +52,14 @@ Owner/manager `POST /api/v1/tenants/{tenantId}/products` and `PUT /api/v1/tenant
 
 Management catalog reads return all metadata. The tenant-host-resolved public menu returns explicit allergen/dietary declarations and localized preparation notes/estimate; it omits SKU. Order receipts and staff order summaries retain snapshots of declarations and preparation guidance taken at checkout. Empty declarations do not assert allergen-free status. Preparation guidance is not a pickup or ready-time promise. The generated migration must be applied before this API code is deployed; there is no startup migration. See [decision 0009](../architecture/decisions/0009-menu-product-metadata.md).
 
+## K2 live orders — KDS operations — 2026-10-14
+
+`GET /api/v1/tenants/{tenantId}/orders` returns `{items, nextCursor, serverTime}`. `serverTime` is sampled before the repository read and anchors client timers and new-order event filtering. Staff order summary/history lines also return the saved `preparationNotes` locale-to-text snapshot alongside `preparationMinutes`; missing metadata is an empty object. No new persistence fields or migration are introduced.
+
+The board measures elapsed time from saved `createdAt`, pickup countdown/urgency from saved `pickupAt`, and advances both using monotonic browser time from the API snapshot. Orders at or below five minutes to pickup are due soon; orders at or past pickup time are overdue. Terminal orders have no active countdown. `preparationMinutes` remains guidance only; it is not turned into a ready-time promise or countdown. The board displays the note matching the order's saved menu locale, with the interface locale as fallback.
+
+Order sound is muted by default and enabled only by a user gesture. It alerts on a deduplicated `order.created` event newer than the latest REST snapshot, with an accessible announcement; replayed, duplicate, status-only, and foreign-tenant events do not alert. The preference lasts for the mounted board session. Persisted preparation stages, stations, pickup shelves, and rush-adjusted deadlines are not represented by the current order/API model and are not shown as if they were saved facts.
+
 ## M5 product photo galleries — 2026-10-09
 
 Source implementation; actual S3/PostgreSQL/hosted acceptance remains open. See [ADR 0008](../architecture/decisions/0008-product-photo-gallery.md).

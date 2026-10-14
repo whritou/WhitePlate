@@ -390,15 +390,16 @@ Add the reference operational KDS features: elapsed/remaining times, urgency cue
 
 Acceptance criteria:
 
-- [ ] Derive elapsed timers and remaining pickup/preparation time from authoritative timestamps and the agreed target; recover correctly after refresh/reconnect and account for clock skew.
-- [ ] Define urgency thresholds and use text/icon labels alongside color; respect reduced motion and do not fake step percentages or average cooking times from sample values.
-- [ ] Provide explicit user-controlled KDS sound enable/mute and accessible new-order alerts; handle browser audio permission, deduplicate repeated/replayed events and avoid replay storms after reconnect.
-- [ ] If included after the decisions below, persist preparation stages, station and pickup-shelf assignments with tenant-authorized updates and concurrency control, then render actual stage/progress data on tickets.
-- [ ] Integrate S3 pickup times, D3 rush status and M2 preparation guidance when available; verify deterministic timer boundaries, lifecycle changes, sound deduplication, reconnect and keyboard/touch controls.
+- [x] Derive elapsed timers from saved `createdAt` and remaining pickup time from saved `pickupAt`, with a server snapshot clock advanced monotonically on the client. A preparation countdown remains deferred because there is no authoritative preparation target; M2 minutes are guidance.
+- [x] Set due-soon at five minutes or less and overdue at/past pickup time. Show semantic text, icon and color together; no motion or fabricated progress is added.
+- [x] Provide explicit user-controlled, session-scoped sound enable/mute and accessible new-order alerts. Ignore duplicate/replayed events and only alert for a creation newer than the API snapshot, including after reconnect.
+- [ ] Persist preparation stages, station and pickup-shelf assignments with tenant-authorized updates and concurrency control, then render actual stage/progress data on tickets. Deferred: the order model has no stage/assignment fields or approved edit-role/concurrency policy.
+- [x] Integrate available S3 pickup times and M2 saved preparation guidance. D3 rush status is not available in the live order/API runtime, so no rush-adjusted deadline is inferred. Local focused tests cover timing boundaries and alert deduplication; keyboard/touch browser acceptance remains open.
 
 Decisions and limits:
 
-- Decide timing source/targets, urgency rules, session versus device sound preferences and who may edit stages/stations/shelves. Preparation stages require an explicit model; external courier/POS integration is not established by a badge.
+- Resolved 2026-10-14: use API `serverTime`, saved UTC `createdAt`, and S3 `pickupAt`; mark due soon at five minutes or less and overdue at/past pickup; keep sound preference for the mounted board session and default it to muted. M2 preparation minutes remain guidance, not a deadline. See [K2 verification and remaining acceptance](../audits/kds-operational-features.md).
+- Deferred: introduce preparation stages and station/shelf assignment only after an order model, tenant-authorized update contract, edit roles and concurrency policy are approved. D3 rush state is also unavailable to the live order runtime; external courier/POS integration is not established by a badge.
 
 ### K3 — Live Orders: cancellation reasons and authoritative payment/refund status
 
