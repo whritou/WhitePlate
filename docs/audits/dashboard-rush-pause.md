@@ -35,7 +35,7 @@ The earlier rollout in this task applied 14 pending migrations from `20261008195
 
 Before changing Coolify, a 69.7 KiB `pg_dump -Fc` was created inside the database container at `/tmp/whiteplate-before-ordering-operations-20261014.dump`. `dotnet ef migrations script` could not rebuild because MSBuild was denied writing a generated `obj` cache (`MSB3491`), so the source migration was reviewed and its three additive column operations plus history row were applied in one PostgreSQL transaction. The transaction added non-null `AcceptingOrders` (default `true`), `OrderingOperationsVersion` (default `1`) and `RushHoldEnabled` (default `false`) and recorded `20261014150246_OrderingOperations` at EF product version `10.0.12`. A subsequent read-only query confirmed this is the latest migration, all three columns and defaults, and the initial settings on both tenants. One concatenated terminal command produced a syntax error after the successful `COMMIT`; the separate verification confirmed the committed state. The in-container dump is temporary and is not off-host backup retention or a restore test.
 
-The D3 schema is now applied to both Neon `test` and Coolify Production. The D3 API/frontend change remains on open PR #92 and was not deployed during this rollout. Migration history does not establish independent-session concurrency or browser behavior.
+The D3 schema is now applied to both Neon `test` and Coolify Production. The D3 API/frontend change remains on open PR #92. Coolify Production and Vercel Production were not deployed during this rollout; migration history does not establish independent-session concurrency or browser behavior.
 
 ## Remaining acceptance and rollout
 

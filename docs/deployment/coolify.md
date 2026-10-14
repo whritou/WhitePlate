@@ -12,7 +12,7 @@ After the user clarified Coolify as the migration target, preflight on `whitepla
 
 A 69.7 KiB `pg_dump -Fc` was created at `/tmp/whiteplate-before-ordering-operations-20261014.dump` inside the database container before applying the change. This temporary container-local dump is not an off-host backup or restore drill. The local `dotnet ef migrations script` build was blocked because MSBuild could not write a generated `obj` cache (`MSB3491`, access denied); the reviewed `20261014150246_OrderingOperations` source adds three non-null `Tenants` columns with defaults `AcceptingOrders=true`, `OrderingOperationsVersion=1`, and `RushHoldEnabled=false`. Those operations and the EF history row (`10.0.12`) were applied in one transaction. A later terminal command concatenation produced a SQL syntax error after that transaction's `COMMIT`; a separate read-only verification confirmed the D3 migration history row, all three columns with their expected defaults, and both tenants at the initial state.
 
-The D3 API/frontend change is on open PR #92 and has not been deployed; no API restart or deployment was performed as part of this schema rollout. PostgreSQL concurrency checks, hosted role/checkout behavior and multi-session browser acceptance remain open. See [D3 evidence](../audits/dashboard-rush-pause.md).
+The D3 API/frontend change is on open PR #92. Coolify Production was not deployed or restarted, and no Vercel Production deployment was performed as part of this schema rollout. PostgreSQL concurrency checks, hosted role/checkout behavior and multi-session browser acceptance remain open. See [D3 evidence](../audits/dashboard-rush-pause.md).
 
 ## Availability incident and recovery — 2026-10-10
 
