@@ -14,6 +14,9 @@ vi.mock("@/components/organization/live-dashboard-order-content", () => ({
 vi.mock("@/components/organization/ordering-operations-panel", () => ({
   OrderingOperationsPauseAction: () => null,
 }))
+vi.mock("./ordering-operations-controller", () => ({
+  OrderingOperationsController: () => null,
+}))
 vi.mock("./live-product-cover", () => ({ LiveProductCover: () => null }))
 vi.mock("./storefront-shortcuts", () => ({ StorefrontShortcuts: () => null }))
 vi.mock("next-intl/server", () => ({
