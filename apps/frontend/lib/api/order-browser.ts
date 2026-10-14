@@ -1,7 +1,9 @@
 import { isRecord } from "@/lib/validation/common"
 import { browserRequest } from "./browser-request"
 import { parseOrderPage } from "@/lib/order-dashboard"
+import { parseDashboardMetrics } from "@/lib/dashboard-metrics"
 import { parsePublicOrderTracking } from "@/lib/validation/public-order-tracking"
+import type { DashboardMetrics } from "@/types/dashboard-metrics"
 import type { PublicOrderTracking } from "@/types/checkout"
 import type { OrderPage, OrderActionError, OrderStatus } from "@/types/orders"
 
@@ -39,6 +41,31 @@ export async function fetchOrderPage(
   if (!page) throw new OrderRequestError("unavailable")
 
   return page
+}
+
+export async function fetchDashboardMetrics(
+  tenantId: string,
+  signal: AbortSignal
+): Promise<DashboardMetrics> {
+  const query = new URLSearchParams({ tenantId })
+  const response = await browserRequest(
+    `/api/kitchen/dashboard/metrics?${query}`,
+    { signal }
+  )
+
+  if (response.status === 401) throw new OrderRequestError("unauthorized")
+  if (response.status === 403 || response.status === 404)
+    throw new OrderRequestError("forbidden")
+  if (response.status === 400) throw new OrderRequestError("invalid")
+  if (!response.ok) throw new OrderRequestError("unavailable")
+
+  const body = response.data
+  const metrics =
+    isRecord(body) && body.ok === true ? parseDashboardMetrics(body.data) : null
+
+  if (!metrics) throw new OrderRequestError("unavailable")
+
+  return metrics
 }
 
 export async function getSignalRToken(): Promise<string> {

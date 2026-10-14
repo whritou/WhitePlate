@@ -60,6 +60,16 @@ The board measures elapsed time from saved `createdAt`, pickup countdown/urgency
 
 Order sound is muted by default and enabled only by a user gesture. It alerts on a deduplicated `order.created` event newer than the latest REST snapshot, with an accessible announcement; replayed, duplicate, status-only, and foreign-tenant events do not alert. The preference lasts for the mounted board session. Persisted preparation stages, stations, pickup shelves, and rush-adjusted deadlines are not represented by the current order/API model and are not shown as if they were saved facts.
 
+## D2 restaurant dashboard metrics — implemented in source, migration rollout pending
+
+`GET /api/v1/tenants/{tenantId}/dashboard/metrics` requires a current owner, manager, or kitchen membership for that tenant and returns a no-store response. Owners and managers receive `orderValue` and `comparisonOrderValue`; Kitchen receives both as `null`. Order value is the saved `Order.Total` after product tax and applied discount, excluding currently cancelled orders. It is an order total, not captured payment revenue. `currency` comes from the restaurant.
+
+`businessDate` is the restaurant-local date containing the server's current time; `comparisonDate` is the previous restaurant-local calendar date. Both use the saved IANA tenant time zone, converted to UTC day boundaries. `orderCount` and hourly volume count orders by `CreatedAt`, including orders later cancelled. Each `hourlyOrders` entry has a local wall-clock `hour` from 0–23 plus `current` and `previous` counts. If a local hour repeats during a fall-back clock change, both occurrences share that hour bucket. Historical aggregates include archived rows while they remain retained.
+
+`activeOrders` is the current live queue across all creation dates, broken into Pending, Preparing, and Ready. `topSellingItems` ranks up to five product IDs/names and quantities from saved order-line snapshots created on `businessDate`, excluding currently cancelled orders; it does not join the live catalog. `averagePreparationMinutes` is the average of `ReadyAt - PreparingAt` for valid timestamp pairs whose `ReadyAt` falls on `businessDate`, with `preparationSampleCount`; the average is `null` when no valid samples exist. Older orders have no inferred lifecycle timestamps.
+
+The same-origin frontend route `/api/kitchen/dashboard/metrics?tenantId=…` rechecks the session's restaurant membership, forwards the API result, and returns `private, no-store` with `Vary: Cookie`. Browser query keys include account, tenant, locale, and role so role changes do not reuse previously cached monetary values. No forecast, growth percentage, repeat-diner rate, or payment metric is returned. The additive migrations add nullable preparation timestamps and aggregate indexes; they are generated but have not been applied to shared databases. See [D2 source and acceptance evidence](../audits/dashboard-metrics.md) and [schema details](../database/database-schema.md#d2-dashboard-metric-source-fields--2026-10-14).
+
 ## M5 product photo galleries — 2026-10-09
 
 Source implementation; actual S3/PostgreSQL/hosted acceptance remains open. See [ADR 0008](../architecture/decisions/0008-product-photo-gallery.md).

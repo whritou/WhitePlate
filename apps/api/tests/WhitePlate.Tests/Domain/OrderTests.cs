@@ -108,6 +108,26 @@ public sealed class OrderTests
     }
 
     [Fact]
+    public void LifecycleRecordsWhenPreparationStartsAndTheOrderBecomesReady()
+    {
+        var order = Order.Create(Guid.NewGuid(), "EUR", "Ada", [
+            new OrderLineSnapshot(Guid.NewGuid(), "Soup", 10m, 0m, 1, [])
+        ], null, 0m, DateTimeOffset.Parse("2026-10-07T09:55:00Z"));
+        var preparingAt = DateTimeOffset.Parse("2026-10-07T10:00:00Z");
+        var readyAt = DateTimeOffset.Parse("2026-10-07T10:12:00Z");
+
+        order.TransitionTo(OrderStatus.Preparing, preparingAt);
+        order.TransitionTo(OrderStatus.Ready, readyAt);
+
+        var preparingTimestamp = typeof(Order).GetProperty("PreparingAt");
+        var readyTimestamp = typeof(Order).GetProperty("ReadyAt");
+        Assert.NotNull(preparingTimestamp);
+        Assert.NotNull(readyTimestamp);
+        Assert.Equal(preparingAt, preparingTimestamp.GetValue(order));
+        Assert.Equal(readyAt, readyTimestamp.GetValue(order));
+    }
+
+    [Fact]
     public void CancellingAnOrderRecordsWhenItWasClosed()
     {
         var cancelledAt = DateTimeOffset.Parse("2026-10-07T00:02:00Z");

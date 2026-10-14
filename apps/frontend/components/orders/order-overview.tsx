@@ -1,6 +1,5 @@
 "use client"
 
-import { CookingPot, ShoppingBag, Wallet } from "lucide-react"
 import { useMemo, useState } from "react"
 import { useOrderDashboard } from "@/hooks/use-order-dashboard"
 import { useKdsClock } from "@/hooks/use-kds-clock"
@@ -70,48 +69,6 @@ export function OrderOverview(props: OrderDashboardProps) {
 
     return result
   }, [page?.items])
-  const activeCount = counts.Pending + counts.Preparing + counts.Ready
-  const loadedTotal = useMemo(() => {
-    const totals = new Map<string, number>()
-
-    for (const order of page?.items ?? [])
-      totals.set(
-        order.currency,
-        (totals.get(order.currency) ?? 0) + order.total
-      )
-
-    return (
-      [...totals]
-        .map(([currency, total]) =>
-          new Intl.NumberFormat(props.locale, {
-            style: "currency",
-            currency,
-          }).format(total)
-        )
-        .join(" · ") || "—"
-    )
-  }, [page?.items, props.locale])
-  const metrics = [
-    {
-      label: live("loadedOrders"),
-      value: page?.items.length ?? "—",
-      Icon: ShoppingBag,
-    },
-    {
-      label: live("activeOrders"),
-      value: page ? activeCount : "—",
-      Icon: CookingPot,
-    },
-    ...(role === "Kitchen"
-      ? []
-      : [
-          {
-            label: live("loadedTotal"),
-            value: page ? loadedTotal : "—",
-            Icon: Wallet,
-          },
-        ]),
-  ]
 
   return (
     <section
@@ -169,27 +126,6 @@ export function OrderOverview(props: OrderDashboardProps) {
           <AlertDescription>{t(message)}</AlertDescription>
         </Alert>
       )}
-
-      <div
-        className={`grid gap-px border-y ${metrics.length === 3 ? "sm:grid-cols-3" : "sm:grid-cols-2"}`}
-      >
-        {metrics.map(({ label, value, Icon }, index) => (
-          <section
-            key={label}
-            className={`min-w-0 py-5 ${index ? "sm:border-l sm:pl-5" : ""} ${index < metrics.length - 1 ? "border-b sm:border-b-0" : ""}`}
-          >
-            <div className="flex items-center justify-between gap-3 text-muted-foreground">
-              <h2 className="text-sm">{label}</h2>
-
-              <Icon aria-hidden="true" className="size-4 shrink-0" />
-            </div>
-
-            <p className="mt-2 font-display text-3xl font-bold break-words tabular-nums sm:text-4xl">
-              {value}
-            </p>
-          </section>
-        ))}
-      </div>
 
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>

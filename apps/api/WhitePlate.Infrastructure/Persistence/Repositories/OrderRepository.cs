@@ -218,6 +218,114 @@ public sealed class OrderRepository(WhitePlateDbContext database) : IOrderReposi
         return new OrderPageData(rows.Select(row => row.Item).ToArray(), nextCursor);
     }
 
+    public async Task<DashboardMetricsDto?> GetDashboardMetricsAsync(Guid tenantId, DateTimeOffset now,
+        bool includeOrderValue, CancellationToken cancellationToken)
+    {
+        var tenant = await database.Tenants.AsNoTracking().Where(item => item.Id == tenantId && item.IsActive)
+            .Select(item => new { item.Currency, item.TimeZone })
+            .SingleOrDefaultAsync(cancellationToken);
+        if (tenant is null) return null;
+
+        var zone = TimeZoneInfo.FindSystemTimeZoneById(tenant.TimeZone);
+        var businessDate = DateOnly.FromDateTime(TimeZoneInfo.ConvertTime(now, zone).DateTime);
+        var comparisonDate = businessDate.AddDays(-1);
+        var comparisonStart = LocalDayStartUtc(comparisonDate, zone);
+        var businessStart = LocalDayStartUtc(businessDate, zone);
+        var followingStart = LocalDayStartUtc(businessDate.AddDays(1), zone);
+        var comparisonStartTicks = comparisonStart.UtcDateTime.Ticks;
+        var businessStartTicks = businessStart.UtcDateTime.Ticks;
+        var followingStartTicks = followingStart.UtcDateTime.Ticks;
+
+        var ordersInRange = database.Orders.AsNoTracking().Where(order => order.TenantId == tenantId &&
+            order.CreatedAtTicks >= comparisonStartTicks && order.CreatedAtTicks < followingStartTicks);
+        var dailyTotals = await ordersInRange.GroupBy(order => order.CreatedAtTicks >= businessStartTicks)
+            .Select(group => new
+            {
+                IsCurrentDay = group.Key,
+                Count = group.Count(),
+                OrderValue = group.Sum(order => order.Status == OrderStatus.Cancelled ? 0m : order.Total)
+            }).ToListAsync(cancellationToken);
+
+        var currentTotals = dailyTotals.SingleOrDefault(day => day.IsCurrentDay);
+        var comparisonTotals = dailyTotals.SingleOrDefault(day => !day.IsCurrentDay);
+        var activeCounts = await database.Orders.AsNoTracking()
+            .Where(order => order.TenantId == tenantId &&
+                (order.Status == OrderStatus.Pending || order.Status == OrderStatus.Preparing ||
+                 order.Status == OrderStatus.Ready))
+            .GroupBy(order => order.Status)
+            .Select(group => new { Status = group.Key, Count = group.Count() })
+            .ToListAsync(cancellationToken);
+        var pending = activeCounts.SingleOrDefault(item => item.Status == OrderStatus.Pending)?.Count ?? 0;
+        var preparing = activeCounts.SingleOrDefault(item => item.Status == OrderStatus.Preparing)?.Count ?? 0;
+        var ready = activeCounts.SingleOrDefault(item => item.Status == OrderStatus.Ready)?.Count ?? 0;
+
+        var createdAtRows = await ordersInRange.Select(order => order.CreatedAt).ToListAsync(cancellationToken);
+        var hourlyCounts = new int[2, 24];
+        foreach (var createdAt in createdAtRows)
+        {
+            var localCreatedAt = TimeZoneInfo.ConvertTime(createdAt, zone);
+            var localDate = DateOnly.FromDateTime(localCreatedAt.DateTime);
+            var period = localDate == businessDate ? 0 : localDate == comparisonDate ? 1 : -1;
+            if (period >= 0) hourlyCounts[period, localCreatedAt.Hour]++;
+        }
+
+        var hourlyOrders = Enumerable.Range(0, 24)
+            .Select(hour => new HourlyOrderMetricsDto(hour, hourlyCounts[0, hour], hourlyCounts[1, hour]))
+            .ToArray();
+
+        var topSellingItemRows = await database.Orders.AsNoTracking()
+            .Where(order => order.TenantId == tenantId && order.CreatedAtTicks >= businessStartTicks &&
+                order.CreatedAtTicks < followingStartTicks && order.Status != OrderStatus.Cancelled)
+            .SelectMany(order => order.Lines)
+            .GroupBy(line => new { line.ProductId, line.ProductName })
+            .Select(product => new
+            {
+                product.Key.ProductId,
+                product.Key.ProductName,
+                Quantity = product.Sum(line => line.Quantity)
+            })
+            .OrderByDescending(product => product.Quantity)
+            .ThenBy(product => product.ProductName)
+            .Take(5)
+            .ToListAsync(cancellationToken);
+        var topSellingItems = topSellingItemRows.Select(product =>
+            new TopSellingItemMetricsDto(product.ProductId, product.ProductName, product.Quantity)).ToArray();
+
+        var preparationRows = await database.Orders.AsNoTracking()
+            .Where(order => order.TenantId == tenantId && order.ReadyAtTicks >= businessStartTicks &&
+                order.ReadyAtTicks < followingStartTicks && order.PreparingAtTicks != null &&
+                order.ReadyAtTicks >= order.PreparingAtTicks)
+            .Select(order => new { order.PreparingAt, order.ReadyAt })
+            .ToListAsync(cancellationToken);
+        var preparationMinutes = preparationRows.Select(order =>
+            (decimal)(order.ReadyAt!.Value - order.PreparingAt!.Value).TotalMinutes).ToArray();
+        decimal? averagePreparationMinutes = preparationMinutes.Length == 0
+            ? null
+            : decimal.Round(preparationMinutes.Average(), 1, MidpointRounding.AwayFromZero);
+
+        return new DashboardMetricsDto(tenant.Currency, tenant.TimeZone, businessDate, comparisonDate,
+            currentTotals?.Count ?? 0, comparisonTotals?.Count ?? 0,
+            includeOrderValue ? currentTotals?.OrderValue ?? 0m : null,
+            includeOrderValue ? comparisonTotals?.OrderValue ?? 0m : null,
+            new ActiveOrderMetricsDto(pending + preparing + ready, pending, preparing, ready),
+            hourlyOrders, topSellingItems, averagePreparationMinutes, preparationMinutes.Length);
+    }
+
+    private static DateTimeOffset LocalDayStartUtc(DateOnly date, TimeZoneInfo zone)
+    {
+        var localStart = DateTime.SpecifyKind(date.ToDateTime(TimeOnly.MinValue), DateTimeKind.Unspecified);
+        for (var minute = 0; zone.IsInvalidTime(localStart); minute++)
+        {
+            if (minute >= 24 * 60) throw new InvalidTimeZoneException("The time zone has no valid start for this local date.");
+            localStart = localStart.AddMinutes(1);
+        }
+
+        var offset = zone.IsAmbiguousTime(localStart)
+            ? zone.GetAmbiguousTimeOffsets(localStart).Max()
+            : zone.GetUtcOffset(localStart);
+        return new DateTimeOffset(localStart, offset).ToUniversalTime();
+    }
+
     public async Task<OrderHistoryPageData> GetHistoryAsync(Guid tenantId, WhitePlate.Domain.Orders.OrderStatus? status,
         string? search, DateTimeOffset? createdAtFrom, DateTimeOffset? createdAtUntil, string sort,
         bool descending, int page, int pageSize, CancellationToken cancellationToken)

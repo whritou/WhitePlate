@@ -28,6 +28,10 @@ public sealed class OrderConfiguration : IEntityTypeConfiguration<Order>
         builder.Property(order => order.PickupAtTicks);
         builder.Property(order => order.PickupTimeZone).HasMaxLength(100);
         builder.Property(order => order.PickupMode).HasConversion<string>().HasMaxLength(16);
+        builder.Property(order => order.PreparingAt);
+        builder.Property(order => order.PreparingAtTicks);
+        builder.Property(order => order.ReadyAt);
+        builder.Property(order => order.ReadyAtTicks);
         builder.Property(order => order.ClosedAt);
         builder.Property(order => order.ClosedAtTicks);
         builder.Property(order => order.ArchivedAt);
@@ -36,6 +40,8 @@ public sealed class OrderConfiguration : IEntityTypeConfiguration<Order>
         builder.HasMany(order => order.Lines).WithOne().HasForeignKey(line => line.OrderId).OnDelete(DeleteBehavior.Cascade);
         builder.HasIndex(order => new { order.TenantId, order.CreatedAt, order.Id });
         builder.HasIndex(order => new { order.TenantId, order.CreatedAtTicks, order.Id });
+        builder.HasIndex(order => new { order.TenantId, order.Status });
+        builder.HasIndex(order => new { order.TenantId, order.ReadyAtTicks });
         builder.HasIndex(order => new { order.Status, order.ClosedAtTicks, order.ArchivedAt });
     }
 }

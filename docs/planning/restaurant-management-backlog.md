@@ -225,15 +225,17 @@ Replace illustrative dashboard KPIs and insight widgets with tenant-scoped serve
 
 Acceptance criteria:
 
-- [ ] Document each metric's source, time window, restaurant time zone, included order statuses, tax/discount treatment and historical-snapshot semantics before computing it.
-- [ ] Return server-side aggregates across all matching orders including retained history; provide real queue breakdowns, hourly volume and product rankings with accessible text alternatives.
-- [ ] Calculate average preparation time only when lifecycle timestamps support it; distinguish order value from captured payment revenue until verified payments exist.
-- [ ] Show meaningful empty/insufficient-data states and comparison periods; never retain sample growth percentages, expected-volume forecasts or repeat-diner rates as real metrics.
-- [ ] Verify aggregate accuracy using deterministic multi-day and two-tenant fixtures, authorization/cache isolation and currency formatting.
+- [x] Document each metric's source, time window, restaurant time zone, included order statuses, tax/discount treatment and historical-snapshot semantics before computing it.
+- [x] Return server-side aggregates across all matching orders including retained history; provide real queue breakdowns, hourly volume and product rankings with accessible text alternatives.
+- [x] Calculate average preparation time only when lifecycle timestamps support it; distinguish order value from captured payment revenue until verified payments exist.
+- [x] Show meaningful empty/insufficient-data states and comparison periods; never retain sample growth percentages, expected-volume forecasts or repeat-diner rates as real metrics.
+- [x] Verify aggregate accuracy using deterministic multi-day and two-tenant fixtures, authorization/cache isolation and currency formatting. PostgreSQL/hosted verification remains open.
 
-Decisions and limits:
+Source decisions and limits:
 
-- Resolve event/timestamp collection, comparison baselines and retention needs. Repeat-diner percentage requires a defined guest identity/privacy model; expected-volume forecasting needs a separate data/model decision.
+- New status transitions capture `PreparingAt` and `ReadyAt`; legacy rows remain null and never receive inferred times. Preparation samples are nonnegative intervals whose `ReadyAt` is within the business date.
+- Compare the restaurant-local calendar day with the previous local calendar day using the saved IANA time zone. Use all still-retained orders, including archived history. Order counts/hourly volume count all statuses including later cancellations; order value and top sellers exclude currently cancelled orders. Saved `Order.Total` includes discounts and tax; payment settlement remains outside this API.
+- Repeat-diner percentage requires a defined guest identity/privacy model; expected-volume forecasting needs a separate data/model decision. PostgreSQL rollout/query-plan and hosted real-data acceptance remain open.
 
 ### D3 — Restaurant Dashboard: rush hold and emergency ordering pause
 

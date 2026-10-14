@@ -92,6 +92,7 @@ public static class ServiceRegistration
         services.AddScoped<GetPublicOrderTrackingQueryHandler>();
         services.AddScoped<ListOrdersQueryHandler>();
         services.AddScoped<ListOrderHistoryQueryHandler>();
+        services.AddScoped<GetDashboardMetricsQueryHandler>();
         services.AddScoped<UpdateOrderStatusCommandHandler>();
         services.AddScoped<KitchenSubscriptionAccess>();
         services.AddSingleton<KitchenSubscriptions>();
