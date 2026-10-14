@@ -133,15 +133,25 @@ export function MenuBuilderCatalog({
 
       if (!item) return
       ordered.splice(to, 0, item)
-      reorder({ entityType: "categories", orderedIds: ordered.map((x) => x.id) })
+      reorder({
+        entityType: "categories",
+        orderedIds: ordered.map((x) => x.id),
+      })
 
       return
     }
 
-    const targetCategory = categories.find((category) => category.id === targetId)
+    const targetCategory = categories.find(
+      (category) => category.id === targetId
+    )
     const product = catalog.products.find((item) => item.id === dragged.id)
 
-    if (!targetCategory || targetCategory.isArchived || !product || isArchived(product))
+    if (
+      !targetCategory ||
+      targetCategory.isArchived ||
+      !product ||
+      isArchived(product)
+    )
       return
     if (product.categoryId === targetId) return
 
@@ -197,7 +207,10 @@ export function MenuBuilderCatalog({
 
     if (!item) return
     ordered.splice(to, 0, item)
-    reorder({ entityType: "categories", orderedIds: ordered.map((category) => category.id) })
+    reorder({
+      entityType: "categories",
+      orderedIds: ordered.map((category) => category.id),
+    })
   }
 
   function moveProductWithKeyboard(id: string, offset: number) {
@@ -216,7 +229,11 @@ export function MenuBuilderCatalog({
 
     if (!item) return
     ordered.splice(to, 0, item)
-    reorder({ entityType: "products", categoryId, orderedIds: ordered.map((product) => product.id) })
+    reorder({
+      entityType: "products",
+      categoryId,
+      orderedIds: ordered.map((product) => product.id),
+    })
   }
 
   return (
@@ -290,7 +307,9 @@ export function MenuBuilderCatalog({
 
         {!selectedId && (
           <section className="live-product-placeholder hidden border-l p-8 text-center lg:grid lg:content-center">
-            <h2 className="font-display text-xl font-bold">{v("selectDish")}</h2>
+            <h2 className="font-display text-xl font-bold">
+              {v("selectDish")}
+            </h2>
           </section>
         )}
       </div>

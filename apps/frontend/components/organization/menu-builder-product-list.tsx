@@ -4,7 +4,11 @@ import { GripVertical } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import type { CatalogCategory, CatalogProduct, ManagedCatalog } from "@/types/catalog-management"
+import type {
+  CatalogCategory,
+  CatalogProduct,
+  ManagedCatalog,
+} from "@/types/catalog-management"
 import type { MenuBuilderDraggedItem } from "@/types/menu-builder"
 import { ArchiveCatalogButton } from "./archive-catalog-button"
 import { LiveProductCover } from "./live-product-cover"
@@ -87,9 +91,7 @@ export function MenuBuilderProductList({
             {u("productCount", { count: products.length })}
           </p>
 
-          <p className="text-xs text-muted-foreground">
-            {t("orderingHelp")}
-          </p>
+          <p className="text-xs text-muted-foreground">{t("orderingHelp")}</p>
 
           {reorderError && (
             <p role="alert" className="text-sm text-destructive">
@@ -102,9 +104,14 @@ export function MenuBuilderProductList({
               <li
                 key={product.id}
                 draggable={
-                  !pending && visibility === "active" && categoryId !== "all" && !isArchived(product)
+                  !pending &&
+                  visibility === "active" &&
+                  categoryId !== "all" &&
+                  !isArchived(product)
                 }
-                onDragStart={() => setDragged({ kind: "product", id: product.id })}
+                onDragStart={() =>
+                  setDragged({ kind: "product", id: product.id })
+                }
                 onDragEnd={() => setDragged(null)}
                 onDragOver={(event) => {
                   if (dragged?.kind === "product") event.preventDefault()
@@ -117,30 +124,38 @@ export function MenuBuilderProductList({
                 className={`live-dish-row border bg-background p-3 ${selectedId === product.id ? "shadow-[4px_4px_0_0_var(--color-primary)]" : "hover:bg-secondary"} ${dragged?.id === product.id ? "opacity-50" : ""}`}
               >
                 <div className="flex min-w-0 flex-wrap items-center justify-between gap-3">
-                  {!isArchived(product) && visibility === "active" && categoryId !== "all" && (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      draggable={!pending}
-                      disabled={pending}
-                      aria-label={t("dragProduct", { name: product.name })}
-                      className="size-8 cursor-grab text-muted-foreground"
-                      onDragStart={(event) => {
-                        event.stopPropagation()
-                        setDragged({ kind: "product", id: product.id })
-                      }}
-                      onDragEnd={() => setDragged(null)}
-                      onKeyDown={(event) => {
-                        if (event.key === "ArrowUp" || event.key === "ArrowDown") {
-                          event.preventDefault()
-                          moveProductWithKeyboard(product.id, event.key === "ArrowUp" ? -1 : 1)
-                        }
-                      }}
-                    >
-                      <GripVertical aria-hidden="true" className="size-4" />
-                    </Button>
-                  )}
+                  {!isArchived(product) &&
+                    visibility === "active" &&
+                    categoryId !== "all" && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        draggable={!pending}
+                        disabled={pending}
+                        aria-label={t("dragProduct", { name: product.name })}
+                        className="size-8 cursor-grab text-muted-foreground"
+                        onDragStart={(event) => {
+                          event.stopPropagation()
+                          setDragged({ kind: "product", id: product.id })
+                        }}
+                        onDragEnd={() => setDragged(null)}
+                        onKeyDown={(event) => {
+                          if (
+                            event.key === "ArrowUp" ||
+                            event.key === "ArrowDown"
+                          ) {
+                            event.preventDefault()
+                            moveProductWithKeyboard(
+                              product.id,
+                              event.key === "ArrowUp" ? -1 : 1
+                            )
+                          }
+                        }}
+                      >
+                        <GripVertical aria-hidden="true" className="size-4" />
+                      </Button>
+                    )}
 
                   <Button
                     variant="unstyled"
@@ -162,7 +177,7 @@ export function MenuBuilderProductList({
                         {product.name}
                       </span>
 
-                      <span className="mt-1 block text-sm font-normal text-muted-foreground [overflow-wrap:break-word]">
+                      <span className="mt-1 block text-sm font-normal [overflow-wrap:break-word] text-muted-foreground">
                         {product.description}
                       </span>
                     </span>
@@ -186,7 +201,8 @@ export function MenuBuilderProductList({
 
                   {isArchived(product) ? (
                     product.isArchived &&
-                    !categories.find((item) => item.id === product.categoryId)?.isArchived && (
+                    !categories.find((item) => item.id === product.categoryId)
+                      ?.isArchived && (
                       <RestoreProductButton
                         compact
                         tenantId={catalog.tenantId}

@@ -88,12 +88,17 @@ export function ProductOptionGroupCard({
                 disabled={pending}
                 aria-label={m("dragOptionGroup", { name: group.name })}
                 className="size-8 cursor-grab text-muted-foreground"
-                onDragStart={() => setDragged({ type: "option-groups", id: group.id })}
+                onDragStart={() =>
+                  setDragged({ type: "option-groups", id: group.id })
+                }
                 onDragEnd={() => setDragged(null)}
                 onKeyDown={(event) => {
                   if (event.key === "ArrowUp" || event.key === "ArrowDown") {
                     event.preventDefault()
-                    moveGroupWithKeyboard(group.id, event.key === "ArrowUp" ? -1 : 1)
+                    moveGroupWithKeyboard(
+                      group.id,
+                      event.key === "ArrowUp" ? -1 : 1
+                    )
                   }
                 }}
               >
@@ -103,7 +108,9 @@ export function ProductOptionGroupCard({
 
             <div className="min-w-0">
               <CardTitle>
-                <h3 className="break-words text-base font-semibold">{group.name}</h3>
+                <h3 className="text-base font-semibold break-words">
+                  {group.name}
+                </h3>
               </CardTitle>
 
               <CardDescription>
@@ -113,55 +120,59 @@ export function ProductOptionGroupCard({
                 })}
               </CardDescription>
 
-              {group.isArchived && <Badge variant="neutral" className="mt-2">{t("archived")}</Badge>}
+              {group.isArchived && (
+                <Badge variant="neutral" className="mt-2">
+                  {t("archived")}
+                </Badge>
+              )}
             </div>
           </div>
 
           <div className="flex flex-wrap gap-2">
-            {group.isArchived ? (
-              !archived && (
-                <RestoreCatalogItemButton
-                  tenantId={catalog.tenantId}
-                  id={group.id}
-                  entityType="option-groups"
-                  name={group.name}
-                  onPendingChange={onPendingChange}
-                />
-              )
-            ) : !archived && (
-              <>
-                <EditorDialog
-                  compact
-                  title={t("editOptionGroup", { name: group.name })}
-                  label={u("edit")}
-                  description={u("groupEditorHelp")}
-                  disabled={pending}
-                >
-                  {(callbacks) => (
-                    <OptionGroupForm
-                      tenantId={catalog.tenantId}
-                      productId={product.id}
-                      productName={product.name}
-                      group={group}
-                      {...callbacks}
-                      onPendingChange={(value) => {
-                        callbacks.onPendingChange?.(value)
-                        onPendingChange(value)
-                      }}
-                    />
-                  )}
-                </EditorDialog>
+            {group.isArchived
+              ? !archived && (
+                  <RestoreCatalogItemButton
+                    tenantId={catalog.tenantId}
+                    id={group.id}
+                    entityType="option-groups"
+                    name={group.name}
+                    onPendingChange={onPendingChange}
+                  />
+                )
+              : !archived && (
+                  <>
+                    <EditorDialog
+                      compact
+                      title={t("editOptionGroup", { name: group.name })}
+                      label={u("edit")}
+                      description={u("groupEditorHelp")}
+                      disabled={pending}
+                    >
+                      {(callbacks) => (
+                        <OptionGroupForm
+                          tenantId={catalog.tenantId}
+                          productId={product.id}
+                          productName={product.name}
+                          group={group}
+                          {...callbacks}
+                          onPendingChange={(value) => {
+                            callbacks.onPendingChange?.(value)
+                            onPendingChange(value)
+                          }}
+                        />
+                      )}
+                    </EditorDialog>
 
-                <ArchiveCatalogButton
-                  compact
-                  tenantId={catalog.tenantId}
-                  id={group.id}
-                  entityType="option-groups"
-                  name={group.name}
-                  onPendingChange={onPendingChange}
-                />
-              </>
-            )}
+                    <ArchiveCatalogButton
+                      compact
+                      tenantId={catalog.tenantId}
+                      id={group.id}
+                      entityType="option-groups"
+                      name={group.name}
+                      onPendingChange={onPendingChange}
+                    />
+                  </>
+                )}
           </div>
         </CardHeader>
 
@@ -174,7 +185,9 @@ export function ProductOptionGroupCard({
                 <li
                   key={option.id}
                   draggable={!locked && !option.isArchived && !pending}
-                  onDragStart={() => setDragged({ type: "options", id: option.id })}
+                  onDragStart={() =>
+                    setDragged({ type: "options", id: option.id })
+                  }
                   onDragEnd={() => setDragged(null)}
                   onDragOver={(event) => {
                     if (dragged?.type === "options") event.preventDefault()
@@ -182,10 +195,18 @@ export function ProductOptionGroupCard({
                   onDrop={(event) => {
                     event.preventDefault()
                     event.stopPropagation()
-                    if (!dragged || dragged.type !== "options" || dragged.id === option.id || locked) return
+                    if (
+                      !dragged ||
+                      dragged.type !== "options" ||
+                      dragged.id === option.id ||
+                      locked
+                    )
+                      return
 
                     const active = options.filter((item) => !item.isArchived)
-                    const from = active.findIndex((item) => item.id === dragged.id)
+                    const from = active.findIndex(
+                      (item) => item.id === dragged.id
+                    )
                     const to = active.findIndex((item) => item.id === option.id)
 
                     if (from < 0 || to < 0) return
@@ -195,7 +216,11 @@ export function ProductOptionGroupCard({
 
                     if (!item) return
                     ordered.splice(to, 0, item)
-                    reorder("options", group.id, ordered.map((item) => item.id))
+                    reorder(
+                      "options",
+                      group.id,
+                      ordered.map((item) => item.id)
+                    )
                   }}
                   className={`flex min-w-0 flex-wrap items-center justify-between gap-3 border bg-background p-3 ${dragged?.id === option.id ? "opacity-50" : ""}`}
                 >
@@ -215,9 +240,16 @@ export function ProductOptionGroupCard({
                         }}
                         onDragEnd={() => setDragged(null)}
                         onKeyDown={(event) => {
-                          if (event.key === "ArrowUp" || event.key === "ArrowDown") {
+                          if (
+                            event.key === "ArrowUp" ||
+                            event.key === "ArrowDown"
+                          ) {
                             event.preventDefault()
-                            moveOptionWithKeyboard(group.id, option.id, event.key === "ArrowUp" ? -1 : 1)
+                            moveOptionWithKeyboard(
+                              group.id,
+                              option.id,
+                              event.key === "ArrowUp" ? -1 : 1
+                            )
                           }
                         }}
                       >
@@ -225,48 +257,23 @@ export function ProductOptionGroupCard({
                       </Button>
                     )}
 
-                    <span className="min-w-0 break-words font-medium">{option.name}</span>
+                    <span className="min-w-0 font-medium break-words">
+                      {option.name}
+                    </span>
 
-                    {(locked || option.isArchived) && <Badge variant="neutral">{t("archived")}</Badge>}
+                    {(locked || option.isArchived) && (
+                      <Badge variant="neutral">{t("archived")}</Badge>
+                    )}
                   </div>
 
                   <div className="flex flex-wrap items-center gap-3">
-                    <span className="tabular-nums">+{money.format(option.priceAdjustment)}</span>
+                    <span className="tabular-nums">
+                      +{money.format(option.priceAdjustment)}
+                    </span>
 
-                    {!locked && (option.isArchived ? (
-                      <RestoreCatalogItemButton
-                        compact
-                        tenantId={catalog.tenantId}
-                        id={option.id}
-                        entityType="options"
-                        name={option.name}
-                        onPendingChange={onPendingChange}
-                      />
-                    ) : (
-                      <>
-                        <EditorDialog
-                          compact
-                          title={t("editOption", { name: option.name })}
-                          label={u("edit")}
-                          description={u("optionEditorHelp")}
-                          disabled={pending}
-                        >
-                          {(callbacks) => (
-                            <OptionForm
-                              tenantId={catalog.tenantId}
-                              currency={catalog.currency}
-                              group={group}
-                              option={option}
-                              {...callbacks}
-                              onPendingChange={(value) => {
-                                callbacks.onPendingChange?.(value)
-                                onPendingChange(value)
-                              }}
-                            />
-                          )}
-                        </EditorDialog>
-
-                        <ArchiveCatalogButton
+                    {!locked &&
+                      (option.isArchived ? (
+                        <RestoreCatalogItemButton
                           compact
                           tenantId={catalog.tenantId}
                           id={option.id}
@@ -274,8 +281,40 @@ export function ProductOptionGroupCard({
                           name={option.name}
                           onPendingChange={onPendingChange}
                         />
-                      </>
-                    ))}
+                      ) : (
+                        <>
+                          <EditorDialog
+                            compact
+                            title={t("editOption", { name: option.name })}
+                            label={u("edit")}
+                            description={u("optionEditorHelp")}
+                            disabled={pending}
+                          >
+                            {(callbacks) => (
+                              <OptionForm
+                                tenantId={catalog.tenantId}
+                                currency={catalog.currency}
+                                group={group}
+                                option={option}
+                                {...callbacks}
+                                onPendingChange={(value) => {
+                                  callbacks.onPendingChange?.(value)
+                                  onPendingChange(value)
+                                }}
+                              />
+                            )}
+                          </EditorDialog>
+
+                          <ArchiveCatalogButton
+                            compact
+                            tenantId={catalog.tenantId}
+                            id={option.id}
+                            entityType="options"
+                            name={option.name}
+                            onPendingChange={onPendingChange}
+                          />
+                        </>
+                      ))}
                   </div>
                 </li>
               ))}

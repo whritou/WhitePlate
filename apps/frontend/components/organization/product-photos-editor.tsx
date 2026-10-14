@@ -68,7 +68,9 @@ export function ProductPhotosEditor(props: ProductPhotosProps) {
           {t("title")}
         </h3>
 
-        <Badge variant="neutral">{t("count", { count: state.photos.length })}</Badge>
+        <Badge variant="neutral">
+          {t("count", { count: state.photos.length })}
+        </Badge>
       </div>
 
       <p className="text-xs text-muted-foreground">{t("ordering")}</p>
@@ -93,7 +95,8 @@ export function ProductPhotosEditor(props: ProductPhotosProps) {
       <div data-photo-controls className="grid min-w-0 content-start gap-3">
         {current && !state.query.isError && (
           <p className="text-xs text-muted-foreground">
-            WebP · {Math.round(current.bytes / 1024)} KB · {current.width} × {current.height}
+            WebP · {Math.round(current.bytes / 1024)} KB · {current.width} ×{" "}
+            {current.height}
           </p>
         )}
 
@@ -111,9 +114,12 @@ export function ProductPhotosEditor(props: ProductPhotosProps) {
           onChange={(event) => {
             const selectedFiles = [...(event.currentTarget.files ?? [])]
             const replacement = target.current
-            const files = replacement ? selectedFiles.slice(0, 1) : selectedFiles
+            const files = replacement
+              ? selectedFiles.slice(0, 1)
+              : selectedFiles
 
-            if (files.length > 0) void state.uploadMany(files, aspect, replacement)
+            if (files.length > 0)
+              void state.uploadMany(files, aspect, replacement)
             target.current = undefined
             setReplaceMode(false)
             event.currentTarget.value = ""
@@ -156,7 +162,9 @@ export function ProductPhotosEditor(props: ProductPhotosProps) {
             <AlertDialogBackdrop />
 
             <AlertDialogPopup>
-              <AlertDialogTitle>{t("removePhoto", { number: position + 1 })}</AlertDialogTitle>
+              <AlertDialogTitle>
+                {t("removePhoto", { number: position + 1 })}
+              </AlertDialogTitle>
 
               <AlertDialogDescription>{t("removeHelp")}</AlertDialogDescription>
 
@@ -167,7 +175,10 @@ export function ProductPhotosEditor(props: ProductPhotosProps) {
                   className="min-h-11 md:min-h-12"
                   disabled={locked || !current}
                   onClick={() => {
-                    if (current) state.change(state.photos.filter((photo) => photo.id !== current.id))
+                    if (current)
+                      state.change(
+                        state.photos.filter((photo) => photo.id !== current.id)
+                      )
                     setSelected(0)
                     setConfirm(false)
                   }}
@@ -176,7 +187,12 @@ export function ProductPhotosEditor(props: ProductPhotosProps) {
                 </Button>
 
                 <AlertDialogClose
-                  render={<Button variant="outline" className="min-h-11 md:min-h-12" />}
+                  render={
+                    <Button
+                      variant="outline"
+                      className="min-h-11 md:min-h-12"
+                    />
+                  }
                 >
                   {t("cancel")}
                 </AlertDialogClose>
@@ -187,53 +203,92 @@ export function ProductPhotosEditor(props: ProductPhotosProps) {
 
         {state.busy === "upload" && (
           <div role="status" className="grid gap-2 text-sm">
-            {t(state.progress === 100 ? "processing" : "uploading", { percent: state.progress })}
+            {t(state.progress === 100 ? "processing" : "uploading", {
+              percent: state.progress,
+            })}
 
-            <progress aria-label={t("progress")} value={state.progress} max={100} className="h-2 w-full accent-primary" />
+            <progress
+              aria-label={t("progress")}
+              value={state.progress}
+              max={100}
+              className="h-2 w-full accent-primary"
+            />
           </div>
         )}
 
         {state.draft && (
           <>
-            <p role="status" className="text-sm font-medium">{t("unsaved")}</p>
+            <p role="status" className="text-sm font-medium">
+              {t("unsaved")}
+            </p>
 
             <div className="flex flex-wrap gap-2">
-              <Button type="button" className="min-h-11 whitespace-normal md:min-h-12" disabled={locked} onClick={() => void state.save()}>
+              <Button
+                type="button"
+                className="min-h-11 whitespace-normal md:min-h-12"
+                disabled={locked}
+                onClick={() => void state.save()}
+              >
                 {t(state.busy === "save" ? "saving" : "save")}
               </Button>
 
-              <Button type="button" variant="ghost" className="min-h-11 whitespace-normal md:min-h-12" disabled={Boolean(state.busy)} onClick={state.discard}>
+              <Button
+                type="button"
+                variant="ghost"
+                className="min-h-11 whitespace-normal md:min-h-12"
+                disabled={Boolean(state.busy)}
+                onClick={state.discard}
+              >
                 {t("discard")}
               </Button>
             </div>
           </>
         )}
 
-        {state.saved && <p role="status" className="text-sm">{t("saved")}</p>}
+        {state.saved && (
+          <p role="status" className="text-sm">
+            {t("saved")}
+          </p>
+        )}
 
         {state.error && (
           <Alert variant="destructive" role="alert">
             <AlertDescription>{t(`errors.${state.error}`)}</AlertDescription>
 
             {state.canRetryUpload && (
-              <Button type="button" variant="outline" className="min-h-11 md:min-h-12" disabled={locked} onClick={state.retryUpload}>
+              <Button
+                type="button"
+                variant="outline"
+                className="min-h-11 md:min-h-12"
+                disabled={locked}
+                onClick={state.retryUpload}
+              >
                 {t("retryUpload")}
               </Button>
             )}
           </Alert>
         )}
 
-        {(state.query.isError || state.query.data?.storageAvailable === false) && (
+        {(state.query.isError ||
+          state.query.data?.storageAvailable === false) && (
           <Alert variant="destructive" role="alert">
             <AlertDescription>{t("unavailable")}</AlertDescription>
 
-            <Button type="button" variant="outline" className="min-h-11 md:min-h-12" disabled={state.query.isFetching} onClick={() => void state.query.refetch()}>
+            <Button
+              type="button"
+              variant="outline"
+              className="min-h-11 md:min-h-12"
+              disabled={state.query.isFetching}
+              onClick={() => void state.query.refetch()}
+            >
               {t("retry")}
             </Button>
           </Alert>
         )}
 
-        {props.archived && <p className="text-sm text-muted-foreground">{t("archived")}</p>}
+        {props.archived && (
+          <p className="text-sm text-muted-foreground">{t("archived")}</p>
+        )}
       </div>
     </section>
   )

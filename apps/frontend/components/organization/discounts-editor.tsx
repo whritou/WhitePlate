@@ -11,7 +11,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import type { CatalogDiscount, DiscountsEditorProps } from "@/types/catalog-management"
+import type {
+  CatalogDiscount,
+  DiscountsEditorProps,
+} from "@/types/catalog-management"
 import { DeactivateDiscountButton } from "./deactivate-discount-button"
 import { DiscountForm } from "./discount-form"
 
@@ -42,17 +45,26 @@ export function DiscountsEditor({
   const money = new Intl.NumberFormat(locale, { style: "currency", currency })
 
   return (
-    <section className="live-discounts" aria-labelledby="discounts-heading" role="region">
+    <section
+      className="live-discounts"
+      aria-labelledby="discounts-heading"
+      role="region"
+    >
       <Card>
         <CardHeader className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <CardTitle>
-              <h2 id="discounts-heading" className="font-display text-2xl font-bold">
+              <h2
+                id="discounts-heading"
+                className="font-display text-2xl font-bold"
+              >
                 {t("discountsTitle")}
               </h2>
             </CardTitle>
 
-            <CardDescription className="mt-2">{t("discountsDescription")}</CardDescription>
+            <CardDescription className="mt-2">
+              {t("discountsDescription")}
+            </CardDescription>
           </div>
 
           <EditorDialog
@@ -62,7 +74,13 @@ export function DiscountsEditor({
             label={t("newDiscountCode")}
             description={u("discountEditorHelp")}
           >
-            {(callbacks) => <DiscountForm tenantId={tenantId} currency={currency} {...callbacks} />}
+            {(callbacks) => (
+              <DiscountForm
+                tenantId={tenantId}
+                currency={currency}
+                {...callbacks}
+              />
+            )}
           </EditorDialog>
         </CardHeader>
 
@@ -97,31 +115,53 @@ export function DiscountsEditor({
                     <div className="min-w-0">
                       <p className="font-bold break-words">{discount.code}</p>
 
-                      <p className="text-sm text-muted-foreground break-words">{discount.name}</p>
+                      <p className="text-sm break-words text-muted-foreground">
+                        {discount.name}
+                      </p>
                     </div>
 
                     <div className="grid gap-1 text-sm xl:block">
-                      <span className="label-mono text-muted-foreground xl:hidden">{t("discountType")}</span>
+                      <span className="label-mono text-muted-foreground xl:hidden">
+                        {t("discountType")}
+                      </span>
 
-                      <span>{t(discount.kind === "Percentage" ? "percentage" : "fixedAmount")}</span>
+                      <span>
+                        {t(
+                          discount.kind === "Percentage"
+                            ? "percentage"
+                            : "fixedAmount"
+                        )}
+                      </span>
                     </div>
 
                     <div className="grid gap-1 xl:block">
-                      <span className="label-mono text-muted-foreground xl:hidden">{t("discountValueShort")}</span>
+                      <span className="label-mono text-muted-foreground xl:hidden">
+                        {t("discountValueShort")}
+                      </span>
 
-                      <span className="tabular-nums">{formatDiscountValue(discount, currency, locale)}</span>
+                      <span className="tabular-nums">
+                        {formatDiscountValue(discount, currency, locale)}
+                      </span>
                     </div>
 
                     <div className="grid gap-1 xl:block">
-                      <span className="label-mono text-muted-foreground xl:hidden">{t("minimumOrderShort", { currency })}</span>
+                      <span className="label-mono text-muted-foreground xl:hidden">
+                        {t("minimumOrderShort", { currency })}
+                      </span>
 
-                      <span className="tabular-nums">{money.format(discount.minimumOrderAmount)}</span>
+                      <span className="tabular-nums">
+                        {money.format(discount.minimumOrderAmount)}
+                      </span>
                     </div>
 
                     <div className="grid gap-1 xl:block">
-                      <span className="label-mono text-muted-foreground xl:hidden">{t("discountExpiresOn")}</span>
+                      <span className="label-mono text-muted-foreground xl:hidden">
+                        {t("discountExpiresOn")}
+                      </span>
 
-                      <span className="tabular-nums">{discount.expiresOn ?? t("neverExpires")}</span>
+                      <span className="tabular-nums">
+                        {discount.expiresOn ?? t("neverExpires")}
+                      </span>
                     </div>
 
                     <Badge variant={discount.isActive ? "success" : "neutral"}>

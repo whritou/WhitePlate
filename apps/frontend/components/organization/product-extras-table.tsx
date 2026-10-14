@@ -40,7 +40,11 @@ export function ProductExtrasTable({
     currency: catalog.currency,
   })
 
-  function reorder(entityType: "option-groups" | "options", parentId: string, orderedIds: string[]) {
+  function reorder(
+    entityType: "option-groups" | "options",
+    parentId: string,
+    orderedIds: string[]
+  ) {
     if (pending || saving || orderedIds.length === 0) return
 
     const input = new FormData()
@@ -72,7 +76,13 @@ export function ProductExtrasTable({
   }
 
   function dropGroup(targetId: string) {
-    if (!dragged || dragged.type !== "option-groups" || dragged.id === targetId || archived) return
+    if (
+      !dragged ||
+      dragged.type !== "option-groups" ||
+      dragged.id === targetId ||
+      archived
+    )
+      return
 
     const active = groups.filter((group) => !group.isArchived)
     const from = active.findIndex((group) => group.id === dragged.id)
@@ -85,7 +95,11 @@ export function ProductExtrasTable({
 
     if (!item) return
     ordered.splice(to, 0, item)
-    reorder("option-groups", product.id, ordered.map((group) => group.id))
+    reorder(
+      "option-groups",
+      product.id,
+      ordered.map((group) => group.id)
+    )
   }
 
   function moveGroupWithKeyboard(id: string, offset: number) {
@@ -102,7 +116,11 @@ export function ProductExtrasTable({
 
     if (!item) return
     ordered.splice(to, 0, item)
-    reorder("option-groups", product.id, ordered.map((group) => group.id))
+    reorder(
+      "option-groups",
+      product.id,
+      ordered.map((group) => group.id)
+    )
   }
 
   function moveOptionWithKeyboard(groupId: string, id: string, offset: number) {
@@ -119,7 +137,11 @@ export function ProductExtrasTable({
 
     if (!item) return
     ordered.splice(to, 0, item)
-    reorder("options", groupId, ordered.map((option) => option.id))
+    reorder(
+      "options",
+      groupId,
+      ordered.map((option) => option.id)
+    )
   }
 
   return (
@@ -152,7 +174,9 @@ export function ProductExtrasTable({
         )}
       </div>
 
-      <p className="text-sm text-muted-foreground">{t("optionGroupsDescription")}</p>
+      <p className="text-sm text-muted-foreground">
+        {t("optionGroupsDescription")}
+      </p>
 
       {orderError && (
         <p role="alert" className="text-sm text-destructive">
@@ -161,13 +185,17 @@ export function ProductExtrasTable({
       )}
 
       {groups.length === 0 ? (
-        <p className="py-4 text-sm text-muted-foreground">{t("noOptionGroups")}</p>
+        <p className="py-4 text-sm text-muted-foreground">
+          {t("noOptionGroups")}
+        </p>
       ) : (
         <ul className="grid gap-3">
           {groups.map((group) => {
             const options = catalog.options
               .filter((option) => option.groupId === group.id)
-              .sort((a, b) => a.sortOrder - b.sortOrder || a.id.localeCompare(b.id))
+              .sort(
+                (a, b) => a.sortOrder - b.sortOrder || a.id.localeCompare(b.id)
+              )
 
             return (
               <ProductOptionGroupCard

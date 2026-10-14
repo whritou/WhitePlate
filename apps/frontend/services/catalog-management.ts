@@ -257,7 +257,11 @@ export async function restoreCatalogItem({
   tenantId,
   id,
   entityType,
-}: { tenantId: string; id: string; entityType: Exclude<CatalogEntityType, "products"> }): Promise<CatalogResult> {
+}: {
+  tenantId: string
+  id: string
+  entityType: Exclude<CatalogEntityType, "products">
+}): Promise<CatalogResult> {
   return mutationResult(
     await whitePlateApi.post(
       `/api/v1/tenants/${tenantId}/${entityType}/${id}/restore`,

@@ -5,7 +5,10 @@ import { useTranslations } from "next-intl"
 import { setCategoryVisibilityAction } from "@/actions/catalog"
 import { Button } from "@/components/ui/button"
 import { EditorDialog } from "@/components/ui/editor-dialog"
-import type { CatalogCategory, ManagedCatalog } from "@/types/catalog-management"
+import type {
+  CatalogCategory,
+  ManagedCatalog,
+} from "@/types/catalog-management"
 import type { MenuBuilderDraggedItem } from "@/types/menu-builder"
 import { ArchiveCatalogButton } from "./archive-catalog-button"
 import { CategoryForm } from "./category-form"
@@ -86,12 +89,17 @@ export function MenuBuilderCategoryList({
                 disabled={pending || category.isArchived}
                 aria-label={t("dragCategory", { name: category.name })}
                 className="size-8 cursor-grab text-muted-foreground"
-                onDragStart={() => setDragged({ kind: "category", id: category.id })}
+                onDragStart={() =>
+                  setDragged({ kind: "category", id: category.id })
+                }
                 onDragEnd={() => setDragged(null)}
                 onKeyDown={(event) => {
                   if (event.key === "ArrowUp" || event.key === "ArrowDown") {
                     event.preventDefault()
-                    moveCategoryWithKeyboard(category.id, event.key === "ArrowUp" ? -1 : 1)
+                    moveCategoryWithKeyboard(
+                      category.id,
+                      event.key === "ArrowUp" ? -1 : 1
+                    )
                   }
                 }}
               >
@@ -111,9 +119,12 @@ export function MenuBuilderCategoryList({
                 <span className="min-w-0 truncate">{category.name}</span>
 
                 <span className="label-mono">
-                  {catalog.products.filter(
-                    (item) => item.categoryId === category.id && !item.isArchived
-                  ).length}
+                  {
+                    catalog.products.filter(
+                      (item) =>
+                        item.categoryId === category.id && !item.isArchived
+                    ).length
+                  }
                 </span>
               </Button>
 
@@ -222,7 +233,11 @@ function CategoryVisibilityButton({
 
       <input type="hidden" name="id" value={category.id} />
 
-      <input type="hidden" name="isVisible" value={String(!category.isVisible)} />
+      <input
+        type="hidden"
+        name="isVisible"
+        value={String(!category.isVisible)}
+      />
 
       <Button
         type="submit"
@@ -231,9 +246,12 @@ function CategoryVisibilityButton({
         className="text-foreground"
         aria-busy={pending}
         disabled={busy || pending}
-        aria-label={t(category.isVisible ? "hideCategoryNamed" : "showCategoryNamed", {
-          name: category.name,
-        })}
+        aria-label={t(
+          category.isVisible ? "hideCategoryNamed" : "showCategoryNamed",
+          {
+            name: category.name,
+          }
+        )}
       >
         <Icon aria-hidden="true" className="size-4" />
       </Button>

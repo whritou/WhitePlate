@@ -27,15 +27,15 @@ test("shared workspace keeps discounts and archived products reachable", async (
   await expect(page.getByRole("form", { name: /Edit product/ })).toBeHidden()
 })
 
-test("dragging a product submits the visible category order", async ({ page }) => {
+test("dragging a product submits the visible category order", async ({
+  page,
+}) => {
   await page.goto("/en/catalog-design-test?view=builder")
   await expect(page.getByTestId("fixture-ready")).toHaveAttribute(
     "data-ready",
     "true"
   )
-  await page
-    .getByRole("button", { name: "Les entrées 2", exact: true })
-    .click()
+  await page.getByRole("button", { name: "Les entrées 2", exact: true }).click()
 
   const rows = page.locator(".live-dish-row")
   const firstProductId = "33333333-3333-4333-8333-333333333333"

@@ -236,7 +236,6 @@ export function MenuBuilderProduct({
           pending={pending}
           onPendingChange={onPendingChange}
         />
-
       </fieldset>
     </section>
   )

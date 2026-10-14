@@ -155,7 +155,10 @@ export function DiscountForm({
         </div>
 
         <div className="grid min-w-0 content-start gap-2">
-          <Label htmlFor={`${prefix}-minimum-order`} className="flex min-h-11 items-end pb-1">
+          <Label
+            htmlFor={`${prefix}-minimum-order`}
+            className="flex min-h-11 items-end pb-1"
+          >
             {t("minimumOrderAmount", { currency })}
           </Label>
 
@@ -172,7 +175,10 @@ export function DiscountForm({
         </div>
 
         <div className="grid min-w-0 content-start gap-2">
-          <Label htmlFor={`${prefix}-expires-on`} className="flex min-h-11 items-end pb-1">
+          <Label
+            htmlFor={`${prefix}-expires-on`}
+            className="flex min-h-11 items-end pb-1"
+          >
             {t("discountExpiresOn")}
           </Label>
 

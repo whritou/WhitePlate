@@ -66,7 +66,11 @@ export function ArchiveCatalogButton({
             type="button"
             variant={removeIcon ? "ghost" : compact ? "ghost" : "outline"}
             size={compact || removeIcon ? "icon" : "default"}
-            className={removeIcon ? "text-destructive hover:bg-destructive hover:text-destructive-foreground" : undefined}
+            className={
+              removeIcon
+                ? "text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                : undefined
+            }
           />
         }
         aria-label={t("archiveName", { name })}

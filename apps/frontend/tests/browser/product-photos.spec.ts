@@ -160,7 +160,9 @@ test("gallery replacement/save failures keep drafts and removal returns keyboard
   expect(saved).toHaveLength(1)
 })
 
-test("dragging a gallery photo changes the saved cover order", async ({ page }) => {
+test("dragging a gallery photo changes the saved cover order", async ({
+  page,
+}) => {
   let saved = [asset, secondAsset]
   let savedIds: string[] = []
   const assetsById = new Map([
@@ -207,9 +209,13 @@ test("dragging a gallery photo changes the saved cover order", async ({ page }) 
   await expect(photos).toHaveCount(2)
   await photos.nth(0).dragTo(photos.nth(1))
   await expect(page.getByText("Unsaved photo changes")).toBeVisible()
-  await expect(photos.nth(0).getByText("Cover photo", { exact: true })).toBeVisible()
+  await expect(
+    photos.nth(0).getByText("Cover photo", { exact: true })
+  ).toBeVisible()
   await page.getByRole("button", { name: "Save photos", exact: true }).click()
-  await expect(page.getByText("Photos saved. Guest menu updated.")).toBeVisible()
+  await expect(
+    page.getByText("Photos saved. Guest menu updated.")
+  ).toBeVisible()
   expect(savedIds).toEqual([secondAsset.id, asset.id])
 })
 

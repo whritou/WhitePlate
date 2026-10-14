@@ -36,8 +36,9 @@ export function parseDiscountInput(input: unknown): DiscountInput | null {
       : typeof rawExpiresOn === "string" &&
           /^\d{4}-\d{2}-\d{2}$/.test(rawExpiresOn) &&
           !Number.isNaN(Date.parse(`${rawExpiresOn}T00:00:00.000Z`)) &&
-          new Date(`${rawExpiresOn}T00:00:00.000Z`).toISOString().slice(0, 10) ===
-            rawExpiresOn
+          new Date(`${rawExpiresOn}T00:00:00.000Z`)
+            .toISOString()
+            .slice(0, 10) === rawExpiresOn
         ? rawExpiresOn
         : undefined
   const name = typeof rawName === "string" ? rawName.trim() : ""
@@ -63,5 +64,14 @@ export function parseDiscountInput(input: unknown): DiscountInput | null {
   )
     return null
 
-  return { tenantId, id, code, name, kind, value, minimumOrderAmount, expiresOn }
+  return {
+    tenantId,
+    id,
+    code,
+    name,
+    kind,
+    value,
+    minimumOrderAmount,
+    expiresOn,
+  }
 }
