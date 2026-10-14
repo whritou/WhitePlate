@@ -139,18 +139,17 @@ The restaurant dashboard initially used a responsive page-scoped order overview 
 
 ### Dashboard presentation revision — 14 October 2026
 
-The approved dashboard refresh makes “Today at a glance” KPIs visibly distinct with the design system's info, warning, success and secondary surface tokens. The large dashboard ticket/filter area is now a compact card with five loaded-page status counts and a link to the full Orders board. It retains the initial loading state, live refresh, stale-data warning, retry, empty state and access-revocation handling. Counts explicitly describe the loaded page; the separate D2 metrics remain restaurant-wide.
+The dashboard now follows the reviewed `/demo/dashboard` composition: its title and pause/resume action sit above an unboxed metrics strip; colored order-stage links and a compact connections/order-status rail follow; latest orders and storefront share the final row. It reads real API values. Metrics remain restaurant-wide, while order-stage counts, overdue pickups and the latest four orders come from the currently loaded page of up to 50 orders. The full order workflow remains on Orders.
 
-Quick availability cards now show the product's saved cover image when an owner or manager can access the private photo endpoint. Kitchen is read-only, consistent with the existing API authorization; it sees current availability with the neutral no-photo fallback and cannot mutate it from this dashboard. D3 ordering controls and all server behavior are unchanged. No database migration was added for this presentation update.
+Owner/manager pause and Rush controls retain D3’s confirmation, conditional update and polling behavior. Kitchen can inspect ordering status but cannot mutate it. Quick availability was removed from this dashboard composition on 14 October at the user’s direction; the page no longer calls the availability read. Existing API behavior and storefront shortcuts remain unchanged. The temporary dashboard preview route, sample components and translation namespace were deleted. No database migration was added.
 
 | Command/check | Result |
 | --- | --- |
-| Bundled Node + `node_modules/eslint/bin/eslint.js .` | Passed: 0 errors, 20 existing warnings (19 image-element warnings and one unused import in the existing Orders component). |
-| Bundled Node + `node_modules/typescript/bin/tsc --noEmit` | Passed. |
-| Bundled Node + `node_modules/next/dist/bin/next build --webpack` | Passed with process-only `BETTER_AUTH_URL=https://auth.build.invalid` and `API_BASE_URL=https://api.build.invalid`; 96 static pages generated. Existing PostgreSQL SSL-mode notices remain. No environment file was edited. |
-| Targeted Prettier check for changed TS/TSX/JSON; `git diff --check` | Passed. Prettier reports the three touched Markdown files as unformatted on the pre-change `HEAD` as well; they were not bulk-reformatted. |
-| Package-runner entrypoints | `npm run lint` and `npm run typecheck` could not start because the system npm shim targets a missing global `npm-cli.js`. The bundled pnpm runner could not fetch registry metadata in the network-restricted environment. The installed local CLIs above were run directly instead. |
-| Automated/browser tests and hosted SignalR acceptance | Not run. Authenticated owner/manager/Kitchen visibility, foreign-tenant denial, revocation, keyboard/touch persistence and hosted SignalR remain review acceptance work; SignalR coordination stays with K1. |
+| Targeted ESLint on changed TS/TSX files | Passed. |
+| TypeScript with a temporary config that excludes stale `.next/dev/types` | Passed; the temporary config was removed. Standard `tsc --noEmit` is blocked by a generated reference to the deleted preview route. |
+| Targeted Prettier check for changed TS/TSX/JSON; English and French JSON parsing; `git diff --check` | Passed. |
+| Local dashboard route | The retired preview route returns 404. The authenticated dashboard redirects to sign-in because no local session is available. |
+| Vitest, production build and hosted acceptance | Not run. The current dev server uses `.next`; hosted owner/manager/Kitchen visibility, authorization, revocation and SignalR acceptance remain open. |
 
 ## D2 restaurant dashboard metrics — 14 October 2026
 

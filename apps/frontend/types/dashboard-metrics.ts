@@ -1,3 +1,5 @@
+import type { RestaurantRole } from "./orders"
+
 export type DashboardMetrics = {
   currency: "EUR" | "USD" | "GBP"
   timeZone: string
@@ -41,4 +43,7 @@ export type DashboardMetricsScope = {
   locale: string
   role: RestaurantRole
 }
-import type { RestaurantRole } from "@/types/orders"
+
+export type DashboardMetricsStripProps = DashboardMetricsScope & {
+  initialMetrics: DashboardMetrics | null
+}

@@ -1,30 +1,31 @@
-# Dashboard overview presentation refresh — 2026-10-14
+# Dashboard overview refresh — 2026-10-14
 
-## Approved scope
+## Current approved composition
 
-Apply the user-approved Lovable dashboard direction to the real restaurant workspace: visibly colored “Today at a glance” metric cards, a compact order-status summary, and saved product covers in Quick availability. Keep the full order workflow on the Orders board and preserve D3 rush/pause behavior. No new API contract or database change is part of this presentation update.
+The authenticated restaurant dashboard follows the reviewed `/demo/dashboard`-inspired composition that was previewed at `/dashboard-preview-test`. The temporary preview page is retired after its layout was transferred to the real page. Live data, role checks and existing backend operations remain authoritative.
 
-## Implementation
+- The page header puts the service title and pause/resume action above the metrics strip.
+- Four unboxed metric cells show today’s orders, active queue, order value and average preparation. Order value stays hidden from Kitchen.
+- A two-column service row places colored order-stage links and pickup timing on the left. The right rail keeps payment connection details above the compact order-status panel.
+- The final row shows the latest four orders from the currently loaded order page and the restaurant storefront. Counts, overdue pickups and recent orders describe the loaded page (up to 50); D2 metrics remain restaurant-wide.
+- Owner/manager controls retain D3 confirmations and versioned updates. Kitchen can see status but cannot pause or change Rush. Rush changes newly offered pickup times by the server-configured ten minutes until manually cleared; emergency pause blocks new checkouts and hides offered slots while existing orders and reservations remain unchanged.
+- Quick availability is intentionally absent from the dashboard by the user’s latest direction. Existing availability API behavior is unchanged; the dashboard no longer requests availability data. Storefront shortcuts remain available to managers.
+- The development-only dashboard preview route, its sample components and its translation namespace have been removed. No database migration was added for this UI transfer.
 
-- KPI cards use the existing info, warning, success and secondary design-system surfaces. Loading placeholders use the same tones.
-- The dashboard order panel shows counts for all five order states from the currently loaded page. It links to the full Orders board and retains loading, refresh, stale, error, retry, empty, access-revocation and live-refresh behavior. Copy explicitly says the counts cover only the loaded page; D2 metrics remain restaurant-wide.
-- Quick availability cards show saved covers to owners and managers. Kitchen sees the same saved availability with the neutral no-photo fallback, but no mutation control. This follows the existing API authorization and the user's 14 October confirmation; product-photo queries are disabled when the role has no access.
-- English and French copy describe the loaded-page counts and Kitchen's read-only view.
+## Verification
 
-## Local verification
-
-All commands ran from `apps/frontend` unless noted.
+All frontend commands ran from `apps/frontend` unless noted.
 
 | Check | Result |
 | --- | --- |
-| Focused Vitest for order overview, metric cards, availability cards, cover access and dashboard role composition | Passed: 5 files, 10 tests. |
-| `node node_modules/vitest/vitest.mjs run --configLoader runner` | Passed: 92 files, 542 tests. |
-| `node node_modules/typescript/bin/tsc --noEmit` | Passed. |
-| `node node_modules/eslint/bin/eslint.js .` | Passed with 0 errors and 19 existing `<img>` warnings in Lovable reference components. |
-| Targeted Prettier `--check` for changed TS/TSX/JSON | Passed. |
+| Targeted ESLint on changed TS/TSX files | Passed. |
+| TypeScript with a temporary config that includes current `.next/types` and excludes stale `.next/dev/types` | Passed; the temporary config was removed. |
+| Standard `tsc --noEmit` | Blocked only by a stale generated `.next/dev/types/app/[locale]/dashboard-preview-test/page.ts` reference to the deleted route. Generated `.next` files were not edited. |
+| Prettier check on changed TS/TSX/JSON; both locale JSON parses | Passed. |
 | `git diff --check` | Passed. |
-| `node node_modules/next/dist/bin/next build --webpack` with process-only inert auth/API URLs | Could not complete: webpack received `EPERM` opening an existing `.next/cache/webpack/{server,client}-production/*.pack_` cache file. No generated build output was edited or removed. |
+| Local authenticated dashboard browser view | Redirected to sign-in; no local session was available. The deleted preview route returns 404 as intended. |
+| Vitest and production build | Not run. The existing dev server is using the default `.next` directory; the installed Next CLI has no per-build output-dir option. |
 
 ## Rollout and remaining acceptance
 
-This is source-only and creates no migration. The frontend is on the existing open PR #92; a pushed source change is not a deployment. Hosted visual review and authenticated owner/manager/Kitchen browser acceptance remain outstanding. Existing API tests continue to enforce Kitchen read access and deny Kitchen availability updates; this change does not expand that permission.
+This is source-only and creates no migration. A pushed source change is not a deployment. Hosted visual review and authenticated owner/manager/Kitchen browser acceptance remain outstanding. Availability API behavior and its existing tenant/role checks remain unchanged.

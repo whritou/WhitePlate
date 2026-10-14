@@ -1,9 +1,6 @@
 import { auth } from "@/lib/auth"
 import { isValidTenantId, resolveOrderHubUrl } from "@/lib/order-dashboard"
-import {
-  getManagedCatalog,
-  getProductAvailability,
-} from "@/services/catalog-management"
+import { getManagedCatalog } from "@/services/catalog-management"
 import {
   getDashboardMetrics,
   getOrderPage,
@@ -74,29 +71,21 @@ export default async function DashboardPage({
       />
     )
 
-  const [
-    orderResponse,
-    metricsResponse,
-    operationsResponse,
-    catalogResponse,
-    availabilityResponse,
-  ] = await Promise.all([
-    getOrderPage(restaurant.id, null, null),
-    getDashboardMetrics(restaurant.id),
-    getOrderingOperations(restaurant.id),
-    restaurant.role === "Kitchen"
-      ? Promise.resolve(null)
-      : getManagedCatalog(restaurant.id),
-    getProductAvailability(restaurant.id),
-  ])
+  const [orderResponse, metricsResponse, operationsResponse, catalogResponse] =
+    await Promise.all([
+      getOrderPage(restaurant.id, null, null),
+      getDashboardMetrics(restaurant.id),
+      getOrderingOperations(restaurant.id),
+      restaurant.role === "Kitchen"
+        ? Promise.resolve(null)
+        : getManagedCatalog(restaurant.id),
+    ])
 
   if (!orderResponse.ok && orderResponse.status === 401)
     redirect(`/${locale}/sign-in`)
   if (!metricsResponse.ok && metricsResponse.status === 401)
     redirect(`/${locale}/sign-in`)
   if (!operationsResponse.ok && operationsResponse.status === 401)
-    redirect(`/${locale}/sign-in`)
-  if (!availabilityResponse.ok && availabilityResponse.status === 401)
     redirect(`/${locale}/sign-in`)
 
   let page: OrderPage | null = null
@@ -143,12 +132,6 @@ export default async function DashboardPage({
       catalog={
         catalogResponse?.ok ? (catalogResponse.data ?? undefined) : undefined
       }
-      productAvailability={
-        availabilityResponse.ok
-          ? (availabilityResponse.data ?? undefined)
-          : undefined
-      }
-      availabilityLoadError={!availabilityResponse.ok}
       storefrontUrl={restaurantShopUrl(
         restaurant.subdomain,
         process.env.STOREFRONT_BASE_DOMAIN,
