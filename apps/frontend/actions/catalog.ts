@@ -121,6 +121,7 @@ export async function restoreCatalogItemAction(
   input: unknown
 ): Promise<CatalogResult> {
   if (!(input instanceof FormData)) return { ok: false, error: "invalid" }
+
   const tenantId = input.get("tenantId")
   const id = input.get("id")
   const entityType = input.get("entityType")

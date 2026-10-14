@@ -41,6 +41,7 @@ export function CategoryForm({
       <input type="hidden" name="tenantId" value={tenantId} />
 
       {category && <input type="hidden" name="id" value={category.id} />}
+
       <input
         type="hidden"
         name="sortOrder"

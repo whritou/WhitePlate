@@ -43,6 +43,7 @@ export function OptionForm({
       <input type="hidden" name="groupId" value={group.id} />
 
       {option && <input type="hidden" name="id" value={option.id} />}
+
       <input
         type="hidden"
         name="sortOrder"

@@ -83,6 +83,58 @@ public sealed class OrganizationEndpointTests
     }
 
     [Fact]
+    public async Task CatalogDragOrderPersistsForCategoriesAndProducts()
+    {
+        using var factory = new OrganizationFactory();
+        var (organizationId, ownerIdentity) = await factory.SeedOwnerAsync();
+        using var client = factory.CreateClient();
+        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue(
+            "Bearer", ownerIdentity.Subject);
+        var ct = TestContext.Current.CancellationToken;
+
+        async Task<Guid> CreateId(string path, object body)
+        {
+            using var response = await client.PostAsJsonAsync(path, body, ct);
+            Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+            using var json = JsonDocument.Parse(await response.Content.ReadAsStringAsync(ct));
+            return json.RootElement.GetProperty("id").GetGuid();
+        }
+
+        var tenantId = await CreateId($"/api/v1/organizations/{organizationId}/restaurants",
+            new { name = "Menu", subdomain = "drag-order", currency = "EUR" });
+        var firstCategory = await CreateId($"/api/v1/tenants/{tenantId}/categories",
+            new { name = "Starters", sortOrder = 0 });
+        var secondCategory = await CreateId($"/api/v1/tenants/{tenantId}/categories",
+            new { name = "Mains", sortOrder = 1 });
+        var firstProduct = await CreateId($"/api/v1/tenants/{tenantId}/products",
+            new { categoryId = firstCategory, name = "Soup", description = (string?)null,
+                basePrice = 8m, taxRatePercent = 0m, sortOrder = 0 });
+        var secondProduct = await CreateId($"/api/v1/tenants/{tenantId}/products",
+            new { categoryId = firstCategory, name = "Salad", description = (string?)null,
+                basePrice = 9m, taxRatePercent = 0m, sortOrder = 1 });
+
+        using var categoryOrder = await client.PutAsJsonAsync($"/api/v1/tenants/{tenantId}/catalog/reorder",
+            new { entityType = "categories", orderedIds = new[] { secondCategory, firstCategory } }, ct);
+        Assert.Equal(HttpStatusCode.NoContent, categoryOrder.StatusCode);
+        using var productOrder = await client.PutAsJsonAsync($"/api/v1/tenants/{tenantId}/catalog/reorder",
+            new { entityType = "products", categoryId = firstCategory,
+                orderedIds = new[] { secondProduct, firstProduct } }, ct);
+        Assert.Equal(HttpStatusCode.NoContent, productOrder.StatusCode);
+
+        using var readBack = await client.GetAsync($"/api/v1/tenants/{tenantId}/catalog", ct);
+        using var catalogJson = JsonDocument.Parse(await readBack.Content.ReadAsStringAsync(ct));
+        var categories = catalogJson.RootElement.GetProperty("categories").EnumerateArray()
+            .ToDictionary(item => item.GetProperty("id").GetGuid(), item => item.GetProperty("sortOrder").GetInt32());
+        var products = catalogJson.RootElement.GetProperty("products").EnumerateArray()
+            .ToDictionary(item => item.GetProperty("id").GetGuid(), item => item.GetProperty("sortOrder").GetInt32());
+
+        Assert.Equal(0, categories[secondCategory]);
+        Assert.Equal(1, categories[firstCategory]);
+        Assert.Equal(0, products[secondProduct]);
+        Assert.Equal(1, products[firstProduct]);
+    }
+
+    [Fact]
     public async Task RestaurantOwnerAndManagerCanManageLocalizedRestaurantDescriptions()
     {
         using var factory = new OrganizationFactory();

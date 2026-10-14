@@ -88,6 +88,51 @@ function areDiscountsValid(value: unknown): value is CatalogDiscount[] {
   )
 }
 
+function areManagedCatalogCollectionsValid(
+  categories: Record<string, unknown>[],
+  products: Record<string, unknown>[],
+  optionGroups: Record<string, unknown>[],
+  options: Record<string, unknown>[],
+  discounts: unknown,
+  categoryIds: Set<string>,
+  productIds: Set<string>,
+  optionGroupIds: Set<string>
+): discounts is CatalogDiscount[] {
+  return (
+    categories.every(
+      (category) =>
+        isSortOrder(category.sortOrder) &&
+        typeof category.isVisible === "boolean"
+    ) &&
+    products.every(
+      (product) =>
+        isSortOrder(product.sortOrder) &&
+        isAmount(product.basePrice, 9999999999.99) &&
+        isAmount(product.taxRatePercent, 100) &&
+        typeof product.isAvailable === "boolean" &&
+        (product.sku === undefined ||
+          product.sku === null ||
+          (typeof product.sku === "string" &&
+            /^[A-Z0-9._-]{1,64}$/.test(product.sku))) &&
+        isProductMetadata(product) &&
+        categoryIds.has(product.categoryId as string)
+    ) &&
+    optionGroups.every(
+      (group) =>
+        productIds.has(group.productId as string) &&
+        isSelectionBounds(group.minimumSelections, group.maximumSelections) &&
+        isSortOrder(group.sortOrder)
+    ) &&
+    options.every(
+      (option) =>
+        optionGroupIds.has(option.groupId as string) &&
+        isAmount(option.priceAdjustment, 9999999999.99) &&
+        isSortOrder(option.sortOrder)
+    ) &&
+    areDiscountsValid(discounts)
+  )
+}
+
 function isDiscount(value: unknown): value is CatalogDiscount {
   if (
     !isRecord(value) ||
@@ -108,6 +153,7 @@ function isDiscount(value: unknown): value is CatalogDiscount {
 
   const minimumOrderAmount = value.minimumOrderAmount ?? 0
   const expiresOn = value.expiresOn ?? null
+
   if (
     !isAmount(minimumOrderAmount, 9999999999.99) ||
     (expiresOn !== null &&
@@ -154,37 +200,16 @@ export function parseManagedCatalog(
   )
 
   if (
-    !categories.every(
-      (category) =>
-        isSortOrder(category.sortOrder) &&
-        typeof category.isVisible === "boolean"
-    ) ||
-    !products.every(
-      (product) =>
-        isSortOrder(product.sortOrder) &&
-        isAmount(product.basePrice, 9999999999.99) &&
-        isAmount(product.taxRatePercent, 100) &&
-        typeof product.isAvailable === "boolean" &&
-        (product.sku === undefined ||
-          product.sku === null ||
-          (typeof product.sku === "string" &&
-            /^[A-Z0-9._-]{1,64}$/.test(product.sku))) &&
-        isProductMetadata(product) &&
-        categoryIds.has(product.categoryId as string)
-    ) ||
-    !optionGroups.every(
-      (group) =>
-        productIds.has(group.productId as string) &&
-        isSelectionBounds(group.minimumSelections, group.maximumSelections) &&
-        isSortOrder(group.sortOrder)
-    ) ||
-    !options.every(
-      (option) =>
-        optionGroupIds.has(option.groupId as string) &&
-        isAmount(option.priceAdjustment, 9999999999.99) &&
-        isSortOrder(option.sortOrder)
-    ) ||
-    !areDiscountsValid(discounts)
+    !areManagedCatalogCollectionsValid(
+      categories,
+      products,
+      optionGroups,
+      options,
+      discounts,
+      categoryIds,
+      productIds,
+      optionGroupIds
+    )
   )
     return null
 

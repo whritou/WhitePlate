@@ -34,6 +34,7 @@ export function ProductPhotoGallery({
         {pending && Array.from({ length: 3 }, (_, index) => (
           <Skeleton key={`photo-skeleton-${index}`} className="aspect-square w-full" />
         ))}
+
         {!error && photos.map((photo, index) => (
           <div
             key={photo.id}
@@ -58,8 +59,9 @@ export function ProductPhotoGallery({
             onDragEnd={() => setDragIndex(null)}
             className={`group relative aspect-square overflow-hidden border bg-secondary ${current?.id === photo.id ? "ring-2 ring-primary ring-offset-2" : ""} ${dragIndex === index ? "opacity-40" : ""}`}
           >
-            <button
+            <Button
               type="button"
+              variant="unstyled"
               className="size-full cursor-grab p-0"
               aria-label={t("showPhoto", { number: index + 1 })}
               aria-pressed={current?.id === photo.id}
@@ -78,12 +80,14 @@ export function ProductPhotoGallery({
                 square
                 className="size-full object-cover"
               />
-            </button>
+            </Button>
+
             {index === 0 && (
               <span className="label-mono pointer-events-none absolute top-1 left-1 bg-accent px-1.5 py-0.5">
                 {t("cover")}
               </span>
             )}
+
             <Button
               type="button"
               variant="ghost"
@@ -101,6 +105,7 @@ export function ProductPhotoGallery({
             </Button>
           </div>
         ))}
+
         {!error && photos.length < 8 && (
           <Button
             type="button"
@@ -110,6 +115,7 @@ export function ProductPhotoGallery({
             className="flex aspect-square h-auto w-full flex-col gap-2 border border-dashed text-center text-muted-foreground hover:bg-secondary hover:text-foreground"
           >
             <ImagePlus aria-hidden="true" className="size-5" />
+
             <span className="label-mono">{t("add")}</span>
           </Button>
         )}

@@ -158,6 +158,7 @@ export function DiscountForm({
           <Label htmlFor={`${prefix}-minimum-order`} className="flex min-h-11 items-end pb-1">
             {t("minimumOrderAmount", { currency })}
           </Label>
+
           <Input
             id={`${prefix}-minimum-order`}
             name="minimumOrderAmount"
@@ -174,6 +175,7 @@ export function DiscountForm({
           <Label htmlFor={`${prefix}-expires-on`} className="flex min-h-11 items-end pb-1">
             {t("discountExpiresOn")}
           </Label>
+
           <Input
             id={`${prefix}-expires-on`}
             name="expiresOn"

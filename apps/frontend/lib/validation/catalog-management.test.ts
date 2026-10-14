@@ -161,6 +161,19 @@ it("validates and preserves active and inactive discount records from the tenant
   ).toEqual([fixedDiscount, percentageDiscount])
 })
 
+it("preserves a discount's order threshold and expiry in the managed catalog", () => {
+  const discount = {
+    ...fixedDiscount,
+    minimumOrderAmount: 25.5,
+    expiresOn: "2026-12-31",
+  }
+
+  expect(
+    parseManagedCatalog({ ...catalog, discounts: [discount] }, tenantId)
+      ?.discounts
+  ).toEqual([discount])
+})
+
 it.each([
   { ...fixedDiscount, id: "bad" },
   { ...fixedDiscount, code: "lowercase" },
@@ -172,6 +185,9 @@ it.each([
   { ...fixedDiscount, value: 1.001 },
   { ...percentageDiscount, value: 100.01 },
   { ...fixedDiscount, value: 10000000000 },
+  { ...fixedDiscount, minimumOrderAmount: -0.01 },
+  { ...fixedDiscount, minimumOrderAmount: 1.001 },
+  { ...fixedDiscount, expiresOn: "2026-02-30" },
   { ...fixedDiscount, isActive: "true" },
 ])(
   "rejects malformed discount records instead of trusting catalog JSON: %o",

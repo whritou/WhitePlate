@@ -6,6 +6,12 @@ const asset = {
   height: 480,
   bytes: 4000,
 }
+const secondAsset = {
+  id: "44444444-4444-4444-8444-444444444444",
+  width: 800,
+  height: 600,
+  bytes: 6200,
+}
 
 test("failed uploads keep the saved cover and can be retried; invalid files do not upload", async ({
   page,
@@ -152,6 +158,59 @@ test("gallery replacement/save failures keep drafts and removal returns keyboard
   ).toBeFocused()
   await page.getByRole("button", { name: "Save photos", exact: true }).click()
   expect(saved).toHaveLength(1)
+})
+
+test("dragging a gallery photo changes the saved cover order", async ({ page }) => {
+  let saved = [asset, secondAsset]
+  let savedIds: string[] = []
+  const assetsById = new Map([
+    [asset.id, asset],
+    [secondAsset.id, secondAsset],
+  ])
+
+  await page.route("**/api/product-photos?**", async (route) => {
+    const request = route.request()
+
+    if (new URL(request.url()).searchParams.has("assetId"))
+      return route.fulfill({
+        path: "public/design/photo-15.webp",
+        contentType: "image/webp",
+      })
+    if (request.method() === "PUT") {
+      const payload = request.postDataJSON() as { assetIds: string[] }
+
+      savedIds = payload.assetIds
+      saved = payload.assetIds.flatMap((id) => {
+        const photo = assetsById.get(id)
+
+        return photo ? [photo] : []
+      })
+    }
+
+    return route.fulfill({ json: { storageAvailable: true, assets: saved } })
+  })
+  await page.goto("/en/photo-design-test")
+  await expect(page.getByTestId("fixture-ready")).toHaveAttribute(
+    "data-ready",
+    "true"
+  )
+  await page
+    .getByRole("button", {
+      name: "Select Burger Le Rustique Truffé",
+      exact: true,
+    })
+    .click()
+
+  const gallery = page.getByRole("region", { name: "Product photography" })
+  const photos = gallery.locator('[draggable="true"]')
+
+  await expect(photos).toHaveCount(2)
+  await photos.nth(0).dragTo(photos.nth(1))
+  await expect(page.getByText("Unsaved photo changes")).toBeVisible()
+  await expect(photos.nth(0).getByText("Cover photo", { exact: true })).toBeVisible()
+  await page.getByRole("button", { name: "Save photos", exact: true }).click()
+  await expect(page.getByText("Photos saved. Guest menu updated.")).toBeVisible()
+  expect(savedIds).toEqual([secondAsset.id, asset.id])
 })
 
 for (const locale of ["en", "fr"])

@@ -51,8 +51,10 @@ export function DiscountsEditor({
                 {t("discountsTitle")}
               </h2>
             </CardTitle>
+
             <CardDescription className="mt-2">{t("discountsDescription")}</CardDescription>
           </div>
+
           <EditorDialog
             sourcePrimary
             icon={Plus}
@@ -71,13 +73,20 @@ export function DiscountsEditor({
             <>
               <div className="label-mono hidden grid-cols-[1.25fr_.85fr_.7fr_1fr_1fr_.75fr_auto] gap-3 px-3 text-muted-foreground xl:grid">
                 <span>{t("discountCode")}</span>
+
                 <span>{t("discountType")}</span>
+
                 <span>{t("discountValueShort")}</span>
+
                 <span>{t("minimumOrderShort", { currency })}</span>
+
                 <span>{t("discountExpiresOn")}</span>
+
                 <span>{m("status")}</span>
+
                 <span className="sr-only">{m("actions")}</span>
               </div>
+
               <ul className="grid gap-2">
                 {discounts.map((discount) => (
                   <li
@@ -87,27 +96,38 @@ export function DiscountsEditor({
                   >
                     <div className="min-w-0">
                       <p className="font-bold break-words">{discount.code}</p>
+
                       <p className="text-sm text-muted-foreground break-words">{discount.name}</p>
                     </div>
+
                     <div className="grid gap-1 text-sm xl:block">
                       <span className="label-mono text-muted-foreground xl:hidden">{t("discountType")}</span>
+
                       <span>{t(discount.kind === "Percentage" ? "percentage" : "fixedAmount")}</span>
                     </div>
+
                     <div className="grid gap-1 xl:block">
                       <span className="label-mono text-muted-foreground xl:hidden">{t("discountValueShort")}</span>
+
                       <span className="tabular-nums">{formatDiscountValue(discount, currency, locale)}</span>
                     </div>
+
                     <div className="grid gap-1 xl:block">
                       <span className="label-mono text-muted-foreground xl:hidden">{t("minimumOrderShort", { currency })}</span>
+
                       <span className="tabular-nums">{money.format(discount.minimumOrderAmount)}</span>
                     </div>
+
                     <div className="grid gap-1 xl:block">
                       <span className="label-mono text-muted-foreground xl:hidden">{t("discountExpiresOn")}</span>
+
                       <span className="tabular-nums">{discount.expiresOn ?? t("neverExpires")}</span>
                     </div>
+
                     <Badge variant={discount.isActive ? "success" : "neutral"}>
                       {t(discount.isActive ? "active" : "inactive")}
                     </Badge>
+
                     {discount.isActive ? (
                       <div className="flex flex-wrap gap-2">
                         <EditorDialog
@@ -125,6 +145,7 @@ export function DiscountsEditor({
                             />
                           )}
                         </EditorDialog>
+
                         <DeactivateDiscountButton
                           tenantId={tenantId}
                           id={discount.id}

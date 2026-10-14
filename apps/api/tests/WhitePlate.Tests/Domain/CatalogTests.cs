@@ -70,4 +70,19 @@ public sealed class CatalogTests
         Assert.Throws<DomainRuleException>(() => PromotionDiscount.Create(Guid.NewGuid(), "BAD", "Bad", DiscountKind.Percentage, 100.01m));
         Assert.Throws<DomainRuleException>(() => PromotionDiscount.Create(Guid.NewGuid(), "BAD", "Bad", DiscountKind.FixedAmount, 0m));
     }
+
+    [Fact]
+    public void DiscountStoresMinimumOrderAndInclusiveExpiryDateAndRejectsInvalidMinimums()
+    {
+        var expiresOn = new DateOnly(2026, 12, 31);
+        var discount = PromotionDiscount.Create(Guid.NewGuid(), "SAVE", "Save", DiscountKind.FixedAmount, 2m,
+            minimumOrderAmount: 25m, expiresOn: expiresOn);
+
+        Assert.Equal(25m, discount.MinimumOrderAmount);
+        Assert.Equal(expiresOn, discount.ExpiresOn);
+        Assert.Throws<DomainRuleException>(() => PromotionDiscount.Create(Guid.NewGuid(), "LOW", "Low",
+            DiscountKind.FixedAmount, 2m, minimumOrderAmount: -0.01m));
+        Assert.Throws<DomainRuleException>(() => PromotionDiscount.Create(Guid.NewGuid(), "PRECISION", "Precision",
+            DiscountKind.FixedAmount, 2m, minimumOrderAmount: 1.001m));
+    }
 }

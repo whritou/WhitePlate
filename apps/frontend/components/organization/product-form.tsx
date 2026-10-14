@@ -76,6 +76,7 @@ export function ProductForm({
         <input type="hidden" name="tenantId" value={tenantId} />
 
         {product && <input type="hidden" name="id" value={product.id} />}
+
         <input
           type="hidden"
           name="sortOrder"

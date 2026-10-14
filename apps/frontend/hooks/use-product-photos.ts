@@ -90,10 +90,13 @@ export function useProductPhotos({
       (!target && photos.length + files.length > 8)
     ) {
       setError("invalid")
+
       return
     }
+
     if (!navigator.onLine) {
       setError("offline")
+
       return
     }
 
@@ -103,10 +106,13 @@ export function useProductPhotos({
     setProgress(0)
     setError(null)
     setSaved(false)
+
     let workingPhotos = [...photos]
+
     try {
       for (const file of files) {
         const attempt = { file, aspect, target }
+
         setRetryFile(attempt)
         controller.current = new AbortController()
         try {
@@ -118,6 +124,7 @@ export function useProductPhotos({
             setProgress,
             controller.current.signal
           )
+
           workingPhotos = target
             ? workingPhotos.map((item) => (item.id === target ? photo : item))
             : [...workingPhotos, photo]
