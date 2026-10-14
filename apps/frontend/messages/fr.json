@@ -3631,5 +3631,61 @@
       "forbidden": "Vous n’avez pas l’autorisation de modifier les paramètres de retrait.",
       "unauthorized": "Votre session a expiré. Reconnectez-vous pour continuer."
     }
+  },
+  "DashboardReviewPreview": {
+    "eyebrow": "Maison Verte · Bastille",
+    "title": "Aujourd’hui, en un coup d’œil",
+    "description": "Les dernières commandes et l’état du service, réunis sans encombrer la page.",
+    "previewOnly": "Maquette · données fictives",
+    "metricsLabel": "Indicateurs du service aujourd’hui",
+    "ordersToday": "Commandes passées aujourd’hui",
+    "ordersTodayNote": "4 de plus qu’hier",
+    "activeQueue": "File active",
+    "activeQueueNote": "2 à accepter · 2 en cuisine · 1 prête",
+    "orderValue": "Valeur des commandes",
+    "orderValueNote": "Total des commandes du jour",
+    "averagePrep": "Préparation moyenne",
+    "averagePrepValue": "14 min",
+    "averagePrepNote": "Sur 12 commandes préparées",
+    "latestOrders": "Dernières commandes",
+    "latestOrdersNote": "Les commandes récentes en un coup d’œil",
+    "statuses": {
+      "pending": "À accepter",
+      "preparing": "En cuisine",
+      "ready": "Prête",
+      "collected": "Retirée"
+    },
+    "orderState": "État des commandes",
+    "serviceOpen": "Commandes ouvertes",
+    "shortStatuses": {
+      "pending": "À accepter",
+      "preparing": "En cuisine",
+      "ready": "Prêtes"
+    },
+    "rushOff": "Rush · inactif",
+    "pauseOff": "Pause d’urgence · inactive",
+    "quickAvailability": "Disponibilités rapides",
+    "quickAvailabilityNote": "Photos d’exemple · lecture seule",
+    "available": "Disponible",
+    "unavailable": "Indisponible",
+    "products": {
+      "burrata": {
+        "name": "Burrata & tomates",
+        "alt": "Burrata accompagnée de tomates"
+      },
+      "burger": {
+        "name": "Burger maison",
+        "alt": "Burger maison et frites"
+      },
+      "bowl": {
+        "name": "Bowl vert",
+        "alt": "Bowl de légumes verts"
+      }
+    },
+    "storefront": "Vitrine",
+    "restaurantName": "Maison Verte",
+    "storefrontLocation": "Bastille · Retrait sur place",
+    "storefrontPreview": "Aperçu",
+    "disclaimer": "Page de démonstration : commandes, montants et disponibilités sont fictifs. Aucun contrôle ne modifie le service réel."
   }
 }

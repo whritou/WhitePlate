@@ -3631,5 +3631,61 @@
       "forbidden": "You do not have permission to change pickup settings.",
       "unauthorized": "Your session expired. Sign in again to continue."
     }
+  },
+  "DashboardReviewPreview": {
+    "eyebrow": "Maison Verte · Bastille",
+    "title": "Today, at a glance",
+    "description": "Recent orders and service status, together without crowding the page.",
+    "previewOnly": "Preview · sample data",
+    "metricsLabel": "Today’s service metrics",
+    "ordersToday": "Orders placed today",
+    "ordersTodayNote": "4 more than yesterday",
+    "activeQueue": "Active queue",
+    "activeQueueNote": "2 to accept · 2 preparing · 1 ready",
+    "orderValue": "Order value",
+    "orderValueNote": "Total orders today",
+    "averagePrep": "Average preparation",
+    "averagePrepValue": "14 min",
+    "averagePrepNote": "Across 12 prepared orders",
+    "latestOrders": "Latest orders",
+    "latestOrdersNote": "Recent orders at a glance",
+    "statuses": {
+      "pending": "To accept",
+      "preparing": "Preparing",
+      "ready": "Ready",
+      "collected": "Collected"
+    },
+    "orderState": "Order status",
+    "serviceOpen": "Orders open",
+    "shortStatuses": {
+      "pending": "To accept",
+      "preparing": "Preparing",
+      "ready": "Ready"
+    },
+    "rushOff": "Rush · off",
+    "pauseOff": "Emergency pause · off",
+    "quickAvailability": "Quick availability",
+    "quickAvailabilityNote": "Sample product photos · view only",
+    "available": "Available",
+    "unavailable": "Unavailable",
+    "products": {
+      "burrata": {
+        "name": "Burrata & tomatoes",
+        "alt": "Burrata with tomatoes"
+      },
+      "burger": {
+        "name": "House burger",
+        "alt": "House burger and fries"
+      },
+      "bowl": {
+        "name": "Green bowl",
+        "alt": "Green vegetable bowl"
+      }
+    },
+    "storefront": "Your storefront",
+    "restaurantName": "Maison Verte",
+    "storefrontLocation": "Bastille · Collection",
+    "storefrontPreview": "Preview",
+    "disclaimer": "Demo page: orders, amounts and availability are sample data. No controls on this page change the live service."
   }
 }

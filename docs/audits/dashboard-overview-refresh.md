@@ -27,4 +27,10 @@ All commands ran from `apps/frontend` unless noted.
 
 ## Rollout and remaining acceptance
 
-This is source-only and creates no migration. The frontend is on the existing open PR #92; a pushed source change is not a deployment. Hosted visual review and authenticated owner/manager/Kitchen browser acceptance remain outstanding. Existing API tests continue to enforce Kitchen read access and deny Kitchen availability updates; this change does not expand that permission.
+This is source-only and creates no migration. The first dashboard refresh is on open PR #93; a pushed source change is not a deployment. Hosted visual review and authenticated owner/manager/Kitchen browser acceptance remain outstanding. Existing API tests continue to enforce Kitchen read access and deny Kitchen availability updates; this change does not expand that permission.
+
+## Review revision — 14 October 2026
+
+The first rendered revision did not match the requested Lovable hierarchy closely enough. Before changing the authenticated dashboard again, a separate development-only review page has been added with a top row of tinted metrics, recent orders as the main content, and a narrow right rail for order state, quick availability photos, and the storefront. All visible values are fictitious; it performs no API reads or mutations. The review route is disabled in production. Live dashboard integration remains pending the user's review of this preview.
+
+Local review: `http://127.0.0.1:3039/fr/dashboard-preview-test?tenantId=22222222-2222-4222-8222-222222222222` returned HTTP 200 and was visually inspected at a 1150px viewport. The four KPI surfaces render with the existing semantic tint tokens; the order list, compact status summary, photo availability list and storefront all fit without horizontal scrolling. Targeted ESLint, frontend typecheck and both translation JSON parses passed. No test suite or production build was run for this review-only route.
