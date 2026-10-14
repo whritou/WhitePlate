@@ -1,5 +1,8 @@
 import { expect, it } from "vitest"
-import { parseManagedCatalog } from "./catalog-management"
+import {
+  parseManagedCatalog,
+  parseProductAvailability,
+} from "./catalog-management"
 
 const tenantId = "11111111-1111-4111-8111-111111111111"
 const categoryId = "22222222-2222-4222-8222-222222222222"
@@ -81,6 +84,32 @@ const parsedProducts = catalog.products.map((product) => ({
   preparationMinutes: null,
   preparationNotes: {},
 }))
+
+it("accepts the narrow product availability contract", () => {
+  expect(
+    parseProductAvailability([
+      { id: productId, name: "Soup", isAvailable: true },
+      { id: optionId, name: "Pie", isAvailable: false },
+    ])
+  ).toEqual([
+    { id: productId, name: "Soup", isAvailable: true },
+    { id: optionId, name: "Pie", isAvailable: false },
+  ])
+})
+
+it.each([
+  null,
+  {},
+  [{ id: productId, name: "Soup", isAvailable: "true" }],
+  [{ id: "bad", name: "Soup", isAvailable: true }],
+  [{ id: productId, name: " ", isAvailable: true }],
+  [
+    { id: productId, name: "Soup", isAvailable: true },
+    { id: productId, name: "Soup", isAvailable: false },
+  ],
+])("rejects malformed availability data: %o", (value) => {
+  expect(parseProductAvailability(value)).toBeNull()
+})
 
 it("accepts the actual management contract and preserves price, tax, order and currency", () => {
   expect(parseManagedCatalog(catalog, tenantId)).toEqual({

@@ -16,6 +16,7 @@ public sealed record MenuProductDto(Guid Id, string Name, string? Description, d
     public int? PreparationMinutes { get; init; }
     public IReadOnlyDictionary<string, string> PreparationNotes { get; init; } = new Dictionary<string, string>();
 }
+public sealed record ProductAvailabilityDto(Guid Id, string Name, bool IsAvailable);
 public sealed record MenuCategoryDto(Guid Id, string Name, int SortOrder, IReadOnlyList<MenuProductDto> Products);
 public sealed record PromotionDiscountDto(Guid Id, string Code, string Name, string Kind, decimal Value, bool IsActive);
 public sealed record CatalogCategoryAdminDto(Guid Id, string Name, int SortOrder, bool IsArchived)

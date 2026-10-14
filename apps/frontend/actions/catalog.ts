@@ -9,6 +9,7 @@ import {
   parseOptionGroupInput,
   parseOptionInput,
   parseProductInput,
+  parseProductAvailabilityInput,
 } from "@/lib/validation/catalog-input"
 import {
   archiveCatalogItem,
@@ -20,6 +21,7 @@ import {
   saveProduct,
   restoreProduct,
   setCategoryVisibility,
+  setProductAvailability,
 } from "@/services/catalog-management"
 import type { CatalogResult } from "@/types/catalog-management"
 
@@ -34,6 +36,16 @@ export async function setCategoryVisibilityAction(
     isUuid(id) &&
     (isVisible === "true" || isVisible === "false")
     ? setCategoryVisibility({ tenantId, id, isVisible: isVisible === "true" })
+    : { ok: false, error: "invalid" }
+}
+
+export async function setProductAvailabilityAction(
+  input: unknown
+): Promise<CatalogResult> {
+  const parsed = parseProductAvailabilityInput(input)
+
+  return parsed
+    ? setProductAvailability(parsed)
     : { ok: false, error: "invalid" }
 }
 

@@ -2,6 +2,7 @@ namespace WhitePlate.Api.Contracts;
 
 public sealed record UpdateMenuCategoryRequest(string Name, int SortOrder);
 public sealed record UpdateCategoryVisibilityRequest(bool? IsVisible);
+public sealed record UpdateProductAvailabilityRequest(bool? IsAvailable);
 public sealed record UpdateMenuProductRequest(string Name, string? Description, decimal BasePrice,
     decimal TaxRatePercent, int SortOrder, bool IsAvailable, Guid? CategoryId = null, string? Sku = null,
     IReadOnlyList<string>? ContainsAllergens = null, IReadOnlyList<string>? MayContainAllergens = null,

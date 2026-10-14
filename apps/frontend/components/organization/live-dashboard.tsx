@@ -5,6 +5,9 @@ import { OrderOverview } from "@/components/orders/order-overview"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { LiveProductCover } from "./live-product-cover"
+import { MenuBuilderRetry } from "./menu-builder-retry"
+import { ProductAvailabilityControls } from "./product-availability-controls"
+import { StorefrontShortcuts } from "./storefront-shortcuts"
 import type { LiveDashboardProps } from "@/types/live-workspace"
 
 export async function LiveDashboard({
@@ -17,6 +20,9 @@ export async function LiveDashboard({
   role,
   loadError,
   hubUrl,
+  productAvailability,
+  availabilityLoadError,
+  storefrontUrl,
 }: LiveDashboardProps) {
   const t = await getTranslations("LiveWorkspace")
   const v = await getTranslations("LiveParity")
@@ -65,6 +71,53 @@ export async function LiveDashboard({
         loadError={loadError}
         hubUrl={hubUrl}
       />
+
+      <section
+        className="min-w-0 border-t pt-7"
+        aria-labelledby="availability-title"
+      >
+        <div className="mb-4">
+          <h2
+            id="availability-title"
+            className="font-display text-2xl font-bold"
+          >
+            {t("quickAvailability")}
+          </h2>
+
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
+            {t("quickAvailabilityHelp")}
+          </p>
+        </div>
+
+        {availabilityLoadError ? (
+          <div role="alert" className="grid justify-items-start gap-1">
+            <p className="text-sm text-muted-foreground">
+              {t("availabilityLoadError")}
+            </p>
+
+            <MenuBuilderRetry />
+          </div>
+        ) : productAvailability?.length ? (
+          <ProductAvailabilityControls
+            tenantId={tenantId}
+            products={productAvailability}
+            labels={{
+              available: t("productAvailable"),
+              unavailable: t("productUnavailable"),
+              markAvailable: t("markAvailable"),
+              markUnavailable: t("markUnavailable"),
+              availabilityFor: t("availabilityFor"),
+              updating: t("updatingAvailability"),
+              updated: t("availabilityUpdated"),
+              updateFailed: t("availabilityUpdateFailed"),
+            }}
+          />
+        ) : (
+          <p className="text-sm text-muted-foreground">
+            {t("availabilityEmpty")}
+          </p>
+        )}
+      </section>
 
       <div className="grid min-w-0 gap-8 border-t pt-7 lg:grid-cols-[1fr_1.2fr] [&>section]:min-w-0">
         {canManageStorefront && (
@@ -160,17 +213,23 @@ export async function LiveDashboard({
                 </Button>
               </>
             )}
+          </div>
 
-            <Button
-              nativeButton={false}
-              role="link"
-              variant={canManageStorefront ? "outline" : "default"}
-              render={<Link href={`/organization/shop?tenantId=${tenantId}`} />}
-            >
-              {t("visitShop")}
-
-              <ArrowUpRight aria-hidden="true" />
-            </Button>
+          <div className="mt-5">
+            <StorefrontShortcuts
+              url={storefrontUrl ?? null}
+              fallbackHref={`/organization/shop?tenantId=${tenantId}`}
+              labels={{
+                visitShop: t("visitShop"),
+                copyShopUrl: t("copyShopUrl"),
+                copiedShopUrl: t("copiedShopUrl"),
+                copyShopUrlFailed: t("copyShopUrlFailed"),
+                showShopQr: t("showShopQr"),
+                hideShopQr: t("hideShopQr"),
+                shopQrLabel: t("shopQrLabel"),
+                shopUnavailable: t("shopUnavailable"),
+              }}
+            />
           </div>
         </section>
       </div>

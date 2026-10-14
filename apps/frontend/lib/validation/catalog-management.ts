@@ -1,6 +1,7 @@
 import type {
   CatalogDiscount,
   ManagedCatalog,
+  ProductAvailability,
 } from "@/types/catalog-management"
 import { isRecord, isUuid } from "./common"
 import { parseCatalog } from "./responses"
@@ -191,4 +192,37 @@ export function parseManagedCatalog(
     options,
     discounts,
   } as ManagedCatalog
+}
+
+export function parseProductAvailability(
+  value: unknown
+): ProductAvailability[] | null {
+  if (!Array.isArray(value)) return null
+
+  const products: ProductAvailability[] = []
+  const ids = new Set<string>()
+
+  for (const candidate of value) {
+    if (
+      !isRecord(candidate) ||
+      !isUuid(candidate.id) ||
+      typeof candidate.name !== "string" ||
+      candidate.name.trim().length === 0 ||
+      candidate.name.length > 160 ||
+      typeof candidate.isAvailable !== "boolean"
+    )
+      return null
+
+    const id = candidate.id.toLowerCase()
+
+    if (ids.has(id)) return null
+    ids.add(id)
+    products.push({
+      id: candidate.id,
+      name: candidate.name,
+      isAvailable: candidate.isAvailable,
+    })
+  }
+
+  return products
 }

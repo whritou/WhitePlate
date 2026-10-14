@@ -56,6 +56,17 @@ public sealed class CatalogManagementCommandHandler(IStaffMembershipRepository m
         catch (DomainRuleException exception) { return Invalid<MenuProductDto>(exception); }
     }
 
+    public async Task<Result<bool>> SetProductAvailabilityAsync(Guid tenantId, Guid productId, bool isAvailable,
+        ExternalIdentity identity, CancellationToken cancellationToken)
+    {
+        if (!await CatalogAccess.CanManageAvailabilityAsync(memberships, tenantId, identity, cancellationToken))
+            return Result<bool>.Failure(new ApplicationError(ErrorCode.NotFound));
+        var updated = await catalog.SetProductAvailabilityAsync(tenantId, productId, isAvailable, cancellationToken);
+        return updated
+            ? Result<bool>.Success(true)
+            : Result<bool>.Failure(new ApplicationError(ErrorCode.NotFound));
+    }
+
     public async Task<Result<MenuOptionGroupDto>> UpdateOptionGroupAsync(UpdateOptionGroupCommand command,
         CancellationToken cancellationToken)
     {
