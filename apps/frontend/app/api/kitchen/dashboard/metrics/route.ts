@@ -1,4 +1,7 @@
-import { getDashboardMetrics, getRestaurantMemberships } from "@/services/orders"
+import {
+  getDashboardMetrics,
+  getRestaurantMemberships,
+} from "@/services/orders"
 import { isValidTenantId } from "@/lib/order-dashboard"
 
 export async function GET(request: Request) {
