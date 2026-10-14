@@ -3647,6 +3647,7 @@
     "averagePrep": "Préparation moyenne",
     "averagePrepValue": "14 min",
     "averagePrepNote": "Sur 12 commandes préparées",
+    "lateOrdersSummary": "{count} {count, plural, one {commande} other {commandes}} au-delà de l’objectif de 12 minutes",
     "latestOrders": "Dernières commandes",
     "latestOrdersNote": "Les commandes récentes en un coup d’œil",
     "statuses": {
@@ -3664,6 +3665,7 @@
     },
     "rushOff": "Rush · inactif",
     "pauseOff": "Pause d’urgence · inactive",
+    "pauseOn": "Pause d’urgence · active",
     "quickAvailability": "Disponibilités rapides",
     "quickAvailabilityNote": "Photos d’exemple · lecture seule",
     "available": "Disponible",

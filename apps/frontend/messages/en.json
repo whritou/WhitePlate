@@ -3647,6 +3647,7 @@
     "averagePrep": "Average preparation",
     "averagePrepValue": "14 min",
     "averagePrepNote": "Across 12 prepared orders",
+    "lateOrdersSummary": "{count} {count, plural, one {order} other {orders}} past the 12-minute target",
     "latestOrders": "Latest orders",
     "latestOrdersNote": "Recent orders at a glance",
     "statuses": {
@@ -3664,6 +3665,7 @@
     },
     "rushOff": "Rush · off",
     "pauseOff": "Emergency pause · off",
+    "pauseOn": "Emergency pause · on",
     "quickAvailability": "Quick availability",
     "quickAvailabilityNote": "Sample product photos · view only",
     "available": "Available",
