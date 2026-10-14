@@ -3,7 +3,7 @@ import {
   LogLevel,
   type HubConnection,
 } from "@microsoft/signalr"
-import type { OrderEventTracker } from "@/lib/order-dashboard"
+import type { OrderEventTracker } from "@/lib/orders/order-event-tracker"
 import type { OrderRealtimeStatus } from "@/types/orders"
 import { getSignalRToken } from "@/lib/api/order-browser"
 
@@ -41,6 +41,7 @@ export function attachOrderRealtime(
   callbacks: {
     onStatus: (status: OrderRealtimeStatus) => void
     onRefresh: () => void
+    onNewOrder?: (orderId: string) => void
   }
 ): () => Promise<void> {
   let disposed = false
@@ -59,9 +60,8 @@ export function attachOrderRealtime(
     }, delay)
   }
 
-  const onOrderChanged = (event: unknown) => {
-    if (tracker.shouldRefresh(event)) callbacks.onRefresh()
-  }
+  const onOrderChanged = (event: unknown) =>
+    handleOrderChanged(event, tracker, callbacks)
 
   const onReconnecting = () => callbacks.onStatus("reconnecting")
   const onReconnected = async () => {
@@ -125,4 +125,23 @@ export function attachOrderRealtime(
     connection.off("order.changed", onOrderChanged)
     await connection.stop()
   }
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value)
+}
+
+function handleOrderChanged(
+  event: unknown,
+  tracker: OrderEventTracker,
+  callbacks: {
+    onRefresh: () => void
+    onNewOrder?: (orderId: string) => void
+  }
+) {
+  const result = tracker.processEvent(event)
+
+  if (result.newOrder && isRecord(event) && typeof event.orderId === "string")
+    callbacks.onNewOrder?.(event.orderId)
+  if (result.refresh) callbacks.onRefresh()
 }

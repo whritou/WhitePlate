@@ -23,6 +23,7 @@ const fixtureOrder: OrderSummary = {
   menuLocale: "fr",
   total: 19.25,
   createdAt: "2026-10-01T18:00:00Z",
+  pickupAt: "2026-10-01T18:05:00Z",
   lines: [
     {
       productId: "11111111-1111-4111-8111-111111111111",
@@ -102,6 +103,7 @@ export function OrderKanbanTestHarness({ role }: { role: RestaurantRole }) {
           )}
           role={role}
           locale={locale}
+          serverTime="2026-10-01T18:00:00Z"
           pending={pending}
           onUpdate={update}
         />

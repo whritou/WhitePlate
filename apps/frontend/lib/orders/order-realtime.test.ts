@@ -65,12 +65,16 @@ it("joins the selected restaurant, refreshes on new events, and recovers after r
   const connection = new FakeConnection()
   const onRefresh = vi.fn()
   const onStatus = vi.fn()
+  const onNewOrder = vi.fn()
   const tracker = new OrderEventTracker("tenant-a")
+
+  tracker.observeOrders([], "2026-10-01T17:59:59Z")
+
   const stop = attachOrderRealtime(
     connection as unknown as HubConnection,
     "tenant-a",
     tracker,
-    { onRefresh, onStatus }
+    { onRefresh, onStatus, onNewOrder }
   )
 
   await new Promise((resolve) => setTimeout(resolve, 0))
@@ -95,6 +99,8 @@ it("joins the selected restaurant, refreshes on new events, and recovers after r
   connection.emit("order.changed", event)
   connection.emit("order.changed", { ...event, tenantId: "tenant-b" })
   expect(onRefresh).toHaveBeenCalledTimes(2)
+  expect(onNewOrder).toHaveBeenCalledOnce()
+  expect(onNewOrder).toHaveBeenCalledWith(event.orderId)
 
   await connection.reconnected?.()
   expect(connection.invoke).toHaveBeenNthCalledWith(

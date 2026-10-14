@@ -3,6 +3,7 @@
 import {
   ArrowRight,
   Clock,
+  TriangleAlert,
   CookingPot,
   Check,
   CheckCheck,
@@ -19,6 +20,11 @@ import {
 } from "@/components/ui/card"
 import { getAvailableOrderTransitions } from "@/lib/order-dashboard"
 import { cn } from "@/lib/utils"
+import {
+  formatKdsDuration,
+  getOrderTiming,
+  resolvePreparationNote,
+} from "@/lib/orders/kds-timing"
 import type { OrderStatus, OrderTicketProps } from "@/types/orders"
 import { useTranslations } from "next-intl"
 
@@ -37,6 +43,7 @@ export function OrderTicket({
   order,
   role,
   locale,
+  now,
   pending,
   onUpdate,
   dragAffordance,
@@ -54,6 +61,27 @@ export function OrderTicket({
   }).format(new Date(order.createdAt))
   const transitions = getAvailableOrderTransitions(role, order.status)
   const { variant, Icon } = statusPresentation[order.status]
+  const isActive = order.status !== "Completed" && order.status !== "Cancelled"
+  const timing = getOrderTiming(order, now)
+  const pickupTime = timing.pickupRemainingSeconds
+  const urgency = timing.urgency
+  const pickupTimerLabel =
+    pickupTime === null || urgency === null
+      ? null
+      : urgency === "overdue"
+        ? pickupTime === 0
+          ? t("pickupDueNow")
+          : t("pickupOverdue", { time: formatKdsDuration(pickupTime) })
+        : urgency === "dueSoon"
+          ? t("pickupDueSoon", { time: formatKdsDuration(pickupTime) })
+          : t("pickupIn", { time: formatKdsDuration(pickupTime) })
+  const pickupUrgencyVariant =
+    urgency === "overdue"
+      ? "destructive"
+      : urgency === "dueSoon"
+        ? "warning"
+        : "neutral"
+  const PickupUrgencyIcon = urgency === "overdue" ? TriangleAlert : Clock
 
   return (
     <article
@@ -117,33 +145,78 @@ export function OrderTicket({
             </p>
           )}
 
-          <ul className="grid gap-2">
-            {order.lines.map((line, index) => (
-              <li key={`${line.productId}:${index}`}>
-                <p className="text-sm font-semibold">
-                  {t("lineItem", {
-                    quantity: line.quantity,
-                    product: line.productName,
-                  })}
-                </p>
+          {isActive && (
+            <div className="mb-3 flex flex-wrap items-center gap-2">
+              <Badge
+                variant="outline"
+                aria-label={t("elapsedTimer", {
+                  time: formatKdsDuration(timing.elapsedSeconds),
+                })}
+              >
+                <Clock aria-hidden="true" />
 
-                {line.preparationMinutes && (
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    {t("preparationGuide", {
-                      minutes: line.preparationMinutes,
+                <time role="timer" aria-live="off" dateTime={order.createdAt}>
+                  {formatKdsDuration(timing.elapsedSeconds)}
+                </time>
+              </Badge>
+
+              {pickupTimerLabel && (
+                <Badge
+                  variant={pickupUrgencyVariant}
+                  aria-label={pickupTimerLabel}
+                >
+                  <PickupUrgencyIcon aria-hidden="true" />
+
+                  {pickupTimerLabel}
+                </Badge>
+              )}
+            </div>
+          )}
+
+          <ul className="grid gap-2">
+            {order.lines.map((line, index) => {
+              const preparationNote = resolvePreparationNote(
+                line.preparationNotes,
+                order.menuLocale,
+                locale
+              )
+
+              return (
+                <li key={`${line.productId}:${index}`}>
+                  <p className="text-sm font-semibold">
+                    {t("lineItem", {
+                      quantity: line.quantity,
+                      product: line.productName,
                     })}
                   </p>
-                )}
 
-                {line.options.length > 0 && (
-                  <ul className="mt-1 ml-5 list-disc text-muted-foreground">
-                    {line.options.map((option) => (
-                      <li key={option.optionId}>{option.name}</li>
-                    ))}
-                  </ul>
-                )}
-              </li>
-            ))}
+                  {line.preparationMinutes && (
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {t("preparationGuide", {
+                        minutes: line.preparationMinutes,
+                      })}
+                    </p>
+                  )}
+
+                  {preparationNote && (
+                    <p className="mt-1 border-l-2 border-primary pl-2 text-sm">
+                      <span className="font-semibold">
+                        {t("preparationNotesLabel")}:
+                      </span>{" "}
+                      {preparationNote}
+                    </p>
+                  )}
+
+                  {line.options.length > 0 && (
+                    <ul className="mt-1 ml-5 list-disc text-muted-foreground">
+                      {line.options.map((option) => (
+                        <li key={option.optionId}>{option.name}</li>
+                      ))}
+                    </ul>
+                  )}
+                </li>
+              )
+            })}
           </ul>
         </CardContent>
 

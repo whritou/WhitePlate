@@ -31,6 +31,7 @@ it("renders all five lanes with auto-fit 18rem responsive tracks", () => {
       orders: [],
       role: "Manager",
       locale: "en",
+      serverTime: "2026-10-01T18:00:00Z",
       pending: null,
       onUpdate: async () => undefined,
     })

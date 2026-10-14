@@ -39,7 +39,11 @@ it("uses the same-origin BFF without a token and forwards cancellation", async (
   const fetch = vi.fn().mockResolvedValue(
     Response.json({
       ok: true,
-      data: { items: [], nextCursor: null },
+      data: {
+        items: [],
+        nextCursor: null,
+        serverTime: "2026-10-01T18:00:00Z",
+      },
     })
   )
 
@@ -50,6 +54,7 @@ it("uses the same-origin BFF without a token and forwards cancellation", async (
   expect(await fetchOrderPage("tenant", "Ready", "older", signal)).toEqual({
     items: [],
     nextCursor: null,
+    serverTime: "2026-10-01T18:00:00Z",
   })
   expect(fetch).toHaveBeenCalledWith(
     "/api/kitchen/orders?tenantId=tenant&status=Ready&cursor=older",

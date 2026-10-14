@@ -256,6 +256,13 @@
   },
   "KitchenOrders": {
     "preparationGuide": "Préparation indicative : environ {minutes} min",
+    "preparationNotesLabel": "Note de préparation",
+    "elapsedTimer": "Écoulé : {time}",
+    "pickupIn": "Retrait dans {time}",
+    "pickupDueSoon": "Retrait bientôt · {time}",
+    "pickupDueNow": "Retrait dû maintenant",
+    "pickupOverdue": "Retrait en retard de {time}",
+    "newOrderAlert": "Nouvelle commande reçue : {reference}",
     "pickupTime": "Retrait : {time}",
     "total": "Total",
     "title": "Commandes en cuisine",
@@ -319,6 +326,11 @@
       "connected": "Mises à jour en direct connectées",
       "reconnecting": "Reconnexion aux mises à jour en direct…",
       "offline": "Mises à jour en direct indisponibles ; vous pouvez actualiser les commandes"
+    },
+    "sound": {
+      "enable": "Activer le son des commandes",
+      "mute": "Couper le son des commandes",
+      "unavailable": "Le son du navigateur n’a pas pu être activé. Les nouvelles commandes restent annoncées à l’écran."
     },
     "boardHelp": "Glissez une commande depuis une zone libre de sa carte. Sur écran tactile, maintenez la pression puis glissez ; utilisez un bouton d’action au clavier. Les compteurs concernent cette page.",
     "loadedCount": "{count, plural, one {# commande chargée} other {# commandes chargées}}",

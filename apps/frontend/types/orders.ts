@@ -26,6 +26,7 @@ export type OrderSummaryLine = {
   quantity: number
   options: OrderSummaryOption[]
   preparationMinutes?: number | null
+  preparationNotes?: Record<string, string>
 }
 
 export type OrderSummary = {
@@ -43,7 +44,11 @@ export type OrderSummary = {
   lines: OrderSummaryLine[]
 }
 
-export type OrderPage = { items: OrderSummary[]; nextCursor: string | null }
+export type OrderPage = {
+  items: OrderSummary[]
+  nextCursor: string | null
+  serverTime: string
+}
 export type OrderHistoryPage = {
   items: OrderSummary[]
   page: number
@@ -130,6 +135,7 @@ export type OrderTicketProps = {
   order: OrderSummary
   role: RestaurantRole
   locale: string
+  now: number
   pending: UpdateOrderStatusInput | null
   onUpdate: (input: Omit<UpdateOrderStatusInput, "tenantId">) => Promise<void>
   dragAffordance?: import("react").ReactNode
@@ -152,6 +158,7 @@ export type OrderKanbanProps = {
   orders: OrderSummary[]
   role: RestaurantRole
   locale: string
+  serverTime: string
   pending: UpdateOrderStatusInput | null
   onUpdate: OrderTicketProps["onUpdate"]
 }
@@ -179,5 +186,7 @@ export type OrderRealtimeProps = {
   tenantId: string
   hubUrl: string | null
   orders: OrderSummary[]
+  serverTime: string | null
+  onNewOrder?: (orderId: string) => void
   onRefresh: () => Promise<void>
 }

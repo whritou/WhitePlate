@@ -65,7 +65,7 @@ it("returns validated pages without caching authenticated responses", async () =
   vi.mocked(getOrderPage).mockResolvedValue({
     ok: true,
     status: 200,
-    data: { items: [], nextCursor: null },
+    data: { items: [], nextCursor: null, serverTime: "2026-10-01T18:00:00Z" },
   })
 
   const request = new Request(

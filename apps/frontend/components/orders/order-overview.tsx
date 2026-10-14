@@ -3,6 +3,7 @@
 import { CookingPot, ShoppingBag, Wallet } from "lucide-react"
 import { useMemo, useState } from "react"
 import { useOrderDashboard } from "@/hooks/use-order-dashboard"
+import { useKdsClock } from "@/hooks/use-kds-clock"
 import { Link, useRouter } from "@/i18n/navigation"
 import { OrderRealtimeConnection } from "@/components/orders/order-realtime-connection"
 import { OrderTicket } from "@/components/orders/order-ticket"
@@ -33,6 +34,7 @@ export function OrderOverview(props: OrderDashboardProps) {
   const live = useTranslations("LiveWorkspace")
   const router = useRouter()
   const dashboard = useOrderDashboard(props)
+  const now = useKdsClock(dashboard.page?.serverTime ?? null)
   const {
     page,
     loadError,
@@ -125,6 +127,7 @@ export function OrderOverview(props: OrderDashboardProps) {
             : hubUrl
         }
         orders={page?.items ?? []}
+        serverTime={page?.serverTime ?? null}
         onRefresh={refresh}
       />
 
@@ -280,6 +283,7 @@ export function OrderOverview(props: OrderDashboardProps) {
               order={order}
               role={role}
               locale={props.locale}
+              now={now}
               pending={pending}
               onUpdate={updateStatus}
               headingLevel="h3"

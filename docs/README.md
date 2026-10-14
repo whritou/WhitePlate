@@ -44,6 +44,7 @@ The currently recorded Coolify API image (`e13860e`) predates merge `8a2f835` (P
 | [Landing and demo responsive audit](audits/landing-demo-responsive.md) | Responsive defects, fixes, captured walkthrough and browser verification for the public landing and menu |
 | [Frontend interaction and density audit](audits/ui-state-density.md) | Project-wide source findings and contrast evidence for hover/pressed states, readable brand text, category width and shared spacing |
 | [Live Orders K1 verification](audits/live-orders.md) | Pickup intent snapshots, loaded-page search/filters, responsive five-lane layout and migration rollout gates |
+| [KDS K2 verification](audits/kds-operational-features.md) | Server-anchored order timers, pickup urgency, user-enabled sound, saved preparation guidance and remaining browser acceptance |
 | [Documentation review](documentation-review.md) | Audit findings, verification evidence, and remaining blockers |
 | [Root agent instructions](../AGENTS.md) | Working rules for development agents |
 | [API agent instructions](../apps/api/AGENTS.md) | Scoped backend project and test rules |

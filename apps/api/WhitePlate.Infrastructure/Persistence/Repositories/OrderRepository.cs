@@ -194,7 +194,12 @@ public sealed class OrderRepository(WhitePlateDbContext database) : IOrderReposi
                     order.Status.ToString(), order.Version, order.CreatedAt,
                     order.Lines.Select(line => new OrderSummaryLineDto(line.ProductId, line.ProductName,
                         line.Quantity, line.Options.Select(option => new OrderSummaryOptionDto(option.OptionId,
-                            option.Name)).ToArray()) { PreparationMinutes = line.PreparationMinutes }).ToArray())
+                            option.Name)).ToArray())
+                    {
+                        PreparationMinutes = line.PreparationMinutes,
+                        PreparationNotes = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(
+                            line.PreparationNotesJson) ?? new()
+                    }).ToArray())
                     {
                         PickupAt = order.PickupAt,
                         PickupTimeZone = order.PickupTimeZone,
@@ -244,7 +249,12 @@ public sealed class OrderRepository(WhitePlateDbContext database) : IOrderReposi
                 order.Status.ToString(), order.Version, order.CreatedAt,
                 order.Lines.Select(line => new OrderSummaryLineDto(line.ProductId, line.ProductName,
                     line.Quantity, line.Options.Select(option => new OrderSummaryOptionDto(option.OptionId,
-                        option.Name)).ToArray()) { PreparationMinutes = line.PreparationMinutes }).ToArray())
+                        option.Name)).ToArray())
+                {
+                    PreparationMinutes = line.PreparationMinutes,
+                    PreparationNotes = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(
+                        line.PreparationNotesJson) ?? new()
+                }).ToArray())
             {
                 PickupAt = order.PickupAt,
                 PickupTimeZone = order.PickupTimeZone,

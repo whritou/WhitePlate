@@ -6,7 +6,8 @@ using WhitePlate.Domain.Orders;
 
 namespace WhitePlate.Application.Orders;
 
-public sealed class ListOrdersQueryHandler(IOrderRepository orders, IStaffMembershipRepository memberships)
+public sealed class ListOrdersQueryHandler(IOrderRepository orders, IStaffMembershipRepository memberships,
+    TimeProvider timeProvider)
 {
     public async Task<Result<OrderPageDto>> HandleAsync(ListOrdersQuery query, ExternalIdentity identity,
         CancellationToken cancellationToken)
@@ -25,9 +26,10 @@ public sealed class ListOrdersQueryHandler(IOrderRepository orders, IStaffMember
             return Result<OrderPageDto>.Failure(new ApplicationError(ErrorCode.ValidationFailed,
                 new ValidationIssue("cursor", "invalid_cursor", "The order cursor is invalid.")));
 
+        var serverTime = timeProvider.GetUtcNow();
         var page = await orders.ListAsync(query.TenantId, query.Status, cursor, pageSize, cancellationToken);
         var nextCursor = page.NextCursor is null ? null : OrderCursorCodec.Encode(page.NextCursor);
-        return Result<OrderPageDto>.Success(new OrderPageDto(page.Items, nextCursor));
+        return Result<OrderPageDto>.Success(new OrderPageDto(page.Items, nextCursor, serverTime));
     }
 }
 

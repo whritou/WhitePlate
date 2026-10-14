@@ -1,8 +1,10 @@
 "use client"
 
+import { Volume2, VolumeX } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { BackLink } from "@/components/organization/back-link"
-import { useEffect, useMemo, useState } from "react"
+import { useMemo, useState } from "react"
 import { useOrderDashboard } from "@/hooks/use-order-dashboard"
 import { useRouter } from "@/i18n/navigation"
 import { OrderStatusTabs } from "./order-status-tabs"
@@ -13,12 +15,14 @@ import { filterOrders } from "@/lib/orders/filter"
 import type { OrderDashboardProps } from "@/types/orders"
 import { useTranslations } from "next-intl"
 import { OrderRealtimeConnection } from "./order-realtime-connection"
+import { useKdsSound } from "@/hooks/use-kds-sound"
 
 export function OrderDashboard(props: OrderDashboardProps) {
   const { tenantId, tenantName, role, selectedStatus, hubUrl } = props
   const t = useTranslations("KitchenOrders")
   const live = useTranslations("LiveWorkspace")
   const router = useRouter()
+  const sound = useKdsSound()
   const dashboard = useOrderDashboard(props)
   const { page, loadError, isInitialLoading, isFetching, refresh, pending } =
     dashboard
@@ -94,16 +98,45 @@ export function OrderDashboard(props: OrderDashboardProps) {
         <BackLink label={t("backToOrganizations")} className="self-start" />
       </header>
 
-      <OrderRealtimeConnection
-        tenantId={tenantId}
-        hubUrl={
-          loadError === "unauthorized" || loadError === "forbidden"
-            ? null
-            : hubUrl
-        }
-        orders={page?.items ?? []}
-        onRefresh={refresh}
-      />
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <OrderRealtimeConnection
+          tenantId={tenantId}
+          hubUrl={
+            loadError === "unauthorized" || loadError === "forbidden"
+              ? null
+              : hubUrl
+          }
+          orders={page?.items ?? []}
+          serverTime={page?.serverTime ?? null}
+          onNewOrder={sound.alertNewOrder}
+          onRefresh={refresh}
+        />
+
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="min-h-11"
+          aria-pressed={sound.state === "enabled"}
+          onClick={() =>
+            sound.state === "enabled" ? sound.mute() : void sound.enable()
+          }
+        >
+          {sound.state === "enabled" ? (
+            <Volume2 aria-hidden="true" />
+          ) : (
+            <VolumeX aria-hidden="true" />
+          )}
+
+          {t(sound.state === "enabled" ? "sound.mute" : "sound.enable")}
+        </Button>
+      </div>
+
+      {sound.state === "unavailable" && (
+        <p role="status" className="text-sm text-muted-foreground">
+          {t("sound.unavailable")}
+        </p>
+      )}
 
       <p
         role="status"

@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils"
 import { useOrderDrag } from "@/hooks/use-order-drag"
 import type { OrderKanbanProps } from "@/types/orders"
 import { OrderTicket } from "./order-ticket"
+import { useKdsClock } from "@/hooks/use-kds-clock"
 
 const laneColors = {
   Pending: "bg-accent",
@@ -22,9 +23,10 @@ const laneColors = {
 }
 
 export function OrderKanban(props: OrderKanbanProps) {
-  const { orders, role, locale, pending, onUpdate } = props
+  const { orders, role, locale, serverTime, pending, onUpdate } = props
   const t = useTranslations("KitchenOrders")
   const container = useRef<HTMLDivElement>(null)
+  const now = useKdsClock(serverTime)
 
   async function update(input: Parameters<OrderKanbanProps["onUpdate"]>[0]) {
     const focused = document.activeElement
@@ -133,6 +135,7 @@ export function OrderKanban(props: OrderKanbanProps) {
                       order={order}
                       role={role}
                       locale={locale}
+                      now={now}
                       pending={pending}
                       onUpdate={update}
                       headingLevel="h3"

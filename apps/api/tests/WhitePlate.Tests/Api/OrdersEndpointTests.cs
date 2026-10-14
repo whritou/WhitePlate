@@ -630,6 +630,15 @@ public sealed partial class OrdersEndpointTests
         using var factory = new OrdersFactory();
         var seeded = await factory.SeedAsync();
         await factory.SeedMembershipAsync(seeded.TenantId, "manager", RestaurantRole.Manager);
+        await using (var scope = factory.Services.CreateAsyncScope())
+        {
+            var database = scope.ServiceProvider.GetRequiredService<WhitePlateDbContext>();
+            var product = await database.Products.SingleAsync(item => item.Id == seeded.ProductId,
+                TestContext.Current.CancellationToken);
+            product.SetMetadata(null, [], [], [], 8,
+                new Dictionary<string, string> { ["en"] = "Finish to order." });
+            await database.SaveChangesAsync(TestContext.Current.CancellationToken);
+        }
         using var client = factory.CreateClient();
         client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", "manager");
 
@@ -656,6 +665,8 @@ public sealed partial class OrdersEndpointTests
             TestContext.Current.CancellationToken);
         Assert.Equal(HttpStatusCode.OK, firstPage.StatusCode);
         using var firstJson = JsonDocument.Parse(await firstPage.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
+        Assert.Equal(new DateTimeOffset(2026, 1, 1, 0, 0, 0, TimeSpan.Zero),
+            firstJson.RootElement.GetProperty("serverTime").GetDateTimeOffset());
         var firstItem = Assert.Single(firstJson.RootElement.GetProperty("items").EnumerateArray());
         AssertTicketSnapshot(firstItem);
         Assert.Equal("Pending", firstItem.GetProperty("status").GetString());
@@ -682,6 +693,8 @@ public sealed partial class OrdersEndpointTests
             Assert.Equal(seeded.ProductId, line.GetProperty("productId").GetGuid());
             Assert.Equal("Soup", line.GetProperty("productName").GetString());
             Assert.Equal(1, line.GetProperty("quantity").GetInt32());
+        Assert.Equal(8, line.GetProperty("preparationMinutes").GetInt32());
+        Assert.Equal("Finish to order.", line.GetProperty("preparationNotes").GetProperty("en").GetString());
             var option = Assert.Single(line.GetProperty("options").EnumerateArray());
             Assert.Equal(seeded.OptionId, option.GetProperty("optionId").GetGuid());
             Assert.Equal("Large", option.GetProperty("name").GetString());

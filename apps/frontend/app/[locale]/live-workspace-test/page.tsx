@@ -196,6 +196,7 @@ export default async function LiveWorkspaceFixture({
             hubUrl={null}
             page={{
               nextCursor: null,
+              serverTime: "2026-10-10T18:00:00Z",
               items: [
                 {
                   id: "44444444-4444-4444-8444-444444444444",
@@ -230,6 +231,7 @@ export default async function LiveWorkspaceFixture({
           cursor: null,
           page: {
             nextCursor: null,
+            serverTime: "2026-10-10T18:00:00Z",
             items: [
               {
                 id: "44444444-4444-4444-8444-444444444444",
