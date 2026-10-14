@@ -1,7 +1,7 @@
 # Menu Builder demo parity design
 
 **Date:** 2026-10-14  
-**Status:** Proposed; awaiting user review  
+**Status:** Approved and implemented in source; rollout pending
 **Scope:** Live organization catalog editor, demo menu hover states, catalog discount persistence and checkout validation
 
 ## Context
@@ -100,6 +100,6 @@ Add matching French and English copy for new confirmation text, restore actions,
 
 ## Documentation and implementation notes
 
-Update API contracts, the database schema reference, the menu-manager audit, and the functional test plan with the behavior actually implemented. Preserve the untracked workspace directories and do not edit generated files. Before implementation, follow the frontend instruction to read the installed Next.js documentation for the affected server/client and mutation patterns. Use the existing API conventions and add the required migration; no dependency upgrade is proposed.
+The source implementation is complete on `feat/menu-builder-demo-parity` in local commits. API contracts, the database schema, the menu-builder/menu-manager audits, and the functional test plan record the implemented behavior and outstanding acceptance. The API project build, frontend TypeScript check, and changed-file ESLint passed. No tests or browser/hosted acceptance were run. The frontend production build was blocked by `EPERM` while writing the `.next` Webpack cache, and Prettier could not load `prettier-plugin-tailwindcss`. The discount migration is source-only and has not been applied to a shared database. Pushing the branch failed because GitHub certificate validation failed, so a pull request has not been created. Preserve the untracked workspace directories and do not edit generated files.
 
 The visual reference is `/demo/menu`; hover colors are a defect in that source and must be corrected there before reusing those status-control treatments in the live editor.
