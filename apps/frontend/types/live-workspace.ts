@@ -5,9 +5,11 @@ import type { Organization } from "./organization"
 import type { ManagedCatalog, ProductAvailability } from "./catalog-management"
 import type { OrderDashboardProps } from "./orders"
 import type { DashboardMetrics } from "./dashboard-metrics"
+import type { OrderingOperations } from "./ordering-operations"
 
 export type LiveDashboardProps = OrderDashboardProps & {
   initialDashboardMetrics?: DashboardMetrics | null
+  initialOrderingOperations?: OrderingOperations | null
   catalog?: ManagedCatalog
   productAvailability?: ProductAvailability[]
   availabilityLoadError?: boolean

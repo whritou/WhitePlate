@@ -1,0 +1,34 @@
+# D3 rush hold and emergency pause verification — 2026-10-14
+
+## Approved operating policy
+
+Decision 0011 records the user-approved policy: organization owners and restaurant managers can change the controls; Kitchen is read-only. Rush hold adds ten minutes to the minimum lead time for newly offered pickup slots and remains active until manually cleared. Emergency pause hides pickup slots and rejects new checkout creation. Orders, reservations, slot capacity and successful idempotent retries remain unchanged.
+
+## Source implementation
+
+- Tenant settings persist `AcceptingOrders`, `RushHoldEnabled` and a concurrency version. Migration `20261014150246_OrderingOperations` is generated and the EF model snapshot includes it.
+- Owner/manager reads and conditional updates expose quoted ETags; Kitchen can read but receives the standard not-found denial on update.
+- Checkout and pause serialize against the tenant row on PostgreSQL. Checkout checks for a successful idempotent replay first, then rejects new order creation when pause wins.
+- Public availability adds `orders_paused` and rush metadata. The live dashboard polls the protected state every 15 seconds, presents confirmation before changes, and only renders server-confirmed values. Guest checkout reports the pause/rush state and refreshes the schedule following a conflict.
+- English and French dashboard and checkout text are included.
+
+## Local verification
+
+Commands were run from `apps/frontend` unless the table names another directory. Package CLIs were invoked directly because the configured `npm` shim points to a missing global `npm-cli.js`.
+
+| Check | Result |
+| --- | --- |
+| `dotnet test apps/api/WhitePlate.slnx --no-restore` (repository root) | Passed: 265 tests, 0 failed. Includes ordering permissions, pause/stale-cart rejection, preserved order/reservation and idempotent replay, resume, rush slot timing, and EF migration/model checks. |
+| `node node_modules/vitest/vitest.mjs run --configLoader runner` | Passed: 534 tests across 88 files. |
+| `node node_modules/typescript/bin/tsc --noEmit` | Passed after the route handler's discriminated authorization result was made explicit. |
+| `node node_modules/eslint/bin/eslint.js .` | Passed with 0 errors and 19 existing `<img>` warnings in Lovable reference components. |
+| Prettier `--check` on changed frontend TypeScript, TSX and JSON | Passed. |
+| `node node_modules/next/dist/bin/next build --webpack` with process-only `BETTER_AUTH_URL=https://auth.build.invalid` and `API_BASE_URL=https://api.build.invalid` | Passed; Next compiled and generated all pages. The build emitted the existing `pg-connection-string` SSL-mode compatibility warning during static page generation. |
+| `dotnet build apps/api/WhitePlate.Api/WhitePlate.Api.csproj --no-restore` | Passed with 0 warnings and 0 errors. |
+| `git diff --check` | Passed. |
+
+The focused API run also passed the four ordering-control cases plus the shared order-endpoint baseline. Frontend unit coverage exercises the ordering-state BFF membership/no-store behavior, role visibility, paused checkout copy, rush notice and public availability parsing.
+
+## Remaining acceptance and rollout
+
+Migration `20261014150246_OrderingOperations` has **not** been applied to a database. The EF migration was generated with a disposable design-time connection value only; no database was contacted. Review/apply it on a disposable PostgreSQL branch, verify defaults and persistent versions, and exercise independent-connection pause-versus-checkout lock ordering before shared rollout. Hosted API/frontend deployment, owner/manager/Kitchen and foreign/revoked access checks against PostgreSQL, and two-session browser polling in English and French remain open. The selected rush policy has no automatic expiry. Source tests do not claim hosted or PostgreSQL concurrency acceptance.

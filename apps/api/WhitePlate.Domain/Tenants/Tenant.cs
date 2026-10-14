@@ -28,6 +28,9 @@ public sealed partial class Tenant
     public string? LegalRegistrationNumber { get; private set; }
     public string? TaxIdentifier { get; private set; }
     public int LegalProfileVersion { get; private set; } = 1;
+    public bool AcceptingOrders { get; private set; } = true;
+    public bool RushHoldEnabled { get; private set; }
+    public int OrderingOperationsVersion { get; private set; } = 1;
 
     private Tenant() { }
 
@@ -62,6 +65,18 @@ public sealed partial class Tenant
     }
 
     public void Deactivate() => IsActive = false;
+
+    public void SetOrderingOperations(bool acceptingOrders, bool rushHoldEnabled)
+    {
+        if (OrderingOperationsVersion == int.MaxValue)
+            throw new DomainRuleException("invalid_ordering_operations", "orderingOperationsVersion",
+                "The ordering operations version is invalid.");
+        if (AcceptingOrders == acceptingOrders && RushHoldEnabled == rushHoldEnabled) return;
+
+        AcceptingOrders = acceptingOrders;
+        RushHoldEnabled = rushHoldEnabled;
+        OrderingOperationsVersion++;
+    }
 
     public void SetCustomLegalProfile(string? country, string? name, string? registration, string? tax)
     {

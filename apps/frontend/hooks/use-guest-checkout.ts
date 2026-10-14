@@ -1,6 +1,12 @@
 "use client"
 
-import { useEffect, useState, useTransition, type FormEvent } from "react"
+import {
+  useCallback,
+  useEffect,
+  useState,
+  useTransition,
+  type FormEvent,
+} from "react"
 import { checkoutGuestOrder } from "@/actions/checkout"
 import { loadPublicPickupSlots } from "@/lib/api/pickup-slots-browser"
 import { useGuestCheckoutStore } from "@/components/storefront/guest-checkout-provider"
@@ -27,6 +33,33 @@ export function useGuestCheckout(menu: StorefrontMenu) {
       : null
   const pickupSlots = pickupAvailability ? pickupAvailability.slots : []
   const [selectedPickupAt, setSelectedPickupAt] = useState("asap")
+  const refreshPickupAvailability = useCallback(
+    async (signal?: AbortSignal) => {
+      try {
+        const result = await loadPublicPickupSlots(
+          signal ?? AbortSignal.timeout(10_000)
+        )
+
+        setPickupSlotState({
+          tenantId: menu.tenantId,
+          availability: result.ok ? result.data : null,
+        })
+
+        const refreshedAvailability = result.ok ? result.data : null
+
+        setSelectedPickupAt((current) =>
+          current === "asap" ||
+          refreshedAvailability?.slots.some((slot) => slot.startsAt === current)
+            ? current
+            : "asap"
+        )
+      } catch {
+        if (!signal?.aborted)
+          setPickupSlotState({ tenantId: menu.tenantId, availability: null })
+      }
+    },
+    [menu.tenantId]
+  )
 
   useEffect(() => {
     const controller = new AbortController()
@@ -38,9 +71,10 @@ export function useGuestCheckout(menu: StorefrontMenu) {
           availability: result.ok ? result.data : null,
         })
       )
-      .catch(() =>
-        setPickupSlotState({ tenantId: menu.tenantId, availability: null })
-      )
+      .catch(() => {
+        if (!controller.signal.aborted)
+          setPickupSlotState({ tenantId: menu.tenantId, availability: null })
+      })
 
     return () => controller.abort()
   }, [menu.tenantId])
@@ -112,6 +146,8 @@ export function useGuestCheckout(menu: StorefrontMenu) {
         state.clearCart()
       } else {
         state.setError(result.ok ? "unavailable" : result.error)
+        if (!result.ok && result.error === "conflict")
+          await refreshPickupAvailability()
       }
     } catch {
       state.setError("unavailable")
@@ -141,6 +177,7 @@ export function useGuestCheckout(menu: StorefrontMenu) {
     pickupSlots: pickupSlots.filter((slot) => slot.remainingCapacity > 0),
     pickupSlotsLoading,
     pickupAvailabilityState: pickupAvailability?.state ?? "no_slots_available",
+    pickupRushBufferMinutes: pickupAvailability?.rushBufferMinutes ?? 0,
     selectedPickupAt,
     changePickupAt: setSelectedPickupAt,
     changeCart,

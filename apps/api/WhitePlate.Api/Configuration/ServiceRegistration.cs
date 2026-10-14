@@ -84,8 +84,10 @@ public static class ServiceRegistration
             "database", timeout: TimeSpan.FromSeconds(3));
         services.AddScoped<ITenantRepository, TenantRepository>();
         services.AddScoped<IEstablishmentSettingsRepository, EstablishmentSettingsRepository>();
+        services.AddScoped<IOrderingOperationsRepository, OrderingOperationsRepository>();
         services.AddSingleton<IEstablishmentOptions, WhitePlate.Infrastructure.Tenants.EstablishmentOptions>();
         services.AddScoped<EstablishmentSettingsHandler>();
+        services.AddScoped<OrderingOperationsHandler>();
         services.AddScoped<ICatalogRepository, CatalogRepository>();
         services.AddScoped<IOrderRepository, OrderRepository>();
         services.AddScoped<CreateOrderCommandHandler>();

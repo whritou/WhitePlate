@@ -43,12 +43,22 @@ function isAvailability(value: unknown): value is PickupAvailability {
   const availability = value as Record<string, unknown>
 
   return (
-    ["available", "schedule_not_configured", "no_slots_available"].includes(
-      String(availability.state)
-    ) &&
+    [
+      "available",
+      "schedule_not_configured",
+      "no_slots_available",
+      "orders_paused",
+    ].includes(String(availability.state)) &&
     (availability.timeZone === null ||
       typeof availability.timeZone === "string") &&
     Array.isArray(availability.slots) &&
+    (availability.acceptingOrders === undefined ||
+      typeof availability.acceptingOrders === "boolean") &&
+    (availability.rushHoldEnabled === undefined ||
+      typeof availability.rushHoldEnabled === "boolean") &&
+    (availability.rushBufferMinutes === undefined ||
+      (Number.isInteger(availability.rushBufferMinutes) &&
+        Number(availability.rushBufferMinutes) >= 0)) &&
     availability.slots.every(isPickupSlot)
   )
 }

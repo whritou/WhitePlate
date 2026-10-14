@@ -18,6 +18,7 @@ public sealed record PickupSlot(DateTimeOffset StartsAt, DateTimeOffset EndsAt, 
 
 public sealed partial class Tenant
 {
+    public const int RushHoldBufferMinutes = 10;
     public string? Phone { get; private set; }
     public string? AddressLine1 { get; private set; }
     public string? AddressLine2 { get; private set; }
@@ -112,7 +113,8 @@ public sealed partial class Tenant
         var settings = GetPickupScheduling();
         var firstLocalDate = DateOnly.FromDateTime(TimeZoneInfo.ConvertTime(now, zone).DateTime);
         var result = new List<PickupSlot>();
-        var earliest = now.AddMinutes(settings.MinimumLeadMinutes);
+        var rushBufferMinutes = RushHoldEnabled ? RushHoldBufferMinutes : 0;
+        var earliest = now.AddMinutes(settings.MinimumLeadMinutes + rushBufferMinutes);
         for (var dayOffset = 0; dayOffset < horizonDays; dayOffset++)
         {
             var date = firstLocalDate.AddDays(dayOffset);

@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server"
 import { Link } from "@/i18n/navigation"
 import { OrderOverview } from "@/components/orders/order-overview"
 import { DashboardMetricsPanel } from "@/components/organization/dashboard-metrics-panel"
+import { OrderingOperationsPanel } from "@/components/organization/ordering-operations-panel"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { LiveProductCover } from "./live-product-cover"
@@ -25,6 +26,7 @@ export async function LiveDashboard({
   availabilityLoadError,
   storefrontUrl,
   initialDashboardMetrics = null,
+  initialOrderingOperations = null,
 }: LiveDashboardProps) {
   const t = await getTranslations("LiveWorkspace")
   const v = await getTranslations("LiveParity")
@@ -60,6 +62,14 @@ export async function LiveDashboard({
           <ArrowUpRight aria-hidden="true" />
         </Button>
       </header>
+
+      <OrderingOperationsPanel
+        userId={userId}
+        tenantId={tenantId}
+        locale={locale}
+        role={role}
+        initialOperations={initialOrderingOperations}
+      />
 
       <DashboardMetricsPanel
         userId={userId}
