@@ -3666,21 +3666,11 @@
     "rushOff": "Rush · off",
     "pauseOff": "Emergency pause · off",
     "pauseOn": "Emergency pause · on",
-    "quickAvailability": "Quick availability",
-    "quickAvailabilityNote": "Sample product photos · view only",
-    "available": "Available",
-    "unavailable": "Unavailable",
     "products": {
-      "burrata": {
-        "name": "Burrata & tomatoes",
-        "alt": "Burrata with tomatoes"
-      },
       "burger": {
-        "name": "House burger",
         "alt": "House burger and fries"
       },
       "bowl": {
-        "name": "Green bowl",
         "alt": "Green vegetable bowl"
       }
     },

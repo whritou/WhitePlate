@@ -1,6 +1,5 @@
 "use client"
 
-import Image from "next/image"
 import { useTranslations } from "next-intl"
 import {
   ArrowRight,
@@ -13,12 +12,6 @@ import {
 import { Copy } from "@/components/lovable/copy"
 import { Link } from "@/components/lovable/navigation"
 import { Button } from "@/components/ui/lovable-button"
-
-const products = [
-  { key: "burrata", image: "/lovable/store/burrata.jpg", available: true },
-  { key: "burger", image: "/lovable/store/burger.jpg", available: true },
-  { key: "bowl", image: "/lovable/store/bowl.jpg", available: false },
-] as const
 
 const stages = [
   { key: "pending", count: "2", tone: "bg-accent" },
@@ -198,45 +191,6 @@ export function DashboardReviewPreviewService({ paused }: { paused: boolean }) {
               {paused ? t("pauseOn") : t("pauseOff")}
             </span>
           </div>
-        </div>
-
-        <div className="border-b py-4">
-          <div className="mb-2 flex items-center justify-between gap-3">
-            <h3 className="font-bold">{t("quickAvailability")}</h3>
-
-            <span className="text-xs text-muted-foreground">
-              {t("quickAvailabilityNote")}
-            </span>
-          </div>
-
-          <ul aria-label={t("quickAvailability")}>
-            {products.map((product) => (
-              <li
-                key={product.key}
-                className="flex min-w-0 items-center gap-3 border-t py-2"
-              >
-                <div className="relative size-10 shrink-0 overflow-hidden">
-                  <Image
-                    src={product.image}
-                    alt={t(`products.${product.key}.alt`)}
-                    fill
-                    sizes="40px"
-                    className="object-cover"
-                  />
-                </div>
-
-                <p className="min-w-0 flex-1 truncate text-sm font-medium">
-                  {t(`products.${product.key}.name`)}
-                </p>
-
-                <span
-                  className={`shrink-0 text-xs ${product.available ? "text-primary" : "text-muted-foreground"}`}
-                >
-                  {product.available ? t("available") : t("unavailable")}
-                </span>
-              </li>
-            ))}
-          </ul>
         </div>
       </section>
     </div>
