@@ -254,7 +254,7 @@ Acceptance criteria:
 Decisions and limits:
 
 - Resolved 14 October 2026: owner/manager writes and Kitchen read-only; fixed +10-minute rush lead buffer with manual clearing and no timer expiry; pause blocks new checkouts and hides public slots while existing orders, reservations and idempotency receipts stay unchanged. See [decision 0011](../architecture/decisions/0011-dashboard-ordering-operations.md).
-- Remaining rollout: review and apply `20261014150246_OrderingOperations`, run independent-connection PostgreSQL concurrency checks, deploy the API/frontend and complete hosted multi-session/browser acceptance. See [D3 evidence](../audits/dashboard-rush-pause.md).
+- Remaining rollout: `20261014150246_OrderingOperations` and its pending predecessors are applied to Neon `test`; run independent-connection PostgreSQL concurrency checks, deploy the API/frontend and complete hosted multi-session/browser acceptance. See [D3 evidence](../audits/dashboard-rush-pause.md).
 
 ### D4 — Restaurant Dashboard: quick availability and storefront shortcuts
 

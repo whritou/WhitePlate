@@ -29,6 +29,10 @@ Commands were run from `apps/frontend` unless the table names another directory.
 
 The focused API run also passed the four ordering-control cases plus the shared order-endpoint baseline. Frontend unit coverage exercises the ordering-state BFF membership/no-store behavior, role visibility, paused checkout copy, rush notice and public availability parsing.
 
+## Migration rollout — 2026-10-14
+
+Reviewed and applied the 14 pending migrations from `20261008195344_CategoryVisibility` through `20261014150246_OrderingOperations` to the repository-documented Neon `test` branch using its direct, non-pooled endpoint. This includes the D3 ordering-controls migration and its required S3/D2 predecessors. `dotnet ef migrations list` then reported zero pending migrations, with `20261014150246_OrderingOperations` latest. Production was not targeted, and no credentials are recorded here. Migration history confirms application; it does not prove independent-session concurrency or browser behavior.
+
 ## Remaining acceptance and rollout
 
-Migration `20261014150246_OrderingOperations` has **not** been applied to a database. The EF migration was generated with a disposable design-time connection value only; no database was contacted. Review/apply it on a disposable PostgreSQL branch, verify defaults and persistent versions, and exercise independent-connection pause-versus-checkout lock ordering before shared rollout. Hosted API/frontend deployment, owner/manager/Kitchen and foreign/revoked access checks against PostgreSQL, and two-session browser polling in English and French remain open. The selected rush policy has no automatic expiry. Source tests do not claim hosted or PostgreSQL concurrency acceptance.
+Exercise independent-connection pause-versus-checkout lock ordering against PostgreSQL before shared production rollout. Hosted API/frontend deployment, owner/manager/Kitchen and foreign/revoked access checks against PostgreSQL, and two-session browser polling in English and French remain open. The selected rush policy has no automatic expiry. Source tests and migration-history verification do not claim hosted or PostgreSQL concurrency acceptance.
