@@ -698,6 +698,11 @@ namespace WhitePlate.Infrastructure.Persistence.Migrations
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid");
 
+                    b.Property<bool>("AcceptingOrders")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true);
+
                     b.Property<string>("AddressLine1")
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
@@ -782,6 +787,11 @@ namespace WhitePlate.Infrastructure.Persistence.Migrations
                     b.Property<string>("OpeningHoursJson")
                         .HasColumnType("jsonb");
 
+                    b.Property<int>("OrderingOperationsVersion")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(1);
+
                     b.Property<Guid>("OrganizationId")
                         .HasColumnType("uuid");
 
@@ -808,6 +818,11 @@ namespace WhitePlate.Infrastructure.Persistence.Migrations
                     b.Property<string>("Region")
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
+
+                    b.Property<bool>("RushHoldEnabled")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
 
                     b.Property<string>("Subdomain")
                         .IsRequired()

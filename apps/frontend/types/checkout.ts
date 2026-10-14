@@ -22,9 +22,16 @@ export type PickupSlot = {
   timeZone: string
 }
 export type PickupAvailability = {
-  state: "available" | "schedule_not_configured" | "no_slots_available"
+  state:
+    | "available"
+    | "schedule_not_configured"
+    | "no_slots_available"
+    | "orders_paused"
   timeZone: string | null
   slots: PickupSlot[]
+  acceptingOrders?: boolean
+  rushHoldEnabled?: boolean
+  rushBufferMinutes?: number
 }
 
 export type PublicOrderTracking = {

@@ -6,6 +6,7 @@ using WhitePlate.Application.Common.Results;
 using WhitePlate.Application.Orders;
 using WhitePlate.Domain.Catalog;
 using WhitePlate.Domain.Orders;
+using WhitePlate.Domain.Tenants;
 using WhitePlate.Infrastructure.Persistence;
 
 namespace WhitePlate.Infrastructure.Persistence.Repositories;
@@ -42,10 +43,13 @@ public sealed class OrderRepository(WhitePlateDbContext database) : IOrderReposi
             item.IsActive && database.Organizations.Any(organization => organization.Id == item.OrganizationId && organization.IsActive),
             cancellationToken);
         if (tenant is null) return new PickupAvailabilityDto("schedule_not_configured", null, []);
+        var rushBufferMinutes = tenant.RushHoldEnabled ? WhitePlate.Domain.Tenants.Tenant.RushHoldBufferMinutes : 0;
+        if (!tenant.AcceptingOrders)
+            return Availability("orders_paused", tenant, [], rushBufferMinutes);
         if (tenant.GetOpeningHours() is null)
-            return new PickupAvailabilityDto("schedule_not_configured", tenant.TimeZone, []);
+            return Availability("schedule_not_configured", tenant, [], rushBufferMinutes);
         var slots = tenant.GeneratePickupSlots(now);
-        if (slots.Count == 0) return new PickupAvailabilityDto("no_slots_available", tenant.TimeZone, []);
+        if (slots.Count == 0) return Availability("no_slots_available", tenant, [], rushBufferMinutes);
         var slotTicks = slots.Select(slot => slot.StartsAt.UtcDateTime.Ticks).ToArray();
         var counts = await database.PickupSlotUsages.AsNoTracking().Where(usage => usage.TenantId == tenantId &&
                 slotTicks.Contains(usage.SlotStartTicks))
@@ -54,8 +58,8 @@ public sealed class OrderRepository(WhitePlateDbContext database) : IOrderReposi
         var available = slots.Select(slot => slot with
                 { RemainingCapacity = Math.Max(0, capacity - counts.GetValueOrDefault(slot.StartsAt.UtcDateTime.Ticks)) })
             .Where(slot => slot.RemainingCapacity > 0).ToArray();
-        return new PickupAvailabilityDto(available.Length > 0 ? "available" : "no_slots_available",
-            tenant.TimeZone, available);
+        return Availability(available.Length > 0 ? "available" : "no_slots_available", tenant,
+            available, rushBufferMinutes);
     }
 
     public async Task<CheckoutCatalogDto> GetCheckoutCatalogAsync(Guid tenantId,
@@ -134,7 +138,16 @@ public sealed class OrderRepository(WhitePlateDbContext database) : IOrderReposi
         }
         if (existing is not null) database.OrderIdempotencyRecords.Remove(existing);
 
-        var tenant = await database.Tenants.AsNoTracking().SingleAsync(item => item.Id == order.TenantId, cancellationToken);
+        var tenantQuery = database.Database.IsNpgsql()
+            ? database.Tenants.FromSqlInterpolated($"SELECT * FROM \"Tenants\" WHERE \"Id\" = {order.TenantId} FOR SHARE")
+            : database.Tenants;
+        var tenant = await tenantQuery.AsNoTracking().SingleAsync(item => item.Id == order.TenantId,
+            cancellationToken);
+        if (!tenant.AcceptingOrders)
+        {
+            await transaction.RollbackAsync(cancellationToken);
+            return new IdempotencyResult(IdempotencyOutcome.Conflict);
+        }
         var capacity = tenant.GetPickupScheduling().Capacity;
         if (order.PickupAtTicks is null)
         {
@@ -488,4 +501,12 @@ public sealed class OrderRepository(WhitePlateDbContext database) : IOrderReposi
                       ?? throw new InvalidOperationException("Stored order receipt is invalid.");
         return new IdempotencyResult(IdempotencyOutcome.Replayed, receipt);
     }
+
+    private static PickupAvailabilityDto Availability(string state, Tenant tenant,
+        IReadOnlyList<PickupSlot> slots, int rushBufferMinutes) => new(state, tenant.TimeZone, slots)
+    {
+        AcceptingOrders = tenant.AcceptingOrders,
+        RushHoldEnabled = tenant.RushHoldEnabled,
+        RushBufferMinutes = rushBufferMinutes
+    };
 }

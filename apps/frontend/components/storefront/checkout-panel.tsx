@@ -43,6 +43,7 @@ export function CheckoutPanel({
     pickupSlots,
     pickupSlotsLoading,
     pickupAvailabilityState,
+    pickupRushBufferMinutes,
     selectedPickupAt,
     changePickupAt,
   } = checkoutState
@@ -190,6 +191,16 @@ export function CheckoutPanel({
                 </>
               )}
 
+              {!isCart && pickupRushBufferMinutes > 0 && (
+                <Alert variant="info" role="status" className="mt-4">
+                  <AlertDescription>
+                    {c("rushBufferNotice", {
+                      minutes: pickupRushBufferMinutes,
+                    })}
+                  </AlertDescription>
+                </Alert>
+              )}
+
               {isCart ? (
                 <Button
                   type="button"
@@ -274,9 +285,12 @@ export function CheckoutPanel({
                         className="text-sm text-muted-foreground"
                       >
                         {c(
-                          pickupAvailabilityState === "schedule_not_configured"
-                            ? "scheduleNotConfigured"
-                            : "noPickupSlots"
+                          pickupAvailabilityState === "orders_paused"
+                            ? "ordersPaused"
+                            : pickupAvailabilityState ===
+                                "schedule_not_configured"
+                              ? "scheduleNotConfigured"
+                              : "noPickupSlots"
                         )}
                       </p>
                     )}
@@ -315,6 +329,7 @@ export function CheckoutPanel({
                       submitting ||
                       changingLanguage ||
                       cart.length === 0 ||
+                      pickupAvailabilityState === "orders_paused" ||
                       pickupSlotsLoading ||
                       pickupSlots.length === 0
                     }

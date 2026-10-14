@@ -9,6 +9,7 @@ import {
   getOrderPage,
   getRestaurantMemberships,
 } from "@/services/orders"
+import { getOrderingOperations } from "@/services/ordering-operations"
 import { restaurantShopUrl } from "@/lib/restaurant-shop-url"
 import { LiveDashboard } from "@/components/organization/live-dashboard"
 import { BackLink } from "@/components/organization/back-link"
@@ -76,11 +77,13 @@ export default async function DashboardPage({
   const [
     orderResponse,
     metricsResponse,
+    operationsResponse,
     catalogResponse,
     availabilityResponse,
   ] = await Promise.all([
     getOrderPage(restaurant.id, null, null),
     getDashboardMetrics(restaurant.id),
+    getOrderingOperations(restaurant.id),
     restaurant.role === "Kitchen"
       ? Promise.resolve(null)
       : getManagedCatalog(restaurant.id),
@@ -90,6 +93,8 @@ export default async function DashboardPage({
   if (!orderResponse.ok && orderResponse.status === 401)
     redirect(`/${locale}/sign-in`)
   if (!metricsResponse.ok && metricsResponse.status === 401)
+    redirect(`/${locale}/sign-in`)
+  if (!operationsResponse.ok && operationsResponse.status === 401)
     redirect(`/${locale}/sign-in`)
   if (!availabilityResponse.ok && availabilityResponse.status === 401)
     redirect(`/${locale}/sign-in`)
@@ -131,6 +136,9 @@ export default async function DashboardPage({
       {...dashboardProps}
       initialDashboardMetrics={
         metricsResponse.ok ? (metricsResponse.data ?? null) : null
+      }
+      initialOrderingOperations={
+        operationsResponse.ok ? (operationsResponse.data ?? null) : null
       }
       catalog={
         catalogResponse?.ok ? (catalogResponse.data ?? undefined) : undefined

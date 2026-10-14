@@ -415,6 +415,8 @@
     "pickupTime": "Pickup time",
     "asapPickup": "ASAP — earliest available",
     "noPickupSlots": "Online pickup is unavailable right now. Please try again later.",
+    "ordersPaused": "This restaurant has paused new online orders. Your cart is still here; please try again later.",
+    "rushBufferNotice": "This restaurant is busy. New pickup times start at least {minutes} minutes later.",
     "scheduleNotConfigured": "This restaurant has not set its opening hours for online orders yet.",
     "pickupAt": "Pickup: {time}",
     "discountCode": "Promo code (optional)",
@@ -3330,6 +3332,52 @@
       "forbidden": "You no longer have access to these restaurant statistics.",
       "invalid": "The statistics request was invalid.",
       "unavailable": "Restaurant statistics could not be loaded. No sample values are shown."
+    },
+    "orderingOperationsTitle": "Ordering status",
+    "orderingOperationsHelp": "Control new online orders and give the kitchen more preparation time during a rush.",
+    "orderingOperationsLoading": "Loading ordering status…",
+    "orderingOperationsRefreshing": "Refreshing ordering status…",
+    "orderingOperationsSaving": "Saving…",
+    "orderingOperationsSaved": "Ordering status updated.",
+    "orderingOperationsReadOnly": "Kitchen staff can view these settings. Owners and managers can change them.",
+    "orderingServiceTitle": "Online ordering",
+    "orderingServiceDescription": "Changes apply to new checkouts and pickup slots. Existing orders and reservations stay as they are.",
+    "ordersAccepting": "Accepting orders",
+    "ordersAcceptingHelp": "Guests can place new orders using the available pickup times.",
+    "ordersPaused": "New orders paused",
+    "ordersPausedHelp": "New checkouts are blocked and pickup times are hidden. Existing orders and reservations are unchanged.",
+    "pauseNewOrders": "Pause new orders",
+    "resumeNewOrders": "Resume new orders",
+    "rushHoldTitle": "Rush hold",
+    "rushHoldActive": "Rush hold · +{minutes} min",
+    "rushHoldEnabledHelp": "New pickup slots start {minutes} minutes later. This hold stays on until someone clears it.",
+    "rushHoldDisabledHelp": "Add {minutes} minutes to the earliest new pickup times while the kitchen catches up.",
+    "enableRushHold": "Add rush hold",
+    "clearRushHold": "Clear rush hold",
+    "confirmChange": "Confirm change",
+    "cancel": "Cancel",
+    "orderingOperationsErrors": {
+      "conflict": "Another manager changed ordering status first. The latest status is being refreshed; review it before trying again.",
+      "forbidden": "You no longer have permission to manage ordering status.",
+      "unavailable": "Ordering status could not be loaded or saved. Try again."
+    },
+    "orderingOperationsConfirm": {
+      "pause": {
+        "title": "Pause new orders?",
+        "description": "New checkouts will stop and pickup times will be hidden. Existing orders and reservations will stay unchanged."
+      },
+      "resume": {
+        "title": "Resume new orders?",
+        "description": "Guests can check out again using the current pickup schedule."
+      },
+      "enableRush": {
+        "title": "Add a rush hold?",
+        "description": "New pickup times will start {minutes} minutes later until an owner or manager clears the hold."
+      },
+      "clearRush": {
+        "title": "Clear the rush hold?",
+        "description": "New pickup times will return to the normal schedule. Existing reservations will not change."
+      }
     },
     "todayOrders": "Orders placed today",
     "ordersYesterday": "{count} yesterday",

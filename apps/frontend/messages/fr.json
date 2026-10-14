@@ -415,6 +415,8 @@
     "pickupTime": "Heure de retrait",
     "asapPickup": "Dès que possible — premier créneau disponible",
     "noPickupSlots": "Le retrait en ligne est indisponible pour le moment. Réessayez plus tard.",
+    "ordersPaused": "Ce restaurant a suspendu les nouvelles commandes en ligne. Votre panier est conservé ; réessayez plus tard.",
+    "rushBufferNotice": "Le restaurant est très sollicité. Les nouveaux créneaux de retrait commencent au moins {minutes} minutes plus tard.",
     "scheduleNotConfigured": "Ce restaurant n’a pas encore défini ses horaires pour les commandes en ligne.",
     "pickupAt": "Retrait : {time}",
     "discountCode": "Code promo (facultatif)",
@@ -3330,6 +3332,52 @@
       "forbidden": "Vous n’avez plus accès aux statistiques de ce restaurant.",
       "invalid": "La demande de statistiques est invalide.",
       "unavailable": "Impossible de charger les statistiques du restaurant. Aucune valeur d’exemple n’est affichée."
+    },
+    "orderingOperationsTitle": "État des commandes",
+    "orderingOperationsHelp": "Gérez les nouvelles commandes en ligne et accordez plus de temps à la cuisine pendant un pic d’activité.",
+    "orderingOperationsLoading": "Chargement de l’état des commandes…",
+    "orderingOperationsRefreshing": "Actualisation de l’état des commandes…",
+    "orderingOperationsSaving": "Enregistrement…",
+    "orderingOperationsSaved": "État des commandes mis à jour.",
+    "orderingOperationsReadOnly": "L’équipe de cuisine peut consulter ces paramètres. Seuls les propriétaires et les responsables peuvent les modifier.",
+    "orderingServiceTitle": "Commandes en ligne",
+    "orderingServiceDescription": "Les changements concernent les nouveaux passages en caisse et créneaux. Les commandes et réservations existantes restent inchangées.",
+    "ordersAccepting": "Commandes ouvertes",
+    "ordersAcceptingHelp": "Les clients peuvent passer commande selon les créneaux de retrait disponibles.",
+    "ordersPaused": "Nouvelles commandes suspendues",
+    "ordersPausedHelp": "Les nouveaux paiements sont bloqués et les créneaux de retrait masqués. Les commandes et réservations existantes ne changent pas.",
+    "pauseNewOrders": "Suspendre les commandes",
+    "resumeNewOrders": "Reprendre les commandes",
+    "rushHoldTitle": "Pic d’activité",
+    "rushHoldActive": "Pic d’activité · +{minutes} min",
+    "rushHoldEnabledHelp": "Les nouveaux créneaux commencent {minutes} minutes plus tard. Cette pause reste active jusqu’à sa suppression manuelle.",
+    "rushHoldDisabledHelp": "Ajoutez {minutes} minutes aux premiers créneaux pour laisser la cuisine rattraper son retard.",
+    "enableRushHold": "Activer la pause",
+    "clearRushHold": "Supprimer la pause",
+    "confirmChange": "Confirmer",
+    "cancel": "Annuler",
+    "orderingOperationsErrors": {
+      "conflict": "Un autre responsable a modifié l’état des commandes. Actualisation en cours ; vérifiez le nouvel état avant de réessayer.",
+      "forbidden": "Vous n’avez plus l’autorisation de gérer les commandes.",
+      "unavailable": "Impossible de charger ou d’enregistrer l’état des commandes. Réessayez."
+    },
+    "orderingOperationsConfirm": {
+      "pause": {
+        "title": "Suspendre les nouvelles commandes ?",
+        "description": "Les nouveaux passages en caisse seront bloqués et les créneaux masqués. Les commandes et réservations existantes resteront inchangées."
+      },
+      "resume": {
+        "title": "Reprendre les nouvelles commandes ?",
+        "description": "Les clients pourront de nouveau commander selon les créneaux actuels."
+      },
+      "enableRush": {
+        "title": "Activer la pause pendant le pic ?",
+        "description": "Les nouveaux créneaux commenceront {minutes} minutes plus tard, jusqu’à la suppression manuelle par un propriétaire ou responsable."
+      },
+      "clearRush": {
+        "title": "Supprimer la pause ?",
+        "description": "Les nouveaux créneaux reprendront l’horaire normal. Les réservations existantes ne changent pas."
+      }
     },
     "todayOrders": "Commandes passées aujourd’hui",
     "ordersYesterday": "{count} hier",

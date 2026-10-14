@@ -19,7 +19,12 @@ public sealed record CheckoutDiscountDto(string Code, DiscountKind Kind, decimal
 public sealed record CheckoutLocaleDto(string Locale, string DefaultLocale);
 public sealed record CheckoutCatalogDto(string Currency, string Locale, IReadOnlyList<CheckoutProductDto> Products,
     CheckoutDiscountDto? Discount);
-public sealed record PickupAvailabilityDto(string State, string? TimeZone, IReadOnlyList<WhitePlate.Domain.Tenants.PickupSlot> Slots);
+public sealed record PickupAvailabilityDto(string State, string? TimeZone, IReadOnlyList<WhitePlate.Domain.Tenants.PickupSlot> Slots)
+{
+    public bool AcceptingOrders { get; init; } = true;
+    public bool RushHoldEnabled { get; init; }
+    public int RushBufferMinutes { get; init; }
+}
 
 public sealed record CreateOrderItem(Guid ProductId, int Quantity, IReadOnlyList<Guid>? OptionIds);
 public sealed record CreateOrderCommand(Guid TenantId, string? CustomerName, string? DiscountCode,

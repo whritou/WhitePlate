@@ -241,19 +241,20 @@ Source decisions and limits:
 
 Reference: dashboard. Dependencies: S3, D1.
 
-Implement the reference rush-hold and emergency-pause controls as persisted operational settings shared by dashboard, storefront and checkout.
+Implemented in source; migration applied to Coolify Production and Neon `test`. The Neon rollout happened before Coolify was clarified as the target. PR #92 remains open; hosted acceptance is still outstanding. The approved operating policy is in [decision 0011](../architecture/decisions/0011-dashboard-ordering-operations.md).
 
 Acceptance criteria:
 
-- [ ] Show current accepting-orders state and explicit rush/pause/resume feedback; define hold duration/expiration and confirmation for service-impacting changes.
-- [ ] Apply additional rush buffer and paused ordering on the server; reject forged or stale checkout requests even when a guest already has a cart.
-- [ ] Propagate updated state across staff views and public availability while preserving in-flight order handling and the documented reservation/idempotency rules.
-- [ ] Keep changes tenant-bound, role-authorized and concurrency-aware; failed saves must not suggest that a restaurant is paused when it is still accepting orders.
-- [ ] Verify multiple staff sessions, stale guest carts, automatic expiry if selected, resume and existing-order behavior. Do not equate service pause with destructive organization archive/deactivation.
+- [x] Show current accepting-orders state and explicit rush/pause/resume feedback. Owners/managers confirm changes; Kitchen can view only. Rush adds ten minutes to newly offered pickup times and stays active until manually cleared.
+- [x] Apply rush buffer and pause on the server; API tests verify hidden slots, rejection of a stale-cart checkout, and a ten-minute shift to new pickup times.
+- [x] Keep accepted orders, reservations, slot capacity and successful idempotent retries unchanged when service is paused; API coverage verifies an existing receipt is still replayed while a new checkout is rejected.
+- [x] Keep updates tenant-bound and role-authorized with versioned conditional writes. PostgreSQL checkout row locking gives pause and new order creation a serialization point; failed dashboard saves retain the last confirmed state.
+- [ ] Verify multiple staff browser sessions against the migrated PostgreSQL runtime. API fixtures already cover pause/resume, a stale guest cart, successful idempotent replay and unchanged prior reservations. No automatic expiry was selected. Do not equate service pause with destructive organization archive/deactivation.
 
 Decisions and limits:
 
-- Decide allowed roles, fixed versus configurable rush delay, expiry behavior and treatment of existing slots/orders before implementation; +10m is a mockup example, not an approved rule.
+- Resolved 14 October 2026: owner/manager writes and Kitchen read-only; fixed +10-minute rush lead buffer with manual clearing and no timer expiry; pause blocks new checkouts and hides public slots while existing orders, reservations and idempotency receipts stay unchanged. See [decision 0011](../architecture/decisions/0011-dashboard-ordering-operations.md).
+- Remaining rollout: after PR #92 is merged, deploy the API/frontend; run independent-connection PostgreSQL concurrency checks and complete hosted multi-session/browser acceptance. `20261014150246_OrderingOperations` is already applied to Coolify Production and Neon `test`. See [D3 evidence](../audits/dashboard-rush-pause.md).
 
 ### D4 — Restaurant Dashboard: quick availability and storefront shortcuts
 
