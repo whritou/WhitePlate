@@ -129,6 +129,7 @@ export function DashboardMetricsPanel({
                 count: metrics.comparisonOrderCount,
               })}
               help={t("ordersIncludesCancelled")}
+              tone="info"
             />
 
             <MetricCard
@@ -139,6 +140,7 @@ export function DashboardMetricsPanel({
                 preparing: metrics.activeOrders.preparing,
                 ready: metrics.activeOrders.ready,
               })}
+              tone="warning"
             />
 
             {dashboard.canViewOrderValue && (
@@ -149,6 +151,7 @@ export function DashboardMetricsPanel({
                   value: money!.format(metrics.comparisonOrderValue ?? 0),
                 })}
                 help={t("orderValueHelp")}
+                tone="success"
               />
             )}
 
@@ -168,6 +171,7 @@ export function DashboardMetricsPanel({
                     })
                   : t("prepInsufficient")
               }
+              tone="neutral"
             />
           </div>
 
@@ -191,14 +195,23 @@ function MetricCard({
   value,
   description,
   help,
+  tone,
 }: {
   title: string
   value: string
   description: string
   help?: string
+  tone: "info" | "warning" | "success" | "neutral"
 }) {
+  const toneClass = {
+    info: "bg-info-muted",
+    warning: "bg-warning-muted",
+    success: "bg-success-muted",
+    neutral: "bg-secondary",
+  }[tone]
+
   return (
-    <Card>
+    <Card className={toneClass}>
       <CardHeader>
         <CardTitle>
           <h3>{title}</h3>
@@ -219,11 +232,21 @@ function MetricCard({
 }
 
 function MetricsLoading() {
+  const tones = [
+    "bg-info-muted",
+    "bg-warning-muted",
+    "bg-success-muted",
+    "bg-secondary",
+  ]
+
   return (
     <div className="grid gap-3" aria-hidden="true">
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        {Array.from({ length: 4 }, (_, index) => (
-          <div key={index} className="grid gap-3 rounded-lg border p-4">
+        {tones.map((tone) => (
+          <div
+            key={tone}
+            className={`grid gap-3 rounded-lg border p-4 ${tone}`}
+          >
             <Skeleton className="h-5 w-2/3" />
 
             <Skeleton className="h-4 w-1/2" />

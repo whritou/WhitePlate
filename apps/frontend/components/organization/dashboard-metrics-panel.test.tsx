@@ -66,6 +66,10 @@ it("renders formatted totals and a screen-reader hourly data table", () => {
   )
 
   expect(html).toContain("€10.73")
+  expect(html).toContain("bg-info-muted")
+  expect(html).toContain("bg-warning-muted")
+  expect(html).toContain("bg-success-muted")
+  expect(html).toContain("bg-secondary")
   expect(html).toContain("Soup")
   expect(html).toContain(
     "hourlyAccessibleSummary 2026-10-14 2026-10-13 Europe/Paris"

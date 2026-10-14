@@ -105,7 +105,9 @@ export async function LiveDashboard({
           </h2>
 
           <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
-            {t("quickAvailabilityHelp")}
+            {canManageStorefront
+              ? t("quickAvailabilityHelp")
+              : t("quickAvailabilityReadOnlyHelp")}
           </p>
         </div>
 
@@ -120,6 +122,8 @@ export async function LiveDashboard({
         ) : productAvailability?.length ? (
           <ProductAvailabilityControls
             tenantId={tenantId}
+            userId={canManageStorefront ? userId : undefined}
+            canManageAvailability={canManageStorefront}
             products={productAvailability}
             labels={{
               available: t("productAvailable"),
