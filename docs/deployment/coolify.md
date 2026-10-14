@@ -60,6 +60,14 @@ Applied `20261012171223_OpeningHours` transactionally: added nullable `Tenants.O
 
 Coolify deployed the merged `main` commit through API resource `white-plate:main-wqyrztj6uyuwlveq75qrl68t` as deployment `hrakmdnqubktj7ox4itq2b23`. The build imported commit `0732e79`; both `/health/ready` checks returned Healthy and the rolling update completed at 2026-10-12 17:54 UTC. The resource reports Running. Automated source checks passed before merge (235 API tests, 481 frontend tests, typecheck, lint and production build; all four PR checks passed). Hosted owner/manager save/read, tenant-host public projection, cross-tenant denial and responsive browser acceptance remain open; frontend deployment remains outstanding. No open-now calculation or checkout enforcement is included in S2. Off-host backup retention and a restore drill remain operational work.
 
+## Production discount minimum and expiry rollout — 2026-10-15
+
+PR #96 merged to `main` as `404d8409a7728fac4e3758a865b667494ea02ccf`. Before changing the production database, preflight confirmed database `whiteplate`, latest migration `20261014150246_OrderingOperations`, two tenants, zero orders, one promotion discount, and neither new discount column. The Coolify PostgreSQL terminal created `/tmp/whiteplate-before-discount-fields-20261015.dump` with `pg_dump -Fc` (70.1 KiB). `pg_restore -l` recognized the custom archive and listed 161 table-of-contents entries. The dump is a temporary copy inside the database container, not an off-host backup or restore drill.
+
+Applied `20261014211126_DiscountMinimumAndExpiration` in one explicit transaction through the Coolify database terminal. It added nullable `PromotionDiscounts.ExpiresOn date`, non-null `PromotionDiscounts.MinimumOrderAmount numeric(12,2) DEFAULT 0`, and the EF history row with product version `10.0.12`. Post-checks confirmed the history row, both column definitions, precision 12/scale 2, and the existing discount's `0.00` minimum with no expiry. No order rows were changed.
+
+GitHub API and Frontend checks and the Vercel Preview passed. Local verification passed 270 API tests, 557 frontend tests, and three targeted browser scenarios for discount/archive reachability, product drag ordering, and photo drag ordering. The Coolify API resource `white-plate:main-wqyrztj6uyuwlveq75qrl68t` was Running, but its latest successful deployment still served commit `dd1d812` (PR #92, 2026-10-14 16:18 UTC); the manual deployment of merge commit `404d840` and hosted end-to-end acceptance remain pending. Do not report checkout minimum/expiry enforcement as live until that deployment and acceptance are verified.
+
 ## Previous verified deployment state — 2026-10-08
 
 | Component | Evidence and remaining work |
