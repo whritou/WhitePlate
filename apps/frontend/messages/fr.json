@@ -291,6 +291,7 @@
       "Completed": "Terminée",
       "Cancelled": "Annulée"
     },
+    "statusCount": "{status} : {count}",
     "actions": {
       "Preparing": "Commencer la préparation",
       "Ready": "Marquer comme prête",
@@ -3319,8 +3320,7 @@
     "loadedTotal": "Total des commandes chargées",
     "dashboardScope": "Statistiques opérationnelles de tout le restaurant pour aujourd’hui et hier, selon son fuseau horaire enregistré. Les montants ne sont pas des paiements encaissés.",
     "activeOrders": "Commandes en cours",
-    "dashboardLoadedScope": "La liste et ses filtres affichent au maximum 50 commandes chargées. Les statistiques ci-dessus couvrent toutes les commandes conservées pour ces dates.",
-    "showingDashboardOrders": "Dernières commandes affichées : {visibleCount} sur {loadedCount} chargées.",
+    "dashboardLoadedScope": "Les compteurs ci-dessous portent sur les {count} commandes actuellement chargées. Les statistiques ci-dessus couvrent toutes les commandes conservées pour ces dates.",
     "metricsTitle": "Aujourd’hui en un coup d’œil",
     "metricsPeriod": "Date du restaurant : {date} ({timeZone}), comparée au {comparisonDate}.",
     "metricsHelp": "Les statistiques opérationnelles de tout le restaurant suivent son fuseau horaire enregistré.",
@@ -3405,6 +3405,7 @@
     "openOrders": "Ouvrir le tableau de commandes",
     "quickAvailability": "Disponibilité rapide",
     "quickAvailabilityHelp": "Choisissez les produits que les clients peuvent commander. Les changements concernent les nouvelles commandes ; les commandes existantes conservent leurs articles enregistrés.",
+    "quickAvailabilityReadOnlyHelp": "Consultez les produits que les clients peuvent commander. Seuls les propriétaires et responsables peuvent modifier leur disponibilité.",
     "availabilityLoadError": "Impossible de charger la disponibilité des produits.",
     "availabilityEmpty": "Aucun produit actif à gérer.",
     "productAvailable": "Disponible",

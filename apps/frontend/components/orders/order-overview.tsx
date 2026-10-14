@@ -1,39 +1,45 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useMemo } from "react"
 import { useOrderDashboard } from "@/hooks/use-order-dashboard"
-import { useKdsClock } from "@/hooks/use-kds-clock"
 import { Link, useRouter } from "@/i18n/navigation"
 import { OrderRealtimeConnection } from "@/components/orders/order-realtime-connection"
-import { OrderTicket } from "@/components/orders/order-ticket"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useTranslations } from "next-intl"
-import type {
-  OrderDashboardProps,
-  OrderOverviewFilter,
-  OrderStatus,
-} from "@/types/orders"
+import type { OrderDashboardProps, OrderStatus } from "@/types/orders"
 
-const statuses = [
+const statuses: OrderStatus[] = [
   "Pending",
   "Preparing",
   "Ready",
   "Completed",
   "Cancelled",
-] as const
-const filters: OrderOverviewFilter[] = ["all", ...statuses]
+]
+
+const statusVariants = {
+  Pending: "warning",
+  Preparing: "info",
+  Ready: "success",
+  Completed: "neutral",
+  Cancelled: "destructive",
+} as const
 
 export function OrderOverview(props: OrderDashboardProps) {
-  const { tenantId, role, hubUrl } = props
+  const { tenantId, hubUrl } = props
   const t = useTranslations("KitchenOrders")
   const live = useTranslations("LiveWorkspace")
   const router = useRouter()
   const dashboard = useOrderDashboard(props)
-  const now = useKdsClock(dashboard.page?.serverTime ?? null)
   const {
     page,
     loadError,
@@ -41,21 +47,9 @@ export function OrderOverview(props: OrderDashboardProps) {
     isInitialLoading,
     isFetching,
     message,
-    pending,
     refresh,
     retry,
-    updateStatus,
   } = dashboard
-  const [selectedFilter, setSelectedFilter] =
-    useState<OrderOverviewFilter>("all")
-  const orders = useMemo(() => {
-    return [...(page?.items ?? [])]
-      .filter(
-        (order) => selectedFilter === "all" || order.status === selectedFilter
-      )
-      .sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt))
-  }, [page?.items, selectedFilter])
-  const latestOrders = orders.slice(0, 4)
   const counts = useMemo(() => {
     const result: Record<OrderStatus, number> = {
       Pending: 0,
@@ -74,7 +68,7 @@ export function OrderOverview(props: OrderDashboardProps) {
     <section
       aria-labelledby="dashboard-order-flow"
       aria-busy={isInitialLoading}
-      className="grid min-w-0 gap-5"
+      className="grid min-w-0 gap-3"
     >
       <OrderRealtimeConnection
         tenantId={tenantId}
@@ -127,114 +121,81 @@ export function OrderOverview(props: OrderDashboardProps) {
         </Alert>
       )}
 
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h2
-            id="dashboard-order-flow"
-            className="font-display text-2xl font-bold"
+      <Card aria-labelledby="dashboard-order-flow" className="min-w-0">
+        <CardHeader className="flex-row flex-wrap items-center justify-between gap-3">
+          <div className="min-w-0">
+            <CardTitle>
+              <h2 id="dashboard-order-flow" className="font-display text-xl">
+                {live("kitchen")}
+              </h2>
+            </CardTitle>
+
+            {page && (
+              <CardDescription className="mt-1">
+                {live("dashboardLoadedScope", { count: page.items.length })}
+              </CardDescription>
+            )}
+          </div>
+
+          <Button
+            nativeButton={false}
+            role="link"
+            variant="outline"
+            render={<Link href={`/organization/orders?tenantId=${tenantId}`} />}
           >
-            {live("kitchen")}
-          </h2>
+            {live("openOrders")}
+          </Button>
+        </CardHeader>
 
-          <p className="mt-1 max-w-3xl text-sm text-muted-foreground">
-            {live("dashboardLoadedScope")}
-          </p>
-        </div>
-
-        <Button
-          nativeButton={false}
-          role="link"
-          variant="outline"
-          render={<Link href={`/organization/orders?tenantId=${tenantId}`} />}
-        >
-          {live("openOrders")}
-        </Button>
-      </div>
-
-      <div
-        role="group"
-        aria-label={t("filterLabel")}
-        className="grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-6"
-      >
-        {filters.map((status) => {
-          const count =
-            status === "all" ? (page?.items.length ?? 0) : counts[status]
-
-          return (
-            <Button
-              key={status}
-              type="button"
-              size="lg"
-              variant={selectedFilter === status ? "secondary" : "outline"}
-              aria-pressed={selectedFilter === status}
-              disabled={!page || isInitialLoading}
-              onClick={() => setSelectedFilter(status)}
-              className="min-h-12 justify-between gap-2 px-3"
-            >
-              <span className="truncate">{t(`statuses.${status}`)}</span>
-
-              <Badge variant="outline" className="shrink-0 tabular-nums">
-                {page ? count : "—"}
-              </Badge>
-            </Button>
-          )
-        })}
-      </div>
-
-      {page && (
-        <p className="text-sm text-muted-foreground">
-          {live("showingDashboardOrders", {
-            visibleCount: Math.min(latestOrders.length, orders.length),
-            loadedCount: page.items.length,
-          })}
-        </p>
-      )}
-
-      {isInitialLoading ? (
-        <div
-          aria-hidden="true"
-          className="grid min-w-0 gap-4 sm:grid-cols-2 2xl:grid-cols-4"
-        >
-          {Array.from({ length: 4 }, (_, index) => (
+        <CardContent>
+          {isInitialLoading ? (
             <div
-              key={index}
               aria-hidden="true"
-              className="grid gap-3 rounded-lg border p-4"
+              className="grid grid-cols-2 gap-2 sm:grid-cols-5"
             >
-              <Skeleton className="h-6 w-2/3" />
+              {statuses.map((status) => (
+                <div key={status} className="grid gap-2 rounded-md border p-3">
+                  <Skeleton className="h-4 w-2/3" />
 
-              <Skeleton className="h-4 w-1/2" />
-
-              <Skeleton className="h-20 w-full" />
-
-              <Skeleton className="h-10 w-1/3" />
+                  <Skeleton className="h-6 w-1/3" />
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-      ) : page && latestOrders.length > 0 ? (
-        <div className="grid min-w-0 items-start gap-4 sm:grid-cols-2 2xl:grid-cols-4">
-          {latestOrders.map((order) => (
-            <OrderTicket
-              key={order.id}
-              order={order}
-              role={role}
-              locale={props.locale}
-              now={now}
-              pending={pending}
-              onUpdate={updateStatus}
-              headingLevel="h3"
-            />
-          ))}
-        </div>
-      ) : page ? (
-        <Card className="border-dashed p-6 text-center">
-          <h3 className="font-display text-lg font-bold">
-            {page.items.length === 0 && selectedFilter === "all"
-              ? live("emptyDashboard")
-              : t("noFilterResults")}
-          </h3>
-        </Card>
-      ) : null}
+          ) : page ? (
+            <>
+              <ul className="grid grid-cols-2 gap-2 sm:grid-cols-5">
+                {statuses.map((status) => (
+                  <li
+                    key={status}
+                    className="flex min-w-0 items-center justify-between gap-2 rounded-md border bg-muted/30 px-3 py-2"
+                  >
+                    <span className="min-w-0 truncate text-sm font-medium">
+                      {t(`statuses.${status}`)}
+                    </span>
+
+                    <Badge
+                      variant={statusVariants[status]}
+                      className="min-w-8 shrink-0 justify-center tabular-nums"
+                      aria-label={t("statusCount", {
+                        status: t(`statuses.${status}`),
+                        count: counts[status],
+                      })}
+                    >
+                      {counts[status]}
+                    </Badge>
+                  </li>
+                ))}
+              </ul>
+
+              {page.items.length === 0 && (
+                <p className="mt-3 text-sm text-muted-foreground">
+                  {live("emptyDashboard")}
+                </p>
+              )}
+            </>
+          ) : null}
+        </CardContent>
+      </Card>
     </section>
   )
 }

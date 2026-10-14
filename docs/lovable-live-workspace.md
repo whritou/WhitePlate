@@ -135,7 +135,13 @@ The subsequent user request explicitly targets real pages only. The [real/demo p
 
 ## D1 restaurant dashboard — 13 October 2026
 
-The restaurant dashboard now uses a responsive page-scoped order overview, all five status filters and the shared `OrderTicket` lifecycle. Its initial page is seeded from the authorized server read and then uses the existing TanStack Query polling, SignalR refresh hints, REST recovery, If-Match actions, stale/error feedback and revoked-membership behavior. The full Kanban remains on Orders. Kitchen membership adds Dashboard to navigation while Orders remains its default; Kitchen receives operational counts/tickets and shop access, but not monetary totals or catalog editing links. Individual ticket totals remain as in the shared ticket. The dashboard loading fallback follows the same responsive structure. Both locales distinguish the page-scoped order list from the restaurant-wide statistics added by D2.
+The restaurant dashboard initially used a responsive page-scoped order overview with filters and the shared `OrderTicket` lifecycle. Its initial page is seeded from the authorized server read and then uses the existing TanStack Query polling, SignalR refresh hints, REST recovery, stale/error feedback and revoked-membership behavior. The full ticket workflow remains on Orders. Kitchen membership adds Dashboard to navigation while Orders remains its default; Kitchen receives operational counts and shop access, but not monetary totals or catalog editing links. Individual ticket totals remain on the shared order board.
+
+### Dashboard presentation revision — 14 October 2026
+
+The approved dashboard refresh makes “Today at a glance” KPIs visibly distinct with the design system's info, warning, success and secondary surface tokens. The large dashboard ticket/filter area is now a compact card with five loaded-page status counts and a link to the full Orders board. It retains the initial loading state, live refresh, stale-data warning, retry, empty state and access-revocation handling. Counts explicitly describe the loaded page; the separate D2 metrics remain restaurant-wide.
+
+Quick availability cards now show the product's saved cover image when an owner or manager can access the private photo endpoint. Kitchen is read-only, consistent with the existing API authorization; it sees current availability with the neutral no-photo fallback and cannot mutate it from this dashboard. D3 ordering controls and all server behavior are unchanged. No database migration was added for this presentation update.
 
 | Command/check | Result |
 | --- | --- |
