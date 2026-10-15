@@ -5,7 +5,11 @@ import { useLocale, useTranslations } from "next-intl"
 import { useRouter } from "@/i18n/navigation"
 import { reorderCatalogAction } from "@/actions/catalog"
 import type { ManagedCatalog } from "@/types/catalog-management"
-import type { MenuBuilderDraggedItem } from "@/types/menu-builder"
+import type {
+  MenuBuilderDraggedItem,
+  MenuBuilderReorderInput,
+} from "@/types/menu-builder"
+import { useMenuBuilderOrdering } from "./use-menu-builder-ordering"
 import { MenuBuilderProduct } from "./menu-builder-product"
 import { MenuBuilderCategoryList } from "./menu-builder-category-list"
 import { MenuBuilderProductList } from "./menu-builder-product-list"
@@ -119,12 +123,7 @@ export function MenuBuilderCatalog({
     })
   }
 
-  function reorder(input: {
-    entityType: "categories" | "products"
-    orderedIds: string[]
-    categoryId?: string
-    movedProductId?: string
-  }) {
+  function reorder(input: MenuBuilderReorderInput) {
     if (submitting.current || pending || input.orderedIds.length === 0) return
 
     const form = new FormData()
@@ -182,137 +181,26 @@ export function MenuBuilderCatalog({
     })
   }
 
-  function dropCategory(targetId: string) {
-    if (!dragged || dragged.id === targetId || pending) return
-    if (dragged.kind === "category") {
-      const active = categories.filter((category) => !category.isArchived)
-      const from = active.findIndex((category) => category.id === dragged.id)
-      const to = active.findIndex((category) => category.id === targetId)
-
-      if (from < 0 || to < 0) return
-
-      const ordered = [...active]
-      const [item] = ordered.splice(from, 1)
-
-      if (!item) return
-      ordered.splice(to, 0, item)
-      reorder({
-        entityType: "categories",
-        orderedIds: ordered.map((x) => x.id),
-      })
-
-      return
-    }
-
-    const targetCategory = categories.find(
-      (category) => category.id === targetId
-    )
-    const source = catalog.products.find((item) => item.id === dragged.id)
-    const product = source
-      ? {
-          ...source,
-          categoryId: productCategoryOverrides[source.id] ?? source.categoryId,
-        }
-      : undefined
-
-    if (
-      !targetCategory ||
-      targetCategory.isArchived ||
-      !product ||
-      isArchived(product)
-    )
-      return
-    if (product.categoryId === targetId) return
-
-    const targetProducts = effectiveProducts
-      .filter((item) => item.categoryId === targetId && !isArchived(item))
-      .sort((a, b) => a.sortOrder - b.sortOrder || a.id.localeCompare(b.id))
-    const orderedIds = targetProducts.map((item) => item.id)
-
-    orderedIds.push(product.id)
-    reorder({
-      entityType: "products",
-      categoryId: targetId,
-      orderedIds,
-      movedProductId: product.id,
-    })
-  }
-
-  function dropProduct(targetId: string) {
-    if (
-      !dragged ||
-      dragged.kind !== "product" ||
-      dragged.id === targetId ||
-      pending ||
-      visibility !== "active" ||
-      categoryId === "all"
-    )
-      return
-
-    const activeProducts = effectiveProducts
-      .filter((item) => item.categoryId === categoryId && !isArchived(item))
-      .sort((a, b) => a.sortOrder - b.sortOrder || a.id.localeCompare(b.id))
-    const from = activeProducts.findIndex((item) => item.id === dragged.id)
-    const to = activeProducts.findIndex((item) => item.id === targetId)
-
-    if (from < 0 || to < 0) return
-
-    const ordered = [...activeProducts]
-    const [item] = ordered.splice(from, 1)
-
-    if (!item) return
-    ordered.splice(to, 0, item)
-    reorder({
-      entityType: "products",
-      categoryId,
-      orderedIds: ordered.map((product) => product.id),
-    })
-  }
-
-  function moveCategoryWithKeyboard(id: string, offset: number) {
-    const active = categories.filter((category) => !category.isArchived)
-    const from = active.findIndex((category) => category.id === id)
-    const to = from + offset
-
-    if (from < 0 || to < 0 || to >= active.length) return
-
-    const ordered = [...active]
-    const [item] = ordered.splice(from, 1)
-
-    if (!item) return
-    ordered.splice(to, 0, item)
-    reorder({
-      entityType: "categories",
-      orderedIds: ordered.map((category) => category.id),
-    })
-  }
-
-  function moveProductWithKeyboard(id: string, offset: number) {
-    if (categoryId === "all" || visibility !== "active") return
-
-    const active = effectiveProducts
-      .filter((item) => item.categoryId === categoryId && !isArchived(item))
-      .sort((a, b) => a.sortOrder - b.sortOrder || a.id.localeCompare(b.id))
-    const from = active.findIndex((item) => item.id === id)
-    const to = from + offset
-
-    if (from < 0 || to < 0 || to >= active.length) return
-
-    const ordered = [...active]
-    const [item] = ordered.splice(from, 1)
-
-    if (!item) return
-    ordered.splice(to, 0, item)
-    reorder({
-      entityType: "products",
-      categoryId,
-      orderedIds: ordered.map((product) => product.id),
-    })
-  }
+  const {
+    dropCategory,
+    dropProduct,
+    moveCategoryWithKeyboard,
+    moveProductWithKeyboard,
+  } = useMenuBuilderOrdering({
+    categories,
+    products: effectiveProducts,
+    categoryId,
+    visibility,
+    pending,
+    dragged,
+    isArchived,
+    reorder,
+  })
 
   return (
     <div className="grid min-w-0 gap-0">
       <div
+        data-dragging={dragged ? "true" : "false"}
         className={`live-menu-layout grid min-w-0 ${selectedId ? "has-product" : ""}`}
       >
         <MenuBuilderCategoryList
@@ -320,6 +208,7 @@ export function MenuBuilderCatalog({
           products={effectiveProducts}
           categories={categories}
           categoryId={categoryId}
+          setVisibility={setVisibility}
           pending={pending}
           onCategoryChange={onCategoryChange}
           setSelectedId={setSelectedId}
@@ -375,6 +264,7 @@ export function MenuBuilderCatalog({
                   )
                 }
               }}
+              onProductRestored={() => setVisibility("active")}
               pending={pending}
               onPendingChange={onPendingChange}
             />

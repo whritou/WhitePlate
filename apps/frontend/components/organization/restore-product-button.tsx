@@ -12,18 +12,20 @@ export function RestoreProductButton({
   tenantId,
   id,
   onPendingChange,
+  onRestored,
   compact = false,
 }: {
   tenantId: string
   id: string
   onPendingChange?: (pending: boolean) => void
+  onRestored?: () => void
   compact?: boolean
 }) {
   const t = useTranslations("Catalog")
   const { pending, state, submit } = useCatalogForm(
     restoreProductAction,
     false,
-    undefined,
+    onRestored,
     t("productRestored"),
     onPendingChange
   )
@@ -39,6 +41,7 @@ export function RestoreProductButton({
         variant={compact ? "ghost" : "outline"}
         size={compact ? "icon" : "default"}
         disabled={pending}
+        data-no-drag="true"
         aria-label={t("restoreProduct")}
       >
         <RotateCcw aria-hidden="true" className="size-4" />

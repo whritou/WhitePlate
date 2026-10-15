@@ -182,8 +182,14 @@
 .lovable-live .live-menu-category-list { width: 100%; max-width: 100%; min-width: 0; }
 .live-menu-category-actions { display: flex; flex-wrap: wrap; gap: .5rem; padding: .75rem; border-top: 1px solid var(--border); background: var(--background); }
 .live-menu-category-actions { position: sticky; bottom: 0; z-index: 2; }
-.live-product-extras [data-slot="card-header"],
-.live-product-extras [data-slot="card-content"] { padding-inline: 1rem; }
+.live-product-extras [data-slot="card-header"] { padding: 1.25rem 1.25rem 0; }
+.live-product-extras [data-slot="card-content"] { padding: 1.25rem; }
+.live-menu-layout[data-dragging="true"] .live-dish-row:hover { background-color: var(--background); }
+.lovable-live .live-menu-layout[data-dragging="true"] [data-slot="button"]:hover:not([aria-pressed="true"]) { background: transparent; color: inherit; }
+.live-menu-layout[data-dragging="true"] [data-drag-source="true"] { border-color: var(--primary); border-style: dashed; opacity: 1; }
+.live-dish-row [data-visibility-action="true"] { position: absolute; inset-block-start: 3.25rem; inset-inline-end: .5rem; z-index: 1; opacity: 0; pointer-events: none; transition: opacity var(--duration-feedback) var(--ease-interface); }
+.live-dish-row:hover [data-visibility-action="true"],
+.live-dish-row:focus-within [data-visibility-action="true"] { opacity: 1; pointer-events: auto; }
 .live-dish-row [data-remove-action="true"] {
   position: absolute;
   inset-block-start: .5rem;
@@ -221,6 +227,7 @@
 }
 @media (hover: none) {
   .live-dish-row [data-remove-action="true"],
+  .live-dish-row [data-visibility-action="true"],
   [data-photo-tile="true"] [data-photo-remove="true"] {
     opacity: 1;
     pointer-events: auto;
