@@ -4,7 +4,7 @@
 
 The product cross and eye remain visible without hover and occupy a vertical stack inside the card. The product eye still updates availability; category visibility and its API remain intact. Category visibility/archive actions are available in the sidebar and no longer duplicated in the product filter toolbar. Controls remain locked during writes, while row selectors and drag handles keep their normal background. The selection shadow follows product selection rather than the availability eye's pressed state.
 
-Extras headers now keep padding below both their selection rule and archived badge. Discount editing retains code/name, type, value, minimum order, expiry, status, save and deactivate behavior. The six data columns have readable minimum widths; save/deactivate actions use a separate row. The workspace width accommodates the desktop columns, while container queries reflow narrower containers. This adopts the scoped Lovable reference without changing shared tokens or API contracts.
+Extras headers now keep padding below both their selection rule and archived badge. Discount editing retains code/name, type, value, minimum order, expiry, status, save and deactivate behavior. Every discount field keeps its visible label above the input, with code and description side by side; the seven columns reflow in narrower containers. Save/deactivate actions use a separate row. The workspace language selector shares the appbar controls' height and vertical alignment. This adopts the scoped Lovable reference without changing shared tokens or API contracts.
 
 Verification from `apps/frontend`:
 
