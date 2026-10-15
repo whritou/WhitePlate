@@ -23,12 +23,16 @@ export function DialogContent({
       <Primitive.Popup
         data-slot="dialog-content"
         className={cn(
-          "fixed start-1/2 top-1/2 z-40 flex max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-2xl -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-xl border border-border bg-popover text-popover-foreground shadow-lg outline-none [&[hidden]]:hidden",
+          "fixed start-1/2 top-1/2 z-40 flex max-h-[calc(100dvh-2rem)] max-w-2xl -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-xl border border-border bg-popover text-popover-foreground shadow-lg outline-none [&[hidden]]:hidden",
           className,
           scope.className
         )}
         {...props}
-        style={{ ...scope.style, ...props.style }}
+        style={{
+          width: "calc(100vw - 2rem)",
+          ...scope.style,
+          ...props.style,
+        }}
       />
     </Primitive.Portal>
   )
