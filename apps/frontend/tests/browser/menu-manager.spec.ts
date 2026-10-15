@@ -186,7 +186,7 @@ test("product status and category filters combine, including inherited archival"
 test("failed optimistic product reorders roll back to the saved order", async ({
   page,
 }) => {
-  await page.goto("/en/catalog-design-test?view=builder")
+  await page.goto("/en/catalog-design-test?view=builder&shell=1")
   await expect(page.getByTestId("fixture-ready")).toHaveAttribute(
     "data-ready",
     "true"

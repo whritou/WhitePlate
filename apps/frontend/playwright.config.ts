@@ -41,6 +41,7 @@ export default defineConfig({
         "menu-builder.spec.ts",
         "menu-builder-catalog.spec.ts",
         "menu-builder-catalog-lifecycle.spec.ts",
+        "menu-builder-layout.spec.ts",
         "menu-manager.spec.ts",
         "menu-workspace-usability.spec.ts",
       ],

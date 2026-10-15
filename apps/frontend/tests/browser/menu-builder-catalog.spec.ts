@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test"
 test("shared workspace keeps discounts and archived products reachable", async ({
   page,
 }) => {
-  await page.goto("/en/catalog-design-test?view=builder")
+  await page.goto("/en/catalog-design-test?view=builder&shell=1")
   await expect(page.getByTestId("fixture-ready")).toHaveAttribute(
     "data-ready",
     "true"
@@ -55,7 +55,7 @@ test("product availability toggles directly from its status control", async ({
     await route.continue()
   })
 
-  await page.goto("/en/catalog-design-test?view=builder")
+  await page.goto("/en/catalog-design-test?view=builder&shell=1")
   await expect(page.getByTestId("fixture-ready")).toHaveAttribute(
     "data-ready",
     "true"
@@ -89,7 +89,7 @@ test("category rows follow the demo layout and keep the add action sticky", asyn
   page,
 }) => {
   await page.setViewportSize({ width: 1440, height: 900 })
-  await page.goto("/en/catalog-design-test?view=builder")
+  await page.goto("/en/catalog-design-test?view=builder&shell=1")
   await expect(page.getByTestId("fixture-ready")).toHaveAttribute(
     "data-ready",
     "true"
@@ -115,7 +115,7 @@ test("category rows follow the demo layout and keep the add action sticky", asyn
 test("dragging a product submits the visible category order", async ({
   page,
 }) => {
-  await page.goto("/en/catalog-design-test?view=builder")
+  await page.goto("/en/catalog-design-test?view=builder&shell=1")
   await expect(page.getByTestId("fixture-ready")).toHaveAttribute(
     "data-ready",
     "true"
@@ -202,7 +202,7 @@ test("active products remain reorderable with all categories selected", async ({
     await route.continue()
   })
 
-  await page.goto("/en/catalog-design-test?view=builder")
+  await page.goto("/en/catalog-design-test?view=builder&shell=1")
   await expect(page.getByTestId("fixture-ready")).toHaveAttribute(
     "data-ready",
     "true"
@@ -257,7 +257,7 @@ test("dragging categories submits and immediately displays the new order", async
   })
 
   await page.setViewportSize({ width: 1440, height: 1400 })
-  await page.goto("/en/catalog-design-test?view=builder")
+  await page.goto("/en/catalog-design-test?view=builder&shell=1")
   await expect(page.getByTestId("fixture-ready")).toHaveAttribute(
     "data-ready",
     "true"
@@ -283,7 +283,7 @@ test("dragging categories submits and immediately displays the new order", async
 test("discount codes use the demo's inline code, type, value, minimum and expiry fields", async ({
   page,
 }) => {
-  await page.goto("/en/catalog-design-test?view=builder")
+  await page.goto("/en/catalog-design-test?view=builder&shell=1")
   await expect(page.getByTestId("fixture-ready")).toHaveAttribute(
     "data-ready",
     "true"
@@ -308,7 +308,7 @@ test("discount codes use the demo's inline code, type, value, minimum and expiry
 test("the product panel opens directly without a redundant edit button", async ({
   page,
 }) => {
-  await page.goto("/en/catalog-design-test?view=builder")
+  await page.goto("/en/catalog-design-test?view=builder&shell=1")
   await expect(page.getByTestId("fixture-ready")).toHaveAttribute(
     "data-ready",
     "true"
@@ -324,11 +324,11 @@ test("the product panel opens directly without a redundant edit button", async (
   )
 })
 
-test("product extras keep the demo's inset cards and the archive cross appears on hover", async ({
+test("product extras have space below their rules and archive badges", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 1440, height: 900 })
-  await page.goto("/en/catalog-design-test?view=builder")
+  await page.goto("/en/catalog-design-test?view=builder&shell=1")
   await expect(page.getByTestId("fixture-ready")).toHaveAttribute(
     "data-ready",
     "true"
@@ -355,34 +355,21 @@ test("product extras keep the demo's inset cards and the archive cross appears o
 
   expect(Number.parseFloat(contentPadding)).toBeGreaterThanOrEqual(20)
 
-  const row = page
-    .locator(".live-dish-row")
-    .filter({ hasText: "Soupe du potager" })
-  const archive = row.getByRole("button", {
-    name: "Archive Soupe du potager",
-    exact: true,
-  })
-  const rowBox = await row.boundingBox()
-  const archiveBox = await archive.boundingBox()
-  const visibility = row.getByRole("button", {
-    name: "Hide product Soupe du potager",
-    exact: true,
-  })
-  const visibilityBox = await visibility.boundingBox()
-
-  await expect(archive).toHaveCSS("position", "absolute")
-  await expect(visibility).toHaveCSS("position", "absolute")
-  expect(visibilityBox?.y).toBeGreaterThan(archiveBox?.y ?? 0)
-  expect(archiveBox?.x).toBeGreaterThanOrEqual(
-    (rowBox?.x ?? 0) + (rowBox?.width ?? 0) - (archiveBox?.width ?? 0) - 16
+  const headers = panel.locator(
+    '.live-product-extras [data-slot="card-header"]'
   )
-  expect(archiveBox?.y).toBeLessThanOrEqual((rowBox?.y ?? 0) + 12)
-  await page.mouse.move(0, 0)
-  await page.evaluate(() => {
-    if (document.activeElement instanceof HTMLElement)
-      document.activeElement.blur()
-  })
-  await expect(archive).toHaveCSS("opacity", "0")
-  await row.hover()
-  await expect(archive).toHaveCSS("opacity", "1")
+
+  for (const header of await headers.all()) {
+    const headerBox = await header.boundingBox()
+    const lastText = header
+      .locator('[data-slot="badge"], [data-slot="card-description"]')
+      .last()
+    const textBox = await lastText.boundingBox()
+
+    expect(headerBox).not.toBeNull()
+    expect(textBox).not.toBeNull()
+    expect(
+      headerBox!.y + headerBox!.height - textBox!.y - textBox!.height
+    ).toBeGreaterThanOrEqual(16)
+  }
 })
