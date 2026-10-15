@@ -34,7 +34,6 @@ test("switching workspace tabs and products preserves an unsaved product draft",
   await page
     .getByRole("button", { name: "Select Soupe du potager", exact: true })
     .click()
-  await page.getByRole("button", { name: "Edit product", exact: true }).click()
 
   const product = page.getByRole("form", {
     name: "Edit product Soupe du potager",
@@ -134,7 +133,6 @@ test("product save locks selection, rejects duplicate submissions and retains a 
   await page
     .getByRole("button", { name: "Select Soupe du potager", exact: true })
     .click()
-  await page.getByRole("button", { name: "Edit product", exact: true }).click()
 
   const form = page.getByRole("form", {
     name: "Edit product Soupe du potager",
@@ -219,9 +217,7 @@ test("category visibility errors preserve the saved state and recover controls",
     })
   })
 
-  await page
-    .getByRole("button", { name: "Manage categories", exact: true })
-    .click()
+  await page.getByRole("button", { name: "Les entrées 2", exact: true }).click()
 
   const hide = page.getByRole("button", {
     name: "Hide category Les entrées",
@@ -230,16 +226,14 @@ test("category visibility errors preserve the saved state and recover controls",
 
   await hide.click()
   await expect(
-    page
-      .getByRole("dialog", { name: "Manage categories", exact: true })
-      .getByRole("alert")
+    page.getByText("The catalog service is unavailable. Try again.", {
+      exact: true,
+    })
   ).toBeVisible()
   await expect(hide).toBeEnabled()
-  await expect(page.getByText("Visible online", { exact: true })).toBeVisible()
-  await page.keyboard.press("Escape")
   await expect(
-    page.getByRole("tab", { name: "Languages", exact: true })
-  ).toBeEnabled()
+    page.getByRole("button", { name: "Hide category Les entrées", exact: true })
+  ).toBeVisible()
 })
 
 for (const locale of ["en", "fr"]) {
@@ -268,12 +262,6 @@ for (const locale of ["en", "fr"]) {
             locale === "fr"
               ? "Sélectionner Soupe du potager"
               : "Select Soupe du potager",
-          exact: true,
-        })
-        .click()
-      await page
-        .getByRole("button", {
-          name: locale === "fr" ? "Modifier le produit" : "Edit product",
           exact: true,
         })
         .click()

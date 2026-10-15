@@ -8,6 +8,8 @@ import {
   saveOptionAction,
   saveOptionGroupAction,
   saveProductAction,
+  restoreCatalogItemAction,
+  restoreProductAction,
   reorderCatalogAction,
   setCategoryVisibilityAction,
   setProductAvailabilityAction,
@@ -573,6 +575,68 @@ it.each(["categories", "products", "option-groups", "options"] as const)(
     expect(whitePlateApi.delete).toHaveBeenCalledWith(
       `/api/v1/tenants/${tenantId}/${entityType}/${productId}`
     )
+  }
+)
+
+it.each(["categories", "option-groups", "options"] as const)(
+  "restores only a validated %s resource in its tenant",
+  async (entityType) => {
+    vi.mocked(whitePlateApi.post).mockResolvedValue({
+      ok: true,
+      status: 204,
+      data: null,
+    })
+
+    expect(
+      await restoreCatalogItemAction(
+        form({ tenantId, id: productId, entityType })
+      )
+    ).toEqual({ ok: true })
+    expect(whitePlateApi.post).toHaveBeenCalledWith(
+      `/api/v1/tenants/${tenantId}/${entityType}/${productId}/restore`,
+      {}
+    )
+  }
+)
+
+it("restores a product through its dedicated validated endpoint", async () => {
+  vi.mocked(whitePlateApi.post).mockResolvedValue({
+    ok: true,
+    status: 204,
+    data: null,
+  })
+
+  expect(await restoreProductAction(form({ tenantId, id: productId }))).toEqual(
+    { ok: true }
+  )
+  expect(whitePlateApi.post).toHaveBeenCalledWith(
+    `/api/v1/tenants/${tenantId}/products/${productId}/restore`,
+    {}
+  )
+})
+
+it.each([
+  { tenantId: "foreign", id: productId, entityType: "options" },
+  { tenantId, id: "bad", entityType: "options" },
+  { tenantId, id: productId, entityType: "products" },
+])(
+  "rejects invalid restore requests without calling the API: %o",
+  async (fields) => {
+    expect(await restoreCatalogItemAction(form(fields))).toEqual({
+      ok: false,
+      error: "invalid",
+    })
+    expect(whitePlateApi.post).not.toHaveBeenCalled()
+  }
+)
+
+it.each([{ tenantId: "foreign" }, { id: "bad" }])(
+  "rejects malformed product restore references without calling the API: %o",
+  async (fields) => {
+    expect(
+      await restoreProductAction(form({ tenantId, id: productId, ...fields }))
+    ).toEqual({ ok: false, error: "invalid" })
+    expect(whitePlateApi.post).not.toHaveBeenCalled()
   }
 )
 

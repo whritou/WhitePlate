@@ -1,8 +1,7 @@
 "use client"
 
-import { Eye, EyeOff, GripVertical, Plus } from "lucide-react"
+import { GripVertical, Plus } from "lucide-react"
 import { useTranslations } from "next-intl"
-import { setCategoryVisibilityAction } from "@/actions/catalog"
 import { Button } from "@/components/ui/button"
 import { EditorDialog } from "@/components/ui/editor-dialog"
 import type {
@@ -10,13 +9,12 @@ import type {
   ManagedCatalog,
 } from "@/types/catalog-management"
 import type { MenuBuilderDraggedItem } from "@/types/menu-builder"
-import { ArchiveCatalogButton } from "./archive-catalog-button"
 import { CategoryForm } from "./category-form"
 import { RestoreCatalogItemButton } from "./restore-catalog-item-button"
-import { useCatalogForm } from "./use-catalog-form"
 
 export function MenuBuilderCategoryList({
   catalog,
+  products,
   categories,
   categoryId,
   pending,
@@ -29,6 +27,7 @@ export function MenuBuilderCategoryList({
   moveCategoryWithKeyboard,
 }: {
   catalog: ManagedCatalog
+  products: ManagedCatalog["products"]
   categories: CatalogCategory[]
   categoryId: string
   pending: boolean
@@ -71,7 +70,9 @@ export function MenuBuilderCategoryList({
           <div
             key={category.id}
             onDragOver={(event) => {
-              if (dragged) event.preventDefault()
+              // Preventing the default lets the browser dispatch `drop` even
+              // if React has not rendered the drag-start state yet.
+              if (!pending) event.preventDefault()
             }}
             onDrop={(event) => {
               event.preventDefault()
@@ -85,13 +86,15 @@ export function MenuBuilderCategoryList({
                 type="button"
                 variant="ghost"
                 size="icon"
-                draggable={!category.isArchived && !pending}
+                draggable={!pending && !category.isArchived}
                 disabled={pending || category.isArchived}
                 aria-label={t("dragCategory", { name: category.name })}
                 className="size-8 cursor-grab text-muted-foreground"
-                onDragStart={() =>
+                onDragStart={(event) => {
+                  event.dataTransfer.effectAllowed = "move"
+                  event.dataTransfer.setData("text/plain", category.id)
                   setDragged({ kind: "category", id: category.id })
-                }
+                }}
                 onDragEnd={() => setDragged(null)}
                 onKeyDown={(event) => {
                   if (event.key === "ArrowUp" || event.key === "ArrowDown") {
@@ -120,7 +123,7 @@ export function MenuBuilderCategoryList({
 
                 <span className="label-mono">
                   {
-                    catalog.products.filter(
+                    products.filter(
                       (item) =>
                         item.categoryId === category.id && !item.isArchived
                     ).length
@@ -137,45 +140,7 @@ export function MenuBuilderCategoryList({
                   name={category.name}
                   onPendingChange={onPendingChange}
                 />
-              ) : (
-                <>
-                  <CategoryVisibilityButton
-                    category={category}
-                    tenantId={catalog.tenantId}
-                    busy={pending}
-                    onPendingChange={onPendingChange}
-                  />
-
-                  <EditorDialog
-                    compact
-                    title={c("editCategory", { name: category.name })}
-                    label={t("editCategory")}
-                    description={t("categoryHelp")}
-                    disabled={pending}
-                  >
-                    {(callbacks) => (
-                      <CategoryForm
-                        tenantId={catalog.tenantId}
-                        category={category}
-                        {...callbacks}
-                        onPendingChange={(value) => {
-                          callbacks.onPendingChange?.(value)
-                          onPendingChange(value)
-                        }}
-                      />
-                    )}
-                  </EditorDialog>
-
-                  <ArchiveCatalogButton
-                    compact
-                    tenantId={catalog.tenantId}
-                    id={category.id}
-                    entityType="categories"
-                    name={category.name}
-                    onPendingChange={onPendingChange}
-                  />
-                </>
-              )}
+              ) : null}
             </div>
           </div>
         ))}
@@ -202,67 +167,5 @@ export function MenuBuilderCategoryList({
         </EditorDialog>
       </div>
     </aside>
-  )
-}
-
-function CategoryVisibilityButton({
-  category,
-  tenantId,
-  busy,
-  onPendingChange,
-}: {
-  category: CatalogCategory
-  tenantId: string
-  busy: boolean
-  onPendingChange: (pending: boolean) => void
-}) {
-  const t = useTranslations("MenuBuilder")
-  const c = useTranslations("Catalog")
-  const { pending, state, submit } = useCatalogForm(
-    setCategoryVisibilityAction,
-    false,
-    undefined,
-    undefined,
-    onPendingChange
-  )
-  const Icon = category.isVisible ? Eye : EyeOff
-
-  return (
-    <form onSubmit={submit} className="contents">
-      <input type="hidden" name="tenantId" value={tenantId} />
-
-      <input type="hidden" name="id" value={category.id} />
-
-      <input
-        type="hidden"
-        name="isVisible"
-        value={String(!category.isVisible)}
-      />
-
-      <Button
-        type="submit"
-        variant="ghost"
-        size="icon"
-        className="text-foreground"
-        aria-busy={pending}
-        disabled={busy || pending}
-        aria-label={t(
-          category.isVisible ? "hideCategoryNamed" : "showCategoryNamed",
-          {
-            name: category.name,
-          }
-        )}
-      >
-        <Icon aria-hidden="true" className="size-4" />
-      </Button>
-
-      {state.status === "error" && (
-        <span className="sr-only" role="alert">
-          {c(`errors.${state.error ?? "unavailable"}`)}
-        </span>
-      )}
-
-      {pending && <span className="sr-only">{c("saving")}</span>}
-    </form>
   )
 }

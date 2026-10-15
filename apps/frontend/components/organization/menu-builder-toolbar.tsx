@@ -1,16 +1,26 @@
 "use client"
 
+import { useState } from "react"
 import { Plus } from "lucide-react"
 import { useTranslations } from "next-intl"
+import {
+  saveCategoryAction,
+  setCategoryVisibilityAction,
+} from "@/actions/catalog"
 import { EditorDialog } from "@/components/ui/editor-dialog"
+import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
+import type { CatalogCategory } from "@/types/catalog-management"
+import { ArchiveCatalogButton } from "./archive-catalog-button"
 import { ProductForm } from "./product-form"
+import { useCatalogForm } from "./use-catalog-form"
 import type { MenuBuilderToolbarProps } from "@/types/menu-builder"
 
 export function MenuBuilderToolbar({
   catalog,
+  category,
   title,
   search,
   onSearch,
@@ -24,9 +34,38 @@ export function MenuBuilderToolbar({
 
   return (
     <div className="live-menu-toolbar flex min-w-0 flex-wrap items-center gap-3 border-b px-6 py-4">
-      <h2 className="min-w-0 flex-1 basis-48 font-display text-2xl font-bold">
-        {title}
-      </h2>
+      {category && !category.isArchived ? (
+        <CategoryNameField
+          key={`${category.id}:${category.name}`}
+          tenantId={catalog.tenantId}
+          category={category}
+          disabled={pending}
+          onPendingChange={onPendingChange}
+        />
+      ) : (
+        <h2 className="min-w-0 flex-1 basis-48 font-display text-2xl font-bold">
+          {title}
+        </h2>
+      )}
+
+      {category && !category.isArchived && (
+        <div className="flex flex-wrap items-center gap-2">
+          <CategoryVisibilityButton
+            tenantId={catalog.tenantId}
+            category={category}
+            disabled={pending}
+            onPendingChange={onPendingChange}
+          />
+
+          <ArchiveCatalogButton
+            tenantId={catalog.tenantId}
+            id={category.id}
+            entityType="categories"
+            name={category.name}
+            onPendingChange={onPendingChange}
+          />
+        </div>
+      )}
 
       <div className="w-44 max-w-full">
         <Label className="sr-only" htmlFor="builder-product-search">
@@ -88,5 +127,123 @@ export function MenuBuilderToolbar({
         )}
       </EditorDialog>
     </div>
+  )
+}
+
+function CategoryNameField({
+  tenantId,
+  category,
+  disabled,
+  onPendingChange,
+}: {
+  tenantId: string
+  category: CatalogCategory
+  disabled: boolean
+  onPendingChange: (pending: boolean) => void
+}) {
+  const t = useTranslations("Catalog")
+  const [name, setName] = useState(category.name)
+  const { pending, state, submit } = useCatalogForm(
+    saveCategoryAction,
+    false,
+    undefined,
+    undefined,
+    onPendingChange
+  )
+
+  return (
+    <form
+      onSubmit={submit}
+      className="min-w-0 flex-1 basis-48"
+      aria-label={t("editCategory", { name: category.name })}
+    >
+      <input type="hidden" name="tenantId" value={tenantId} />
+
+      <input type="hidden" name="id" value={category.id} />
+
+      <input type="hidden" name="sortOrder" value={category.sortOrder} />
+
+      <Label className="sr-only" htmlFor={`category-name-${category.id}`}>
+        {t("name")}
+      </Label>
+
+      <Input
+        id={`category-name-${category.id}`}
+        name="name"
+        value={name}
+        maxLength={120}
+        required
+        disabled={disabled || pending}
+        aria-label={t("name")}
+        onChange={(event) => setName(event.target.value)}
+        onBlur={(event) => {
+          if (event.currentTarget.value.trim() !== category.name)
+            event.currentTarget.form?.requestSubmit()
+        }}
+        className="h-auto border-0 bg-transparent p-0 font-display text-2xl font-bold shadow-none focus-visible:border-0 focus-visible:ring-2"
+      />
+
+      {state.status === "error" && (
+        <span role="alert" className="text-xs text-destructive">
+          {t(`errors.${state.error ?? "unavailable"}`)}
+        </span>
+      )}
+    </form>
+  )
+}
+
+function CategoryVisibilityButton({
+  tenantId,
+  category,
+  disabled,
+  onPendingChange,
+}: {
+  tenantId: string
+  category: CatalogCategory
+  disabled: boolean
+  onPendingChange: (pending: boolean) => void
+}) {
+  const t = useTranslations("MenuBuilder")
+  const c = useTranslations("Catalog")
+  const { pending, state, submit } = useCatalogForm(
+    setCategoryVisibilityAction,
+    false,
+    undefined,
+    undefined,
+    onPendingChange
+  )
+
+  return (
+    <form onSubmit={submit} className="contents">
+      <input type="hidden" name="tenantId" value={tenantId} />
+
+      <input type="hidden" name="id" value={category.id} />
+
+      <input
+        type="hidden"
+        name="isVisible"
+        value={String(!category.isVisible)}
+      />
+
+      <Button
+        type="submit"
+        variant="outline"
+        size="sm"
+        aria-busy={pending}
+        disabled={disabled || pending}
+        aria-label={t(
+          category.isVisible ? "hideCategoryNamed" : "showCategoryNamed",
+          { name: category.name }
+        )}
+      >
+        {t(category.isVisible ? "hideCategory" : "showCategory")}
+      </Button>
+
+      {state.status === "error" && (
+        <span role="alert" className="sr-only">
+          {c(`errors.${state.error ?? "unavailable"}`)}
+        </span>
+      )}
+    </form>
   )
 }

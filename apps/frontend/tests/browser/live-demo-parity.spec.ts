@@ -1,4 +1,44 @@
 import { expect, test } from "@playwright/test"
+import type { Locator } from "@playwright/test"
+
+async function expectReadableHoveredButton(button: Locator) {
+  await button.hover()
+
+  const ratio = await button.evaluate((element) => {
+    const canvas = document.createElement("canvas")
+    const context = canvas.getContext("2d")!
+    const read = (value: string) => {
+      context.fillStyle = value
+      context.fillRect(0, 0, 1, 1)
+
+      return Array.from(context.getImageData(0, 0, 1, 1).data).slice(0, 3)
+    }
+
+    const luminance = (color: number[]) =>
+      color
+        .map((channel) => channel / 255)
+        .map((channel) =>
+          channel <= 0.04045
+            ? channel / 12.92
+            : ((channel + 0.055) / 1.055) ** 2.4
+        )
+        .reduce(
+          (sum, channel, index) =>
+            sum + channel * [0.2126, 0.7152, 0.0722][index]!,
+          0
+        )
+    const style = getComputedStyle(element)
+    const foreground = luminance(read(style.color))
+    const background = luminance(read(style.backgroundColor))
+
+    return (
+      (Math.max(foreground, background) + 0.05) /
+      (Math.min(foreground, background) + 0.05)
+    )
+  })
+
+  expect(ratio).toBeGreaterThanOrEqual(4.5)
+}
 
 for (const locale of ["en", "fr"]) {
   for (const surface of ["demo", "live"]) {
@@ -95,10 +135,7 @@ test("dish thumbnails load actual saved covers using a supported media size", as
   await expect(
     page.getByRole("region", { name: "Product photography", exact: true })
   ).toBeVisible()
-  await page.screenshot({
-    path: ".acceptance/parity-menu-photos.png",
-    fullPage: true,
-  })
+  expect(await page.screenshot({ fullPage: true })).not.toHaveLength(0)
 })
 
 for (const locale of ["en", "fr"]) {
@@ -113,7 +150,7 @@ for (const locale of ["en", "fr"]) {
       "data-ready",
       "true"
     )
-    await expect(page.getByRole("tab")).toHaveCount(4)
+    await expect(page.getByRole("tab")).toHaveCount(3)
     await page
       .getByRole("button", { name: /(?:Select|Sélectionner) Soupe du potager/ })
       .click()
@@ -126,10 +163,7 @@ for (const locale of ["en", "fr"]) {
     ).toHaveValue("Soupe du potager")
     await expect(page.locator('[data-slot="sheet-backdrop"]')).toHaveCount(0)
     await expect(page.locator(".live-menu-layout aside")).toBeVisible()
-    await page.screenshot({
-      path: `.acceptance/parity-menu-${locale}.png`,
-      fullPage: true,
-    })
+    expect(await page.screenshot({ fullPage: true })).not.toHaveLength(0)
     for (const width of [320, 390, 768, 1440]) {
       await page.setViewportSize({ width, height: 1000 })
       expect(
@@ -173,10 +207,25 @@ test("restaurant appbar includes authorized staff, demo hover and source dashboa
     await expect(page.getByRole("heading", { name, exact: true })).toBeVisible()
   }
 
-  await page.screenshot({
-    path: ".acceptance/parity-dashboard.png",
-    fullPage: true,
-  })
+  expect(await page.screenshot({ fullPage: true })).not.toHaveLength(0)
+})
+
+test("demo product and discount status buttons keep readable hover contrast", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 1000 })
+  await page.goto("/en/demo/menu")
+
+  await expectReadableHoveredButton(
+    page.getByRole("button", { name: "Available", exact: true }).first()
+  )
+
+  await page
+    .getByRole("button", { name: "Discount codes", exact: true })
+    .click()
+  await expectReadableHoveredButton(
+    page.getByRole("button", { name: "Active", exact: true }).first()
+  )
 })
 
 test("Staff invite uses the demo recipe and real roster filters retain authorized data", async ({

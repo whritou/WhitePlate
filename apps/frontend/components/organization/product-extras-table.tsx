@@ -145,7 +145,10 @@ export function ProductExtrasTable({
   }
 
   return (
-    <section aria-label={m("extras")} className="grid min-w-0 gap-4">
+    <section
+      aria-label={m("extras")}
+      className="live-product-extras grid min-w-0 gap-4"
+    >
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="font-display text-xl font-bold">{m("extras")}</h2>
 

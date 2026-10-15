@@ -754,6 +754,67 @@ public sealed class OrganizationEndpointTests
     }
 
     [Fact]
+    public async Task OwnerRestoresOptionGroupsAndOptionsIndividuallyAfterTheirParentsAreActive()
+    {
+        using var factory = new OrganizationFactory();
+        var (organizationId, identity) = await factory.SeedOwnerAsync();
+        using var client = factory.CreateClient();
+        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", identity.Subject);
+        var ct = TestContext.Current.CancellationToken;
+
+        async Task<Guid> CreateId(string path, object body)
+        {
+            using var response = await client.PostAsJsonAsync(path, body, ct);
+            Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+            using var json = JsonDocument.Parse(await response.Content.ReadAsStringAsync(ct));
+            return json.RootElement.GetProperty("id").GetGuid();
+        }
+
+        var tenantId = await factory.SeedRestaurantAsync(organizationId);
+        var categoryId = await CreateId($"/api/v1/tenants/{tenantId}/categories",
+            new { name = "Mains", sortOrder = 0 });
+        var productId = await CreateId($"/api/v1/tenants/{tenantId}/products",
+            new { categoryId, name = "Soup", description = (string?)null, basePrice = 8m, taxRatePercent = 10m, sortOrder = 0 });
+        var groupId = await CreateId($"/api/v1/tenants/{tenantId}/products/{productId}/option-groups",
+            new { name = "Size", minimumSelections = 0, maximumSelections = 2, sortOrder = 0 });
+        var optionId = await CreateId($"/api/v1/tenants/{tenantId}/option-groups/{groupId}/options",
+            new { name = "Large", priceAdjustment = 1.5m, sortOrder = 0 });
+
+        using var archiveCategory = await client.DeleteAsync($"/api/v1/tenants/{tenantId}/categories/{categoryId}", ct);
+        Assert.Equal(HttpStatusCode.NoContent, archiveCategory.StatusCode);
+        using var blockedGroupRestore = await client.PostAsync($"/api/v1/tenants/{tenantId}/option-groups/{groupId}/restore", null, ct);
+        using var blockedOptionRestore = await client.PostAsync($"/api/v1/tenants/{tenantId}/options/{optionId}/restore", null, ct);
+        Assert.Equal(HttpStatusCode.NotFound, blockedGroupRestore.StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, blockedOptionRestore.StatusCode);
+
+        using var restoreCategory = await client.PostAsync($"/api/v1/tenants/{tenantId}/categories/{categoryId}/restore", null, ct);
+        Assert.Equal(HttpStatusCode.NoContent, restoreCategory.StatusCode);
+        using var blockedGroupRestoreUntilProductIsActive = await client.PostAsync($"/api/v1/tenants/{tenantId}/option-groups/{groupId}/restore", null, ct);
+        Assert.Equal(HttpStatusCode.NotFound, blockedGroupRestoreUntilProductIsActive.StatusCode);
+
+        using var restoreProduct = await client.PostAsync($"/api/v1/tenants/{tenantId}/products/{productId}/restore", null, ct);
+        Assert.Equal(HttpStatusCode.NoContent, restoreProduct.StatusCode);
+        using var blockedOptionRestoreUntilGroupIsActive = await client.PostAsync($"/api/v1/tenants/{tenantId}/options/{optionId}/restore", null, ct);
+        Assert.Equal(HttpStatusCode.NotFound, blockedOptionRestoreUntilGroupIsActive.StatusCode);
+
+        using var restoreGroup = await client.PostAsync($"/api/v1/tenants/{tenantId}/option-groups/{groupId}/restore", null, ct);
+        Assert.Equal(HttpStatusCode.NoContent, restoreGroup.StatusCode);
+        using var groupRestoredCatalog = await client.GetAsync($"/api/v1/tenants/{tenantId}/catalog", ct);
+        using var groupRestoredJson = JsonDocument.Parse(await groupRestoredCatalog.Content.ReadAsStringAsync(ct));
+        var restoredGroup = Assert.Single(groupRestoredJson.RootElement.GetProperty("optionGroups").EnumerateArray());
+        var stillArchivedOption = Assert.Single(groupRestoredJson.RootElement.GetProperty("options").EnumerateArray());
+        Assert.False(restoredGroup.GetProperty("isArchived").GetBoolean());
+        Assert.True(stillArchivedOption.GetProperty("isArchived").GetBoolean());
+
+        using var restoreOption = await client.PostAsync($"/api/v1/tenants/{tenantId}/options/{optionId}/restore", null, ct);
+        Assert.Equal(HttpStatusCode.NoContent, restoreOption.StatusCode);
+        using var fullyRestoredCatalog = await client.GetAsync($"/api/v1/tenants/{tenantId}/catalog", ct);
+        using var fullyRestoredJson = JsonDocument.Parse(await fullyRestoredCatalog.Content.ReadAsStringAsync(ct));
+        var restoredOption = Assert.Single(fullyRestoredJson.RootElement.GetProperty("options").EnumerateArray());
+        Assert.False(restoredOption.GetProperty("isArchived").GetBoolean());
+    }
+
+    [Fact]
     public async Task EstablishmentSettingsPersistNormalizeAndRejectStaleOrForeignWrites()
     {
         using var factory = new OrganizationFactory();

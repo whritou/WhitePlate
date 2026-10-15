@@ -1,37 +1,21 @@
 "use client"
 
 import { Plus } from "lucide-react"
-import { useLocale, useTranslations } from "next-intl"
+import { useState } from "react"
+import { useTranslations } from "next-intl"
+import { saveDiscountAction } from "@/actions/catalog"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { EditorDialog } from "@/components/ui/editor-dialog"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
 import type {
   CatalogDiscount,
   DiscountsEditorProps,
 } from "@/types/catalog-management"
 import { DeactivateDiscountButton } from "./deactivate-discount-button"
 import { DiscountForm } from "./discount-form"
-
-function formatDiscountValue(
-  discount: CatalogDiscount,
-  currency: string,
-  locale: string
-) {
-  return new Intl.NumberFormat(
-    locale,
-    discount.kind === "Percentage"
-      ? { style: "percent", maximumFractionDigits: 2 }
-      : { style: "currency", currency }
-  ).format(
-    discount.kind === "Percentage" ? discount.value / 100 : discount.value
-  )
-}
+import { useCatalogForm } from "./use-catalog-form"
 
 export function DiscountsEditor({
   tenantId,
@@ -41,37 +25,29 @@ export function DiscountsEditor({
   const t = useTranslations("Catalog")
   const u = useTranslations("CatalogView")
   const m = useTranslations("MenuBuilder")
-  const locale = useLocale()
-  const money = new Intl.NumberFormat(locale, { style: "currency", currency })
 
   return (
-    <section
-      className="live-discounts"
-      aria-labelledby="discounts-heading"
-      role="region"
-    >
-      <Card>
-        <CardHeader className="flex flex-wrap items-start justify-between gap-4">
+    <section className="live-discounts" aria-labelledby="discounts-heading">
+      <div className="mx-auto max-w-4xl space-y-3">
+        <header className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <CardTitle>
-              <h2
-                id="discounts-heading"
-                className="font-display text-2xl font-bold"
-              >
-                {t("discountsTitle")}
-              </h2>
-            </CardTitle>
+            <h2
+              id="discounts-heading"
+              className="font-display text-2xl font-bold"
+            >
+              {t("discountsTitle")}
+            </h2>
 
-            <CardDescription className="mt-2">
-              {t("discountsDescription")}
-            </CardDescription>
+            <p className="text-sm text-muted-foreground">
+              {t("discountBuilderDescription")}
+            </p>
           </div>
 
           <EditorDialog
             sourcePrimary
             icon={Plus}
             title={t("newDiscountCode")}
-            label={t("newDiscountCode")}
+            label={t("addCode")}
             description={u("discountEditorHelp")}
           >
             {(callbacks) => (
@@ -82,126 +58,202 @@ export function DiscountsEditor({
               />
             )}
           </EditorDialog>
-        </CardHeader>
+        </header>
 
-        <CardContent className="grid gap-3">
-          {discounts.length === 0 ? (
-            <p className="py-6 text-muted-foreground">{t("noDiscounts")}</p>
-          ) : (
-            <>
-              <div className="label-mono hidden grid-cols-[1.25fr_.85fr_.7fr_1fr_1fr_.75fr_auto] gap-3 px-3 text-muted-foreground xl:grid">
-                <span>{t("discountCode")}</span>
+        {discounts.length === 0 ? (
+          <p className="py-6 text-muted-foreground">{t("noDiscounts")}</p>
+        ) : (
+          <>
+            <div className="label-mono hidden grid-cols-[1.4fr_1fr_.8fr_.8fr_1.2fr_.8fr_auto_auto] gap-2 px-3 text-muted-foreground xl:grid">
+              <span>{t("discountCode")}</span>
 
-                <span>{t("discountType")}</span>
+              <span>{t("discountTypeShort")}</span>
 
-                <span>{t("discountValueShort")}</span>
+              <span>{t("discountValueShort")}</span>
 
-                <span>{t("minimumOrderShort", { currency })}</span>
+              <span>{t("minimumOrderShort", { currency })}</span>
 
-                <span>{t("discountExpiresOn")}</span>
+              <span>{t("discountExpiresOn")}</span>
 
-                <span>{m("status")}</span>
+              <span>{m("status")}</span>
 
-                <span className="sr-only">{m("actions")}</span>
-              </div>
+              <span className="sr-only">{m("actions")}</span>
 
-              <ul className="grid gap-2">
-                {discounts.map((discount) => (
-                  <li
-                    key={discount.id}
-                    aria-label={`${discount.code} ${discount.name}`}
-                    className={`grid min-w-0 grid-cols-1 items-center gap-3 border bg-background p-3 xl:grid-cols-[1.25fr_.85fr_.7fr_1fr_1fr_.75fr_auto] ${!discount.isActive ? "opacity-60" : ""}`}
-                  >
-                    <div className="min-w-0">
-                      <p className="font-bold break-words">{discount.code}</p>
+              <span className="sr-only">{t("save")}</span>
+            </div>
 
-                      <p className="text-sm break-words text-muted-foreground">
-                        {discount.name}
-                      </p>
-                    </div>
-
-                    <div className="grid gap-1 text-sm xl:block">
-                      <span className="label-mono text-muted-foreground xl:hidden">
-                        {t("discountType")}
-                      </span>
-
-                      <span>
-                        {t(
-                          discount.kind === "Percentage"
-                            ? "percentage"
-                            : "fixedAmount"
-                        )}
-                      </span>
-                    </div>
-
-                    <div className="grid gap-1 xl:block">
-                      <span className="label-mono text-muted-foreground xl:hidden">
-                        {t("discountValueShort")}
-                      </span>
-
-                      <span className="tabular-nums">
-                        {formatDiscountValue(discount, currency, locale)}
-                      </span>
-                    </div>
-
-                    <div className="grid gap-1 xl:block">
-                      <span className="label-mono text-muted-foreground xl:hidden">
-                        {t("minimumOrderShort", { currency })}
-                      </span>
-
-                      <span className="tabular-nums">
-                        {money.format(discount.minimumOrderAmount)}
-                      </span>
-                    </div>
-
-                    <div className="grid gap-1 xl:block">
-                      <span className="label-mono text-muted-foreground xl:hidden">
-                        {t("discountExpiresOn")}
-                      </span>
-
-                      <span className="tabular-nums">
-                        {discount.expiresOn ?? t("neverExpires")}
-                      </span>
-                    </div>
-
-                    <Badge variant={discount.isActive ? "success" : "neutral"}>
-                      {t(discount.isActive ? "active" : "inactive")}
-                    </Badge>
-
-                    {discount.isActive ? (
-                      <div className="flex flex-wrap gap-2">
-                        <EditorDialog
-                          compact
-                          title={t("editDiscount", { code: discount.code })}
-                          label={u("edit")}
-                          description={u("discountEditorHelp")}
-                        >
-                          {(callbacks) => (
-                            <DiscountForm
-                              tenantId={tenantId}
-                              currency={currency}
-                              discount={discount}
-                              {...callbacks}
-                            />
-                          )}
-                        </EditorDialog>
-
-                        <DeactivateDiscountButton
-                          tenantId={tenantId}
-                          id={discount.id}
-                          code={discount.code}
-                        />
-                      </div>
-                    ) : (
-                      <span />
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </>
-          )}
-        </CardContent>
-      </Card>
+            <ul className="grid gap-2">
+              {discounts.map((discount) => (
+                <DiscountRow
+                  key={discount.id}
+                  tenantId={tenantId}
+                  discount={discount}
+                />
+              ))}
+            </ul>
+          </>
+        )}
+      </div>
     </section>
+  )
+}
+
+function DiscountRow({
+  tenantId,
+  discount,
+}: {
+  tenantId: string
+  discount: CatalogDiscount
+}) {
+  const t = useTranslations("Catalog")
+  const [kind, setKind] = useState(discount.kind)
+  const { pending, state, submit } = useCatalogForm(saveDiscountAction)
+  const active = discount.isActive
+  const valueMaximum = kind === "Percentage" ? 100 : 9999999999.99
+
+  return (
+    <li
+      aria-label={`${discount.code} ${discount.name}`}
+      data-testid="discount-row"
+      className={`grid min-w-0 grid-cols-1 items-center gap-3 border bg-background p-3 xl:grid-cols-[1.4fr_1fr_.8fr_.8fr_1.2fr_.8fr_auto_auto] ${!active ? "opacity-60" : ""}`}
+    >
+      <form
+        onSubmit={submit}
+        aria-label={t("editDiscount", { code: discount.code })}
+        className="contents"
+      >
+        <input type="hidden" name="tenantId" value={tenantId} />
+
+        <input type="hidden" name="id" value={discount.id} />
+
+        <fieldset disabled={!active || pending} className="contents">
+          <div className="grid min-w-0 gap-1">
+            <Input
+              value={discount.code}
+              readOnly
+              aria-label={t("discountCode")}
+              className="border bg-background px-2 font-bold"
+            />
+
+            <Input
+              name="name"
+              defaultValue={discount.name}
+              required
+              maxLength={120}
+              aria-label={t("name")}
+              className="h-8 border bg-background px-2 text-xs"
+            />
+          </div>
+
+          <div className="grid min-w-0 gap-1">
+            <span className="label-mono text-muted-foreground xl:hidden">
+              {t("discountTypeShort")}
+            </span>
+
+            <NativeSelect
+              name="kind"
+              value={kind}
+              onChange={(event) =>
+                setKind(event.currentTarget.value as CatalogDiscount["kind"])
+              }
+              aria-label={t("discountTypeShort")}
+              className="w-full"
+              selectClassName="w-full"
+              required
+            >
+              <NativeSelectOption value="Percentage">
+                {t("percentage")}
+              </NativeSelectOption>
+
+              <NativeSelectOption value="FixedAmount">
+                {t("fixedAmount")}
+              </NativeSelectOption>
+            </NativeSelect>
+          </div>
+
+          <div className="grid min-w-0 gap-1">
+            <span className="label-mono text-muted-foreground xl:hidden">
+              {t("discountValueShort")}
+            </span>
+
+            <Input
+              name="value"
+              type="number"
+              min="0.01"
+              max={valueMaximum}
+              step="0.01"
+              defaultValue={discount.value}
+              aria-label={t("discountValueShort")}
+              required
+              className="border bg-background px-2"
+            />
+          </div>
+
+          <div className="grid min-w-0 gap-1">
+            <span className="label-mono text-muted-foreground xl:hidden">
+              {t("minimumOrderField")}
+            </span>
+
+            <Input
+              name="minimumOrderAmount"
+              type="number"
+              min="0"
+              max="9999999999.99"
+              step="0.01"
+              defaultValue={String(discount.minimumOrderAmount)}
+              aria-label={t("minimumOrderField")}
+              required
+              className="border bg-background px-2"
+            />
+          </div>
+
+          <div className="grid min-w-0 gap-1">
+            <span className="label-mono text-muted-foreground xl:hidden">
+              {t("discountExpiresOn")}
+            </span>
+
+            <Input
+              name="expiresOn"
+              type="date"
+              defaultValue={discount.expiresOn ?? ""}
+              aria-label={t("discountExpiresOn")}
+              className="border bg-background px-2"
+            />
+          </div>
+
+          <Badge variant={active ? "success" : "neutral"}>
+            {t(active ? "active" : "inactive")}
+          </Badge>
+
+          {active ? (
+            <Button
+              type="submit"
+              variant="ghost"
+              size="sm"
+              aria-label={t("saveDiscount", { code: discount.code })}
+              disabled={pending}
+            >
+              {pending ? t("saving") : t("save")}
+            </Button>
+          ) : (
+            <span />
+          )}
+        </fieldset>
+
+        {state.status === "error" && (
+          <p role="alert" className="text-sm text-destructive xl:col-span-8">
+            {t(`errors.${state.error ?? "unavailable"}`)}
+          </p>
+        )}
+      </form>
+
+      {active && (
+        <DeactivateDiscountButton
+          tenantId={tenantId}
+          id={discount.id}
+          code={discount.code}
+        />
+      )}
+    </li>
   )
 }

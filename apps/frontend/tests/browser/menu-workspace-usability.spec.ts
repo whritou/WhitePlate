@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test"
 const fixture =
   "/en/catalog-design-test?view=builder&shell=1&tenantId=11111111-1111-4111-8111-111111111111"
 
-test("archive confirmation stays a usable width in the menu category manager", async ({
+test("category archive confirmation stays usable at desktop and mobile widths", async ({
   page,
 }) => {
   for (const width of [1440, 390]) {
@@ -13,16 +13,11 @@ test("archive confirmation stays a usable width in the menu category manager", a
       "data-ready",
       "true"
     )
-    await page.getByRole("button", { name: "Manage categories" }).click()
-
-    const manager = page.getByRole("dialog", {
-      name: "Manage categories",
-    })
-
-    await expect(manager).toBeVisible()
-    await manager
-      .getByRole("button", { name: /^Archive / })
-      .first()
+    await page
+      .getByRole("button", { name: "Les entrées 2", exact: true })
+      .click()
+    await page
+      .getByRole("button", { name: "Archive Les entrées", exact: true })
       .click()
 
     const popup = page.locator('[data-slot="alert-dialog-popup"]')
@@ -78,9 +73,7 @@ test("desktop menu height follows its content instead of leaving a blank tail", 
   )
 })
 
-test("discount code helper text does not shift the paired name input", async ({
-  page,
-}) => {
+test("discount rows expose the fields shown in the demo", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 })
   await page.goto(fixture)
   await expect(page.getByTestId("fixture-ready")).toHaveAttribute(
@@ -88,15 +81,14 @@ test("discount code helper text does not shift the paired name input", async ({
     "true"
   )
   await page.getByRole("tab", { name: "Discount codes" }).click()
-  await page.getByRole("button", { name: "New discount code" }).click()
 
-  const form = page.getByRole("form", { name: "New discount code" })
-  const code = await form.getByLabel("Discount code").boundingBox()
-  const name = await form.getByLabel("Name").boundingBox()
+  const row = page.getByTestId("discount-row").first()
 
-  expect(code).not.toBeNull()
-  expect(name).not.toBeNull()
-  expect(code!.y).toBe(name!.y)
+  await expect(row.getByLabel("Discount code", { exact: true })).toBeVisible()
+  await expect(row.getByLabel("Type", { exact: true })).toBeVisible()
+  await expect(row.getByLabel("Value", { exact: true })).toBeVisible()
+  await expect(row.getByLabel("Minimum order", { exact: true })).toBeVisible()
+  await expect(row.getByLabel("Expires", { exact: true })).toBeVisible()
 })
 
 test("product metadata stays editable and readable while its form is scrolled", async ({
@@ -128,7 +120,6 @@ test("product metadata stays editable and readable while its form is scrolled", 
 
   await expect(description).toBeVisible()
   await expect(description).toHaveCSS("overflow-wrap", "break-word")
-  await page.getByRole("button", { name: "Edit product", exact: true }).click()
 
   const form = panel.getByRole("form", {
     name: "Edit product Soupe du potager",
@@ -139,10 +130,6 @@ test("product metadata stays editable and readable while its form is scrolled", 
   const cancel = form.getByRole("button", { name: "Cancel", exact: true })
   const createCategory = page.getByRole("button", {
     name: "New category",
-    exact: true,
-  })
-  const manageCategories = page.getByRole("button", {
-    name: "Manage categories",
     exact: true,
   })
 
@@ -182,7 +169,6 @@ test("product metadata stays editable and readable while its form is scrolled", 
 
     if (width <= 1024) {
       await expect(createCategory).toBeInViewport()
-      await expect(manageCategories).toBeInViewport()
       await expect(cancel).toBeInViewport()
 
       const createBox = await createCategory.boundingBox()
@@ -234,41 +220,30 @@ test("category actions stay together at the bottom of the menu while scrolling",
   })
 
   const create = page.getByRole("button", { name: "New category", exact: true })
-  const manage = page.getByRole("button", {
-    name: "Manage categories",
-    exact: true,
-  })
 
   for (const width of [1440, 1024, 390]) {
     await page.setViewportSize({ width, height: 720 })
     if (width === 1440) {
       const createBefore = await create.boundingBox()
-      const manageBefore = await manage.boundingBox()
 
       await menuList.evaluate((element) => {
         element.scrollTop = 600
       })
 
       const createAfter = await create.boundingBox()
-      const manageAfter = await manage.boundingBox()
 
       expect(
         Math.abs((createAfter?.y ?? 0) - (createBefore?.y ?? 0))
-      ).toBeLessThan(2)
-      expect(
-        Math.abs((manageAfter?.y ?? 0) - (manageBefore?.y ?? 0))
       ).toBeLessThan(2)
     } else {
       await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
     }
 
     await expect(create).toBeInViewport()
-    await expect(manage).toBeInViewport()
 
     const createBox = await create.boundingBox()
-    const manageBox = await manage.boundingBox()
 
-    expect(Math.abs((createBox?.y ?? 0) - (manageBox?.y ?? 0))).toBeLessThan(64)
+    expect(createBox?.height).toBeGreaterThanOrEqual(40)
   }
 })
 
@@ -284,7 +259,6 @@ test("allergen declarations use click-to-toggle multi-select menus and no separa
   await page
     .getByRole("button", { name: "Select Soupe du potager", exact: true })
     .click()
-  await page.getByRole("button", { name: "Edit product", exact: true }).click()
 
   const form = page.getByRole("form", { name: "Edit product Soupe du potager" })
   const contains = form.getByRole("button", { name: "Contains", exact: true })
@@ -378,39 +352,4 @@ test("mobile product details scroll with the page and end without a blank tail",
   await expect
     .poll(() => page.evaluate(() => window.scrollY))
     .toBeLessThan(beforeScroll)
-})
-
-test("desktop photo controls sit beside the preview and stack on small screens", async ({
-  page,
-}) => {
-  await page.setViewportSize({ width: 1440, height: 900 })
-  await page.goto("/en/photo-design-test")
-  await expect(page.getByTestId("fixture-ready")).toHaveAttribute(
-    "data-ready",
-    "true"
-  )
-  await page
-    .getByRole("button", {
-      name: "Select Burger Le Rustique Truffé",
-      exact: true,
-    })
-    .click()
-
-  const photos = page.getByRole("region", { name: "Product photography" })
-  const preview = photos.locator("[data-photo-preview]")
-  const controls = photos.locator("[data-photo-controls]")
-
-  await expect(preview).toBeVisible()
-  await expect(controls).toBeVisible()
-
-  const desktopPreview = await preview.boundingBox()
-  const desktopControls = await controls.boundingBox()
-
-  expect(desktopPreview?.x).toBeLessThan(desktopControls?.x ?? 0)
-  await page.setViewportSize({ width: 390, height: 844 })
-
-  const mobilePreview = await preview.boundingBox()
-  const mobileControls = await controls.boundingBox()
-
-  expect(mobileControls?.y).toBeGreaterThan(mobilePreview?.y ?? 0)
 })

@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test"
 
-test("demo tabs retain filters while category management stays reachable", async ({
+test("demo tabs retain filters and category actions stay in the selected category", async ({
   page,
 }) => {
   await page.goto(
@@ -21,11 +21,15 @@ test("demo tabs retain filters while category management stays reachable", async
   await expect(page.getByLabel("Search products", { exact: true })).toHaveValue(
     "Soupe"
   )
-  await page
-    .getByRole("button", { name: "Manage categories", exact: true })
-    .click()
   await expect(
-    page.getByRole("table", { name: "Categories", exact: true })
+    page.getByRole("button", { name: "Manage categories", exact: true })
+  ).toHaveCount(0)
+  await page.getByRole("button", { name: "Les entrées 2", exact: true }).click()
+  await expect(
+    page.getByRole("button", { name: "Hide category Les entrées", exact: true })
+  ).toBeVisible()
+  await expect(
+    page.getByRole("button", { name: "Archive Les entrées", exact: true })
   ).toBeVisible()
 })
 
@@ -52,7 +56,6 @@ test("dish cards open an adjacent product editor and retain its draft", async ({
       .getByRole("region", { name: "Product details" })
       .getByText("Légumes de saison et herbes fraîches.", { exact: true })
   ).toBeVisible()
-  await sheet.getByRole("button", { name: "Edit product", exact: true }).click()
   await sheet.getByLabel("Name", { exact: true }).fill("Retained draft")
   await sheet.getByRole("button", { name: "Close", exact: true }).click()
   await expect(
@@ -64,8 +67,10 @@ test("dish cards open an adjacent product editor and retain its draft", async ({
   await expect(sheet.getByLabel("Name", { exact: true })).toHaveValue(
     "Retained draft"
   )
-  await expect(sheet.getByRole("table", { name: "Extras" })).toBeVisible()
-  await expect(sheet.getByRole("table", { name: "Translations" })).toBeVisible()
+  await expect(sheet.getByRole("region", { name: "Extras" })).toBeVisible()
+  await expect(sheet.getByRole("table", { name: "Translations" })).toHaveCount(
+    0
+  )
 })
 
 test("an empty menu can save a category in context and select it without clearing the product", async ({
@@ -95,7 +100,11 @@ test("an empty menu can save a category in context and select it without clearin
   let reject = true
 
   await page.route("**/catalog-design-test*", async (route) => {
-    if (route.request().method() !== "POST") return route.continue()
+    if (
+      route.request().method() !== "POST" ||
+      !route.request().headers()["next-action"]
+    )
+      return route.continue()
 
     const result = reject
       ? { ok: false, error: "unavailable" }
@@ -160,7 +169,9 @@ test("product status and category filters combine, including inherited archival"
   await expect(
     table.getByRole("button", { name: "Select Velouté d’hiver", exact: true })
   ).toBeVisible()
-  await page.getByRole("button", { name: /Ancienne carte/ }).click()
+  await page
+    .getByRole("button", { name: "Ancienne carte 1", exact: true })
+    .click()
   await expect(
     table.getByRole("button", {
       name: "Select Produit de la catégorie archivée",
@@ -172,7 +183,7 @@ test("product status and category filters combine, including inherited archival"
   ).toHaveCount(0)
 })
 
-test("rejected display-order saves retain the input and restore controls", async ({
+test("failed optimistic product reorders roll back to the saved order", async ({
   page,
 }) => {
   await page.goto("/en/catalog-design-test?view=builder")
@@ -180,8 +191,23 @@ test("rejected display-order saves retain the input and restore controls", async
     "data-ready",
     "true"
   )
+  await page.getByRole("button", { name: "Les entrées 2", exact: true }).click()
+
+  let releaseAction: () => void = () => {}
+
+  let actionArrived: () => void = () => {}
+
+  const release = new Promise<void>((resolve) => {
+    releaseAction = resolve
+  })
+  const arrived = new Promise<void>((resolve) => {
+    actionArrived = resolve
+  })
+
   await page.route("**/catalog-design-test*", async (route) => {
     if (route.request().method() !== "POST") return route.continue()
+    actionArrived()
+    await release
     await route.fulfill({
       status: 200,
       contentType: "text/x-component",
@@ -189,29 +215,26 @@ test("rejected display-order saves retain the input and restore controls", async
     })
   })
 
-  const table = page.getByRole("list", { name: "Products", exact: true })
+  const rows = page.locator(".live-dish-row")
 
-  await table
-    .getByLabel("Display order for Soupe du potager", { exact: true })
-    .fill("8")
-  await table
-    .getByRole("button", {
-      name: "Save order for Soupe du potager",
-      exact: true,
-    })
-    .click()
-  await expect(table.getByRole("alert")).toBeVisible()
-  await expect(
-    table.getByLabel("Display order for Soupe du potager", { exact: true })
-  ).toHaveValue("8")
-  await expect(
-    page.getByRole("button", { name: "New product", exact: true })
-  ).toBeEnabled()
+  try {
+    await expect(rows).toHaveCount(2)
+    await rows.nth(1).dragTo(rows.nth(0))
+    await arrived
+    await expect(rows.nth(0)).toContainText("Salade de tomates anciennes")
+    releaseAction()
+    await expect(rows.nth(0)).toContainText("Soupe du potager")
+    await expect(
+      page.getByText("The catalog service is unavailable. Try again.", {
+        exact: true,
+      })
+    ).toBeVisible()
+  } finally {
+    releaseAction()
+  }
 })
 
-test("extras and translations can be edited from the sheet and retain failed writes", async ({
-  page,
-}) => {
+test("extras retain failed edits from the product sheet", async ({ page }) => {
   await page.goto("/en/catalog-design-test?view=builder")
   await expect(page.getByTestId("fixture-ready")).toHaveAttribute(
     "data-ready",
@@ -247,32 +270,6 @@ test("extras and translations can be edited from the sheet and retain failed wri
     "Retained extra group"
   )
   await form.getByRole("button", { name: "Cancel", exact: true }).click()
-
-  const sheet = page.locator(".live-product-panel").filter({ visible: true })
-
-  await sheet.getByLabel("Edit language", { exact: true }).selectOption("en")
-  await sheet
-    .getByRole("button", {
-      name: "Translate Soupe du potager (en)",
-      exact: true,
-    })
-    .click()
-
-  const translation = page.getByRole("dialog", {
-    name: "Translate Soupe du potager (en)",
-    exact: true,
-  })
-
-  await translation
-    .getByLabel("Name", { exact: true })
-    .fill("Retained translation")
-  await translation
-    .getByRole("button", { name: "Save translation", exact: true })
-    .click()
-  await expect(translation.getByRole("alert")).toBeVisible()
-  await expect(translation.getByLabel("Name", { exact: true })).toHaveValue(
-    "Retained translation"
-  )
 })
 
 test("new product allows creating a category without losing its fields", async ({

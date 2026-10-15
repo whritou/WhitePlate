@@ -1,7 +1,10 @@
 "use client"
 
+import { useState } from "react"
 import { GripVertical } from "lucide-react"
 import { useTranslations } from "next-intl"
+import { setProductAvailabilityAction } from "@/actions/catalog"
+import { useRouter } from "@/i18n/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import type {
@@ -74,6 +77,7 @@ export function MenuBuilderProductList({
       <Card className="min-w-0 gap-0 border-0 p-0">
         <MenuBuilderToolbar
           catalog={catalog}
+          category={categories.find((item) => item.id === categoryId)}
           title={
             categories.find((item) => item.id === categoryId)?.name ??
             u("allCategories")
@@ -103,15 +107,18 @@ export function MenuBuilderProductList({
             {products.map((product) => (
               <li
                 key={product.id}
+                data-product-order-id={product.id}
                 draggable={
                   !pending &&
                   visibility === "active" &&
                   categoryId !== "all" &&
                   !isArchived(product)
                 }
-                onDragStart={() =>
+                onDragStart={(event) => {
+                  event.dataTransfer.effectAllowed = "move"
+                  event.dataTransfer.setData("text/plain", product.id)
                   setDragged({ kind: "product", id: product.id })
-                }
+                }}
                 onDragEnd={() => setDragged(null)}
                 onDragOver={(event) => {
                   if (dragged?.kind === "product") event.preventDefault()
@@ -121,7 +128,7 @@ export function MenuBuilderProductList({
                   event.stopPropagation()
                   dropProduct(product.id)
                 }}
-                className={`live-dish-row border bg-background p-3 ${selectedId === product.id ? "shadow-[4px_4px_0_0_var(--color-primary)]" : "hover:bg-secondary"} ${dragged?.id === product.id ? "opacity-50" : ""}`}
+                className={`live-dish-row group relative border bg-background p-3 pr-14 ${selectedId === product.id ? "shadow-[4px_4px_0_0_var(--color-primary)]" : "hover:bg-secondary"} ${dragged?.id === product.id ? "opacity-50" : ""}`}
               >
                 <div className="flex min-w-0 flex-wrap items-center justify-between gap-3">
                   {!isArchived(product) &&
@@ -131,15 +138,9 @@ export function MenuBuilderProductList({
                         type="button"
                         variant="ghost"
                         size="icon"
-                        draggable={!pending}
                         disabled={pending}
                         aria-label={t("dragProduct", { name: product.name })}
                         className="size-8 cursor-grab text-muted-foreground"
-                        onDragStart={(event) => {
-                          event.stopPropagation()
-                          setDragged({ kind: "product", id: product.id })
-                        }}
-                        onDragEnd={() => setDragged(null)}
                         onKeyDown={(event) => {
                           if (
                             event.key === "ArrowUp" ||
@@ -187,17 +188,19 @@ export function MenuBuilderProductList({
                     {money.format(product.basePrice)}
                   </span>
 
-                  <span
-                    className={`label-mono flex min-h-11 shrink-0 items-center justify-center border px-2 py-1.5 whitespace-nowrap ${!isArchived(product) && product.isAvailable ? "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground" : "text-destructive hover:bg-destructive hover:text-destructive-foreground"}`}
-                  >
-                    {c(
-                      isArchived(product)
-                        ? "archived"
-                        : product.isAvailable
-                          ? "available"
-                          : "unavailable"
-                    )}
-                  </span>
+                  {isArchived(product) ? (
+                    <span className="label-mono flex min-h-11 shrink-0 items-center justify-center border px-2 py-1.5 whitespace-nowrap">
+                      {c("archived")}
+                    </span>
+                  ) : (
+                    <ProductAvailabilityButton
+                      key={`${product.id}:${product.isAvailable}`}
+                      tenantId={catalog.tenantId}
+                      product={product}
+                      disabled={pending}
+                      onPendingChange={onPendingChange}
+                    />
+                  )}
 
                   {isArchived(product) ? (
                     product.isArchived &&
@@ -232,5 +235,84 @@ export function MenuBuilderProductList({
         </CardContent>
       </Card>
     </fieldset>
+  )
+}
+
+function ProductAvailabilityButton({
+  tenantId,
+  product,
+  disabled,
+  onPendingChange,
+}: {
+  tenantId: string
+  product: CatalogProduct
+  disabled: boolean
+  onPendingChange: (pending: boolean) => void
+}) {
+  const t = useTranslations("Catalog")
+  const l = useTranslations("LiveWorkspace")
+  const router = useRouter()
+  const [available, setAvailable] = useState(product.isAvailable)
+  const [saving, setSaving] = useState(false)
+  const [failed, setFailed] = useState(false)
+
+  async function toggleAvailability() {
+    if (saving || disabled) return
+
+    const previous = available
+    const next = !previous
+
+    setAvailable(next)
+    setSaving(true)
+    setFailed(false)
+    onPendingChange(true)
+
+    try {
+      const result = await setProductAvailabilityAction({
+        tenantId,
+        id: product.id,
+        isAvailable: next,
+      })
+
+      if (!result.ok) {
+        setAvailable(previous)
+        setFailed(true)
+      } else {
+        router.refresh()
+      }
+    } catch {
+      setAvailable(previous)
+      setFailed(true)
+    } finally {
+      setSaving(false)
+      onPendingChange(false)
+    }
+  }
+
+  return (
+    <>
+      <Button
+        type="button"
+        variant="ghost"
+        className={`label-mono min-h-11 shrink-0 border px-2 py-1.5 whitespace-nowrap ${available ? "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground" : "bg-destructive text-destructive-foreground hover:bg-destructive hover:text-destructive-foreground"}`}
+        disabled={disabled || saving}
+        aria-label={`${l(available ? "markUnavailable" : "markAvailable")}: ${product.name}`}
+        aria-pressed={available}
+        aria-busy={saving}
+        onClick={() => void toggleAvailability()}
+      >
+        {saving
+          ? l("updatingAvailability")
+          : available
+            ? t("available")
+            : t("unavailable")}
+      </Button>
+
+      {failed && (
+        <span className="sr-only" role="alert">
+          {l("availabilityUpdateFailed")}
+        </span>
+      )}
+    </>
   )
 }
