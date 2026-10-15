@@ -1,7 +1,8 @@
 "use client"
 
-import { GripVertical, Plus } from "lucide-react"
+import { Eye, EyeOff, GripVertical, Plus } from "lucide-react"
 import { useTranslations } from "next-intl"
+import { setCategoryVisibilityAction } from "@/actions/catalog"
 import { Button } from "@/components/ui/button"
 import { EditorDialog } from "@/components/ui/editor-dialog"
 import type {
@@ -10,13 +11,16 @@ import type {
 } from "@/types/catalog-management"
 import type { MenuBuilderDraggedItem } from "@/types/menu-builder"
 import { CategoryForm } from "./category-form"
+import { ArchiveCatalogButton } from "./archive-catalog-button"
 import { RestoreCatalogItemButton } from "./restore-catalog-item-button"
+import { useCatalogForm } from "./use-catalog-form"
 
 export function MenuBuilderCategoryList({
   catalog,
   products,
   categories,
   categoryId,
+  setVisibility,
   pending,
   onCategoryChange,
   setSelectedId,
@@ -30,6 +34,7 @@ export function MenuBuilderCategoryList({
   products: ManagedCatalog["products"]
   categories: CatalogCategory[]
   categoryId: string
+  setVisibility: (value: string) => void
   pending: boolean
   onCategoryChange: (id: string) => void
   setSelectedId: (id: string) => void
@@ -69,6 +74,7 @@ export function MenuBuilderCategoryList({
         {categories.map((category) => (
           <div
             key={category.id}
+            draggable={!pending && !category.isArchived}
             onDragOver={(event) => {
               // Preventing the default lets the browser dispatch `drop` even
               // if React has not rendered the drag-start state yet.
@@ -79,23 +85,29 @@ export function MenuBuilderCategoryList({
               event.stopPropagation()
               dropCategory(category.id)
             }}
-            className={`live-menu-category-row border-b px-2 ${dragged?.id === category.id ? "opacity-50" : ""}`}
+            onDragStart={(event) => {
+              if ((event.target as HTMLElement).closest("[data-no-drag]")) {
+                event.preventDefault()
+
+                return
+              }
+
+              event.dataTransfer.effectAllowed = "move"
+              event.dataTransfer.setData("text/plain", category.id)
+              setDragged({ kind: "category", id: category.id })
+            }}
+            onDragEnd={() => setDragged(null)}
+            data-drag-source={dragged?.id === category.id ? "true" : undefined}
+            className="live-menu-category-row group border-b px-2"
           >
             <div className="flex min-w-0 items-center gap-1">
               <Button
                 type="button"
                 variant="ghost"
                 size="icon"
-                draggable={!pending && !category.isArchived}
                 disabled={pending || category.isArchived}
                 aria-label={t("dragCategory", { name: category.name })}
                 className="size-8 cursor-grab text-muted-foreground"
-                onDragStart={(event) => {
-                  event.dataTransfer.effectAllowed = "move"
-                  event.dataTransfer.setData("text/plain", category.id)
-                  setDragged({ kind: "category", id: category.id })
-                }}
-                onDragEnd={() => setDragged(null)}
                 onKeyDown={(event) => {
                   if (event.key === "ArrowUp" || event.key === "ArrowDown") {
                     event.preventDefault()
@@ -139,8 +151,31 @@ export function MenuBuilderCategoryList({
                   entityType="categories"
                   name={category.name}
                   onPendingChange={onPendingChange}
+                  onRestored={() => setVisibility("active")}
                 />
-              ) : null}
+              ) : (
+                <div
+                  data-no-drag="true"
+                  className="flex shrink-0 flex-col items-center"
+                >
+                  <ArchiveCatalogButton
+                    compact
+                    removeIcon
+                    tenantId={catalog.tenantId}
+                    id={category.id}
+                    entityType="categories"
+                    name={category.name}
+                    onPendingChange={onPendingChange}
+                  />
+
+                  <CategoryVisibilityButton
+                    category={category}
+                    tenantId={catalog.tenantId}
+                    disabled={pending}
+                    onPendingChange={onPendingChange}
+                  />
+                </div>
+              )}
             </div>
           </div>
         ))}
@@ -167,5 +202,63 @@ export function MenuBuilderCategoryList({
         </EditorDialog>
       </div>
     </aside>
+  )
+}
+
+function CategoryVisibilityButton({
+  category,
+  tenantId,
+  disabled,
+  onPendingChange,
+}: {
+  category: CatalogCategory
+  tenantId: string
+  disabled: boolean
+  onPendingChange: (pending: boolean) => void
+}) {
+  const t = useTranslations("MenuBuilder")
+  const c = useTranslations("Catalog")
+  const { pending, state, submit } = useCatalogForm(
+    setCategoryVisibilityAction,
+    false,
+    undefined,
+    undefined,
+    onPendingChange
+  )
+  const Icon = category.isVisible ? Eye : EyeOff
+
+  return (
+    <form onSubmit={submit} className="contents" data-no-drag="true">
+      <input type="hidden" name="tenantId" value={tenantId} />
+
+      <input type="hidden" name="id" value={category.id} />
+
+      <input
+        type="hidden"
+        name="isVisible"
+        value={String(!category.isVisible)}
+      />
+
+      <Button
+        type="submit"
+        variant="ghost"
+        size="icon"
+        className="text-foreground"
+        aria-busy={pending}
+        disabled={disabled || pending}
+        aria-label={t(
+          category.isVisible ? "hideCategoryNamed" : "showCategoryNamed",
+          { name: category.name }
+        )}
+      >
+        <Icon aria-hidden="true" className="size-4" />
+      </Button>
+
+      {state.status === "error" && (
+        <span role="alert" className="sr-only">
+          {c(`errors.${state.error ?? "unavailable"}`)}
+        </span>
+      )}
+    </form>
   )
 }

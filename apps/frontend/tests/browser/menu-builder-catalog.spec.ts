@@ -62,8 +62,14 @@ test("product availability toggles directly from its status control", async ({
   )
   await page.getByRole("button", { name: "Les entrées 2", exact: true }).click()
 
+  const row = page
+    .locator(".live-dish-row")
+    .filter({ hasText: "Soupe du potager" })
+
+  await row.hover()
+
   const toggle = page.getByRole("button", {
-    name: "Mark unavailable: Soupe du potager",
+    name: "Hide product Soupe du potager",
     exact: true,
   })
 
@@ -71,7 +77,7 @@ test("product availability toggles directly from its status control", async ({
   await toggle.click()
   await expect(
     page.getByRole("button", {
-      name: "Make available: Soupe du potager",
+      name: "Make product Soupe du potager available",
       exact: true,
     })
   ).toHaveAttribute("aria-pressed", "false")
@@ -93,10 +99,10 @@ test("category rows follow the demo layout and keep the add action sticky", asyn
     .locator(".live-menu-category-row")
     .filter({ hasText: "Les entrées" })
 
-  await expect(categoryRow.getByRole("button")).toHaveCount(2)
+  await expect(categoryRow.getByRole("button")).toHaveCount(4)
   await expect(
     categoryRow.getByRole("button", { name: "Hide category Les entrées" })
-  ).toHaveCount(0)
+  ).toBeVisible()
   await expect(
     categoryRow.getByRole("button", { name: "Edit category Les entrées" })
   ).toHaveCount(0)
@@ -145,7 +151,10 @@ test("dragging a product submits the visible category order", async ({
     await route.continue()
   })
   await expect(rows).toHaveCount(2)
-  await rows.nth(1).dragTo(rows.nth(0))
+  await rows
+    .nth(1)
+    .locator("[data-product-selector]")
+    .dragTo(rows.nth(0).locator("[data-product-selector]"))
   await actionSubmitted
 
   await expect(rows.nth(0)).toContainText(
@@ -157,6 +166,62 @@ test("dragging a product submits the visible category order", async ({
 
   expect(actionBody.indexOf(secondProductId)).toBeGreaterThanOrEqual(0)
   expect(actionBody.indexOf(firstProductId)).toBeGreaterThanOrEqual(0)
+  expect(actionBody.indexOf(secondProductId)).toBeLessThan(
+    actionBody.indexOf(firstProductId)
+  )
+})
+
+test("active products remain reorderable with all categories selected", async ({
+  page,
+}) => {
+  const firstProductId = "33333333-3333-4333-8333-333333333333"
+  const secondProductId = "33333333-3333-4333-8333-444444444444"
+  let actionBody = ""
+  let resolveAction: () => void = () => {}
+
+  const actionSubmitted = new Promise<void>((resolve) => {
+    resolveAction = resolve
+  })
+
+  await page.route("**/catalog-design-test*", async (route) => {
+    if (
+      route.request().method() === "POST" &&
+      route.request().headers()["next-action"]
+    ) {
+      actionBody = route.request().postData() ?? ""
+      resolveAction()
+      await route.fulfill({
+        status: 200,
+        contentType: "text/x-component",
+        body: '0:{"a":{"ok":true},"f":"","b":""}\n',
+      })
+
+      return
+    }
+
+    await route.continue()
+  })
+
+  await page.goto("/en/catalog-design-test?view=builder")
+  await expect(page.getByTestId("fixture-ready")).toHaveAttribute(
+    "data-ready",
+    "true"
+  )
+
+  const rows = page.locator(".live-dish-row")
+
+  await expect(rows).toHaveCount(2)
+  await expect(rows.nth(0)).toHaveAttribute("draggable", "true")
+  await rows
+    .nth(1)
+    .locator("[data-product-selector]")
+    .dragTo(rows.nth(0).locator("[data-product-selector]"))
+  await actionSubmitted
+
+  await expect(rows.nth(0)).toContainText(
+    "Salade de tomates anciennes et burrata"
+  )
+  expect(actionBody).toContain("22222222-2222-4222-8222-222222222222")
   expect(actionBody.indexOf(secondProductId)).toBeLessThan(
     actionBody.indexOf(firstProductId)
   )
@@ -202,9 +267,7 @@ test("dragging categories submits and immediately displays the new order", async
 
     await expect(rows).toHaveCount(3)
 
-    const source = rows
-      .nth(2)
-      .getByRole("button", { name: "Move category Les desserts", exact: true })
+    const source = rows.nth(2).getByRole("button").nth(1)
 
     await source.dragTo(rows.nth(0))
     await expect(rows.nth(0)).toContainText("Les desserts", { timeout: 1_000 })
@@ -286,6 +349,12 @@ test("product extras keep the demo's inset cards and the archive cross appears o
 
   expect(Number.parseFloat(headerPadding)).toBeGreaterThanOrEqual(12)
 
+  const contentPadding = await group
+    .locator('[data-slot="card-content"]')
+    .evaluate((element) => getComputedStyle(element).paddingInlineStart)
+
+  expect(Number.parseFloat(contentPadding)).toBeGreaterThanOrEqual(20)
+
   const row = page
     .locator(".live-dish-row")
     .filter({ hasText: "Soupe du potager" })
@@ -295,8 +364,15 @@ test("product extras keep the demo's inset cards and the archive cross appears o
   })
   const rowBox = await row.boundingBox()
   const archiveBox = await archive.boundingBox()
+  const visibility = row.getByRole("button", {
+    name: "Hide product Soupe du potager",
+    exact: true,
+  })
+  const visibilityBox = await visibility.boundingBox()
 
   await expect(archive).toHaveCSS("position", "absolute")
+  await expect(visibility).toHaveCSS("position", "absolute")
+  expect(visibilityBox?.y).toBeGreaterThan(archiveBox?.y ?? 0)
   expect(archiveBox?.x).toBeGreaterThanOrEqual(
     (rowBox?.x ?? 0) + (rowBox?.width ?? 0) - (archiveBox?.width ?? 0) - 16
   )

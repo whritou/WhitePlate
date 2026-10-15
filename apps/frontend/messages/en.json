@@ -1274,6 +1274,8 @@
     "orderingHelp": "Drag products to reorder them. Drop a product on a category to move it.",
     "dragCategory": "Move category {name}",
     "dragProduct": "Move product {name}",
+    "hideProductNamed": "Hide product {name}",
+    "showProductNamed": "Make product {name} available",
     "dragOptionGroup": "Move option group {name}",
     "dragOption": "Move option {name}",
     "status": "Status",

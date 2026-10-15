@@ -38,6 +38,13 @@ export type MenuBuilderDraggedItem = {
   id: string
 }
 
+export type MenuBuilderReorderInput = {
+  entityType: "categories" | "products"
+  orderedIds: string[]
+  categoryId?: string
+  movedProductId?: string
+}
+
 export type ProductExtrasDraggedItem = {
   type: "option-groups" | "options"
   id: string

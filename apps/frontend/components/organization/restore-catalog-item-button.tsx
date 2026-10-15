@@ -15,6 +15,7 @@ export function RestoreCatalogItemButton({
   name,
   compact = false,
   onPendingChange,
+  onRestored,
 }: {
   tenantId: string
   id: string
@@ -22,12 +23,13 @@ export function RestoreCatalogItemButton({
   name: string
   compact?: boolean
   onPendingChange?: (pending: boolean) => void
+  onRestored?: () => void
 }) {
   const t = useTranslations("Catalog")
   const { pending, state, submit } = useCatalogForm(
     restoreCatalogItemAction,
     false,
-    undefined,
+    onRestored,
     t("restoredItem", { name }),
     onPendingChange
   )
@@ -45,6 +47,7 @@ export function RestoreCatalogItemButton({
         variant={compact ? "ghost" : "outline"}
         size={compact ? "icon" : "default"}
         disabled={pending}
+        data-no-drag="true"
         aria-label={t("restoreItem", { name })}
       >
         <RotateCcw aria-hidden="true" className="size-4" />

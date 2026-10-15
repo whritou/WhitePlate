@@ -18,6 +18,7 @@ export function MenuBuilderProduct({
   product,
   open,
   onOpenChange,
+  onProductRestored,
   pending,
   onPendingChange,
 }: {
@@ -26,6 +27,7 @@ export function MenuBuilderProduct({
   product: CatalogProduct
   open: boolean
   onOpenChange: (open: boolean) => void
+  onProductRestored: () => void
   pending: boolean
   onPendingChange: (pending: boolean) => void
 }) {
@@ -212,6 +214,7 @@ export function MenuBuilderProduct({
                 tenantId={catalog.tenantId}
                 id={product.id}
                 onPendingChange={onPendingChange}
+                onRestored={onProductRestored}
               />
             )}
           </section>

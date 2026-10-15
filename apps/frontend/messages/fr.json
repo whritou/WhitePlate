@@ -1274,6 +1274,8 @@
     "orderingHelp": "Glissez les produits pour les réordonner. Déposez un produit sur une catégorie pour le déplacer.",
     "dragCategory": "Déplacer la catégorie {name}",
     "dragProduct": "Déplacer le produit {name}",
+    "hideProductNamed": "Masquer le produit {name}",
+    "showProductNamed": "Rendre le produit {name} disponible",
     "dragOptionGroup": "Déplacer le groupe d’options {name}",
     "dragOption": "Déplacer l’option {name}",
     "status": "Statut",

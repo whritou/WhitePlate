@@ -74,6 +74,7 @@ export function ArchiveCatalogButton({
                   : undefined
             }
             data-remove-action={removeIcon ? "true" : undefined}
+            data-no-drag="true"
           />
         }
         aria-label={t("archiveName", { name })}
