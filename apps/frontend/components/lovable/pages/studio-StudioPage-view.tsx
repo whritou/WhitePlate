@@ -7,6 +7,7 @@ import { useStudioPageView } from "./studio-StudioPage-context"
 import { StudioPageSection1 } from "./studio-StudioPage-section-1"
 export function StudioPageView() {
   const live = useTranslations("LiveWorkspace")
+  const theme = useTranslations("ThemeStudio")
   const {
     isLive,
     t,
@@ -19,6 +20,9 @@ export function StudioPageView() {
     setDnsOpen,
     set,
     publish,
+    connected,
+    locked,
+    saving,
   } = useStudioPageView()
 
   return (
@@ -66,8 +70,16 @@ export function StudioPageView() {
             </Copy>
           </div>
 
-          <Button onClick={publish}>
-            {isLive ? (
+          <Button onClick={publish} disabled={locked || (connected && saved)}>
+            {connected ? (
+              saving ? (
+                theme("saving")
+              ) : saved ? (
+                theme("savedButton")
+              ) : (
+                theme("save")
+              )
+            ) : isLive ? (
               saved ? (
                 live("draftSaved")
               ) : (

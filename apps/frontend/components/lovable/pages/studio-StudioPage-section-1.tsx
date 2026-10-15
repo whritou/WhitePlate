@@ -1,5 +1,6 @@
 "use client"
 import { Copy } from "@/components/lovable/copy"
+import { useTranslations } from "next-intl"
 import { Storefront } from "@/components/lovable/Storefront"
 import { CustomerCheckout } from "@/components/lovable/CustomerCheckout"
 import { CustomerTracking } from "@/components/lovable/CustomerTracking"
@@ -7,8 +8,17 @@ import { PREVIEW_ORDER } from "@/lib/lovable/customerOrder"
 import { useStudioPageView } from "./studio-StudioPage-context"
 import { StudioPageSection2 } from "./studio-StudioPage-section-2"
 export function StudioPageSection1() {
-  const { t, device, page, previewCart, setPreviewCart, saved, menu } =
-    useStudioPageView()
+  const text = useTranslations("ThemeStudio")
+  const {
+    t,
+    device,
+    page,
+    previewCart,
+    setPreviewCart,
+    saved,
+    menu,
+    connected,
+  } = useStudioPageView()
 
   return (
     <div className="flex min-h-0 flex-1 flex-col sm:flex-row">
@@ -56,7 +66,11 @@ export function StudioPageSection1() {
         <Copy>
           {!saved && (
             <p className="label-mono mt-4 text-muted-foreground">
-              <Copy>Unsaved demo changes — save to this browser</Copy>
+              {connected ? (
+                text("unsaved")
+              ) : (
+                <Copy>Unsaved demo changes — save to this browser</Copy>
+              )}
             </p>
           )}
         </Copy>

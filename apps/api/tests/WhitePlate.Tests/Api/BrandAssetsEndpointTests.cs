@@ -225,6 +225,7 @@ public sealed partial class BrandAssetsEndpointTests
     {
         public bool IsAvailable => true;
         public bool FailWrites;
+        public bool FailReads;
         public readonly Dictionary<string, byte[]> Objects = [];
         public Task PutAsync(string key, byte[] bytes, string type, CancellationToken ct)
         {
@@ -232,7 +233,8 @@ public sealed partial class BrandAssetsEndpointTests
             Objects[key] = bytes;
             return Task.CompletedTask;
         }
-        public Task<byte[]> GetAsync(string key, CancellationToken ct) => Task.FromResult(Objects[key]);
+        public Task<byte[]> GetAsync(string key, CancellationToken ct) => FailReads
+            ? throw new MediaUnavailableException() : Task.FromResult(Objects[key]);
         public Task DeleteAsync(string key, CancellationToken ct) { Objects.Remove(key); return Task.CompletedTask; }
     }
     private sealed class MediaAuthentication(IOptionsMonitor<AuthenticationSchemeOptions> options, ILoggerFactory logger, UrlEncoder encoder)

@@ -88,6 +88,9 @@ public static class ServiceRegistration
         services.AddSingleton<IEstablishmentOptions, WhitePlate.Infrastructure.Tenants.EstablishmentOptions>();
         services.AddScoped<EstablishmentSettingsHandler>();
         services.AddScoped<OrderingOperationsHandler>();
+        services.AddScoped<IThemeSettingsRepository, ThemeSettingsRepository>();
+        services.AddScoped<ThemeSettingsHandler>();
+        services.AddSingleton<ILogoPaletteExtractor, WhitePlate.Infrastructure.Media.LogoPaletteExtractor>();
         services.AddScoped<ICatalogRepository, CatalogRepository>();
         services.AddScoped<IOrderRepository, OrderRepository>();
         services.AddScoped<CreateOrderCommandHandler>();

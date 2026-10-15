@@ -2,11 +2,11 @@
 import { useState } from "react"
 import { useTranslations } from "next-intl"
 import { useSearchParams } from "next/navigation"
-import { StudioPage } from "@/components/lovable/pages/studio"
+import { LiveThemeStudio } from "./live-theme-studio"
 import { Button } from "@/components/ui/button"
 import { BrandAssetsWorkspace } from "./brand-assets-workspace"
-import type { BrandAssetsProps } from "@/types/brand-assets"
-export function LiveStudio(props: BrandAssetsProps) {
+import type { LiveStudioProps } from "@/types/theme"
+export function LiveStudio(props: LiveStudioProps) {
   const t = useTranslations("LiveWorkspace")
   const search = useSearchParams()
   const [panel, setPanel] = useState(
@@ -53,17 +53,7 @@ export function LiveStudio(props: BrandAssetsProps) {
           <BrandAssetsWorkspace {...props} />
         </div>
       ) : (
-        <>
-          <div className="border-b bg-secondary px-6 py-2">
-            <p className="text-xs text-muted-foreground">
-              {t("studioPending")}
-            </p>
-          </div>
-
-          <StudioPage
-            storageKey={`whiteplate-live-draft:${props.userId}:${props.tenantId}:appearance`}
-          />
-        </>
+        <LiveThemeStudio {...props} />
       )}
     </div>
   )

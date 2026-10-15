@@ -92,6 +92,10 @@ Saved SKU, controlled allergen/dietary declarations and preparation guidance are
 
 Tenant-owned logo, favicon and banner uploads are wired in source using private S3-compatible storage, normalized images, protected draft previews and explicit per-asset save/removal. The workspace is `/[locale]/organization/theming?tenantId=…`; saved assets reach the public storefront through host-resolved delivery. The media migrations are applied to Coolify Production and Neon `test`; a real bucket and hosted two-tenant acceptance remain unverified. T2/T3 and product-photo workflows remain separate. See the [storage decision](architecture/decisions/0007-brand-media-storage.md), [setup](development.md#brand-media-storage-t1), and [verification evidence](audits/brand-assets.md).
 
+## T2 theme controls — 15 October 2026
+
+Appearance drafts are implemented in source, retaining the demo Studio design while connecting palette, ambiance, radius and font controls to authorized backend persistence. Saved-logo extraction, safe schema, version conflicts and real contrast diagnostics are included. Migration and hosted acceptance remain pending; T3 publication is separate. See [T2 evidence](audits/theme-controls.md) and [decision 0012](architecture/decisions/0012-tenant-theme-drafts.md).
+
 ## Workspace regression fixes — 10 October 2026
 
 [Issue #65 evidence](audits/workspace-regressions.md) records light-only appearance, responsive shop/Studio cards, inline category creation, shared history filters/summary/export, demo locale switching, organization/restaurant navigation, restaurant settings entry points and official provider marks.

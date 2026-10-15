@@ -1,4 +1,5 @@
 export type StoreTheme = {
+  ambiance?: "custom" | "crisp-light" | "warm-cream" | "bistro-noir"
   name: string
   tagline: string
   primary: string

@@ -7,13 +7,16 @@ import {
   SourceLabel,
 } from "@/components/ui/lovable-controls"
 import { Button } from "@/components/ui/lovable-button"
-import { FONTS, FONT_PAIRS, type StoreTheme } from "@/lib/lovable/storeTheme"
+import { FONT_PAIRS, type StoreTheme } from "@/lib/lovable/storeTheme"
+import { StudioFontSelect as FontSelect } from "./StudioFontSelect"
 export function StudioAppearance({
   t,
   set,
+  connected = false,
 }: {
   t: StoreTheme
   set: (patch: Partial<StoreTheme>) => void
+  connected?: boolean
 }) {
   return (
     <>
@@ -58,12 +61,14 @@ export function StudioAppearance({
 
         <FontSelect
           label="Heading font"
+          connected={connected}
           value={t.headingFont}
           onChange={(headingFont) => set({ headingFont })}
         />
 
         <FontSelect
           label="Body font"
+          connected={connected}
           value={t.font}
           onChange={(font) => set({ font })}
         />
@@ -269,37 +274,6 @@ export function StudioAppearance({
         />
       </section>
     </>
-  )
-}
-
-function FontSelect({
-  label,
-  value,
-  onChange,
-}: {
-  label: string
-  value: string
-  onChange: (v: string) => void
-}) {
-  return (
-    <SourceLabel className="block space-y-2 text-sm font-medium">
-      <Copy>{label}</Copy>
-
-      <SourceSelect
-        aria-label={label}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="w-full border bg-background p-2"
-      >
-        <Copy>
-          {FONTS.map((f) => (
-            <SourceOption key={f} value={f}>
-              <Copy>{f}</Copy>
-            </SourceOption>
-          ))}
-        </Copy>
-      </SourceSelect>
-    </SourceLabel>
   )
 }
 
