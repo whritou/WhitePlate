@@ -43,6 +43,7 @@ export function EditorDialog({
         render={
           <Button
             type="button"
+            className={compact ? "relative" : undefined}
             variant={
               sourcePrimary
                 ? "source-primary"

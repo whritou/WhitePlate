@@ -2,13 +2,10 @@
 
 import { useRef, useState } from "react"
 import { useTranslations } from "next-intl"
-import { ImagePlus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
 import {
   AlertDialog,
   AlertDialogPortal,
@@ -26,11 +23,10 @@ export function ProductPhotosEditor(props: ProductPhotosProps) {
   const t = useTranslations("ProductPhotos")
   const state = useProductPhotos(props)
   const [selected, setSelected] = useState(0)
-  const [aspect, setAspect] = useState("1:1")
-  const [replaceMode, setReplaceMode] = useState(false)
+  const [aspect, setAspect] = useState<"1:1" | "4:3">("1:1")
   const [confirm, setConfirm] = useState(false)
   const input = useRef<HTMLInputElement>(null)
-  const target = useRef<string | undefined>(undefined)
+  const addPhotoButton = useRef<HTMLButtonElement>(null)
   const current = state.photos[selected] ?? state.photos[0]
   const position = current
     ? state.photos.findIndex((photo) => photo.id === current.id)
@@ -38,9 +34,7 @@ export function ProductPhotosEditor(props: ProductPhotosProps) {
   const locked = !state.available || Boolean(state.busy)
   const id = `photos-${props.productId}`
 
-  function choose(replace: boolean) {
-    setReplaceMode(replace)
-    target.current = replace ? current?.id : undefined
+  function choose() {
     requestAnimationFrame(() => input.current?.click())
   }
 
@@ -89,7 +83,8 @@ export function ProductPhotosEditor(props: ProductPhotosProps) {
           setConfirm(true)
         }}
         onReorder={move}
-        onAdd={() => choose(false)}
+        onAdd={choose}
+        addButtonRef={addPhotoButton}
       />
 
       <div data-photo-controls className="grid min-w-0 content-start gap-3">
@@ -110,52 +105,56 @@ export function ProductPhotosEditor(props: ProductPhotosProps) {
           aria-label={t("choose")}
           className="hidden"
           disabled={locked}
-          multiple={!replaceMode}
+          multiple
           onChange={(event) => {
             const selectedFiles = [...(event.currentTarget.files ?? [])]
-            const replacement = target.current
-            const files = replacement
-              ? selectedFiles.slice(0, 1)
-              : selectedFiles
 
-            if (files.length > 0)
-              void state.uploadMany(files, aspect, replacement)
-            target.current = undefined
-            setReplaceMode(false)
+            if (selectedFiles.length > 0)
+              void state.uploadMany(selectedFiles, aspect)
             event.currentTarget.value = ""
           }}
         />
 
-        <Label htmlFor={`${id}-aspect`} className="grid min-w-0 gap-2">
-          {t("framing")}
+        <fieldset disabled={locked} className="grid min-w-0 gap-2">
+          <legend className="text-sm font-semibold">{t("framing")}</legend>
 
-          <NativeSelect
-            id={`${id}-aspect`}
+          <div
+            role="group"
             aria-label={t("framing")}
-            value={aspect}
-            disabled={locked}
-            selectClassName="min-h-11 md:min-h-12"
-            onChange={(event) => setAspect(event.target.value)}
+            className="grid grid-cols-2 gap-2"
           >
-            <NativeSelectOption value="1:1">1:1</NativeSelectOption>
+            {(
+              [
+                ["1:1", "squareFraming", "aspect-square w-9"],
+                ["4:3", "landscapeFraming", "aspect-[4/3] w-12"],
+              ] as const
+            ).map(([value, label, frameClass]) => (
+              <Button
+                key={value}
+                type="button"
+                variant="ghost"
+                aria-label={t(label)}
+                aria-pressed={aspect === value}
+                className={[
+                  "flex h-auto min-h-12 flex-col gap-2 border px-3 py-3",
+                  aspect === value
+                    ? "bg-accent font-semibold hover:bg-accent hover:text-accent-foreground"
+                    : "bg-background",
+                ].join(" ")}
+                onClick={() => setAspect(value)}
+              >
+                <span
+                  aria-hidden="true"
+                  className={`block ${frameClass} border-2 border-current`}
+                />
 
-            <NativeSelectOption value="4:3">4:3</NativeSelectOption>
-          </NativeSelect>
-        </Label>
+                <span>{t(label)}</span>
+              </Button>
+            ))}
+          </div>
 
-        {current && !state.query.isError && (
-          <Button
-            type="button"
-            variant="outline"
-            className="min-h-11 whitespace-normal md:min-h-12"
-            disabled={locked}
-            onClick={() => choose(true)}
-          >
-            <ImagePlus aria-hidden="true" className="size-4" />
-
-            {t("replace")}
-          </Button>
-        )}
+          <p className="text-xs text-muted-foreground">{t("framingHelp")}</p>
+        </fieldset>
 
         <AlertDialog open={confirm} onOpenChange={setConfirm}>
           <AlertDialogPortal>
@@ -181,6 +180,11 @@ export function ProductPhotosEditor(props: ProductPhotosProps) {
                       )
                     setSelected(0)
                     setConfirm(false)
+                    requestAnimationFrame(() =>
+                      requestAnimationFrame(() =>
+                        addPhotoButton.current?.focus()
+                      )
+                    )
                   }}
                 >
                   {t("remove")}

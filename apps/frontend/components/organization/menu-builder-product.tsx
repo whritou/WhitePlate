@@ -1,7 +1,7 @@
 "use client"
 
 import { useRef, useState } from "react"
-import { Pencil, RotateCcw, X } from "lucide-react"
+import { RotateCcw, X } from "lucide-react"
 import { useLocale, useTranslations } from "next-intl"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -37,7 +37,6 @@ export function MenuBuilderProduct({
     (item) => item.id === product.categoryId
   )
   const archived = product.isArchived || !!category?.isArchived
-  const [editing, setEditing] = useState(true)
   const [dirty, setDirty] = useState(false)
   const [revision, setRevision] = useState(0)
   const editor = useRef<HTMLDivElement>(null)
@@ -118,16 +117,6 @@ export function MenuBuilderProduct({
 
           {!archived && (
             <div className="flex flex-wrap gap-2">
-              <Button
-                variant="outline"
-                disabled={pending}
-                onClick={() => setEditing(true)}
-              >
-                <Pencil aria-hidden="true" className="size-4" />
-
-                {t("editProduct")}
-              </Button>
-
               <ArchiveCatalogButton
                 tenantId={catalog.tenantId}
                 id={product.id}
@@ -174,7 +163,7 @@ export function MenuBuilderProduct({
           )}
         </section>
 
-        {editing && !archived && (
+        {!archived && (
           <section className="grid gap-4 border-t border-border pt-5">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <h2 className="font-semibold">{t("productEditor")}</h2>
@@ -206,7 +195,6 @@ export function MenuBuilderProduct({
                 onSuccess={() => setDirty(false)}
                 onDirtyChange={() => setDirty(true)}
                 onCancel={() => {
-                  setEditing(false)
                   setDirty(false)
                   setRevision((value) => value + 1)
                 }}

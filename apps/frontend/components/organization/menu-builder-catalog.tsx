@@ -30,6 +30,13 @@ export function MenuBuilderCatalog({
   const router = useRouter()
   const [search, setSearch] = useState("")
   const [visibility, setVisibility] = useState("active")
+  const [categoryOrder, setCategoryOrder] = useState<string[]>([])
+  const [productOrders, setProductOrders] = useState<Record<string, string[]>>(
+    {}
+  )
+  const [productCategoryOverrides, setProductCategoryOverrides] = useState<
+    Record<string, string>
+  >({})
   const [selectedId, setSelectedId] = useState("")
   const [visited, setVisited] = useState<string[]>([])
   const [dragged, setDragged] = useState<MenuBuilderDraggedItem | null>(null)
@@ -39,10 +46,29 @@ export function MenuBuilderCatalog({
   const categories = [...catalog.categories].sort(
     (a, b) => a.sortOrder - b.sortOrder || a.id.localeCompare(b.id)
   )
+
+  if (categoryOrder.length > 0) {
+    categories.sort((a, b) => {
+      const aOrder = categoryOrder.indexOf(a.id)
+      const bOrder = categoryOrder.indexOf(b.id)
+
+      if (aOrder >= 0 && bOrder >= 0) return aOrder - bOrder
+      if (aOrder >= 0) return -1
+      if (bOrder >= 0) return 1
+
+      return a.sortOrder - b.sortOrder || a.id.localeCompare(b.id)
+    })
+  }
+
+  const effectiveProducts = catalog.products.map((product) => {
+    const categoryId = productCategoryOverrides[product.id]
+
+    return categoryId ? { ...product, categoryId } : product
+  })
   const isArchived = (product: ManagedCatalog["products"][number]) =>
     product.isArchived ||
     !!categories.find((item) => item.id === product.categoryId)?.isArchived
-  const products = [...catalog.products]
+  const products = [...effectiveProducts]
     .filter(
       (product) =>
         (categoryId === "all" || product.categoryId === categoryId) &&
@@ -54,13 +80,24 @@ export function MenuBuilderCatalog({
           .toLocaleLowerCase()
           .includes(search.trim().toLocaleLowerCase())
     )
-    .sort(
-      (a, b) =>
+    .sort((a, b) => {
+      const categoryOrderDifference =
         categories.findIndex((item) => item.id === a.categoryId) -
-          categories.findIndex((item) => item.id === b.categoryId) ||
-        a.sortOrder - b.sortOrder ||
-        a.id.localeCompare(b.id)
-    )
+        categories.findIndex((item) => item.id === b.categoryId)
+
+      if (categoryOrderDifference !== 0) return categoryOrderDifference
+
+      const order = productOrders[a.categoryId]
+
+      if (order) {
+        const aOrder = order.indexOf(a.id)
+        const bOrder = order.indexOf(b.id)
+
+        if (aOrder >= 0 && bOrder >= 0) return aOrder - bOrder
+      }
+
+      return a.sortOrder - b.sortOrder || a.id.localeCompare(b.id)
+    })
   const money = new Intl.NumberFormat(locale, {
     style: "currency",
     currency: catalog.currency,
@@ -86,6 +123,7 @@ export function MenuBuilderCatalog({
     entityType: "categories" | "products"
     orderedIds: string[]
     categoryId?: string
+    movedProductId?: string
   }) {
     if (submitting.current || pending || input.orderedIds.length === 0) return
 
@@ -95,6 +133,25 @@ export function MenuBuilderCatalog({
     form.set("entityType", input.entityType)
     if (input.categoryId) form.set("categoryId", input.categoryId)
     input.orderedIds.forEach((id) => form.append("orderedIds", id))
+
+    const previousCategoryOrder = categoryOrder
+    const previousProductOrders = productOrders
+    const previousProductCategoryOverrides = productCategoryOverrides
+
+    if (input.entityType === "categories") setCategoryOrder(input.orderedIds)
+    if (input.entityType === "products" && input.categoryId) {
+      setProductOrders((current) => ({
+        ...current,
+        [input.categoryId!]: input.orderedIds,
+      }))
+      if (input.movedProductId) {
+        setProductCategoryOverrides((current) => ({
+          ...current,
+          [input.movedProductId!]: input.categoryId!,
+        }))
+      }
+    }
+
     submitting.current = true
     setReorderError(null)
     onPendingChange(true)
@@ -103,6 +160,9 @@ export function MenuBuilderCatalog({
         const result = await reorderCatalogAction(form)
 
         if (!result.ok) {
+          setCategoryOrder(previousCategoryOrder)
+          setProductOrders(previousProductOrders)
+          setProductCategoryOverrides(previousProductCategoryOverrides)
           setReorderError(result.error)
 
           return
@@ -110,6 +170,9 @@ export function MenuBuilderCatalog({
 
         router.refresh()
       } catch {
+        setCategoryOrder(previousCategoryOrder)
+        setProductOrders(previousProductOrders)
+        setProductCategoryOverrides(previousProductCategoryOverrides)
         setReorderError("unavailable")
       } finally {
         submitting.current = false
@@ -144,7 +207,13 @@ export function MenuBuilderCatalog({
     const targetCategory = categories.find(
       (category) => category.id === targetId
     )
-    const product = catalog.products.find((item) => item.id === dragged.id)
+    const source = catalog.products.find((item) => item.id === dragged.id)
+    const product = source
+      ? {
+          ...source,
+          categoryId: productCategoryOverrides[source.id] ?? source.categoryId,
+        }
+      : undefined
 
     if (
       !targetCategory ||
@@ -155,13 +224,18 @@ export function MenuBuilderCatalog({
       return
     if (product.categoryId === targetId) return
 
-    const targetProducts = catalog.products
+    const targetProducts = effectiveProducts
       .filter((item) => item.categoryId === targetId && !isArchived(item))
       .sort((a, b) => a.sortOrder - b.sortOrder || a.id.localeCompare(b.id))
     const orderedIds = targetProducts.map((item) => item.id)
 
     orderedIds.push(product.id)
-    reorder({ entityType: "products", categoryId: targetId, orderedIds })
+    reorder({
+      entityType: "products",
+      categoryId: targetId,
+      orderedIds,
+      movedProductId: product.id,
+    })
   }
 
   function dropProduct(targetId: string) {
@@ -175,7 +249,7 @@ export function MenuBuilderCatalog({
     )
       return
 
-    const activeProducts = catalog.products
+    const activeProducts = effectiveProducts
       .filter((item) => item.categoryId === categoryId && !isArchived(item))
       .sort((a, b) => a.sortOrder - b.sortOrder || a.id.localeCompare(b.id))
     const from = activeProducts.findIndex((item) => item.id === dragged.id)
@@ -216,7 +290,7 @@ export function MenuBuilderCatalog({
   function moveProductWithKeyboard(id: string, offset: number) {
     if (categoryId === "all" || visibility !== "active") return
 
-    const active = catalog.products
+    const active = effectiveProducts
       .filter((item) => item.categoryId === categoryId && !isArchived(item))
       .sort((a, b) => a.sortOrder - b.sortOrder || a.id.localeCompare(b.id))
     const from = active.findIndex((item) => item.id === id)
@@ -243,6 +317,7 @@ export function MenuBuilderCatalog({
       >
         <MenuBuilderCategoryList
           catalog={catalog}
+          products={effectiveProducts}
           categories={categories}
           categoryId={categoryId}
           pending={pending}
@@ -279,7 +354,7 @@ export function MenuBuilderCatalog({
           moveProductWithKeyboard={moveProductWithKeyboard}
         />
 
-        {catalog.products
+        {effectiveProducts
           .filter((product) => visited.includes(product.id))
           .map((product) => (
             <MenuBuilderProduct

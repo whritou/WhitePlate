@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, type RefObject } from "react"
 import { ImagePlus, X } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/button"
@@ -20,10 +20,12 @@ export function ProductPhotoGallery({
   onRemove,
   onReorder,
   onAdd,
+  addButtonRef,
 }: ProductPhotoGalleryProps & {
   onRemove: (index: number) => void
   onReorder: (from: number, to: number) => void
   onAdd: () => void
+  addButtonRef: RefObject<HTMLButtonElement | null>
 }) {
   const t = useTranslations("ProductPhotos")
   const [dragIndex, setDragIndex] = useState<number | null>(null)
@@ -47,6 +49,7 @@ export function ProductPhotoGallery({
           photos.map((photo, index) => (
             <div
               key={photo.id}
+              data-photo-tile="true"
               draggable={!busy}
               onDragStart={(event) => {
                 if (busy) return
@@ -106,7 +109,8 @@ export function ProductPhotoGallery({
                 size="icon"
                 disabled={busy}
                 aria-label={t("removePhoto", { number: index + 1 })}
-                className="absolute top-1 right-1 size-8 bg-foreground text-background hover:bg-foreground hover:text-background"
+                data-photo-remove="true"
+                className="absolute top-1 right-1 size-11 bg-foreground text-background opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100 hover:bg-foreground hover:text-background focus-visible:opacity-100"
                 onClick={(event) => {
                   event.stopPropagation()
                   onSelect(index)
@@ -120,6 +124,7 @@ export function ProductPhotoGallery({
 
         {!error && photos.length < 8 && (
           <Button
+            ref={addButtonRef}
             type="button"
             variant="ghost"
             disabled={busy}

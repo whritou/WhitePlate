@@ -69,6 +69,7 @@ This is an acceptance plan with dated verification notes below. The API suite co
 - While archived, restaurants are omitted from active workspace memberships; staff access, public tenant/menu resolution, and new checkout orders are rejected. Pending invitations remain stored and cannot be accepted during archive.
 - An owner restores the organization from the overview or settings. Existing restaurant activation and product availability values are unchanged.
 - An owner or manager restores an archived product under an active category. The product is unarchived but remains unavailable, and archived option descendants remain archived. There is no permanent product purge action.
+- An owner or manager restores archived option groups and options separately after their parents are active. Restoring a group leaves its options archived, and restoring an option before its group, product, or category is active returns `404`. `OrganizationEndpointTests.OwnerRestoresOptionGroupsAndOptionsIndividuallyAfterTheirParentsAreActive` verifies the parent-first sequence and persisted read-back over HTTP.
 
 ## 1. Current scaffold checks
 
@@ -184,11 +185,11 @@ The 2026-10-14 implementation changes the live catalog workspace and checkout ru
 | CAT-ORDER-01 | Drag categories and products into a new order; move a product to another category; repeat with keyboard arrow controls | Persisted ordering is reflected after reload, moved product appears in the destination, and source ordering remains contiguous |
 | CAT-ARCHIVE-01 | Archive a category, product, option group and option; cancel each confirmation, then confirm each action | Cancel leaves data unchanged; confirmation archives only the selected entity plus the existing documented descendant behavior |
 | CAT-RESTORE-01 | Filter archived products, restore a product, and restore archived category/group/option independently | Product is discoverable in the archived filter; restore is explicit, children are not implicitly restored, and active-parent requirements are enforced |
-| CAT-PHOTO-01 | Add multiple valid photos, remove one and cancel/confirm, reorder photos, save, discard, and replace a photo | Tile ordering persists with the first tile as cover; cancel/discard preserve server state; upload progress, retry and stale-gallery conflict remain recoverable |
+| CAT-PHOTO-01 | Add multiple valid photos, remove one and cancel/confirm, reorder photos, choose a crop shape, save, and discard | The three-column square gallery matches the demo; the first tile is the cover; cancel/discard preserve server state; upload progress, retry and stale-gallery conflict remain recoverable |
 | CAT-DISCOUNT-01 | Create and edit fixed/percentage discounts with minimum order and expiration; checkout below/at minimum and before/on/after expiry in restaurant timezone | Minimum applies to product plus option subtotal before tax/discount; expiry date is inclusive in restaurant-local time; existing discounts without values remain eligible |
 | CAT-HOVER-01 | Hover/focus product availability and discount status controls in both themes and English/French | Foreground text remains readable against the state background and keyboard focus remains visible |
 
-These are acceptance scenarios, not results from this implementation turn. The API build and frontend type check passed locally; browser, database-backed checkout and hosted acceptance remain open. The new additive discount migration has not been applied to any shared database.
+These scenarios still require the guarded shared-database checkout and hosted checks. Local fixture/browser results are recorded separately below; intercepted responses do not establish persistence. The new additive discount migration has not been applied to any shared database.
 
 The public tracking implementation has focused coverage in `OrdersEndpointTests.PublicTrackingRequiresTenantAndCapabilityAndReturnsOnlyOrderStatus` and the frontend tracking BFF/client/store tests. It verifies tenant isolation, stored token hash, expiry, status transition visibility, minimal response fields, exact-origin rejection, API-factory host routing, and per-tenant Zustand isolation. The production migration was applied and its history row, two columns, and zero order rows were verified on Coolify Production on 2026-10-08. Hosted tracking remains unverified until the feature code is deployed.
 
@@ -464,9 +465,26 @@ Guarded shared-database browser acceptance and hosted verification remain outsta
 
 ## Menu manager follow-up — 9 October 2026
 
-Run the `menu-builder`, `catalog-design` and `product-photos` fixture browser projects against the local development server. `menu-manager.spec.ts` covers the grouped sidebar entry, exactly two tabs with one table each, category-to-menu filtering, category deep-link reload, right-sheet details/focus/draft retention, building an empty menu with inline category creation and failed-save recovery, combined status/category filters, order-save failures, and extras/translation editing failures. Existing projects cover the translations dialog and retained language drafts, archived guards, discounts, pending/duplicate writes, category visibility, photos, EN/FR, light/dark, keyboard, reduced motion and 320–1920px/200% text sizing. Intercepted save responses are UI evidence, not persistence evidence.
+Run the `menu-builder`, `catalog-design` and `product-photos` fixture browser projects against the local development server. `menu-manager.spec.ts` covers the grouped sidebar entry, the three existing Dishes/Discount codes/Languages tabs, category-to-menu filtering, category deep-link reload, the adjacent product editor and draft retention, building an empty menu with inline category creation and failed-save recovery, combined status/category filters, optimistic order rollback, and retained failed edits in extras. Product translation controls remain outside the product editor in the existing Languages tab. Other projects cover catalog-language drafts, archived guards, discounts, pending/duplicate writes, category visibility, photos, EN/FR, light/dark, keyboard, reduced motion and 320–1920px/200% text sizing. Intercepted save responses are UI evidence, not persistence evidence.
 
-The API suite verifies category reassignment and display-order read-back through HTTP/SQLite, rejected foreign/archived/missing/empty category assignments without a write, and backward-compatible updates omitting `categoryId`. In the explicitly guarded non-production acceptance environment, repeat category/product creation from an empty menu, reassignment between active categories, category/product order save/reload and public menu order, extras/translation saves and locale fallback, photo drafts, archive/restore and unauthorized/cross-tenant attempts with actual stored records. Deploy API before frontend; no new migration is required. Hosted acceptance and the project-card update remain separate handoff items.
+The API suite verifies category reassignment and display-order read-back through HTTP/SQLite, rejected foreign/archived/missing/empty category assignments without a write, and backward-compatible updates omitting `categoryId`. In the explicitly guarded non-production acceptance environment, repeat category/product creation from an empty menu, reassignment between active categories, category/product order save/reload and public menu order, extras saves and locale fallback, photo drafts, archive/restore and unauthorized/cross-tenant attempts with actual stored records. Deploy API before frontend; no new migration is required. Hosted acceptance and the project-card update remain separate handoff items.
+
+### Menu builder demo parity verification — 2026-10-15
+
+The local fixture suite now checks immediate category/product drag ordering and rollback, the archived-product filter and explicit restoration, confirmation before archiving, direct availability toggles, the demo's inline discount fields, product extras spacing, a hover-only product archive icon, the square three-column photo gallery with cover reordering, and readable demo status-button hover contrast. The product editor keeps SKU, food declarations, preparation guidance, options/extras and photo crop controls; product translation editing remains on the existing Languages tab. EN/FR and light/dark layouts include 320 px and 200% text zoom checks. These browser fixtures intercept storage and catalog actions and do not prove database persistence or hosted behavior.
+
+| Command/check | Actual result |
+| --- | --- |
+| Local Playwright `menu-builder`, `product-photos`, and `live-demo-parity` projects against `http://localhost:3039` | 86 checks passed after the final UI fixes. |
+| Frontend Vitest via `vitest.cmd run --configLoader runner` | 92 test files, 566 tests passed. The default config bundler could not write its temporary file under `node_modules/.vite-temp`. |
+| Frontend ESLint | Passed with 0 errors and 19 existing `<img>` warnings. |
+| Frontend TypeScript and changed-file Prettier checks | `tsc --noEmit` passed; all changed `.ts`/`.tsx` files passed targeted Prettier. |
+| `dotnet test apps/api/WhitePlate.slnx --no-restore` | 271 API tests passed, 0 failed. |
+| `npm run test:browser` through the configured PowerShell npm shim | Could not start: its npm-cli path is missing. The package-local Playwright binary was used for browser verification. |
+| Broad frontend Prettier check | The repository-wide check flagged 517 files before changed-file formatting; it remains a repository baseline issue. |
+| Next production build | Could not write the existing `.next/cache/webpack` cache (`EPERM`); the development server is using that generated cache. |
+
+Repeat order/archive/restore and discount-checkout scenarios in the guarded non-production environment with persisted read-back before treating the catalog scope as fully accepted.
 
 ## T1 brand assets acceptance
 

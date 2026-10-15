@@ -21,28 +21,32 @@ test("mobile menu actions stay compact and dialogs remain clickable above them",
   await expect(selector).toBeInViewport()
 
   const categoryAction = page.getByRole("button", {
-    name: "Manage categories",
+    name: "New category",
+    exact: true,
   })
   const save = page.getByRole("button", { name: "Save changes", exact: true })
 
   expect((await categoryAction.boundingBox())?.height).toBeLessThanOrEqual(42)
   expect((await save.boundingBox())?.height).toBeLessThanOrEqual(42)
 
-  await categoryAction.click()
+  await page.getByRole("button", { name: "Les entrées 2", exact: true }).click()
 
-  const dialog = page.getByRole("dialog", { name: "Manage categories" })
+  const archive = page.getByRole("button", {
+    name: "Archive Les entrées",
+    exact: true,
+  })
+
+  await archive.click()
+
+  const dialog = page.getByRole("alertdialog")
 
   await expect(dialog).toBeVisible()
 
-  const hide = dialog.getByRole("button", {
-    name: "Hide category Les entrées",
-  })
+  const confirm = dialog.getByRole("button", { name: "Confirm archive" })
 
-  await hide.scrollIntoViewIfNeeded()
-  await expect(hide).toBeInViewport()
-  await expect(dialog.getByRole("button", { name: "Close" })).toBeInViewport()
+  await expect(confirm).toBeInViewport()
   expect(
-    await hide.evaluate((element) => {
+    await confirm.evaluate((element) => {
       const bounds = element.getBoundingClientRect()
       const hit = document.elementFromPoint(
         bounds.x + bounds.width / 2,

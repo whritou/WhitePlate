@@ -28,13 +28,18 @@ vi.mock("next-intl", () => ({
       discountsTitle: "Discount codes",
       discountsDescription: "Manage the offers available at checkout.",
       newDiscountCode: "New discount code",
+      addCode: "+ Code",
+      discountBuilderDescription: "Customers enter these in the basket.",
       editDiscount: "Edit discount {code}",
+      saveDiscount: "Save discount {code}",
       createDiscount: "Create discount code",
       discountCode: "Discount code",
       discountCodeHint: "Use letters, numbers, or hyphens; saved in uppercase.",
       name: "Name",
       discountType: "Discount type",
+      discountTypeShort: "Type",
       minimumOrderAmount: "Minimum order amount ({currency})",
+      minimumOrderField: "Minimum order",
       discountExpiresOn: "Expires on",
       fixedAmount: "Fixed amount",
       percentage: "Percentage",
@@ -98,12 +103,13 @@ function markup(value: DiscountsEditorProps = props) {
 it("renders active discount management with restaurant currency and percentage", () => {
   const html = markup()
 
-  expect(html).toContain('aria-label="New discount code"')
+  expect(html).toContain('aria-label="+ Code"')
   expect(html).toContain('aria-label="Edit discount LUNCH10"')
   expect(html).toContain('aria-label="Deactivate discount LUNCH10"')
-  expect(html).toContain("£5.50")
-  expect(html).toContain("15%")
-  expect(html).not.toContain("<form")
+  expect(html).toContain('name="value" value="15"')
+  expect(html).toContain('aria-label="Type"')
+  expect(html).toContain('aria-label="Minimum order"')
+  expect(html).toContain("<form")
 })
 
 it("keeps inactive codes visible as read-only history", () => {
@@ -114,16 +120,15 @@ it("keeps inactive codes visible as read-only history", () => {
 
   expect(html).toContain("Inactive")
   expect(html).toContain("WELCOME15")
-  expect(html).not.toContain('aria-label="Edit discount WELCOME15"')
   expect(html).not.toContain('aria-label="Deactivate discount WELCOME15"')
-  expect(html).not.toContain("<form")
+  expect(html).toContain("disabled")
 })
 
 it("shows a localized empty state while keeping the create form available", () => {
   const html = markup({ ...props, discounts: [] })
 
   expect(html).toContain("No discount codes yet.")
-  expect(html).toContain('aria-label="New discount code"')
+  expect(html).toContain('aria-label="+ Code"')
 })
 
 it("renders the minimum order and expiry controls with saved discount values", () => {

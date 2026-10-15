@@ -30,6 +30,14 @@ const catalog: ManagedCatalog = {
       isArchived: true,
       translations: {},
     },
+    {
+      id: "22222222-2222-4222-8222-444444444444",
+      name: "Les desserts",
+      sortOrder: 2,
+      isVisible: true,
+      isArchived: false,
+      translations: { fr: { name: "Les desserts", description: null } },
+    },
   ],
   products: [
     {
@@ -85,6 +93,18 @@ const catalog: ManagedCatalog = {
       basePrice: 9,
       taxRatePercent: 10,
       sortOrder: 2,
+      isAvailable: true,
+      isArchived: false,
+      translations: {},
+    },
+    {
+      id: "33333333-3333-4333-8333-777777777777",
+      categoryId: "22222222-2222-4222-8222-444444444444",
+      name: "Tarte aux pommes",
+      description: null,
+      basePrice: 6.5,
+      taxRatePercent: 10,
+      sortOrder: 0,
       isAvailable: true,
       isArchived: false,
       translations: {},

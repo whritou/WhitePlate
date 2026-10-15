@@ -60,7 +60,7 @@ test("failed uploads keep the saved cover and can be retried; invalid files do n
     page.getByRole("region", { name: "Product photography" }).getByRole("alert")
   ).toContainText("valid photo")
   expect(uploads).toBe(0)
-  await page.getByRole("button", { name: "Replace photo", exact: true }).click()
+  await page.getByRole("button", { name: "Add photos", exact: true }).click()
   await page.getByLabel("Choose product photos").setInputFiles({
     name: "burger.jpg",
     mimeType: "image/jpeg",
@@ -80,7 +80,7 @@ test("failed uploads keep the saved cover and can be retried; invalid files do n
   await expect(page.getByText("Unsaved photo changes")).not.toBeVisible()
 })
 
-test("gallery replacement/save failures keep drafts and removal returns keyboard focus", async ({
+test("gallery updates/save failures keep drafts and removal returns keyboard focus", async ({
   page,
   context,
 }) => {
@@ -158,6 +158,67 @@ test("gallery replacement/save failures keep drafts and removal returns keyboard
   ).toBeFocused()
   await page.getByRole("button", { name: "Save photos", exact: true }).click()
   expect(saved).toHaveLength(1)
+})
+
+test("photo actions follow the demo gallery and expose an understandable crop choice", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 900 })
+  await page.route("**/api/product-photos?**", (route) =>
+    new URL(route.request().url()).searchParams.has("assetId")
+      ? route.fulfill({
+          path: "public/design/photo-15.webp",
+          contentType: "image/webp",
+        })
+      : route.fulfill({ json: { storageAvailable: true, assets: [asset] } })
+  )
+  await page.goto("/en/photo-design-test")
+  await expect(page.getByTestId("fixture-ready")).toHaveAttribute(
+    "data-ready",
+    "true"
+  )
+  await page
+    .getByRole("button", {
+      name: "Select Burger Le Rustique Truffé",
+      exact: true,
+    })
+    .click()
+
+  const gallery = page.getByRole("region", { name: "Product photography" })
+  const galleryGrid = gallery.getByRole("group", {
+    name: "Product photo gallery",
+  })
+  const tile = galleryGrid.locator("[data-photo-tile]")
+
+  await expect(
+    gallery.getByRole("button", { name: "Replace photo", exact: true })
+  ).toHaveCount(0)
+  await expect(
+    gallery.getByRole("button", { name: "Add photos" })
+  ).toBeVisible()
+  await expect(
+    gallery.getByRole("button", { name: "Square · 1:1" })
+  ).toBeVisible()
+  await expect(
+    gallery.getByRole("button", { name: "Landscape · 4:3" })
+  ).toBeVisible()
+
+  async function expectDemoGalleryLayout() {
+    await expect(tile).toHaveCount(1)
+
+    const box = await tile.boundingBox()
+    const columns = await galleryGrid.evaluate(
+      (element) =>
+        getComputedStyle(element).gridTemplateColumns.split(" ").length
+    )
+
+    expect(columns).toBe(3)
+    expect(box?.width).toBeCloseTo(box?.height ?? 0, 0)
+  }
+
+  await expectDemoGalleryLayout()
+  await page.setViewportSize({ width: 390, height: 844 })
+  await expectDemoGalleryLayout()
 })
 
 test("dragging a gallery photo changes the saved cover order", async ({
