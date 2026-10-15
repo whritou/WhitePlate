@@ -79,6 +79,10 @@
   font-size: 0.875rem;
 }
 
+.lovable-live .workspace-language-select {
+  padding-bottom: 0;
+}
+
 .workspace-language-select button.workspace-language-select__button:hover {
   background: var(--muted);
 }
