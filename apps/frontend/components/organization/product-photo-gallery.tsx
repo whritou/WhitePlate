@@ -129,7 +129,7 @@ export function ProductPhotoGallery({
             variant="ghost"
             disabled={busy}
             onClick={onAdd}
-            className="flex aspect-square h-auto w-full flex-col gap-2 border border-dashed text-center text-muted-foreground hover:bg-secondary hover:text-foreground"
+            className="flex aspect-square h-auto w-full flex-col gap-2 border border-dashed border-border text-center text-muted-foreground hover:bg-secondary hover:text-foreground"
           >
             <ImagePlus aria-hidden="true" className="size-5" />
 

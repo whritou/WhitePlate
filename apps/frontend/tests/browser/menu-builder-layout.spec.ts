@@ -118,6 +118,7 @@ test("saving an archive does not paint unrelated row controls gray", async ({
   await row
     .getByRole("button", { name: "Archive Soupe du potager", exact: true })
     .click()
+  await expect(page.getByRole("alertdialog")).toBeVisible()
   try {
     await page
       .getByRole("alertdialog")

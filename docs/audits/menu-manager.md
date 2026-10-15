@@ -19,6 +19,25 @@ Verification from `apps/frontend`:
 
 Chrome comparison used the supplied hosted catalog and `/fr/demo/menu` tabs. Local Chrome screenshots show the [visible product controls](assets/menu-manager/controls-fr-20261015.jpg), [readable discount columns](assets/menu-manager/discounts-fr-20261015.jpg), and [extras spacing including an archived badge](assets/menu-manager/extras-fr-20261015.jpg). No hosted catalog data was modified during that comparison. This follow-up requires no migration; hosted acceptance follows deployment.
 
+## Follow-up — 2026-10-15: product photos and persistent actions
+
+The product photo add tile now has a visible dashed border like the demo gallery. Selecting a category accents its full row. New category stays fixed at the lower left; the product editor keeps its body scrollable and its shared Archive, Cancel and Save actions fixed at the lower right while a product is selected. Photo-specific Save/Discard and the duplicate product discard action are removed. Cancel clears product and photo drafts. The menu layout no longer reserves an oversized blank tail.
+
+The shared Save action writes photo ordering first and then product fields. These remain separate API writes, so a successful photo write is retained if the subsequent product-field write fails; no API transaction or schema change was introduced. The existing design tokens and API contract remain unchanged.
+
+Verification from `apps/frontend`:
+
+- `node node_modules/typescript/bin/tsc --noEmit`: passed.
+- `node node_modules/eslint/bin/eslint.js .`: 0 errors; 19 existing `<img>` warnings.
+- `node node_modules/vitest/vitest.mjs run --configLoader runner`: 92 files / 566 tests passed. The default config bundler cannot write its temporary config under `node_modules/.vite-temp` in this sandbox; the supported Vite runner loader avoids that temporary write.
+- With PowerShell `$env:WHITEPLATE_ACCEPTANCE_URL` set to `http://localhost:3039`, `node node_modules/@playwright/test/cli.js test --project product-photos --reporter=line`: 48 passed, including a combined photo/product save and cancel scenario, the gallery border, shared actions, desktop/mobile layout, EN/FR and responsive photo editor.
+- With the same base URL, `node node_modules/@playwright/test/cli.js test --project menu-builder --reporter=line`: 41 passed, covering category selection and actions, product saves, extras, desktop/mobile layout and the empty-page regression.
+- Prettier check passed for the changed frontend TypeScript, TSX, JSON and Playwright configuration files. The changed Markdown audit reports a Prettier formatting warning; no whole-document reformat was applied.
+- `git diff --check`: passed.
+- Production build was not run in this follow-up because the active Next.js development server shares the `.next` output directory.
+
+The photo editor screenshots were refreshed by the browser suite: [French desktop](assets/menu-manager/photo-fr-light-1440.png) and [English dark phone](assets/menu-manager/photo-en-dark-390.png).
+
 ## Follow-up — 2026-10-14: live workspace parity
 
 The current `/organization/catalog` route now uses the approved demo-style menu builder. This supersedes the earlier description of explicit numeric display-order saves: categories and products reorder by drag-and-drop, as do option groups and options. Product photos use the square tile gallery with multi-add, remove confirmation, drag ordering and first-photo cover, while preserving live upload, framing, save/discard and conflict behavior. Product translations are no longer edited in the product panel; the separate restaurant-language workspace remains unchanged.

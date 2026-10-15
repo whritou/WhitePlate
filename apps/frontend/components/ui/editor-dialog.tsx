@@ -4,6 +4,7 @@ import { useState } from "react"
 import { Pencil, X } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
 import {
   Dialog,
   DialogClose,
@@ -103,29 +104,43 @@ export function EditorFormActions({
   label,
   onCancel,
   className,
+  form,
+  disabled = false,
+  cancelDisabled = false,
 }: {
   pending: boolean
   label: string
   onCancel?: () => void
   className?: string
+  form?: string
+  disabled?: boolean
+  cancelDisabled?: boolean
 }) {
   const t = useTranslations("Editor")
 
   return (
     <div
-      className={`flex flex-wrap justify-end gap-2 border-t border-border pt-5 sm:col-span-2 ${className ?? ""}`}
+      className={cn(
+        "flex flex-wrap justify-end gap-2 border-t border-border pt-5 sm:col-span-2",
+        className
+      )}
     >
       {onCancel && (
         <Button
           type="button"
           variant="outline"
-          disabled={pending}
+          disabled={pending || cancelDisabled}
           onClick={onCancel}
         >
           {t("cancel")}
         </Button>
       )}
-      <Button type="submit" disabled={pending} aria-busy={pending}>
+      <Button
+        type="submit"
+        form={form}
+        disabled={pending || disabled}
+        aria-busy={pending}
+      >
         {label}
       </Button>
     </div>

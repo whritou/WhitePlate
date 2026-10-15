@@ -85,7 +85,7 @@ test("product availability toggles directly from its status control", async ({
   expect(requests[0]).toContain("false")
 })
 
-test("category rows follow the demo layout and keep the add action sticky", async ({
+test("category rows follow the demo layout and keep the add action anchored", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 1440, height: 900 })
@@ -108,7 +108,7 @@ test("category rows follow the demo layout and keep the add action sticky", asyn
   ).toHaveCount(0)
   await expect(page.locator(".live-menu-category-actions")).toHaveCSS(
     "position",
-    "sticky"
+    "fixed"
   )
 })
 

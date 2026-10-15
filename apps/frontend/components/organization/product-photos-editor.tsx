@@ -1,6 +1,12 @@
 "use client"
 
-import { useRef, useState } from "react"
+import {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react"
 import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -17,11 +23,19 @@ import {
 } from "@/components/ui/alert-dialog"
 import { ProductPhotoGallery } from "./product-photo-gallery"
 import { useProductPhotos } from "@/hooks/use-product-photos"
-import type { ProductPhotosProps } from "@/types/product-photos"
+import type {
+  ProductPhotosEditorHandle,
+  ProductPhotosProps,
+} from "@/types/product-photos"
 
-export function ProductPhotosEditor(props: ProductPhotosProps) {
+export const ProductPhotosEditor = forwardRef<
+  ProductPhotosEditorHandle,
+  ProductPhotosProps
+>(function ProductPhotosEditor(props, ref) {
   const t = useTranslations("ProductPhotos")
+  const { onDraftChange } = props
   const state = useProductPhotos(props)
+  const stateRef = useRef(state)
   const [selected, setSelected] = useState(0)
   const [aspect, setAspect] = useState<"1:1" | "4:3">("1:1")
   const [confirm, setConfirm] = useState(false)
@@ -33,6 +47,21 @@ export function ProductPhotosEditor(props: ProductPhotosProps) {
     : 0
   const locked = !state.available || Boolean(state.busy)
   const id = `photos-${props.productId}`
+
+  stateRef.current = state
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      save: () => stateRef.current.save(false),
+      discard: () => stateRef.current.discard(),
+    }),
+    []
+  )
+
+  useEffect(() => {
+    onDraftChange?.(Boolean(state.draft))
+  }, [onDraftChange, state.draft])
 
   function choose() {
     requestAnimationFrame(() => input.current?.click())
@@ -220,35 +249,6 @@ export function ProductPhotosEditor(props: ProductPhotosProps) {
           </div>
         )}
 
-        {state.draft && (
-          <>
-            <p role="status" className="text-sm font-medium">
-              {t("unsaved")}
-            </p>
-
-            <div className="flex flex-wrap gap-2">
-              <Button
-                type="button"
-                className="min-h-11 whitespace-normal md:min-h-12"
-                disabled={locked}
-                onClick={() => void state.save()}
-              >
-                {t(state.busy === "save" ? "saving" : "save")}
-              </Button>
-
-              <Button
-                type="button"
-                variant="ghost"
-                className="min-h-11 whitespace-normal md:min-h-12"
-                disabled={Boolean(state.busy)}
-                onClick={state.discard}
-              >
-                {t("discard")}
-              </Button>
-            </div>
-          </>
-        )}
-
         {state.saved && (
           <p role="status" className="text-sm">
             {t("saved")}
@@ -296,4 +296,4 @@ export function ProductPhotosEditor(props: ProductPhotosProps) {
       </div>
     </section>
   )
-}
+})

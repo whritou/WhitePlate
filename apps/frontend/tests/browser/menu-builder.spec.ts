@@ -83,9 +83,7 @@ test("switching workspace tabs and products preserves an unsaved product draft",
   await expect(product.getByLabel("Name", { exact: true })).toHaveValue(
     "Unsaved seasonal soup"
   )
-  await page
-    .getByRole("button", { name: "Discard product changes", exact: true })
-    .click()
+  await product.getByRole("button", { name: "Cancel", exact: true }).click()
   await expect(product.getByLabel("Name", { exact: true })).toHaveValue(
     "Soupe du potager"
   )
@@ -173,6 +171,7 @@ test("product save locks selection, rejects duplicate submissions and retains a 
   ).toBeDisabled()
   await form
     .locator("form")
+    .first()
     .evaluate((element: HTMLFormElement) => element.requestSubmit())
   release()
   await expect(form.getByRole("alert")).toBeVisible()
@@ -195,7 +194,7 @@ test("product save locks selection, rejects duplicate submissions and retains a 
   })
   await form.getByRole("button", { name: "Save changes", exact: true }).click()
   await expect(
-    page.getByRole("button", { name: "Discard product changes", exact: true })
+    form.getByRole("button", { name: "Cancel", exact: true })
   ).toBeDisabled()
 })
 

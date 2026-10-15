@@ -154,7 +154,11 @@ export type CategoryFormProps = EditorCallbacks & {
   onCreated?: (category: CatalogCategory) => void
 }
 export type ProductFormProps = EditorCallbacks & {
+  action?: CatalogFormAction
   onDirtyChange?: () => void
+  formId?: string
+  showActions?: boolean
+  semanticForm?: boolean
   studio?: boolean
   tenantId: string
   currency: string
@@ -196,6 +200,7 @@ export type DiscountsEditorProps = {
 export type ArchiveButtonProps = ArchiveInput & {
   name: string
   compact?: boolean
+  disabled?: boolean
   removeIcon?: boolean
   onPendingChange?: (pending: boolean) => void
 }

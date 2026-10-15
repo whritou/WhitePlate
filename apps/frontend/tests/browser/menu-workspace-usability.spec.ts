@@ -27,6 +27,27 @@ test("category archive confirmation stays usable at desktop and mobile widths", 
   }
 })
 
+test("the selected category highlights its full row", async ({ page }) => {
+  await page.goto(fixture)
+  await expect(page.getByTestId("fixture-ready")).toHaveAttribute(
+    "data-ready",
+    "true"
+  )
+
+  const row = page
+    .locator(".live-menu-category-row")
+    .filter({ hasText: "Les desserts" })
+  const category = row.locator('button[aria-pressed="false"]')
+
+  await category.click()
+
+  const background = await row.evaluate(
+    (element) => getComputedStyle(element).backgroundColor
+  )
+
+  expect(background).not.toBe("rgba(0, 0, 0, 0)")
+})
+
 test("desktop menu height follows its content instead of leaving a blank tail", async ({
   page,
 }) => {
@@ -125,7 +146,10 @@ test("product metadata stays editable and readable while its form is scrolled", 
     name: "Edit product Soupe du potager",
   })
   const sku = form.getByLabel(/SKU \/ reference/)
-  const metadata = form.getByRole("heading", { name: "Product details" })
+  const metadata = form.getByRole("heading", {
+    name: "Product details",
+    level: 3,
+  })
   const save = form.getByRole("button", { name: "Save changes", exact: true })
   const cancel = form.getByRole("button", { name: "Cancel", exact: true })
   const createCategory = page.getByRole("button", {
@@ -244,6 +268,14 @@ test("category actions stay together at the bottom of the menu while scrolling",
     const createBox = await create.boundingBox()
 
     expect(createBox?.height).toBeGreaterThanOrEqual(40)
+    expect(createBox?.x).toBeLessThanOrEqual(16)
+    expect(
+      Math.abs(
+        (createBox?.y ?? 0) +
+          (createBox?.height ?? 0) -
+          (await page.evaluate(() => innerHeight))
+      )
+    ).toBeLessThan(16)
   }
 })
 

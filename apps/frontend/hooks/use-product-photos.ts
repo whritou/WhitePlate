@@ -146,17 +146,18 @@ export function useProductPhotos({
     await uploadMany([file], aspect, target)
   }
 
-  async function save() {
-    if (gate.current || !draft || !available) return
+  async function save(notifyPending = true): Promise<boolean> {
+    if (!draft) return true
+    if (gate.current || !available) return false
     if (!navigator.onLine) {
       setError("offline")
 
-      return
+      return false
     }
 
     gate.current = true
     setBusy("save")
-    onPendingChange?.(true)
+    if (notifyPending) onPendingChange?.(true)
     setError(null)
     try {
       const data = await saveProductGallery(tenantId, productId, {
@@ -170,12 +171,16 @@ export function useProductPhotos({
       setRetryFile(null)
       setSaved(true)
       void query.refetch()
+
+      return true
     } catch (reason) {
       failure(reason)
+
+      return false
     } finally {
       gate.current = false
       setBusy(null)
-      onPendingChange?.(false)
+      if (notifyPending) onPendingChange?.(false)
     }
   }
 

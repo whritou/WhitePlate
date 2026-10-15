@@ -36,6 +36,7 @@ export function ArchiveCatalogButton({
   entityType,
   name,
   compact,
+  disabled = false,
   removeIcon,
   onPendingChange,
 }: ArchiveButtonProps) {
@@ -60,7 +61,8 @@ export function ArchiveCatalogButton({
       }}
     >
       <AlertDialogTrigger
-        disabled={submitting}
+        disabled={submitting || disabled}
+        data-product-archive="true"
         render={
           <Button
             type="button"

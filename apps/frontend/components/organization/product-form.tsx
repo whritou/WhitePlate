@@ -24,10 +24,14 @@ export function ProductForm({
   onCancel,
   studio,
   onDirtyChange,
+  action,
+  formId: requestedFormId,
+  showActions = true,
+  semanticForm = true,
 }: ProductFormProps) {
   const t = useTranslations("Catalog")
   const { pending, state, submit } = useCatalogForm(
-    saveProductAction,
+    action ?? saveProductAction,
     !product,
     onSuccess,
     undefined,
@@ -36,17 +40,21 @@ export function ProductForm({
   const prefix = product?.id ?? "new-product"
   const [categoryPending, setCategoryPending] = useState(false)
   const [categoryAdding, setCategoryAdding] = useState(false)
-  const formId = `${prefix}-form`
+  const formId = requestedFormId ?? `${prefix}-form`
 
   return (
     <div
-      role="form"
+      role={semanticForm ? "form" : undefined}
       onChange={(event) => {
         if (event.currentTarget.contains(event.target as Node))
           onDirtyChange?.()
       }}
       aria-label={
-        product ? t("editProduct", { name: product.name }) : t("newProduct")
+        semanticForm
+          ? product
+            ? t("editProduct", { name: product.name })
+            : t("newProduct")
+          : undefined
       }
       className="grid gap-4"
     >
@@ -184,14 +192,16 @@ export function ProductForm({
             disabled={pending || categoryPending}
           />
 
-          <EditorFormActions
-            className={`live-product-save-actions sticky bottom-0 z-10 bg-background pb-2 ${studio ? "xl:col-span-4" : ""}`}
-            pending={pending || categoryPending || categoryAdding}
-            onCancel={onCancel}
-            label={
-              pending ? t("saving") : product ? t("save") : t("createProduct")
-            }
-          />
+          {showActions && (
+            <EditorFormActions
+              className={`live-product-save-actions sticky bottom-0 z-10 bg-background pb-2 ${studio ? "xl:col-span-4" : ""}`}
+              pending={pending || categoryPending || categoryAdding}
+              onCancel={onCancel}
+              label={
+                pending ? t("saving") : product ? t("save") : t("createProduct")
+              }
+            />
+          )}
         </fieldset>
 
         <ResultMessage
