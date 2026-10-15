@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import type { ReactNode } from "react"
 import { Eye, EyeOff } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { setProductAvailabilityAction } from "@/actions/catalog"
@@ -14,11 +15,13 @@ export function MenuBuilderProductAvailabilityButton({
   product,
   disabled,
   onPendingChange,
+  children,
 }: {
   tenantId: string
   product: CatalogProduct
   disabled: boolean
   onPendingChange: (pending: boolean) => void
+  children: ReactNode
 }) {
   const t = useTranslations("Catalog")
   const l = useTranslations("LiveWorkspace")
@@ -72,23 +75,30 @@ export function MenuBuilderProductAvailabilityButton({
             : t("unavailable")}
       </Badge>
 
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon"
-        className="text-foreground"
-        disabled={disabled || saving}
+      <div
+        className="live-dish-actions flex shrink-0 flex-col items-center"
         data-no-drag="true"
-        data-visibility-action="true"
-        aria-label={m(available ? "hideProductNamed" : "showProductNamed", {
-          name: product.name,
-        })}
-        aria-pressed={available}
-        aria-busy={saving}
-        onClick={() => void toggleAvailability()}
       >
-        <VisibilityIcon aria-hidden="true" className="size-4" />
-      </Button>
+        {children}
+
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          className="text-foreground"
+          disabled={disabled || saving}
+          data-no-drag="true"
+          data-visibility-action="true"
+          aria-label={m(available ? "hideProductNamed" : "showProductNamed", {
+            name: product.name,
+          })}
+          aria-pressed={available}
+          aria-busy={saving}
+          onClick={() => void toggleAvailability()}
+        >
+          <VisibilityIcon aria-hidden="true" className="size-4" />
+        </Button>
+      </div>
 
       {failed && (
         <span className="sr-only" role="alert">

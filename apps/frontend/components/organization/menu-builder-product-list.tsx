@@ -132,7 +132,7 @@ export function MenuBuilderProductList({
                   event.stopPropagation()
                   dropProduct(product.id)
                 }}
-                className={`live-dish-row group relative border bg-background p-3 pr-14 ${selectedId === product.id ? "shadow-[4px_4px_0_0_var(--color-primary)]" : "hover:bg-secondary"}`}
+                className={`live-dish-row group relative border bg-background p-3 ${selectedId === product.id ? "shadow-[4px_4px_0_0_var(--color-primary)]" : "hover:bg-secondary"}`}
               >
                 <div className="flex min-w-0 flex-wrap items-center justify-between gap-3">
                   {!isArchived(product) && visibility === "active" && (
@@ -201,10 +201,20 @@ export function MenuBuilderProductList({
                       product={product}
                       disabled={pending}
                       onPendingChange={onPendingChange}
-                    />
+                    >
+                      <ArchiveCatalogButton
+                        compact
+                        removeIcon
+                        tenantId={catalog.tenantId}
+                        id={product.id}
+                        entityType="products"
+                        name={product.name}
+                        onPendingChange={onPendingChange}
+                      />
+                    </MenuBuilderProductAvailabilityButton>
                   )}
 
-                  {isArchived(product) ? (
+                  {isArchived(product) &&
                     product.isArchived &&
                     !categories.find((item) => item.id === product.categoryId)
                       ?.isArchived && (
@@ -215,18 +225,7 @@ export function MenuBuilderProductList({
                         onPendingChange={onPendingChange}
                         onRestored={() => setVisibility("active")}
                       />
-                    )
-                  ) : (
-                    <ArchiveCatalogButton
-                      compact
-                      removeIcon
-                      tenantId={catalog.tenantId}
-                      id={product.id}
-                      entityType="products"
-                      name={product.name}
-                      onPendingChange={onPendingChange}
-                    />
-                  )}
+                    )}
                 </div>
               </li>
             ))}

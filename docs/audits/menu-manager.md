@@ -1,5 +1,24 @@
 # Menu manager — 9 October 2026
 
+## Follow-up — 2026-10-15: visible controls and readable fields
+
+The product cross and eye remain visible without hover and occupy a vertical stack inside the card. The product eye still updates availability; category visibility and its API remain intact. Category visibility/archive actions are available in the sidebar and no longer duplicated in the product filter toolbar. Controls remain locked during writes, while row selectors and drag handles keep their normal background. The selection shadow follows product selection rather than the availability eye's pressed state.
+
+Extras headers now keep padding below both their selection rule and archived badge. Discount editing retains code/name, type, value, minimum order, expiry, status, save and deactivate behavior. The six data columns have readable minimum widths; save/deactivate actions use a separate row. The workspace width accommodates the desktop columns, while container queries reflow narrower containers. This adopts the scoped Lovable reference without changing shared tokens or API contracts.
+
+Verification from `apps/frontend`:
+
+- Test-first browser regressions reproduced the overflowing eye, hover-only actions, duplicate toolbar actions, the one-pixel gap below extras text, muted fills during pending archives, and compressed discount inputs (55–78px for the code). A further regression exposed the outer width constraint preventing the desktop columns from appearing.
+- `WHITEPLATE_ACCEPTANCE_URL=http://localhost:3039 node node_modules/@playwright/test/cli.js test --project=menu-builder --reporter=line --timeout=45000`: **40 passed**. These include FR/EN, phone/desktop layout, ordering, failed-save recovery, archive/restore, retained drafts and extras. The initial run had one timeout in the reorder rollback test: its unscoped fixture clipped the taller product rows. That regression now mounts the actual workspace shell and passes in isolation and in the full rerun.
+- `npm test`: **92 files / 566 tests passed**. The sandbox initially blocked Vitest's temporary config file under `node_modules/.vite-temp`; the authorized retry completed successfully.
+- `npm run lint`: **0 errors, 19 existing image warnings**. New browser checks were split into a focused file to comply with the file-size rule.
+- `npm run typecheck`: passed.
+- `npm run build`: passed with process-only HTTPS placeholders for `BETTER_AUTH_URL` and `API_BASE_URL`. The first attempt rejected the development HTTP auth URL. No environment file was changed. The existing PostgreSQL SSL-mode compatibility warning remains.
+- Prettier checks of the changed TypeScript files passed. The global `npm run format:check` reports 523 pre-existing files in this Windows checkout; allowing its existing line endings reduces the report to five untouched files: `category-form.tsx`, `option-form.tsx`, `option-group-form.tsx`, `product-form.tsx` and `hooks/use-product-photos.ts`. No repository-wide reformat was performed.
+- `git diff --check`: passed.
+
+Chrome comparison used the supplied hosted catalog and `/fr/demo/menu` tabs. Local Chrome screenshots show the [visible product controls](assets/menu-manager/controls-fr-20261015.jpg), [readable discount columns](assets/menu-manager/discounts-fr-20261015.jpg), and [extras spacing including an archived badge](assets/menu-manager/extras-fr-20261015.jpg). No hosted catalog data was modified during that comparison. This follow-up requires no migration; hosted acceptance follows deployment.
+
 ## Follow-up — 2026-10-14: live workspace parity
 
 The current `/organization/catalog` route now uses the approved demo-style menu builder. This supersedes the earlier description of explicit numeric display-order saves: categories and products reorder by drag-and-drop, as do option groups and options. Product photos use the square tile gallery with multi-add, remove confirmation, drag ordering and first-photo cover, while preserving live upload, framing, save/discard and conflict behavior. Product translations are no longer edited in the product panel; the separate restaurant-language workspace remains unchanged.

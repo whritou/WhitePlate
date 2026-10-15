@@ -28,7 +28,7 @@ export function DiscountsEditor({
 
   return (
     <section className="live-discounts" aria-labelledby="discounts-heading">
-      <div className="mx-auto max-w-4xl space-y-3">
+      <div className="live-discounts-content mx-auto max-w-5xl space-y-3">
         <header className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h2
@@ -64,7 +64,10 @@ export function DiscountsEditor({
           <p className="py-6 text-muted-foreground">{t("noDiscounts")}</p>
         ) : (
           <>
-            <div className="label-mono hidden grid-cols-[1.4fr_1fr_.8fr_.8fr_1.2fr_.8fr_auto_auto] gap-2 px-3 text-muted-foreground xl:grid">
+            <div
+              className="live-discount-columns label-mono text-muted-foreground"
+              aria-hidden="true"
+            >
               <span>{t("discountCode")}</span>
 
               <span>{t("discountTypeShort")}</span>
@@ -76,10 +79,6 @@ export function DiscountsEditor({
               <span>{t("discountExpiresOn")}</span>
 
               <span>{m("status")}</span>
-
-              <span className="sr-only">{m("actions")}</span>
-
-              <span className="sr-only">{t("save")}</span>
             </div>
 
             <ul className="grid gap-2">
@@ -109,15 +108,17 @@ function DiscountRow({
   const [kind, setKind] = useState(discount.kind)
   const { pending, state, submit } = useCatalogForm(saveDiscountAction)
   const active = discount.isActive
+  const formId = `discount-${discount.id}`
   const valueMaximum = kind === "Percentage" ? 100 : 9999999999.99
 
   return (
     <li
       aria-label={`${discount.code} ${discount.name}`}
       data-testid="discount-row"
-      className={`grid min-w-0 grid-cols-1 items-center gap-3 border bg-background p-3 xl:grid-cols-[1.4fr_1fr_.8fr_.8fr_1.2fr_.8fr_auto_auto] ${!active ? "opacity-60" : ""}`}
+      className={`live-discount-row min-w-0 items-center border bg-background p-4 ${!active ? "opacity-60" : ""}`}
     >
       <form
+        id={formId}
         onSubmit={submit}
         aria-label={t("editDiscount", { code: discount.code })}
         className="contents"
@@ -146,7 +147,7 @@ function DiscountRow({
           </div>
 
           <div className="grid min-w-0 gap-1">
-            <span className="label-mono text-muted-foreground xl:hidden">
+            <span className="live-discount-field-label label-mono text-muted-foreground">
               {t("discountTypeShort")}
             </span>
 
@@ -172,7 +173,7 @@ function DiscountRow({
           </div>
 
           <div className="grid min-w-0 gap-1">
-            <span className="label-mono text-muted-foreground xl:hidden">
+            <span className="live-discount-field-label label-mono text-muted-foreground">
               {t("discountValueShort")}
             </span>
 
@@ -190,7 +191,7 @@ function DiscountRow({
           </div>
 
           <div className="grid min-w-0 gap-1">
-            <span className="label-mono text-muted-foreground xl:hidden">
+            <span className="live-discount-field-label label-mono text-muted-foreground">
               {t("minimumOrderField")}
             </span>
 
@@ -208,7 +209,7 @@ function DiscountRow({
           </div>
 
           <div className="grid min-w-0 gap-1">
-            <span className="label-mono text-muted-foreground xl:hidden">
+            <span className="live-discount-field-label label-mono text-muted-foreground">
               {t("discountExpiresOn")}
             </span>
 
@@ -224,35 +225,34 @@ function DiscountRow({
           <Badge variant={active ? "success" : "neutral"}>
             {t(active ? "active" : "inactive")}
           </Badge>
-
-          {active ? (
-            <Button
-              type="submit"
-              variant="ghost"
-              size="sm"
-              aria-label={t("saveDiscount", { code: discount.code })}
-              disabled={pending}
-            >
-              {pending ? t("saving") : t("save")}
-            </Button>
-          ) : (
-            <span />
-          )}
         </fieldset>
 
         {state.status === "error" && (
-          <p role="alert" className="text-sm text-destructive xl:col-span-8">
+          <p role="alert" className="col-span-full text-sm text-destructive">
             {t(`errors.${state.error ?? "unavailable"}`)}
           </p>
         )}
       </form>
 
       {active && (
-        <DeactivateDiscountButton
-          tenantId={tenantId}
-          id={discount.id}
-          code={discount.code}
-        />
+        <div className="live-discount-actions col-span-full flex flex-wrap justify-end gap-3 border-t pt-3">
+          <Button
+            type="submit"
+            form={formId}
+            variant="ghost"
+            size="sm"
+            aria-label={t("saveDiscount", { code: discount.code })}
+            disabled={pending}
+          >
+            {pending ? t("saving") : t("save")}
+          </Button>
+
+          <DeactivateDiscountButton
+            tenantId={tenantId}
+            id={discount.id}
+            code={discount.code}
+          />
+        </div>
       )}
     </li>
   )

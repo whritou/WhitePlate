@@ -130,7 +130,7 @@ export function MenuBuilderWorkspace({
       </TabsContent>
 
       <TabsContent value="discounts" keepMounted>
-        <div className="mx-auto max-w-3xl p-6">
+        <div className="mx-auto max-w-6xl p-6">
           <DiscountsEditor
             tenantId={catalog.tenantId}
             currency={catalog.currency}
