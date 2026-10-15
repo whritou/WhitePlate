@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { EditorDialog } from "@/components/ui/editor-dialog"
 import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
 import type {
   CatalogDiscount,
@@ -70,6 +71,8 @@ export function DiscountsEditor({
             >
               <span>{t("discountCode")}</span>
 
+              <span>{t("description")}</span>
+
               <span>{t("discountTypeShort")}</span>
 
               <span>{t("discountValueShort")}</span>
@@ -128,22 +131,40 @@ function DiscountRow({
         <input type="hidden" name="id" value={discount.id} />
 
         <fieldset disabled={!active || pending} className="contents">
-          <div className="grid min-w-0 gap-1">
-            <Input
-              value={discount.code}
-              readOnly
-              aria-label={t("discountCode")}
-              className="border bg-background px-2 font-bold"
-            />
+          <div className="live-discount-code-fields min-w-0">
+            <div className="grid min-w-0 gap-1">
+              <Label
+                htmlFor={`discount-code-${discount.id}`}
+                className="live-discount-field-label label-mono text-muted-foreground"
+              >
+                {t("discountCode")}
+              </Label>
 
-            <Input
-              name="name"
-              defaultValue={discount.name}
-              required
-              maxLength={120}
-              aria-label={t("name")}
-              className="h-8 border bg-background px-2 text-xs"
-            />
+              <Input
+                id={`discount-code-${discount.id}`}
+                value={discount.code}
+                readOnly
+                className="border bg-background px-2 font-bold"
+              />
+            </div>
+
+            <div className="grid min-w-0 gap-1">
+              <Label
+                htmlFor={`discount-description-${discount.id}`}
+                className="live-discount-field-label label-mono text-muted-foreground"
+              >
+                {t("description")}
+              </Label>
+
+              <Input
+                id={`discount-description-${discount.id}`}
+                name="name"
+                defaultValue={discount.name}
+                required
+                maxLength={120}
+                className="h-8 border bg-background px-2 text-xs"
+              />
+            </div>
           </div>
 
           <div className="grid min-w-0 gap-1">
