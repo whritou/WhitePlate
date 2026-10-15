@@ -1,8 +1,7 @@
 "use client"
 
-import { Eye, EyeOff, GripVertical, Plus } from "lucide-react"
+import { GripVertical, Plus } from "lucide-react"
 import { useTranslations } from "next-intl"
-import { setCategoryVisibilityAction } from "@/actions/catalog"
 import { Button } from "@/components/ui/button"
 import { EditorDialog } from "@/components/ui/editor-dialog"
 import type {
@@ -11,9 +10,8 @@ import type {
 } from "@/types/catalog-management"
 import type { MenuBuilderDraggedItem } from "@/types/menu-builder"
 import { CategoryForm } from "./category-form"
-import { ArchiveCatalogButton } from "./archive-catalog-button"
+import { MenuBuilderCategoryActions } from "./menu-builder-category-actions"
 import { RestoreCatalogItemButton } from "./restore-catalog-item-button"
-import { useCatalogForm } from "./use-catalog-form"
 
 export function MenuBuilderCategoryList({
   catalog,
@@ -155,27 +153,12 @@ export function MenuBuilderCategoryList({
                   onRestored={() => setVisibility("active")}
                 />
               ) : (
-                <div
-                  data-no-drag="true"
-                  className="flex shrink-0 flex-col items-center"
-                >
-                  <ArchiveCatalogButton
-                    compact
-                    removeIcon
-                    tenantId={catalog.tenantId}
-                    id={category.id}
-                    entityType="categories"
-                    name={category.name}
-                    onPendingChange={onPendingChange}
-                  />
-
-                  <CategoryVisibilityButton
-                    category={category}
-                    tenantId={catalog.tenantId}
-                    disabled={pending}
-                    onPendingChange={onPendingChange}
-                  />
-                </div>
+                <MenuBuilderCategoryActions
+                  category={category}
+                  tenantId={catalog.tenantId}
+                  disabled={pending}
+                  onPendingChange={onPendingChange}
+                />
               )}
             </div>
           </div>
@@ -203,63 +186,5 @@ export function MenuBuilderCategoryList({
         </EditorDialog>
       </div>
     </aside>
-  )
-}
-
-function CategoryVisibilityButton({
-  category,
-  tenantId,
-  disabled,
-  onPendingChange,
-}: {
-  category: CatalogCategory
-  tenantId: string
-  disabled: boolean
-  onPendingChange: (pending: boolean) => void
-}) {
-  const t = useTranslations("MenuBuilder")
-  const c = useTranslations("Catalog")
-  const { pending, state, submit } = useCatalogForm(
-    setCategoryVisibilityAction,
-    false,
-    undefined,
-    undefined,
-    onPendingChange
-  )
-  const Icon = category.isVisible ? Eye : EyeOff
-
-  return (
-    <form onSubmit={submit} className="contents" data-no-drag="true">
-      <input type="hidden" name="tenantId" value={tenantId} />
-
-      <input type="hidden" name="id" value={category.id} />
-
-      <input
-        type="hidden"
-        name="isVisible"
-        value={String(!category.isVisible)}
-      />
-
-      <Button
-        type="submit"
-        variant="ghost"
-        size="icon"
-        className="text-foreground"
-        aria-busy={pending}
-        disabled={disabled || pending}
-        aria-label={t(
-          category.isVisible ? "hideCategoryNamed" : "showCategoryNamed",
-          { name: category.name }
-        )}
-      >
-        <Icon aria-hidden="true" className="size-4" />
-      </Button>
-
-      {state.status === "error" && (
-        <span role="alert" className="sr-only">
-          {c(`errors.${state.error ?? "unavailable"}`)}
-        </span>
-      )}
-    </form>
   )
 }
