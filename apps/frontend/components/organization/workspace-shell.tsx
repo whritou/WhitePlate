@@ -304,7 +304,11 @@ function LocaleSelector({
   )
 
   return (
-    <div role="group" aria-label={t("language")} className="shrink-0">
+    <div
+      role="group"
+      aria-label={t("language")}
+      className="flex h-11 shrink-0 items-center"
+    >
       <ReactFlagsSelect
         id="workspace-language"
         rfsKey="workspace-language"

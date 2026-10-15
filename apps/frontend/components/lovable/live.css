@@ -212,17 +212,13 @@
 }
 /* The discount identity fields stay together; actions occupy their own row. */
 .live-discounts-content { container-type: inline-size; }
-.live-discount-columns { display: none; }
 .live-discount-row { display: grid; grid-template-columns: minmax(0,1fr); gap: 1rem; }
 .live-discount-code-fields { display: grid; grid-column: 1 / -1; grid-template-columns: repeat(2,minmax(0,1fr)); gap: .5rem; }
 @container (min-width: 32rem) {
   .live-discount-row { grid-template-columns: repeat(2,minmax(0,1fr)); }
 }
 @container (min-width: 64rem) {
-  .live-discount-columns,
   .live-discount-row { grid-template-columns: minmax(10rem,1.4fr) minmax(10rem,1.2fr) minmax(10rem,1fr) minmax(5rem,.8fr) minmax(6.25rem,.8fr) minmax(10rem,1.2fr) minmax(4rem,.6fr); column-gap: 1rem; }
-  .live-discount-columns { padding-inline: 1rem; }
-  .live-discount-field-label { display: none; }
   .live-discount-code-fields { grid-column: auto; display: contents; }
 }
 [data-photo-tile="true"] [data-photo-remove="true"] {

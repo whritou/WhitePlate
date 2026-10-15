@@ -25,7 +25,6 @@ export function DiscountsEditor({
 }: DiscountsEditorProps) {
   const t = useTranslations("Catalog")
   const u = useTranslations("CatalogView")
-  const m = useTranslations("MenuBuilder")
 
   return (
     <section className="live-discounts" aria-labelledby="discounts-heading">
@@ -64,36 +63,15 @@ export function DiscountsEditor({
         {discounts.length === 0 ? (
           <p className="py-6 text-muted-foreground">{t("noDiscounts")}</p>
         ) : (
-          <>
-            <div
-              className="live-discount-columns label-mono text-muted-foreground"
-              aria-hidden="true"
-            >
-              <span>{t("discountCode")}</span>
-
-              <span>{t("description")}</span>
-
-              <span>{t("discountTypeShort")}</span>
-
-              <span>{t("discountValueShort")}</span>
-
-              <span>{t("minimumOrderShort", { currency })}</span>
-
-              <span>{t("discountExpiresOn")}</span>
-
-              <span>{m("status")}</span>
-            </div>
-
-            <ul className="grid gap-2">
-              {discounts.map((discount) => (
-                <DiscountRow
-                  key={discount.id}
-                  tenantId={tenantId}
-                  discount={discount}
-                />
-              ))}
-            </ul>
-          </>
+          <ul className="grid gap-2">
+            {discounts.map((discount) => (
+              <DiscountRow
+                key={discount.id}
+                tenantId={tenantId}
+                discount={discount}
+              />
+            ))}
+          </ul>
         )}
       </div>
     </section>
