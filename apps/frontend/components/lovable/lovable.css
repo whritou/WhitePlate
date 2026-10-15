@@ -292,16 +292,20 @@
   color: var(--foreground);
 }
 /* Tailwind's spacing names in the existing system shadow these container names. */
-.lovable-surface .max-w-sm {
+.lovable-surface .max-w-sm,
+.lovable-surface.max-w-sm {
   max-width: 24rem;
 }
-.lovable-surface .max-w-md {
+.lovable-surface .max-w-md,
+.lovable-surface.max-w-md {
   max-width: 28rem;
 }
-.lovable-surface .max-w-lg {
+.lovable-surface .max-w-lg,
+.lovable-surface.max-w-lg {
   max-width: 32rem;
 }
-.lovable-surface .max-w-xl {
+.lovable-surface .max-w-xl,
+.lovable-surface.max-w-xl {
   max-width: 36rem;
 }
 

@@ -1,5 +1,69 @@
 import { expect, test } from "@playwright/test"
 
+for (const width of [390, 768, 1440]) {
+  test(`category rename dialog stays readable at ${width}px`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width, height: 900 })
+    await page.goto("/en/catalog-design-test?view=builder&shell=1")
+    await expect(page.getByTestId("fixture-ready")).toHaveAttribute(
+      "data-ready",
+      "true"
+    )
+    await page
+      .getByRole("button", { name: "Actions for Les entrées", exact: true })
+      .click()
+    await page
+      .getByRole("menuitem", { name: "Rename category", exact: true })
+      .click()
+
+    const dialog = page.getByRole("dialog")
+    const box = await dialog.boundingBox()
+
+    expect(box!.width).toBeGreaterThanOrEqual(320)
+    expect(box!.x).toBeGreaterThanOrEqual(16)
+    expect(box!.x + box!.width).toBeLessThanOrEqual(width - 16)
+    await expect(dialog.getByRole("textbox")).toBeVisible()
+  })
+}
+
+test("desktop product details scroll without clipping the form or leaving a page gap", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 900 })
+  await page.goto("/en/catalog-design-test?view=builder&shell=1")
+  await expect(page.getByTestId("fixture-ready")).toHaveAttribute(
+    "data-ready",
+    "true"
+  )
+  await page
+    .locator(".live-dish-row")
+    .filter({ hasText: "Soupe du potager" })
+    .locator("[data-product-selector]")
+    .click()
+
+  const panel = page.locator(".live-product-panel:not([hidden])")
+  const body = panel.locator(".live-product-panel-body")
+
+  await body.hover()
+  await page.mouse.wheel(0, 600)
+  await expect
+    .poll(() => body.evaluate((element) => element.scrollTop))
+    .toBeGreaterThan(0)
+  await body.evaluate((element) => {
+    element.scrollTop = element.scrollHeight
+  })
+  await expect(panel.locator(".live-product-extras")).toBeInViewport()
+  await expect(panel.locator(".live-product-actions")).toBeInViewport()
+
+  const bounds = await panel.boundingBox()
+
+  expect(bounds!.y + bounds!.height).toBeLessThanOrEqual(900)
+  expect(
+    await page.evaluate(() => document.documentElement.scrollHeight)
+  ).toBeLessThanOrEqual(950)
+})
+
 for (const width of [1440, 390]) {
   test(`product actions stay visible inside the card at ${width}px`, async ({
     page,
@@ -72,7 +136,7 @@ test("category filters leave category actions in the sidebar", async ({
     page
       .locator(".live-menu-category-row")
       .filter({ hasText: "Les entrées" })
-      .getByRole("button", { name: "Hide category Les entrées", exact: true })
+      .getByRole("button", { name: "Actions for Les entrées", exact: true })
   ).toBeVisible()
 })
 
@@ -107,9 +171,21 @@ test("saving an archive does not paint unrelated row controls gray", async ({
   const controls = page.locator(
     '.live-dish-row [data-product-selector], .live-dish-row button[aria-label^="Move"], .live-menu-category-row button[aria-label^="Move"], .live-menu-category-row button[aria-pressed]'
   )
-  const backgrounds = await controls.evaluateAll((elements) =>
-    elements.map((element) => getComputedStyle(element).backgroundColor)
-  )
+  const visibleBackgrounds = (elements: Element[]) =>
+    elements.map((element) => {
+      let surface: Element | null = element
+
+      while (surface) {
+        const color = getComputedStyle(surface).backgroundColor
+
+        if (color !== "rgba(0, 0, 0, 0)" && color !== "transparent")
+          return color
+        surface = surface.parentElement
+      }
+
+      return "transparent"
+    })
+  const backgrounds = await controls.evaluateAll(visibleBackgrounds)
   const row = page
     .locator(".live-dish-row")
     .filter({ hasText: "Soupe du potager" })
@@ -124,13 +200,10 @@ test("saving an archive does not paint unrelated row controls gray", async ({
       .getByRole("alertdialog")
       .getByRole("button", { name: "Confirm archive", exact: true })
       .click()
+    await page.mouse.move(0, 0)
     await expect(row.locator("[data-product-selector]")).toBeDisabled()
     await expect
-      .poll(() =>
-        controls.evaluateAll((elements) =>
-          elements.map((element) => getComputedStyle(element).backgroundColor)
-        )
-      )
+      .poll(() => controls.evaluateAll(visibleBackgrounds))
       .toEqual(backgrounds)
   } finally {
     releaseAction()

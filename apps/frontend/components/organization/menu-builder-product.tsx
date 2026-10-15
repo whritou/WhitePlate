@@ -114,139 +114,141 @@ export function MenuBuilderProduct({
           </Button>
         </header>
 
-        <fieldset
-          disabled={pending}
-          aria-busy={pending}
-          className="live-product-panel-body grid min-w-0 flex-1 content-start gap-6 border-0 p-0"
-        >
-          <div className="grid min-w-0 content-start gap-6">
-            {userId && (
-              <ProductPhotosEditor
-                ref={photosEditor}
-                key={`${userId}:${catalog.tenantId}:${product.id}`}
-                userId={userId}
-                tenantId={catalog.tenantId}
-                productId={product.id}
-                archived={archived}
-                onPendingChange={onPendingChange}
-                onDraftChange={setPhotosDirty}
-              />
-            )}
-
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <Badge
-                variant={
-                  archived
-                    ? "neutral"
-                    : product.isAvailable
-                      ? "success"
-                      : "warning"
-                }
-              >
-                {c(
-                  archived
-                    ? "archived"
-                    : product.isAvailable
-                      ? "available"
-                      : "unavailable"
-                )}
-              </Badge>
-            </div>
-
-            <section aria-label={t("productDetails")} className="grid gap-4">
-              <h2 className="font-semibold">{t("productDetails")}</h2>
-
-              <p className="text-sm break-words whitespace-pre-wrap">
-                {product.description || t("noDescription")}
-              </p>
-
-              <dl className="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <dt className="text-muted-foreground">
-                    {c("price", { currency: catalog.currency })}
-                  </dt>
-
-                  <dd className="mt-1 font-semibold tabular-nums">
-                    {money.format(product.basePrice)}
-                  </dd>
-                </div>
-
-                <div>
-                  <dt className="text-muted-foreground">{c("tax")}</dt>
-
-                  <dd className="mt-1 tabular-nums">
-                    {new Intl.NumberFormat(locale, {
-                      style: "percent",
-                      maximumFractionDigits: 2,
-                    }).format(product.taxRatePercent / 100)}
-                  </dd>
-                </div>
-              </dl>
-
-              {!category?.isVisible && !category?.isArchived && (
-                <p className="text-sm text-warning">
-                  {t("categoryHiddenHelp")}
-                </p>
+        <div className="live-product-panel-body">
+          <fieldset
+            disabled={pending}
+            aria-busy={pending}
+            className="grid min-w-0 content-start gap-6 border-0 p-0"
+          >
+            <div className="grid min-w-0 content-start gap-6">
+              {userId && (
+                <ProductPhotosEditor
+                  ref={photosEditor}
+                  key={`${userId}:${catalog.tenantId}:${product.id}`}
+                  userId={userId}
+                  tenantId={catalog.tenantId}
+                  productId={product.id}
+                  archived={archived}
+                  onPendingChange={onPendingChange}
+                  onDraftChange={setPhotosDirty}
+                />
               )}
-            </section>
 
-            {!archived && (
-              <section className="grid gap-4 border-t border-border pt-5">
-                <h2 className="font-semibold">{t("productEditor")}</h2>
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <Badge
+                  variant={
+                    archived
+                      ? "neutral"
+                      : product.isAvailable
+                        ? "success"
+                        : "warning"
+                  }
+                >
+                  {c(
+                    archived
+                      ? "archived"
+                      : product.isAvailable
+                        ? "available"
+                        : "unavailable"
+                  )}
+                </Badge>
+              </div>
 
-                <p role="status" className="text-xs text-muted-foreground">
-                  {t(hasChanges ? "unsaved" : "savedFields")}
+              <section aria-label={t("productDetails")} className="grid gap-4">
+                <h2 className="font-semibold">{t("productDetails")}</h2>
+
+                <p className="text-sm break-words whitespace-pre-wrap">
+                  {product.description || t("noDescription")}
                 </p>
 
-                <div ref={editor}>
-                  <ProductForm
-                    key={revision}
-                    tenantId={catalog.tenantId}
-                    currency={catalog.currency}
-                    categories={catalog.categories}
-                    product={product}
-                    action={saveProductChanges}
-                    formId={formId}
-                    showActions={false}
-                    semanticForm={false}
-                    onPendingChange={onPendingChange}
-                    onSuccess={() => {
-                      setDirty(false)
-                      setPhotosDirty(false)
-                    }}
-                    onDirtyChange={() => setDirty(true)}
-                    onCancel={discard}
-                  />
-                </div>
-              </section>
-            )}
+                <dl className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <dt className="text-muted-foreground">
+                      {c("price", { currency: catalog.currency })}
+                    </dt>
 
-            {archived && (
-              <section className="grid gap-3">
-                <p className="text-sm text-muted-foreground">
-                  {t("archivedHelp")}
-                </p>
+                    <dd className="mt-1 font-semibold tabular-nums">
+                      {money.format(product.basePrice)}
+                    </dd>
+                  </div>
 
-                {product.isArchived && !category?.isArchived && (
-                  <RestoreProductButton
-                    tenantId={catalog.tenantId}
-                    id={product.id}
-                    onPendingChange={onPendingChange}
-                    onRestored={onProductRestored}
-                  />
+                  <div>
+                    <dt className="text-muted-foreground">{c("tax")}</dt>
+
+                    <dd className="mt-1 tabular-nums">
+                      {new Intl.NumberFormat(locale, {
+                        style: "percent",
+                        maximumFractionDigits: 2,
+                      }).format(product.taxRatePercent / 100)}
+                    </dd>
+                  </div>
+                </dl>
+
+                {!category?.isVisible && !category?.isArchived && (
+                  <p className="text-sm text-warning">
+                    {t("categoryHiddenHelp")}
+                  </p>
                 )}
               </section>
-            )}
 
-            <ProductExtrasTable
-              catalog={catalog}
-              product={product}
-              archived={archived}
-              pending={pending}
-              onPendingChange={onPendingChange}
-            />
-          </div>
-        </fieldset>
+              {!archived && (
+                <section className="grid gap-4 border-t border-border pt-5">
+                  <h2 className="font-semibold">{t("productEditor")}</h2>
+
+                  <p role="status" className="text-xs text-muted-foreground">
+                    {t(hasChanges ? "unsaved" : "savedFields")}
+                  </p>
+
+                  <div ref={editor}>
+                    <ProductForm
+                      key={revision}
+                      tenantId={catalog.tenantId}
+                      currency={catalog.currency}
+                      categories={catalog.categories}
+                      product={product}
+                      action={saveProductChanges}
+                      formId={formId}
+                      showActions={false}
+                      semanticForm={false}
+                      onPendingChange={onPendingChange}
+                      onSuccess={() => {
+                        setDirty(false)
+                        setPhotosDirty(false)
+                      }}
+                      onDirtyChange={() => setDirty(true)}
+                      onCancel={discard}
+                    />
+                  </div>
+                </section>
+              )}
+
+              {archived && (
+                <section className="grid gap-3">
+                  <p className="text-sm text-muted-foreground">
+                    {t("archivedHelp")}
+                  </p>
+
+                  {product.isArchived && !category?.isArchived && (
+                    <RestoreProductButton
+                      tenantId={catalog.tenantId}
+                      id={product.id}
+                      onPendingChange={onPendingChange}
+                      onRestored={onProductRestored}
+                    />
+                  )}
+                </section>
+              )}
+
+              <ProductExtrasTable
+                catalog={catalog}
+                product={product}
+                archived={archived}
+                pending={pending}
+                onPendingChange={onPendingChange}
+              />
+            </div>
+          </fieldset>
+        </div>
 
         {!archived && (
           <footer className="live-product-actions">
