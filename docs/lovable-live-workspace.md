@@ -15,7 +15,7 @@ Paths retain `/en` or `/fr`. Organization context uses `organizationId`; restaur
 | History | `/organization/order-history?tenantId=…` | Existing archived order history, filters and pagination; operational layout retained. |
 | Analytics | `/organization/analytics?tenantId=…` | Original Lovable charts and fictitious figures, explicitly marked. Owner/manager authorization required. |
 | Menu | `/organization/catalog?tenantId=…` | Existing real catalog, categories, extras, translations, discounts, stock and galleries. Editor/table behavior retained with source fonts, borders, colors and scoped overlays. |
-| Studio | `/organization/theming?tenantId=…` | Original Lovable appearance editor and sample customer previews; local draft only. Separate brand-media tab preserves actual upload/storage operations. |
+| Studio | `/organization/theming?tenantId=…` | Original Lovable appearance editor and sample previews; T2 now saves authorized, versioned backend theme drafts. Separate Brand media tab preserves actual uploads. Publication remains T3. |
 | Staff | `/organization/team?organizationId=…` | Existing roster, invitations and revocation. Real roles and API fields retained; source styling applied by shared workspace scope. |
 | Settings | `/organization/settings?organizationId=…&section=…` | Original seven-section shell. Actual organization name/archive/restore and legal profile forms; restaurant actions link to real management. Payments, billing, domains and notifications remain identified placeholders/drafts. |
 | Store / checkout | Tenant-host `/` and `/?step=checkout&menuLocale=…` | Real catalog and uploaded assets, source customer header/hero/product grid/basket. Original guest controller, cart validation, authoritative checkout, discounts and idempotency retained. |
@@ -42,7 +42,7 @@ Appearance/settings drafts are isolated by account and context: `whiteplate-live
 | Analytics | Authorized reporting/period aggregates; chart figures are fictitious. |
 | Stripe, payments, payouts, invoices and subscriptions | Verified account state, payment/billing integration and authoritative amounts. Connect Stripe is disabled. |
 | Legal/company details | Organization legal country/name and optional country-specific registration/tax identifiers persist; restaurant legal settings inherit or store independent overrides. |
-| Appearance | Validated tenant theme persistence/publication and theme consumption by the live storefront. Save stores a browser draft only; the Studio preview uses a sample menu. |
+| Appearance | T2 draft persistence is implemented; migration and hosted acceptance pending. T3 publication and live storefront consumption remain open. Preview uses a sample menu. See [T2 evidence](audits/theme-controls.md). |
 | Domains and notification preferences | Actual ownership/DNS/TLS verification, configuration persistence and delivery. No DNS/email operation is performed. |
 | Fine-grained custom staff permissions | Lovable permission matrix has no equivalent real contract; existing fixed API roles are preserved. |
 | Restaurant contact/service slots and payment-method choices | Live contracts do not provide all original source fields. The live checkout composition disables and discloses unconnected controls; no payment/slot behavior is invented. |

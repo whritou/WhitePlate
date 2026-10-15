@@ -1,5 +1,9 @@
 # Database schema and tenant model
 
+## T2 theme drafts — 15 October 2026
+
+Migration `20261015171219_TenantThemeDraft` adds nullable `Tenants.ThemeDraftJson` (`jsonb`) and required `ThemeDraftVersion` (`integer`, default 1). Existing restaurants resolve the same Lovable defaults without backfilling JSON. The version is independent of establishment, legal and ordering versions. Owner/manager writes conditionally update only these columns and recheck active organization/restaurant membership in SQL. Appearance validation excludes identity, assets, domain data and arbitrary CSS/font URLs. No published theme is introduced. Migration is generated, not applied; no startup migration is added. See [decision 0012](../architecture/decisions/0012-tenant-theme-drafts.md) and [API contract](../api/api-contracts.md#t2-theme-drafts--15-october-2026).
+
 ## Menu discount eligibility — 2026-10-14
 
 Generated migration `20261014211126_DiscountMinimumAndExpiration` adds required `PromotionDiscounts.MinimumOrderAmount` (`numeric(12,2)`, default `0`) and nullable `PromotionDiscounts.ExpiresOn` (`date`). Existing discounts therefore remain eligible without a minimum or expiry. Checkout compares the minimum with the saved-price subtotal of product and option quantities before taxes and discount, and accepts a code through the expiration date in the tenant's saved time zone. The migration is source-only; no shared or production database was changed, and the API does not migrate on startup.

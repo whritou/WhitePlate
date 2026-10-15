@@ -9,9 +9,13 @@ import {
   saveTheme,
   type StoreTheme,
 } from "@/lib/lovable/storeTheme"
-export function useStudioPageModel(storageKey?: string) {
+import type { StudioController } from "@/types/theme"
+export function useStudioPageModel(
+  storageKey?: string,
+  controller?: StudioController
+) {
   const [t, setT] = useDemoDraft<StoreTheme>(DEFAULT_THEME, () =>
-    loadTheme(storageKey)
+    controller ? DEFAULT_THEME : loadTheme(storageKey)
   )
   const [device, setDevice] = useState<"desktop" | "mobile">("desktop")
   const [page, setPage] = useState<"store" | "checkout" | "tracking">("store")
@@ -20,7 +24,7 @@ export function useStudioPageModel(storageKey?: string) {
   const [dnsOpen, setDnsOpen] = useState(false)
   const [panel, setPanel] = useState<"design" | "brand">("design")
   const [menu, setMenu] = useDemoDraft<MenuData>(DEFAULT_MENU, () =>
-    storageKey ? DEFAULT_MENU : loadMenu()
+    storageKey || controller ? DEFAULT_MENU : loadMenu()
   )
 
   const set = (p: Partial<StoreTheme>) => {
@@ -34,8 +38,12 @@ export function useStudioPageModel(storageKey?: string) {
   }
 
   return {
-    isLive: Boolean(storageKey),
-    t,
+    isLive: Boolean(storageKey || controller),
+    connected: Boolean(controller),
+    locked: controller?.locked ?? false,
+    saving: controller?.saving ?? false,
+    logoPreset: controller?.logoPreset,
+    t: controller?.theme ?? t,
     setT,
     device,
     setDevice,
@@ -43,7 +51,7 @@ export function useStudioPageModel(storageKey?: string) {
     setPage,
     previewCart,
     setPreviewCart,
-    saved,
+    saved: controller?.saved ?? saved,
     setSaved,
     dnsOpen,
     setDnsOpen,
@@ -51,7 +59,7 @@ export function useStudioPageModel(storageKey?: string) {
     setPanel,
     menu,
     setMenu,
-    set,
-    publish,
+    set: controller?.set ?? set,
+    publish: controller?.publish ?? publish,
   }
 }

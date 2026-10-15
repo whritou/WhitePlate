@@ -3318,6 +3318,24 @@
       "unavailable": "Impossible d’enregistrer le profil. Vérifiez les identifiants et réessayez."
     }
   },
+  "ThemeStudio": {
+    "save": "Enregistrer le brouillon",
+    "savedButton": "Brouillon enregistré ✓",
+    "saving": "Enregistrement…",
+    "loading": "Chargement du thème enregistré…",
+    "loadFailed": "Le thème enregistré n’a pas pu être chargé. Rechargez pour réessayer.",
+    "saveFailed": "Le thème n’a pas pu être enregistré. Vos modifications sont conservées ; réessayez.",
+    "conflict": "Le thème a changé dans une autre session. Vos modifications sont conservées. Rechargez le brouillon enregistré avant de modifier à nouveau.",
+    "reload": "Recharger le brouillon enregistré",
+    "saved": "Brouillon du thème enregistré pour cet établissement. La publication est distincte. L’aperçu utilise un menu d’exemple.",
+    "draftNotice": "Modifiez le brouillon du thème de cet établissement. La publication est distincte. L’aperçu utilise un menu d’exemple. Les couleurs du logo apparaissent dans les préréglages si un logo enregistré est disponible ; sinon, utilisez les couleurs manuelles ou les préréglages.",
+    "unsaved": "Modifications du thème non enregistrées",
+    "contrastWarning": "Contraste du brouillon : texte {text}:1, couleur principale {primary}:1, accent {accent}:1. Certaines paires de texte courant sont sous 4,5:1 ; corrigez-les avant publication.",
+    "crispLight": "Clair épuré",
+    "warmCream": "Crème chaleureux",
+    "bistroNoir": "Bistro noir",
+    "fromLogo": "Depuis votre logo"
+  },
   "LiveWorkspace": {
     "settingsSections": "Catégories des paramètres du restaurant",
     "establishmentSettingsCategory": "Établissement",

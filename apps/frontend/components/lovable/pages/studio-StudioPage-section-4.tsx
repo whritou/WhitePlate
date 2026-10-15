@@ -1,5 +1,6 @@
 "use client"
 import { Copy } from "@/components/lovable/copy"
+import { useTranslations } from "next-intl"
 import {
   SourceButton,
   SourceInput,
@@ -8,10 +9,44 @@ import {
 import { Button } from "@/components/ui/lovable-button"
 import { StudioAppearance } from "@/components/lovable/StudioAppearance"
 import { DEFAULT_THEME, PRESETS } from "@/lib/lovable/storeTheme"
+import type { StoreTheme } from "@/types/lovable/storeTheme"
 import { ImagePick, Group, Field } from "./studio-shared"
 import { useStudioPageView } from "./studio-StudioPage-context"
 export function StudioPageSection4() {
-  const { t, setDnsOpen, panel, set } = useStudioPageView()
+  const { t, setDnsOpen, panel, set, connected, logoPreset } =
+    useStudioPageView()
+  const text = useTranslations("ThemeStudio")
+  const presets: { label: string; theme: Partial<StoreTheme> }[] = connected
+    ? [
+        ...PRESETS,
+        {
+          label: text("crispLight"),
+          theme: {
+            bg: "#ffffff",
+            text: "#14201a",
+            ambiance: "crisp-light" as const,
+          },
+        },
+        {
+          label: text("warmCream"),
+          theme: {
+            bg: "#fff8ef",
+            text: "#2a1a12",
+            ambiance: "warm-cream" as const,
+          },
+        },
+        {
+          label: text("bistroNoir"),
+          theme: {
+            bg: "#111111",
+            text: "#f3efe6",
+            primary: "#e8e2d4",
+            ambiance: "bistro-noir" as const,
+          },
+        },
+        ...(logoPreset ? [{ label: text("fromLogo"), theme: logoPreset }] : []),
+      ]
+    : PRESETS
 
   return (
     <>
@@ -20,12 +55,13 @@ export function StudioPageSection4() {
           <Group title="Presets">
             <div className="grid grid-cols-2 gap-2">
               <Copy>
-                {PRESETS.map((p) => (
+                {presets.map((p) => (
                   <Button
                     variant="outline"
                     key={p.label}
                     onClick={() =>
                       set({
+                        ambiance: "custom",
                         ...p.theme,
                         headingFont: p.theme.font ?? t.headingFont,
                       })
@@ -35,10 +71,10 @@ export function StudioPageSection4() {
                     <div className="mb-2 flex h-5">
                       <Copy>
                         {[
-                          p.theme.bg,
-                          p.theme.primary,
-                          p.theme.accent,
-                          p.theme.text,
+                          p.theme.bg ?? t.bg,
+                          p.theme.primary ?? t.primary,
+                          p.theme.accent ?? t.accent,
+                          p.theme.text ?? t.text,
                         ].map((c, i) => (
                           <span
                             key={i}
@@ -76,7 +112,9 @@ export function StudioPageSection4() {
                     aria-label={`${l} color`}
                     type="color"
                     value={t[k]}
-                    onChange={(e) => set({ [k]: e.target.value })}
+                    onChange={(e) =>
+                      set({ [k]: e.target.value, ambiance: "custom" })
+                    }
                     className="h-7 w-7 cursor-pointer border-0 bg-transparent p-0"
                   />
                 </SourceLabel>
@@ -84,7 +122,7 @@ export function StudioPageSection4() {
             </Copy>
           </Group>
 
-          <StudioAppearance t={t} set={set} />
+          <StudioAppearance t={t} set={set} connected={connected} />
 
           <Button
             variant="link"

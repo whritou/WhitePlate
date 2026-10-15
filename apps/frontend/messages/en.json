@@ -3318,6 +3318,24 @@
       "unavailable": "Could not save the profile. Check the identifiers and try again."
     }
   },
+  "ThemeStudio": {
+    "save": "Save draft",
+    "savedButton": "Draft saved ✓",
+    "saving": "Saving…",
+    "loading": "Loading saved theme…",
+    "loadFailed": "The saved theme could not be loaded. Reload to try again.",
+    "saveFailed": "The theme could not be saved. Your changes are preserved; try again.",
+    "conflict": "The theme changed in another session. Your edits are preserved. Reload the saved draft before editing again.",
+    "reload": "Reload saved draft",
+    "saved": "Theme draft saved to this restaurant. Publication is separate. The preview uses a sample menu.",
+    "draftNotice": "Edit this restaurant’s theme draft. Publication is separate. The preview uses a sample menu. Logo colors appear as a preset when a saved logo is available; otherwise use the manual colors or presets.",
+    "unsaved": "Unsaved theme changes",
+    "contrastWarning": "Draft contrast: text {text}:1, primary {primary}:1, accent {accent}:1. Some normal-text pairs are below 4.5:1; correct them before publication.",
+    "crispLight": "Crisp Light",
+    "warmCream": "Warm Cream",
+    "bistroNoir": "Bistro Noir",
+    "fromLogo": "From your logo"
+  },
   "LiveWorkspace": {
     "settingsSections": "Restaurant settings categories",
     "establishmentSettingsCategory": "Establishment",

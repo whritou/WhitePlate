@@ -50,5 +50,7 @@ public sealed class TenantConfiguration : IEntityTypeConfiguration<Tenant>
         builder.Property(tenant => tenant.AcceptingOrders).IsRequired().HasDefaultValue(true);
         builder.Property(tenant => tenant.RushHoldEnabled).IsRequired().HasDefaultValue(false);
         builder.Property(tenant => tenant.OrderingOperationsVersion).IsRequired().HasDefaultValue(1);
+        builder.Property(tenant => tenant.ThemeDraftJson).HasColumnType("jsonb");
+        builder.Property(tenant => tenant.ThemeDraftVersion).IsRequired().HasDefaultValue(1);
     }
 }

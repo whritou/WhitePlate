@@ -221,6 +221,22 @@ The dispatcher publishes `order.changed` with `eventId`, `tenantId`, `orderId`, 
 
 The localized staff page at `/[locale]/organization/orders?tenantId=<id>` reads `/me` first and only requests the selected tenant's order page when that membership is present. It uses saved ticket labels, passes status and cursor filters through the page URL, and calls the status API through a same-origin Next.js server action with `If-Match`. The frontend's `POST /api/kitchen/signalr-token` route requires a verified session and exact same-origin `Origin`, returns a short-lived API JWT with `Cache-Control: no-store`, and grants no tenant-specific permission. The browser keeps the token in memory for SignalR only. The API still authorizes `JoinRestaurant`; events trigger a coalesced REST refresh, and reconnect rejoins the selected tenant before reloading REST state. Set `PUBLIC_API_BASE_URL` to the browser-reachable API origin when it differs from server-side `API_BASE_URL`. Production URL, CORS, proxy, and TLS verification remain in the hosting/operations task.
 
+## T2 theme drafts — 15 October 2026
+
+Implemented in source; migration/hosted acceptance pending. Every route requires an active organization owner or restaurant manager. Foreign, missing, inactive or unauthorized restaurants return 404; anonymous requests return 401. All responses are no-store.
+
+| Method/path | Request | Result |
+| --- | --- | --- |
+| GET `/api/v1/tenants/{tenantId}/theme` | None | `{ theme, version, contrast }` with quoted integer ETag. Defaults/version 1 when no draft exists. |
+| PUT `/api/v1/tenants/{tenantId}/theme` | Appearance object (8 KiB maximum), `If-Match: "<version>"` | Updated draft and incremented version/ETag. Invalid/unknown fields: 400; missing/invalid precondition: 428; stale: 412. No publication. |
+| GET `/api/v1/tenants/{tenantId}/theme/palette` | None | `{ palette: { primary, accent, bg, text }, reason: null }`, or `{ palette: null, reason: "no_logo" | "unavailable" | "unusable" }`. Uses only the authorized saved T1 logo. |
+
+Appearance: six-digit HEX `primary`, `accent`, `bg`, `text`; allowlisted `font`, `headingFont`; `headingWeight` 400/500/600/700; `bodyWeight` 400/500; `textScale` 0.9–1.2; `lineHeight` 1.3–1.8; integer `buttonRadius` 0–28 and `radius` 0–24; `buttonStyle` solid/outline; `spacing` compact/comfortable/airy; `imageRatio` square/landscape/wide; integer `bannerHeight` 180–440 and `bannerOverlay` 20–85; `bannerAlign` left/center; booleans `showRestaurantInfo`, `showBanner`; `layout` grid/list; `ambiance` custom/crisp-light/warm-cream/bistro-noir. Omitted fields use reference defaults; callers send the full object. Identity, URLs, media, domain and arbitrary CSS are excluded.
+
+Contrast returns unrounded sRGB `textOnBackground`, `primaryOnBackground`, `textOnAccent`, `backgroundOnPrimary` and `readyForPublication` for these normal-text pairs (all at least 4.5:1). This diagnostic does not certify all rendered states. Low-contrast drafts can be saved; T3 must enforce safe publication.
+
+Browser BFF: GET `/api/theme-settings?tenantId=…` (`palette=1` for suggestions); PUT the same path with `{ theme, version }`. PUT requires exact configured Origin, validates selector/body and forwards If-Match. Credentials remain server-only; responses use `private, no-store`, `Vary: Cookie`. See [decision 0012](../architecture/decisions/0012-tenant-theme-drafts.md).
+
 ## 5. Error contract
 
 Errors use `ApiProblemResponse` with `application/problem+json`, `type: about:blank`, status, safe English detail, a stable code, trace ID, and optional field issues. `instance` is omitted and responses are `Cache-Control: no-store`. Exception/provider details, request values, and arbitrary JSON paths are not returned or logged.

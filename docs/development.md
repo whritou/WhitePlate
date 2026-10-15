@@ -1,5 +1,7 @@
 # Development guide
 
+T2 theme drafts require additive migration `20261015171219_TenantThemeDraft` before API rollout. No new provider, environment variable or package is required: optional logo suggestions reuse the saved T1 logo/storage, and fonts are already bundled. Migration application and hosted acceptance remain separate. See [decision 0012](architecture/decisions/0012-tenant-theme-drafts.md), [API contract](api/api-contracts.md#t2-theme-drafts--15-october-2026) and [verification](audits/theme-controls.md).
+
 The approved Lovable design now also covers real workspaces and tenant customer shells. See [real routes, connected operations and explicit fictitious drafts](lovable-live-workspace.md). Existing backend contracts are retained; hosted acceptance remains separate.
 
 The public landing and `/[locale]/demo` pages follow the supplied Lovable export. See [migration routes, local state and backend connections](lovable-migration.md). Fonts are bundled locally under `public/lovable` and `public/design`. Run the `lovable-migration` Playwright project against a local server; these browser simulations do not prove real payment or DNS behavior.

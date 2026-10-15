@@ -14,6 +14,7 @@ export default defineConfig({
   timeout: 120_000,
   expect: { timeout: 20_000 },
   projects: [
+    { name: "theme-studio", testMatch: "theme-studio.spec.ts" },
     {
       name: "establishment-settings",
       testMatch: "establishment-settings.spec.ts",

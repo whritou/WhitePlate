@@ -2,8 +2,15 @@
 import { useStudioPageModel } from "./studio-StudioPage-model"
 import { StudioPageProvider } from "./studio-StudioPage-context"
 import { StudioPageView } from "./studio-StudioPage-view"
-export function StudioPage({ storageKey }: { storageKey?: string }) {
-  const model = useStudioPageModel(storageKey)
+import type { StudioController } from "@/types/theme"
+export function StudioPage({
+  storageKey,
+  controller,
+}: {
+  storageKey?: string
+  controller?: StudioController
+}) {
+  const model = useStudioPageModel(storageKey, controller)
 
   return (
     <StudioPageProvider model={model}>

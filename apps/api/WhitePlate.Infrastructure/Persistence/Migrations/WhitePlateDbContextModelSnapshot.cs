@@ -13,9 +13,6 @@ namespace WhitePlate.Infrastructure.Persistence.Migrations
     [DbContext(typeof(WhitePlateDbContext))]
     partial class WhitePlateDbContextModelSnapshot : ModelSnapshot
     {
-        internal static void BuildMigrationTargetModel(ModelBuilder modelBuilder) =>
-            new WhitePlateDbContextModelSnapshot().BuildModel(modelBuilder);
-
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
@@ -844,6 +841,14 @@ namespace WhitePlate.Infrastructure.Persistence.Migrations
                     b.Property<string>("TaxIdentifier")
                         .HasMaxLength(32)
                         .HasColumnType("character varying(32)");
+
+                    b.Property<string>("ThemeDraftJson")
+                        .HasColumnType("jsonb");
+
+                    b.Property<int>("ThemeDraftVersion")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(1);
 
                     b.Property<string>("TimeZone")
                         .IsRequired()
