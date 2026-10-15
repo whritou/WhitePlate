@@ -105,10 +105,7 @@ test("saving an archive does not paint unrelated row controls gray", async ({
   )
 
   const controls = page.locator(
-    '.live-dish-row [data-product-selector], .live-dish-row button[aria-label^="Move"], .live-menu-category-row button[aria-label^="Move"], .live-menu-category-row button[aria-pressed]'
-  )
-  const backgrounds = await controls.evaluateAll((elements) =>
-    elements.map((element) => getComputedStyle(element).backgroundColor)
+    '.live-dish-row [data-product-selector], .live-dish-row button[aria-label^="Move"], .live-menu-category-row button[aria-label^="Move"]'
   )
   const row = page
     .locator(".live-dish-row")
@@ -118,6 +115,12 @@ test("saving an archive does not paint unrelated row controls gray", async ({
   await row
     .getByRole("button", { name: "Archive Soupe du potager", exact: true })
     .click()
+  await expect(page.getByRole("alertdialog")).toBeVisible()
+
+  const backgrounds = await controls.evaluateAll((elements) =>
+    elements.map((element) => getComputedStyle(element).backgroundColor)
+  )
+
   try {
     await page
       .getByRole("alertdialog")

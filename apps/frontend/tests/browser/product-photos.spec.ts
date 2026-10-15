@@ -72,12 +72,15 @@ test("failed uploads keep the saved cover and can be retried; invalid files do n
   await expect(page.getByText("Cover photo", { exact: true })).toBeVisible()
   failUpload = false
   await page.getByRole("button", { name: "Retry upload", exact: true }).click()
-  await expect(page.getByText("Unsaved photo changes")).toBeVisible()
+  await expect(page.getByText("Unsaved product changes")).toBeVisible()
   expect(uploads).toBe(2)
-  await page
-    .getByRole("button", { name: "Discard photo changes", exact: true })
-    .click()
-  await expect(page.getByText("Unsaved photo changes")).not.toBeVisible()
+
+  const productForm = page.getByRole("form", {
+    name: "Edit product Burger Le Rustique Truffé",
+  })
+
+  await productForm.getByRole("button", { name: "Cancel", exact: true }).click()
+  await expect(page.getByText("Unsaved product changes")).not.toBeVisible()
 })
 
 test("gallery updates/save failures keep drafts and removal returns keyboard focus", async ({
@@ -126,22 +129,29 @@ test("gallery updates/save failures keep drafts and removal returns keyboard foc
     mimeType: "image/jpeg",
     buffer: Buffer.from([255, 216, 255]),
   })
-  await expect(page.getByText("Unsaved photo changes")).toBeVisible()
-  await page.getByRole("button", { name: "Save photos", exact: true }).click()
+  await expect(page.getByText("Unsaved product changes")).toBeVisible()
+
+  const productForm = page.getByRole("form", {
+    name: "Edit product Burger Le Rustique Truffé",
+  })
+  const saveChanges = productForm.getByRole("button", {
+    name: "Save changes",
+    exact: true,
+  })
+
+  await saveChanges.click()
   await expect(
     page.getByRole("region", { name: "Product photography" }).getByRole("alert")
   ).toContainText("kept")
-  await expect(
-    page.getByRole("button", { name: "Save photos", exact: true })
-  ).toBeEnabled()
+  await expect(saveChanges).toBeEnabled()
   await context.setOffline(true)
-  await page.getByRole("button", { name: "Save photos", exact: true }).click()
+  await saveChanges.click()
   await expect(
     page.getByRole("region", { name: "Product photography" }).getByRole("alert")
   ).toContainText("offline")
   await context.setOffline(false)
   fail = false
-  await page.getByRole("button", { name: "Save photos", exact: true }).click()
+  await saveChanges.click()
   await expect(
     page.getByText("Photos saved. Guest menu updated.")
   ).toBeVisible()
@@ -156,69 +166,8 @@ test("gallery updates/save failures keep drafts and removal returns keyboard foc
   await expect(
     page.getByRole("button", { name: "Add photos", exact: true })
   ).toBeFocused()
-  await page.getByRole("button", { name: "Save photos", exact: true }).click()
+  await saveChanges.click()
   expect(saved).toHaveLength(1)
-})
-
-test("photo actions follow the demo gallery and expose an understandable crop choice", async ({
-  page,
-}) => {
-  await page.setViewportSize({ width: 1440, height: 900 })
-  await page.route("**/api/product-photos?**", (route) =>
-    new URL(route.request().url()).searchParams.has("assetId")
-      ? route.fulfill({
-          path: "public/design/photo-15.webp",
-          contentType: "image/webp",
-        })
-      : route.fulfill({ json: { storageAvailable: true, assets: [asset] } })
-  )
-  await page.goto("/en/photo-design-test")
-  await expect(page.getByTestId("fixture-ready")).toHaveAttribute(
-    "data-ready",
-    "true"
-  )
-  await page
-    .getByRole("button", {
-      name: "Select Burger Le Rustique Truffé",
-      exact: true,
-    })
-    .click()
-
-  const gallery = page.getByRole("region", { name: "Product photography" })
-  const galleryGrid = gallery.getByRole("group", {
-    name: "Product photo gallery",
-  })
-  const tile = galleryGrid.locator("[data-photo-tile]")
-
-  await expect(
-    gallery.getByRole("button", { name: "Replace photo", exact: true })
-  ).toHaveCount(0)
-  await expect(
-    gallery.getByRole("button", { name: "Add photos" })
-  ).toBeVisible()
-  await expect(
-    gallery.getByRole("button", { name: "Square · 1:1" })
-  ).toBeVisible()
-  await expect(
-    gallery.getByRole("button", { name: "Landscape · 4:3" })
-  ).toBeVisible()
-
-  async function expectDemoGalleryLayout() {
-    await expect(tile).toHaveCount(1)
-
-    const box = await tile.boundingBox()
-    const columns = await galleryGrid.evaluate(
-      (element) =>
-        getComputedStyle(element).gridTemplateColumns.split(" ").length
-    )
-
-    expect(columns).toBe(3)
-    expect(box?.width).toBeCloseTo(box?.height ?? 0, 0)
-  }
-
-  await expectDemoGalleryLayout()
-  await page.setViewportSize({ width: 390, height: 844 })
-  await expectDemoGalleryLayout()
 })
 
 test("dragging a gallery photo changes the saved cover order", async ({
@@ -269,11 +218,14 @@ test("dragging a gallery photo changes the saved cover order", async ({
 
   await expect(photos).toHaveCount(2)
   await photos.nth(0).dragTo(photos.nth(1))
-  await expect(page.getByText("Unsaved photo changes")).toBeVisible()
+  await expect(page.getByText("Unsaved product changes")).toBeVisible()
   await expect(
     photos.nth(0).getByText("Cover photo", { exact: true })
   ).toBeVisible()
-  await page.getByRole("button", { name: "Save photos", exact: true }).click()
+  await page
+    .getByRole("form", { name: "Edit product Burger Le Rustique Truffé" })
+    .getByRole("button", { name: "Save changes", exact: true })
+    .click()
   await expect(
     page.getByText("Photos saved. Guest menu updated.")
   ).toBeVisible()

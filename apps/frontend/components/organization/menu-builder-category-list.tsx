@@ -98,6 +98,7 @@ export function MenuBuilderCategoryList({
             }}
             onDragEnd={() => setDragged(null)}
             data-drag-source={dragged?.id === category.id ? "true" : undefined}
+            data-selected={categoryId === category.id ? "true" : undefined}
             className="live-menu-category-row group border-b px-2"
           >
             <div className="flex min-w-0 items-center gap-1">
@@ -129,7 +130,7 @@ export function MenuBuilderCategoryList({
                   onCategoryChange(category.id)
                   setSelectedId("")
                 }}
-                className={`min-w-0 flex-1 justify-between px-2 py-3 text-left ${categoryId === category.id ? "bg-accent font-bold hover:bg-accent hover:text-accent-foreground" : ""}`}
+                className={`min-w-0 flex-1 justify-between px-2 py-3 text-left ${categoryId === category.id ? "font-bold" : ""}`}
               >
                 <span className="min-w-0 truncate">{category.name}</span>
 

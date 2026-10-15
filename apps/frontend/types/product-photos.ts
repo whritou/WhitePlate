@@ -24,6 +24,11 @@ export type PhotoScope = { userId: string; tenantId: string; productId: string }
 export type ProductPhotosProps = PhotoScope & {
   archived?: boolean
   onPendingChange?: (busy: boolean) => void
+  onDraftChange?: (dirty: boolean) => void
+}
+export type ProductPhotosEditorHandle = {
+  save: () => Promise<boolean>
+  discard: () => void
 }
 export type PhotoError = ApiError | "offline"
 export type PhotoUploadAttempt = { file: File; target?: string; aspect: string }
