@@ -202,6 +202,9 @@ export type ArchiveButtonProps = ArchiveInput & {
   compact?: boolean
   disabled?: boolean
   removeIcon?: boolean
+  open?: boolean
+  hideTrigger?: boolean
+  onOpenChange?: (open: boolean) => void
   onPendingChange?: (pending: boolean) => void
 }
 export type CatalogSubmit = (event: FormEvent<HTMLFormElement>) => void

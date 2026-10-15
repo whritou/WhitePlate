@@ -38,10 +38,20 @@ export function ArchiveCatalogButton({
   compact,
   disabled = false,
   removeIcon,
+  open,
+  hideTrigger = false,
+  onOpenChange,
   onPendingChange,
 }: ArchiveButtonProps) {
   const t = useTranslations("Catalog")
-  const [confirming, setConfirming] = useState(false)
+  const [uncontrolledOpen, setUncontrolledOpen] = useState(false)
+  const confirming = open ?? uncontrolledOpen
+
+  function setConfirming(value: boolean) {
+    if (open === undefined) setUncontrolledOpen(value)
+    onOpenChange?.(value)
+  }
+
   const { pending, state, submit } = useCatalogForm(
     archiveCatalogItemAction,
     false,
@@ -60,37 +70,39 @@ export function ArchiveCatalogButton({
         setConfirming(open)
       }}
     >
-      <AlertDialogTrigger
-        disabled={submitting || disabled}
-        data-product-archive="true"
-        render={
-          <Button
-            type="button"
-            variant={removeIcon ? "ghost" : compact ? "ghost" : "outline"}
-            size={removeIcon ? "icon" : compact ? "icon" : "default"}
-            className={
-              removeIcon
-                ? "size-11 text-destructive hover:text-destructive"
-                : compact
-                  ? "relative"
-                  : undefined
-            }
-            data-remove-action={removeIcon ? "true" : undefined}
-            data-no-drag="true"
-          />
-        }
-        aria-label={t("archiveName", { name })}
-      >
-        {removeIcon ? (
-          <X aria-hidden="true" className="size-4" />
-        ) : (
-          <Archive aria-hidden="true" className="size-4" />
-        )}
+      {!hideTrigger && (
+        <AlertDialogTrigger
+          disabled={submitting || disabled}
+          data-product-archive="true"
+          render={
+            <Button
+              type="button"
+              variant={removeIcon ? "ghost" : compact ? "ghost" : "outline"}
+              size={removeIcon ? "icon" : compact ? "icon" : "default"}
+              className={
+                removeIcon
+                  ? "size-11 text-destructive hover:text-destructive"
+                  : compact
+                    ? "relative"
+                    : undefined
+              }
+              data-remove-action={removeIcon ? "true" : undefined}
+              data-no-drag="true"
+            />
+          }
+          aria-label={t("archiveName", { name })}
+        >
+          {removeIcon ? (
+            <X aria-hidden="true" className="size-4" />
+          ) : (
+            <Archive aria-hidden="true" className="size-4" />
+          )}
 
-        <span className={compact || removeIcon ? "sr-only" : undefined}>
-          {t("archive")}
-        </span>
-      </AlertDialogTrigger>
+          <span className={compact || removeIcon ? "sr-only" : undefined}>
+            {t("archive")}
+          </span>
+        </AlertDialogTrigger>
+      )}
 
       <AlertDialogPortal>
         <AlertDialogBackdrop />

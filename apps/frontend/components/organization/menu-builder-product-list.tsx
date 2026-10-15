@@ -75,7 +75,6 @@ export function MenuBuilderProductList({
       <Card className="min-w-0 gap-0 border-0 p-0">
         <MenuBuilderToolbar
           catalog={catalog}
-          category={categories.find((item) => item.id === categoryId)}
           title={
             categories.find((item) => item.id === categoryId)?.name ??
             u("allCategories")

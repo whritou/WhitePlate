@@ -1,4 +1,4 @@
-import type { CatalogCategory, ManagedCatalog } from "./catalog-management"
+import type { ManagedCatalog } from "./catalog-management"
 import type {
   MenuLanguageSettings,
   RestaurantDescriptionTranslations,
@@ -23,7 +23,6 @@ export type CategoryVisibilityInput = {
 
 export type MenuBuilderToolbarProps = {
   catalog: ManagedCatalog
-  category?: CatalogCategory
   title: string
   search: string
   onSearch: (value: string) => void
