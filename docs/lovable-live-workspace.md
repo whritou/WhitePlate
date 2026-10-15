@@ -42,7 +42,7 @@ Appearance/settings drafts are isolated by account and context: `whiteplate-live
 | Analytics | Authorized reporting/period aggregates; chart figures are fictitious. |
 | Stripe, payments, payouts, invoices and subscriptions | Verified account state, payment/billing integration and authoritative amounts. Connect Stripe is disabled. |
 | Legal/company details | Organization legal country/name and optional country-specific registration/tax identifiers persist; restaurant legal settings inherit or store independent overrides. |
-| Appearance | T2 draft persistence is implemented; migration and hosted acceptance pending. T3 publication and live storefront consumption remain open. Preview uses a sample menu. See [T2 evidence](audits/theme-controls.md). |
+| Appearance | T2 draft persistence is merged; production migration applied, API deployment/hosted acceptance unverified. T3 publication and live storefront consumption remain open. Preview uses a sample menu. See [T2 evidence](audits/theme-controls.md). |
 | Domains and notification preferences | Actual ownership/DNS/TLS verification, configuration persistence and delivery. No DNS/email operation is performed. |
 | Fine-grained custom staff permissions | Lovable permission matrix has no equivalent real contract; existing fixed API roles are preserved. |
 | Restaurant contact/service slots and payment-method choices | Live contracts do not provide all original source fields. The live checkout composition disables and discloses unconnected controls; no payment/slot behavior is invented. |

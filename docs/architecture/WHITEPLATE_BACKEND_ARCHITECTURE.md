@@ -1,6 +1,6 @@
 # Backend architecture
 
-T2 adds Domain theme validation/defaults and tenant draft/version fields, an Application handler/repository port, Infrastructure conditional owner/manager EF writes and saved-logo PNG extraction, and protected GET/PUT/palette routes. Only allowlisted appearance is stored; actual sRGB contrast is reported. This does not publish a theme or change the public menu. Migration is generated, not applied. See [decision 0012](decisions/0012-tenant-theme-drafts.md).
+T2 adds Domain theme validation/defaults and tenant draft/version fields, an Application handler/repository port, Infrastructure conditional owner/manager EF writes and saved-logo PNG extraction, and protected GET/PUT/palette routes. Only allowlisted appearance is stored; actual sRGB contrast is reported. This does not publish a theme or change the public menu. PR #110 is merged and the production migration is applied; API deployment/hosted acceptance remain unverified. See [decision 0012](decisions/0012-tenant-theme-drafts.md).
 
 S1 legal profiles use optional jurisdiction-specific organization identifiers with restaurant-level inherit/custom mode. Domain validates France, Germany, UK and US formats; organization and tenant APIs authorize every read/write and use conditional versions. No default tax rate exists; product rates and order snapshots remain the tax source. Migration `20261012190104_LegalProfileSettings` is applied to Coolify Production and Neon `test`; hosted acceptance remains open.
 

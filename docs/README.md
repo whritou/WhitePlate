@@ -94,7 +94,7 @@ Tenant-owned logo, favicon and banner uploads are wired in source using private 
 
 ## T2 theme controls — 15 October 2026
 
-Appearance drafts are implemented in source, retaining the demo Studio design while connecting palette, ambiance, radius and font controls to authorized backend persistence. Saved-logo extraction, safe schema, version conflicts and real contrast diagnostics are included. Migration and hosted acceptance remain pending; T3 publication is separate. See [T2 evidence](audits/theme-controls.md) and [decision 0012](architecture/decisions/0012-tenant-theme-drafts.md).
+Appearance drafts are implemented in source, retaining the demo Studio design while connecting palette, ambiance, radius and font controls to authorized backend persistence. Saved-logo extraction, safe schema, version conflicts and real contrast diagnostics are included. PR #110 is merged and the production migration is applied; API deployment/hosted acceptance remain unverified. T3 publication is separate. See [T2 evidence](audits/theme-controls.md) and [decision 0012](architecture/decisions/0012-tenant-theme-drafts.md).
 
 ## Workspace regression fixes — 10 October 2026
 

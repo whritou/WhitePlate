@@ -223,7 +223,7 @@ The localized staff page at `/[locale]/organization/orders?tenantId=<id>` reads 
 
 ## T2 theme drafts — 15 October 2026
 
-Implemented in source; migration/hosted acceptance pending. Every route requires an active organization owner or restaurant manager. Foreign, missing, inactive or unauthorized restaurants return 404; anonymous requests return 401. All responses are no-store.
+Implemented and merged; production schema applied, API deployment/hosted acceptance unverified. Every route requires an active organization owner or restaurant manager. Foreign, missing, inactive or unauthorized restaurants return 404; anonymous requests return 401. All responses are no-store.
 
 | Method/path | Request | Result |
 | --- | --- | --- |
