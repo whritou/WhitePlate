@@ -21,7 +21,7 @@ Chrome comparison used the supplied hosted catalog and `/fr/demo/menu` tabs. Loc
 
 ## Follow-up — 2026-10-15: product photos and persistent actions
 
-The product photo add tile now has a visible dashed border like the demo gallery. Selecting a category accents its full row. New category stays fixed at the lower left; the product editor keeps its body scrollable and its shared Archive, Cancel and Save actions fixed at the lower right while a product is selected. Photo-specific Save/Discard and the duplicate product discard action are removed. Cancel clears product and photo drafts. The menu layout no longer reserves an oversized blank tail.
+The product photo add tile now has a visible dashed border like the demo gallery. Selecting a category accents its full row, and hovering a category applies the same accent across its full row. New category stays fixed at the lower left; the product editor keeps its body scrollable and its shared Archive, Cancel and Save actions fixed at the lower right while a product is selected. Photo-specific Save/Discard and the duplicate product discard action are removed. Cancel clears product and photo drafts. The menu layout no longer reserves an oversized blank tail.
 
 The shared Save action writes photo ordering first and then product fields. These remain separate API writes, so a successful photo write is retained if the subsequent product-field write fails; no API transaction or schema change was introduced. The existing design tokens and API contract remain unchanged.
 

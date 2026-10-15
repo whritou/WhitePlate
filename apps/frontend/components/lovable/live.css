@@ -185,6 +185,7 @@
 .live-menu-category-actions { position: fixed; left: 0; bottom: 0; z-index: 30; width: 14rem; }
 .live-menu-category-actions > [data-slot="button"] { width: 100%; justify-content: flex-start; }
 .live-menu-category-row[data-selected="true"] { background: var(--accent); color: var(--accent-foreground); }
+.live-menu-category-row:hover { background: var(--accent); color: var(--accent-foreground); }
 .live-menu-category-row[data-selected="true"] [aria-pressed="true"] { background: transparent; color: inherit; }
 .live-product-actions { display: flex; align-items: center; justify-content: space-between; gap: .75rem; border-top: 1px solid var(--border); background: var(--background); padding: .75rem; box-shadow: 0 -1px 4px rgb(15 23 42 / .08); }
 .live-product-save-actions { flex-shrink: 0; gap: .5rem; }
