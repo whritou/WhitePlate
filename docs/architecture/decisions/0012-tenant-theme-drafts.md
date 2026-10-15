@@ -1,6 +1,6 @@
 # T2 tenant theme drafts
 
-Date: 15 October 2026. Status: implemented in source; migration and hosted acceptance pending.
+Date: 15 October 2026. Status: implemented and merged; production migration applied; API deployment and hosted acceptance unverified.
 
 The user approved retaining the existing `/demo/studio` design for the real Studio and connecting its controls to the backend. The real editor previously stored only a browser draft. T2 now saves an independent restaurant theme draft; T3 owns publication and public storefront consumption.
 
@@ -18,6 +18,6 @@ The user approved retaining the existing `/demo/studio` design for the real Stud
 
 Browser-only drafts cannot provide cross-device persistence or authorization. Publishing every save would silently combine T2 and T3; it is excluded. Drafts do not affect the public storefront, metadata, light-only admin shell or demo browser storage.
 
-Migration `20261015171219_TenantThemeDraft` must precede API deployment; this task has not applied it. EF regeneration exposed an older migration delegating its target model to the mutable snapshot. Its designer now contains the original committed target model, preserving migration history independently of new fields.
+Migration `20261015171219_TenantThemeDraft` was applied to Coolify Production through Chrome after PR #110 merged; other database environments are outside this rollout. API deployment and hosted behavior remain unverified. EF regeneration exposed an older migration delegating its target model to the mutable snapshot. Its designer now contains the original committed target model, preserving migration history independently of new fields.
 
 See [contracts](../../api/api-contracts.md#t2-theme-drafts--15-october-2026), [schema](../../database/database-schema.md#t2-theme-drafts--15-october-2026) and [verification](../../audits/theme-controls.md).

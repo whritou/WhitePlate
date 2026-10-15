@@ -70,7 +70,7 @@ Decisions and limits:
 
 ### T2 — Theming Studio: logo-derived palettes, presets and style controls
 
-15 October 2026: implemented in source using the user-approved unchanged Lovable Studio styling, authorized versioned backend drafts, saved-logo suggestions, real contrast diagnostics, ambiance presets and existing radius/font controls. Migration and hosted two-tenant acceptance remain pending. Low-contrast drafts are recoverable; safe publication is T3. The reference radius sliders supersede separate historical Stitch radius buttons. See [decision 0012](../architecture/decisions/0012-tenant-theme-drafts.md) and [evidence](../audits/theme-controls.md). The user is handling the board update.
+15 October 2026: implemented and merged in PR #110 using the user-approved unchanged Lovable Studio styling, authorized versioned backend drafts, saved-logo suggestions, real contrast diagnostics, ambiance presets and existing radius/font controls. Production migration is applied; API deployment and hosted two-tenant acceptance remain unverified. Low-contrast drafts are recoverable; safe publication is T3. The reference radius sliders supersede separate historical Stitch radius buttons. See [decision 0012](../architecture/decisions/0012-tenant-theme-drafts.md) and [evidence](../audits/theme-controls.md). The user is handling the board update.
 
 Reference: theming. Dependencies: T1.
 
