@@ -251,13 +251,15 @@
   .live-settings-sections [data-slot="button"]:hover:not([aria-current="page"]) { background: var(--secondary); color: var(--secondary-foreground); }
 }
 @media (min-width: 64rem) {
-  .live-menu-layout { height: auto; max-height: calc(100dvh - 15rem); min-height: 0; overflow: clip; }
+  .live-menu-layout { height: auto; max-height: calc(100dvh - 16rem); min-height: 0; overflow: clip; }
   .live-menu-categories { display: flex; height: 100%; flex-direction: column; overflow: hidden; }
   .live-menu-category-list { min-height: 0; flex: 1; flex-direction: column; overflow-x: hidden; overflow-y: auto; }
   .live-menu-category-actions { width: 14rem; flex-direction: column; }
   .live-menu-layout > fieldset { min-height: 0; overflow-y: auto; }
-  .live-product-panel { align-self: start; height: auto; max-height: calc(100dvh - 15rem); }
-  .live-product-form-shell { display: flex; height: auto; max-height: calc(100dvh - 15rem); min-height: 0; flex-direction: column; }
+  .live-product-panel { display: flex; align-self: start; height: auto; max-height: calc(100dvh - 16rem); flex-direction: column; overflow: hidden; }
+  .live-product-form-shell { display: flex; min-height: 0; flex: 1 1 auto; flex-direction: column; }
+  .live-product-form-shell > header,
+  .live-product-actions { flex-shrink: 0; }
   .live-product-panel-body { min-height: 0; flex: 0 1 auto; overflow-y: auto; padding-bottom: 1rem; }
 }
 @media (max-width: 63.99rem) {
