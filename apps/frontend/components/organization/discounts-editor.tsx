@@ -28,7 +28,7 @@ export function DiscountsEditor({
 
   return (
     <section className="live-discounts" aria-labelledby="discounts-heading">
-      <div className="live-discounts-content mx-auto max-w-[88rem] space-y-3">
+      <div className="live-discounts-content mx-auto max-w-[96rem] space-y-3">
         <header className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h2

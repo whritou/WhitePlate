@@ -96,3 +96,9 @@ The required project-board lookup was attempted. Browser tooling could not start
 Expanded the discount editor's desktop content width to 88rem and increased the grid's minimum tracks so the description, type, amount, minimum-order, and expiration controls remain readable. Narrow containers still reflow the fields. Removed the flags selector library's built-in bottom padding, which visually raised the language button despite matching its height to neighboring appbar controls. No palette or shared color token changed.
 
 Verification: TypeScript, ESLint (0 errors; 19 existing image warnings), Prettier for the changed TSX file, and `git diff --check` passed. The repo's `npm` shim could not start because its configured `npm-cli.js` is missing; equivalent installed frontend tools were run directly from `node_modules`. Tests and build were not run.
+
+### Follow-up — 15 October 2026: contain desktop discount row
+
+The expanded discount fields and their action row still overflowed the card at the 88rem content cap. Increased that cap and the menu builder's intermediate content width from 72rem to 96rem so the fields, active badge, and save/deactivate actions can stay inside the card on wide desktop screens. Container-based reflow remains in place when the available width is smaller.
+
+Verification: targeted ESLint, TypeScript, Prettier for both changed TSX files, and `git diff --check` passed. No automated test or build was run.
