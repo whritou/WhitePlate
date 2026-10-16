@@ -46,60 +46,60 @@
 
 **Files:** domain theme/media entities, EF configurations, generated migration and model snapshot.
 
-- [ ] Add `ThemePublicationSnapshot` with `Appearance`, nullable `LogoAssetId`, `FaviconAssetId`, and `BannerAssetId`, `SourceDraftVersion`, and nullable `PublishedAt`.
-- [ ] Add nullable `Tenant.PublishedThemeJson` and independent `Tenant.ThemePublicationVersion` defaulting to 1. Null reads as `new ThemeAppearance()`, no selected assets, and null publication time.
-- [ ] Add domain operations that reject non-current draft/publication versions, version overflow, and invalid appearances; do not let a publish operation change `ThemeDraftJson` or `ThemeDraftVersion`.
-- [ ] Add `MediaAsset.IsInPublishedTheme`. Publishing replaces the complete marker set; releasing a retired marker sets `ExpiresAt = now.AddDays(7)` so a long-lived published asset receives seven full retention days after release.
-- [ ] Generate the migration with `dotnet ef migrations add ThemePublication --project apps/api/WhitePlate.Infrastructure/WhitePlate.Infrastructure.csproj --startup-project apps/api/WhitePlate.Api/WhitePlate.Api.csproj --context WhitePlateDbContext --output-dir Persistence/Migrations`.
-- [ ] Backfill existing tenants to default public appearance, their existing `ThemeDraftVersion`, null `PublishedAt`, and their current active saved T1 asset IDs. Mark exactly those assets as published. Leave new tenants at null snapshot/version 1. Do not apply the migration to a shared database.
-- [ ] Confirm the EF model snapshot contains the two tenant columns and media marker/index; do not manually edit generated model files.
+- [x] Add `ThemePublicationSnapshot` with `Appearance`, nullable `LogoAssetId`, `FaviconAssetId`, and `BannerAssetId`, `SourceDraftVersion`, and nullable `PublishedAt`.
+- [x] Add nullable `Tenant.PublishedThemeJson` and independent `Tenant.ThemePublicationVersion` defaulting to 1. Null reads as `new ThemeAppearance()`, no selected assets, and null publication time.
+- [x] Add domain operations that reject non-current draft/publication versions, version overflow, and invalid appearances; do not let a publish operation change `ThemeDraftJson` or `ThemeDraftVersion`.
+- [x] Add `MediaAsset.IsInPublishedTheme`. Publishing replaces the complete marker set; releasing a retired marker sets `ExpiresAt = now.AddDays(7)` so a long-lived published asset receives seven full retention days after release.
+- [x] Generate the migration with `dotnet ef migrations add ThemePublication --project apps/api/WhitePlate.Infrastructure/WhitePlate.Infrastructure.csproj --startup-project apps/api/WhitePlate.Api/WhitePlate.Api.csproj --context WhitePlateDbContext --output-dir Persistence/Migrations`.
+- [x] Backfill existing tenants to default public appearance, their existing `ThemeDraftVersion`, null `PublishedAt`, and their current active saved T1 asset IDs. Mark exactly those assets as published. Leave new tenants at null snapshot/version 1. Do not apply the migration to a shared database.
+- [x] Confirm the EF model snapshot contains the two tenant columns and media marker/index; do not manually edit generated model files.
 
 ## Task 2: Publish atomically and resolve public theme/assets by host
 
 **Files:** Application publication contracts/handler/repository, persistence repositories, API controllers, media service and cleanup.
 
-- [ ] Define management DTO `ThemePublicationDto(ThemeAppearance Theme, Guid? LogoAssetId, Guid? FaviconAssetId, Guid? BannerAssetId, int SourceDraftVersion, DateTimeOffset? PublishedAt, int Version)` and request `PublishThemeRequest(int DraftVersion)`.
-- [ ] Implement `GET /api/v1/tenants/{tenantId}/theme/publication` for current publication state and `POST` on the same route with `{ "draftVersion": n }` and `If-Match: "<publicationVersion>"`.
-- [ ] In the publish transaction, recheck active tenant/organization and owner/manager membership, require both versions to match, read the current saved draft and current ready tenant-owned T1 slots, validate allowlisted appearance and publication contrast, write the snapshot/version, switch `IsInPublishedTheme`, and commit once. The request never supplies appearance or asset IDs.
-- [ ] Enforce 4.5:1 for text/background, primary/background, and text/accent. If a banner asset is selected, reject `BannerOverlay < 65`; if no banner is selected, the identity header renders against theme background/text. Add an `UnprocessableEntity` application error mapped to HTTP 422 for unsafe saved-draft/asset publication state without changing existing 400 theme-save errors. Missing preconditions map to 428 and stale versions to 412. Failed writes leave prior JSON, version, and markers untouched.
-- [ ] Implement host-resolved `GET /api/v1/theme` with `RequireTenant`; it must not accept a tenant ID in query/body. Return default values and version 1 when the snapshot is null. Apply no-store headers.
-- [ ] Change `BrandMediaService.PublicAsync` to resolve the slot asset ID from the tenant snapshot, verify tenant ownership/readiness, and read that exact asset. Keep management listing and preview reads on the editable T1 slot behavior.
-- [ ] Exclude `IsInPublishedTheme` rows from cleanup and include the marker in the conditional claim. Keep the existing favicon fallback when the published snapshot has no favicon.
+- [x] Define management DTO `ThemePublicationDto(ThemeAppearance Theme, Guid? LogoAssetId, Guid? FaviconAssetId, Guid? BannerAssetId, int SourceDraftVersion, DateTimeOffset? PublishedAt, int Version)` and request `PublishThemeRequest(int DraftVersion)`.
+- [x] Implement `GET /api/v1/tenants/{tenantId}/theme/publication` for current publication state and `POST` on the same route with `{ "draftVersion": n }` and `If-Match: "<publicationVersion>"`.
+- [x] In the publish transaction, recheck active tenant/organization and owner/manager membership, require both versions to match, read the current saved draft and current ready tenant-owned T1 slots, validate allowlisted appearance and publication contrast, write the snapshot/version, switch `IsInPublishedTheme`, and commit once. The request never supplies appearance or asset IDs.
+- [x] Enforce 4.5:1 for text/background, primary/background, and text/accent. If a banner asset is selected, reject `BannerOverlay < 65`; if no banner is selected, the identity header renders against theme background/text. Add an `UnprocessableEntity` application error mapped to HTTP 422 for unsafe saved-draft/asset publication state without changing existing 400 theme-save errors. Missing preconditions map to 428 and stale versions to 412. Failed writes leave prior JSON, version, and markers untouched.
+- [x] Implement host-resolved `GET /api/v1/theme` with `RequireTenant`; it must not accept a tenant ID in query/body. Return default values and version 1 when the snapshot is null. Apply no-store headers.
+- [x] Change `BrandMediaService.PublicAsync` to resolve the slot asset ID from the tenant snapshot, verify tenant ownership/readiness, and read that exact asset. Keep management listing and preview reads on the editable T1 slot behavior.
+- [x] Exclude `IsInPublishedTheme` rows from cleanup and include the marker in the conditional claim. Keep the existing favicon fallback when the published snapshot has no favicon.
 
 ## Task 3: Add tenant-safe frontend publication and storefront reads
 
 **Files:** types/parsers, services/BFFs, storefront server pages and client shells.
 
-- [ ] Add parsed `ThemePublication` and public `PublishedTheme` types. Validate enum, color, numeric, version, and nullable asset-ID fields before the values reach React.
-- [ ] Add authenticated server service and same-origin `GET/POST /api/theme-publication?tenantId=…`. Enforce a single valid tenant selector, strict request shape, exact configured `Origin` for POST, existing server-only auth client, and `private, no-store`/`Vary: Cookie` responses.
-- [ ] Add `getPublicTheme(hostHeader)` using the existing `getTenantSlug` and `getTenantApiBaseUrl` functions, `GET /api/v1/theme`, and the public request factory. Do not pass a browser tenant selector or use shared Next/CDN caching.
-- [ ] Convert the allowlisted API appearance into the existing `StoreTheme` CSS-variable shape; use server-resolved restaurant name for `name`, use published asset slot URLs with `?v=<publicationVersion>`, and never expose IDs as a tenant authorization mechanism.
-- [ ] Fetch theme on the real storefront page and pass it through `RestaurantMenu` to `LiveCustomerShell` and `LiveRestaurantIdentity`. Apply colors, fonts, weights, spacing, radius, image ratio, banner height/alignment/overlay, banner visibility, and layout. Preserve the current 65% minimum scrim for a published banner.
-- [ ] Set the versioned published favicon in root metadata. On tracking, use the validated host to fetch the menu identity and published theme, set the restaurant title/favicon, and pass the theme into its customer shell.
-- [ ] Keep menu data, checkout behavior, tracking token handling, sample previews, and menu-locale selection unchanged.
+- [x] Add parsed `ThemePublication` and public `PublishedTheme` types. Validate enum, color, numeric, version, and nullable asset-ID fields before the values reach React.
+- [x] Add authenticated server service and same-origin `GET/POST /api/theme-publication?tenantId=…`. Enforce a single valid tenant selector, strict request shape, exact configured `Origin` for POST, existing server-only auth client, and `private, no-store`/`Vary: Cookie` responses.
+- [x] Add `getPublicTheme(hostHeader)` using the existing `getTenantSlug` and `getTenantApiBaseUrl` functions, `GET /api/v1/theme`, and the public request factory. Do not pass a browser tenant selector or use shared Next/CDN caching.
+- [x] Convert the allowlisted API appearance into the existing `StoreTheme` CSS-variable shape; use server-resolved restaurant name for `name`, use published asset slot URLs with `?v=<publicationVersion>`, and never expose IDs as a tenant authorization mechanism.
+- [x] Fetch theme on the real storefront page and pass it through `RestaurantMenu` to `LiveCustomerShell` and `LiveRestaurantIdentity`. Apply colors, fonts, weights, spacing, radius, image ratio, banner height/alignment/overlay, banner visibility, and layout. Preserve the current 65% minimum scrim for a published banner.
+- [x] Set the versioned published favicon in root metadata. On tracking, use the validated host to fetch the menu identity and published theme, set the restaurant title/favicon, and pass the theme into its customer shell.
+- [x] Keep menu data, checkout behavior, tracking token handling, sample previews, and menu-locale selection unchanged.
 
 ## Task 4: Separate Studio draft save from publication and correct navigation labels
 
 **Files:** Studio hook/controller/components, brand workspace, EN/FR catalogs.
 
-- [ ] Keep the current T2 Save draft action. Add a distinct Publish action that is enabled only when the local appearance is saved, both query versions are current, and publication is not pending.
-- [ ] On successful publish, refresh published-theme, publication-status, and saved-brand query data; on failure or conflict, retain the old live state and all browser edits. Offer explicit reload for stale publication.
-- [ ] Add Discard to clear only local unsaved edits and reload server-saved theme; keep Reset design as a local stage-default action that still requires save and publish. Do not reset/remove brand slots.
-- [ ] Add a localized next-publication notice after saved brand asset changes. Keep brand slot save/removal scoped per slot.
-- [ ] Change the tab values in `messages/en.json` and `messages/fr.json` to “Design” and “Brand & Details”; preserve internal state and `panel=appearance|brand` deep links.
-- [ ] Keep sample preview disclosure and the existing validated storefront URL/copy action; do not introduce order/payment side effects into preview.
-- [ ] Confirm both tabs and actions use shared design-system controls, semantic selected/status state, visible keyboard focus, responsive wrapping, reduced-motion handling, and the existing accessibility targets.
+- [x] Keep the current T2 Save draft action. Add a distinct Publish action that is enabled only when the local appearance is saved, both query versions are current, and publication is not pending.
+- [x] On successful publish, refresh published-theme, publication-status, and saved-brand query data; on failure or conflict, retain the old live state and all browser edits. Offer explicit reload for stale publication.
+- [x] Add Discard to clear only local unsaved edits and reload server-saved theme; keep Reset design as a local stage-default action that still requires save and publish. Do not reset/remove brand slots.
+- [x] Add a localized next-publication notice after saved brand asset changes. Keep brand slot save/removal scoped per slot.
+- [x] Change the tab values in `messages/en.json` and `messages/fr.json` to “Design” and “Brand & Details”; preserve internal state and `panel=appearance|brand` deep links.
+- [x] Keep sample preview disclosure and the existing validated storefront URL/copy action; do not introduce order/payment side effects into preview.
+- [ ] Browser-verify both tabs and actions use shared design-system controls, semantic selected/status state, visible keyboard focus, responsive wrapping, reduced-motion handling, and the existing accessibility targets.
 
 ## Task 5: Update contracts/docs and perform non-test verification
 
 **Files:** API/database/frontend docs, T3 backlog card, source branches.
 
-- [ ] Document routes, ETags, error statuses, snapshot/null defaults, migration backfill, media release retention, host-only tenant resolution, and current deployment boundary in the API, database, and architecture references.
-- [ ] Add T3 acceptance steps for desktop, 390px preview, 320/375/390/768/1024/1440/wide viewport checks, EN/FR, keyboard/focus, reduced motion, 200% zoom, a fresh guest session, refresh, all three media slots, and tenant/cache isolation to `docs/functional-test-plan.md`.
-- [ ] Update the backlog entry to the implemented source state and keep production migration/deployment/hosted acceptance separate from local implementation.
-- [ ] Run `dotnet build apps/api/WhitePlate.Api/WhitePlate.Api.csproj` from the repository root.
-- [ ] From `apps/frontend`, run `npm run lint`, `npm run typecheck`, `npm run format:check`, and `npm run build` when the locked frontend dependencies are available. Record unavailable commands and exact failures.
-- [ ] Run `git diff --check`, inspect the complete diff, and commit the feature with a Conventional Commit message. Do not run or add tests unless the user asks for verification.
+- [x] Document routes, ETags, error statuses, snapshot/null defaults, migration backfill, media release retention, host-only tenant resolution, and current deployment boundary in the API, database, and architecture references.
+- [x] Add T3 acceptance steps for desktop, 390px preview, 320/375/390/768/1024/1440/wide viewport checks, EN/FR, keyboard/focus, reduced motion, 200% zoom, a fresh guest session, refresh, all three media slots, and tenant/cache isolation to `docs/functional-test-plan.md`.
+- [x] Update the backlog entry to the implemented source state and keep production migration/deployment/hosted acceptance separate from local implementation.
+- [x] Run `dotnet build apps/api/WhitePlate.Api/WhitePlate.Api.csproj` from the repository root; build passed with zero warnings and errors.
+- [x] Run frontend lint, typecheck, focused changed-file Prettier check, repository `format:check`, and production build. Lint/typecheck/focused formatting/build passed; the repository format check flags 651 baseline files. Build used disposable configuration and logged expected unreachable local database schema checks.
+- [ ] Run `git diff --check`, inspect the complete diff, and commit the feature with a Conventional Commit message. `git diff --check` has passed; final review and commit remain.
 
 ## Plan self-review
 

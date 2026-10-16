@@ -65,7 +65,8 @@ public sealed class BrandMediaService(IStaffMembershipRepository memberships, IM
 
     public async Task<Result<MediaContent>> PublicAsync(Guid tenantId, string slot, CancellationToken ct)
     {
-        var asset = (await repository.ActiveAsync(tenantId, ct)).SingleOrDefault(item => item.Slot == slot);
+        if (!MediaAsset.IsSlot(slot)) return Failure<MediaContent>(ErrorCode.NotFound);
+        var asset = await repository.PublishedAsync(tenantId, slot, ct);
         return await ReadAsync(asset, ct);
     }
 

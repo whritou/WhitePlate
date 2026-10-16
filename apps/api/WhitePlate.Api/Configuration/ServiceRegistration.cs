@@ -90,6 +90,8 @@ public static class ServiceRegistration
         services.AddScoped<OrderingOperationsHandler>();
         services.AddScoped<IThemeSettingsRepository, ThemeSettingsRepository>();
         services.AddScoped<ThemeSettingsHandler>();
+        services.AddScoped<IThemePublicationRepository, ThemePublicationRepository>();
+        services.AddScoped<ThemePublicationHandler>();
         services.AddSingleton<ILogoPaletteExtractor, WhitePlate.Infrastructure.Media.LogoPaletteExtractor>();
         services.AddScoped<ICatalogRepository, CatalogRepository>();
         services.AddScoped<IOrderRepository, OrderRepository>();

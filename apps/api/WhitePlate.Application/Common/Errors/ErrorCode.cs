@@ -4,6 +4,7 @@ namespace WhitePlate.Application.Common.Errors;
 public enum ErrorCode
 {
     ValidationFailed,
+    UnprocessableEntity,
     NotFound,
     Conflict,
     Unauthorized,

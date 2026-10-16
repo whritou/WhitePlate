@@ -52,5 +52,7 @@ public sealed class TenantConfiguration : IEntityTypeConfiguration<Tenant>
         builder.Property(tenant => tenant.OrderingOperationsVersion).IsRequired().HasDefaultValue(1);
         builder.Property(tenant => tenant.ThemeDraftJson).HasColumnType("jsonb");
         builder.Property(tenant => tenant.ThemeDraftVersion).IsRequired().HasDefaultValue(1);
+        builder.Property(tenant => tenant.PublishedThemeJson).HasColumnType("jsonb");
+        builder.Property(tenant => tenant.ThemePublicationVersion).IsRequired().HasDefaultValue(1).IsConcurrencyToken();
     }
 }

@@ -1,7 +1,8 @@
 import { RestaurantMenu } from "@/components/storefront/restaurant-menu"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { LandingPage } from "@/components/marketing/landing-page"
-import { getPublicMenu } from "@/lib/api/public-storefront"
+import { getPublicMenu, getPublicTheme } from "@/lib/api/public-storefront"
+import { publishedStoreTheme } from "@/lib/lovable/storeTheme"
 import { getTranslations } from "next-intl/server"
 import { headers } from "next/headers"
 import { Suspense } from "react"
@@ -16,15 +17,23 @@ export async function generateMetadata({
     searchParams,
     headers(),
   ])
-  const storefront = await getPublicMenu(
-    requestHeaders.get("host"),
-    query.menuLocale
-  )
+  const [storefront, publication] = await Promise.all([
+    getPublicMenu(requestHeaders.get("host"), query.menuLocale),
+    getPublicTheme(requestHeaders.get("host")),
+  ])
 
   return storefront.kind === "menu"
     ? {
         title: storefront.menu.restaurantName,
-        icons: { icon: [{ url: "/api/public/brand-assets/favicon" }] },
+        icons: {
+          icon: [
+            {
+              url: publication?.hasFavicon
+                ? `/api/public/brand-assets/favicon?v=${publication.version}`
+                : "/favicon.ico",
+            },
+          ],
+        },
         description: t("storefrontDescription", {
           restaurant: storefront.menu.restaurantName,
         }),
@@ -52,16 +61,17 @@ async function PageContent({
   searchParams: Promise<{ menuLocale?: string; step?: string }>
 }) {
   const [query, requestHeaders] = await Promise.all([searchParams, headers()])
-  const storefront = await getPublicMenu(
-    requestHeaders.get("host"),
-    query.menuLocale
-  )
+  const [storefront, publication] = await Promise.all([
+    getPublicMenu(requestHeaders.get("host"), query.menuLocale),
+    getPublicTheme(requestHeaders.get("host")),
+  ])
 
   if (storefront.kind === "menu")
     return (
       <RestaurantMenu
         key={storefront.menu.tenantId}
         menu={storefront.menu}
+        theme={publishedStoreTheme(storefront.menu.restaurantName, publication)}
         step={query.step === "checkout" ? "checkout" : "shop"}
       />
     )

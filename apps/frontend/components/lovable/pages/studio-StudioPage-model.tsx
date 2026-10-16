@@ -32,9 +32,14 @@ export function useStudioPageModel(
     setSaved(false)
   }
 
-  const publish = () => {
+  const saveDemo = () => {
     if (saveTheme(t, storageKey)) setSaved(true)
     else alert("Your images are too large to save. Try smaller image files.")
+  }
+
+  const discardDemo = () => {
+    setT(loadTheme(storageKey))
+    setSaved(true)
   }
 
   return {
@@ -42,6 +47,8 @@ export function useStudioPageModel(
     connected: Boolean(controller),
     locked: controller?.locked ?? false,
     saving: controller?.saving ?? false,
+    publishing: controller?.publishing ?? false,
+    canPublish: controller?.canPublish ?? false,
     logoPreset: controller?.logoPreset,
     t: controller?.theme ?? t,
     setT,
@@ -60,6 +67,8 @@ export function useStudioPageModel(
     menu,
     setMenu,
     set: controller?.set ?? set,
-    publish: controller?.publish ?? publish,
+    saveDraft: controller?.saveDraft ?? saveDemo,
+    publish: controller?.publish ?? (() => undefined),
+    discard: controller?.discard ?? discardDemo,
   }
 }

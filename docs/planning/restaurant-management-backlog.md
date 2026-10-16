@@ -21,7 +21,7 @@ The settings screenshot shows the active opening-hours panel; its HTML also cont
 
 ## Current boundaries and overlap
 
-Existing source includes the real Lovable Dashboard overview and five-lane Orders page, catalog and language workspaces, organization Settings shell, appearance Studio with account/tenant-scoped browser drafts, guest checkout without payment, order history and REST/SignalR recovery. Analytics and unsupported settings remain disclosed examples/drafts. Tenant theme persistence/publication, scheduling, guest-order email, Stripe connection, authoritative analytics and other listed backend capabilities remain open. See [Lovable real workspace routes and behavior](../lovable-live-workspace.md).
+Existing source includes the real Lovable Dashboard overview and five-lane Orders page, catalog and language workspaces, organization Settings shell, appearance Studio, guest checkout without payment, order history and REST/SignalR recovery. T2 tenant theme drafts and T3 publication/storefront application are now implemented in source; migration rollout and hosted/browser acceptance remain open. Analytics and unsupported settings remain disclosed examples/drafts. Scheduling, guest-order email, Stripe connection, authoritative analytics and other listed backend capabilities remain open. See [Lovable real workspace routes and behavior](../lovable-live-workspace.md).
 
 The initial planning pass reviewed all 89 existing project items; the follow-up reviewed the resulting 102 items before adding the missing menu-builder and live-orders work. Reuse the completed kitchen, catalog, organization shell and design-system work. Existing In review storefront unavailable-product acceptance and hosted SignalR delivery/reconnect retain their own scope; the new cards link to them rather than duplicating their implementation.
 
@@ -94,6 +94,8 @@ Reference: theming. Dependencies: T1, T2.
 
 Deliver the complete Studio layout with instant mobile/desktop storefront preview, reset and deliberate publication of restaurant branding.
 
+Implementation update (16 October 2026): T3 publication and real storefront application are implemented in source. Studio keeps saved drafts separate from publication, adds explicit Publish/Discard actions and “Design” / “Brand & Details” tab labels, and applies the published appearance and asset IDs to the host-resolved menu, checkout, tracking, page title, and favicon. API build, frontend lint/typecheck/build, focused Prettier checks, and migration SQL generation passed. Lint reports 19 existing image-element warnings; repository-wide Prettier still flags 651 files. The generated `20261016132000_ThemePublication` migration preserves current default appearance and active brand slots but has not been applied. Production rollout, fresh guest-session/browser visual acceptance, and hosted tenant isolation remain pending. No automated tests were run. The approved design and implementation details are in [T3 spec](../superpowers/specs/2026-10-16-theme-publication-design.md), [plan](../superpowers/plans/2026-10-16-theme-publication.md), [API contract](../api/api-contracts.md#t3-theme-publication), and [schema note](../database/database-schema.md#t3-published-theme-snapshot).
+
 Acceptance criteria:
 
 - [ ] Match the supplied two-column editor/preview hierarchy on desktop; provide usable stacked or switchable controls/preview on mobile, including 390px preview and desktop mode.
@@ -104,7 +106,7 @@ Acceptance criteria:
 
 Decisions and limits:
 
-- Record draft persistence, reset/default behavior and publication concurrency/versioning before implementation.
+- Draft persistence, reset/discard semantics, publication concurrency, snapshot backfill and safe publication thresholds are recorded in the approved [T3 spec](../superpowers/specs/2026-10-16-theme-publication-design.md).
 
 ### S1 — Restaurant Settings: establishment identity and pickup information
 

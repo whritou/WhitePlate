@@ -9,11 +9,13 @@ import {
 } from "@/components/ui/card"
 import type { CartItem } from "@/types/checkout"
 import type { Product } from "@/types/storefront"
+import type { StoreTheme } from "@/types/lovable/storeTheme"
 import { useLocale, useTranslations } from "next-intl"
 import { ProductOrdering } from "./product-ordering"
 
 export function MenuProductCard({
   product,
+  layout,
   item,
   locked,
   orderRound,
@@ -21,6 +23,7 @@ export function MenuProductCard({
   onSave,
 }: {
   product: Product
+  layout: StoreTheme["layout"]
   imageIndex?: number
   item?: CartItem
   locked: boolean
@@ -34,17 +37,20 @@ export function MenuProductCard({
   return (
     <Card
       size="sm"
-      className="grid h-full grid-cols-1 grid-rows-[auto_auto_1fr_auto] gap-0 overflow-hidden p-0 shadow-none"
+      className={`grid h-full gap-0 overflow-hidden p-0 shadow-none ${layout === "grid" ? "grid-cols-1 grid-rows-[auto_auto_1fr_auto]" : "grid-cols-[7rem_minmax(0,1fr)] grid-rows-[auto_1fr_auto]"}`}
     >
       <ProductPhotoImage
         key={product.photos?.[0]?.id ?? "fallback"}
         productId={product.id}
         photo={product.photos?.[0]}
         size={640}
-        className="col-start-1 row-start-1 aspect-[4/3] w-full"
+        square
+        className={`${layout === "grid" ? "customer-image-ratio" : "row-span-3 h-full"} col-start-1 row-start-1 w-full`}
       />
 
-      <CardHeader className="col-start-1 row-start-2 min-w-0 px-4 pt-4 pb-0">
+      <CardHeader
+        className={`${layout === "grid" ? "col-start-1 row-start-2" : "col-start-2 row-start-1"} min-w-0 px-4 pt-4 pb-0`}
+      >
         <CardTitle>
           <h3 className="font-heading text-base font-bold wrap-anywhere">
             {product.name}
@@ -52,7 +58,9 @@ export function MenuProductCard({
         </CardTitle>
       </CardHeader>
 
-      <CardContent className="col-start-1 row-start-3 flex min-w-0 flex-col gap-3 px-4 pt-2 pb-0">
+      <CardContent
+        className={`${layout === "grid" ? "col-start-1 row-start-3" : "col-start-2 row-start-2"} flex min-w-0 flex-col gap-3 px-4 pt-2 pb-0`}
+      >
         {product.description && (
           <p className="text-body-sm wrap-anywhere text-muted-foreground">
             {product.description}
@@ -122,7 +130,9 @@ export function MenuProductCard({
         )}
       </CardContent>
 
-      <CardFooter className="col-start-1 row-start-4 flex-wrap justify-between gap-3 border-t-0 p-4">
+      <CardFooter
+        className={`${layout === "grid" ? "col-start-1 row-start-4" : "col-start-2 row-start-3"} flex-wrap justify-between gap-3 border-t-0 p-4`}
+      >
         <span className="font-heading text-headline-sm tabular-nums">
           {price.format(product.basePrice)}
         </span>
