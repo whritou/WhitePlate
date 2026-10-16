@@ -1,6 +1,6 @@
 # Human translation review and glossary
 
-Date: 17 October 2026. Status: implemented in source; migration application and hosted acceptance pending.
+Date: 17 October 2026. Status: implemented in source and applied to Coolify Production; API deployment and hosted acceptance pending.
 
 ## Context
 
@@ -19,4 +19,4 @@ Catalog translations are entered by restaurant staff. M3 adds review and termino
 
 ## Consequences and limits
 
-Review is an explicit step for changed translations, while unaffected legacy translations continue to work without migration metadata. Candidate versioning and text fingerprints prevent review decisions from applying to changed source/draft text. Glossary wording remains advisory. The additive migration is generated in source but has not been applied to shared databases; PostgreSQL concurrency and hosted staff/guest acceptance remain open. See the [API contract](../../api/api-contracts.md#m3-human-translation-review-and-glossary--2026-10-17), [schema](../../database/database-schema.md#m3-human-translation-review-and-glossary--2026-10-17), and [functional acceptance plan](../../functional-test-plan.md#m3-human-translation-review-and-glossary).
+Review is an explicit step for changed translations, while unaffected legacy translations continue to work without migration metadata. Candidate versioning and text fingerprints prevent review decisions from applying to changed source/draft text. Glossary wording remains advisory. The additive migration was applied to Coolify Production with both tables empty and `whiteplate_api` grants verified; no legacy translation data was changed. PostgreSQL application-level concurrency and hosted staff/guest acceptance remain open because the API has not been deployed. See [rollout evidence](../../audits/catalog-translation-workflow.md), the [API contract](../../api/api-contracts.md#m3-human-translation-review-and-glossary--2026-10-17), [schema](../../database/database-schema.md#m3-human-translation-review-and-glossary--2026-10-17), and [functional acceptance plan](../../functional-test-plan.md#m3-human-translation-review-and-glossary).

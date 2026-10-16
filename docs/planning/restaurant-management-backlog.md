@@ -39,7 +39,7 @@ Some historical documents and completed card bodies retain older In review/In pr
 
 ## Suggested implementation order
 
-The Lovable Menu workspace (M1) and existing five-lane Orders screen (K1) provide the implemented foundations. Product metadata (M2) depends on M1; product photos are a separate task (M5), depending on M1 and T1; assisted translations (M3) and catalog publication/history (M4) build on M1 after their decisions. KDS operational features (K2) and cancellation/payment details (K3) extend existing Orders behavior, with scheduling, media, metrics, notification and financial dependencies gated to actual runtime support.
+The Lovable Menu workspace (M1) and existing five-lane Orders screen (K1) provide the implemented foundations. Product metadata (M2) depends on M1; product photos are a separate task (M5), depending on M1 and T1; human translation review (M3) and catalog publication/history (M4) build on M1 after their decisions. KDS operational features (K2) and cancellation/payment details (K3) extend existing Orders behavior, with scheduling, media, metrics, notification and financial dependencies gated to actual runtime support.
 
 Start remaining establishment identity (S1) and hosted media acceptance (T1); the Lovable Dashboard overview exists, while any remaining D1 gaps must be confirmed against source. Follow with persistent theme controls (T2), opening hours (S2), theme preview/publication (T3), slot enforcement (S3), metrics (D2) and availability (D4). Rush/pause (D3) depends on slot enforcement. Email (S4) and Stripe connection (S5) follow establishment identity and explicit product/provider decisions; pickup fields and branding integrate only when their dependencies exist.
 
@@ -295,7 +295,7 @@ Acceptance criteria:
 
 Decisions and limits:
 
-- Define navigation migration and per-product editing/save semantics. Product metadata, assisted translation, publication history and product photos are tracked in M2–M5; do not show their controls as operational before they are wired.
+- Define navigation migration and per-product editing/save semantics. Product metadata, human translation review, publication history and product photos are tracked in M2–M5; do not show their controls as operational before they are wired.
 
 ### M2 — Menu Builder: allergens, SKU and preparation metadata
 
@@ -314,23 +314,24 @@ Decisions and limits:
 
 - Decide SKU uniqueness/integration scope, supported allergen/dietary vocabulary, snapshot requirements and preparation-duration semantics. SKU does not establish a POS integration; sample stock quantities are not inventory.
 
-### M3 — Menu Builder: assisted translation, glossary and human review workflow
+### M3 — Menu Builder: human translation review and glossary
 
 Reference: menu-builder. Dependencies: M1.
 
-Implement the reference translation studio's generate-all/retranslate, glossary validation, locale review and explicit save/approval workflow as a separate feature from existing manual translations.
+Add a human-entered translation review workflow and tenant-owned glossary to the existing manual catalog translations. AI, machine and automatic translation are out of scope.
 
 Acceptance criteria:
 
-- [ ] Retain fully working manual translation when assistance is unavailable; generate drafts only for explicitly selected enabled menu locales and supported fields.
-- [ ] Provide source/target-language panels, missing/review/approved state, per-locale save and safe retranslation confirmation so existing human edits are not silently overwritten.
-- [ ] Define tenant-owned glossary terms and human approval/version metadata, showing actual reviewer information only when persisted and authorized.
-- [ ] Use a server-side provider adapter with timeouts, bounded usage/cost controls and secret protection; preserve source text and show retryable failures without fabricating a gastronomic quality score.
-- [ ] Require human review of allergen/safety wording and keep unapproved drafts out of published guest content; verify locale fallback, glossary application, concurrent edits, provider failures and cross-tenant isolation.
+- [x] Keep existing saved translations unchanged; only an explicit new or changed human submission creates a versioned review candidate. Unchanged submissions are no-ops and existing translations receive no backfill.
+- [x] Restrict submission, review queue, decisions and glossary management to persisted tenant owners/managers; prevent authors from reviewing their own candidates and reject stale source/saved-text versions.
+- [x] Keep candidate text separate until approval; approval updates the editable draft, rejection preserves saved text, and M4 publication remains required for guest visibility.
+- [x] Keep the tenant glossary advisory: validate locale pairs and normalized duplicates, but never insert or rewrite translation text.
+- [x] Apply the additive empty-table migration to Coolify Production and verify migration history, empty review/glossary tables, API-role CRUD grants and unchanged tenant/publication counts.
+- [ ] Deploy the API and complete hosted PostgreSQL concurrency plus manager/guest acceptance.
 
 Decisions and limits:
 
-- Select translation provider and usage/cost policy, glossary scope and approval permissions. AI/DeepL labels and 98% quality claims in the reference are examples, not an approved provider or validated metric.
+- No translation provider or AI behavior is approved or implemented. Hosted API/runtime acceptance is still required before the M3 workflow is complete.
 
 ### M4 — Menu Builder: catalog draft publication and change history
 
@@ -350,7 +351,7 @@ Acceptance criteria:
 
 Decisions and limits:
 
-- Decision 0013 settles immediate D4 availability bypass, Owner/Manager publication permissions, indefinite history retention and rollback as a new version. M3 translation provider/review states remain outside M4; saved translations are captured as-is. M5 photos remain independently saved and are not part of catalog snapshots.
+- Decision 0013 settles immediate D4 availability bypass, Owner/Manager publication permissions, indefinite history retention and rollback as a new version. M3 human review and glossary remain separate from publication; saved translations are captured as-is. M5 photos remain independently saved and are not part of catalog snapshots.
 
 ### M5 — Menu Builder: upload and manage product photos
 

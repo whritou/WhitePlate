@@ -2,6 +2,12 @@
 
 This is the runbook for the user-approved, single hosted development stack ([decision 0005](../architecture/decisions/0005-coolify-hosting.md)). Runtime credentials belong in Coolify/Vercel settings, never this file, client code or `NEXT_PUBLIC_*` variables. The migration is tracked in [issue #17](https://github.com/whritou/WhitePlate/issues/17).
 
+## M3 translation-review schema rollout — 2026-10-17
+
+After PR [#116](https://github.com/whritou/WhitePlate/pull/116) merged as `36da90c`, the Coolify Production preflight found `20261016155331_CatalogPublicationHistory` as the latest migration, two tenants, two publication heads, and no M3 tables. A custom-format backup was created at `/tmp/whiteplate-before-m3-translation-20261017.dump` inside the PostgreSQL container (81,505 bytes); `pg_restore --list` validated it. This temporary in-container file is not an off-host backup or restore test.
+
+The additive `20261016222355_M3CatalogTranslationWorkflow` DDL and EF history row (`10.0.12`) were applied in one PostgreSQL transaction through the Coolify terminal. Post-checks confirmed the history row, both empty M3 tables, unchanged counts of two tenants and two publication heads, and `whiteplate_api` `SELECT`, `INSERT`, `UPDATE`, and `DELETE` grants on both tables. No existing translations were changed or backfilled. The API was not deployed or restarted; hosted workflow acceptance remains open. See [M3 rollout evidence](../audits/catalog-translation-workflow.md).
+
 ## D2 dashboard-metrics schema rollout — 2026-10-14
 
 Applied `20261014122001_DashboardMetricsPreparationTimestamps` and `20261014122436_DashboardMetricsTenantStatusIndex` transactionally to `whiteplate-postgresql-main` before merging the dashboard API change, keeping the additive schema ready before code deployment. Preflight found `20261013191310_OrderPickupMode` as the latest EF migration and no D2 columns or indexes. A 68.7 KB `pg_dump -Fc` was created at `/tmp/whiteplate-before-dashboard-metrics-20261014.dump` inside the database container before applying the change. Post-checks confirmed both EF history rows at version `10.0.12`, all four nullable `Orders` columns with their expected types, and both tenant indexes. No existing orders were backfilled or modified. This temporary container-local dump is not an off-host backup or restore drill. Hosted metrics against real order data and query-plan checks remain open; see [D2 evidence](../audits/dashboard-metrics.md).

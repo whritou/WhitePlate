@@ -62,7 +62,7 @@ M5 product galleries are implemented in source, with the migration applied to Co
 
 ## M3 human translation review and glossary
 
-The local Domain, repository, handler, API and frontend tests cover explicit human submissions, no-op saves, candidate versioning/superseding, source/saved-text staleness, tenant isolation, owner/manager authorization, self-review denial, rejection preserving saved text, approval changing the draft only, frontend pending-candidate presentation, and glossary validation/warnings. These source tests do not prove applying the generated migration to PostgreSQL or hosted acceptance.
+The local Domain, repository, handler, API and frontend tests cover explicit human submissions, no-op saves, candidate versioning/superseding, source/saved-text staleness, tenant isolation, owner/manager authorization, self-review denial, rejection preserving saved text, approval changing the draft only, frontend pending-candidate presentation, and glossary validation/warnings. The M3 migration has been applied to Coolify Production; post-checks confirmed both tables are empty and the API role has CRUD access. The API is not deployed, so hosted workflow acceptance remains open.
 
 - Confirm a pre-existing saved translation remains visible and unchanged without a review row or generated candidate. Submit a changed translation and verify the new candidate is pending while the prior saved text remains displayed and public.
 - Confirm submitting the same saved text creates no review candidate. Submit a newer changed candidate and verify the prior pending candidate is superseded and decisions use the latest version.
@@ -72,7 +72,7 @@ The local Domain, repository, handler, API and frontend tests cover explicit hum
 - Create, edit and delete glossary entries; check duplicate normalization and locale-pair validation. Verify glossary warnings are advisory, never insert or rewrite catalog text, and are isolated by tenant.
 - Verify Kitchen, foreign, anonymous and revoked identities cannot submit, read the queue, decide, or manage glossary entries. Repeat EN/FR, keyboard/focus, responsive widths and error/retry states.
 
-Migration `20261016222355_M3CatalogTranslationWorkflow` creates empty tables without legacy translation backfill. It has not been applied to a shared database; PostgreSQL transaction/concurrency and hosted manager/guest acceptance remain open. See [decision 0014](architecture/decisions/0014-human-translation-review.md).
+Migration `20261016222355_M3CatalogTranslationWorkflow` creates empty tables without legacy translation backfill. It was applied transactionally to Coolify Production on 17 October 2026, and the migration history, empty tables, unchanged tenant/publication counts and API-role grants were verified. PostgreSQL application-level concurrency and hosted manager/guest acceptance remain open. See [rollout evidence](audits/catalog-translation-workflow.md) and [decision 0014](architecture/decisions/0014-human-translation-review.md).
 
 ## M4 catalog publication and history
 
