@@ -3,9 +3,17 @@ import { useTranslations } from "next-intl"
 import { StudioPage } from "@/components/lovable/pages/studio"
 import { Button } from "@/components/ui/button"
 import { useTenantTheme } from "@/hooks/use-tenant-theme"
-import type { LiveStudioProps } from "@/types/theme"
+import { BrandAssetsWorkspace } from "./brand-assets-workspace"
+import type { LiveStudioProps, StudioPanel } from "@/types/theme"
 
-export function LiveThemeStudio(props: LiveStudioProps) {
+export function LiveThemeStudio({
+  panel,
+  onPanelChange,
+  ...props
+}: LiveStudioProps & {
+  panel: StudioPanel
+  onPanelChange: (panel: StudioPanel) => void
+}) {
   const controller = useTenantTheme(props)
   const t = useTranslations("ThemeStudio")
 
@@ -27,7 +35,12 @@ export function LiveThemeStudio(props: LiveStudioProps) {
         )}
       </div>
 
-      {!controller.hidden && <StudioPage controller={controller} />}
+      {!controller.hidden && (
+        <StudioPage
+          controller={{ ...controller, panel, setPanel: onPanelChange }}
+          brandAssets={<BrandAssetsWorkspace {...props} />}
+        />
+      )}
     </>
   )
 }

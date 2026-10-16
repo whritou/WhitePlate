@@ -1,5 +1,6 @@
 "use client"
 import { useDemoDraft } from "@/hooks/lovable/use-demo-draft"
+import type { ReactNode } from "react"
 import { useState } from "react"
 import { PREVIEW_CART } from "@/lib/lovable/customerOrder"
 import { DEFAULT_MENU, loadMenu, type MenuData } from "@/lib/lovable/menu"
@@ -9,10 +10,11 @@ import {
   saveTheme,
   type StoreTheme,
 } from "@/lib/lovable/storeTheme"
-import type { StudioController } from "@/types/theme"
+import type { StudioController, StudioNavigation } from "@/types/theme"
 export function useStudioPageModel(
   storageKey?: string,
-  controller?: StudioController
+  controller?: StudioController & Partial<StudioNavigation>,
+  brandAssets?: ReactNode
 ) {
   const [t, setT] = useDemoDraft<StoreTheme>(DEFAULT_THEME, () =>
     controller ? DEFAULT_THEME : loadTheme(storageKey)
@@ -32,16 +34,24 @@ export function useStudioPageModel(
     setSaved(false)
   }
 
-  const publish = () => {
+  const saveDemo = () => {
     if (saveTheme(t, storageKey)) setSaved(true)
     else alert("Your images are too large to save. Try smaller image files.")
+  }
+
+  const discardDemo = () => {
+    setT(loadTheme(storageKey))
+    setSaved(true)
   }
 
   return {
     isLive: Boolean(storageKey || controller),
     connected: Boolean(controller),
+    brandAssets,
     locked: controller?.locked ?? false,
     saving: controller?.saving ?? false,
+    publishing: controller?.publishing ?? false,
+    canPublish: controller?.canPublish ?? false,
     logoPreset: controller?.logoPreset,
     t: controller?.theme ?? t,
     setT,
@@ -55,11 +65,13 @@ export function useStudioPageModel(
     setSaved,
     dnsOpen,
     setDnsOpen,
-    panel,
-    setPanel,
+    panel: controller?.panel ?? panel,
+    setPanel: controller?.setPanel ?? setPanel,
     menu,
     setMenu,
     set: controller?.set ?? set,
-    publish: controller?.publish ?? publish,
+    saveDraft: controller?.saveDraft ?? saveDemo,
+    publish: controller?.publish ?? (() => undefined),
+    discard: controller?.discard ?? discardDemo,
   }
 }

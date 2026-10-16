@@ -26,5 +26,6 @@ public sealed class MediaAssetConfiguration : IEntityTypeConfiguration<MediaAsse
             .HasForeignKey(asset => new { asset.TenantId, asset.ProductId }).OnDelete(DeleteBehavior.Restrict);
         builder.HasIndex(asset => new { asset.TenantId, asset.ProductId, asset.IsActive, asset.SortOrder });
         builder.HasIndex(asset => asset.ExpiresAt);
+        builder.HasIndex(asset => new { asset.TenantId, asset.IsInPublishedTheme });
     }
 }

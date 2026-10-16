@@ -6,6 +6,7 @@ import { isUuid } from "@/lib/validation/common"
 import { getRestaurantMemberships } from "@/services/orders"
 import { getBrandAssets } from "@/services/brand-assets"
 import { getThemeDraft } from "@/services/theme-settings"
+import { getThemePublication } from "@/services/theme-publication"
 import { LiveStudio } from "@/components/organization/live-studio"
 import { MenuBuilderRetry } from "@/components/organization/menu-builder-retry"
 import { Alert, AlertDescription } from "@/components/ui/alert"
@@ -29,10 +30,11 @@ export default async function ThemingPage({ searchParams }: BrandPageProps) {
           (item) => item.id === query.tenantId && item.role !== "Kitchen"
         )
       : undefined
-  const [initial, theme] = restaurant
+  const [initial, theme, publication] = restaurant
     ? await Promise.all([
         getBrandAssets(restaurant.id),
         getThemeDraft(restaurant.id),
+        getThemePublication(restaurant.id),
       ])
     : []
 
@@ -46,6 +48,9 @@ export default async function ThemingPage({ searchParams }: BrandPageProps) {
           restaurantName={restaurant.name}
           initialData={initial?.ok ? initial.data : undefined}
           initialTheme={theme?.ok && theme.data ? theme.data : undefined}
+          initialPublication={
+            publication?.ok && publication.data ? publication.data : undefined
+          }
         />
       ) : (
         <>

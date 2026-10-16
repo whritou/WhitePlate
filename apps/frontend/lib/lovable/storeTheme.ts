@@ -1,4 +1,5 @@
 import type { StoreTheme } from "@/types/lovable/storeTheme"
+import type { PublishedTheme } from "@/types/theme"
 import type { CSSProperties } from "react"
 export type { StoreTheme } from "@/types/lovable/storeTheme"
 
@@ -39,6 +40,33 @@ export const DEFAULT_THEME: StoreTheme = {
   hours: "Mon–Sat · 11:30–14:30, 18:30–22:30",
   prepTime: "15 min",
 }
+
+export function publishedStoreTheme(
+  restaurantName: string,
+  publication: PublishedTheme | null
+): StoreTheme {
+  const version = publication?.version ?? 1
+  const assetUrl = (slot: "logo" | "banner" | "favicon", available: boolean) =>
+    available ? `/api/public/brand-assets/${slot}?v=${version}` : ""
+
+  return {
+    ...DEFAULT_THEME,
+    ...(publication?.theme ?? {}),
+    name: restaurantName,
+    tagline: "",
+    address: "",
+    phone: "",
+    hours: "",
+    prepTime: "",
+    logo: assetUrl("logo", publication?.hasLogo ?? false),
+    banner: assetUrl("banner", publication?.hasBanner ?? false),
+    favicon:
+      assetUrl("favicon", publication?.hasFavicon ?? false) || "/favicon.ico",
+    domain: "",
+    domainStatus: "none",
+  }
+}
+
 export const PRESETS: { label: string; theme: Partial<StoreTheme> }[] = [
   {
     label: "Verte",

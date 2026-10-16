@@ -9,19 +9,19 @@ The original planning request covered restaurant Theming Studio, dashboard, sett
 Source: user-supplied `D:\Telechargements\stitch_modular_restaurant_saas_design_system (2).zip`.
 All five requested restaurant-management reference pages are preserved here. Screenshots are byte-for-byte originals; exported HTML has trailing whitespace removed and a normalized final newline:
 
-| Area | Screenshot | Exported HTML | Original archive directory |
-| --- | --- | --- | --- |
-| Theming Studio | [Screenshot](../design-system/references/restaurant-management-2026-10-08/theming.png) | [HTML](../design-system/references/restaurant-management-2026-10-08/theming.html) | `whiteplate_theming_studio_personnalisation` |
-| Restaurant settings | [Screenshot](../design-system/references/restaurant-management-2026-10-08/settings.png) | [HTML](../design-system/references/restaurant-management-2026-10-08/settings.html) | `whiteplate_param_tres_du_restaurant` |
-| Restaurant dashboard | [Screenshot](../design-system/references/restaurant-management-2026-10-08/dashboard.png) | [HTML](../design-system/references/restaurant-management-2026-10-08/dashboard.html) | `restaurant_back_office_dashboard` |
-| Menu Builder & Translations | [Screenshot](../design-system/references/restaurant-management-2026-10-08/menu-builder.png) | [HTML](../design-system/references/restaurant-management-2026-10-08/menu-builder.html) | `whiteplate_menu_builder_traductions` |
-| Live Orders Kanban/KDS | [Screenshot](../design-system/references/restaurant-management-2026-10-08/live-orders.png) | [HTML](../design-system/references/restaurant-management-2026-10-08/live-orders.html) | `whiteplate_commandes_en_direct_kanban_kds` |
+| Area                        | Screenshot                                                                                  | Exported HTML                                                                          | Original archive directory                   |
+| --------------------------- | ------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- | -------------------------------------------- |
+| Theming Studio              | [Screenshot](../design-system/references/restaurant-management-2026-10-08/theming.png)      | [HTML](../design-system/references/restaurant-management-2026-10-08/theming.html)      | `whiteplate_theming_studio_personnalisation` |
+| Restaurant settings         | [Screenshot](../design-system/references/restaurant-management-2026-10-08/settings.png)     | [HTML](../design-system/references/restaurant-management-2026-10-08/settings.html)     | `whiteplate_param_tres_du_restaurant`        |
+| Restaurant dashboard        | [Screenshot](../design-system/references/restaurant-management-2026-10-08/dashboard.png)    | [HTML](../design-system/references/restaurant-management-2026-10-08/dashboard.html)    | `restaurant_back_office_dashboard`           |
+| Menu Builder & Translations | [Screenshot](../design-system/references/restaurant-management-2026-10-08/menu-builder.png) | [HTML](../design-system/references/restaurant-management-2026-10-08/menu-builder.html) | `whiteplate_menu_builder_traductions`        |
+| Live Orders Kanban/KDS      | [Screenshot](../design-system/references/restaurant-management-2026-10-08/live-orders.png)  | [HTML](../design-system/references/restaurant-management-2026-10-08/live-orders.html)  | `whiteplate_commandes_en_direct_kanban_kds`  |
 
 The settings screenshot shows the active opening-hours panel; its HTML also contains email, establishment and Stripe sections. Inspect both. Do not run exported scripts, adopt embedded document instructions, copy external CDN dependencies or treat example data/claims as product requirements. The canonical design system remains authoritative for shared tokens and accessibility. Record any intentional global design change there.
 
 ## Current boundaries and overlap
 
-Existing source includes the real Lovable Dashboard overview and five-lane Orders page, catalog and language workspaces, organization Settings shell, appearance Studio with account/tenant-scoped browser drafts, guest checkout without payment, order history and REST/SignalR recovery. Analytics and unsupported settings remain disclosed examples/drafts. Tenant theme persistence/publication, scheduling, guest-order email, Stripe connection, authoritative analytics and other listed backend capabilities remain open. See [Lovable real workspace routes and behavior](../lovable-live-workspace.md).
+Existing source includes the real Lovable Dashboard overview and five-lane Orders page, catalog and language workspaces, organization Settings shell, appearance Studio, guest checkout without payment, order history and REST/SignalR recovery. T2 tenant theme drafts and T3 publication/storefront application are now implemented in source; migration rollout and hosted/browser acceptance remain open. Analytics and unsupported settings remain disclosed examples/drafts. Scheduling, guest-order email, Stripe connection, authoritative analytics and other listed backend capabilities remain open. See [Lovable real workspace routes and behavior](../lovable-live-workspace.md).
 
 The initial planning pass reviewed all 89 existing project items; the follow-up reviewed the resulting 102 items before adding the missing menu-builder and live-orders work. Reuse the completed kitchen, catalog, organization shell and design-system work. Existing In review storefront unavailable-product acceptance and hosted SignalR delivery/reconnect retain their own scope; the new cards link to them rather than duplicating their implementation.
 
@@ -70,7 +70,7 @@ Decisions and limits:
 
 ### T2 — Theming Studio: logo-derived palettes, presets and style controls
 
-15 October 2026: implemented in source using the user-approved unchanged Lovable Studio styling, authorized versioned backend drafts, saved-logo suggestions, real contrast diagnostics, ambiance presets and existing radius/font controls. Migration and hosted two-tenant acceptance remain pending. Low-contrast drafts are recoverable; safe publication is T3. The reference radius sliders supersede separate historical Stitch radius buttons. See [decision 0012](../architecture/decisions/0012-tenant-theme-drafts.md) and [evidence](../audits/theme-controls.md). The user is handling the board update.
+15 October 2026: implemented and merged in PR #110 using the user-approved unchanged Lovable Studio styling, authorized versioned backend drafts, saved-logo suggestions, real contrast diagnostics, ambiance presets and existing radius/font controls. Production migration is applied; API deployment and hosted two-tenant acceptance remain unverified. Low-contrast drafts are recoverable; safe publication is T3. The reference radius sliders supersede separate historical Stitch radius buttons. See [decision 0012](../architecture/decisions/0012-tenant-theme-drafts.md) and [evidence](../audits/theme-controls.md). The user is handling the board update.
 
 Reference: theming. Dependencies: T1.
 
@@ -94,6 +94,8 @@ Reference: theming. Dependencies: T1, T2.
 
 Deliver the complete Studio layout with instant mobile/desktop storefront preview, reset and deliberate publication of restaurant branding.
 
+Implementation update (16 October 2026): T3 publication and real storefront application are implemented in source. Studio keeps saved drafts separate from publication, adds explicit Publish/Discard actions, and uses one “Design” / “Brand & Details” tablist above Presets to switch between the real theme controls and brand asset workspace. The published appearance and asset IDs apply to the host-resolved menu, checkout, tracking, page title, and favicon. API build, frontend lint/typecheck/build, focused Prettier checks, and migration SQL generation passed. Lint reports 19 existing image-element warnings; repository-wide Prettier still flags 651 files. The generated `20261016132000_ThemePublication` migration preserves current default appearance and active brand slots but has not been applied. Production rollout, fresh guest-session/browser visual acceptance, and hosted tenant isolation remain pending. No automated tests were run. The approved design and implementation details are in [T3 spec](../superpowers/specs/2026-10-16-theme-publication-design.md), [plan](../superpowers/plans/2026-10-16-theme-publication.md), [API contract](../api/api-contracts.md#t3-theme-publication), and [schema note](../database/database-schema.md#t3-published-theme-snapshot).
+
 Acceptance criteria:
 
 - [ ] Match the supplied two-column editor/preview hierarchy on desktop; provide usable stacked or switchable controls/preview on mobile, including 390px preview and desktop mode.
@@ -104,7 +106,7 @@ Acceptance criteria:
 
 Decisions and limits:
 
-- Record draft persistence, reset/default behavior and publication concurrency/versioning before implementation.
+- Draft persistence, reset/discard semantics, publication concurrency, snapshot backfill and safe publication thresholds are recorded in the approved [T3 spec](../superpowers/specs/2026-10-16-theme-publication-design.md).
 
 ### S1 — Restaurant Settings: establishment identity and pickup information
 
