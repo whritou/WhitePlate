@@ -12,8 +12,6 @@ public interface ICatalogRepository
         Task.FromResult<MenuLanguageSettingsDto?>(null);
     Task<MenuLanguageSettingsDto?> UpdateMenuLanguageSettingsAsync(Guid tenantId, IReadOnlyList<string> locales,
         string defaultLocale, CancellationToken cancellationToken) => Task.FromResult<MenuLanguageSettingsDto?>(null);
-    Task<bool> SetTranslationAsync(Guid tenantId, string entityType, Guid entityId, string locale, string name,
-        string? description, CancellationToken cancellationToken) => Task.FromResult(false);
     Task<RestaurantDescriptionTranslationsDto?> GetRestaurantDescriptionTranslationsAsync(Guid tenantId,
         CancellationToken cancellationToken) => Task.FromResult<RestaurantDescriptionTranslationsDto?>(null);
     Task<bool> SetRestaurantDescriptionTranslationAsync(Guid tenantId, string locale, string? description,

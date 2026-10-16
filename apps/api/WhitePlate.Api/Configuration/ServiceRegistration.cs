@@ -118,6 +118,8 @@ public static class ServiceRegistration
         services.AddScoped<GetManagementCatalogQueryHandler>();
         services.AddScoped<GetProductAvailabilityQueryHandler>();
         services.AddScoped<MenuLanguageSettingsHandler>();
+        services.AddScoped<ICatalogTranslationWorkflowRepository, CatalogTranslationWorkflowRepository>();
+        services.AddScoped<CatalogTranslationWorkflowHandler>();
         services.AddScoped<CreateProductCommandHandler>();
         services.AddScoped<IStaffMembershipRepository, StaffMembershipRepository>();
         services.AddScoped<IStaffDirectoryRepository, StaffDirectoryRepository>();

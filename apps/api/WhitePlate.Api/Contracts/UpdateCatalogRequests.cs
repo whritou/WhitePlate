@@ -15,4 +15,7 @@ public sealed record UpdateDiscountRequest(string Name, string Kind, decimal Val
     decimal MinimumOrderAmount = 0m, DateOnly? ExpiresOn = null);
 public sealed record UpdateMenuLanguagesRequest(IReadOnlyList<string> Locales, string DefaultLocale);
 public sealed record UpdateCatalogTranslationRequest(string Locale, string Name, string? Description);
+public sealed record ReviewCatalogTranslationRequest(int ExpectedVersion);
+public sealed record SaveCatalogTranslationGlossaryTermRequest(Guid? Id, string SourceLocale, string TargetLocale,
+    string SourceTerm, string TargetTerm);
 public sealed record UpdateRestaurantDescriptionRequest(string? Description);

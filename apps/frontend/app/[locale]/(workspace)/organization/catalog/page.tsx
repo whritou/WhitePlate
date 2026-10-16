@@ -10,6 +10,8 @@ import { getManagedCatalog } from "@/services/catalog-management"
 import {
   getMenuLanguageSettings,
   getRestaurantDescriptionTranslations,
+  getCatalogTranslationReviews,
+  getCatalogTranslationGlossary,
 } from "@/services/organization-queries"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import type { CatalogPageProps } from "@/types/catalog-management"
@@ -31,13 +33,21 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
             (item.role === "OrganizationOwner" || item.role === "Manager")
         )
       : null
-  const [response, languages, description] = restaurant
+  const [
+    response,
+    languages,
+    description,
+    translationReviews,
+    translationGlossary,
+  ] = restaurant
     ? await Promise.all([
         getManagedCatalog(restaurant.id),
         getMenuLanguageSettings(restaurant.id),
         getRestaurantDescriptionTranslations(restaurant.id),
+        getCatalogTranslationReviews(restaurant.id),
+        getCatalogTranslationGlossary(restaurant.id),
       ])
-    : [null, null, null]
+    : [null, null, null, null, null]
   const catalog = response?.ok ? response.data : null
 
   if (!catalog || !restaurant) {
@@ -66,6 +76,19 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
         settings={languages?.ok ? (languages.data ?? undefined) : undefined}
         description={
           description?.ok ? (description.data ?? undefined) : undefined
+        }
+        translationReviews={
+          translationReviews?.ok
+            ? (translationReviews.data ?? undefined)
+            : undefined
+        }
+        translationGlossary={
+          translationGlossary?.ok
+            ? (translationGlossary.data ?? undefined)
+            : undefined
+        }
+        translationWorkflowUnavailable={
+          !translationReviews?.ok || !translationGlossary?.ok
         }
         initialView={
           query.view === "discounts"

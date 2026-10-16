@@ -20,6 +20,24 @@ export type CatalogTranslationInput = {
   name: string
   description: string | null
 }
+export type CatalogTranslationDecisionInput = {
+  tenantId: string
+  reviewId: string
+  expectedVersion: number
+  decision: "approve" | "reject"
+}
+export type CatalogTranslationGlossaryInput = {
+  tenantId: string
+  id: string | null
+  sourceLocale: string
+  targetLocale: string
+  sourceTerm: string
+  targetTerm: string
+}
+export type CatalogTranslationGlossaryDeleteInput = {
+  tenantId: string
+  id: string
+}
 export type StaffRole =
   "OrganizationOwner" | "RestaurantManager" | "KitchenStaff"
 export type StaffInvitationInput = {

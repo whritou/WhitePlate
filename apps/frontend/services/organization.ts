@@ -2,10 +2,16 @@ import "server-only"
 import { isInvitationToken, isRecord, isUuid } from "@/lib/validation/common"
 import { sendInvitationEmail } from "@/lib/email"
 import { whitePlateApi } from "@/lib/api"
-import type { ActionResult } from "@/types/organization"
+import type {
+  ActionResult,
+  CatalogTranslationSaveResult,
+} from "@/types/organization"
 import type { ApiResult } from "@/types/api"
 import type {
   CatalogTranslationInput,
+  CatalogTranslationDecisionInput,
+  CatalogTranslationGlossaryInput,
+  CatalogTranslationGlossaryDeleteInput,
   MenuLanguagesInput,
   RestaurantDescriptionTranslationInput,
   OrganizationRenameInput,
@@ -59,11 +65,69 @@ export async function saveCatalogTranslation({
   locale,
   name,
   description,
-}: CatalogTranslationInput): Promise<ActionResult> {
+}: CatalogTranslationInput): Promise<CatalogTranslationSaveResult> {
+  const response = await whitePlateApi.put<unknown>(
+    `/api/v1/tenants/${tenantId}/catalog/${entityType}/${entityId}/translation`,
+    { locale, name, description }
+  )
+
+  if (!response.ok) {
+    const result = actionResult(response)
+
+    return result.ok ? { ok: false, message: "unavailable" } : result
+  }
+
+  if (
+    !isRecord(response.data) ||
+    typeof response.data.unchanged !== "boolean" ||
+    (response.data.status !== "Pending" && response.data.status !== "Unchanged")
+  )
+    return { ok: false, message: "unavailable" }
+
+  return {
+    ok: true,
+    unchanged: response.data.unchanged,
+    status: response.data.status,
+  }
+}
+
+export async function decideCatalogTranslation({
+  tenantId,
+  reviewId,
+  expectedVersion,
+  decision,
+}: CatalogTranslationDecisionInput): Promise<ActionResult> {
+  return actionResult(
+    await whitePlateApi.post(
+      `/api/v1/tenants/${tenantId}/catalog/translation-reviews/${reviewId}/${decision}`,
+      { expectedVersion }
+    )
+  )
+}
+
+export async function saveCatalogTranslationGlossary({
+  tenantId,
+  id,
+  sourceLocale,
+  targetLocale,
+  sourceTerm,
+  targetTerm,
+}: CatalogTranslationGlossaryInput): Promise<ActionResult> {
   return actionResult(
     await whitePlateApi.put(
-      `/api/v1/tenants/${tenantId}/catalog/${entityType}/${entityId}/translation`,
-      { locale, name, description }
+      `/api/v1/tenants/${tenantId}/catalog/translation-glossary`,
+      { id, sourceLocale, targetLocale, sourceTerm, targetTerm }
+    )
+  )
+}
+
+export async function deleteCatalogTranslationGlossary({
+  tenantId,
+  id,
+}: CatalogTranslationGlossaryDeleteInput): Promise<ActionResult> {
+  return actionResult(
+    await whitePlateApi.delete(
+      `/api/v1/tenants/${tenantId}/catalog/translation-glossary/${id}`
     )
   )
 }

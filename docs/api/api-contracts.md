@@ -28,6 +28,20 @@ Public `/menu`, public tenant locale output, public establishment locale fallbac
 
 Source wiring and API build are complete; migration application, PostgreSQL concurrency, and end-to-end guest/staff acceptance remain unverified. See [decision 0013](../architecture/decisions/0013-catalog-publication-and-history.md) and [schema](../database/database-schema.md#m4-catalog-publication-and-history--2026-10-16).
 
+## M3 human translation review and glossary — 2026-10-17
+
+| Method and route | Access and behavior |
+| --- | --- |
+| `PUT /api/v1/tenants/{tenantId}/catalog/{entityType}/{entityId}/translation` | Owner/manager; submits a changed human-entered translation as a versioned pending candidate; saved text remains in place until a different owner/manager approves |
+| `GET /api/v1/tenants/{tenantId}/catalog/translation-reviews` | Owner/manager; returns the latest candidate per catalog item/locale with source text, status, version, glossary warnings and whether the caller may review it |
+| `POST /api/v1/tenants/{tenantId}/catalog/translation-reviews/{reviewId}/approve` | Owner/manager other than the author; `{expectedVersion}`; approval updates normalized draft translation only; stale/source-changed candidates return 409 |
+| `POST /api/v1/tenants/{tenantId}/catalog/translation-reviews/{reviewId}/reject` | Owner/manager other than the author; `{expectedVersion}`; rejection retains the existing saved translation |
+| `GET /api/v1/tenants/{tenantId}/catalog/translation-glossary?sourceLocale=…&targetLocale=…` | Owner/manager; tenant-scoped glossary entries for an enabled locale pair |
+| `PUT /api/v1/tenants/{tenantId}/catalog/translation-glossary` | Owner/manager; create or update a human-managed source/target term; duplicate normalized source terms in the same locale pair are rejected |
+| `DELETE /api/v1/tenants/{tenantId}/catalog/translation-glossary/{termId}` | Owner/manager; delete a glossary entry |
+
+There is no machine or AI translation. Only an explicit new or changed translation submission creates review state. The workflow does not backfill current translation maps or attach review metadata to unchanged legacy entries. Re-submitting already-saved text is a no-op. A newer submission supersedes the prior pending candidate. Review decisions use candidate versions and source/saved-text fingerprints to prevent applying candidates after relevant content changes. Approval changes the editable catalog draft; the existing M4 publication action remains required before guests see it. Glossary warnings are advisory only and never alter translation text. The additive `20261016222355_M3CatalogTranslationWorkflow` migration creates review and glossary tables without backfill; it is generated in source and has not been applied to a shared database. Migrations do not run at startup. See [decision 0014](../architecture/decisions/0014-human-translation-review.md) and [schema](../database/database-schema.md#m3-human-translation-review-and-glossary--2026-10-17).
+
 ## S1 organization and restaurant legal profiles — 2026-10-12
 
 Organization creation now requires `legalCountryCode` (`FR`, `DE`, `GB`, or `US`) and accepts optional `legalName`, `legalRegistrationNumber`, and `taxIdentifier`. `GET /api/v1/organizations/{organizationId}/legal-profile` and `PUT` manage the profile for persisted organization owners. PUT requires a quoted `If-Match` legal-profile version; stale writes return 412. The organization response includes the current profile and `legalProfileVersion`.
@@ -161,7 +175,7 @@ All paths are rooted at `/api/v1`. Success responses contain the resource direct
 | `GET /tenants/{tenantId}/restaurant-description-translations` | Organization owner or restaurant manager | Read enabled locales, default locale, and saved restaurant description translations; private response is not cached |
 | `PUT /tenants/{tenantId}/restaurant-description-translations/{locale}` | Organization owner or restaurant manager | Save or clear the restaurant description for an enabled menu locale; descriptions are trimmed and limited to 500 characters |
 | `PUT /tenants/{tenantId}/menu-languages` | Organization owner or restaurant manager | Replace enabled menu languages and default; requires at least one unique language and a default included in the list. Changing the default requires translations for every active category, product, option group, and option in the new default language |
-| `PUT /tenants/{tenantId}/catalog/{entityType}/{entityId}/translation` | Organization owner or restaurant manager | Save a translated name and optional product description for an enabled locale; supported entity types are categories, products, option-groups, and options |
+| `PUT /tenants/{tenantId}/catalog/{entityType}/{entityId}/translation` | Organization owner or restaurant manager | Submit a changed human-entered translation candidate for an enabled locale; existing saved text remains until another owner/manager approves it |
 | `POST /tenants/{tenantId}/categories` | Organization owner or restaurant manager | Create a category |
 | `PUT /tenants/{tenantId}/categories/{categoryId}` | Organization owner or restaurant manager | Update a category name and sort order |
 | `PUT /tenants/{tenantId}/categories/{categoryId}/visibility` | Organization owner or restaurant manager | Set temporary public visibility with `{ "isVisible": true/false }`; requires an active category in the authorized tenant |

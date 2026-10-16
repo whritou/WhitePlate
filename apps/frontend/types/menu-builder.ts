@@ -3,6 +3,10 @@ import type {
   MenuLanguageSettings,
   RestaurantDescriptionTranslations,
 } from "./catalog"
+import type {
+  CatalogTranslationGlossaryTerm,
+  CatalogTranslationReview,
+} from "./catalog-translation-workflow"
 
 export type MenuBuilderView =
   | "products"
@@ -17,6 +21,9 @@ export type MenuBuilderProps = {
   restaurantName?: string
   settings?: MenuLanguageSettings
   description?: RestaurantDescriptionTranslations
+  translationReviews?: CatalogTranslationReview[]
+  translationGlossary?: CatalogTranslationGlossaryTerm[]
+  translationWorkflowUnavailable?: boolean
   initialView?: MenuBuilderView
 }
 

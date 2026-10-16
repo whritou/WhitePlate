@@ -5,6 +5,9 @@ import {
   parseMenuLanguages,
   parseRestaurantDescriptionTranslation,
   parseCatalogTranslation,
+  parseCatalogTranslationDecision,
+  parseCatalogTranslationGlossary,
+  parseCatalogTranslationGlossaryDelete,
   parseOrganizationLegalProfile,
   parseOrganizationRename,
   parseStaffInvitation,
@@ -13,6 +16,9 @@ import {
   updateMenuLanguages,
   saveRestaurantDescriptionTranslation,
   saveCatalogTranslation,
+  decideCatalogTranslation,
+  saveCatalogTranslationGlossary,
+  deleteCatalogTranslationGlossary,
   createOrganization,
   renameOrganization,
   sendStaffInvitation,
@@ -20,7 +26,10 @@ import {
   acceptStaffInvitation,
   setOrganizationActive,
 } from "@/services/organization"
-import type { ActionResult } from "@/types/organization"
+import type {
+  ActionResult,
+  CatalogTranslationSaveResult,
+} from "@/types/organization"
 
 export async function updateMenuLanguagesAction(
   input: unknown
@@ -42,11 +51,41 @@ export async function saveRestaurantDescriptionTranslationAction(
 
 export async function saveCatalogTranslationAction(
   input: unknown
-): Promise<ActionResult> {
+): Promise<CatalogTranslationSaveResult> {
   const value = parseCatalogTranslation(input)
 
   return value
     ? saveCatalogTranslation(value)
+    : { ok: false, message: "invalid" }
+}
+
+export async function decideCatalogTranslationAction(
+  input: unknown
+): Promise<ActionResult> {
+  const value = parseCatalogTranslationDecision(input)
+
+  return value
+    ? decideCatalogTranslation(value)
+    : { ok: false, message: "invalid" }
+}
+
+export async function saveCatalogTranslationGlossaryAction(
+  input: unknown
+): Promise<ActionResult> {
+  const value = parseCatalogTranslationGlossary(input)
+
+  return value
+    ? saveCatalogTranslationGlossary(value)
+    : { ok: false, message: "invalid" }
+}
+
+export async function deleteCatalogTranslationGlossaryAction(
+  input: unknown
+): Promise<ActionResult> {
+  const value = parseCatalogTranslationGlossaryDelete(input)
+
+  return value
+    ? deleteCatalogTranslationGlossary(value)
     : { ok: false, message: "invalid" }
 }
 

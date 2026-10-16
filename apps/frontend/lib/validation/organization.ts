@@ -1,6 +1,9 @@
 import { isRecord, isUuid } from "./common"
 import type {
   CatalogTranslationInput,
+  CatalogTranslationDecisionInput,
+  CatalogTranslationGlossaryInput,
+  CatalogTranslationGlossaryDeleteInput,
   MenuLanguagesInput,
   RestaurantDescriptionTranslationInput,
   OrganizationRenameInput,
@@ -82,6 +85,58 @@ export function parseCatalogTranslation(
     name: input.name,
     description: input.description as string | null,
   }
+}
+
+const isLocaleTag = (value: unknown): value is string =>
+  typeof value === "string" &&
+  value.length <= 128 &&
+  /^[A-Za-z]{2,8}(?:-[A-Za-z0-9]{1,8})*$/.test(value)
+
+export function parseCatalogTranslationDecision(
+  input: unknown
+): CatalogTranslationDecisionInput | null {
+  if (
+    !isRecord(input) ||
+    !isUuid(input.tenantId) ||
+    !isUuid(input.reviewId) ||
+    !Number.isSafeInteger(input.expectedVersion) ||
+    (input.expectedVersion as number) < 1 ||
+    (input.decision !== "approve" && input.decision !== "reject")
+  )
+    return null
+
+  return input as unknown as CatalogTranslationDecisionInput
+}
+
+export function parseCatalogTranslationGlossary(
+  input: unknown
+): CatalogTranslationGlossaryInput | null {
+  if (
+    !isRecord(input) ||
+    !isUuid(input.tenantId) ||
+    (input.id !== null && !isUuid(input.id)) ||
+    !isLocaleTag(input.sourceLocale) ||
+    !isLocaleTag(input.targetLocale) ||
+    input.sourceLocale.toLowerCase() === input.targetLocale.toLowerCase() ||
+    typeof input.sourceTerm !== "string" ||
+    !input.sourceTerm.trim() ||
+    input.sourceTerm.trim().length > 120 ||
+    typeof input.targetTerm !== "string" ||
+    !input.targetTerm.trim() ||
+    input.targetTerm.trim().length > 120
+  )
+    return null
+
+  return input as unknown as CatalogTranslationGlossaryInput
+}
+
+export function parseCatalogTranslationGlossaryDelete(
+  input: unknown
+): CatalogTranslationGlossaryDeleteInput | null {
+  if (!isRecord(input) || !isUuid(input.tenantId) || !isUuid(input.id))
+    return null
+
+  return input as unknown as CatalogTranslationGlossaryDeleteInput
 }
 
 export function parseOrganizationName(form: unknown): string | null {

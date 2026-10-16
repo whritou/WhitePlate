@@ -24,6 +24,7 @@ public sealed class TenantCatalogController(
     GetManagementCatalogQueryHandler getManagementCatalog,
     GetProductAvailabilityQueryHandler getProductAvailability,
     MenuLanguageSettingsHandler menuLanguageSettings,
+    CatalogTranslationWorkflowHandler translationWorkflow,
     ApiErrorMapper errors) : ControllerBase
 {
     [HttpGet("menu-languages")]
@@ -56,7 +57,7 @@ public sealed class TenantCatalogController(
     }
 
     [HttpPut("catalog/{entityType}/{entityId:guid}/translation")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType<CatalogTranslationSubmissionDto>(StatusCodes.Status200OK)]
     [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status400BadRequest, "application/problem+json")]
     [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status401Unauthorized, "application/problem+json")]
     [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status404NotFound, "application/problem+json")]
@@ -65,8 +66,96 @@ public sealed class TenantCatalogController(
     {
         var identity = currentIdentity.Identity;
         if (identity is null) return Unauthorized();
-        var result = await menuLanguageSettings.TranslateAsync(tenantId, entityId, entityType, identity,
-            request.Locale, request.Name, request.Description, cancellationToken);
+        var result = await translationWorkflow.SubmitAsync(tenantId, entityType, entityId, request.Locale,
+            request.Name, request.Description, identity, cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : errors.ToActionResult(errors.Create(HttpContext, result.Error));
+    }
+
+    [HttpGet("catalog/translation-reviews")]
+    [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+    [ProducesResponseType<IReadOnlyList<CatalogTranslationReviewDto>>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status401Unauthorized, "application/problem+json")]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status404NotFound, "application/problem+json")]
+    public async Task<ActionResult<IReadOnlyList<CatalogTranslationReviewDto>>> GetTranslationReviews(Guid tenantId,
+        CancellationToken cancellationToken)
+    {
+        var identity = currentIdentity.Identity;
+        if (identity is null) return Unauthorized();
+        var result = await translationWorkflow.GetLatestReviewsAsync(tenantId, identity, cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : errors.ToActionResult(errors.Create(HttpContext, result.Error));
+    }
+
+    [HttpPost("catalog/translation-reviews/{reviewId:guid}/approve")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status401Unauthorized, "application/problem+json")]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status403Forbidden, "application/problem+json")]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status404NotFound, "application/problem+json")]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status409Conflict, "application/problem+json")]
+    public Task<IActionResult> ApproveTranslation(Guid tenantId, Guid reviewId,
+        ReviewCatalogTranslationRequest request, CancellationToken cancellationToken) =>
+        DecideTranslation(tenantId, reviewId, request, approve: true, cancellationToken);
+
+    [HttpPost("catalog/translation-reviews/{reviewId:guid}/reject")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status401Unauthorized, "application/problem+json")]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status403Forbidden, "application/problem+json")]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status404NotFound, "application/problem+json")]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status409Conflict, "application/problem+json")]
+    public Task<IActionResult> RejectTranslation(Guid tenantId, Guid reviewId,
+        ReviewCatalogTranslationRequest request, CancellationToken cancellationToken) =>
+        DecideTranslation(tenantId, reviewId, request, approve: false, cancellationToken);
+
+    [HttpGet("catalog/translation-glossary")]
+    [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+    [ProducesResponseType<IReadOnlyList<CatalogTranslationGlossaryTermDto>>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status401Unauthorized, "application/problem+json")]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status404NotFound, "application/problem+json")]
+    public async Task<ActionResult<IReadOnlyList<CatalogTranslationGlossaryTermDto>>> GetTranslationGlossary(
+        Guid tenantId, [FromQuery] string? sourceLocale, [FromQuery] string? targetLocale,
+        CancellationToken cancellationToken)
+    {
+        var identity = currentIdentity.Identity;
+        if (identity is null) return Unauthorized();
+        var result = await translationWorkflow.GetGlossaryAsync(tenantId, identity, sourceLocale, targetLocale,
+            cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : errors.ToActionResult(errors.Create(HttpContext, result.Error));
+    }
+
+    [HttpPut("catalog/translation-glossary")]
+    [ProducesResponseType<CatalogTranslationGlossaryTermDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status400BadRequest, "application/problem+json")]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status401Unauthorized, "application/problem+json")]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status404NotFound, "application/problem+json")]
+    public async Task<ActionResult<CatalogTranslationGlossaryTermDto>> SaveTranslationGlossaryTerm(Guid tenantId,
+        SaveCatalogTranslationGlossaryTermRequest request, CancellationToken cancellationToken)
+    {
+        var identity = currentIdentity.Identity;
+        if (identity is null) return Unauthorized();
+        var result = await translationWorkflow.SaveGlossaryTermAsync(tenantId, request.Id, request.SourceLocale,
+            request.TargetLocale, request.SourceTerm, request.TargetTerm, identity, cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : errors.ToActionResult(errors.Create(HttpContext, result.Error));
+    }
+
+    [HttpDelete("catalog/translation-glossary/{termId:guid}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status401Unauthorized, "application/problem+json")]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status404NotFound, "application/problem+json")]
+    public async Task<IActionResult> DeleteTranslationGlossaryTerm(Guid tenantId, Guid termId,
+        CancellationToken cancellationToken)
+    {
+        var identity = currentIdentity.Identity;
+        if (identity is null) return Unauthorized();
+        var result = await translationWorkflow.DeleteGlossaryTermAsync(tenantId, termId, identity, cancellationToken);
+        return result.IsSuccess ? NoContent() : errors.ToActionResult(errors.Create(HttpContext, result.Error));
+    }
+
+    private async Task<IActionResult> DecideTranslation(Guid tenantId, Guid reviewId,
+        ReviewCatalogTranslationRequest request, bool approve, CancellationToken cancellationToken)
+    {
+        var identity = currentIdentity.Identity;
+        if (identity is null) return Unauthorized();
+        var result = await translationWorkflow.DecideAsync(tenantId, reviewId, request.ExpectedVersion, approve,
+            identity, cancellationToken);
         return result.IsSuccess ? NoContent() : errors.ToActionResult(errors.Create(HttpContext, result.Error));
     }
 
