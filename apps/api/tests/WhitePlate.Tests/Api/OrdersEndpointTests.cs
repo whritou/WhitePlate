@@ -334,6 +334,7 @@ public sealed partial class OrdersEndpointTests
     {
         using var factory = new OrdersFactory();
         var seeded = await factory.SeedAsync();
+        await factory.SeedMembershipAsync(seeded.TenantId, "manager", RestaurantRole.Manager);
         await using (var scope = factory.Services.CreateAsyncScope())
         {
             var database = scope.ServiceProvider.GetRequiredService<WhitePlateDbContext>();
@@ -345,6 +346,16 @@ public sealed partial class OrdersEndpointTests
             (await database.ProductOptions.SingleAsync(item => item.Id == seeded.OptionId,
                 TestContext.Current.CancellationToken)).SetTranslation("fr", "Grande", null);
             await database.SaveChangesAsync(TestContext.Current.CancellationToken);
+        }
+
+        using (var publisher = factory.CreateClient())
+        {
+            publisher.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", "manager");
+            using var publish = new HttpRequestMessage(HttpMethod.Post,
+                $"/api/v1/tenants/{seeded.TenantId}/catalog/publish");
+            publish.Headers.TryAddWithoutValidation("If-Match", "\"1\"");
+            using var published = await publisher.SendAsync(publish, TestContext.Current.CancellationToken);
+            Assert.Equal(HttpStatusCode.OK, published.StatusCode);
         }
 
         using var client = factory.CreateClient();
@@ -701,6 +712,13 @@ public sealed partial class OrdersEndpointTests
         }
         using var client = factory.CreateClient();
         client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", "manager");
+        using (var publish = new HttpRequestMessage(HttpMethod.Post,
+            $"/api/v1/tenants/{seeded.TenantId}/catalog/publish"))
+        {
+            publish.Headers.TryAddWithoutValidation("If-Match", "\"1\"");
+            using var published = await client.SendAsync(publish, TestContext.Current.CancellationToken);
+            Assert.Equal(HttpStatusCode.OK, published.StatusCode);
+        }
 
         async Task<Guid> CreateAsync(string key)
         {
