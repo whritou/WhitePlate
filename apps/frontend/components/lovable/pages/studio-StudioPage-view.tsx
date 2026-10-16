@@ -19,10 +19,15 @@ export function StudioPageView() {
     dnsOpen,
     setDnsOpen,
     set,
+    saveDraft,
     publish,
+    discard,
     connected,
     locked,
     saving,
+    publishing,
+    canPublish,
+    panel,
   } = useStudioPageView()
 
   return (
@@ -33,62 +38,86 @@ export function StudioPageView() {
         </h1>
 
         <div className="flex flex-wrap items-center gap-3">
-          <div
-            className="flex max-w-full flex-wrap border"
-            role="tablist"
-            aria-label="Customer page preview"
-          >
-            <Copy>
-              {(["store", "checkout", "tracking"] as const).map((p) => (
-                <Button
-                  key={p}
-                  role="tab"
-                  aria-selected={page === p}
-                  variant={page === p ? "secondary" : "ghost"}
-                  size="sm"
-                  onClick={() => setPage(p)}
-                  className="capitalize"
-                >
-                  <Copy>{p === "tracking" ? "Order tracking" : p}</Copy>
-                </Button>
-              ))}
-            </Copy>
-          </div>
+          {panel === "design" && (
+            <>
+              <div
+                className="flex max-w-full flex-wrap border"
+                role="tablist"
+                aria-label="Customer page preview"
+              >
+                <Copy>
+                  {(["store", "checkout", "tracking"] as const).map((p) => (
+                    <Button
+                      key={p}
+                      role="tab"
+                      aria-selected={page === p}
+                      variant={page === p ? "secondary" : "ghost"}
+                      size="sm"
+                      onClick={() => setPage(p)}
+                      className="capitalize"
+                    >
+                      <Copy>{p === "tracking" ? "Order tracking" : p}</Copy>
+                    </Button>
+                  ))}
+                </Copy>
+              </div>
 
-          <div className="flex max-w-full flex-wrap border">
-            <Copy>
-              {(["desktop", "mobile"] as const).map((d) => (
-                <Button
-                  key={d}
-                  variant={device === d ? "secondary" : "ghost"}
-                  size="sm"
-                  onClick={() => setDevice(d)}
-                >
-                  <Copy>{d}</Copy>
-                </Button>
-              ))}
-            </Copy>
-          </div>
+              <div className="flex max-w-full flex-wrap border">
+                <Copy>
+                  {(["desktop", "mobile"] as const).map((d) => (
+                    <Button
+                      key={d}
+                      variant={device === d ? "secondary" : "ghost"}
+                      size="sm"
+                      onClick={() => setDevice(d)}
+                    >
+                      <Copy>{d}</Copy>
+                    </Button>
+                  ))}
+                </Copy>
+              </div>
+            </>
+          )}
 
-          <Button onClick={publish} disabled={locked || (connected && saved)}>
-            {connected ? (
-              saving ? (
-                theme("saving")
-              ) : saved ? (
-                theme("savedButton")
+          {connected ? (
+            <>
+              {panel === "design" && (
+                <Button onClick={saveDraft} disabled={locked || saved}>
+                  {saving
+                    ? theme("saving")
+                    : saved
+                      ? theme("savedButton")
+                      : theme("save")}
+                </Button>
+              )}
+
+              <Button onClick={publish} disabled={locked || !canPublish}>
+                {publishing ? theme("publishing") : theme("publish")}
+              </Button>
+
+              {panel === "design" && (
+                <Button
+                  variant="outline"
+                  onClick={discard}
+                  disabled={locked || saved}
+                >
+                  {theme("discard")}
+                </Button>
+              )}
+            </>
+          ) : (
+            <Button onClick={saveDraft} disabled={locked || saved}>
+              {isLive ? (
+                saved ? (
+                  live("draftSaved")
+                ) : (
+                  live("saveDraft")
+                )
               ) : (
-                theme("save")
-              )
-            ) : isLive ? (
-              saved ? (
-                live("draftSaved")
-              ) : (
-                live("saveDraft")
-              )
-            ) : (
-              <Copy>{saved ? "Saved in this browser ✓" : "Save demo"}</Copy>
-            )}
-          </Button>
+                <Copy>{saved ? "Saved in this browser ✓" : "Save demo"}</Copy>
+              )}
+            </Button>
+          )}
         </div>
       </div>
 

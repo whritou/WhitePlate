@@ -34,6 +34,7 @@ export function BrandAssetsWorkspace({
   const locale = useLocale()
   const client = useQueryClient()
   const [drafts, setDrafts] = useState<Partial<Record<BrandSlot, string>>>({})
+  const [stagedNotice, setStagedNotice] = useState(false)
   const query = useQuery({
     queryKey: ["brand-assets", userId, tenantId, locale],
     queryFn: ({ signal }) => fetchBrandAssets(tenantId, signal),
@@ -49,7 +50,8 @@ export function BrandAssetsWorkspace({
   )
   const onSaved = useCallback(
     async (slot?: BrandSlot, asset?: BrandAsset | null) => {
-      if (slot)
+      if (slot) {
+        setStagedNotice(true)
         client.setQueryData<BrandAssets>(
           ["brand-assets", userId, tenantId, locale],
           (current) =>
@@ -63,6 +65,7 @@ export function BrandAssetsWorkspace({
                 }
               : current
         )
+      }
 
       await query.refetch()
     },
@@ -86,6 +89,12 @@ export function BrandAssetsWorkspace({
           {t("description")}
         </p>
       </header>
+
+      {stagedNotice && (
+        <Alert role="status">
+          <AlertDescription>{t("stagedUntilPublish")}</AlertDescription>
+        </Alert>
+      )}
 
       {(query.isError || (data && !data.storageAvailable)) && (
         <Alert variant="destructive" role="alert">

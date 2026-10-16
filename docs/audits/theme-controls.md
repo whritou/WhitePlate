@@ -26,9 +26,19 @@ Additional checks:
 - The broad demo run on the existing development server initially passed 12/15 (all four theme cases passed). EN/FR reflow and all-route navigation failed with `net::ERR_ABORTED`. A later development rerun hit a loading timeout in the French Studio and EN reflow. The isolated French Studio rerun subsequently passed at all four widths. These dev results are not silently waived: the same existing demo suite passed **11/11 on the local production build at port 3045**, including both reflow cases and route navigation. An initially anchored isolated-test grep matched no tests; the corrected selector ran and passed.
 - Desktop 1440px and mobile 390px Studio captures were inspected. Existing two-column/stacked editor, source typography, preset-card style and preview are retained. No stylesheet or canonical token changed. Captures are generated local test artifacts, not proof of a supplied pixel-diff baseline.
 
+## Production schema rollout — 15 October 2026
+
+PR [#110](https://github.com/whritou/WhitePlate/pull/110) merged after all GitHub API/frontend checks and Vercel Preview passed, as `ece37f6eb25c25ce3e8d0aa5d4457a58b5c35b9f` at 17:41 UTC. The user explicitly requested applying migrations through Chrome. The existing Coolify `whiteplate` / `production` resource `whiteplate-postgresql-main` was used; no Neon database was changed.
+
+Preflight found database `whiteplate`, latest migration `20261014211126_DiscountMinimumAndExpiration`, two tenants and neither theme column. An initial read-only preflight command had a shell-quoting syntax error; the corrected heredoc completed before any schema change. `pg_dump -Fc` created `/tmp/whiteplate-before-theme-t2-20261015.dump` (70.7 KB); `pg_restore -l` successfully read the archive (171 listing lines). This container-local copy is not an off-host backup or restore drill.
+
+Applied the reviewed `20261015171219_TenantThemeDraft` operations through the Chrome Coolify terminal in one explicit transaction, with `ON_ERROR_STOP`, a 5-second lock timeout, a 30-second statement timeout, database/prior-history guards and the EF history insert (`10.0.12`). PostgreSQL confirmed both ALTERs, the history INSERT and COMMIT.
+
+Independent post-checks confirmed `ThemeDraftJson` is nullable JSONB, `ThemeDraftVersion` is non-null integer default 1, both tenants still have null draft JSON/version 1, and the API role has SELECT/UPDATE access to the JSON column. No existing theme was fabricated or published. [Visible verification capture](assets/theme-controls/production-migration-20261015.png).
+
 ## Rollout and remaining acceptance
 
-Migration generated, not applied. Deploy migration/API before frontend. Verify real PostgreSQL conditional writes, cross-account/two-tenant isolation, manager revocation, actual media-provider failure and saved-logo replacement/removal from another session/device. Browser tests intercept theme transport; API tests independently use the actual handler/repository with SQLite and test storage.
+The production migration is applied. API deployment and hosted behavior have not been verified by this schema rollout; no manual API deployment/restart was triggered. Verify real PostgreSQL conditional writes, cross-account/two-tenant isolation, manager revocation, actual media-provider failure and saved-logo replacement/removal from another session/device. Browser tests intercept theme transport; API tests independently use the actual handler/repository with SQLite and test storage. Other database environments remain outside this rollout.
 
 Actual contrast is reported; drafts below thresholds are allowed. T3 must enforce safe publication and assess every real storefront/checkout/tracking state. Radius retains reference sliders and fonts remain bundled. Real T1 uploads use the existing Brand media tab; demo-only inner Brand & details controls are disabled in connected Studio.
 

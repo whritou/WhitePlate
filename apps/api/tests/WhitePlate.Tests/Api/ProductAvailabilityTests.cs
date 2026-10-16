@@ -89,6 +89,11 @@ public sealed partial class OrdersEndpointTests
         using var archive = await managerClient.DeleteAsync(
             $"/api/v1/tenants/{seeded.TenantId}/products/{seeded.ProductId}", TestContext.Current.CancellationToken);
         Assert.Equal(HttpStatusCode.NoContent, archive.StatusCode);
+        using var publishArchive = new HttpRequestMessage(HttpMethod.Post,
+            $"/api/v1/tenants/{seeded.TenantId}/catalog/publish");
+        publishArchive.Headers.TryAddWithoutValidation("If-Match", "\"1\"");
+        using var archivedCatalog = await managerClient.SendAsync(publishArchive, TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.OK, archivedCatalog.StatusCode);
 
         using var kitchenClient = factory.CreateClient();
         kitchenClient.DefaultRequestHeaders.Authorization = new("Bearer", "kitchen");
@@ -159,6 +164,11 @@ public sealed partial class OrdersEndpointTests
             $"/api/v1/tenants/{seeded.TenantId}/categories/{categoryId}/visibility",
             new { isVisible = false }, TestContext.Current.CancellationToken);
         Assert.Equal(HttpStatusCode.NoContent, hide.StatusCode);
+        using var publishHidden = new HttpRequestMessage(HttpMethod.Post,
+            $"/api/v1/tenants/{seeded.TenantId}/catalog/publish");
+        publishHidden.Headers.TryAddWithoutValidation("If-Match", "\"1\"");
+        using var hiddenCatalog = await manager.SendAsync(publishHidden, TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.OK, hiddenCatalog.StatusCode);
 
         using var publish = new HttpRequestMessage(HttpMethod.Post,
             $"/api/v1/tenants/{seeded.TenantId}/catalog/publish");

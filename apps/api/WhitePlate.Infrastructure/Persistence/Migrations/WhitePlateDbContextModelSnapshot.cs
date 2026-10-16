@@ -524,6 +524,9 @@ namespace WhitePlate.Infrastructure.Persistence.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean");
 
+                    b.Property<bool>("IsInPublishedTheme")
+                        .HasColumnType("boolean");
+
                     b.Property<bool>("IsReady")
                         .HasColumnType("boolean");
 
@@ -558,6 +561,8 @@ namespace WhitePlate.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("ObjectKey")
                         .IsUnique();
+
+                    b.HasIndex("TenantId", "IsInPublishedTheme");
 
                     b.HasIndex("TenantId", "Slot")
                         .IsUnique()
@@ -1018,6 +1023,9 @@ namespace WhitePlate.Infrastructure.Persistence.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)");
 
+                    b.Property<string>("PublishedThemeJson")
+                        .HasColumnType("jsonb");
+
                     b.Property<string>("Region")
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
@@ -1040,6 +1048,12 @@ namespace WhitePlate.Infrastructure.Persistence.Migrations
                         .HasColumnType("jsonb");
 
                     b.Property<int>("ThemeDraftVersion")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(1);
+
+                    b.Property<int>("ThemePublicationVersion")
+                        .IsConcurrencyToken()
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
                         .HasDefaultValue(1);

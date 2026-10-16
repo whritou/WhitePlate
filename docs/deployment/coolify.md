@@ -14,6 +14,12 @@ A 69.7 KiB `pg_dump -Fc` was created at `/tmp/whiteplate-before-ordering-operati
 
 The D3 API/frontend change is on open PR #92. Coolify Production was not deployed or restarted, and no Vercel Production deployment was performed as part of this schema rollout. PostgreSQL concurrency checks, hosted role/checkout behavior and multi-session browser acceptance remain open. See [D3 evidence](../audits/dashboard-rush-pause.md).
 
+## Production T2 theme-draft schema rollout — 2026-10-15
+
+After PR [#110](https://github.com/whritou/WhitePlate/pull/110) merged as `ece37f6eb25c25ce3e8d0aa5d4457a58b5c35b9f`, the user requested applying migrations in Chrome. Preflight on `whiteplate-postgresql-main` confirmed database `whiteplate`, latest migration `20261014211126_DiscountMinimumAndExpiration`, two tenants and no theme columns. A 70.7 KB custom-format backup was created at `/tmp/whiteplate-before-theme-t2-20261015.dump`; `pg_restore -l` read it successfully (171 listing lines). It is a temporary container-local backup, not an off-host copy or restore drill.
+
+The Chrome Coolify PostgreSQL terminal applied `20261015171219_TenantThemeDraft` in one guarded transaction with 5-second lock/30-second statement timeouts and `ON_ERROR_STOP`: nullable `Tenants.ThemeDraftJson jsonb`, non-null `ThemeDraftVersion integer DEFAULT 1`, and its EF history row at version `10.0.12`. Separate post-checks confirmed definitions/history, both tenants at null JSON/version 1, and existing API SELECT/UPDATE access to the JSON column. No row contents were edited or theme published. No Neon environment was changed, and no API deployment/restart was triggered. See [verification and remaining hosted acceptance](../audits/theme-controls.md#production-schema-rollout--15-october-2026).
+
 ## Availability incident and recovery — 2026-10-10
 
 The public API returned HTTP 503 (`no available server`) on `/health/live`, `/health/ready` and `/api/v1/organizations`. Coolify reported the API as Degraded: its process was running, but PostgreSQL readiness failed repeatedly. Authentication on Vercel still worked. The workspace could not load organizations or restaurant memberships, so its context-dependent navigation links were absent.

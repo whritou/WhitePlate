@@ -518,9 +518,21 @@ The local fixture suite now checks immediate category/product drag ordering and 
 
 Repeat order/archive/restore and discount-checkout scenarios in the guarded non-production environment with persisted read-back before treating the catalog scope as fully accepted.
 
+## T3 theme publication — source implementation and remaining acceptance
+
+The source implementation is complete. The additive migration is generated but has not been applied to any shared database. Run the manual and hosted scenarios below after the API is deployed with the matching schema and object storage configuration. A code build does not establish production persistence, public host routing or browser-cache behavior.
+
+1. With an owner and a manager, save a T2 appearance draft and each T1 media slot. Confirm Studio labels show “Design” and “Brand & Details” in EN and FR, existing `panel=appearance|brand` links still select the right panel, and saved changes are identified as staged until publication.
+2. Before publishing, read the public theme and logo/favicon/banner from a guest browser. Confirm saved appearance and asset replacement/removal leave the old published storefront unchanged.
+3. Publish from Studio. Refresh the storefront in a separate guest session and verify colors, fonts, weights, spacing, layout, image ratio, banner, restaurant info, logo, favicon, title and versioned image URLs. Confirm menu, checkout, and order tracking use the same publication, while guest checkout and tracking behavior remain unchanged.
+4. Verify no selected asset can be published unless it is ready and owned by that tenant. Test contrast failures below 4.5:1 for text/background, primary/background, or text/accent; test a selected banner with overlay below 65%. A failed publish must keep the previous public snapshot and all current Studio edits.
+5. Exercise absent/malformed publication `If-Match` (428), stale publication ETag (412), stale draft version (412), unsafe publication (422), and owner/manager success. Verify anonymous access is 401 and Kitchen, foreign, revoked, or inactive membership/tenant access is denied without revealing tenant existence.
+6. Publish a replacement asset and confirm the retired published object remains readable until the snapshot releases it; after release, verify the seven-day retention policy and cleanup retry behavior. Confirm the migration backfill selects each existing tenant's active T1 slot without publishing its unsaved T2 appearance.
+7. Check 320, 375, 390, 768, 1024, 1440 and 1920px widths; switch the preview between 390px mobile and desktop modes; verify EN/FR, keyboard tab and arrow navigation, focus visibility, status announcements, 200% text zoom, and reduced motion. Verify public theme/media responses are no-store and one tenant's URLs or cache cannot expose another tenant's snapshot.
+
 ## T1 brand assets acceptance
 
-T2 theme draft coverage is recorded in [theme-controls](audits/theme-controls.md). Run frontend unit/lint/type/format/build checks, Playwright `--project=theme-studio` on the existing localhost dev server, and the API solution. Hosted acceptance must verify real PostgreSQL versioned saves, separate-device read-back, owner/manager/Kitchen/foreign/revoked access, actual logo storage failure and tenant isolation. T3 publication and public rendering remain separate; no draft save should alter the public storefront or demo storage.
+T2 theme draft coverage is recorded in [theme-controls](audits/theme-controls.md). Run frontend unit/lint/type/format/build checks, Playwright `--project=theme-studio` on the existing localhost dev server, and the API solution. Hosted acceptance must verify real PostgreSQL versioned saves, separate-device read-back, owner/manager/Kitchen/foreign/revoked access, actual logo storage failure and tenant isolation. Draft saves must not alter the public storefront or demo storage; publication acceptance is listed in the T3 section above.
 
 Source checks: `dotnet test apps/api/WhitePlate.slnx`; frontend `npm test`, `npm run lint`, `npm run typecheck`, `npm run format:check`, `npm run build`; focused browser fixtures with `node node_modules/@playwright/test/cli.js test --project brand-assets` against the development server. Fixture screenshots and intercepted storage responses are UI evidence only.
 

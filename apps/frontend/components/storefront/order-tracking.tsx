@@ -20,6 +20,7 @@ import { useQuery } from "@tanstack/react-query"
 import { useLocale, useTranslations } from "next-intl"
 import { useSyncExternalStore } from "react"
 import { CurrentCollectionInformation } from "./current-collection-information"
+import type { StoreTheme } from "@/types/lovable/storeTheme"
 
 function subscribeToHash(onChange: () => void) {
   window.addEventListener("hashchange", onChange)
@@ -37,7 +38,15 @@ function readRestaurantHost() {
   return window.location.host
 }
 
-export function OrderTracking({ orderId }: { orderId: string }) {
+export function OrderTracking({
+  orderId,
+  name,
+  theme,
+}: {
+  orderId: string
+  name: string
+  theme: StoreTheme
+}) {
   const t = useTranslations("OrderTracking")
   const checkout = useTranslations("Checkout")
   const locale = useLocale()
@@ -67,7 +76,7 @@ export function OrderTracking({ orderId }: { orderId: string }) {
   const order = tracking.data
 
   return (
-    <CustomerShell>
+    <CustomerShell name={name} theme={theme}>
       <main className="mx-auto min-h-[60vh] max-w-[1120px] px-4 py-10 sm:px-8">
         <Card className="w-full gap-0 border-0 bg-transparent p-0 shadow-none">
           <CardHeader className="px-0">
