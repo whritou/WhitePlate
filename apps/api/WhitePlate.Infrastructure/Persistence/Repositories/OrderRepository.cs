@@ -2,6 +2,7 @@ using System.Text.Json;
 using System.Security.Cryptography;
 using Microsoft.EntityFrameworkCore;
 using WhitePlate.Application.Common.Errors;
+using WhitePlate.Application.Catalog;
 using WhitePlate.Application.Common.Results;
 using WhitePlate.Application.Orders;
 using WhitePlate.Domain.Catalog;
@@ -11,7 +12,8 @@ using WhitePlate.Infrastructure.Persistence;
 
 namespace WhitePlate.Infrastructure.Persistence.Repositories;
 
-public sealed class OrderRepository(WhitePlateDbContext database) : IOrderRepository
+public sealed class OrderRepository(WhitePlateDbContext database,
+    ICatalogPublicationRepository catalogPublications) : IOrderRepository
 {
     private static readonly JsonSerializerOptions ReceiptJson = new(JsonSerializerDefaults.Web);
 
@@ -30,6 +32,16 @@ public sealed class OrderRepository(WhitePlateDbContext database) : IOrderReposi
             .SingleOrDefaultAsync(item => item.Id == tenantId && item.IsActive && database.Organizations.Any(organization =>
                 organization.Id == item.OrganizationId && organization.IsActive), cancellationToken);
         if (tenant is null) return null;
+
+        var published = await catalogPublications.GetPublishedCatalogAsync(tenantId, cancellationToken);
+        if (published is not null)
+        {
+            var publishedLocale = MenuLocale.TryCreate(requestedLocale, out var normalized) &&
+                                  published.Locales.Contains(normalized!.Value, StringComparer.OrdinalIgnoreCase)
+                ? normalized.Value
+                : published.DefaultLocale;
+            return new CheckoutLocaleDto(publishedLocale, published.DefaultLocale);
+        }
 
         var locale = tenant.SupportsMenuLocale(requestedLocale) ?
             WhitePlate.Domain.Tenants.MenuLocale.Create(requestedLocale).Value : tenant.DefaultMenuLocale;
@@ -70,6 +82,11 @@ public sealed class OrderRepository(WhitePlateDbContext database) : IOrderReposi
                 database.Organizations.Any(organization => organization.Id == tenant.OrganizationId && organization.IsActive))
             .Select(tenant => new { tenant.Currency, tenant.TimeZone }).SingleOrDefaultAsync(cancellationToken);
         if (tenant is null) return new CheckoutCatalogDto(string.Empty, locale, [], null);
+
+        var published = await catalogPublications.GetPublishedCatalogAsync(tenantId, cancellationToken);
+        if (published is not null)
+            return BuildPublishedCheckoutCatalog(published, tenant.TimeZone, locale, defaultLocale,
+                productIds, discountCode);
 
         var products = await database.Products.AsNoTracking().Where(product => product.TenantId == tenantId &&
                 productIds.Contains(product.Id) && product.IsAvailable && !product.IsArchived &&
@@ -122,6 +139,56 @@ public sealed class OrderRepository(WhitePlateDbContext database) : IOrderReposi
                 item.MinimumOrderAmount, item.ExpiresOn))
             .SingleOrDefaultAsync(cancellationToken);
         return new CheckoutCatalogDto(tenant.Currency, locale, checkoutProducts, discount, tenant.TimeZone);
+    }
+
+    private static CheckoutCatalogDto BuildPublishedCheckoutCatalog(PublishedCatalogSnapshot catalog,
+        string timeZone, string locale, string defaultLocale, IReadOnlyCollection<Guid> productIds,
+        string? discountCode)
+    {
+        var categoryIds = catalog.Categories.Where(category => !category.IsArchived && category.IsVisible)
+            .Select(category => category.Id).ToHashSet();
+        var products = catalog.Products.Where(product => productIds.Contains(product.Id) && product.IsAvailable &&
+            !product.IsArchived && categoryIds.Contains(product.CategoryId)).OrderBy(product => product.Id).ToArray();
+        var ids = products.Select(product => product.Id).ToHashSet();
+        var groups = catalog.OptionGroups.Where(group => ids.Contains(group.ProductId) && !group.IsArchived)
+            .OrderBy(group => group.SortOrder).ThenBy(group => group.Id).ToArray();
+        var groupIds = groups.Select(group => group.Id).ToHashSet();
+        var options = catalog.Options.Where(option => groupIds.Contains(option.GroupId) && !option.IsArchived)
+            .OrderBy(option => option.SortOrder).ThenBy(option => option.Id).ToArray();
+        var checkoutProducts = products.Select(product => new CheckoutProductDto(product.Id,
+            ResolveCatalogText(product.Name, product.Translations, locale, defaultLocale).Name,
+            product.BasePrice, product.TaxRatePercent,
+            groups.Where(group => group.ProductId == product.Id).Select(group => new CheckoutOptionGroupDto(
+                group.Id, group.MinimumSelections, group.MaximumSelections,
+                options.Where(option => option.GroupId == group.Id).Select(option => new CheckoutOptionDto(
+                    option.Id, ResolveCatalogText(option.Name, option.Translations, locale, defaultLocale).Name,
+                    option.PriceAdjustment)).ToArray())).ToArray())
+        {
+            ContainsAllergens = product.ContainsAllergens,
+            MayContainAllergens = product.MayContainAllergens,
+            DietaryTags = product.DietaryTags,
+            PreparationMinutes = product.PreparationMinutes,
+            PreparationNotes = product.PreparationNotes
+        }).ToArray();
+
+        var selectedDiscount = string.IsNullOrWhiteSpace(discountCode)
+            ? null
+            : catalog.Discounts.FirstOrDefault(discount => discount.IsActive &&
+                string.Equals(discount.Code, discountCode, StringComparison.Ordinal));
+        var discount = selectedDiscount is null ? null : new CheckoutDiscountDto(
+            selectedDiscount.Code, Enum.TryParse<DiscountKind>(selectedDiscount.Kind, out var kind) ? kind : (DiscountKind)0,
+            selectedDiscount.Value, selectedDiscount.MinimumOrderAmount, selectedDiscount.ExpiresOn);
+        return new CheckoutCatalogDto(catalog.Currency, locale, checkoutProducts, discount, timeZone);
+    }
+
+    private static CatalogLocalizedText ResolveCatalogText(string name,
+        IReadOnlyDictionary<string, CatalogLocalizedText> translations, string locale, string defaultLocale)
+    {
+        var translation = translations.FirstOrDefault(pair => string.Equals(pair.Key, locale,
+            StringComparison.OrdinalIgnoreCase)).Value;
+        translation ??= translations.FirstOrDefault(pair => string.Equals(pair.Key, defaultLocale,
+            StringComparison.OrdinalIgnoreCase)).Value;
+        return translation ?? new CatalogLocalizedText(name);
     }
 
     public async Task<IdempotencyResult> CreateOrderAsync(WhitePlate.Domain.Orders.Order order,

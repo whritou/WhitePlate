@@ -22,6 +22,71 @@ namespace WhitePlate.Infrastructure.Persistence.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("WhitePlate.Domain.Catalog.CatalogPublicationHead", b =>
+                {
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("PublishedVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer");
+
+                    b.Property<string>("SnapshotJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("TenantId");
+
+                    b.ToTable("CatalogPublicationHeads", (string)null);
+                });
+
+            modelBuilder.Entity("WhitePlate.Domain.Catalog.CatalogRevision", b =>
+                {
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Version")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Action")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)");
+
+                    b.Property<string>("ActorIssuer")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("ActorSubject")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("ChangeSetJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<DateTimeOffset>("PublishedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("SnapshotJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<int?>("SourceVersion")
+                        .HasColumnType("integer");
+
+                    b.HasKey("TenantId", "Version");
+
+                    b.HasIndex("TenantId", "PublishedAt");
+
+                    b.ToTable("CatalogRevisions", (string)null);
+                });
+
             modelBuilder.Entity("WhitePlate.Domain.Catalog.MenuCategory", b =>
                 {
                     b.Property<Guid>("Id")
@@ -944,6 +1009,24 @@ namespace WhitePlate.Infrastructure.Persistence.Migrations
                     b.HasIndex("TenantId", "OccurredAt", "Id");
 
                     b.ToTable("OrderOutboxMessages", (string)null);
+                });
+
+            modelBuilder.Entity("WhitePlate.Domain.Catalog.CatalogPublicationHead", b =>
+                {
+                    b.HasOne("WhitePlate.Domain.Tenants.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("WhitePlate.Domain.Catalog.CatalogRevision", b =>
+                {
+                    b.HasOne("WhitePlate.Domain.Tenants.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("WhitePlate.Domain.Catalog.MenuCategory", b =>

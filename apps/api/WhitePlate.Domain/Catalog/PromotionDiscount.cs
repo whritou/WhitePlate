@@ -59,6 +59,7 @@ public sealed class PromotionDiscount
     }
 
     public void Deactivate() => IsActive = false;
+    public void Activate() => IsActive = true;
 
     private static void ValidateMinimum(decimal value)
     {

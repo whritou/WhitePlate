@@ -16,6 +16,7 @@ export default function PhotoDesignFixture() {
   const catalog: ManagedCatalog = {
     tenantId,
     currency: "EUR",
+    publication: null,
     categories: [
       {
         id: categoryId,

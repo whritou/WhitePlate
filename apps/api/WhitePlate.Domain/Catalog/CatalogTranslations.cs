@@ -31,6 +31,15 @@ public static class CatalogTranslations
         return JsonSerializer.Serialize(translations, JsonOptions);
     }
 
+    public static string Replace(IReadOnlyDictionary<string, CatalogLocalizedText>? values,
+        int maxNameLength, int maxDescriptionLength = 0)
+    {
+        var json = "{}";
+        foreach (var (locale, text) in values ?? new Dictionary<string, CatalogLocalizedText>())
+            json = Set(json, locale, text.Name, text.Description, maxNameLength, maxDescriptionLength);
+        return json;
+    }
+
     public static CatalogLocalizedText Get(string? json, string locale, string defaultLocale,
         string name, string? description = null)
     {

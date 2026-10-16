@@ -63,6 +63,50 @@ export type CatalogDiscount = {
   expiresOn: string | null
   isActive: boolean
 }
+export type CatalogFieldChange = {
+  field: string
+  before: string | null
+  after: string | null
+}
+export type CatalogChange = {
+  entityType: string
+  entityId: string
+  name: string
+  action: "added" | "updated" | "removed"
+  fields: CatalogFieldChange[]
+}
+export type CatalogPublicationSummary = {
+  publishedVersion: number
+  publishedAt: string
+  hasUnpublishedChanges: boolean
+  changeCount: number
+  changes: CatalogChange[]
+}
+export type CatalogHistoryRevision = {
+  version: number
+  publishedAt: string
+  action: string
+  sourceVersion: number | null
+  actorIssuer: string
+  actorSubject: string
+  changes: CatalogChange[]
+}
+export type CatalogHistory = {
+  currentVersion: number
+  revisions: CatalogHistoryRevision[]
+}
+export type CatalogPublicationResult = {
+  publishedVersion: number
+  publishedAt: string
+}
+export type PublicationConfirmAction =
+  | { kind: "publish" }
+  | { kind: "discard" }
+  | { kind: "restore"; version: number }
+export type CatalogPublicationInput = {
+  tenantId: string
+  expectedVersion: number
+}
 export type ManagedCatalog = {
   tenantId: string
   currency: string
@@ -71,9 +115,14 @@ export type ManagedCatalog = {
   optionGroups: CatalogOptionGroup[]
   options: CatalogOption[]
   discounts: CatalogDiscount[]
+  publication: CatalogPublicationSummary | null
 }
 export type CatalogResult =
-  | { ok: true; category?: CatalogCategory }
+  | {
+      ok: true
+      category?: CatalogCategory
+      publication?: CatalogPublicationResult
+    }
   | {
       ok: false
       error:

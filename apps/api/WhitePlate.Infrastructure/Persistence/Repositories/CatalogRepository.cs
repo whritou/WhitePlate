@@ -3,34 +3,42 @@ using WhitePlate.Application.Catalog;
 using WhitePlate.Application.Tenants;
 using WhitePlate.Domain.Catalog;
 using WhitePlate.Domain.Common;
+using WhitePlate.Domain.Identity;
 using WhitePlate.Domain.Tenants;
 
 namespace WhitePlate.Infrastructure.Persistence.Repositories;
 
-public sealed class CatalogRepository(WhitePlateDbContext database) : ICatalogRepository
+public sealed class CatalogRepository(WhitePlateDbContext database, ICatalogPublicationRepository publications) : ICatalogRepository
 {
     public async Task<IReadOnlyList<ProductAvailabilityDto>> GetProductAvailabilityAsync(Guid tenantId,
-        CancellationToken cancellationToken) => await database.Products.AsNoTracking()
-        .Where(product => product.TenantId == tenantId && !product.IsArchived &&
-            database.MenuCategories.Any(category => category.TenantId == tenantId &&
-                category.Id == product.CategoryId && !category.IsArchived && category.IsVisible))
-        .OrderBy(product => product.SortOrder)
-        .ThenBy(product => product.Name)
-        .Select(product => new ProductAvailabilityDto(product.Id, product.Name, product.IsAvailable))
-        .ToListAsync(cancellationToken);
-
-    public async Task<bool> SetProductAvailabilityAsync(Guid tenantId, Guid productId, bool isAvailable,
         CancellationToken cancellationToken)
     {
-        var product = await database.Products.SingleOrDefaultAsync(item => item.TenantId == tenantId &&
-            item.Id == productId && !item.IsArchived &&
-            database.MenuCategories.Any(category => category.TenantId == tenantId &&
-                category.Id == item.CategoryId && !category.IsArchived && category.IsVisible), cancellationToken);
-        if (product is null) return false;
-        product.SetAvailability(isAvailable);
-        await database.SaveChangesAsync(cancellationToken);
-        return true;
+        var snapshot = await publications.GetPublishedCatalogAsync(tenantId, cancellationToken);
+        if (snapshot is not null)
+        {
+            var categories = snapshot.Categories.Where(category => !category.IsArchived && category.IsVisible)
+                .Select(category => category.Id).ToHashSet();
+            return snapshot.Products.Where(product => !product.IsArchived && categories.Contains(product.CategoryId))
+                .OrderBy(product => product.SortOrder).ThenBy(product => product.Name)
+                .Select(product => new ProductAvailabilityDto(product.Id, product.Name, product.IsAvailable)).ToArray();
+        }
+
+        return await database.Products.AsNoTracking().Where(product => product.TenantId == tenantId && !product.IsArchived &&
+                database.MenuCategories.Any(category => category.TenantId == tenantId &&
+                    category.Id == product.CategoryId && !category.IsArchived && category.IsVisible))
+            .OrderBy(product => product.SortOrder).ThenBy(product => product.Name)
+            .Select(product => new ProductAvailabilityDto(product.Id, product.Name, product.IsAvailable))
+            .ToListAsync(cancellationToken);
     }
+
+    public async Task<bool> SetProductAvailabilityAsync(Guid tenantId, Guid productId, bool isAvailable,
+        CancellationToken cancellationToken) =>
+        await publications.SetProductAvailabilityAsync(tenantId, productId, isAvailable,
+            ExternalIdentity.Create("https://system.whiteplate.invalid", "legacy-availability"), cancellationToken);
+
+    public Task<bool> SetProductAvailabilityAsync(Guid tenantId, Guid productId, bool isAvailable,
+        ExternalIdentity identity, CancellationToken cancellationToken) =>
+        publications.SetProductAvailabilityAsync(tenantId, productId, isAvailable, identity, cancellationToken);
 
     public async Task<MenuLanguageSettingsDto?> GetMenuLanguageSettingsAsync(Guid tenantId,
         CancellationToken cancellationToken)
@@ -99,9 +107,9 @@ public sealed class CatalogRepository(WhitePlateDbContext database) : ICatalogRe
 
     public async Task<CatalogManagementDto?> GetManagementCatalogAsync(Guid tenantId, CancellationToken cancellationToken)
     {
-        var currency = await database.Tenants.AsNoTracking().Where(tenant => tenant.Id == tenantId)
-            .Select(tenant => tenant.Currency).SingleOrDefaultAsync(cancellationToken);
-        if (currency is null) return null;
+        var tenant = await database.Tenants.AsNoTracking().SingleOrDefaultAsync(item => item.Id == tenantId,
+            cancellationToken);
+        if (tenant is null) return null;
         var categories = await database.MenuCategories.AsNoTracking().Where(item => item.TenantId == tenantId)
             .OrderBy(item => item.SortOrder).ThenBy(item => item.Id).ToListAsync(cancellationToken);
         var products = await database.Products.AsNoTracking().Where(item => item.TenantId == tenantId)
@@ -112,7 +120,7 @@ public sealed class CatalogRepository(WhitePlateDbContext database) : ICatalogRe
             .OrderBy(item => item.SortOrder).ThenBy(item => item.Id).ToListAsync(cancellationToken);
         var discounts = await database.PromotionDiscounts.AsNoTracking().Where(item => item.TenantId == tenantId)
             .OrderBy(item => item.Code).ThenBy(item => item.Id).ToListAsync(cancellationToken);
-        return new CatalogManagementDto(tenantId, currency,
+        var draft = new CatalogManagementDto(tenantId, tenant.Currency,
             categories.Select(item => new CatalogCategoryAdminDto(item.Id, item.Name, item.SortOrder, item.IsArchived)
                 { IsVisible = item.IsVisible, Translations = CatalogTranslations.GetAll(item.TranslationsJson) }).ToArray(),
             products.Select(item => new CatalogProductAdminDto(item.Id, item.CategoryId, item.Name, item.Description,
@@ -128,6 +136,9 @@ public sealed class CatalogRepository(WhitePlateDbContext database) : ICatalogRe
                 item.PriceAdjustment, item.SortOrder, item.IsArchived)
                 { Translations = CatalogTranslations.GetAll(item.TranslationsJson) }).ToArray(),
             discounts.Select(ToDto).ToArray());
+        var snapshot = ToPublishedSnapshot(draft, tenant.GetMenuLocales(), tenant.DefaultMenuLocale);
+        var publication = await publications.GetSummaryAsync(tenantId, snapshot, cancellationToken);
+        return publication is null ? draft : draft with { Publication = publication };
     }
 
     public Task<bool> ProductBelongsToTenantAsync(Guid tenantId, Guid productId, CancellationToken cancellationToken) =>
@@ -509,6 +520,10 @@ public sealed class CatalogRepository(WhitePlateDbContext database) : ICatalogRe
     {
         var restaurant = await database.Tenants.AsNoTracking()
             .SingleOrDefaultAsync(item => item.Id == tenant.Id, cancellationToken);
+        var published = await publications.GetPublishedCatalogAsync(tenant.Id, cancellationToken);
+        if (restaurant is not null && published is not null)
+            return await MapPublishedMenuAsync(tenant, restaurant, published, requestedLocale, cancellationToken);
+
         var locale = MenuLocale.TryCreate(requestedLocale, out var normalizedLocale) &&
                      tenant.MenuLocales.Contains(normalizedLocale!.Value, StringComparer.OrdinalIgnoreCase)
             ? normalizedLocale.Value
@@ -649,6 +664,89 @@ public sealed class CatalogRepository(WhitePlateDbContext database) : ICatalogRe
     private static PromotionDiscountDto ToDto(WhitePlate.Domain.Catalog.PromotionDiscount discount) =>
         new(discount.Id, discount.Code, discount.Name, discount.Kind.ToString(), discount.Value, discount.IsActive,
             discount.MinimumOrderAmount, discount.ExpiresOn);
+
+    private static PublishedCatalogSnapshot ToPublishedSnapshot(CatalogManagementDto catalog,
+        IReadOnlyList<string> locales, string defaultLocale) => new(catalog.TenantId, catalog.Currency, defaultLocale,
+        locales, catalog.Categories, catalog.Products, catalog.OptionGroups, catalog.Options, catalog.Discounts);
+
+    private async Task<MenuDto> MapPublishedMenuAsync(TenantDto tenant, WhitePlate.Domain.Tenants.Tenant restaurant,
+        PublishedCatalogSnapshot snapshot, string? requestedLocale, CancellationToken cancellationToken)
+    {
+        var locale = MenuLocale.TryCreate(requestedLocale, out var normalized) &&
+                     snapshot.Locales.Contains(normalized!.Value, StringComparer.OrdinalIgnoreCase)
+            ? normalized.Value
+            : snapshot.DefaultLocale;
+        var categories = snapshot.Categories.Where(category => !category.IsArchived && category.IsVisible)
+            .OrderBy(category => category.SortOrder).ThenBy(category => category.Id).ToArray();
+        var categoryIds = categories.Select(category => category.Id).ToHashSet();
+        var products = snapshot.Products.Where(product => !product.IsArchived && categoryIds.Contains(product.CategoryId))
+            .OrderBy(product => product.SortOrder).ThenBy(product => product.Id).ToArray();
+        var productIds = products.Select(product => product.Id).ToHashSet();
+        var groups = snapshot.OptionGroups.Where(group => !group.IsArchived && productIds.Contains(group.ProductId))
+            .OrderBy(group => group.SortOrder).ThenBy(group => group.Id).ToArray();
+        var groupIds = groups.Select(group => group.Id).ToHashSet();
+        var options = snapshot.Options.Where(option => !option.IsArchived && groupIds.Contains(option.GroupId))
+            .OrderBy(option => option.SortOrder).ThenBy(option => option.Id).ToArray();
+        var photos = await database.MediaAssets.AsNoTracking().Where(asset => asset.TenantId == tenant.Id &&
+                asset.ProductId != null && productIds.Contains(asset.ProductId.Value) && asset.IsActive && asset.IsReady)
+            .OrderBy(asset => asset.SortOrder).ThenBy(asset => asset.Id).ToListAsync(cancellationToken);
+        var groupsByProduct = groups.GroupBy(group => group.ProductId).ToDictionary(group => group.Key,
+            group => (IReadOnlyList<MenuOptionGroupDto>)group.Select(item => new MenuOptionGroupDto(item.Id,
+                ResolveText(item.Name, null, item.Translations, locale, snapshot.DefaultLocale).Name,
+                item.MinimumSelections, item.MaximumSelections, item.SortOrder,
+                options.Where(option => option.GroupId == item.Id).Select(option => new MenuOptionDto(option.Id,
+                    ResolveText(option.Name, null, option.Translations, locale, snapshot.DefaultLocale).Name,
+                    option.PriceAdjustment, option.SortOrder)).ToArray())).ToArray());
+        var productsByCategory = products.GroupBy(product => product.CategoryId).ToDictionary(group => group.Key,
+            group => (IReadOnlyList<MenuProductDto>)group.Select(item =>
+            {
+                var text = ResolveText(item.Name, item.Description, item.Translations, locale, snapshot.DefaultLocale);
+                return new MenuProductDto(item.Id, text.Name, text.Description, item.BasePrice, item.TaxRatePercent,
+                    item.SortOrder, groupsByProduct.GetValueOrDefault(item.Id, []))
+                {
+                    IsAvailable = item.IsAvailable,
+                    ContainsAllergens = item.ContainsAllergens,
+                    MayContainAllergens = item.MayContainAllergens,
+                    DietaryTags = item.DietaryTags,
+                    PreparationMinutes = item.PreparationMinutes,
+                    PreparationNotes = item.PreparationNotes,
+                    Photos = photos.Where(asset => asset.ProductId == item.Id).Select(asset =>
+                        new WhitePlate.Application.Media.ProductPhotoDto(asset.Id, asset.Width, asset.Height, asset.Bytes)).ToArray()
+                };
+            }).ToArray());
+
+        return new MenuDto(tenant.Id, tenant.Name, snapshot.Currency, locale, snapshot.DefaultLocale,
+            snapshot.Locales, categories.Select(category => new MenuCategoryDto(category.Id,
+                ResolveText(category.Name, null, category.Translations, locale, snapshot.DefaultLocale).Name,
+                category.SortOrder, productsByCategory.GetValueOrDefault(category.Id, []))).ToArray())
+        {
+            RestaurantDescription = ResolvePublishedDescription(restaurant, locale, snapshot.DefaultLocale),
+            Establishment = PublicEstablishmentDto.FromTenant(restaurant, locale, snapshot.Locales,
+                snapshot.DefaultLocale)
+        };
+    }
+
+    private static string? ResolvePublishedDescription(WhitePlate.Domain.Tenants.Tenant restaurant,
+        string locale, string defaultLocale)
+    {
+        var translations = restaurant.GetDescriptionTranslations();
+
+        return translations.GetValueOrDefault(locale) ?? translations.GetValueOrDefault(defaultLocale);
+    }
+
+    private static CatalogLocalizedText ResolveText(string name, string? description,
+        IReadOnlyDictionary<string, CatalogLocalizedText> translations, string locale, string defaultLocale)
+    {
+        if (translations.TryGetValue(locale, out var translated)) return translated;
+        if (translations.FirstOrDefault(pair => string.Equals(pair.Key, locale,
+                StringComparison.OrdinalIgnoreCase)) is { Value: not null } caseInsensitive)
+            return caseInsensitive.Value;
+        if (translations.TryGetValue(defaultLocale, out var fallback)) return fallback;
+        if (translations.FirstOrDefault(pair => string.Equals(pair.Key, defaultLocale,
+                StringComparison.OrdinalIgnoreCase)) is { Value: not null } defaultCaseInsensitive)
+            return defaultCaseInsensitive.Value;
+        return new CatalogLocalizedText(name, description);
+    }
 
     private static MenuProductDto ToMenuProductDto(Product product) =>
         new(product.Id, product.Name, product.Description, product.BasePrice, product.TaxRatePercent,

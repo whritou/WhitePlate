@@ -332,21 +332,23 @@ Decisions and limits:
 
 ### M4 — Menu Builder: catalog draft publication and change history
 
+Implementation update (2026-10-16): source now uses normalized management rows as the draft and immutable JSON snapshots as the guest/checkout publication. Owner/manager publish, discard, restore and history endpoints carry optimistic version preconditions; validation and publication are transactional, and D4 availability remains immediate with actor-attributed revision history. Decision 0013 records migration, retention and rollback scope. The additive migration is generated but not applied; database and guest/staff acceptance remain outstanding.
+
 Reference: menu-builder. Dependencies: M1.
 
 Define and implement the Publish changes and History controls shown in the Stitch Menu Builder without confusing them with the existing immediate-save catalog or order history.
 
 Acceptance criteria:
 
-- [ ] Record the draft/published catalog model and migration path from current immediate writes before changing behavior; keep existing restaurants usable during rollout.
-- [ ] Track changes and reviewable publication scope across categories, products, options, pricing and translations, with dirty-state feedback and explicit publish/discard behavior.
-- [ ] Validate completeness, availability, locale fallback and all relevant price/option rules on the server before atomic publication; reject stale concurrent publishes and retain the last valid storefront version on failure.
-- [ ] Provide tenant-authorized catalog change history with actor/time/version and useful diffs; define retention and rollback scope rather than reusing the unrelated order-history page.
+- [x] Record the draft/published catalog model and migration path from current immediate writes before changing behavior; keep existing restaurants usable during rollout.
+- [x] Track changes and reviewable publication scope across categories, products, options, pricing and translations, with dirty-state feedback and explicit publish/discard behavior.
+- [x] Validate completeness, availability, locale fallback and all relevant price/option rules on the server before atomic publication; reject stale concurrent publishes and retain the last valid storefront version on failure.
+- [x] Provide tenant-authorized catalog change history with actor/time/version and useful diffs; define retention and rollback scope rather than reusing the unrelated order-history page.
 - [ ] Verify publication/cache refresh across guest and staff sessions while preserving checkout pricing/idempotency and immutable historical order snapshots.
 
 Decisions and limits:
 
-- Decide whether immediate availability/86 changes bypass drafts, publication permissions, version retention and rollback guarantees. Coordinate with M3 review states and D4 quick availability so emergency changes remain coherent.
+- Decision 0013 settles immediate D4 availability bypass, Owner/Manager publication permissions, indefinite history retention and rollback as a new version. M3 translation provider/review states remain outside M4; saved translations are captured as-is. M5 photos remain independently saved and are not part of catalog snapshots.
 
 ### M5 — Menu Builder: upload and manage product photos
 

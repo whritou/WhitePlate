@@ -9,11 +9,23 @@ public sealed record PublicEstablishmentDto(string Name, string? Phone, string? 
     string TimeZone, string? PickupInstruction, string? PickupLocale, OpeningHoursSchedule? OpeningHours)
 {
     public static PublicEstablishmentDto FromTenant(Tenant tenant, string? locale)
+        => FromTenant(tenant, locale, tenant.GetMenuLocales(), tenant.DefaultMenuLocale);
+
+    public static PublicEstablishmentDto FromTenant(Tenant tenant, string? locale,
+        IReadOnlyList<string> locales, string defaultLocale)
     {
-        var pickup = tenant.ResolvePickupInstructions(locale);
+        var effectiveLocale = MenuLocale.TryCreate(locale, out var normalized) &&
+                              locales.Contains(normalized!.Value, StringComparer.OrdinalIgnoreCase)
+            ? normalized.Value
+            : defaultLocale;
+        var pickupInstructions = tenant.GetPickupInstructions();
+        var pickupLocale = pickupInstructions.ContainsKey(effectiveLocale)
+            ? effectiveLocale
+            : pickupInstructions.ContainsKey(defaultLocale) ? defaultLocale : null;
+        var pickupText = pickupLocale is null ? null : pickupInstructions[pickupLocale];
         return new(tenant.Name, tenant.Phone, tenant.AddressLine1, tenant.AddressLine2, tenant.PostalCode,
             tenant.City, tenant.Region, tenant.CountryCode, tenant.Latitude, tenant.Longitude, tenant.TimeZone,
-            pickup.Text, pickup.Locale, tenant.GetOpeningHours());
+            pickupText, pickupLocale, tenant.GetOpeningHours());
     }
 }
 

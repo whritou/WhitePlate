@@ -25,6 +25,8 @@ public sealed class MenuCategory
     public void Rename(string? name) => Name = NormalizeName(name);
     public void SetTranslation(string? locale, string? name, string? description = null) =>
         TranslationsJson = CatalogTranslations.Set(TranslationsJson, locale, name, description, MaxNameLength);
+    public void ReplaceTranslations(IReadOnlyDictionary<string, CatalogLocalizedText>? translations) =>
+        TranslationsJson = CatalogTranslations.Replace(translations, MaxNameLength);
     public void Update(string? name, int sortOrder)
     {
         if (sortOrder < 0) throw new DomainRuleException("invalid_sort_order", "sortOrder", "Sort order cannot be negative.");

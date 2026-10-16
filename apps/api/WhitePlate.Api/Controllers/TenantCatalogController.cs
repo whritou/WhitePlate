@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Globalization;
 using WhitePlate.Api.Contracts;
 using WhitePlate.Api.Errors;
 using WhitePlate.Application.Catalog;
@@ -19,6 +20,7 @@ public sealed class TenantCatalogController(
     CreateOptionCommandHandler createOption,
     CreateDiscountCommandHandler createDiscount,
     CatalogManagementCommandHandler manageCatalog,
+    CatalogPublicationCommandHandler catalogPublication,
     GetManagementCatalogQueryHandler getManagementCatalog,
     GetProductAvailabilityQueryHandler getProductAvailability,
     MenuLanguageSettingsHandler menuLanguageSettings,
@@ -107,8 +109,103 @@ public sealed class TenantCatalogController(
         var identity = currentIdentity.Identity;
         if (identity is null) return Unauthorized();
         var result = await getManagementCatalog.HandleAsync(new GetManagementCatalogQuery(tenantId, identity), cancellationToken);
+        if (!result.IsSuccess) return errors.ToActionResult(errors.Create(HttpContext, result.Error));
+        if (result.Value.Publication is { } publication)
+            Response.Headers.ETag = FormatCatalogEtag(publication.PublishedVersion);
+        return Ok(result.Value);
+    }
+
+    [HttpGet("catalog/history")]
+    [ProducesResponseType<CatalogHistoryDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status401Unauthorized, "application/problem+json")]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status404NotFound, "application/problem+json")]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status400BadRequest, "application/problem+json")]
+    public async Task<ActionResult<CatalogHistoryDto>> GetCatalogHistory(Guid tenantId, [FromQuery] int? beforeVersion,
+        [FromQuery] int pageSize = 25, CancellationToken cancellationToken = default)
+    {
+        var identity = currentIdentity.Identity;
+        if (identity is null) return Unauthorized();
+        var result = await catalogPublication.GetHistoryAsync(tenantId, beforeVersion, pageSize, identity,
+            cancellationToken);
         return result.IsSuccess ? Ok(result.Value) : errors.ToActionResult(errors.Create(HttpContext, result.Error));
     }
+
+    [HttpPost("catalog/publish")]
+    [ProducesResponseType<CatalogPublicationResultDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status401Unauthorized, "application/problem+json")]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status404NotFound, "application/problem+json")]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status400BadRequest, "application/problem+json")]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status412PreconditionFailed, "application/problem+json")]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status428PreconditionRequired, "application/problem+json")]
+    public async Task<ActionResult<CatalogPublicationResultDto>> PublishCatalog(Guid tenantId,
+        CancellationToken cancellationToken)
+    {
+        var identity = currentIdentity.Identity;
+        if (identity is null) return Unauthorized();
+        var expectedVersion = ParseIfMatch(out var valid);
+        if (!valid) return BadRequest();
+        var result = await catalogPublication.PublishAsync(tenantId, expectedVersion, identity, cancellationToken);
+        if (!result.IsSuccess) return errors.ToActionResult(errors.Create(HttpContext, result.Error));
+        Response.Headers.ETag = FormatCatalogEtag(result.Value.PublishedVersion);
+        return Ok(result.Value);
+    }
+
+    [HttpPost("catalog/discard")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status401Unauthorized, "application/problem+json")]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status404NotFound, "application/problem+json")]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status400BadRequest, "application/problem+json")]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status412PreconditionFailed, "application/problem+json")]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status428PreconditionRequired, "application/problem+json")]
+    public async Task<IActionResult> DiscardCatalog(Guid tenantId, CancellationToken cancellationToken)
+    {
+        var identity = currentIdentity.Identity;
+        if (identity is null) return Unauthorized();
+        var expectedVersion = ParseIfMatch(out var valid);
+        if (!valid) return BadRequest();
+        var result = await catalogPublication.DiscardAsync(tenantId, expectedVersion, identity, cancellationToken);
+        if (!result.IsSuccess) return errors.ToActionResult(errors.Create(HttpContext, result.Error));
+        Response.Headers.ETag = FormatCatalogEtag(expectedVersion!.Value);
+        return NoContent();
+    }
+
+    [HttpPost("catalog/history/{version:int}/restore")]
+    [ProducesResponseType<CatalogPublicationResultDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status401Unauthorized, "application/problem+json")]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status404NotFound, "application/problem+json")]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status400BadRequest, "application/problem+json")]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status412PreconditionFailed, "application/problem+json")]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status428PreconditionRequired, "application/problem+json")]
+    public async Task<ActionResult<CatalogPublicationResultDto>> RestoreCatalogVersion(Guid tenantId, int version,
+        CancellationToken cancellationToken)
+    {
+        var identity = currentIdentity.Identity;
+        if (identity is null) return Unauthorized();
+        var expectedVersion = ParseIfMatch(out var valid);
+        if (!valid) return BadRequest();
+        var result = await catalogPublication.RestoreAsync(tenantId, expectedVersion, version, identity,
+            cancellationToken);
+        if (!result.IsSuccess) return errors.ToActionResult(errors.Create(HttpContext, result.Error));
+        Response.Headers.ETag = FormatCatalogEtag(result.Value.PublishedVersion);
+        return Ok(result.Value);
+    }
+
+    private int? ParseIfMatch(out bool valid)
+    {
+        var value = Request.Headers.IfMatch.ToString().Trim();
+        if (value.Length == 0)
+        {
+            valid = true;
+            return null;
+        }
+
+        valid = value.Length >= 3 && value[0] == '"' && value[^1] == '"' &&
+            int.TryParse(value.AsSpan(1, value.Length - 2), NumberStyles.None, CultureInfo.InvariantCulture,
+                out var version) && version > 0;
+        return valid ? int.Parse(value.AsSpan(1, value.Length - 2), NumberStyles.None, CultureInfo.InvariantCulture) : null;
+    }
+
+    private static string FormatCatalogEtag(int version) => $"\"{version.ToString(CultureInfo.InvariantCulture)}\"";
 
     [HttpPut("catalog/reorder")]
     [RequestSizeLimit(65536)]

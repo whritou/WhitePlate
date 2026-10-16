@@ -63,7 +63,8 @@ public sealed class CatalogManagementCommandHandler(IStaffMembershipRepository m
     {
         if (!await CatalogAccess.CanManageAvailabilityAsync(memberships, tenantId, identity, cancellationToken))
             return Result<bool>.Failure(new ApplicationError(ErrorCode.NotFound));
-        var updated = await catalog.SetProductAvailabilityAsync(tenantId, productId, isAvailable, cancellationToken);
+        var updated = await catalog.SetProductAvailabilityAsync(tenantId, productId, isAvailable, identity,
+            cancellationToken);
         return updated
             ? Result<bool>.Success(true)
             : Result<bool>.Failure(new ApplicationError(ErrorCode.NotFound));
