@@ -8,6 +8,26 @@ Owner/manager catalog mutations continue to require persisted membership for the
 
 Discount create/update requests and management reads now include `minimumOrderAmount` (decimal, 0–9,999,999,999.99; defaults to 0) and nullable `expiresOn` (`YYYY-MM-DD`). Checkout applies the minimum to the products-plus-options subtotal before tax and discount. Expiration is inclusive through that calendar date in the restaurant's saved IANA time zone. The additive migration `20261014211126_DiscountMinimumAndExpiration` adds a defaulted `numeric(12,2)` minimum and nullable `date`; it is source-only and has not been applied to a shared database. No startup migration is configured.
 
+## M4 catalog publication and history — 2026-10-16
+
+| Method and route | Access and behavior |
+| --- | --- |
+| `GET /api/v1/tenants/{tenantId}/catalog` | Owner/manager; current draft catalog plus `publication` summary; returns the quoted published version as `ETag` |
+| `GET /api/v1/tenants/{tenantId}/catalog/history?pageSize=25&beforeVersion=…` | Owner/manager; newest-first revision pages, 1–100 entries; cursor is an exclusive version bound |
+| `POST /api/v1/tenants/{tenantId}/catalog/publish` | Owner/manager; `{}` plus quoted positive integer `If-Match`; validates and atomically publishes the complete draft, returns `{publishedVersion, publishedAt}` and a new `ETag` |
+| `POST /api/v1/tenants/{tenantId}/catalog/discard` | Owner/manager; `{}` plus quoted `If-Match`; replaces the working draft with the current published snapshot and returns 204 with the current `ETag` |
+| `POST /api/v1/tenants/{tenantId}/catalog/history/{version}/restore` | Owner/manager; `{}` plus quoted `If-Match`; restores the selected catalog as a new publication, returns the new version and `ETag` |
+
+The draft remains in the existing normalized catalog rows. The `CatalogPublicationHistory` migration creates `CatalogPublicationHeads` and `CatalogRevisions`, backfills each existing tenant's current catalog as baseline version 1, and stores new tenants' empty baseline at creation. The migration is generated, has not been applied to a shared or production database, and must be applied before deploying the API. No startup migration runs automatically.
+
+The catalog response's `publication` contains `publishedVersion`, `publishedAt`, `hasUnpublishedChanges`, `changeCount`, and reviewable entity/field changes. History entries include version, time, action, optional source version, actor issuer/subject, and change set. Revisions are retained indefinitely; there is no purge endpoint. Restore creates a new version instead of modifying an old row. Discard soft-archives or deactivates draft-only entries so existing references remain intact.
+
+Publishing validates the full draft on the server, including locale/default configuration, catalog relationships, prices, option bounds, discount rules and identifiers. The published head and revision are committed together under a row lock and serializable transaction. Missing `If-Match` returns 428, stale versions return 412, and invalid input returns 400. A failed publish preserves the previous public version. Publishing an unchanged draft is a no-op and does not add a revision.
+
+Public `/menu`, public tenant locale output, public establishment locale fallback and checkout catalog/pricing use the published snapshot. Restaurant description text and establishment details remain separate current settings. Existing order snapshots and idempotency receipts are not rewritten. Product-photo galleries retain M5's independent immediate-save behavior and do not appear in catalog diffs. D4 availability changes remain immediate for owners/managers/Kitchen and add an availability revision; full catalog history and publication remain owner/manager-only. Normal product-form availability changes stay in the draft.
+
+Source wiring and API build are complete; migration application, PostgreSQL concurrency, and end-to-end guest/staff acceptance remain unverified. See [decision 0013](../architecture/decisions/0013-catalog-publication-and-history.md) and [schema](../database/database-schema.md#m4-catalog-publication-and-history--2026-10-16).
+
 ## S1 organization and restaurant legal profiles — 2026-10-12
 
 Organization creation now requires `legalCountryCode` (`FR`, `DE`, `GB`, or `US`) and accepts optional `legalName`, `legalRegistrationNumber`, and `taxIdentifier`. `GET /api/v1/organizations/{organizationId}/legal-profile` and `PUT` manage the profile for persisted organization owners. PUT requires a quoted `If-Match` legal-profile version; stale writes return 412. The organization response includes the current profile and `legalProfileVersion`.
@@ -131,7 +151,11 @@ All paths are rooted at `/api/v1`. Success responses contain the resource direct
 | `DELETE /organizations/{organizationId}/invitations/{invitationId}` | Better Auth bearer, owner | Revoke a pending invitation; accepted, revoked, expired, missing, or foreign invitations return the same `404` |
 | `POST /invitations/accept` | Better Auth bearer, verified invitee | Accept only when the JWT verified email matches the invitation email |
 | `GET /me` | Better Auth bearer | Return the current identity and its organization/restaurant memberships |
-| `GET /tenants/{tenantId}/catalog` | Organization owner or restaurant manager | Read tenant catalog entries, including archived entries and discount state |
+| `GET /tenants/{tenantId}/catalog` | Organization owner or restaurant manager | Read current draft entries, archived entries, discount state, and the publication summary |
+| `GET /tenants/{tenantId}/catalog/history` | Organization owner or restaurant manager | Read paginated actor/time/version/change history |
+| `POST /tenants/{tenantId}/catalog/publish` | Organization owner or restaurant manager | Validate and atomically publish the current draft using quoted `If-Match` |
+| `POST /tenants/{tenantId}/catalog/discard` | Organization owner or restaurant manager | Replace the current draft from the published snapshot using quoted `If-Match` |
+| `POST /tenants/{tenantId}/catalog/history/{version}/restore` | Organization owner or restaurant manager | Publish a historical snapshot as a new version using quoted `If-Match` |
 | `GET /tenants/{tenantId}/products/availability` | Organization owner, restaurant manager, or Kitchen member | Read only ID, name and availability for products in active, visible categories |
 | `GET /tenants/{tenantId}/menu-languages` | Organization owner or restaurant manager | Read enabled menu language tags and default language |
 | `GET /tenants/{tenantId}/restaurant-description-translations` | Organization owner or restaurant manager | Read enabled locales, default locale, and saved restaurant description translations; private response is not cached |

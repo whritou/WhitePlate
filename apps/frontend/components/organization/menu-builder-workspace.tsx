@@ -12,6 +12,7 @@ import { MenuLanguageSettings } from "./menu-language-settings"
 import { CatalogTranslationsEditor } from "./catalog-translations-editor"
 import { RestaurantDescriptionEditor } from "./restaurant-description-editor"
 import { DiscountsEditor } from "./discounts-editor"
+import { CatalogPublicationPanel } from "./catalog-publication-panel"
 import styles from "./menu-builder.module.css"
 
 export function MenuBuilderWorkspace({
@@ -72,6 +73,15 @@ export function MenuBuilderWorkspace({
           </p>
         </div>
       </header>
+
+      <div className="px-4 pt-4 sm:px-6">
+        <CatalogPublicationPanel
+          tenantId={catalog.tenantId}
+          userId={userId}
+          publication={catalog.publication}
+          pending={pending}
+        />
+      </div>
 
       <div className="flex flex-wrap items-center justify-between gap-3 border-b px-6">
         <TabsList

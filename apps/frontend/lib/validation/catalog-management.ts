@@ -1,5 +1,9 @@
 import type {
+  CatalogChange,
   CatalogDiscount,
+  CatalogHistory,
+  CatalogHistoryRevision,
+  CatalogPublicationSummary,
   ManagedCatalog,
   ProductAvailability,
 } from "@/types/catalog-management"
@@ -44,6 +48,97 @@ const allergens = [
   "sulphites",
 ]
 const diets = ["dairyFree", "glutenFree", "pescatarian", "vegan", "vegetarian"]
+const isTimestamp = (value: unknown): value is string =>
+  typeof value === "string" && !Number.isNaN(Date.parse(value))
+
+function isCatalogChange(value: unknown): value is CatalogChange {
+  return (
+    isRecord(value) &&
+    typeof value.entityType === "string" &&
+    isUuid(value.entityId) &&
+    typeof value.name === "string" &&
+    (value.action === "added" ||
+      value.action === "updated" ||
+      value.action === "removed") &&
+    Array.isArray(value.fields) &&
+    value.fields.every(
+      (field) =>
+        isRecord(field) &&
+        typeof field.field === "string" &&
+        (field.before === null || typeof field.before === "string") &&
+        (field.after === null || typeof field.after === "string")
+    )
+  )
+}
+
+function parsePublicationSummary(
+  value: unknown
+): CatalogPublicationSummary | null {
+  if (
+    !isRecord(value) ||
+    !Number.isSafeInteger(value.publishedVersion) ||
+    (value.publishedVersion as number) < 1 ||
+    !isTimestamp(value.publishedAt) ||
+    typeof value.hasUnpublishedChanges !== "boolean" ||
+    !Number.isSafeInteger(value.changeCount) ||
+    (value.changeCount as number) < 0 ||
+    !Array.isArray(value.changes) ||
+    !value.changes.every(isCatalogChange) ||
+    value.changeCount !== value.changes.length
+  )
+    return null
+
+  return value as unknown as CatalogPublicationSummary
+}
+
+function parseHistoryRevision(value: unknown): CatalogHistoryRevision | null {
+  if (
+    !isRecord(value) ||
+    !Number.isSafeInteger(value.version) ||
+    (value.version as number) < 1 ||
+    !isTimestamp(value.publishedAt) ||
+    !["baseline", "publish", "rollback", "availability"].includes(
+      String(value.action)
+    ) ||
+    (value.sourceVersion !== null &&
+      (!Number.isSafeInteger(value.sourceVersion) ||
+        (value.sourceVersion as number) < 1)) ||
+    typeof value.actorIssuer !== "string" ||
+    typeof value.actorSubject !== "string" ||
+    !Array.isArray(value.changes) ||
+    !value.changes.every(isCatalogChange)
+  )
+    return null
+
+  return value as unknown as CatalogHistoryRevision
+}
+
+export function parseCatalogHistory(value: unknown): CatalogHistory | null {
+  if (
+    !isRecord(value) ||
+    !Number.isSafeInteger(value.currentVersion) ||
+    (value.currentVersion as number) < 1 ||
+    !Array.isArray(value.revisions)
+  )
+    return null
+
+  const revisions = value.revisions.map(parseHistoryRevision)
+
+  if (
+    revisions.some((revision) => revision === null) ||
+    revisions.some(
+      (revision, index) =>
+        index > 0 && revision!.version >= revisions[index - 1]!.version
+    )
+  )
+    return null
+
+  return {
+    currentVersion: value.currentVersion as number,
+    revisions: revisions as CatalogHistoryRevision[],
+  }
+}
+
 const isCodeList = (value: unknown, supported: string[]) =>
   Array.isArray(value) &&
   value.length <= supported.length &&
@@ -186,6 +281,18 @@ export function parseManagedCatalog(
   )
     return null
 
+  const publication =
+    value.publication === undefined || value.publication === null
+      ? null
+      : parsePublicationSummary(value.publication)
+
+  if (
+    value.publication !== undefined &&
+    value.publication !== null &&
+    !publication
+  )
+    return null
+
   const categories = value.categories as Record<string, unknown>[]
   const products = value.products as Record<string, unknown>[]
   const optionGroups = value.optionGroups as Record<string, unknown>[]
@@ -233,6 +340,7 @@ export function parseManagedCatalog(
       minimumOrderAmount: discount.minimumOrderAmount ?? 0,
       expiresOn: discount.expiresOn ?? null,
     })),
+    publication,
   } as ManagedCatalog
 }
 

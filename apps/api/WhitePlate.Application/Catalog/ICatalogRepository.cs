@@ -1,4 +1,5 @@
 using WhitePlate.Application.Tenants;
+using WhitePlate.Domain.Identity;
 
 namespace WhitePlate.Application.Catalog;
 
@@ -22,6 +23,9 @@ public interface ICatalogRepository
         CancellationToken cancellationToken);
     Task<bool> SetProductAvailabilityAsync(Guid tenantId, Guid productId, bool isAvailable,
         CancellationToken cancellationToken);
+    Task<bool> SetProductAvailabilityAsync(Guid tenantId, Guid productId, bool isAvailable,
+        ExternalIdentity identity, CancellationToken cancellationToken) =>
+        SetProductAvailabilityAsync(tenantId, productId, isAvailable, cancellationToken);
     Task<bool> CategoryBelongsToTenantAsync(Guid tenantId, Guid categoryId, CancellationToken cancellationToken);
     Task<MenuCategoryDto> AddCategoryAsync(WhitePlate.Domain.Catalog.MenuCategory category, CancellationToken cancellationToken);
     Task<bool> AddProductAsync(WhitePlate.Domain.Catalog.Product product, CancellationToken cancellationToken);
@@ -36,6 +40,14 @@ public interface ICatalogRepository
         Guid? categoryId = null, string? sku = null, IReadOnlyList<string>? containsAllergens = null,
         IReadOnlyList<string>? mayContainAllergens = null, IReadOnlyList<string>? dietaryTags = null,
         int? preparationMinutes = null, IReadOnlyDictionary<string, string>? preparationNotes = null);
+    Task<MenuProductDto?> UpdateProductAsync(Guid tenantId, Guid productId, string name, string? description,
+        decimal basePrice, decimal taxRatePercent, int sortOrder, bool isAvailable, CancellationToken cancellationToken,
+        Guid? categoryId, string? sku, IReadOnlyList<string>? containsAllergens,
+        IReadOnlyList<string>? mayContainAllergens, IReadOnlyList<string>? dietaryTags,
+        int? preparationMinutes, IReadOnlyDictionary<string, string>? preparationNotes, ExternalIdentity identity) =>
+        UpdateProductAsync(tenantId, productId, name, description, basePrice, taxRatePercent, sortOrder,
+            isAvailable, cancellationToken, categoryId, sku, containsAllergens, mayContainAllergens,
+            dietaryTags, preparationMinutes, preparationNotes);
     Task<MenuOptionGroupDto?> UpdateOptionGroupAsync(Guid tenantId, Guid groupId, string name, int minimumSelections,
         int maximumSelections, int sortOrder, CancellationToken cancellationToken);
     Task<MenuOptionDto?> UpdateOptionAsync(Guid tenantId, Guid optionId, string name, decimal priceAdjustment,

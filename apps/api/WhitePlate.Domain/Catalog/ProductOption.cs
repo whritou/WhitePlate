@@ -44,6 +44,8 @@ public sealed class ProductOption
 
     public void SetTranslation(string? locale, string? name, string? description = null) =>
         TranslationsJson = CatalogTranslations.Set(TranslationsJson, locale, name, description, 120);
+    public void ReplaceTranslations(IReadOnlyDictionary<string, CatalogLocalizedText>? translations) =>
+        TranslationsJson = CatalogTranslations.Replace(translations, 120);
 
     public void Archive() => IsArchived = true;
     public void Restore() => IsArchived = false;

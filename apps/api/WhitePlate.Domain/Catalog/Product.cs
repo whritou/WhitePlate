@@ -65,6 +65,8 @@ public sealed class Product
     public void SetTranslation(string? locale, string? name, string? description) =>
         TranslationsJson = CatalogTranslations.Set(TranslationsJson, locale, name, description,
             MaxNameLength, MaxDescriptionLength);
+    public void ReplaceTranslations(IReadOnlyDictionary<string, CatalogLocalizedText>? translations) =>
+        TranslationsJson = CatalogTranslations.Replace(translations, MaxNameLength, MaxDescriptionLength);
 
     public void SetMetadata(string? sku, IReadOnlyCollection<string>? containsAllergens,
         IReadOnlyCollection<string>? mayContainAllergens, IReadOnlyCollection<string>? dietaryTags,

@@ -1,8 +1,9 @@
 import "server-only"
-import { isUuid } from "@/lib/validation/common"
+import { isRecord, isUuid } from "@/lib/validation/common"
 import { whitePlateApi } from "@/lib/api"
 import {
   parseManagedCatalog,
+  parseCatalogHistory,
   parseProductAvailability,
 } from "@/lib/validation/catalog-management"
 import type { ApiResult } from "@/types/api"
@@ -11,6 +12,7 @@ import type {
   ArchiveInput,
   CatalogReorderInput,
   CatalogEntityType,
+  CatalogHistory,
   CategoryInput,
   CatalogResult,
   DiscountInput,
@@ -301,4 +303,90 @@ export async function restoreProduct(
       {}
     )
   )
+}
+
+export async function getCatalogHistory(
+  tenantId: string,
+  beforeVersion: number | null,
+  pageSize: number,
+  signal?: AbortSignal
+): Promise<ApiResult<CatalogHistory>> {
+  const query = new URLSearchParams({ pageSize: String(pageSize) })
+
+  if (beforeVersion !== null) query.set("beforeVersion", String(beforeVersion))
+
+  const response = await whitePlateApi.get<unknown>(
+    `/api/v1/tenants/${tenantId}/catalog/history?${query}`,
+    { signal }
+  )
+
+  if (!response.ok) return response
+
+  const data = parseCatalogHistory(response.data)
+
+  return data
+    ? { ok: true, status: 200, data }
+    : { ok: false, status: 502, error: "unavailable" }
+}
+
+function publicationMutationResult(
+  response: ApiResult<unknown>
+): CatalogResult {
+  if (!response.ok) return mutationResult(response)
+  if (
+    !isRecord(response.data) ||
+    !Number.isSafeInteger(response.data.publishedVersion) ||
+    (response.data.publishedVersion as number) < 1 ||
+    typeof response.data.publishedAt !== "string" ||
+    Number.isNaN(Date.parse(response.data.publishedAt))
+  )
+    return { ok: false, error: "unavailable" }
+
+  return {
+    ok: true,
+    publication: {
+      publishedVersion: response.data.publishedVersion as number,
+      publishedAt: response.data.publishedAt,
+    },
+  }
+}
+
+export async function publishCatalog(
+  tenantId: string,
+  expectedVersion: number
+): Promise<CatalogResult> {
+  const response = await whitePlateApi.post<unknown, Record<string, never>>(
+    `/api/v1/tenants/${tenantId}/catalog/publish`,
+    {},
+    { ifMatch: `"${expectedVersion}"` }
+  )
+
+  return publicationMutationResult(response)
+}
+
+export async function discardCatalogDraft(
+  tenantId: string,
+  expectedVersion: number
+): Promise<CatalogResult> {
+  return mutationResult(
+    await whitePlateApi.post<unknown, Record<string, never>>(
+      `/api/v1/tenants/${tenantId}/catalog/discard`,
+      {},
+      { ifMatch: `"${expectedVersion}"` }
+    )
+  )
+}
+
+export async function restoreCatalogVersion(
+  tenantId: string,
+  expectedVersion: number,
+  sourceVersion: number
+): Promise<CatalogResult> {
+  const response = await whitePlateApi.post<unknown, Record<string, never>>(
+    `/api/v1/tenants/${tenantId}/catalog/history/${sourceVersion}/restore`,
+    {},
+    { ifMatch: `"${expectedVersion}"` }
+  )
+
+  return publicationMutationResult(response)
 }

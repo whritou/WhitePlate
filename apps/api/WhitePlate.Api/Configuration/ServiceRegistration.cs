@@ -93,6 +93,7 @@ public static class ServiceRegistration
         services.AddScoped<IThemePublicationRepository, ThemePublicationRepository>();
         services.AddScoped<ThemePublicationHandler>();
         services.AddSingleton<ILogoPaletteExtractor, WhitePlate.Infrastructure.Media.LogoPaletteExtractor>();
+        services.AddScoped<ICatalogPublicationRepository, CatalogPublicationRepository>();
         services.AddScoped<ICatalogRepository, CatalogRepository>();
         services.AddScoped<IOrderRepository, OrderRepository>();
         services.AddScoped<CreateOrderCommandHandler>();
@@ -115,6 +116,7 @@ public static class ServiceRegistration
         services.AddScoped<CreateOptionCommandHandler>();
         services.AddScoped<CreateDiscountCommandHandler>();
         services.AddScoped<CatalogManagementCommandHandler>();
+        services.AddScoped<CatalogPublicationCommandHandler>();
         services.AddScoped<GetManagementCatalogQueryHandler>();
         services.AddScoped<GetProductAvailabilityQueryHandler>();
         services.AddScoped<MenuLanguageSettingsHandler>();

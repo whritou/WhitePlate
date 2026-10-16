@@ -53,7 +53,10 @@ public sealed record CatalogOptionAdminDto(Guid Id, Guid GroupId, string Name, d
 public sealed record CatalogManagementDto(Guid TenantId, string Currency,
     IReadOnlyList<CatalogCategoryAdminDto> Categories, IReadOnlyList<CatalogProductAdminDto> Products,
     IReadOnlyList<CatalogOptionGroupAdminDto> OptionGroups, IReadOnlyList<CatalogOptionAdminDto> Options,
-    IReadOnlyList<PromotionDiscountDto> Discounts);
+    IReadOnlyList<PromotionDiscountDto> Discounts)
+{
+    public CatalogPublicationSummaryDto? Publication { get; init; }
+}
 public sealed record MenuDto(Guid TenantId, string RestaurantName, string Currency,
     string Locale, string DefaultLocale, IReadOnlyList<string> AvailableLocales,
     IReadOnlyList<MenuCategoryDto> Categories)
