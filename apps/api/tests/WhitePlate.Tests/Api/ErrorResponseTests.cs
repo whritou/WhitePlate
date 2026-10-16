@@ -97,7 +97,11 @@ public sealed class ErrorResponseTests
             builder.UseEnvironment(environment);
             builder.UseSetting("Authentication:Issuer", "https://localhost:3000");
             builder.UseSetting("Authentication:Audience", "whiteplate-api");
-            builder.ConfigureLogging(logging => logging.ClearProviders());
+            builder.ConfigureLogging(logging =>
+            {
+                logging.ClearProviders();
+                logging.AddFilter("Microsoft.AspNetCore.DataProtection", LogLevel.None);
+            });
             builder.ConfigureServices(services =>
             {
                 services.AddControllers().AddApplicationPart(typeof(ErrorProbeController).Assembly);

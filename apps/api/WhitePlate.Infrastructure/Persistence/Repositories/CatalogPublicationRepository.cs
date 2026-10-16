@@ -147,7 +147,7 @@ public sealed class CatalogPublicationRepository(WhitePlateDbContext database) :
         if (product is null || category is null) return false;
         var row = await database.Products.SingleOrDefaultAsync(item => item.TenantId == tenantId &&
             item.Id == productId, cancellationToken);
-        if (row is null) return false;
+        if (row is null || row.IsArchived) return false;
         if (product.IsAvailable == isAvailable)
         {
             row.SetAvailability(isAvailable);

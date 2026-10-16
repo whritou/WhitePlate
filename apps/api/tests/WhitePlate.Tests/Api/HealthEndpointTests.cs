@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Hosting;
 using WhitePlate.Api.Realtime;
 using WhitePlate.Infrastructure.Persistence;
@@ -63,6 +64,7 @@ public sealed class HealthEndpointTests
             if (databaseReachable) connection.Open();
 
             builder.UseEnvironment("Production");
+            builder.ConfigureLogging(logging => logging.ClearProviders());
             builder.UseSetting("Authentication:Issuer", "https://localhost:3000");
             builder.UseSetting("Authentication:Audience", "whiteplate-api");
             builder.ConfigureServices(services =>

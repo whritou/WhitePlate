@@ -15,6 +15,7 @@ public sealed partial class OrdersEndpointTests
     {
         using var factory = new OrdersFactory();
         var seeded = await factory.SeedAsync();
+        await factory.SeedPublishedCatalogAsync(seeded.TenantId);
         await factory.SeedMembershipAsync(seeded.TenantId, "kitchen", RestaurantRole.Kitchen);
         using var client = factory.CreateClient();
         client.DefaultRequestHeaders.Authorization = new("Bearer", "kitchen");
@@ -52,6 +53,7 @@ public sealed partial class OrdersEndpointTests
     {
         using var factory = new OrdersFactory();
         var seeded = await factory.SeedAsync();
+        await factory.SeedPublishedCatalogAsync(seeded.TenantId);
         await factory.SeedMembershipAsync(seeded.TenantId, "manager", RestaurantRole.Manager);
         await factory.SeedMembershipAsync(seeded.TenantId, "kitchen", RestaurantRole.Kitchen);
         await factory.SeedMembershipAsync(seeded.TenantId, "revoked-kitchen", RestaurantRole.Kitchen);
@@ -120,6 +122,7 @@ public sealed partial class OrdersEndpointTests
     {
         using var factory = new OrdersFactory();
         var seeded = await factory.SeedAsync();
+        await factory.SeedPublishedCatalogAsync(seeded.TenantId);
         await factory.SeedMembershipAsync(seeded.TenantId, "manager", RestaurantRole.Manager);
         await factory.SeedOwnerAsync(seeded.OrganizationId, "owner");
 
@@ -142,6 +145,7 @@ public sealed partial class OrdersEndpointTests
     {
         using var factory = new OrdersFactory();
         var seeded = await factory.SeedAsync();
+        await factory.SeedPublishedCatalogAsync(seeded.TenantId);
         await factory.SeedMembershipAsync(seeded.TenantId, "manager", RestaurantRole.Manager);
         await factory.SeedMembershipAsync(seeded.TenantId, "kitchen", RestaurantRole.Kitchen);
         using var scope = factory.Services.CreateScope();
@@ -155,6 +159,12 @@ public sealed partial class OrdersEndpointTests
             $"/api/v1/tenants/{seeded.TenantId}/categories/{categoryId}/visibility",
             new { isVisible = false }, TestContext.Current.CancellationToken);
         Assert.Equal(HttpStatusCode.NoContent, hide.StatusCode);
+
+        using var publish = new HttpRequestMessage(HttpMethod.Post,
+            $"/api/v1/tenants/{seeded.TenantId}/catalog/publish");
+        publish.Headers.TryAddWithoutValidation("If-Match", "\"1\"");
+        using var publication = await manager.SendAsync(publish, TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.OK, publication.StatusCode);
 
         using var kitchen = factory.CreateClient();
         kitchen.DefaultRequestHeaders.Authorization = new("Bearer", "kitchen");

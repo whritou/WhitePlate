@@ -40,11 +40,11 @@ public sealed class TenantRepository(WhitePlateDbContext database) : ITenantRepo
         catch (DbUpdateException exception) when (exception.InnerException is PostgresException
             { SqlState: PostgresErrorCodes.UniqueViolation, ConstraintName: TenantConfiguration.SubdomainIndex })
         {
+            var publicationHead = database.CatalogPublicationHeads.Local.Single(item => item.TenantId == tenant.Id);
+            var revision = database.CatalogRevisions.Local.Single(item => item.TenantId == tenant.Id);
+            database.Entry(publicationHead).State = EntityState.Detached;
+            database.Entry(revision).State = EntityState.Detached;
             database.Entry(tenant).State = EntityState.Detached;
-            database.Entry(database.CatalogPublicationHeads.Local.Single(item => item.TenantId == tenant.Id)).State =
-                EntityState.Detached;
-            database.Entry(database.CatalogRevisions.Local.Single(item => item.TenantId == tenant.Id)).State =
-                EntityState.Detached;
             return false;
         }
     }

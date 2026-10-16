@@ -15,6 +15,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
+using WhitePlate.Application.Catalog;
 using WhitePlate.Domain.Identity;
 using WhitePlate.Api.Tenancy;
 using WhitePlate.Api.Realtime;
@@ -1003,6 +1004,63 @@ public sealed partial class OrdersEndpointTests
             var database = scope.ServiceProvider.GetRequiredService<WhitePlateDbContext>();
             database.OrganizationOwnerMemberships.Add(OrganizationOwnerMembership.Create(organizationId,
                 ExternalIdentity.Create("https://identity.example.test/", subject)));
+            await database.SaveChangesAsync(TestContext.Current.CancellationToken);
+        }
+
+        public async Task SeedPublishedCatalogAsync(Guid tenantId)
+        {
+            using var scope = Services.CreateScope();
+            var database = scope.ServiceProvider.GetRequiredService<WhitePlateDbContext>();
+            var tenant = await database.Tenants.SingleAsync(item => item.Id == tenantId,
+                TestContext.Current.CancellationToken);
+            var categories = await database.MenuCategories.Where(item => item.TenantId == tenantId)
+                .OrderBy(item => item.SortOrder).ThenBy(item => item.Id)
+                .ToListAsync(TestContext.Current.CancellationToken);
+            var products = await database.Products.Where(item => item.TenantId == tenantId)
+                .OrderBy(item => item.SortOrder).ThenBy(item => item.Id)
+                .ToListAsync(TestContext.Current.CancellationToken);
+            var groups = await database.ProductOptionGroups.Where(item => item.TenantId == tenantId)
+                .OrderBy(item => item.SortOrder).ThenBy(item => item.Id)
+                .ToListAsync(TestContext.Current.CancellationToken);
+            var options = await database.ProductOptions.Where(item => item.TenantId == tenantId)
+                .OrderBy(item => item.SortOrder).ThenBy(item => item.Id)
+                .ToListAsync(TestContext.Current.CancellationToken);
+            var discounts = await database.PromotionDiscounts.Where(item => item.TenantId == tenantId)
+                .OrderBy(item => item.Code).ThenBy(item => item.Id)
+                .ToListAsync(TestContext.Current.CancellationToken);
+            var snapshot = new PublishedCatalogSnapshot(tenant.Id, tenant.Currency, tenant.DefaultMenuLocale,
+                tenant.GetMenuLocales(), categories.Select(category => new CatalogCategoryAdminDto(category.Id,
+                    category.Name, category.SortOrder, category.IsArchived)
+                {
+                    IsVisible = category.IsVisible,
+                    Translations = CatalogTranslations.GetAll(category.TranslationsJson)
+                }).ToArray(), products.Select(product => new CatalogProductAdminDto(product.Id, product.CategoryId,
+                    product.Name, product.Description, product.BasePrice, product.TaxRatePercent, product.SortOrder,
+                    product.IsAvailable, product.IsArchived)
+                {
+                    Sku = product.Sku,
+                    ContainsAllergens = product.ContainsAllergens,
+                    MayContainAllergens = product.MayContainAllergens,
+                    DietaryTags = product.DietaryTags,
+                    PreparationMinutes = product.PreparationMinutes,
+                    PreparationNotes = product.PreparationNotes,
+                    Translations = CatalogTranslations.GetAll(product.TranslationsJson)
+                }).ToArray(), groups.Select(group => new CatalogOptionGroupAdminDto(group.Id, group.ProductId,
+                    group.Name, group.MinimumSelections, group.MaximumSelections, group.SortOrder, group.IsArchived)
+                {
+                    Translations = CatalogTranslations.GetAll(group.TranslationsJson)
+                }).ToArray(), options.Select(option => new CatalogOptionAdminDto(option.Id, option.GroupId,
+                    option.Name, option.PriceAdjustment, option.SortOrder, option.IsArchived)
+                {
+                    Translations = CatalogTranslations.GetAll(option.TranslationsJson)
+                }).ToArray(), discounts.Select(discount => new PromotionDiscountDto(discount.Id, discount.Code,
+                    discount.Name, discount.Kind.ToString(), discount.Value, discount.IsActive,
+                    discount.MinimumOrderAmount, discount.ExpiresOn)).ToArray());
+            var snapshotJson = JsonSerializer.Serialize(snapshot, CatalogPublicationJson.Options);
+            var now = DateTimeOffset.UtcNow;
+            database.CatalogPublicationHeads.Add(CatalogPublicationHead.Create(tenantId, 1, snapshotJson, now));
+            database.CatalogRevisions.Add(CatalogRevision.Create(tenantId, 1, snapshotJson, "[]", "baseline",
+                null, "system", "test-seed", now));
             await database.SaveChangesAsync(TestContext.Current.CancellationToken);
         }
 
