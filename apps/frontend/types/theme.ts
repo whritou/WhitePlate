@@ -28,6 +28,23 @@ export type ThemeAppearance = Pick<
   | "showBanner"
 > & { ambiance: ThemeAmbiance }
 export type ThemeDraft = { theme: ThemeAppearance; version: number }
+export type ThemePublication = {
+  theme: ThemeAppearance
+  logoAssetId: string | null
+  faviconAssetId: string | null
+  bannerAssetId: string | null
+  sourceDraftVersion: number
+  publishedAt: string | null
+  version: number
+}
+export type PublishedTheme = {
+  theme: ThemeAppearance
+  hasLogo: boolean
+  hasFavicon: boolean
+  hasBanner: boolean
+  publishedAt: string | null
+  version: number
+}
 export type ThemePalette = Pick<
   ThemeAppearance,
   "primary" | "accent" | "bg" | "text"
@@ -36,14 +53,21 @@ export type ThemePaletteResult = {
   palette: ThemePalette | null
   reason: "no_logo" | "unavailable" | "unusable" | null
 }
-export type LiveStudioProps = BrandAssetsProps & { initialTheme?: ThemeDraft }
+export type LiveStudioProps = BrandAssetsProps & {
+  initialTheme?: ThemeDraft
+  initialPublication?: ThemePublication
+}
 export type StudioController = {
   theme: StoreTheme
   set: (patch: Partial<StoreTheme>) => void
+  saveDraft: () => void
   publish: () => void
+  discard: () => void
   saved: boolean
   locked: boolean
   saving: boolean
+  publishing: boolean
+  canPublish: boolean
   notice: string
   logoPreset?: ThemePalette
   canReload: boolean

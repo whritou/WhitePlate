@@ -129,7 +129,7 @@ export function StudioPageSection4() {
             onClick={() => set(DEFAULT_THEME)}
             className="px-0 text-muted-foreground"
           >
-            <Copy>Reset to default</Copy>
+            <Copy>{text("resetDesign")}</Copy>
           </Button>
         </>
       ) : (

@@ -16,6 +16,7 @@ public sealed class MediaAsset
     public bool IsReady { get; private set; }
     public bool IsActive { get; private set; }
     public bool WasPublished { get; private set; }
+    public bool IsInPublishedTheme { get; private set; }
     public DateTimeOffset CreatedAt { get; private set; }
     public DateTimeOffset? ExpiresAt { get; private set; }
 
@@ -57,6 +58,14 @@ public sealed class MediaAsset
     public void Retire(DateTimeOffset now)
     {
         IsActive = false;
-        ExpiresAt = now.AddDays(7);
+        ExpiresAt = IsInPublishedTheme ? null : now.AddDays(7);
+    }
+
+    public void SetInPublishedTheme(bool published, DateTimeOffset now)
+    {
+        if (IsInPublishedTheme == published) return;
+
+        IsInPublishedTheme = published;
+        ExpiresAt = published || IsActive ? null : now.AddDays(7);
     }
 }

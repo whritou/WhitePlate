@@ -20,7 +20,7 @@ export function StudioPageSection2() {
               onClick={() => setPanel(p)}
               className="flex-1 capitalize"
             >
-              <Copy>{p === "brand" ? "Brand & details" : "Design"}</Copy>
+              <Copy>{p === "brand" ? "Brand & Details" : "Design"}</Copy>
             </Button>
           ))}
         </Copy>

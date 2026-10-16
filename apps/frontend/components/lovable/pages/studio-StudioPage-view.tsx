@@ -19,10 +19,14 @@ export function StudioPageView() {
     dnsOpen,
     setDnsOpen,
     set,
+    saveDraft,
     publish,
+    discard,
     connected,
     locked,
     saving,
+    publishing,
+    canPublish,
   } = useStudioPageView()
 
   return (
@@ -70,25 +74,41 @@ export function StudioPageView() {
             </Copy>
           </div>
 
-          <Button onClick={publish} disabled={locked || (connected && saved)}>
-            {connected ? (
-              saving ? (
-                theme("saving")
-              ) : saved ? (
-                theme("savedButton")
+          {connected ? (
+            <>
+              <Button onClick={saveDraft} disabled={locked || saved}>
+                {saving
+                  ? theme("saving")
+                  : saved
+                    ? theme("savedButton")
+                    : theme("save")}
+              </Button>
+
+              <Button onClick={publish} disabled={locked || !canPublish}>
+                {publishing ? theme("publishing") : theme("publish")}
+              </Button>
+
+              <Button
+                variant="outline"
+                onClick={discard}
+                disabled={locked || saved}
+              >
+                {theme("discard")}
+              </Button>
+            </>
+          ) : (
+            <Button onClick={saveDraft} disabled={locked || saved}>
+              {isLive ? (
+                saved ? (
+                  live("draftSaved")
+                ) : (
+                  live("saveDraft")
+                )
               ) : (
-                theme("save")
-              )
-            ) : isLive ? (
-              saved ? (
-                live("draftSaved")
-              ) : (
-                live("saveDraft")
-              )
-            ) : (
-              <Copy>{saved ? "Saved in this browser ✓" : "Save demo"}</Copy>
-            )}
-          </Button>
+                <Copy>{saved ? "Saved in this browser ✓" : "Save demo"}</Copy>
+              )}
+            </Button>
+          )}
         </div>
       </div>
 

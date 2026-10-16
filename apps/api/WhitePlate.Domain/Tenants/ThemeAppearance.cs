@@ -55,6 +55,15 @@ public record ThemeAppearance
         Require(Ambiance is "custom" or "crisp-light" or "warm-cream" or "bistro-noir", "ambiance");
     }
 
+    public void ValidateForPublication(bool hasBanner)
+    {
+        Validate();
+        Require(Contrast(Text, Bg) >= 4.5, "text");
+        Require(Contrast(Primary, Bg) >= 4.5, "primary");
+        Require(Contrast(Text, Accent) >= 4.5, "accent");
+        if (hasBanner) Require(BannerOverlay >= 65, "bannerOverlay");
+    }
+
     private static void Require(bool valid, string field)
     {
         if (!valid) throw new DomainRuleException("invalid_theme", field, "The theme value is not supported.");

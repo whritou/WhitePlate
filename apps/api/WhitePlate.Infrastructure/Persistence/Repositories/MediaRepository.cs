@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using WhitePlate.Application.Media;
 using WhitePlate.Domain.Media;
+using WhitePlate.Domain.Tenants;
 
 namespace WhitePlate.Infrastructure.Persistence.Repositories;
 
@@ -10,6 +11,16 @@ public sealed class MediaRepository(WhitePlateDbContext database) : IMediaReposi
 {
     public async Task<IReadOnlyList<MediaAsset>> ActiveAsync(Guid tenantId, CancellationToken ct) =>
         await database.MediaAssets.AsNoTracking().Where(asset => asset.TenantId == tenantId && asset.ProductId == null && asset.IsActive).ToArrayAsync(ct);
+    public async Task<MediaAsset?> PublishedAsync(Guid tenantId, string slot, CancellationToken ct)
+    {
+        var tenant = await database.Tenants.AsNoTracking().Where(row => row.Id == tenantId && row.IsActive &&
+            database.Organizations.Any(organization => organization.Id == row.OrganizationId && organization.IsActive))
+            .SingleOrDefaultAsync(ct);
+        var id = tenant?.GetPublishedTheme().AssetIdFor(slot);
+        return id is null ? null : await database.MediaAssets.AsNoTracking().SingleOrDefaultAsync(asset =>
+            asset.TenantId == tenantId && asset.Id == id && asset.Slot == slot && asset.ProductId == null &&
+            asset.IsReady && asset.IsInPublishedTheme, ct);
+    }
     public Task<MediaAsset?> FindAsync(Guid tenantId, Guid id, CancellationToken ct) =>
         database.MediaAssets.AsNoTracking().SingleOrDefaultAsync(asset => asset.TenantId == tenantId && asset.Id == id, ct);
 

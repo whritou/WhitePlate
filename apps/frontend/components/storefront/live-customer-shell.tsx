@@ -5,19 +5,21 @@ import { BrandAssetImage } from "@/components/brand/asset-image"
 import { VisualScopeProvider } from "@/components/ui/visual-scope"
 import { DEFAULT_THEME, themeVariables } from "@/lib/lovable/storeTheme"
 import { useTranslations } from "next-intl"
-
-const style = themeVariables(DEFAULT_THEME)
+import type { StoreTheme } from "@/types/lovable/storeTheme"
 
 export function LiveCustomerShell({
   name,
+  theme = DEFAULT_THEME,
   children,
   headerActions,
 }: {
   name?: string
+  theme?: StoreTheme
   children: ReactNode
   headerActions?: ReactNode
 }) {
   const t = useTranslations("BrandAssets")
+  const style = themeVariables(theme)
 
   return (
     <VisualScopeProvider
@@ -25,19 +27,26 @@ export function LiveCustomerShell({
     >
       <div
         className="lovable-surface lovable-live customer-page min-h-screen"
+        data-button-style={theme.buttonStyle}
         style={style}
       >
-        <header className="flex flex-wrap items-center justify-between gap-3 border-b px-6 py-3">
+        <header className="flex flex-wrap items-center justify-between gap-3 border-b px-[var(--customer-padding)] py-3">
           <Link href="/" className="flex max-w-full min-w-0 items-center gap-3">
-            {name && (
+            {name && theme.logo && (
               <BrandAssetImage
-                src="/api/public/brand-assets/logo"
+                src={theme.logo}
                 label={t("logoFallback")}
                 className="size-10 shrink-0"
               />
             )}
 
-            <span className="min-w-0 font-display text-xl font-bold wrap-anywhere">
+            <span
+              className="min-w-0 text-xl font-bold wrap-anywhere"
+              style={{
+                fontFamily: "var(--customer-heading-font)",
+                fontWeight: "var(--customer-heading-weight)",
+              }}
+            >
               {name ?? "WhitePlate"}
             </span>
           </Link>
