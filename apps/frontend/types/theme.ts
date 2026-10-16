@@ -57,6 +57,7 @@ export type LiveStudioProps = BrandAssetsProps & {
   initialTheme?: ThemeDraft
   initialPublication?: ThemePublication
 }
+export type StudioPanel = "design" | "brand"
 export type StudioController = {
   theme: StoreTheme
   set: (patch: Partial<StoreTheme>) => void
@@ -71,4 +72,8 @@ export type StudioController = {
   notice: string
   logoPreset?: ThemePalette
   canReload: boolean
+}
+export type StudioNavigation = {
+  panel: StudioPanel
+  setPanel: (panel: StudioPanel) => void
 }
