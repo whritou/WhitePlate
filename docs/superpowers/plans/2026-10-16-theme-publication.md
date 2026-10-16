@@ -99,7 +99,7 @@
 - [x] Update the backlog entry to the implemented source state and keep production migration/deployment/hosted acceptance separate from local implementation.
 - [x] Run `dotnet build apps/api/WhitePlate.Api/WhitePlate.Api.csproj` from the repository root; build passed with zero warnings and errors.
 - [x] Run frontend lint, typecheck, focused changed-file Prettier check, repository `format:check`, and production build. Lint/typecheck/focused formatting/build passed; the repository format check flags 651 baseline files. Build used disposable configuration and logged expected unreachable local database schema checks.
-- [ ] Run `git diff --check`, inspect the complete diff, and commit the feature with a Conventional Commit message. `git diff --check` has passed; final review and commit remain.
+- [x] Run `git diff --check`, inspect the complete diff, and commit the feature with a Conventional Commit message. Staged diff check passed; commit `feat(studio): publish saved themes to storefront` was pushed on `feat/theme-publication`.
 
 ## Plan self-review
 
