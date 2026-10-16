@@ -8,7 +8,14 @@ The user approved retaining the existing `/demo/studio` design for the real Stud
 
 - Store allowlisted appearance in nullable `Tenants.ThemeDraftJson` (`jsonb`) and an independent integer `ThemeDraftVersion`, initially 1. A missing object resolves to the existing Lovable default. Conditional writes change only these columns and recheck active restaurant/organization and owner/manager membership in the update predicate.
 - Preserve the demo's editable primary, accent, background and text roles, named presets and bundled fonts. Inter is already bundled and also available in the live selector. No arbitrary CSS, remote fonts, asset URLs, domain status or restaurant identity can be saved through this endpoint.
-- Add Crisp Light (`#ffffff` / `#14201a`), Warm Cream (`#fff8ef` / `#2a1a12`) and Bistro Noir (`#111111` / `#f3efe6`, primary `#e8e2d4`) to the existing live preset grid. Manual colors mark ambiance custom. Retain the reference sliders: cards 0–24px, buttons 0–28px; 0 is sharp, 12 medium, 28 gives pill buttons. The user-approved demo controls supersede the historical Stitch recipe.
+- Add Crisp Light (`#22577a` / `#a8dadc` primary/accent, `#ffffff` / `#14201a`
+  background/text), Warm Cream (`#8b4513` / `#f4d35e`, `#fff8ef` / `#2a1a12`)
+  and Bistro Noir (`#e8e2d4` / `#8b3a3a`, `#111111` / `#f3efe6`) to the existing
+  live preset grid. Every named preset defines its complete palette so its
+  swatches and applied colors do not depend on the currently selected theme.
+  Manual colors mark ambiance custom. Retain the reference sliders: cards
+  0–24px, buttons 0–28px; 0 is sharp, 12 medium, 28 gives pill buttons. The
+  user-approved demo controls supersede the historical Stitch recipe.
 - Derive editable suggestions only from the authorized saved T1 logo. Decode normalized PNG with a pinned decoder; sample at most 64×64 pixels, skip transparent/neutral pixels and count deterministic color buckets. Missing/unusable logos or storage failure leave manual colors and named presets available. No URL or foreign private asset selector is accepted.
 - Return real sRGB ratios for text/background, primary/background, text/accent and background/primary. `readyForPublication` means these supported normal-text pairs meet 4.5:1; it is not a full accessibility certification or publication operation. Low-contrast drafts can be saved to preserve editing. T3 must block unsafe publication and verify all rendered states and image overlays.
 - Seed the editor from a server read; scope interactive Query keys to account, tenant and locale. First edit captures the version; background reads never rebase dirty drafts. Failed/stale saves preserve edits. Explicit Reload discards edits and fetches the authoritative draft. Denied reads/writes hide the editor. Pending writes lock controls and reject duplicate submissions.
