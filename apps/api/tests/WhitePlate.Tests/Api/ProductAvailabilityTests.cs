@@ -15,7 +15,6 @@ public sealed partial class OrdersEndpointTests
     {
         using var factory = new OrdersFactory();
         var seeded = await factory.SeedAsync();
-        await factory.SeedPublishedCatalogAsync(seeded.TenantId);
         await factory.SeedMembershipAsync(seeded.TenantId, "kitchen", RestaurantRole.Kitchen);
         using var client = factory.CreateClient();
         client.DefaultRequestHeaders.Authorization = new("Bearer", "kitchen");
@@ -53,7 +52,6 @@ public sealed partial class OrdersEndpointTests
     {
         using var factory = new OrdersFactory();
         var seeded = await factory.SeedAsync();
-        await factory.SeedPublishedCatalogAsync(seeded.TenantId);
         await factory.SeedMembershipAsync(seeded.TenantId, "manager", RestaurantRole.Manager);
         await factory.SeedMembershipAsync(seeded.TenantId, "kitchen", RestaurantRole.Kitchen);
         await factory.SeedMembershipAsync(seeded.TenantId, "revoked-kitchen", RestaurantRole.Kitchen);
@@ -127,7 +125,6 @@ public sealed partial class OrdersEndpointTests
     {
         using var factory = new OrdersFactory();
         var seeded = await factory.SeedAsync();
-        await factory.SeedPublishedCatalogAsync(seeded.TenantId);
         await factory.SeedMembershipAsync(seeded.TenantId, "manager", RestaurantRole.Manager);
         await factory.SeedOwnerAsync(seeded.OrganizationId, "owner");
 
@@ -150,7 +147,6 @@ public sealed partial class OrdersEndpointTests
     {
         using var factory = new OrdersFactory();
         var seeded = await factory.SeedAsync();
-        await factory.SeedPublishedCatalogAsync(seeded.TenantId);
         await factory.SeedMembershipAsync(seeded.TenantId, "manager", RestaurantRole.Manager);
         await factory.SeedMembershipAsync(seeded.TenantId, "kitchen", RestaurantRole.Kitchen);
         using var scope = factory.Services.CreateScope();
@@ -172,7 +168,12 @@ public sealed partial class OrdersEndpointTests
 
         using var publish = new HttpRequestMessage(HttpMethod.Post,
             $"/api/v1/tenants/{seeded.TenantId}/catalog/publish");
-        publish.Headers.TryAddWithoutValidation("If-Match", "\"1\"");
+        using var draft = await manager.GetAsync(
+            $"/api/v1/tenants/{seeded.TenantId}/catalog", TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.OK, draft.StatusCode);
+        var expectedVersion = draft.Headers.ETag?.Tag ?? throw new InvalidOperationException(
+            "The catalog response must include its publication ETag.");
+        publish.Headers.TryAddWithoutValidation("If-Match", expectedVersion);
         using var publication = await manager.SendAsync(publish, TestContext.Current.CancellationToken);
         Assert.Equal(HttpStatusCode.OK, publication.StatusCode);
 
