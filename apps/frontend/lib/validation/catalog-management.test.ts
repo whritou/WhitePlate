@@ -124,6 +124,7 @@ it("accepts the actual management contract and preserves price, tax, order and c
     optionGroups: [],
     options: [],
     discounts: [],
+    publication: null,
   })
 })
 
@@ -227,6 +228,7 @@ it("parses option groups and options only when their parent relationships belong
     optionGroups: [optionGroup],
     options: [option],
     discounts: [],
+    publication: null,
   })
 })
 
