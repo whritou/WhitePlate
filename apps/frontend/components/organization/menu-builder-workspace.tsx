@@ -42,7 +42,9 @@ export function MenuBuilderWorkspace({
   function changeView(value: unknown) {
     if (
       pending ||
-      !["products", "discounts", "languages"].includes(String(value))
+      !["products", "discounts", "languages", "versions"].includes(
+        String(value)
+      )
     )
       return
     setView(value as MenuBuilderView)
@@ -74,15 +76,6 @@ export function MenuBuilderWorkspace({
         </div>
       </header>
 
-      <div className="px-4 pt-4 sm:px-6">
-        <CatalogPublicationPanel
-          tenantId={catalog.tenantId}
-          userId={userId}
-          publication={catalog.publication}
-          pending={pending}
-        />
-      </div>
-
       <div className="flex flex-wrap items-center justify-between gap-3 border-b px-6">
         <TabsList
           aria-label={t("sections")}
@@ -93,6 +86,7 @@ export function MenuBuilderWorkspace({
               ["products", "dishes"],
               ["discounts", "discounts"],
               ["languages", "languages"],
+              ["versions", "versionsTab"],
             ] as const
           ).map(([value, label]) => (
             <TabsTrigger
@@ -106,24 +100,36 @@ export function MenuBuilderWorkspace({
           ))}
         </TabsList>
 
-        {view === "products" && settings && (
-          <div className="flex flex-wrap items-center gap-2 py-2">
-            <span className="label-mono text-muted-foreground">
-              {v("editingIn")}
-            </span>
+        {view === "products" && (
+          <div className="flex flex-wrap items-center gap-3 py-2">
+            <CatalogPublicationPanel
+              mode="actions"
+              tenantId={catalog.tenantId}
+              userId={userId}
+              publication={catalog.publication}
+              pending={pending}
+            />
 
-            <span className="label-mono border bg-accent px-3 py-2">
-              {settings.defaultLocale.toUpperCase()} · {v("base")}
-            </span>
+            {settings && (
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="label-mono text-muted-foreground">
+                  {v("editingIn")}
+                </span>
 
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => changeView("languages")}
-              disabled={pending}
-            >
-              {v("languages")}
-            </Button>
+                <span className="label-mono border bg-accent px-3 py-2">
+                  {settings.defaultLocale.toUpperCase()} · {v("base")}
+                </span>
+
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => changeView("languages")}
+                  disabled={pending}
+                >
+                  {v("languages")}
+                </Button>
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -180,6 +186,16 @@ export function MenuBuilderWorkspace({
             </Alert>
           )}
         </div>
+      </TabsContent>
+
+      <TabsContent value="versions">
+        <CatalogPublicationPanel
+          mode="manager"
+          tenantId={catalog.tenantId}
+          userId={userId}
+          publication={catalog.publication}
+          pending={pending}
+        />
       </TabsContent>
     </Tabs>
   )

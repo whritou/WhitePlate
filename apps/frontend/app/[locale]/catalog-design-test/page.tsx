@@ -233,9 +233,11 @@ export default async function CatalogDesignTestPage({
           initialView={
             query.view === "categories"
               ? "categories"
-              : query.view === "translations"
-                ? "translations"
-                : "products"
+              : query.view === "versions"
+                ? "versions"
+                : query.view === "translations"
+                  ? "translations"
+                  : "products"
           }
         />
       ) : query.view === "languages" ? (

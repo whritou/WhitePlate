@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { History, LoaderCircle, RotateCcw, Upload } from "lucide-react"
+import { LoaderCircle, RotateCcw, Upload } from "lucide-react"
 import { useQueryClient } from "@tanstack/react-query"
 import { useLocale, useTranslations } from "next-intl"
 import { useRouter } from "@/i18n/navigation"
@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/card"
 import {
   CatalogChangesDialog,
-  CatalogHistoryDialog,
+  CatalogHistoryList,
 } from "./catalog-publication-dialogs"
 import { CatalogPublicationConfirmation } from "./catalog-publication-confirmation"
 import type {
@@ -32,11 +32,13 @@ import type {
 } from "@/types/catalog-management"
 
 export function CatalogPublicationPanel({
+  mode,
   tenantId,
   userId,
   publication,
   pending,
 }: {
+  mode: "actions" | "manager"
   tenantId: string
   userId?: string
   publication: CatalogPublicationSummary | null
@@ -46,7 +48,7 @@ export function CatalogPublicationPanel({
   const locale = useLocale()
   const router = useRouter()
   const queryClient = useQueryClient()
-  const [panel, setPanel] = useState<"changes" | "history" | null>(null)
+  const [panel, setPanel] = useState<"changes" | null>(null)
   const [confirmation, setConfirmation] =
     useState<PublicationConfirmAction | null>(null)
   const [working, setWorking] = useState(false)
@@ -114,126 +116,172 @@ export function CatalogPublicationPanel({
 
   return (
     <>
-      <Card aria-busy={working || pending}>
-        <CardContent className="grid gap-4 p-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
-          <CardHeader className="flex min-w-0 flex-row items-start gap-3 p-0">
-            <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-secondary">
-              <Upload aria-hidden="true" className="size-5" />
-            </span>
+      {mode === "actions" ? (
+        <div
+          className="flex flex-wrap items-center gap-2"
+          aria-busy={working || pending}
+        >
+          {error && (
+            <Alert variant="destructive" role="alert" className="basis-full">
+              <AlertDescription>{t(`errors.${error}`)}</AlertDescription>
+            </Alert>
+          )}
 
-            <div className="grid min-w-0 gap-1">
-              <div className="flex flex-wrap items-center gap-2">
-                <CardTitle className="text-base">
-                  <h2>
-                    {publication
-                      ? t("publishedVersion", {
-                          version: publication.publishedVersion,
-                        })
-                      : t("unavailableTitle")}
-                  </h2>
-                </CardTitle>
+          {success && (
+            <Alert role="status" className="basis-full">
+              <AlertDescription>{t(success)}</AlertDescription>
+            </Alert>
+          )}
 
-                <Badge variant={hasChanges ? "warning" : "success"}>
-                  {hasChanges ? t("draftPending") : t("upToDate")}
-                </Badge>
-              </div>
+          <Button
+            type="button"
+            disabled={disabled || !hasChanges}
+            onClick={() => setConfirmation({ kind: "publish" })}
+          >
+            {working ? (
+              <LoaderCircle
+                aria-hidden="true"
+                className="size-4 animate-spin motion-reduce:animate-none"
+              />
+            ) : (
+              <Upload aria-hidden="true" className="size-4" />
+            )}
 
-              <CardDescription className="text-sm">
-                {publication
-                  ? hasChanges
-                    ? t("changesPending", { count: publication.changeCount })
-                    : t("publishedAt", { date: formattedDate ?? "" })
-                  : t("unavailableDescription")}
-              </CardDescription>
-            </div>
-          </CardHeader>
+            {working ? t("working") : t("publish")}
+          </Button>
 
-          <div className="flex flex-wrap items-center gap-2 sm:justify-end">
+          {hasChanges && (
             <Button
               type="button"
               variant="outline"
-              disabled={!publication}
-              onClick={() => {
-                setError(null)
-                setPanel("history")
-              }}
-            >
-              <History aria-hidden="true" className="size-4" />
-
-              {t("history")}
-            </Button>
-
-            <Button
-              type="button"
-              variant="outline"
-              disabled={!hasChanges}
-              onClick={() => setPanel("changes")}
-            >
-              {t("reviewChanges", { count: publication?.changeCount ?? 0 })}
-            </Button>
-
-            <Button
-              type="button"
-              variant="outline"
-              disabled={disabled || !hasChanges}
+              disabled={disabled}
               onClick={() => setConfirmation({ kind: "discard" })}
             >
               <RotateCcw aria-hidden="true" className="size-4" />
 
               {t("discard")}
             </Button>
+          )}
+        </div>
+      ) : (
+        <div className="grid gap-6 p-4 sm:p-6">
+          <section
+            aria-labelledby="catalog-publication-review-title"
+            className="grid gap-4"
+          >
+            <div className="grid gap-1">
+              <h2
+                id="catalog-publication-review-title"
+                className="font-heading text-xl font-semibold"
+              >
+                {t("reviewSectionTitle")}
+              </h2>
 
-            <Button
-              type="button"
-              disabled={disabled || !hasChanges}
-              onClick={() => setConfirmation({ kind: "publish" })}
+              <p className="text-sm text-muted-foreground">
+                {t("reviewSectionDescription")}
+              </p>
+            </div>
+
+            <Card aria-busy={working || pending}>
+              <CardContent className="grid gap-4 p-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
+                <CardHeader className="flex min-w-0 flex-row items-start gap-3 p-0">
+                  <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-secondary">
+                    <Upload aria-hidden="true" className="size-5" />
+                  </span>
+
+                  <div className="grid min-w-0 gap-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <CardTitle className="text-base">
+                        <h3>
+                          {publication
+                            ? t("publishedVersion", {
+                                version: publication.publishedVersion,
+                              })
+                            : t("unavailableTitle")}
+                        </h3>
+                      </CardTitle>
+
+                      <Badge variant={hasChanges ? "warning" : "success"}>
+                        {hasChanges ? t("draftPending") : t("upToDate")}
+                      </Badge>
+                    </div>
+
+                    <CardDescription className="text-sm">
+                      {publication
+                        ? hasChanges
+                          ? t("changesPending", {
+                              count: publication.changeCount,
+                            })
+                          : t("publishedAt", { date: formattedDate ?? "" })
+                        : t("unavailableDescription")}
+                    </CardDescription>
+                  </div>
+                </CardHeader>
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={!hasChanges}
+                  onClick={() => setPanel("changes")}
+                >
+                  {t("reviewChanges", {
+                    count: publication?.changeCount ?? 0,
+                  })}
+                </Button>
+              </CardContent>
+            </Card>
+          </section>
+
+          {publication ? (
+            <CatalogHistoryList
+              tenantId={tenantId}
+              userId={userId}
+              currentVersion={publication.publishedVersion}
+              disabled={disabled}
+              onRestore={(version) =>
+                setConfirmation({ kind: "restore", version })
+              }
+            />
+          ) : (
+            <section
+              aria-labelledby="catalog-history-title"
+              className="grid gap-4"
             >
-              {working ? (
-                <LoaderCircle
-                  aria-hidden="true"
-                  className="size-4 animate-spin motion-reduce:animate-none"
-                />
-              ) : (
-                <Upload aria-hidden="true" className="size-4" />
-              )}
+              <h2
+                id="catalog-history-title"
+                className="font-heading text-xl font-semibold"
+              >
+                {t("historyTitle")}
+              </h2>
 
-              {working ? t("working") : t("publish")}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+              <Alert variant="destructive" role="alert">
+                <AlertDescription>
+                  {t("unavailableDescription")}
+                </AlertDescription>
+              </Alert>
+            </section>
+          )}
+        </div>
+      )}
 
-      {error && (
+      {mode === "manager" && error && (
         <Alert variant="destructive" role="alert" className="mt-3">
           <AlertDescription>{t(`errors.${error}`)}</AlertDescription>
         </Alert>
       )}
 
-      {success && (
+      {mode === "manager" && success && (
         <Alert role="status" className="mt-3">
           <AlertDescription>{t(success)}</AlertDescription>
         </Alert>
       )}
 
       <CatalogChangesDialog
-        open={panel === "changes"}
+        open={mode === "manager" && panel === "changes"}
         onOpenChange={(open) => {
           if (!open) setPanel(null)
         }}
         changes={publication?.changes ?? []}
-      />
-
-      <CatalogHistoryDialog
-        open={panel === "history"}
-        userId={userId}
-        tenantId={tenantId}
-        locale={locale}
-        currentVersion={publication?.publishedVersion ?? 0}
-        disabled={disabled}
-        onOpenChange={(open) => {
-          if (!open) setPanel(null)
-        }}
-        onRestore={(version) => setConfirmation({ kind: "restore", version })}
       />
 
       <CatalogPublicationConfirmation

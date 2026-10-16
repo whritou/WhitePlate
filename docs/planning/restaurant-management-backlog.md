@@ -334,7 +334,7 @@ Decisions and limits:
 
 ### M4 — Menu Builder: catalog draft publication and change history
 
-Implementation update (2026-10-16): source now uses normalized management rows as the draft and immutable JSON snapshots as the guest/checkout publication. Owner/manager publish, discard, restore and history endpoints carry optimistic version preconditions; validation and publication are transactional, and D4 availability remains immediate with actor-attributed revision history. Decision 0013 records migration, retention and rollback scope. The additive migration is generated but not applied; database and guest/staff acceptance remain outstanding.
+Implementation update (2026-10-16): source now uses normalized management rows as the draft and immutable JSON snapshots as the guest/checkout publication. Owner/manager publish, discard, restore and history endpoints carry optimistic version preconditions; validation and publication are transactional, and D4 availability remains immediate with actor-attributed revision history. Decision 0013 records migration, retention and rollback scope. Migration `20261016155331_CatalogPublicationHistory` was applied to Coolify Production; baseline rows and API table grants were checked. API deployment and database/guest/staff runtime acceptance remain outstanding.
 
 Reference: menu-builder. Dependencies: M1.
 

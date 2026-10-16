@@ -61,26 +61,21 @@ export function CatalogChangesDialog({
   )
 }
 
-export function CatalogHistoryDialog({
-  open,
-  onOpenChange,
+export function CatalogHistoryList({
   tenantId,
   userId,
-  locale,
   currentVersion,
   disabled,
   onRestore,
 }: {
-  open: boolean
-  onOpenChange: (open: boolean) => void
   tenantId: string
   userId?: string
-  locale: string
   currentVersion: number
   disabled: boolean
   onRestore: (version: number) => void
 }) {
   const t = useTranslations("CatalogPublication")
+  const locale = useLocale()
   const query = useInfiniteQuery({
     queryKey: ["catalog-history", userId, tenantId, locale],
     queryFn: ({ pageParam, signal }) =>
@@ -90,7 +85,6 @@ export function CatalogHistoryDialog({
       lastPage.revisions.length === HISTORY_PAGE_SIZE
         ? lastPage.revisions.at(-1)?.version
         : undefined,
-    enabled: open,
     retry: false,
   })
   const revisions = query.data?.pages.flatMap((page) => page.revisions) ?? []
@@ -99,75 +93,70 @@ export function CatalogHistoryDialog({
     ["unauthorized", "forbidden", "not_found"].includes(query.error.code)
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl p-0">
-        <div className="flex items-start justify-between gap-4 border-b p-5">
-          <div className="grid gap-1">
-            <DialogTitle className="font-heading text-xl font-semibold">
-              {t("historyTitle")}
-            </DialogTitle>
+    <section aria-labelledby="catalog-history-title" className="grid gap-4">
+      <div className="grid gap-1">
+        <h2
+          id="catalog-history-title"
+          className="font-heading text-xl font-semibold"
+        >
+          {t("historyTitle")}
+        </h2>
 
-            <DialogDescription className="text-sm text-muted-foreground">
-              {t("historyDescription")}
-            </DialogDescription>
-          </div>
+        <p className="text-sm text-muted-foreground">
+          {t("historyDescription")}
+        </p>
+      </div>
 
-          <DialogClose render={<Button type="button" variant="outline" />}>
-            {t("close")}
-          </DialogClose>
-        </div>
+      <div className="grid gap-4">
+        {query.isPending ? (
+          <p role="status">{t("loading")}</p>
+        ) : denied ? (
+          <Alert variant="destructive" role="alert">
+            <AlertDescription>{t("accessLost")}</AlertDescription>
+          </Alert>
+        ) : query.isError ? (
+          <Alert variant="destructive" role="alert">
+            <AlertDescription>{t("historyFailed")}</AlertDescription>
 
-        <div className="grid max-h-[70dvh] gap-4 overflow-y-auto p-5">
-          {query.isPending ? (
-            <p role="status">{t("loading")}</p>
-          ) : denied ? (
-            <Alert variant="destructive" role="alert">
-              <AlertDescription>{t("accessLost")}</AlertDescription>
-            </Alert>
-          ) : query.isError ? (
-            <Alert variant="destructive" role="alert">
-              <AlertDescription>{t("historyFailed")}</AlertDescription>
+            <Button
+              type="button"
+              variant="outline"
+              disabled={query.isFetching}
+              onClick={() => void query.refetch()}
+            >
+              {t("retry")}
+            </Button>
+          </Alert>
+        ) : revisions.length === 0 ? (
+          <p>{t("noHistory")}</p>
+        ) : (
+          <div className="grid gap-4">
+            <ol className="grid gap-3">
+              {revisions.map((revision) => (
+                <HistoryEntry
+                  key={revision.version}
+                  revision={revision}
+                  currentVersion={currentVersion}
+                  disabled={disabled}
+                  onRestore={onRestore}
+                />
+              ))}
+            </ol>
 
+            {query.hasNextPage && (
               <Button
                 type="button"
                 variant="outline"
-                disabled={query.isFetching}
-                onClick={() => void query.refetch()}
+                disabled={query.isFetchingNextPage}
+                onClick={() => void query.fetchNextPage()}
               >
-                {t("retry")}
+                {query.isFetchingNextPage ? t("loading") : t("loadOlder")}
               </Button>
-            </Alert>
-          ) : revisions.length === 0 ? (
-            <p>{t("noHistory")}</p>
-          ) : (
-            <div className="grid gap-4">
-              <ol className="grid gap-3">
-                {revisions.map((revision) => (
-                  <HistoryEntry
-                    key={revision.version}
-                    revision={revision}
-                    currentVersion={currentVersion}
-                    disabled={disabled}
-                    onRestore={onRestore}
-                  />
-                ))}
-              </ol>
-
-              {query.hasNextPage && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  disabled={query.isFetchingNextPage}
-                  onClick={() => void query.fetchNextPage()}
-                >
-                  {query.isFetchingNextPage ? t("loading") : t("loadOlder")}
-                </Button>
-              )}
-            </div>
-          )}
-        </div>
-      </DialogContent>
-    </Dialog>
+            )}
+          </div>
+        )}
+      </div>
+    </section>
   )
 }
 

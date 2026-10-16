@@ -58,7 +58,7 @@ After applying the additive migration, verify owner/manager create/update/clear 
 - Against the real bucket, verify cleanup after interrupted variant writes, 24-hour drafts, seven-day retired objects, active exclusions, delete-before-metadata and failed-delete retries. Verify the deployed Linux image decoder.
 - Verify EN/FR, light/dark, 320/375/390/768/1024/1440/1920px, keyboard/focus return, 200% text, reduced motion, readable contrast and fallbacks. Keep required controls visible, guest boxes stable across loading and mixed ratios, and states distinct for loading/empty/pending/validation/retry/success/offline/unavailable.
 
-M5 product galleries are implemented in source, with the migration applied to Coolify Production; provider and hosted acceptance remain open. Uploads stay private until explicit **Save photos**, which publishes that gallery immediately; product metadata save does not publish photo drafts. M4 catalog publication is implemented in source; its migration has not been applied and runtime acceptance remains open.
+M5 product galleries are implemented in source, with the migration applied to Coolify Production; provider and hosted acceptance remain open. Uploads stay private until explicit **Save photos**, which publishes that gallery immediately; product metadata save does not publish photo drafts. M4 catalog publication is implemented in source and its migration has been applied to Coolify Production; API deployment and runtime acceptance remain open.
 
 ## M4 catalog publication and history
 
