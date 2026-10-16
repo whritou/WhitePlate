@@ -22,6 +22,8 @@ public sealed class WhitePlateDbContext(DbContextOptions<WhitePlateDbContext> op
     public DbSet<PromotionDiscount> PromotionDiscounts => Set<PromotionDiscount>();
     public DbSet<CatalogPublicationHead> CatalogPublicationHeads => Set<CatalogPublicationHead>();
     public DbSet<CatalogRevision> CatalogRevisions => Set<CatalogRevision>();
+    public DbSet<CatalogTranslationReview> CatalogTranslationReviews => Set<CatalogTranslationReview>();
+    public DbSet<CatalogTranslationGlossaryTerm> CatalogTranslationGlossaryTerms => Set<CatalogTranslationGlossaryTerm>();
     public DbSet<Order> Orders => Set<Order>();
     public DbSet<IdempotencyRecord> OrderIdempotencyRecords => Set<IdempotencyRecord>();
     public DbSet<OutboxMessage> OrderOutboxMessages => Set<OutboxMessage>();

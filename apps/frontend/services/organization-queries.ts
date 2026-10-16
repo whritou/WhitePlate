@@ -10,6 +10,10 @@ import {
   parseOrganizationMembers,
   parseRestaurants,
 } from "@/lib/validation/responses"
+import {
+  parseCatalogTranslationGlossary,
+  parseCatalogTranslationReviews,
+} from "@/lib/validation/catalog-translation-workflow"
 import type { ApiResult } from "@/types/api"
 
 async function readResource<T>(
@@ -63,6 +67,20 @@ export async function getRestaurantDescriptionTranslations(tenantId: string) {
   return readResource(
     `/api/v1/tenants/${tenantId}/restaurant-description-translations`,
     parseRestaurantDescriptionTranslations
+  )
+}
+
+export async function getCatalogTranslationReviews(tenantId: string) {
+  return readResource(
+    `/api/v1/tenants/${tenantId}/catalog/translation-reviews`,
+    parseCatalogTranslationReviews
+  )
+}
+
+export async function getCatalogTranslationGlossary(tenantId: string) {
+  return readResource(
+    `/api/v1/tenants/${tenantId}/catalog/translation-glossary`,
+    parseCatalogTranslationGlossary
   )
 }
 

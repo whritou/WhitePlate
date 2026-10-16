@@ -54,7 +54,11 @@ export function CatalogTranslationForm({
       })
 
       if (result.ok) {
-        toast.success(t("translationSaved"))
+        toast.success(
+          result.unchanged
+            ? u("translationUnchanged")
+            : u("translationSubmitted")
+        )
         onSuccess?.()
         router.refresh()
       } else setState("error")

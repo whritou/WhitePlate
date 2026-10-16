@@ -74,22 +74,4 @@ public sealed class MenuLanguageSettingsHandler(IStaffMembershipRepository membe
         }
     }
 
-    public async Task<Result<bool>> TranslateAsync(Guid tenantId, Guid entityId, string entityType,
-        ExternalIdentity identity, string locale, string name, string? description,
-        CancellationToken cancellationToken)
-    {
-        if (!await CatalogAccess.CanManageAsync(memberships, tenantId, identity, cancellationToken))
-            return Result<bool>.Failure(new ApplicationError(ErrorCode.NotFound));
-        try
-        {
-            var result = await catalog.SetTranslationAsync(tenantId, entityType, entityId, locale, name,
-                description, cancellationToken);
-            return result ? Result<bool>.Success(true) : Result<bool>.Failure(new ApplicationError(ErrorCode.NotFound));
-        }
-        catch (DomainRuleException exception)
-        {
-            return Result<bool>.Failure(new ApplicationError(ErrorCode.ValidationFailed,
-                new ValidationIssue(exception.Field, exception.Code, exception.Message)));
-        }
-    }
 }

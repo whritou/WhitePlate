@@ -4,6 +4,10 @@ import { useLocale, useTranslations } from "next-intl"
 import { useId, useState } from "react"
 import { Search } from "lucide-react"
 import { CatalogTranslationRow } from "./catalog-translation-row"
+import { CatalogTranslationGlossary } from "./catalog-translation-glossary"
+import { useRouter } from "@/i18n/navigation"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Button } from "@/components/ui/button"
 import {
   Card,
   CardHeader,
@@ -22,12 +26,19 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import type { CatalogTranslationData, TranslationRow } from "@/types/catalog"
+import type {
+  CatalogTranslationGlossaryTerm,
+  CatalogTranslationReview,
+} from "@/types/catalog-translation-workflow"
 
 export function CatalogTranslationsEditor({
   tenantId,
   locales,
   defaultLocale,
   catalog,
+  reviews = [],
+  glossary = [],
+  workflowUnavailable = false,
   readOnly,
   includeArchived,
   onPendingChange,
@@ -36,6 +47,9 @@ export function CatalogTranslationsEditor({
   locales: string[]
   defaultLocale: string
   catalog: CatalogTranslationData
+  reviews?: CatalogTranslationReview[]
+  glossary?: CatalogTranslationGlossaryTerm[]
+  workflowUnavailable?: boolean
   readOnly?: boolean
   includeArchived?: boolean
   onPendingChange?: (pending: boolean) => void
@@ -43,6 +57,7 @@ export function CatalogTranslationsEditor({
   const t = useTranslations("Auth")
   const u = useTranslations("MenuTranslations")
   const uiLocale = useLocale()
+  const router = useRouter()
   const prefix = useId()
   const [chosenLocale, setLocale] = useState(defaultLocale)
   const [search, setSearch] = useState("")
@@ -119,6 +134,20 @@ export function CatalogTranslationsEditor({
       </CardHeader>
 
       <CardContent className="grid gap-5">
+        <p className="text-sm text-muted-foreground">{u("humanOnly")}</p>
+
+        {workflowUnavailable && (
+          <Alert variant="destructive" role="alert">
+            <AlertDescription className="flex flex-wrap items-center justify-between gap-3">
+              <span>{u("workflowUnavailable")}</span>
+
+              <Button variant="outline" onClick={() => router.refresh()}>
+                {t("retry")}
+              </Button>
+            </AlertDescription>
+          </Alert>
+        )}
+
         <div className="grid gap-4 border-b border-border pb-5 md:grid-cols-[minmax(0,1fr)_auto_auto]">
           <div className="grid gap-2">
             <Label htmlFor={`${prefix}-search`}>{u("search")}</Label>
@@ -222,6 +251,12 @@ export function CatalogTranslationsEditor({
               {visible.map((row) => {
                 const text =
                   row.translations[locale] ?? row.translations[defaultLocale]
+                const review = reviews.find(
+                  (candidate) =>
+                    candidate.entityType === row.type &&
+                    candidate.entityId === row.id &&
+                    candidate.locale === locale
+                )
 
                 return (
                   <CatalogTranslationRow
@@ -232,13 +267,23 @@ export function CatalogTranslationsEditor({
                     initialName={text?.name ?? row.name}
                     initialDescription={text?.description ?? row.description}
                     label={row.label}
-                    readOnly={readOnly || row.isArchived}
+                    review={review}
+                    readOnly={readOnly || row.isArchived || workflowUnavailable}
                     onPendingChange={onPendingChange}
                   />
                 )
               })}
             </TableBody>
           </Table>
+        )}
+
+        {!workflowUnavailable && (
+          <CatalogTranslationGlossary
+            tenantId={tenantId}
+            locales={locales}
+            sourceLocale={defaultLocale}
+            terms={glossary}
+          />
         )}
       </CardContent>
     </Card>

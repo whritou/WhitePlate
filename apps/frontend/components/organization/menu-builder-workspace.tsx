@@ -20,6 +20,9 @@ export function MenuBuilderWorkspace({
   catalog,
   settings,
   description,
+  translationReviews,
+  translationGlossary,
+  translationWorkflowUnavailable,
   initialView = "products",
 }: MenuBuilderProps) {
   const t = useTranslations("MenuBuilder")
@@ -173,6 +176,9 @@ export function MenuBuilderWorkspace({
               <CatalogTranslationsEditor
                 {...settings}
                 catalog={catalog}
+                reviews={translationReviews}
+                glossary={translationGlossary}
+                workflowUnavailable={translationWorkflowUnavailable}
                 onPendingChange={setPending}
               />
             </>

@@ -166,6 +166,17 @@ public sealed partial class OrdersEndpointTests
         using var hiddenCatalog = await manager.SendAsync(publishHidden, TestContext.Current.CancellationToken);
         Assert.Equal(HttpStatusCode.OK, hiddenCatalog.StatusCode);
 
+        using var publish = new HttpRequestMessage(HttpMethod.Post,
+            $"/api/v1/tenants/{seeded.TenantId}/catalog/publish");
+        using var draft = await manager.GetAsync(
+            $"/api/v1/tenants/{seeded.TenantId}/catalog", TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.OK, draft.StatusCode);
+        var expectedVersion = draft.Headers.ETag?.Tag ?? throw new InvalidOperationException(
+            "The catalog response must include its publication ETag.");
+        publish.Headers.TryAddWithoutValidation("If-Match", expectedVersion);
+        using var publication = await manager.SendAsync(publish, TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.OK, publication.StatusCode);
+
         using var kitchen = factory.CreateClient();
         kitchen.DefaultRequestHeaders.Authorization = new("Bearer", "kitchen");
         using var read = await kitchen.GetAsync(

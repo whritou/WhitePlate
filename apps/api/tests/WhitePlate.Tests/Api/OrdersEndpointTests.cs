@@ -15,6 +15,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
+using WhitePlate.Application.Catalog;
 using WhitePlate.Domain.Identity;
 using WhitePlate.Api.Tenancy;
 using WhitePlate.Api.Realtime;

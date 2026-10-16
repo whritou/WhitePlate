@@ -60,12 +60,26 @@ After applying the additive migration, verify owner/manager create/update/clear 
 
 M5 product galleries are implemented in source, with the migration applied to Coolify Production; provider and hosted acceptance remain open. Uploads stay private until explicit **Save photos**, which publishes that gallery immediately; product metadata save does not publish photo drafts. M4 catalog publication is implemented in source and its migration has been applied to Coolify Production; API deployment and runtime acceptance remain open.
 
+## M3 human translation review and glossary
+
+The local Domain, repository, handler, API and frontend tests cover explicit human submissions, no-op saves, candidate versioning/superseding, source/saved-text staleness, tenant isolation, owner/manager authorization, self-review denial, rejection preserving saved text, approval changing the draft only, frontend pending-candidate presentation, and glossary validation/warnings. These source tests do not prove applying the generated migration to PostgreSQL or hosted acceptance.
+
+- Confirm a pre-existing saved translation remains visible and unchanged without a review row or generated candidate. Submit a changed translation and verify the new candidate is pending while the prior saved text remains displayed and public.
+- Confirm submitting the same saved text creates no review candidate. Submit a newer changed candidate and verify the prior pending candidate is superseded and decisions use the latest version.
+- Verify the author cannot approve or reject their candidate. A different persisted owner/manager may approve or reject; rejection leaves saved text unchanged, while approval updates only the normalized draft.
+- Change the source text or saved target translation after submission and verify decision returns a conflict and cannot apply the stale candidate. Verify the next explicit human submission creates the candidate to review.
+- Publish an approved candidate through M4 and verify only then does guest output change; discard the draft and confirm the previously published translation remains.
+- Create, edit and delete glossary entries; check duplicate normalization and locale-pair validation. Verify glossary warnings are advisory, never insert or rewrite catalog text, and are isolated by tenant.
+- Verify Kitchen, foreign, anonymous and revoked identities cannot submit, read the queue, decide, or manage glossary entries. Repeat EN/FR, keyboard/focus, responsive widths and error/retry states.
+
+Migration `20261016222355_M3CatalogTranslationWorkflow` creates empty tables without legacy translation backfill. It has not been applied to a shared database; PostgreSQL transaction/concurrency and hosted manager/guest acceptance remain open. See [decision 0014](architecture/decisions/0014-human-translation-review.md).
+
 ## M4 catalog publication and history
 
 Run these scenarios after applying `CatalogPublicationHistory` to a disposable PostgreSQL database containing both an existing tenant and a newly created tenant. Do not interpret source compilation as migration or runtime acceptance.
 
 - Verify migration backfills one v1 revision/head per existing tenant and new tenant creation writes a v1 baseline. Confirm public menu and checkout read the baseline snapshot after rollout.
-- As Owner/Manager, edit categories, products, prices, options, discounts and translations. Confirm management reads show the saved draft and anonymous guest reads continue showing the published snapshot.
+- As Owner/Manager, edit categories, products, prices, options and discounts; submit changed translations for review, then approve them. Confirm candidates stay separate until approval, the resulting draft stays separate until publish, and anonymous guest reads continue showing the prior published snapshot.
 - Publish with the current strong quoted `ETag`; verify a new version, actor/time, field-level change summary, guest menu update and checkout price/option resolution all change together.
 - Publish with a stale `If-Match`, omit it, and send malformed/weak tags. Expect conflict or precondition-required responses with no partial publication; verify a no-change publish creates no duplicate revision.
 - Make invalid drafts (missing required locale/category, invalid price/discount/option relationship) and verify publication fails while the last published guest menu remains intact.

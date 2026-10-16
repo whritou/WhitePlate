@@ -3,6 +3,10 @@ export type ActionErrorMessage = "unauthorized" | "invalid" | "unavailable"
 export type ActionResult =
   { ok: true } | { ok: false; message: ActionErrorMessage }
 
+export type CatalogTranslationSaveResult =
+  | { ok: true; unchanged: boolean; status: "Pending" | "Unchanged" }
+  | { ok: false; message: ActionErrorMessage }
+
 export type Organization = {
   id: string
   name: string

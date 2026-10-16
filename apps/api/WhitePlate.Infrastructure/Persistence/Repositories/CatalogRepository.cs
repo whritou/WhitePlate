@@ -62,28 +62,6 @@ public sealed class CatalogRepository(WhitePlateDbContext database, ICatalogPubl
         return new MenuLanguageSettingsDto(tenant.Id, tenant.GetMenuLocales(), tenant.DefaultMenuLocale);
     }
 
-    public async Task<bool> SetTranslationAsync(Guid tenantId, string entityType, Guid entityId, string locale,
-        string name, string? description, CancellationToken cancellationToken)
-    {
-        var tenant = await database.Tenants.AsNoTracking().SingleOrDefaultAsync(item => item.Id == tenantId,
-            cancellationToken);
-        if (tenant is null) return false;
-        if (!tenant.SupportsMenuLocale(locale))
-            throw new DomainRuleException("unsupported_menu_locale", "locale",
-                "Enable this language in the restaurant menu settings before adding its translation.");
-
-        var updated = entityType switch
-        {
-            "categories" => await SetCategoryTranslationAsync(tenantId, entityId, locale, name, cancellationToken),
-            "products" => await SetProductTranslationAsync(tenantId, entityId, locale, name, description, cancellationToken),
-            "option-groups" => await SetOptionGroupTranslationAsync(tenantId, entityId, locale, name, cancellationToken),
-            "options" => await SetOptionTranslationAsync(tenantId, entityId, locale, name, cancellationToken),
-            _ => throw new DomainRuleException("invalid_catalog_type", "entityType", "The catalog item type is invalid.")
-        };
-        if (updated) await database.SaveChangesAsync(cancellationToken);
-        return updated;
-    }
-
     public async Task<RestaurantDescriptionTranslationsDto?> GetRestaurantDescriptionTranslationsAsync(Guid tenantId,
         CancellationToken cancellationToken)
     {
@@ -619,46 +597,6 @@ public sealed class CatalogRepository(WhitePlateDbContext database, ICatalogPubl
             .Any(translations => !CatalogTranslations.HasTranslation(translations, locale)))
             throw new DomainRuleException("default_translation_required", "defaultLocale",
                 "Translate every active menu item into a new default language before switching to it.");
-    }
-
-    private async Task<bool> SetCategoryTranslationAsync(Guid tenantId, Guid entityId, string locale, string name,
-        CancellationToken cancellationToken)
-    {
-        var category = await database.MenuCategories.SingleOrDefaultAsync(item => item.TenantId == tenantId &&
-            item.Id == entityId && !item.IsArchived, cancellationToken);
-        if (category is null) return false;
-        category.SetTranslation(locale, name);
-        return true;
-    }
-
-    private async Task<bool> SetProductTranslationAsync(Guid tenantId, Guid entityId, string locale, string name,
-        string? description, CancellationToken cancellationToken)
-    {
-        var product = await database.Products.SingleOrDefaultAsync(item => item.TenantId == tenantId &&
-            item.Id == entityId && !item.IsArchived, cancellationToken);
-        if (product is null) return false;
-        product.SetTranslation(locale, name, description);
-        return true;
-    }
-
-    private async Task<bool> SetOptionGroupTranslationAsync(Guid tenantId, Guid entityId, string locale, string name,
-        CancellationToken cancellationToken)
-    {
-        var group = await database.ProductOptionGroups.SingleOrDefaultAsync(item => item.TenantId == tenantId &&
-            item.Id == entityId && !item.IsArchived, cancellationToken);
-        if (group is null) return false;
-        group.SetTranslation(locale, name);
-        return true;
-    }
-
-    private async Task<bool> SetOptionTranslationAsync(Guid tenantId, Guid entityId, string locale, string name,
-        CancellationToken cancellationToken)
-    {
-        var option = await database.ProductOptions.SingleOrDefaultAsync(item => item.TenantId == tenantId &&
-            item.Id == entityId && !item.IsArchived, cancellationToken);
-        if (option is null) return false;
-        option.SetTranslation(locale, name);
-        return true;
     }
 
     private static PromotionDiscountDto ToDto(WhitePlate.Domain.Catalog.PromotionDiscount discount) =>
