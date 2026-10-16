@@ -15,31 +15,39 @@ import { Card, CardContent } from "@/components/ui/card"
 import { useGuestCheckout } from "@/hooks/use-guest-checkout"
 import { useRouter } from "@/i18n/navigation"
 import type { StorefrontMenu } from "@/types/storefront"
+import type { StoreTheme } from "@/types/lovable/storeTheme"
 import { useLocale, useTranslations } from "next-intl"
 import { CheckoutPanel } from "./checkout-panel"
 import { GuestCheckoutProvider } from "./guest-checkout-provider"
 import { MenuProductCard } from "./menu-product-card"
 import { CollectionInformation } from "./collection-information"
+import { publishedStoreTheme } from "@/lib/lovable/storeTheme"
 
 export function RestaurantMenu({
   menu,
+  theme,
   step,
 }: {
   menu: StorefrontMenu
+  theme?: StoreTheme
   step: "shop" | "checkout"
 }) {
+  const currentTheme = theme ?? publishedStoreTheme(menu.restaurantName, null)
+
   return (
     <GuestCheckoutProvider tenantId={menu.tenantId}>
-      <RestaurantMenuContent menu={menu} step={step} />
+      <RestaurantMenuContent menu={menu} theme={currentTheme} step={step} />
     </GuestCheckoutProvider>
   )
 }
 
 function RestaurantMenuContent({
   menu,
+  theme,
   step,
 }: {
   menu: StorefrontMenu
+  theme: StoreTheme
   step: "shop" | "checkout"
 }) {
   const t = useTranslations("Storefront")
@@ -71,6 +79,7 @@ function RestaurantMenuContent({
     <Dialog>
       <CustomerShell
         name={menu.restaurantName}
+        theme={theme}
         headerActions={
           <LiveStoreActions
             menu={menu}
@@ -85,6 +94,7 @@ function RestaurantMenuContent({
           <RestaurantIdentity
             name={menu.restaurantName}
             description={menu.restaurantDescription}
+            theme={theme}
           />
 
           <div className="mx-auto w-full px-6">
@@ -111,7 +121,7 @@ function RestaurantMenuContent({
               />
             ) : (
               <>
-                {menu.establishment && (
+                {theme.showRestaurantInfo && menu.establishment && (
                   <div className="mx-auto my-6 max-w-[1120px] border p-4">
                     <CollectionInformation establishment={menu.establishment} />
                   </div>
@@ -139,7 +149,7 @@ function RestaurantMenuContent({
 
                 <div className="mt-4 grid items-start gap-6">
                   <div
-                    className="grid min-w-0 content-start gap-xl"
+                    className="grid min-w-0 content-start gap-[var(--customer-gap)]"
                     lang={menu.locale}
                   >
                     {menu.categories.length === 0 && (
@@ -168,11 +178,14 @@ function RestaurantMenuContent({
                             {t("emptyCategory")}
                           </p>
                         ) : (
-                          <ul className="customer-product-grid grid items-stretch gap-4">
+                          <ul
+                            className={`items-stretch gap-[var(--customer-gap)] ${theme.layout === "grid" ? "customer-product-grid grid" : "flex flex-col"}`}
+                          >
                             {category.products.map((product, imageIndex) => (
                               <li key={product.id} className="min-w-0">
                                 <MenuProductCard
                                   product={product}
+                                  layout={theme.layout}
                                   imageIndex={imageIndex}
                                   item={cart.find(
                                     (item) => item.productId === product.id

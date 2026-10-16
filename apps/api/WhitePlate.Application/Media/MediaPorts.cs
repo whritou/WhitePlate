@@ -39,6 +39,7 @@ public interface IMediaImageProcessor
 public interface IMediaRepository
 {
     Task<IReadOnlyList<MediaAsset>> ActiveAsync(Guid tenantId, CancellationToken cancellationToken);
+    Task<MediaAsset?> PublishedAsync(Guid tenantId, string slot, CancellationToken cancellationToken);
     Task<MediaAsset?> FindAsync(Guid tenantId, Guid id, CancellationToken cancellationToken);
     Task<bool> AddPendingAsync(MediaAsset asset, CancellationToken cancellationToken);
     Task MarkReadyAsync(MediaAsset asset, CancellationToken cancellationToken);

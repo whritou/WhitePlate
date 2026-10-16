@@ -29,9 +29,11 @@ public sealed class TenantRepository(WhitePlateDbContext database) : ITenantRepo
             tenant.GetMenuLocales(), [], [], [], [], []);
         var snapshotJson = JsonSerializer.Serialize(snapshot, CatalogPublicationJson.Options);
         var now = DateTimeOffset.UtcNow;
-        database.CatalogPublicationHeads.Add(CatalogPublicationHead.Create(tenant.Id, 1, snapshotJson, now));
-        database.CatalogRevisions.Add(CatalogRevision.Create(tenant.Id, 1, snapshotJson, "[]", "baseline",
-            null, "system", "tenant-created", now));
+        var publicationHead = CatalogPublicationHead.Create(tenant.Id, 1, snapshotJson, now);
+        var baselineRevision = CatalogRevision.Create(tenant.Id, 1, snapshotJson, "[]", "baseline",
+            null, "system", "tenant-created", now);
+        database.CatalogPublicationHeads.Add(publicationHead);
+        database.CatalogRevisions.Add(baselineRevision);
         try
         {
             await database.SaveChangesAsync(cancellationToken);
@@ -41,10 +43,8 @@ public sealed class TenantRepository(WhitePlateDbContext database) : ITenantRepo
             { SqlState: PostgresErrorCodes.UniqueViolation, ConstraintName: TenantConfiguration.SubdomainIndex })
         {
             database.Entry(tenant).State = EntityState.Detached;
-            database.Entry(database.CatalogPublicationHeads.Local.Single(item => item.TenantId == tenant.Id)).State =
-                EntityState.Detached;
-            database.Entry(database.CatalogRevisions.Local.Single(item => item.TenantId == tenant.Id)).State =
-                EntityState.Detached;
+            database.Entry(publicationHead).State = EntityState.Detached;
+            database.Entry(baselineRevision).State = EntityState.Detached;
             return false;
         }
     }

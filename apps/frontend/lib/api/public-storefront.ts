@@ -3,6 +3,8 @@ import { createApiRequestFactory } from "./request-factory"
 import { getTenantSlug, getTenantApiBaseUrl } from "./tenant-routing"
 import { parseStorefrontMenu } from "@/lib/validation/responses"
 import type { PublicMenuResult } from "@/types/storefront"
+import { parsePublishedTheme } from "@/lib/validation/theme-publication"
+import type { PublishedTheme } from "@/types/theme"
 
 export async function getPublicMenu(
   hostHeader: string | null,
@@ -35,4 +37,32 @@ export async function getPublicMenu(
   const menu = response.ok ? parseStorefrontMenu(response.data) : null
 
   return menu ? { kind: "menu", tenantSlug, menu } : { kind: "unavailable" }
+}
+
+export async function getPublicTheme(
+  hostHeader: string | null
+): Promise<PublishedTheme | null> {
+  const tenantSlug = getTenantSlug(
+    hostHeader,
+    process.env.STOREFRONT_BASE_DOMAIN
+  )
+
+  if (!tenantSlug) return null
+
+  const baseUrl = getTenantApiBaseUrl(
+    tenantSlug,
+    process.env.PUBLIC_TENANT_API_URL_TEMPLATE,
+    process.env.STOREFRONT_BASE_DOMAIN
+  )
+
+  if (!baseUrl) return null
+
+  const api = createApiRequestFactory({
+    baseUrl,
+    getToken: async () => null,
+    public: true,
+  })
+  const response = await api.get<unknown>("/api/v1/theme")
+
+  return response.ok ? parsePublishedTheme(response.data) : null
 }

@@ -27,8 +27,19 @@ public sealed partial class OrdersEndpointTests
         }
 
         var path = $"/api/v1/tenants/{seeded.TenantId}/categories/{categoryId}/visibility";
+
+        async Task PublishAsync(int expectedVersion)
+        {
+            using var request = new HttpRequestMessage(HttpMethod.Post,
+                $"/api/v1/tenants/{seeded.TenantId}/catalog/publish");
+            request.Headers.TryAddWithoutValidation("If-Match", $"\"{expectedVersion}\"");
+            using var response = await client.SendAsync(request, TestContext.Current.CancellationToken);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        }
+
         using var hide = await client.PutAsJsonAsync(path, new { isVisible = false }, TestContext.Current.CancellationToken);
         Assert.Equal(HttpStatusCode.NoContent, hide.StatusCode);
+        await PublishAsync(1);
         using var read = await client.GetAsync($"/api/v1/tenants/{seeded.TenantId}/catalog", TestContext.Current.CancellationToken);
         using var catalog = JsonDocument.Parse(await read.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
         Assert.False(catalog.RootElement.GetProperty("categories")[0].GetProperty("isVisible").GetBoolean());
@@ -51,6 +62,7 @@ public sealed partial class OrdersEndpointTests
 
         using var show = await client.PutAsJsonAsync(path, new { isVisible = true }, TestContext.Current.CancellationToken);
         Assert.Equal(HttpStatusCode.NoContent, show.StatusCode);
+        await PublishAsync(2);
         using var shownMenu = await client.GetAsync("https://bistro.example.test/api/v1/menu", TestContext.Current.CancellationToken);
         using var shownJson = JsonDocument.Parse(await shownMenu.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
         Assert.Single(shownJson.RootElement.GetProperty("categories").EnumerateArray());

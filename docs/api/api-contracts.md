@@ -247,7 +247,7 @@ The localized staff page at `/[locale]/organization/orders?tenantId=<id>` reads 
 
 ## T2 theme drafts — 15 October 2026
 
-Implemented in source; migration/hosted acceptance pending. Every route requires an active organization owner or restaurant manager. Foreign, missing, inactive or unauthorized restaurants return 404; anonymous requests return 401. All responses are no-store.
+Implemented and merged; production schema applied, API deployment/hosted acceptance unverified. Every route requires an active organization owner or restaurant manager. Foreign, missing, inactive or unauthorized restaurants return 404; anonymous requests return 401. All responses are no-store.
 
 | Method/path | Request | Result |
 | --- | --- | --- |
@@ -260,6 +260,23 @@ Appearance: six-digit HEX `primary`, `accent`, `bg`, `text`; allowlisted `font`,
 Contrast returns unrounded sRGB `textOnBackground`, `primaryOnBackground`, `textOnAccent`, `backgroundOnPrimary` and `readyForPublication` for these normal-text pairs (all at least 4.5:1). This diagnostic does not certify all rendered states. Low-contrast drafts can be saved; T3 must enforce safe publication.
 
 Browser BFF: GET `/api/theme-settings?tenantId=…` (`palette=1` for suggestions); PUT the same path with `{ theme, version }`. PUT requires exact configured Origin, validates selector/body and forwards If-Match. Credentials remain server-only; responses use `private, no-store`, `Vary: Cookie`. See [decision 0012](../architecture/decisions/0012-tenant-theme-drafts.md).
+
+## T3 theme publication
+
+Implementation status: source implemented; migration rollout and hosted acceptance pending.
+
+Owner/manager publication reads and writes require persisted membership and return no-store responses. The published snapshot is separate from the editable T2 draft and from T1's saved active slots. A publish captures the current saved appearance and current ready logo/favicon/banner slot IDs in one transaction; changing a T1 slot only stages the replacement until the next publish.
+
+| Method/path | Request | Result |
+| --- | --- | --- |
+| GET `/api/v1/tenants/{tenantId}/theme/publication` | None | Current snapshot, source draft version, asset IDs, publication time, and quoted publication-version ETag. Null snapshot reads as default appearance, no assets, and version 1. |
+| POST `/api/v1/tenants/{tenantId}/theme/publication` | `{ "draftVersion": n }`, `If-Match: "<publicationVersion>"` | Publishes the current saved draft and saved active T1 slots atomically; returns the new snapshot and ETag. The request cannot supply theme values or asset IDs. |
+| GET `/api/v1/theme` | Validated tenant host; no tenant selector | Public appearance, published asset-presence flags, publication time, and version; no-store. |
+| GET `/api/v1/brand-assets/{logo|favicon|banner}` | Validated tenant host | Exact ready asset ID in the published snapshot; draft slot changes are not served. Existing default favicon fallback remains. |
+
+Missing or malformed `If-Match` returns 428; a stale publication or draft version returns 412; a saved appearance that fails publication contrast checks or a selected asset that is not ready returns 422. Publication requires at least 4.5:1 for text/background, primary/background, and text/accent. When a banner is selected, its overlay must be at least 65%. Unauthorized or inactive tenant access remains indistinguishable as 404 (anonymous management access is 401).
+
+The same-origin frontend `/api/theme-publication?tenantId=…` BFF requires one UUID tenant selector; POST also checks the configured exact `Origin`, forwards the publication ETag, and returns `private, no-store`/`Vary: Cookie`. The real menu, checkout shell, order tracking shell, title, and favicon consume only host-resolved published values and versioned asset URLs. The additive `20261016132000_ThemePublication` migration backfills existing restaurants with the default appearance and their current active T1 assets to preserve current storefront behavior. It is generated source only and has not been applied; API deployment, guest-browser refresh, and hosted tenant-isolation acceptance remain pending.
 
 ## 5. Error contract
 
@@ -274,7 +291,8 @@ Errors use `ApiProblemResponse` with `application/problem+json`, `type: about:bl
 | `409` | `conflict`: invalid state transition, conflicting idempotency key, duplicate resource |
 | `412` | `precondition_failed`: stale `If-Match` version |
 | `413` | `request_too_large`: body exceeds the checkout limit |
-| `428` | `precondition_required`: order status change omitted `If-Match` |
+| `422` | `unprocessable_entity`: saved tenant theme or selected brand asset is unsafe to publish |
+| `428` | `precondition_required`: versioned mutation omitted or malformed `If-Match` |
 | `429` | `rate_limited`: checkout fixed-window limit reached |
 | `500` | `unexpected_error`: safe fallback without exception details |
 

@@ -60,8 +60,7 @@ public sealed partial class BrandAssetsEndpointTests
         var readBack = await client.GetFromJsonAsync<BrandAssetsDto>(path, Ct);
         Assert.Equal(draft.Id, Assert.Single(readBack!.Assets).Id);
         using var publicImage = await client.GetAsync("https://bistro.example.test/api/v1/brand-assets/logo", Ct);
-        Assert.Equal(HttpStatusCode.OK, publicImage.StatusCode);
-        Assert.Equal(await privatePreview.Content.ReadAsByteArrayAsync(Ct), await publicImage.Content.ReadAsByteArrayAsync(Ct));
+        Assert.Equal(HttpStatusCode.NotFound, publicImage.StatusCode);
         factory.Storage.FailWrites = true;
         using var failed = await client.PostAsync($"{path}/logo/uploads", Binary(ImageBytes()), Ct);
         Assert.Equal(HttpStatusCode.ServiceUnavailable, failed.StatusCode);
