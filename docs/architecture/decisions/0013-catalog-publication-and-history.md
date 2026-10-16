@@ -1,6 +1,6 @@
 # Catalog publication and history
 
-Date: 16 October 2026. Status: implemented in source; migration rollout and runtime acceptance pending.
+Date: 16 October 2026. Status: implemented in source; migration applied to Coolify Production; runtime acceptance pending.
 
 M1 currently edits normalized catalog rows directly. M4 adds a guest-visible publication boundary while keeping those rows as the restaurant's editable workspace.
 
@@ -19,4 +19,4 @@ M1 currently edits normalized catalog rows directly. M4 adds a guest-visible pub
 
 The API and UI can show a draft-versus-published diff without a second set of mutable catalog tables. Existing order snapshots remain independent. Rollback has an auditable actor and time, and quick availability stays responsive for Kitchen without granting Kitchen catalog or history access.
 
-The `CatalogPublicationHistory` migration is generated but has not been applied to any shared or production database. Source builds do not prove PostgreSQL execution, concurrency behavior, cache behavior, or guest/staff acceptance. M3 assisted-translation review states are not implemented or included in publication gating. See the [API contract](../../api/api-contracts.md#m4-catalog-publication-and-history--2026-10-16), [schema](../../database/database-schema.md#m4-catalog-publication-and-history--2026-10-16), and [acceptance plan](../../functional-test-plan.md#m4-catalog-publication-and-history).
+The `20261016155331_CatalogPublicationHistory` migration was applied to Coolify Production on 16 October 2026. Post-checks confirmed two version-1 baseline heads/revisions and the required `whiteplate_api` table grants. A custom-format dump was validated inside the PostgreSQL container before DDL, but was not copied off-host as a durable backup. The API has not been deployed, so production publication behavior, PostgreSQL concurrency, and guest/staff runtime acceptance remain open. M3 assisted-translation review states are not implemented or included in publication gating. See the [M4 rollout evidence](../../audits/catalog-publication-history.md), [API contract](../../api/api-contracts.md#m4-catalog-publication-and-history--2026-10-16), [schema](../../database/database-schema.md#m4-catalog-publication-and-history--2026-10-16), and [acceptance plan](../../functional-test-plan.md#m4-catalog-publication-and-history).

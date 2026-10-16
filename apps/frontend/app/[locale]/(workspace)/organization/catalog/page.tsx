@@ -72,11 +72,13 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
             ? "discounts"
             : query.view === "languages"
               ? "languages"
-              : query.view === "categories"
-                ? "categories"
-                : query.view === "translations"
-                  ? "translations"
-                  : "products"
+              : query.view === "versions"
+                ? "versions"
+                : query.view === "categories"
+                  ? "categories"
+                  : query.view === "translations"
+                    ? "translations"
+                    : "products"
         }
       />
     </main>

@@ -5,7 +5,12 @@ import type {
 } from "./catalog"
 
 export type MenuBuilderView =
-  "products" | "categories" | "translations" | "discounts" | "languages"
+  | "products"
+  | "categories"
+  | "translations"
+  | "discounts"
+  | "languages"
+  | "versions"
 export type MenuBuilderProps = {
   userId?: string
   catalog: ManagedCatalog
