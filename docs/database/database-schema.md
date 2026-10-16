@@ -4,7 +4,7 @@
 
 Generated migration `20261016222355_M3CatalogTranslationWorkflow` adds tenant-owned `CatalogTranslationReviews` and `CatalogTranslationGlossaryTerms`. Review rows store the catalog entity/locale, candidate text, source and saved-translation fingerprints, version/status, author identity and optional reviewer identity/time. Unique `(TenantId, EntityType, EntityId, Locale, Version)` and queue indexes support scoped review history. Glossary rows store an enabled source/target locale pair and human-managed terms; a normalized source key is unique per tenant and locale pair.
 
-The migration creates empty tables only. It does not touch, copy or attach review metadata to any existing translation. Only new or changed submissions create candidate rows. Migrations are not applied automatically and this migration has not been applied to a shared database. See [decision 0014](../architecture/decisions/0014-human-translation-review.md) and the [API contract](../api/api-contracts.md#m3-human-translation-review-and-glossary--2026-10-17).
+The migration creates empty tables only. It does not touch, copy or attach review metadata to any existing translation. Only new or changed submissions create candidate rows. The migration was applied to Coolify Production on 17 October 2026; post-checks confirmed both tables are empty and `whiteplate_api` has table-level CRUD grants. Migrations are not applied automatically. API deployment and hosted workflow acceptance remain open. See [rollout evidence](../audits/catalog-translation-workflow.md), [decision 0014](../architecture/decisions/0014-human-translation-review.md) and the [API contract](../api/api-contracts.md#m3-human-translation-review-and-glossary--2026-10-17).
 
 ## M4 catalog publication and history — 2026-10-16
 
