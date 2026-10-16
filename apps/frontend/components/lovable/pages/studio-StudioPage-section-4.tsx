@@ -22,6 +22,8 @@ export function StudioPageSection4() {
         {
           label: text("crispLight"),
           theme: {
+            primary: "#22577a",
+            accent: "#a8dadc",
             bg: "#ffffff",
             text: "#14201a",
             ambiance: "crisp-light" as const,
@@ -30,6 +32,8 @@ export function StudioPageSection4() {
         {
           label: text("warmCream"),
           theme: {
+            primary: "#8b4513",
+            accent: "#f4d35e",
             bg: "#fff8ef",
             text: "#2a1a12",
             ambiance: "warm-cream" as const,
@@ -41,6 +45,7 @@ export function StudioPageSection4() {
             bg: "#111111",
             text: "#f3efe6",
             primary: "#e8e2d4",
+            accent: "#8b3a3a",
             ambiance: "bistro-noir" as const,
           },
         },
