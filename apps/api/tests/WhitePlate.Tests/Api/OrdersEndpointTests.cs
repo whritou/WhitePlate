@@ -991,10 +991,42 @@ public sealed partial class OrdersEndpointTests
             database.ProductOptionGroups.Add(group);
             var option = ProductOption.Create(tenant.Id, group.Id, "Large", 1.25m, 0);
             database.ProductOptions.Add(option);
-            database.PromotionDiscounts.Add(PromotionDiscount.Create(tenant.Id, "SAVE", "Save two",
-                DiscountKind.FixedAmount, 2m, discountMinimumOrderAmount, discountExpiresOn));
+            var discount = PromotionDiscount.Create(tenant.Id, "SAVE", "Save two",
+                DiscountKind.FixedAmount, 2m, discountMinimumOrderAmount, discountExpiresOn);
+            database.PromotionDiscounts.Add(discount);
+            await database.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+            var baselinePublishedAt = DateTimeOffset.UtcNow;
+            SeedCatalogPublicationBaseline(tenant, category, product, [group], [option], [discount], baselinePublishedAt);
+            SeedCatalogPublicationBaseline(otherTenant, otherCategory, otherProduct, [], [], [], baselinePublishedAt);
             await database.SaveChangesAsync(TestContext.Current.CancellationToken);
             return (tenant.Id, product.Id, option.Id, otherTenant.Id, otherProduct.Id, organization.Id);
+
+            void SeedCatalogPublicationBaseline(Tenant seededTenant, MenuCategory seededCategory, Product seededProduct,
+                IReadOnlyList<ProductOptionGroup> optionGroups, IReadOnlyList<ProductOption> options,
+                IReadOnlyList<PromotionDiscount> discounts, DateTimeOffset publishedAt)
+            {
+                var snapshot = new WhitePlate.Application.Catalog.PublishedCatalogSnapshot(seededTenant.Id,
+                    seededTenant.Currency, seededTenant.DefaultMenuLocale, seededTenant.GetMenuLocales(),
+                    [new WhitePlate.Application.Catalog.CatalogCategoryAdminDto(seededCategory.Id, seededCategory.Name,
+                        seededCategory.SortOrder, seededCategory.IsArchived) { IsVisible = seededCategory.IsVisible }],
+                    [new WhitePlate.Application.Catalog.CatalogProductAdminDto(seededProduct.Id, seededProduct.CategoryId,
+                        seededProduct.Name, seededProduct.Description, seededProduct.BasePrice, seededProduct.TaxRatePercent,
+                        seededProduct.SortOrder, seededProduct.IsAvailable, seededProduct.IsArchived)],
+                    optionGroups.Select(item => new WhitePlate.Application.Catalog.CatalogOptionGroupAdminDto(item.Id,
+                        item.ProductId, item.Name, item.MinimumSelections, item.MaximumSelections, item.SortOrder, item.IsArchived))
+                        .ToArray(),
+                    options.Select(item => new WhitePlate.Application.Catalog.CatalogOptionAdminDto(item.Id, item.GroupId,
+                        item.Name, item.PriceAdjustment, item.SortOrder, item.IsArchived)).ToArray(),
+                    discounts.Select(item => new WhitePlate.Application.Catalog.PromotionDiscountDto(item.Id, item.Code,
+                        item.Name, item.Kind.ToString(), item.Value, item.IsActive, item.MinimumOrderAmount, item.ExpiresOn))
+                        .ToArray());
+                var snapshotJson = JsonSerializer.Serialize(snapshot,
+                    WhitePlate.Application.Catalog.CatalogPublicationJson.Options);
+                database.CatalogPublicationHeads.Add(CatalogPublicationHead.Create(seededTenant.Id, 1, snapshotJson, publishedAt));
+                database.CatalogRevisions.Add(CatalogRevision.Create(seededTenant.Id, 1, snapshotJson, "[]", "baseline",
+                    null, "system", "test-seed", publishedAt));
+            }
         }
 
         public async Task SeedOwnerAsync(Guid organizationId, string subject)
