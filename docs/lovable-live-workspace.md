@@ -17,7 +17,7 @@ Paths retain `/en` or `/fr`. Organization context uses `organizationId`; restaur
 | Menu | `/organization/catalog?tenantId=…` | Existing real catalog, categories, extras, translations, discounts, stock and galleries. Editor/table behavior retained with source fonts, borders, colors and scoped overlays. |
 | Studio | `/organization/theming?tenantId=…` | Original Lovable appearance editor and sample previews; T2 now saves authorized, versioned backend theme drafts. Separate Brand media tab preserves actual uploads. Publication remains T3. |
 | Staff | `/organization/team?organizationId=…` | Existing roster, invitations and revocation. Real roles and API fields retained; source styling applied by shared workspace scope. |
-| Settings | `/organization/settings?organizationId=…&section=…` | Original seven-section shell. Actual organization name/archive/restore and legal profile forms; restaurant actions link to real management. Payments, billing, domains and notifications remain identified placeholders/drafts. |
+| Settings | `/organization/settings?organizationId=…&section=…` | Actual organization name/archive/restore and legal profile forms. The organization Payments section summarizes Stripe connection/readiness per restaurant and links to that restaurant’s payment settings; it does not connect accounts itself. Billing, domains and notifications remain identified placeholders/drafts. |
 | Store / checkout | Tenant-host `/` and `/?step=checkout&menuLocale=…` | Real catalog and uploaded assets, source customer header/hero/product grid/basket. Original guest controller, cart validation, authoritative checkout, discounts and idempotency retained. |
 | Tracking | Existing tenant-host localized `/order/[orderId]#<trackingToken>` route | Customer shell updated; existing capability token, REST status recovery and order snapshots retained. |
 
@@ -40,7 +40,7 @@ Appearance/settings drafts are isolated by account and context: `whiteplate-live
 | Interface | Remaining connection |
 | --- | --- |
 | Analytics | Authorized reporting/period aggregates; chart figures are fictitious. |
-| Stripe, payments, payouts, invoices and subscriptions | Verified account state, payment/billing integration and authoritative amounts. Connect Stripe is disabled. |
+| Stripe Connect | Standard OAuth and Stripe-verified connection/readiness are implemented per restaurant. Organization Payments is a read-only overview; connection management stays in restaurant settings. S5 adds no checkout, charges, payout controls or application fees. |
 | Legal/company details | Organization legal country/name and optional country-specific registration/tax identifiers persist; restaurant legal settings inherit or store independent overrides. |
 | Appearance | T2 draft persistence is merged; production migration applied, API deployment/hosted acceptance unverified. T3 publication and live storefront consumption remain open. Preview uses a sample menu. See [T2 evidence](audits/theme-controls.md). |
 | Domains and notification preferences | Actual ownership/DNS/TLS verification, configuration persistence and delivery. No DNS/email operation is performed. |
@@ -100,7 +100,7 @@ The supplied `C:\Users\whrit\Desktop\whiteplate.zip` is the current visual refer
 | Staff | Actual member/invitation tables and summary cells; only pending invitations can be revoked. Source permission matrix is an explicitly fictitious, read-only preview and grants no authorization. |
 | Dashboard | Responsive page-scoped summary and recent shared order tickets with five status filters. It uses the existing order query, SignalR/REST recovery and role-derived status transitions; the full Kanban remains on Orders. Aggregate page order value is limited to owners/managers while per-ticket totals follow the existing shared ticket. No paid-order claim is inferred. |
 | Studio | Actual logo/favicon/banner editor sidebar and adjacent preview using real media; storage/save/removal remain unchanged. |
-| Settings | Actual organization rename/archive form and restaurant cards from the authorized existing restaurant read; original settings navigation and illustrative missing-service panels retained. |
+| Settings | Organization rename/archive and restaurant cards use authorized reads. Organization Payments shows per-restaurant Stripe connection/readiness and links to restaurant-level management; the other illustrative settings remain drafts. |
 | Organizations/creation | Source square surfaces, spacing, display headings and bordered creation forms, preserving actual creation/archive links and actions. These flows have no exact source counterpart. |
 | Customer checkout/tracking | Original two-column pickup/contact/order-summary composition and vertical tracking timeline around real cart, name, discount, receipt and capability tracking. Quantity, remove, uncertainty retry and tenant isolation remain active. |
 

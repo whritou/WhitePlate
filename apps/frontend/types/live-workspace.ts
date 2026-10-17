@@ -6,6 +6,7 @@ import type { ManagedCatalog } from "./catalog-management"
 import type { OrderDashboardProps } from "./orders"
 import type { DashboardMetrics } from "./dashboard-metrics"
 import type { OrderingOperations } from "./ordering-operations"
+import type { StripeConnectOverviewEntry } from "./stripe-connect"
 
 export type LiveDashboardProps = OrderDashboardProps & {
   initialDashboardMetrics?: DashboardMetrics | null
@@ -36,4 +37,5 @@ export type LiveSettingsProps = {
   userId: string
   children: ReactNode
   restaurants?: ApiResult<Restaurant[]>
+  stripeOverview?: StripeConnectOverviewEntry[]
 }
