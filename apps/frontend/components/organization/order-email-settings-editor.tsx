@@ -11,11 +11,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
-import { Textarea } from "@/components/ui/textarea"
 import { OrderEmailPreview } from "@/components/organization/order-email-preview"
+import { OrderEmailTemplateFields } from "@/components/organization/order-email-template-fields"
 import { useTranslations } from "next-intl"
 import type {
   OrderEmailEventKey,
@@ -228,58 +227,12 @@ export function OrderEmailSettingsEditor({
               </Label>
             </div>
 
-            <Label className="grid gap-2" htmlFor="email-template-subject">
-              {t("subject")}
-
-              <Input
-                id="email-template-subject"
-                maxLength={120}
-                value={activeTemplate?.subject ?? ""}
-                disabled={pending}
-                onChange={(item) =>
-                  updateTemplate("subject", item.target.value)
-                }
-              />
-            </Label>
-
-            <Label className="grid gap-2" htmlFor="email-template-heading">
-              {t("heading")}
-
-              <Input
-                id="email-template-heading"
-                maxLength={120}
-                value={activeTemplate?.heading ?? ""}
-                disabled={pending}
-                onChange={(item) =>
-                  updateTemplate("heading", item.target.value)
-                }
-              />
-            </Label>
-
-            <Label className="grid gap-2" htmlFor="email-template-body">
-              {t("body")}
-
-              <Textarea
-                id="email-template-body"
-                maxLength={2000}
-                rows={7}
-                value={activeTemplate?.body ?? ""}
-                disabled={pending}
-                onChange={(item) => updateTemplate("body", item.target.value)}
-              />
-            </Label>
-
-            <div className="grid gap-1">
-              <p className="text-sm font-medium">{t("variables")}</p>
-
-              <p className="text-sm text-muted-foreground">
-                <code>
-                  {
-                    "{{customerName}}, {{restaurantName}}, {{orderNumber}}, {{orderSummary}}, {{pickupTime}}, {{pickupInstructions}}, {{trackingUrl}}"
-                  }
-                </code>
-              </p>
-            </div>
+            <OrderEmailTemplateFields
+              key={`${activeLocale}-${event}`}
+              activeTemplate={activeTemplate}
+              pending={pending}
+              onChange={updateTemplate}
+            />
 
             {error && (
               <Alert variant="destructive" role="alert">
