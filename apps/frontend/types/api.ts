@@ -5,6 +5,7 @@ export type ApiError =
   | "not_found"
   | "conflict"
   | "rate_limited"
+  | "analytics_unavailable"
   | "unavailable"
 
 export type ApiResult<T> =

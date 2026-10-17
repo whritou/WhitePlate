@@ -43,7 +43,8 @@ public sealed class OrdersController(ICurrentTenant currentTenant, ICurrentIdent
         var command = new CreateOrderCommand(tenant.Id, request.CustomerName, request.DiscountCode,
             request.MenuLocale, items,
             Request.Headers["Idempotency-Key"].FirstOrDefault(), request.TrackingToken, request.PickupAt,
-            request.CustomerEmail, request.EmailUpdatesConsented);
+            request.CustomerEmail, request.EmailUpdatesConsented, request.AnalyticsConsented,
+            request.AnalyticsSource?.Trim().ToLowerInvariant() ?? "web");
         var result = await createOrder.HandleAsync(command, cancellationToken);
         if (!result.IsSuccess)
             return errors.ToActionResult(errors.Create(HttpContext, result.Error));

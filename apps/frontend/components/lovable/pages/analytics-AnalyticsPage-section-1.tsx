@@ -1,9 +1,6 @@
 "use client"
 import { Copy } from "@/components/lovable/copy"
-import { SourceButton } from "@/components/ui/lovable-controls"
 import {
-  Area,
-  AreaChart,
   Bar,
   BarChart,
   CartesianGrid,
@@ -15,17 +12,25 @@ import {
   XAxis,
   YAxis,
 } from "recharts"
-import { C, eur } from "./analytics-shared"
+import { C, eur, formatCurrency } from "./analytics-shared"
 import { useAnalyticsPageView } from "./analytics-AnalyticsPage-context"
+import { AnalyticsPageTrend } from "./analytics-AnalyticsPage-trend"
+import { AnalyticsPageKitchen } from "./analytics-AnalyticsPage-kitchen"
+import { useLocale, useTranslations } from "next-intl"
 export function AnalyticsPageSection1() {
-  const { rest, metric, setMetric, d, kpis, maxDish } = useAnalyticsPageView()
+  const { d, kpis, maxDish, pageMode, dishBarMetric } = useAnalyticsPageView()
+  const t = useTranslations("AnalyticsLive")
+  const locale = useLocale()
+  const liveLabel = (key: Parameters<typeof t>[0], demo: string) =>
+    pageMode === "live" ? t(key) : demo
 
   return (
     <main className="space-y-6 px-6 pb-12">
       <div className="grid grid-cols-2 gap-px border bg-foreground md:grid-cols-3 xl:grid-cols-6">
         <Copy>
           {kpis.map((x) => {
-            const good = x.invert ? x.delta < 0 : x.delta > 0
+            const good =
+              x.delta !== null && (x.invert ? x.delta < 0 : x.delta > 0)
 
             return (
               <div key={x.k} className="bg-background p-5">
@@ -42,7 +47,9 @@ export function AnalyticsPageSection1() {
                 >
                   <Copy>
                     {x.note ??
-                      `${x.delta > 0 ? "▲" : "▼"} ${Math.abs(x.delta).toFixed(1)}% vs previous`}
+                      (x.delta === null
+                        ? t("comparisonUnavailable")
+                        : `${x.delta > 0 ? "▲" : "▼"} ${Math.abs(x.delta).toFixed(1)}% ${liveLabel("vsPrevious", "vs previous")}`)}
                   </Copy>
                 </p>
               </div>
@@ -51,102 +58,12 @@ export function AnalyticsPageSection1() {
         </Copy>
       </div>
 
-      <div className="card-hard bg-background">
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b px-5 py-3">
-          <p className="font-display text-lg font-bold">
-            <Copy>{metric === "revenue" ? "Revenue" : "Orders"}</Copy>{" "}
-            <Copy> over time</Copy>
-          </p>
-
-          <div className="flex border">
-            <Copy>
-              {(["revenue", "orders"] as const).map((m) => (
-                <SourceButton
-                  key={m}
-                  onClick={() => setMetric(m)}
-                  className={`label-mono px-3 py-1.5 ${metric === m ? "bg-foreground text-background" : ""}`}
-                >
-                  <Copy>{m}</Copy>
-                </SourceButton>
-              ))}
-            </Copy>
-          </div>
-        </div>
-
-        <div className="h-72 p-4">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={d.series} margin={{ left: 0, right: 8, top: 8 }}>
-              <defs>
-                <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor={C.primary} stopOpacity={0.35} />
-
-                  <stop offset="100%" stopColor={C.primary} stopOpacity={0} />
-                </linearGradient>
-              </defs>
-
-              <CartesianGrid stroke={C.grid} vertical={false} />
-
-              <XAxis
-                dataKey="day"
-                tick={{ fontSize: 11, fill: C.muted }}
-                tickLine={false}
-                axisLine={false}
-                minTickGap={24}
-              />
-
-              <YAxis
-                tick={{ fontSize: 11, fill: C.muted }}
-                tickLine={false}
-                axisLine={false}
-                width={50}
-                tickFormatter={(v) =>
-                  metric === "revenue"
-                    ? `€${v >= 1000 ? `${(v / 1000).toFixed(1)}k` : v}`
-                    : v
-                }
-              />
-
-              <Tooltip
-                contentStyle={{
-                  border: "1px solid var(--color-foreground)",
-                  borderRadius: 0,
-                  background: "var(--color-background)",
-                }}
-                formatter={(v: number, n: string) => [
-                  metric === "revenue" ? eur(v) : v,
-                  n === "prev" ? "Previous period" : metric,
-                ]}
-              />
-
-              <Copy>
-                {metric === "revenue" && (
-                  <Area
-                    type="monotone"
-                    dataKey="prev"
-                    stroke={C.muted}
-                    strokeDasharray="4 4"
-                    fill="none"
-                    strokeWidth={1.5}
-                  />
-                )}
-              </Copy>
-
-              <Area
-                type="monotone"
-                dataKey={metric}
-                stroke={C.primary}
-                fill="url(#g)"
-                strokeWidth={2.5}
-              />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
+      <AnalyticsPageTrend />
 
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="card-hard bg-background lg:col-span-2">
           <p className="border-b px-5 py-3 font-display text-lg font-bold">
-            <Copy>Peak hours</Copy>
+            <Copy>{liveLabel("peakHours", "Peak hours")}</Copy>
           </p>
 
           <div className="h-64 p-4">
@@ -205,7 +122,7 @@ export function AnalyticsPageSection1() {
 
         <div className="card-hard bg-background">
           <p className="border-b px-5 py-3 font-display text-lg font-bold">
-            <Copy>Order channels</Copy>
+            <Copy>{liveLabel("orderChannels", "Order channels")}</Copy>
           </p>
 
           <div className="h-44">
@@ -255,7 +172,13 @@ export function AnalyticsPageSection1() {
                   </span>
 
                   <span className="font-bold">
-                    <Copy>{c.value}</Copy>%
+                    <Copy>
+                      {c.state === "unavailable"
+                        ? "—"
+                        : c.state === "untracked"
+                          ? t("untracked")
+                          : `${c.value}%`}
+                    </Copy>
                   </span>
                 </li>
               ))}
@@ -267,7 +190,7 @@ export function AnalyticsPageSection1() {
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="card-hard bg-background lg:col-span-2">
           <p className="border-b px-5 py-3 font-display text-lg font-bold">
-            <Copy>Best-selling dishes</Copy>
+            <Copy>{liveLabel("bestSellingDishes", "Best-selling dishes")}</Copy>
           </p>
 
           <div className="overflow-x-auto">
@@ -277,17 +200,17 @@ export function AnalyticsPageSection1() {
                   <th className="px-5 py-2">#</th>
 
                   <th>
-                    <Copy>Dish</Copy>
+                    <Copy>{liveLabel("dish", "Dish")}</Copy>
                   </th>
 
                   <th className="w-1/3" />
 
                   <th className="text-right">
-                    <Copy>Sold</Copy>
+                    <Copy>{liveLabel("sold", "Sold")}</Copy>
                   </th>
 
                   <th className="px-5 text-right">
-                    <Copy>Revenue</Copy>
+                    <Copy>{liveLabel("revenue", "Revenue")}</Copy>
                   </th>
                 </tr>
               </thead>
@@ -295,20 +218,35 @@ export function AnalyticsPageSection1() {
               <tbody>
                 <Copy>
                   {d.dishes.map((x, i) => (
-                    <tr key={x.n} className="border-b last:border-0">
+                    <tr
+                      key={`${x.tenantId ?? "demo"}-${x.n}`}
+                      className="border-b last:border-0"
+                    >
                       <td className="px-5 py-2.5 font-display font-bold">
-                        <Copy>{i + 1}</Copy>
+                        <Copy>{x.rank ?? i + 1}</Copy>
                       </td>
 
                       <td className="font-semibold">
-                        <Copy>{x.n}</Copy>
+                        <Copy>
+                          {x.restaurant ? `${x.n} · ${x.restaurant}` : x.n}
+                        </Copy>
                       </td>
 
                       <td className="pr-4">
                         <div className="h-2 bg-secondary">
                           <div
                             className="h-2 bg-primary"
-                            style={{ width: `${(x.rev / maxDish) * 100}%` }}
+                            style={{
+                              width: `${
+                                ((dishBarMetric === "quantity"
+                                  ? x.q
+                                  : dishBarMetric === "normalized"
+                                    ? (x.barValue ?? 0)
+                                    : x.rev) /
+                                  maxDish) *
+                                100
+                              }%`,
+                            }}
                           />
                         </div>
                       </td>
@@ -318,74 +256,32 @@ export function AnalyticsPageSection1() {
                       </td>
 
                       <td className="px-5 text-right font-bold">
-                        <Copy>{eur(x.rev)}</Copy>
+                        <Copy>
+                          {x.currency
+                            ? formatCurrency(x.rev, x.currency, locale)
+                            : eur(x.rev)}
+                        </Copy>
                       </td>
                     </tr>
                   ))}
+
+                  {d.dishes.length === 0 && (
+                    <tr>
+                      <td
+                        colSpan={5}
+                        className="px-5 py-6 text-sm text-muted-foreground"
+                      >
+                        {t("noDishData")}
+                      </td>
+                    </tr>
+                  )}
                 </Copy>
               </tbody>
             </table>
           </div>
         </div>
 
-        <div className="card-hard bg-ink text-ink-foreground">
-          <p className="border-b border-ink-foreground/20 px-5 py-3 font-display text-lg font-bold">
-            <Copy>Kitchen performance</Copy>
-          </p>
-
-          <div className="space-y-5 p-5">
-            <Copy>
-              {[
-                ["On-time pickups", 94 - rest, "%"],
-                ["Accepted < 1 min", 88 + rest, "%"],
-                ["Cancelled orders", 2 + rest * 0.3, "%"],
-              ].map(([k, v, u]) => (
-                <div key={k as string}>
-                  <div className="flex justify-between text-sm">
-                    <span>
-                      <Copy>{k}</Copy>
-                    </span>
-
-                    <span className="font-bold">
-                      <Copy>
-                        {(v as number).toFixed(0)}
-
-                        <Copy></Copy>
-
-                        {u}
-                      </Copy>
-                    </span>
-                  </div>
-
-                  <div className="mt-1.5 h-2 bg-ink-foreground/15">
-                    <div className="h-2 bg-accent" style={{ width: `${v}%` }} />
-                  </div>
-                </div>
-              ))}
-            </Copy>
-
-            <div className="grid grid-cols-2 gap-px border border-ink-foreground/20 bg-ink-foreground/20">
-              <Copy>
-                {[
-                  ["Fastest", `${6 + rest} min`],
-                  ["Slowest", `${24 + rest} min`],
-                  ["Discount uses", `${42 - rest * 6}`],
-                  ["Refunds", eur(86 - rest * 10)],
-                ].map(([k, v]) => (
-                  <div key={k} className="bg-ink p-3">
-                    <p className="label-mono opacity-60">
-                      <Copy>{k}</Copy>
-                    </p>
-
-                    <p className="font-display text-xl font-bold">
-                      <Copy>{v}</Copy>
-                    </p>
-                  </div>
-                ))}
-              </Copy>
-            </div>
-          </div>
-        </div>
+        <AnalyticsPageKitchen />
       </div>
     </main>
   )

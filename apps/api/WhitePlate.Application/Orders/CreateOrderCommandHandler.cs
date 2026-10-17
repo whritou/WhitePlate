@@ -10,7 +10,8 @@ using WhitePlate.Domain.Orders;
 namespace WhitePlate.Application.Orders;
 
 public sealed class CreateOrderCommandHandler(IOrderRepository orders, TimeProvider timeProvider,
-    IEmailTrackingCapability trackingCapability)
+    IEmailTrackingCapability trackingCapability, IAnalyticsRepository? analytics = null,
+    IAnalyticsPrivacyService? analyticsPrivacy = null)
 {
     private static readonly JsonSerializerOptions FingerprintJson = new(JsonSerializerDefaults.Web);
 
@@ -22,9 +23,13 @@ public sealed class CreateOrderCommandHandler(IOrderRepository orders, TimeProvi
 
         if (!IsValidIdempotencyKey(command.IdempotencyKey))
             return Validation("Idempotency-Key", "required", "A valid Idempotency-Key header is required.");
-        if (command.EmailUpdatesConsented != !string.IsNullOrWhiteSpace(command.CustomerEmail))
+        var hasEmail = !string.IsNullOrWhiteSpace(command.CustomerEmail);
+        if (command.EmailUpdatesConsented && !hasEmail || command.AnalyticsConsented && !hasEmail ||
+            !command.EmailUpdatesConsented && !command.AnalyticsConsented && hasEmail)
             return Validation("emailUpdatesConsent", "consent_required",
-                "Provide an email address only when opting in to order updates.");
+                "Provide an email address only when opting in to analytics or order updates.");
+        if (command.AnalyticsSource is not ("web" or "qr"))
+            return Validation("analyticsSource", "invalid_value", "The analytics source is invalid.");
 
         string? trackingTokenHash = null;
         if (command.TrackingToken is not null && !OrderTrackingToken.TryHash(command.TrackingToken, out trackingTokenHash))
@@ -36,8 +41,36 @@ public sealed class CreateOrderCommandHandler(IOrderRepository orders, TimeProvi
         if (locale is null) return Result<OrderReceiptDto>.Failure(new ApplicationError(ErrorCode.NotFound));
 
         var now = timeProvider.GetUtcNow();
+        IReadOnlyList<AnalyticsFingerprint>? analyticsFingerprints = null;
+        IReadOnlyList<(string KeyVersion, string Hash)> analyticsFingerprintKeys = [];
+        if (command.AnalyticsConsented)
+        {
+            if (analytics is null || analyticsPrivacy is null)
+                return Validation("analyticsConsent", "privacy_key_unavailable",
+                    "Analytics consent is temporarily unavailable. You can place the order without selecting analytics consent.");
+            var lookup = analyticsPrivacy.CreateLookup(command.TenantId, command.CustomerEmail);
+            if (lookup.Status == AnalyticsFingerprintLookupStatus.InvalidEmail)
+                return Validation("customerEmail", "invalid_value", "Provide a valid email address for analytics consent.");
+            if (lookup.Status != AnalyticsFingerprintLookupStatus.Available || lookup.CurrentKeyVersion is null ||
+                lookup.Hashes.Count == 0)
+                return Validation("analyticsConsent", "privacy_key_unavailable",
+                    "Analytics consent is temporarily unavailable. You can place the order without selecting analytics consent.");
+            var currentFingerprint = lookup.Hashes.SingleOrDefault(item => item.KeyVersion == lookup.CurrentKeyVersion);
+            if (currentFingerprint == default)
+                return Validation("analyticsConsent", "privacy_key_unavailable",
+                    "Analytics consent is temporarily unavailable. You can place the order without selecting analytics consent.");
+            analyticsFingerprintKeys = lookup.Hashes;
+            analyticsFingerprints = [new AnalyticsFingerprint(currentFingerprint.KeyVersion, currentFingerprint.Hash,
+                now.AddDays(365))];
+        }
+        IReadOnlyList<Guid> analyticsPriorOrderIds = command.AnalyticsConsented
+            ? await analytics!.GetPriorConsentedOrderIdsAsync(command.TenantId, analyticsFingerprintKeys, now,
+                now.AddDays(-365), cancellationToken)
+            : Array.Empty<Guid>();
+        var returningCustomer = analyticsPriorOrderIds.Count > 0;
         var keyHash = Hash(key);
-        var requestHash = Hash(CreateFingerprint(command, locale.Locale, trackingTokenHash));
+        var requestHash = Hash(CreateFingerprint(command, locale.Locale, trackingTokenHash,
+            analyticsFingerprints));
         var existing = await orders.FindIdempotentOrderAsync(command.TenantId, keyHash, requestHash, now,
             cancellationToken);
         if (existing.Outcome == IdempotencyOutcome.Replayed)
@@ -153,7 +186,9 @@ public sealed class CreateOrderCommandHandler(IOrderRepository orders, TimeProvi
                 selectedSlot.StartsAt, selectedSlot.TimeZone,
                 command.PickupAt is null ? PickupMode.Asap : PickupMode.Scheduled,
                 command.EmailUpdatesConsented ? command.CustomerEmail : null,
-                command.EmailUpdatesConsented ? now : null, emailTrackingCapability?.TokenHash, orderId);
+                command.EmailUpdatesConsented ? now : null, emailTrackingCapability?.TokenHash, orderId,
+                command.AnalyticsSource, command.AnalyticsConsented ? now : null, returningCustomer,
+                analyticsFingerprintKeys, analyticsPriorOrderIds);
             var receipt = order.ToReceipt();
             var result = await orders.CreateOrderAsync(order, receipt, keyHash, requestHash, now,
                 cancellationToken);
@@ -175,13 +210,16 @@ public sealed class CreateOrderCommandHandler(IOrderRepository orders, TimeProvi
         value.Trim().All(character => character is >= '!' and <= '~');
 
     private static string CreateFingerprint(CreateOrderCommand command, string effectiveLocale,
-        string? trackingTokenHash)
+        string? trackingTokenHash, IReadOnlyList<AnalyticsFingerprint>? analyticsFingerprints)
     {
         var canonical = new
         {
             customerName = command.CustomerName?.Trim(),
             customerEmail = command.EmailUpdatesConsented ? command.CustomerEmail?.Trim().ToLowerInvariant() : null,
             emailUpdatesConsented = command.EmailUpdatesConsented,
+            analyticsConsented = command.AnalyticsConsented,
+            analyticsSource = command.AnalyticsConsented ? command.AnalyticsSource : null,
+            analyticsFingerprints = analyticsFingerprints?.Select(item => new { item.KeyVersion, item.Hash }),
             menuLocale = effectiveLocale,
             trackingTokenHash,
             pickupAt = command.PickupAt?.UtcDateTime,

@@ -109,14 +109,17 @@ public static class ServiceRegistration
         services.AddScoped<ICatalogPublicationRepository, CatalogPublicationRepository>();
         services.AddScoped<ICatalogRepository, CatalogRepository>();
         services.AddScoped<IOrderRepository, OrderRepository>();
+        services.AddScoped<IAnalyticsRepository, AnalyticsRepository>();
         services.AddScoped<CreateOrderCommandHandler>();
         services.AddSingleton<IEmailTrackingCapability, HmacEmailTrackingCapability>();
+        services.AddSingleton<IAnalyticsPrivacyService, AnalyticsPrivacyService>();
         services.AddSingleton<ResendOrderEmailSender>();
         services.AddHttpClient();
         services.AddScoped<GetPublicOrderTrackingQueryHandler>();
         services.AddScoped<ListOrdersQueryHandler>();
         services.AddScoped<ListOrderHistoryQueryHandler>();
         services.AddScoped<GetDashboardMetricsQueryHandler>();
+        services.AddScoped<GetAnalyticsMetricsQueryHandler>();
         services.AddScoped<UpdateOrderStatusCommandHandler>();
         services.AddScoped<KitchenSubscriptionAccess>();
         services.AddSingleton<KitchenSubscriptions>();

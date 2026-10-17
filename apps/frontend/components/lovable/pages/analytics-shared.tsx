@@ -95,3 +95,13 @@ export function build(days: number, rIdx: number) {
 
 export const eur = (n: number) => `€${Math.round(n).toLocaleString("en-GB")}`
 export const pct = (a: number, b: number) => (b ? ((a - b) / b) * 100 : 0)
+export const formatCurrency = (
+  value: number,
+  currency: string,
+  locale = "en-GB"
+) =>
+  new Intl.NumberFormat(locale, {
+    style: "currency",
+    currency,
+    maximumFractionDigits: 2,
+  }).format(value)

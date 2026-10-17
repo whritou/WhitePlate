@@ -31,7 +31,20 @@ public sealed record CreateOrderItem(Guid ProductId, int Quantity, IReadOnlyList
 public sealed record CreateOrderCommand(Guid TenantId, string? CustomerName, string? DiscountCode,
     string? MenuLocale, IReadOnlyList<CreateOrderItem>? Items, string? IdempotencyKey,
     string? TrackingToken = null, DateTimeOffset? PickupAt = null, string? CustomerEmail = null,
-    bool EmailUpdatesConsented = false);
+    bool EmailUpdatesConsented = false, bool AnalyticsConsented = false,
+    string AnalyticsSource = "web");
+
+public sealed record AnalyticsFingerprint(string KeyVersion, string Hash, DateTimeOffset ExpiresAt);
+
+public interface IAnalyticsPrivacyService
+{
+    AnalyticsFingerprintLookup CreateLookup(Guid tenantId, string? email);
+}
+
+public enum AnalyticsFingerprintLookupStatus { InvalidEmail, Unavailable, Available }
+
+public sealed record AnalyticsFingerprintLookup(AnalyticsFingerprintLookupStatus Status, string? CurrentKeyVersion,
+    IReadOnlyList<(string KeyVersion, string Hash)> Hashes);
 
 public sealed record EmailTrackingCapability(string Token, string TokenHash);
 

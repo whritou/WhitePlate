@@ -10,6 +10,8 @@ export type OrderInput = {
   customerName: string
   customerEmail: string
   emailUpdatesConsented: boolean
+  analyticsConsented?: boolean
+  analyticsSource?: "web" | "qr"
   discountCode: string | null
   menuLocale: string
   trackingToken?: string
@@ -110,8 +112,10 @@ export type CheckoutPanelProps = {
 export type CheckoutEmailUpdatesProps = {
   customerEmail: string
   emailUpdatesConsented: boolean
+  analyticsConsented?: boolean
   changeCustomerEmail: (value: string) => void
   changeEmailUpdatesConsent: (value: boolean) => void
+  changeAnalyticsConsent?: (value: boolean) => void
 }
 
 export type CheckoutPickupSelectorProps = {

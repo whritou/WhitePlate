@@ -17,6 +17,7 @@ export type GuestCheckoutState = {
   customerName: string
   customerEmail: string
   emailUpdatesConsented: boolean
+  analyticsConsented?: boolean
   discountCode: string
   error: ApiError | null
   submitting: boolean
@@ -28,6 +29,7 @@ export type GuestCheckoutState = {
   changeCustomerName: (value: string) => void
   changeCustomerEmail: (value: string) => void
   changeEmailUpdatesConsent: (value: boolean) => void
+  changeAnalyticsConsent?: (value: boolean) => void
   changeDiscountCode: (value: string) => void
   setError: (error: ApiError | null) => void
   setSubmitting: (submitting: boolean) => void

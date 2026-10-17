@@ -17,6 +17,8 @@ import { CheckoutPickupSelector } from "@/components/storefront/checkout-pickup-
 import type { CheckoutPanelProps } from "@/types/checkout"
 import { useTranslations } from "next-intl"
 import { Receipt } from "./receipt"
+import { AnalyticsWithdrawalForm } from "./analytics-withdrawal-form"
+import { Link } from "@/i18n/navigation"
 
 export function CheckoutPanel({
   checkoutState,
@@ -31,6 +33,7 @@ export function CheckoutPanel({
     customerName,
     customerEmail,
     emailUpdatesConsented,
+    analyticsConsented,
     discountCode,
     error,
     submitting,
@@ -44,6 +47,7 @@ export function CheckoutPanel({
     changeCustomerName,
     changeCustomerEmail,
     changeEmailUpdatesConsent,
+    changeAnalyticsConsent,
     changeDiscountCode,
     pickupSlots,
     pickupSlotsLoading,
@@ -67,6 +71,17 @@ export function CheckoutPanel({
         {receipt ? (
           <>
             <Receipt receipt={receipt} trackingToken={trackingToken} />
+
+            <div className="mt-5 border-t pt-5">
+              <AnalyticsWithdrawalForm tenantId={receipt.tenantId} />
+
+              <Link
+                className="mt-3 inline-flex min-h-11 items-center text-sm text-primary underline-offset-4 hover:underline"
+                href={`/analytics-privacy/${receipt.tenantId}`}
+              >
+                {c("analyticsPrivacyLink")}
+              </Link>
+            </div>
 
             <CardFooter className="border-0 p-0">
               <Button
@@ -248,8 +263,10 @@ export function CheckoutPanel({
                     <CheckoutEmailUpdates
                       customerEmail={customerEmail}
                       emailUpdatesConsented={emailUpdatesConsented}
+                      analyticsConsented={analyticsConsented ?? false}
                       changeCustomerEmail={changeCustomerEmail}
                       changeEmailUpdatesConsent={changeEmailUpdatesConsent}
+                      changeAnalyticsConsent={changeAnalyticsConsent}
                     />
 
                     <CheckoutPickupSelector
