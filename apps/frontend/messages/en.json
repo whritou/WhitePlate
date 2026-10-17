@@ -769,7 +769,7 @@
     "reviewRejected": "Rejected",
     "reviewStale": "Source changed",
     "reviewSuperseded": "Replaced by a newer submission",
-    "awaitingIndependentReviewer": "The person who submitted this change cannot approve it.",
+    "awaitingIndependentReviewer": "Your role cannot review translations. Ask an organization owner or restaurant manager.",
     "reviewWarning": "Check glossary term: {term}",
     "approve": "Approve",
     "reject": "Reject",
@@ -3683,6 +3683,7 @@
   "LiveParity": {
     "inviteMember": "Invite member",
     "title": "Menu builder",
+    "versionsTab": "Versions",
     "dishes": "Dishes",
     "allergens": "Allergens",
     "discounts": "Discount codes",

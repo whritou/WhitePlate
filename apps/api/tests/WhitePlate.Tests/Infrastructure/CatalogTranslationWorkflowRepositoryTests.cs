@@ -39,7 +39,7 @@ public sealed class CatalogTranslationWorkflowRepositoryTests
             .Select(head => head.SnapshotJson).SingleAsync(TestContext.Current.CancellationToken));
 
         var result = await repository.DecideAsync(tenant.Id, submitted.Review.Id, submitted.Review.Version,
-            approve: true, reviewer, TestContext.Current.CancellationToken);
+            approve: true, reviewer, allowAuthorReview: false, TestContext.Current.CancellationToken);
 
         Assert.Equal(CatalogTranslationDecisionOutcome.Succeeded, result);
         Assert.Equal("Soupe nouvelle", CatalogTranslations.GetAll(product.TranslationsJson)["fr"].Name);
@@ -113,7 +113,7 @@ public sealed class CatalogTranslationWorkflowRepositoryTests
         await database.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var result = await repository.DecideAsync(tenant.Id, submitted.Review.Id, submitted.Review.Version,
-            approve: true, reviewer, TestContext.Current.CancellationToken);
+            approve: true, reviewer, allowAuthorReview: false, TestContext.Current.CancellationToken);
 
         Assert.Equal(CatalogTranslationDecisionOutcome.Stale, result);
         Assert.Equal(CatalogTranslationReviewStatus.Stale, submitted.Review.Status);
@@ -136,7 +136,7 @@ public sealed class CatalogTranslationWorkflowRepositoryTests
         Assert.NotNull(submitted?.Review);
 
         var result = await repository.DecideAsync(tenant.Id, submitted.Review.Id, submitted.Review.Version,
-            approve: false, reviewer, TestContext.Current.CancellationToken);
+            approve: false, reviewer, allowAuthorReview: false, TestContext.Current.CancellationToken);
 
         Assert.Equal(CatalogTranslationDecisionOutcome.Succeeded, result);
         Assert.Equal(CatalogTranslationReviewStatus.Rejected, submitted.Review.Status);
@@ -160,7 +160,7 @@ public sealed class CatalogTranslationWorkflowRepositoryTests
         Assert.NotNull(submitted?.Review);
 
         var result = await repository.DecideAsync(tenant.Id, submitted.Review.Id, submitted.Review.Version,
-            approve: true, author, TestContext.Current.CancellationToken);
+            approve: true, author, allowAuthorReview: false, TestContext.Current.CancellationToken);
 
         Assert.Equal(CatalogTranslationDecisionOutcome.SelfReviewNotAllowed, result);
         Assert.Equal(CatalogTranslationReviewStatus.Pending, submitted.Review.Status);

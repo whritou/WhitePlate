@@ -10,12 +10,13 @@ public sealed class CatalogTranslationReviewTests
     private static readonly string Fingerprint = new('a', 64);
 
     [Fact]
-    public void AuthorCannotApproveTheirOwnTranslationChange()
+    public void AuthorCannotApproveTheirOwnTranslationChangeWithoutPrivilegedAuthorization()
     {
         var author = ExternalIdentity.Create("https://identity.example.test", "manager-1");
         var review = CreateReview(author);
 
-        var exception = Assert.Throws<DomainRuleException>(() => review.Approve(author, 1, Now.AddMinutes(1)));
+        var exception = Assert.Throws<DomainRuleException>(() =>
+            review.Approve(author, 1, Now.AddMinutes(1), allowAuthorReview: false));
 
         Assert.Equal("self_review_not_allowed", exception.Code);
         Assert.Equal(CatalogTranslationReviewStatus.Pending, review.Status);
@@ -30,7 +31,7 @@ public sealed class CatalogTranslationReviewTests
         var review = CreateReview(author);
         var reviewedAt = Now.AddMinutes(1);
 
-        review.Approve(reviewer, 1, reviewedAt);
+        review.Approve(reviewer, 1, reviewedAt, allowAuthorReview: false);
 
         Assert.Equal(CatalogTranslationReviewStatus.Approved, review.Status);
         Assert.Equal(reviewer.Issuer, review.ReviewerIssuer);

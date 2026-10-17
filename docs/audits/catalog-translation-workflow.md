@@ -27,3 +27,11 @@ The API was not deployed or restarted. Existing saved translations were not chan
 ## Source verification
 
 For PR #116, the direct API test runner reported 291 passed and 0 failed; `dotnet test` built the solution but reported zero discovered tests with the current Microsoft.Testing.Platform integration. The frontend suite reported 589 passed. All six GitHub checks passed before merge. These checks do not replace hosted acceptance.
+
+## Owner/manager self-review correction — 17 October 2026
+
+Persisted organization owners and restaurant managers can approve or reject their own pending candidates. The API checks those exact roles before passing the explicit self-review authorization into the Domain; its default behavior still blocks self-review, and Kitchen members cannot access review decisions. Approval continues to update only the normalized draft, so M4 publication remains separate. No schema or existing translation data changed.
+
+The translation editor now reports review permission by role instead of claiming authors can never review their own candidates. `LiveParity.versionsTab` is now present in both English and French catalogs, so the workspace tab no longer displays the raw message key.
+
+Verification for this correction: API test assembly build passed; the full direct xUnit runner passed 293 tests. One initial full-suite run had a transient 500 in `TenantEndpointTests.HostsSelectSeparateTenantsAndHeadersCannotOverrideThem`; that test passed by itself and the subsequent full-suite run passed all 293 tests. The frontend Vitest suite passed 590 tests, and `node node_modules/typescript/bin/tsc --noEmit` passed. The system npm shim points to a missing global npm install, so Vitest and TypeScript were run from the installed local packages. This correction has not been deployed; hosted acceptance remains open.

@@ -26,28 +26,43 @@ public sealed class CatalogTranslationWorkflowHandlerTests
     }
 
     [Fact]
-    public async Task ManagerCannotDecideTheirOwnTranslationCandidate()
+    public async Task ManagerCanDecideTheirOwnTranslationCandidate()
     {
         var tenantId = Guid.NewGuid();
         var identity = ExternalIdentity.Create("https://identity.example.test", "manager");
-        var repository = new TranslationWorkflowRepositoryStub
-        {
-            Decision = CatalogTranslationDecisionOutcome.SelfReviewNotAllowed
-        };
+        var repository = new TranslationWorkflowRepositoryStub();
         var handler = new CatalogTranslationWorkflowHandler(
             new MembershipStub(tenantId, identity, RestaurantRole.Manager), repository);
 
         var result = await handler.DecideAsync(tenantId, Guid.NewGuid(), 1, approve: true, identity,
             TestContext.Current.CancellationToken);
 
-        Assert.Equal(ErrorCode.Forbidden, result.Error.Code);
+        Assert.True(result.IsSuccess);
         Assert.Equal(1, repository.Decisions);
+        Assert.True(repository.AllowAuthorReview);
+    }
+
+    [Fact]
+    public async Task KitchenRoleCannotDecideTranslationCandidate()
+    {
+        var tenantId = Guid.NewGuid();
+        var identity = ExternalIdentity.Create("https://identity.example.test", "kitchen");
+        var repository = new TranslationWorkflowRepositoryStub();
+        var handler = new CatalogTranslationWorkflowHandler(
+            new MembershipStub(tenantId, identity, RestaurantRole.Kitchen), repository);
+
+        var result = await handler.DecideAsync(tenantId, Guid.NewGuid(), 1, approve: true, identity,
+            TestContext.Current.CancellationToken);
+
+        Assert.Equal(ErrorCode.NotFound, result.Error.Code);
+        Assert.Equal(0, repository.Decisions);
     }
 
     private sealed class TranslationWorkflowRepositoryStub : ICatalogTranslationWorkflowRepository
     {
         public int Submissions { get; private set; }
         public int Decisions { get; private set; }
+        public bool AllowAuthorReview { get; private set; }
         public CatalogTranslationDecisionOutcome Decision { get; init; } = CatalogTranslationDecisionOutcome.Succeeded;
 
         public Task<CatalogTranslationDraftSubmission?> SubmitAsync(Guid tenantId, string entityType, Guid entityId,
@@ -61,9 +76,10 @@ public sealed class CatalogTranslationWorkflowHandlerTests
             CancellationToken cancellationToken) => Task.FromResult<IReadOnlyList<CatalogTranslationReviewEntry>>([]);
 
         public Task<CatalogTranslationDecisionOutcome> DecideAsync(Guid tenantId, Guid reviewId, int expectedVersion,
-            bool approve, ExternalIdentity reviewer, CancellationToken cancellationToken)
+            bool approve, ExternalIdentity reviewer, bool allowAuthorReview, CancellationToken cancellationToken)
         {
             Decisions++;
+            AllowAuthorReview = allowAuthorReview;
             return Task.FromResult(Decision);
         }
 

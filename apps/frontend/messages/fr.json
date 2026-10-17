@@ -769,7 +769,7 @@
     "reviewRejected": "Refusée",
     "reviewStale": "Le texte source a changé",
     "reviewSuperseded": "Remplacée par une proposition plus récente",
-    "awaitingIndependentReviewer": "La personne à l’origine de cette modification ne peut pas l’approuver.",
+    "awaitingIndependentReviewer": "Votre rôle ne permet pas de vérifier les traductions. Demandez à un propriétaire de l’organisation ou à un gestionnaire du restaurant.",
     "reviewWarning": "Vérifier le terme du glossaire : {term}",
     "approve": "Approuver",
     "reject": "Refuser",
@@ -3683,6 +3683,7 @@
   "LiveParity": {
     "inviteMember": "Inviter un membre",
     "title": "Éditeur de menu",
+    "versionsTab": "Versions",
     "dishes": "Plats",
     "allergens": "Allergènes",
     "discounts": "Codes de réduction",
