@@ -8,6 +8,8 @@ export type CartItem = {
 
 export type OrderInput = {
   customerName: string
+  customerEmail: string
+  emailUpdatesConsented: boolean
   discountCode: string | null
   menuLocale: string
   trackingToken?: string
@@ -103,4 +105,19 @@ export type CheckoutPanelProps = {
   onBack?: () => void
   onContinue?: () => void
   onNewOrder: () => void
+}
+
+export type CheckoutEmailUpdatesProps = {
+  customerEmail: string
+  emailUpdatesConsented: boolean
+  changeCustomerEmail: (value: string) => void
+  changeEmailUpdatesConsent: (value: boolean) => void
+}
+
+export type CheckoutPickupSelectorProps = {
+  pickupSlots: PickupSlot[]
+  pickupSlotsLoading: boolean
+  pickupAvailabilityState: PickupAvailability["state"]
+  selectedPickupAt: string
+  changePickupAt: (value: string) => void
 }

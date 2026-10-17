@@ -118,6 +118,7 @@ export default async function LiveWorkspaceFixture({
           userId={userId}
           initial={null}
           legalProfile={null}
+          emailSettings={null}
           section="establishment"
           restaurant={{
             id: tenantId,

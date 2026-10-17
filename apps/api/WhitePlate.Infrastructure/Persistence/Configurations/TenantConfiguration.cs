@@ -54,5 +54,7 @@ public sealed class TenantConfiguration : IEntityTypeConfiguration<Tenant>
         builder.Property(tenant => tenant.ThemeDraftVersion).IsRequired().HasDefaultValue(1);
         builder.Property(tenant => tenant.PublishedThemeJson).HasColumnType("jsonb");
         builder.Property(tenant => tenant.ThemePublicationVersion).IsRequired().HasDefaultValue(1).IsConcurrencyToken();
+        builder.Property(tenant => tenant.OrderEmailTemplatesJson).HasColumnType("jsonb").IsRequired().HasDefaultValue("{}");
+        builder.Property(tenant => tenant.OrderEmailTemplatesVersion).IsRequired().HasDefaultValue(1).IsConcurrencyToken();
     }
 }

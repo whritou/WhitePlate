@@ -82,6 +82,8 @@ export function useGuestCheckout(menu: StorefrontMenu) {
   const {
     cart,
     customerName,
+    customerEmail,
+    emailUpdatesConsented,
     discountCode,
     error,
     submitting,
@@ -102,6 +104,8 @@ export function useGuestCheckout(menu: StorefrontMenu) {
 
     const input = {
       customerName,
+      customerEmail: emailUpdatesConsented ? customerEmail : "",
+      emailUpdatesConsented,
       discountCode: discountCode || null,
       menuLocale: menu.locale,
       pickupAt: selectedPickupAt === "asap" ? null : selectedPickupAt,
@@ -166,6 +170,8 @@ export function useGuestCheckout(menu: StorefrontMenu) {
     startLanguageChange,
     cart,
     customerName,
+    customerEmail,
+    emailUpdatesConsented,
     discountCode,
     error,
     submitting,
@@ -184,6 +190,8 @@ export function useGuestCheckout(menu: StorefrontMenu) {
     checkout,
     startNewOrder,
     changeCustomerName: state.changeCustomerName,
+    changeCustomerEmail: state.changeCustomerEmail,
+    changeEmailUpdatesConsent: state.changeEmailUpdatesConsent,
     changeDiscountCode: state.changeDiscountCode,
   }
 }

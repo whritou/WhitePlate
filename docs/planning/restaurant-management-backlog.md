@@ -21,7 +21,7 @@ The settings screenshot shows the active opening-hours panel; its HTML also cont
 
 ## Current boundaries and overlap
 
-Existing source includes the real Lovable Dashboard overview and five-lane Orders page, catalog and language workspaces, organization Settings shell, appearance Studio, guest checkout without payment, order history and REST/SignalR recovery. T2 tenant theme drafts and T3 publication/storefront application are now implemented in source; migration rollout and hosted/browser acceptance remain open. Analytics and unsupported settings remain disclosed examples/drafts. Scheduling, guest-order email, Stripe connection, authoritative analytics and other listed backend capabilities remain open. See [Lovable real workspace routes and behavior](../lovable-live-workspace.md).
+Existing source includes the real Lovable Dashboard overview and five-lane Orders page, catalog and language workspaces, organization Settings shell, appearance Studio, guest checkout without payment, order history and REST/SignalR recovery. T2 tenant theme drafts, T3 publication/storefront application, and the S4 order-email source flow are implemented; the T2, T3 and S4 schema migrations are applied to Coolify Production, while hosted acceptance remains open. Analytics and unsupported settings remain disclosed examples/drafts. Pickup scheduling, Stripe connection, authoritative analytics and other listed backend capabilities remain open. See [Lovable real workspace routes and behavior](../lovable-live-workspace.md).
 
 The initial planning pass reviewed all 89 existing project items; the follow-up reviewed the resulting 102 items before adding the missing menu-builder and live-orders work. Reuse the completed kitchen, catalog, organization shell and design-system work. Existing In review storefront unavailable-product acceptance and hosted SignalR delivery/reconnect retain their own scope; the new cards link to them rather than duplicating their implementation.
 
@@ -41,7 +41,7 @@ Some historical documents and completed card bodies retain older In review/In pr
 
 The Lovable Menu workspace (M1) and existing five-lane Orders screen (K1) provide the implemented foundations. Product metadata (M2) depends on M1; product photos are a separate task (M5), depending on M1 and T1; human translation review (M3) and catalog publication/history (M4) build on M1 after their decisions. KDS operational features (K2) and cancellation/payment details (K3) extend existing Orders behavior, with scheduling, media, metrics, notification and financial dependencies gated to actual runtime support.
 
-Start remaining establishment identity (S1) and hosted media acceptance (T1); the Lovable Dashboard overview exists, while any remaining D1 gaps must be confirmed against source. Follow with persistent theme controls (T2), opening hours (S2), theme preview/publication (T3), slot enforcement (S3), metrics (D2) and availability (D4). Rush/pause (D3) depends on slot enforcement. Email (S4) and Stripe connection (S5) follow establishment identity and explicit product/provider decisions; pickup fields and branding integrate only when their dependencies exist.
+Start remaining establishment identity (S1) and hosted media acceptance (T1); the Lovable Dashboard overview exists, while any remaining D1 gaps must be confirmed against source. Follow with persistent theme controls (T2), opening hours (S2), theme preview/publication (T3), slot enforcement (S3), metrics (D2) and availability (D4). Rush/pause (D3) depends on slot enforcement. S4 transactional email has a source implementation, resolved consent/event/provider decisions and an applied Coolify Production migration; provider and hosted acceptance remain open. Stripe connection (S5) still needs establishment identity and explicit product/provider decisions.
 
 All feature cards start in Backlog. Move a card to Ready when its listed decisions and dependencies are settled; completion requires implementation and verification.
 
@@ -170,19 +170,20 @@ Decisions and limits:
 
 Reference: settings. Dependencies: S1.
 
-Build Notifications & Emails for order-confirmed, preparing and ready notifications with subject, greeting/body, branding and mobile/desktop previews.
+Build Notifications & Emails for order-received, preparing and ready notifications with subject, greeting/body, branding and mobile/desktop previews.
 
 Acceptance criteria:
 
-- [ ] Edit and persist localized template content with an allowlisted variable set and escaped/sanitized output; support preview, reset/discard, validation and pending/error states.
-- [ ] Reuse published restaurant identity/banner when available, and include accurate order summary, tracking link, pickup instructions and pickup time only when backed by the relevant feature.
-- [ ] Trigger sends from committed authoritative order events; define verified recipient collection/consent, retry, deduplication and safe delivery status rather than claiming Email Sent from a UI action.
-- [ ] Keep sender/provider credentials server-side and sender domains verified; distinguish existing auth/invitation email from this new guest-order notification flow.
-- [ ] Verify actual provider test delivery, duplicate-event retry, unavailable provider, locale fallback and cross-tenant templates/recipients without contacting real guests.
+- [x] Edit and persist localized template content with an allowlisted variable set and escaped output; support preview, reset/discard, validation and pending/error states.
+- [x] Reuse published restaurant identity/logo/banner/colors when available, and include saved order summary, tracking link, pickup instructions and pickup time.
+- [x] Trigger sends from committed authoritative order events; optional email requires explicit consent. The independent delivery outbox records pending/sending/accepted/failed state, retries with event-ID deduplication, and never equates a saved template with a sent email.
+- [x] Keep provider credentials and the tracking signing key in the API runtime; retain the verified platform sender and keep the existing auth/invitation email flow distinct.
+- [ ] Verify actual provider test delivery, duplicate-event retry, unavailable provider, locale fallback and cross-tenant templates/recipients with a controlled mailbox and without contacting real guests.
 
 Decisions and limits:
 
-- Decide recipient collection/privacy, event timing, editable sender/reply-to scope and provider configuration. The design's after-payment trigger depends on a future payment integration; SMS remains optional backlog scope, not automatically included.
+- Resolved 2026-10-17: optional email with explicit order-update opt-in; send on committed creation, Preparing and Ready events; use Resend with the verified platform sender and published restaurant identity. Clear the order email on close or 30-day tracking expiry, and clear delivery recipients/content after provider acceptance/final failure or expiry. Sender-domain/reply-to customization, after-payment notices, marketing and SMS remain out of scope.
+- Remaining: configure the API-side Resend sender, HTTPS storefront template and stable signing key; deploy the API; then verify real provider delivery and hosted tenant acceptance. The schema migration is applied to Coolify Production. See [decision 0015](../architecture/decisions/0015-transactional-order-email.md), [S4 contract](../api/api-contracts.md#s4-transactional-order-email), and [S4 schema](../database/database-schema.md#s4-transactional-order-email--2026-10-17).
 
 ### S5 — Restaurant Settings: Stripe Connect onboarding and connection status
 

@@ -12,7 +12,8 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
+import { CheckoutEmailUpdates } from "@/components/storefront/checkout-email-updates"
+import { CheckoutPickupSelector } from "@/components/storefront/checkout-pickup-selector"
 import type { CheckoutPanelProps } from "@/types/checkout"
 import { useTranslations } from "next-intl"
 import { Receipt } from "./receipt"
@@ -28,6 +29,8 @@ export function CheckoutPanel({
   const {
     cart,
     customerName,
+    customerEmail,
+    emailUpdatesConsented,
     discountCode,
     error,
     submitting,
@@ -39,6 +42,8 @@ export function CheckoutPanel({
     changeCart,
     checkout,
     changeCustomerName,
+    changeCustomerEmail,
+    changeEmailUpdatesConsent,
     changeDiscountCode,
     pickupSlots,
     pickupSlotsLoading,
@@ -240,60 +245,20 @@ export function CheckoutPanel({
                       />
                     </Label>
 
-                    <Label
-                      className="grid gap-1.5 font-medium"
-                      htmlFor="pickup-time"
-                    >
-                      {c("pickupTime")}
+                    <CheckoutEmailUpdates
+                      customerEmail={customerEmail}
+                      emailUpdatesConsented={emailUpdatesConsented}
+                      changeCustomerEmail={changeCustomerEmail}
+                      changeEmailUpdatesConsent={changeEmailUpdatesConsent}
+                    />
 
-                      <NativeSelect
-                        id="pickup-time"
-                        value={selectedPickupAt}
-                        onChange={(event) =>
-                          changePickupAt(event.currentTarget.value)
-                        }
-                        disabled={
-                          pickupSlotsLoading || pickupSlots.length === 0
-                        }
-                      >
-                        <NativeSelectOption value="asap">
-                          {c("asapPickup")}
-                        </NativeSelectOption>
-
-                        {pickupSlots.map((slot) => (
-                          <NativeSelectOption
-                            key={slot.startsAt}
-                            value={slot.startsAt}
-                          >
-                            {new Intl.DateTimeFormat(undefined, {
-                              weekday: "short",
-                              month: "short",
-                              day: "numeric",
-                              hour: "numeric",
-                              minute: "2-digit",
-                              timeZone: slot.timeZone,
-                              timeZoneName: "shortOffset",
-                            }).format(new Date(slot.startsAt))}
-                          </NativeSelectOption>
-                        ))}
-                      </NativeSelect>
-                    </Label>
-
-                    {pickupSlots.length === 0 && !pickupSlotsLoading && (
-                      <p
-                        role="status"
-                        className="text-sm text-muted-foreground"
-                      >
-                        {c(
-                          pickupAvailabilityState === "orders_paused"
-                            ? "ordersPaused"
-                            : pickupAvailabilityState ===
-                                "schedule_not_configured"
-                              ? "scheduleNotConfigured"
-                              : "noPickupSlots"
-                        )}
-                      </p>
-                    )}
+                    <CheckoutPickupSelector
+                      pickupSlots={pickupSlots}
+                      pickupSlotsLoading={pickupSlotsLoading}
+                      pickupAvailabilityState={pickupAvailabilityState}
+                      selectedPickupAt={selectedPickupAt}
+                      changePickupAt={changePickupAt}
+                    />
 
                     <Label
                       className="grid gap-1.5 font-medium"

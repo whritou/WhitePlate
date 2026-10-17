@@ -9,7 +9,8 @@ using WhitePlate.Domain.Orders;
 
 namespace WhitePlate.Application.Orders;
 
-public sealed class CreateOrderCommandHandler(IOrderRepository orders, TimeProvider timeProvider)
+public sealed class CreateOrderCommandHandler(IOrderRepository orders, TimeProvider timeProvider,
+    IEmailTrackingCapability trackingCapability)
 {
     private static readonly JsonSerializerOptions FingerprintJson = new(JsonSerializerDefaults.Web);
 
@@ -21,6 +22,9 @@ public sealed class CreateOrderCommandHandler(IOrderRepository orders, TimeProvi
 
         if (!IsValidIdempotencyKey(command.IdempotencyKey))
             return Validation("Idempotency-Key", "required", "A valid Idempotency-Key header is required.");
+        if (command.EmailUpdatesConsented != !string.IsNullOrWhiteSpace(command.CustomerEmail))
+            return Validation("emailUpdatesConsent", "consent_required",
+                "Provide an email address only when opting in to order updates.");
 
         string? trackingTokenHash = null;
         if (command.TrackingToken is not null && !OrderTrackingToken.TryHash(command.TrackingToken, out trackingTokenHash))
@@ -138,10 +142,18 @@ public sealed class CreateOrderCommandHandler(IOrderRepository orders, TimeProvi
                     decimal.Round(subtotal * discount.Value / 100m, 2, MidpointRounding.AwayFromZero),
                 _ => 0m
             };
+            var orderId = Guid.NewGuid();
+            var emailExpiry = DateTimeOffset.FromUnixTimeSeconds(now.AddDays(30).ToUnixTimeSeconds());
+            var emailTrackingCapability = command.EmailUpdatesConsented
+                ? trackingCapability.Create(command.TenantId, orderId, emailExpiry)
+                : null;
             var order = Order.Create(command.TenantId, catalog.Currency, command.CustomerName, snapshots,
                 normalizedCode, discountAmount, now, catalog.Locale, trackingTokenHash,
-                trackingTokenHash is null ? null : now.AddDays(30), selectedSlot.StartsAt, selectedSlot.TimeZone,
-                command.PickupAt is null ? PickupMode.Asap : PickupMode.Scheduled);
+                trackingTokenHash is null && emailTrackingCapability is null ? null : emailExpiry,
+                selectedSlot.StartsAt, selectedSlot.TimeZone,
+                command.PickupAt is null ? PickupMode.Asap : PickupMode.Scheduled,
+                command.EmailUpdatesConsented ? command.CustomerEmail : null,
+                command.EmailUpdatesConsented ? now : null, emailTrackingCapability?.TokenHash, orderId);
             var receipt = order.ToReceipt();
             var result = await orders.CreateOrderAsync(order, receipt, keyHash, requestHash, now,
                 cancellationToken);
@@ -168,6 +180,8 @@ public sealed class CreateOrderCommandHandler(IOrderRepository orders, TimeProvi
         var canonical = new
         {
             customerName = command.CustomerName?.Trim(),
+            customerEmail = command.EmailUpdatesConsented ? command.CustomerEmail?.Trim().ToLowerInvariant() : null,
+            emailUpdatesConsented = command.EmailUpdatesConsented,
             menuLocale = effectiveLocale,
             trackingTokenHash,
             pickupAt = command.PickupAt?.UtcDateTime,

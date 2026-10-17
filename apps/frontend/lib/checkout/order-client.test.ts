@@ -6,6 +6,8 @@ const productId = "11111111-1111-4111-8111-111111111111"
 const tenantId = "22222222-2222-4222-8222-222222222222"
 const input = {
   customerName: "Alice",
+  customerEmail: "",
+  emailUpdatesConsented: false,
   discountCode: null,
   menuLocale: "fr",
   items: [{ productId, quantity: 2, optionIds: [] }],

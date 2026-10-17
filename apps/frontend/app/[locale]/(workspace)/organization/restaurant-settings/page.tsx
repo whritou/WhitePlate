@@ -7,6 +7,7 @@ import {
   getEstablishmentSettings,
   getTenantLegalProfile,
 } from "@/services/establishment-settings"
+import { getOrderEmailSettings } from "@/services/order-email-settings"
 
 export default async function RestaurantSettingsPage({
   searchParams,
@@ -28,14 +29,18 @@ export default async function RestaurantSettingsPage({
     )
   }
 
-  const [settings, legalProfile] = await Promise.all([
+  const [settings, legalProfile, emailSettings] = await Promise.all([
     getEstablishmentSettings(restaurant.id),
     getTenantLegalProfile(restaurant.id),
+    getOrderEmailSettings(restaurant.id),
   ])
   const section =
     typeof params.section === "string" &&
-    ["establishment", "legal", "hours", "pickup"].includes(params.section)
-      ? (params.section as "establishment" | "legal" | "hours" | "pickup")
+    ["establishment", "legal", "hours", "pickup", "notifications"].includes(
+      params.section
+    )
+      ? (params.section as
+          "establishment" | "legal" | "hours" | "pickup" | "notifications")
       : "establishment"
 
   return (
@@ -44,6 +49,7 @@ export default async function RestaurantSettingsPage({
       userId={restaurant.userId}
       initial={settings.ok ? settings.data : null}
       legalProfile={legalProfile.ok ? legalProfile.data : null}
+      emailSettings={emailSettings.ok ? emailSettings.data : null}
       section={section}
     />
   )

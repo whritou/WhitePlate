@@ -27,6 +27,7 @@ public sealed class OrderOutboxDispatcher(IServiceScopeFactory scopeFactory, Tim
                 {
                     operation = "idempotency_cleanup";
                     await orders.DeleteExpiredIdempotencyRecordsAsync(now, stoppingToken);
+                    await orders.CleanExpiredOrderEmailDataAsync(now, stoppingToken);
                     nextIdempotencyCleanup = now.AddMinutes(1);
                 }
                 operation = "claim_batch";

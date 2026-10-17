@@ -11,6 +11,8 @@ const productId = "11111111-1111-4111-8111-111111111111"
 const optionId = "22222222-2222-4222-8222-222222222222"
 const input = {
   customerName: " Alice ",
+  customerEmail: "",
+  emailUpdatesConsented: false,
   discountCode: " lunch ",
   menuLocale: "en",
   items: [{ productId, quantity: 2, optionIds: [optionId] }],
@@ -47,6 +49,8 @@ describe("guest cart", () => {
 
     expect(prepareCheckout(forged, null, () => "key").input).toEqual({
       customerName: "Alice",
+      customerEmail: "",
+      emailUpdatesConsented: false,
       discountCode: "LUNCH",
       menuLocale: "en",
       items: [{ productId, quantity: 2, optionIds: [optionId] }],
@@ -104,6 +108,8 @@ describe("guest cart", () => {
     expect(retry.input).toEqual({
       ...input,
       customerName: "Alice",
+      customerEmail: "",
+      emailUpdatesConsented: false,
       discountCode: "LUNCH",
     })
   })
@@ -126,6 +132,8 @@ describe("guest cart", () => {
         .input
     ).toEqual({
       customerName: "Alice",
+      customerEmail: "",
+      emailUpdatesConsented: false,
       discountCode: "LUNCH",
       menuLocale: "fr",
       items: [{ productId, quantity: 2, optionIds: [optionId] }],
@@ -148,6 +156,26 @@ describe("guest cart", () => {
     ).toBe("english-key")
   })
 
+  it("keeps email consent and its address in the idempotent order payload", () => {
+    const optedIn = {
+      ...input,
+      customerEmail: "ada@example.com",
+      emailUpdatesConsented: true,
+    }
+    const first = prepareCheckout(optedIn, null, () => "email-order-key")
+    const retry = prepareCheckout(optedIn, first, () => "unused-key")
+    const changed = prepareCheckout(
+      { ...optedIn, emailUpdatesConsented: false, customerEmail: "" },
+      first,
+      () => "new-email-order-key"
+    )
+
+    expect(first.input.customerEmail).toBe("ada@example.com")
+    expect(first.input.emailUpdatesConsented).toBe(true)
+    expect(retry.key).toBe("email-order-key")
+    expect(changed.key).toBe("new-email-order-key")
+  })
+
   it("copies the attempt so later cart edits cannot change an uncertain order", () => {
     const editable = structuredClone(input)
     const first = prepareCheckout(editable, null, () => "first-key")
@@ -158,6 +186,26 @@ describe("guest cart", () => {
 
   it("accepts a valid bounded order", () => {
     expect(validateOrderInput(input)).toBe(true)
+  })
+
+  it("requires an address for opt-in and removes an address without opt-in", () => {
+    expect(
+      validateOrderInput({
+        ...input,
+        customerEmail: "ada@example.com",
+        emailUpdatesConsented: true,
+      })
+    ).toBe(true)
+    expect(
+      validateOrderInput({
+        ...input,
+        customerEmail: "",
+        emailUpdatesConsented: true,
+      })
+    ).toBe(false)
+    expect(
+      validateOrderInput({ ...input, customerEmail: "ada@example.com" })
+    ).toBe(false)
   })
 
   it.each([

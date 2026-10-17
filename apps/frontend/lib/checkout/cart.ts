@@ -61,6 +61,10 @@ export function prepareCheckout(
 ): CheckoutAttempt {
   const normalized = {
     customerName: input.customerName.trim(),
+    customerEmail: input.emailUpdatesConsented
+      ? input.customerEmail.trim()
+      : "",
+    emailUpdatesConsented: input.emailUpdatesConsented,
     discountCode: input.discountCode?.trim().toUpperCase() || null,
     menuLocale: input.menuLocale,
     ...(input.pickupAt ? { pickupAt: input.pickupAt } : {}),
@@ -75,6 +79,8 @@ export function prepareCheckout(
   const previousInput = previous
     ? {
         customerName: previous.input.customerName,
+        customerEmail: previous.input.customerEmail,
+        emailUpdatesConsented: previous.input.emailUpdatesConsented,
         discountCode: previous.input.discountCode,
         menuLocale: previous.input.menuLocale,
         ...(previous.input.pickupAt
@@ -107,6 +113,12 @@ export function validateOrderInput(input: unknown): input is OrderInput {
     typeof value.customerName !== "string" ||
     !value.customerName.trim() ||
     value.customerName.trim().length > 200 ||
+    typeof value.customerEmail !== "string" ||
+    value.customerEmail.length > 254 ||
+    typeof value.emailUpdatesConsented !== "boolean" ||
+    (value.emailUpdatesConsented &&
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.customerEmail.trim())) ||
+    (!value.emailUpdatesConsented && value.customerEmail.length > 0) ||
     (value.discountCode !== null &&
       (typeof value.discountCode !== "string" ||
         value.discountCode.length > 64)) ||

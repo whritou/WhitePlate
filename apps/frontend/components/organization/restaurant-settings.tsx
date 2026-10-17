@@ -12,21 +12,25 @@ import type {
   RestaurantSettingsSection,
   TenantLegalProfile,
 } from "@/types/establishment-settings"
+import type { OrderEmailSettings } from "@/types/order-email-settings"
 import { EstablishmentEditor } from "./establishment-editor"
 import { RestaurantLegalProfileEditor } from "./restaurant-legal-profile-editor"
 import { PickupSchedulingEditor } from "./pickup-scheduling-editor"
+import { OrderEmailSettingsEditor } from "./order-email-settings-editor"
 
 export function RestaurantSettings({
   restaurant,
   userId,
   initial,
   legalProfile,
+  emailSettings,
   section,
 }: {
   restaurant: RestaurantMembership
   userId: string
   initial: EstablishmentRead | null
   legalProfile: TenantLegalProfile | null
+  emailSettings: OrderEmailSettings | null
   section: RestaurantSettingsSection
 }) {
   const t = useTranslations("LiveWorkspace")
@@ -38,6 +42,7 @@ export function RestaurantSettings({
     { id: "legal", label: t("legalSettingsCategory") },
     { id: "hours", label: t("openingHoursCategory") },
     { id: "pickup", label: t("pickupSchedulingCategory") },
+    { id: "notifications", label: t("notificationsSettingsCategory") },
   ]
 
   function navigate(next: RestaurantSettingsSection) {
@@ -224,6 +229,14 @@ export function RestaurantSettings({
               onSaved={async () => {
                 router.refresh()
               }}
+            />
+          )}
+
+          {section === "notifications" && (
+            <OrderEmailSettingsEditor
+              tenantId={restaurant.id}
+              restaurantName={restaurant.name}
+              initial={emailSettings}
             />
           )}
         </div>

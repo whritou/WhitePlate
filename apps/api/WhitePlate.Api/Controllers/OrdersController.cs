@@ -42,8 +42,8 @@ public sealed class OrdersController(ICurrentTenant currentTenant, ICurrentIdent
             .ToArray();
         var command = new CreateOrderCommand(tenant.Id, request.CustomerName, request.DiscountCode,
             request.MenuLocale, items,
-            Request.Headers["Idempotency-Key"].FirstOrDefault(), request.TrackingToken);
-        command = command with { PickupAt = request.PickupAt };
+            Request.Headers["Idempotency-Key"].FirstOrDefault(), request.TrackingToken, request.PickupAt,
+            request.CustomerEmail, request.EmailUpdatesConsented);
         var result = await createOrder.HandleAsync(command, cancellationToken);
         if (!result.IsSuccess)
             return errors.ToActionResult(errors.Create(HttpContext, result.Error));

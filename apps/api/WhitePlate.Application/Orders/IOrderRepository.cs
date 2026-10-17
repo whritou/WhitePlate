@@ -39,4 +39,6 @@ public interface IOrderRepository
         OrderStatus status, DateTimeOffset now, CancellationToken cancellationToken);
 
     Task<int> DeleteExpiredIdempotencyRecordsAsync(DateTimeOffset now, CancellationToken cancellationToken);
+
+    Task<int> CleanExpiredOrderEmailDataAsync(DateTimeOffset now, CancellationToken cancellationToken);
 }

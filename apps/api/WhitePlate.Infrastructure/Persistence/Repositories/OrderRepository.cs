@@ -242,7 +242,8 @@ public sealed class OrderRepository(WhitePlateDbContext database,
             order.PickupAtTicks.Value));
         database.OrderIdempotencyRecords.Add(IdempotencyRecord.Create(order.TenantId, keyHash, requestHash,
             JsonSerializer.Serialize(receipt, ReceiptJson), now));
-        AddOrderEvent(order, "order.created", now);
+        var eventId = AddOrderEvent(order, "order.created", now);
+        AddEmailDelivery(eventId, order, "order.created", now);
         try
         {
             await database.SaveChangesAsync(cancellationToken);
@@ -458,18 +459,22 @@ public sealed class OrderRepository(WhitePlateDbContext database,
         string tokenHash, DateTimeOffset now, CancellationToken cancellationToken)
     {
         var order = await database.Orders.AsNoTracking().Where(item => item.TenantId == tenantId &&
-                item.Id == orderId && item.TrackingTokenHash != null)
+                item.Id == orderId && (item.TrackingTokenHash != null || item.EmailTrackingTokenHash != null))
             .Select(item => new
             {
-                item.TrackingTokenHash, item.TrackingTokenExpiresAt, item.Id, item.Status, item.Version, item.CreatedAt, item.MenuLocale, item.PickupAt, item.PickupTimeZone
+                item.TrackingTokenHash, item.EmailTrackingTokenHash, item.TrackingTokenExpiresAt, item.Id,
+                item.Status, item.Version, item.CreatedAt, item.MenuLocale, item.PickupAt, item.PickupTimeZone
             }).SingleOrDefaultAsync(cancellationToken);
-        if (order is null || order.TrackingTokenExpiresAt <= now || !CryptographicOperations.FixedTimeEquals(
-                Convert.FromHexString(order.TrackingTokenHash!), Convert.FromHexString(tokenHash)))
+        if (order is null || order.TrackingTokenExpiresAt <= now ||
+            !MatchesTokenHash(order.TrackingTokenHash, tokenHash) && !MatchesTokenHash(order.EmailTrackingTokenHash, tokenHash))
             return null;
 
         return new PublicOrderTrackingDto(order.Id, order.Status.ToString(), order.Version, order.CreatedAt, order.MenuLocale)
             { PickupAt = order.PickupAt, PickupTimeZone = order.PickupTimeZone };
     }
+
+    private static bool MatchesTokenHash(string? stored, string supplied) => stored is not null &&
+        CryptographicOperations.FixedTimeEquals(Convert.FromHexString(stored), Convert.FromHexString(supplied));
 
     public Task<int> ArchiveClosedOrdersBeforeAsync(DateTimeOffset cutoff, CancellationToken cancellationToken)
     {
@@ -524,9 +529,13 @@ public sealed class OrderRepository(WhitePlateDbContext database,
                         throw new InvalidOperationException("The pickup slot reservation counter is inconsistent.");
                 }
             }
-            AddOrderEvent(order, status == WhitePlate.Domain.Orders.OrderStatus.Cancelled
+            var eventType = status == WhitePlate.Domain.Orders.OrderStatus.Cancelled
                 ? "order.cancelled"
-                : "order.status_changed", now);
+                : "order.status_changed";
+            var eventId = AddOrderEvent(order, eventType, now);
+            if (status is WhitePlate.Domain.Orders.OrderStatus.Preparing or WhitePlate.Domain.Orders.OrderStatus.Ready)
+                AddEmailDelivery(eventId, order, status == WhitePlate.Domain.Orders.OrderStatus.Preparing
+                    ? "order.preparing" : "order.ready", now);
             var receipt = order.ToReceipt();
             await database.SaveChangesAsync(cancellationToken);
             await transaction.CommitAsync(cancellationToken);
@@ -550,13 +559,55 @@ public sealed class OrderRepository(WhitePlateDbContext database,
         CancellationToken cancellationToken) => database.OrderIdempotencyRecords
         .Where(record => record.ExpiresAt <= now).ExecuteDeleteAsync(cancellationToken);
 
-    private void AddOrderEvent(WhitePlate.Domain.Orders.Order order, string eventType, DateTimeOffset occurredAt)
+    public async Task<int> CleanExpiredOrderEmailDataAsync(DateTimeOffset now, CancellationToken cancellationToken)
+    {
+        var orders = await database.Orders.Where(order => order.CustomerEmail != null ||
+                order.EmailTrackingTokenHash != null).ToListAsync(cancellationToken);
+        var clearedOrders = 0;
+        foreach (var order in orders)
+        {
+            if ((order.TrackingTokenExpiresAt ?? order.CreatedAt.AddDays(30)) > now) continue;
+            order.ClearExpiredEmailData(now);
+            clearedOrders++;
+        }
+
+        var deliveries = await database.OrderEmailDeliveries.Where(delivery => delivery.RecipientEmail != null)
+            .ToListAsync(cancellationToken);
+        var orderIds = deliveries.Select(delivery => delivery.OrderId).Distinct().ToArray();
+        var orderExpirations = await database.Orders.Where(order => orderIds.Contains(order.Id))
+            .Select(order => new { order.Id, order.TenantId, order.TrackingTokenExpiresAt, order.CreatedAt })
+            .ToListAsync(cancellationToken);
+        var validOrderIds = orderExpirations.Where(order => (order.TrackingTokenExpiresAt ?? order.CreatedAt.AddDays(30)) > now)
+            .Select(order => (order.TenantId, order.Id)).ToHashSet();
+        var clearedDeliveries = 0;
+        foreach (var delivery in deliveries)
+        {
+            if (validOrderIds.Contains((delivery.TenantId, delivery.OrderId))) continue;
+            delivery.Discard("order_closed_or_expired");
+            clearedDeliveries++;
+        }
+
+        if (clearedOrders > 0 || clearedDeliveries > 0)
+            await database.SaveChangesAsync(cancellationToken);
+        return clearedOrders + clearedDeliveries;
+    }
+
+    private Guid AddOrderEvent(WhitePlate.Domain.Orders.Order order, string eventType, DateTimeOffset occurredAt)
     {
         var eventId = Guid.NewGuid();
         var orderEvent = new KitchenOrderEvent(eventId, order.TenantId, order.Id, eventType,
             order.Status.ToString(), order.Version, occurredAt);
         database.OrderOutboxMessages.Add(OutboxMessage.Create(eventId, order.TenantId, eventType,
             JsonSerializer.Serialize(orderEvent, ReceiptJson), occurredAt));
+        return eventId;
+    }
+
+    private void AddEmailDelivery(Guid eventId, WhitePlate.Domain.Orders.Order order, string eventType,
+        DateTimeOffset occurredAt)
+    {
+        if (order.CustomerEmail is null) return;
+        database.OrderEmailDeliveries.Add(OrderEmailDelivery.Create(eventId, order.TenantId, order.Id,
+            eventType, order.CustomerEmail, occurredAt));
     }
 
     private static IdempotencyResult ResolveExisting(IdempotencyRecord? record, string requestHash, DateTimeOffset now)

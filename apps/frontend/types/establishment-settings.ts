@@ -55,7 +55,7 @@ export type TenantLegalProfile = {
   version: number
 }
 export type RestaurantSettingsSection =
-  "establishment" | "legal" | "hours" | "pickup"
+  "establishment" | "legal" | "hours" | "pickup" | "notifications"
 export type EstablishmentRead = {
   settings: EstablishmentSettings
   options: EstablishmentOptions
