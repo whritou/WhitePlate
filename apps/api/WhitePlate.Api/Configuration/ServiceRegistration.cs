@@ -120,6 +120,7 @@ public static class ServiceRegistration
         services.AddScoped<ListOrderHistoryQueryHandler>();
         services.AddScoped<GetDashboardMetricsQueryHandler>();
         services.AddScoped<GetAnalyticsMetricsQueryHandler>();
+        services.AddScoped<WithdrawAnalyticsConsentCommandHandler>();
         services.AddScoped<UpdateOrderStatusCommandHandler>();
         services.AddScoped<KitchenSubscriptionAccess>();
         services.AddSingleton<KitchenSubscriptions>();
