@@ -134,10 +134,10 @@ export function createPlaceholderBadge(
   badge.setAttribute("aria-label", placeholderLabels[placeholder])
   badge.title = placeholderLabels[placeholder]
   badge.className = cn(
-    badgeVariants({ variant: "secondary" }),
+    badgeVariants({ variant: "info" }),
     "mx-0.5 align-baseline select-none"
   )
-  badge.textContent = `{{${placeholder}}}`
+  badge.textContent = placeholderLabels[placeholder]
 
   return badge
 }
