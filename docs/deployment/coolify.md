@@ -2,6 +2,14 @@
 
 This is the runbook for the user-approved, single hosted development stack ([decision 0005](../architecture/decisions/0005-coolify-hosting.md)). Runtime credentials belong in Coolify/Vercel settings, never this file, client code or `NEXT_PUBLIC_*` variables. The migration is tracked in [issue #17](https://github.com/whritou/WhitePlate/issues/17).
 
+## D5 live analytics schema rollout — 2026-10-17
+
+Preflight on Coolify Production resource `whiteplate-postgresql-main` confirmed database `whiteplate`, latest migration `20261017170519_OrderCancellationReason`, two tenants, zero orders, no analytics order columns or tables, and the `whiteplate_api` role. A custom-format backup was created at `/tmp/whiteplate-before-analytics-live-20261017.dump` inside the PostgreSQL container (102,928 bytes); `pg_restore --list` recognized 225 entries. This temporary container-local backup is not an off-host copy or restore test.
+
+Migrations `20261017184500_AnalyticsLive` and `20261017201650_AnalyticsRepeatLinks`, both recorded with EF product version `10.0.12`, were applied in one transaction with a 5-second lock timeout and 30-second statement timeout. The guarded transaction checked the target database, exact prior migration, absence of analytics history/schema and presence of `whiteplate_api`; it granted that role `SELECT`, `INSERT`, `UPDATE` and `DELETE` on both analytics tables. Post-checks confirmed both history rows, the three expected `Orders` columns and defaults, both tables, four indexes on fingerprints, five on repeat links (including primary keys), and all eight API-role privileges. PostgreSQL shortened one generated index identifier to its 63-character limit. Tenant/order counts remained at two/zero, and no existing business rows were modified or backfilled.
+
+The schema is ready ahead of the connected API rollout. The API was not manually restarted or deployed as part of the database operation. Real-order analytics and hosted consent/withdrawal acceptance remain outstanding. See [D5 API contract](../api/api-contracts.md#d5-live-organization-analytics), [schema](../database/database-schema.md#d5-live-analytics--2026-10-17), and [functional checks](../functional-test-plan.md#d5-live-organization-analytics--2026-10-17).
+
 ## S5 Stripe Connect schema rollout — 2026-10-17
 
 Before applying migration `20261017134031_StripeConnect`, Coolify Production resource `whiteplate-postgresql-main` was checked through the PostgreSQL container terminal. Database `whiteplate` was current, the latest history row was `20261017104323_OrderEmailNotifications`, two tenants and zero orders existed, and all three S5 tables were absent. A custom-format dump at `/tmp/whiteplate-before-stripe-connect-s5-20261017.dump` was 92,754 bytes; `pg_restore --list` recognized its 13,641-byte listing. This temporary container-local backup is not an off-host copy or restore test.
