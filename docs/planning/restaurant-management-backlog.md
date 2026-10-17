@@ -189,19 +189,21 @@ Decisions and limits:
 
 Reference: settings. Dependencies: S1.
 
-Add the Payments & Stripe Connect section for connecting a restaurant account, completing onboarding and viewing authoritative capability/status information.
+Implemented in source: the Payments settings section connects each restaurant's existing Standard account through server-side OAuth in a server-selected Stripe test/live mode. Owners manage the connection; owners/managers read Stripe-sourced connection/readiness status. WhitePlate adds no application fee and S5 does not create payments or charges.
 
 Acceptance criteria:
 
-- [ ] Record the Connect account/ownership and permission model before coding; create tenant-bound onboarding/resume links server-side with validated return/refresh routes.
-- [ ] Show unconnected, onboarding, action-required/restricted and active states derived from verified Stripe data; never infer readiness from the browser redirect alone.
-- [ ] Verify webhook signatures and deduplicate/reconcile account status events. Reject connecting or viewing another tenant's account; keep secret keys and bank details out of client configuration and logs.
-- [ ] Provide an authorized Stripe dashboard link where the account model supports it. Show balance/payout/payment-method information only if genuinely available and approved; do not copy mock fees, balances, IBAN or J+1 promises.
-- [ ] Verify the connection lifecycle with test-mode accounts and document production configuration separately. Connecting an account does not activate card charging in the current no-payment checkout.
+- [x] Use Standard OAuth to connect the exact existing account; persist one account per tenant and mode; bind one-use state to tenant, initiating owner, mode and locale; recheck owner membership before code exchange.
+- [x] Show connection and Stripe readiness states from live Stripe account fields and signed webhooks; a callback redirect never proves connection or verification.
+- [x] Verify webhook signatures, deduplicate events, ignore stale updates and prevent account.updated from restoring a disconnected connection. Deny foreign-tenant access and keep secrets, tokens, bank data and requirement details server-side.
+- [x] Provide a fixed mode-correct Stripe Dashboard link for owners; managers receive read-only status. Do not show balances, bank data or payment methods.
+- [x] Add localized EN/FR Payments settings and document test/live server configuration. S5 does not activate checkout or create charges.
+- [ ] Complete manual OAuth/webhook acceptance with a configured Stripe test client, `sk_test_…` key, `whsec_…` secret and reachable callback, then apply the reviewed additive migration to each intended runtime database before deployment.
 
 Decisions and limits:
 
-- Choose Connect onboarding/account configuration, charge and liability model, account replacement/disconnection and supported countries/currencies. Guest payment, refunds, reconciliation and paid-order semantics require separately scoped decisions before charging.
+- Resolved for S5: existing Standard account via OAuth; Stripe processing fees remain with the restaurant; WhitePlate takes no application fee; no in-app unlink or active-account replacement; no payment execution.
+- Guest checkout, direct-charge execution, refunds, reconciliation, paid-order semantics, countries/currencies and live deployment require separate implementation and acceptance before WhitePlate processes payments.
 
 ### D1 — Restaurant Dashboard: live operations overview from existing orders
 

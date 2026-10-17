@@ -13,10 +13,12 @@ import type {
   TenantLegalProfile,
 } from "@/types/establishment-settings"
 import type { OrderEmailSettings } from "@/types/order-email-settings"
+import type { StripeConnectStatus } from "@/types/stripe-connect"
 import { EstablishmentEditor } from "./establishment-editor"
 import { RestaurantLegalProfileEditor } from "./restaurant-legal-profile-editor"
 import { PickupSchedulingEditor } from "./pickup-scheduling-editor"
 import { OrderEmailSettingsEditor } from "./order-email-settings-editor"
+import { StripeConnectPanel } from "./stripe-connect-panel"
 
 export function RestaurantSettings({
   restaurant,
@@ -25,6 +27,8 @@ export function RestaurantSettings({
   legalProfile,
   emailSettings,
   section,
+  stripeConnectStatus,
+  stripeConnectCallbackOutcome,
 }: {
   restaurant: RestaurantMembership
   userId: string
@@ -32,6 +36,8 @@ export function RestaurantSettings({
   legalProfile: TenantLegalProfile | null
   emailSettings: OrderEmailSettings | null
   section: RestaurantSettingsSection
+  stripeConnectStatus?: StripeConnectStatus | null
+  stripeConnectCallbackOutcome?: string
 }) {
   const t = useTranslations("LiveWorkspace")
   const a = useTranslations("Auth")
@@ -43,6 +49,7 @@ export function RestaurantSettings({
     { id: "hours", label: t("openingHoursCategory") },
     { id: "pickup", label: t("pickupSchedulingCategory") },
     { id: "notifications", label: t("notificationsSettingsCategory") },
+    { id: "payments", label: t("paymentSettings") },
   ]
 
   function navigate(next: RestaurantSettingsSection) {
@@ -237,6 +244,15 @@ export function RestaurantSettings({
               tenantId={restaurant.id}
               restaurantName={restaurant.name}
               initial={emailSettings}
+            />
+          )}
+
+          {section === "payments" && (
+            <StripeConnectPanel
+              tenantId={restaurant.id}
+              role={restaurant.role}
+              initialStatus={stripeConnectStatus ?? null}
+              callbackOutcome={stripeConnectCallbackOutcome}
             />
           )}
         </div>

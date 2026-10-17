@@ -3878,5 +3878,49 @@
       "forbidden": "You do not have permission to change pickup settings.",
       "unauthorized": "Your session expired. Sign in again to continue."
     }
+  },
+  "StripeConnect": {
+    "title": "Stripe account connection",
+    "description": "Connect this restaurant’s existing Stripe account. WhitePlate does not charge an application fee. This connection does not enable online checkout.",
+    "connect": "Connect Stripe account",
+    "connecting": "Opening Stripe…",
+    "openDashboard": "Open Stripe Dashboard",
+    "refresh": "Refresh status",
+    "refreshing": "Checking Stripe…",
+    "unavailable": "Status unavailable",
+    "unavailableDescription": "Stripe status could not be confirmed. Try refreshing.",
+    "notVerifiedYet": "Stripe has not returned a successful status check yet.",
+    "mode": "Mode: {mode}",
+    "lastVerified": "Last verified by Stripe: {date} UTC",
+    "readinessLabel": "Readiness: {state}",
+    "modes": {
+      "test": "Test",
+      "live": "Live"
+    },
+    "connection": {
+      "not_connected": "Not connected",
+      "connected": "Connected",
+      "disconnected": "Disconnected"
+    },
+    "readiness": {
+      "unknown": "Unknown",
+      "onboarding": "Setup required",
+      "action_required": "Action required in Stripe",
+      "pending_verification": "Stripe is reviewing your information",
+      "restricted": "Restricted",
+      "verified": "Ready for Stripe card payments"
+    },
+    "callback": {
+      "connected": "You returned from Stripe. The connection status below is checked against Stripe.",
+      "canceled": "You canceled the connection. No account was linked.",
+      "existing_account_required": "Stripe created a new account during setup. WhitePlate disconnected it; connect an existing account instead.",
+      "owner_required": "An organization owner must complete the Stripe connection.",
+      "failed": "The Stripe connection could not be confirmed. Check the status below or start a new connection."
+    },
+    "errors": {
+      "access": "You no longer have permission to manage this restaurant’s Stripe connection.",
+      "alreadyConnected": "This restaurant already has an active Stripe account. Contact Stripe support before changing accounts.",
+      "unavailable": "Stripe could not be reached. Try again in a moment."
+    }
   }
 }

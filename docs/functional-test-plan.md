@@ -1,5 +1,17 @@
 # Functional test plan
 
+## S5 Stripe Connect — 2026-10-17
+
+Automated API tests cover owner-only OAuth start, manager status reads, owner recheck and state replay prevention at callback, cancellation without code exchange, rejection/deauthorization of accounts created in OAuth, successful linking of a pre-existing Standard account, readiness precedence, test/live credential separation, raw-body webhook signature verification, state single consumption/expiry, tenant/mode uniqueness, webhook deduplication, stale-event handling, and deauthorization that later account updates cannot undo. These tests use fake Stripe responses and SQLite; they do not call Stripe or prove PostgreSQL concurrency.
+
+- Configure test-mode `sk_test_…`, Connect client ID, exact localhost callback URI and `whsec_…` signing secret as described in the [development guide](development.md#s5-stripe-connect-test-mode-setup). Confirm every secret stays in API User Secrets and the browser receives no key/token.
+- Connect a pre-existing Standard test account using the organization owner, return to Payments, and confirm the displayed state comes from a fresh API status read. Repeat as manager and confirm status is read-only; verify Kitchen, another tenant, anonymous calls and a revoked owner are denied.
+- Cancel OAuth and confirm no account is saved. Replay a callback or use expired state and confirm no second code exchange occurs. Verify test/live mode mismatch, new-account creation during OAuth, and existing active-account replacement are rejected; newly created accounts are deauthorized.
+- Deliver valid signed `account.updated` and `account.application.deauthorized` events. Check invalid signatures/mode mismatches fail, duplicate IDs are acknowledged without duplicate updates, stale updates do not regress status, and a later account update does not restore a revoked connection.
+- Check all readiness precedence states, localized EN/FR messages, status-refresh outage behavior, safe Dashboard target and owner-only actions at mobile/desktop widths and keyboard use. Confirm no balance, bank, identity, charge or payment information appears.
+
+The implementation and migration are source-only. No Stripe credentials/API calls, live Stripe test-account flow, shared-database migration, deployment or hosted acceptance were run as part of source changes. Complete the manual lifecycle above once configured test credentials and a reachable callback/webhook endpoint are available.
+
 ## S1 establishment settings — local implementation acceptance
 
 See [S1 evidence](audits/establishment-settings.md) for commands/results and remaining hosted checks. Automated API coverage includes actual owner/manager membership, anonymous/kitchen/foreign/revoked/inactive denial, defaults/normalization, precondition parsing, rejected-input atomicity, independent concurrent settings and menu configuration, host-resolved public projection/fallback and saved tracking locale. Domain tests cover locale clearing/disable/re-enable, international addresses, phone/string/coordinate rules. Browser fixture coverage includes real form dirty/save/cancel, duplicate submission, conflict discard/reload, unavailable retry, revoked form hiding, independent receipt collection failure, EN/FR responsive matrix/keyboard/zoom.

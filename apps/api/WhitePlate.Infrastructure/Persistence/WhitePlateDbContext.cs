@@ -4,6 +4,7 @@ using WhitePlate.Domain.Tenants;
 using WhitePlate.Domain.Identity;
 using WhitePlate.Domain.Catalog;
 using WhitePlate.Domain.Orders;
+using WhitePlate.Domain.Payments;
 
 namespace WhitePlate.Infrastructure.Persistence;
 
@@ -30,6 +31,9 @@ public sealed class WhitePlateDbContext(DbContextOptions<WhitePlateDbContext> op
     public DbSet<PickupSlotUsage> PickupSlotUsages => Set<PickupSlotUsage>();
     public DbSet<PickupSlotReservation> PickupSlotReservations => Set<PickupSlotReservation>();
     public DbSet<OrderEmailDelivery> OrderEmailDeliveries => Set<OrderEmailDelivery>();
+    public DbSet<StripeConnectConnectionRecord> StripeConnectConnections => Set<StripeConnectConnectionRecord>();
+    public DbSet<StripeConnectOAuthStateRecord> StripeConnectOAuthStates => Set<StripeConnectOAuthStateRecord>();
+    public DbSet<StripeConnectWebhookEventRecord> StripeConnectWebhookEvents => Set<StripeConnectWebhookEventRecord>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder) =>
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(WhitePlateDbContext).Assembly);

@@ -1,12 +1,12 @@
 # S5 Stripe Connect implementation plan
 
-> Manually prepared at the user's request because the required writing-plans skill is unavailable. This plan is for review only. Do not begin implementation until the user approves it and selects the execution method.
+> Manually prepared at the user's request because the required writing-plans skill is unavailable. The user approved the plan and selected inline execution on 2026-10-17.
 
 **Goal:** Let organization owners connect each restaurant's existing Stripe Standard account through OAuth, and let owners and restaurant managers see Stripe-verified connection and readiness status. Support server-configured test and live modes. WhitePlate charges no application fee and S5 does not create payments or charges.
 
-**Architecture:** Keep Stripe SDK calls in API infrastructure behind application ports. Persist the restaurant/mode connection, one-time OAuth state digest, and webhook event IDs in PostgreSQL. The API owns authorization, OAuth state, mode selection, status mapping and webhook reconciliation. The localized restaurant settings page calls the API through the existing server-only service/action boundary and renders a Payments section in English and French.
+**Architecture:** Keep Stripe requests in API infrastructure behind application ports. A mode-matched provider uses fixed Stripe API/Connect origins and server-side HTTP clients for OAuth/account operations, with Stripe.NET webhook signature validation. Persist the restaurant/mode connection, one-time OAuth state digest, and webhook event IDs in PostgreSQL. The API owns authorization, OAuth state, mode selection, status mapping and webhook reconciliation. The localized restaurant settings page calls the API through the existing server-only service/action boundary and renders a Payments section in English and French.
 
-**Plan status:** Draft for user review. Plan approval and execution method selection are still required before implementation.
+**Plan status:** Approved and implemented inline in source. The generated migration is unapplied to shared databases. Manual Stripe test-mode OAuth/webhook acceptance and deployment remain open because no Stripe test credentials or reachable callback were available in this session.
 
 ## Scope and invariants
 
@@ -125,4 +125,4 @@
 - The plan keeps Stripe SDK types and secrets out of the frontend and application/domain boundaries.
 - Callback and webhook trust derive from consumed OAuth state and verified Stripe signatures respectively; redirect parameters never establish readiness.
 - The schema and API contracts are additive. Shared database migration, deployment, live credential activation, guest checkout and future charge behavior remain outside this plan.
-- Implementation begins only after the user approves this plan and chooses the execution method.
+- The user approved the written plan and chose inline execution before implementation began.

@@ -1,5 +1,15 @@
 # Database schema and tenant model
 
+## S5 Stripe Connect — 2026-10-17
+
+Generated migration `20261017134031_StripeConnect` adds three tenant/mode-aware tables:
+
+- `StripeConnectConnections` stores one current Stripe account per `(TenantId, Mode)`, with unique `(Mode, StripeAccountId)`, connection/readiness state, Stripe readiness booleans/capability status and requirement counts, connection time, last successful verification and last applied webhook time. It references `Tenants` with restrictive deletion.
+- `StripeConnectOAuthStates` stores only the SHA-256 state digest, tenant, initiating owner issuer/subject, mode, locale, creation/expiry and optional consumption timestamp. The digest and expiry/consumption lookup are indexed; a callback atomically consumes it before any code exchange.
+- `StripeConnectWebhookEvents` records mode, event ID/type, optional connected account ID and event/received timestamps. Unique `(Mode, EventId)` makes signed Stripe retries idempotent.
+
+Test and live rows are independent. Disconnected rows remain to preserve account uniqueness and audit the prior association; a later owner OAuth can update that tenant/mode row after Stripe revokes it. The migration is generated source only and has not been applied to a shared database. No startup migration is configured.
+
 ## S4 transactional order email — 2026-10-17
 
 Generated migration `20261017104323_OrderEmailNotifications` adds required `Tenants.OrderEmailTemplatesJson` (`jsonb`, `{}` default) and `OrderEmailTemplatesVersion` (integer, default 1, optimistic concurrency token). `Orders` adds nullable `CustomerEmail` (`varchar(254)`), `EmailUpdatesConsentedAt` (`timestamptz`), and `EmailTrackingTokenHash` (`varchar(64)`). `OrderEmailDeliveries` stores one row per email-triggering order event, keyed by the authoritative event ID and linked to the order; it records tenant/order/event IDs, recipient, `Pending`/`Sending`/`Accepted`/`Failed` state, attempts/lease/retry timing, provider acceptance ID, safe failure code, and rendered subject/HTML/text snapshots. The snapshots store a tracking-token placeholder, never the raw capability.
