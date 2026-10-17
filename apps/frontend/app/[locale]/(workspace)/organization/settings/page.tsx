@@ -74,13 +74,14 @@ export default async function OrganizationSettingsPage({
 
             return {
               restaurantId: restaurant.id,
-              status: result.ok && result.data
-                ? {
-                    mode: result.data.mode,
-                    connectionState: result.data.connectionState,
-                    readinessState: result.data.readinessState,
-                  }
-                : null,
+              status:
+                result.ok && result.data
+                  ? {
+                      mode: result.data.mode,
+                      connectionState: result.data.connectionState,
+                      readinessState: result.data.readinessState,
+                    }
+                  : null,
             }
           })
         )
