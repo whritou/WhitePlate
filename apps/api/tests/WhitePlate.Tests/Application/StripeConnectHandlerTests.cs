@@ -90,7 +90,7 @@ public sealed class StripeConnectHandlerTests
     }
 
     [Fact]
-    public async Task CallbackDeauthorizesAndRejectsAnAccountCreatedDuringOAuth()
+    public async Task CallbackLinksAStandardAccountCreatedDuringOAuthAndKeepsItsOnboardingStatus()
     {
         var state = CallbackState();
         var store = new Store { OAuthState = state };
@@ -104,10 +104,11 @@ public sealed class StripeConnectHandlerTests
         var result = await handler.CompleteOAuthAsync("known-state", "one-use-code", null,
             TestContext.Current.CancellationToken);
 
-        Assert.Equal("existing_account_required", result.Outcome);
+        Assert.Equal("connected", result.Outcome);
         Assert.Equal(1, provider.ExchangeCount);
-        Assert.Equal(["acct_new"], provider.DeauthorizedAccountIds);
-        Assert.Null(store.SavedConnection);
+        Assert.NotNull(store.SavedConnection);
+        Assert.Equal("acct_new", store.SavedConnection.StripeAccountId);
+        Assert.Equal(StripeReadinessState.Onboarding, store.SavedConnection.ReadinessState);
     }
 
     [Fact]
@@ -217,7 +218,6 @@ public sealed class StripeConnectHandlerTests
         public string DashboardUrl(StripeConnectMode mode) => mode == StripeConnectMode.Test
             ? "https://dashboard.stripe.com/test" : "https://dashboard.stripe.com/";
         public int ExchangeCount { get; private set; }
-        public List<string> DeauthorizedAccountIds { get; } = [];
         public StripeAccountDetails Account { get; init; } = new("acct_existing", "standard",
             DateTimeOffset.UtcNow.AddDays(-1), false,
             new StripeAccountReadinessInput(true, true, true, "active", 0, 0, 0));
@@ -231,11 +231,6 @@ public sealed class StripeConnectHandlerTests
         }
         public Task<StripeAccountDetails> GetAccountAsync(StripeConnectMode mode, string accountId, CancellationToken cancellationToken) =>
             Task.FromResult(Account);
-        public Task DeauthorizeAsync(StripeConnectMode mode, string accountId, CancellationToken cancellationToken)
-        {
-            DeauthorizedAccountIds.Add(accountId);
-            return Task.CompletedTask;
-        }
         public StripeConnectWebhookEvent? VerifyWebhook(StripeConnectMode mode, string rawBody, string signature) => null;
     }
 }

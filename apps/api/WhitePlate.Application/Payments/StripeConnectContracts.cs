@@ -82,7 +82,6 @@ public interface IStripeConnectProvider
         CancellationToken cancellationToken);
     Task<StripeAccountDetails> GetAccountAsync(StripeConnectMode mode, string accountId,
         CancellationToken cancellationToken);
-    Task DeauthorizeAsync(StripeConnectMode mode, string accountId, CancellationToken cancellationToken);
     StripeConnectWebhookEvent? VerifyWebhook(StripeConnectMode mode, string rawBody, string signature);
 }
 

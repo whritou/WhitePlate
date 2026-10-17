@@ -1,19 +1,19 @@
 # S5 Stripe Connect implementation plan
 
-> Manually prepared at the user's request because the required writing-plans skill is unavailable. The user approved the plan and selected inline execution on 2026-10-17.
+> Manually prepared at the user's request because the required writing-plans skill was unavailable. The user approved the plan and selected inline execution on 2026-10-17. The account-creation rule was updated after the user clarified on 2026-10-17 that Stripe may create the restaurant's account during OAuth.
 
-**Goal:** Let organization owners connect each restaurant's existing Stripe Standard account through OAuth, and let owners and restaurant managers see Stripe-verified connection and readiness status. Support server-configured test and live modes. WhitePlate charges no application fee and S5 does not create payments or charges.
+**Goal:** Let organization owners connect each restaurant's Stripe Standard account through OAuth, whether they select an existing account or create one during the flow, and let owners and restaurant managers see Stripe-verified connection and readiness status. Support server-configured test and live modes. WhitePlate charges no application fee and S5 does not create payments or charges.
 
 **Architecture:** Keep Stripe requests in API infrastructure behind application ports. A mode-matched provider uses fixed Stripe API/Connect origins and server-side HTTP clients for OAuth/account operations, with Stripe.NET webhook signature validation. Persist the restaurant/mode connection, one-time OAuth state digest, and webhook event IDs in PostgreSQL. The API owns authorization, OAuth state, mode selection, status mapping and webhook reconciliation. The localized restaurant settings page calls the API through the existing server-only service/action boundary and renders a Payments section in English and French.
 
-**Plan status:** Approved and implemented inline in source. The generated migration is unapplied to shared databases. Manual Stripe test-mode OAuth/webhook acceptance and deployment remain open because no Stripe test credentials or reachable callback were available in this session.
+**Plan status:** Implemented inline in source. Migration `20261017134031_StripeConnect` is already applied to Coolify Production. Manual Stripe test-mode OAuth/webhook acceptance remains open and this OAuth callback fix adds no schema change.
 
 ## Scope and invariants
 
-- Use Standard OAuth to connect the restaurant's existing Stripe account; do not create Express or API-provisioned accounts.
+- Use Standard OAuth to connect the returned Standard account; the owner may select an existing account or create one during OAuth. Do not create Express or API-provisioned accounts.
 - One current account per tenant and mode. The active mode comes from server configuration; the browser cannot select credentials, mode, account ID, callback URI or return URL.
 - OAuth state is cryptographically random, short-lived, single-use and tenant/owner/mode bound. The callback rechecks the initiating owner's current membership.
-- Reject and deauthorize an account created during the OAuth flow. Do not persist OAuth access or refresh tokens.
+- Accept a Standard account created during OAuth. Persist its Stripe account ID and readiness snapshot; do not reject it based on `created` time or deauthorize it. Do not persist OAuth access or refresh tokens.
 - Owners can start/retry OAuth and open the mode-correct Stripe Dashboard. Owners and restaurant managers can read status. Kitchen members and other tenants cannot.
 - Derive readiness from Stripe Account v1 fields, signed webhooks and live status reads. A redirect never proves connection or verification. An outage reports unknown and keeps the last successful verification timestamp.
 - Stripe processing fees stay with the restaurant; WhitePlate takes no application fee. S5 does not create charges, accept guest payments, or add unlink/replacement controls for an active account.
@@ -72,10 +72,9 @@
 - Generate high-entropy state, store its digest with a short expiry, tenant, owner identity, mode and allowlisted locale/return route, then construct the Stripe authorization URL server-side with response_type=code and scope=read_write.
 - Add a fixed anonymous callback protected by the state digest. Atomically consume state before exchanging a successful authorization code. Recheck that the stored initiating identity remains an owner of the tenant. Handle cancellation as navigation only.
 - Exchange each authorization code at most once with the matching mode's server credentials. On an uncertain exchange failure, require the owner to start a new OAuth flow; never replay the code.
-- Verify the returned livemode and retrieve the Stripe account. Require Stripe's account-created timestamp to precede state creation. If OAuth created the account, deauthorize it with matching credentials, leave the tenant unconnected and return a localized actionable result.
-- Persist a valid existing account ID and initial Stripe status only after every check passes. Enforce the database account uniqueness rule and do not expose the account ID or OAuth tokens to the browser.
+- Verify the returned livemode, account identity and Standard type. Accept the selected account even when Stripe created it during this OAuth flow. Persist its account ID and initial Stripe readiness only after every check passes; show onboarding/action-required readiness while Stripe's account setup is incomplete. Enforce the database account uniqueness rule and do not expose the account ID or OAuth tokens to the browser.
 - Redirect only to the stored fixed Payments settings route. The frontend reloads status from the API; callback query parameters do not assert verification.
-- Test owner-only start, foreign-tenant denial, state expiry/replay, owner removal before callback, cancellation, code exchange once, mode mismatch, account-created-during-OAuth rejection/deauthorization, and successful existing-account linking.
+- Test owner-only start, foreign-tenant denial, state expiry/replay, owner removal before callback, cancellation, code exchange once, mode mismatch, successful existing-account linking, and successful linking of an account created during OAuth with its initial onboarding readiness.
 
 ## Task 4: Add authorized status reads and signed webhook reconciliation
 
@@ -108,7 +107,7 @@
 - Document management start/status routes, OAuth callback and webhook boundaries, response DTOs, authorization, no-store behavior, safe errors, state replay handling and readiness mapping in the API contract.
 - Document tables, tenant/mode/account uniqueness, state-hash expiry/consumption and webhook deduplication indexes in the database schema reference.
 - Document server-only Test/Live configuration names and local .NET user-secrets setup. Never add real keys or Stripe webhook secrets to source control, client bundles or NEXT_PUBLIC variables.
-- Add a manual acceptance flow using Stripe test API key, test Connect client ID, test webhook secret and a reachable registered callback. Verify existing-account linking, status refresh, revocation webhook, mode-correct Dashboard destination, and that no payment/charge is created.
+- Add a manual acceptance flow using Stripe test API key, test Connect client ID, test webhook secret and a reachable registered callback. Verify linking an existing account and an account created during OAuth, status refresh, revocation webhook, mode-correct Dashboard destination, and that no payment/charge is created.
 - Add the required API authorization/invariant tests and focused frontend tests with fakes; tests must not call Stripe or require secrets. Run the full API/frontend verification commands after implementation; record failures and any hosted OAuth checks that could not run.
 - Update the S5 Kanban card and planning documentation with implemented results, command output and remaining hosted/live setup work. Do not deploy or apply migrations to shared infrastructure.
 
@@ -121,7 +120,7 @@
 
 ## Plan self-review
 
-- All approved scope is represented: existing Standard OAuth account, zero WhitePlate application fee, owner management, owner/manager status reads, tenant isolation, test/live configuration, Stripe-sourced readiness and no payment execution.
+- All approved scope is represented: Standard OAuth account selected or created during the flow, zero WhitePlate application fee, owner management, owner/manager status reads, tenant isolation, test/live configuration, Stripe-sourced readiness and no payment execution.
 - The plan keeps Stripe SDK types and secrets out of the frontend and application/domain boundaries.
 - Callback and webhook trust derive from consumed OAuth state and verified Stripe signatures respectively; redirect parameters never establish readiness.
 - The schema and API contracts are additive. Shared database migration, deployment, live credential activation, guest checkout and future charge behavior remain outside this plan.
