@@ -13,8 +13,10 @@ using WhitePlate.Api.Errors;
 using WhitePlate.Application.Common.Errors;
 using WhitePlate.Application.Catalog;
 using WhitePlate.Application.Orders;
+using WhitePlate.Application.Payments;
 using WhitePlate.Api.Realtime;
 using WhitePlate.Api.OpenApi;
+using WhitePlate.Infrastructure.Payments;
 
 namespace WhitePlate.Api.Configuration;
 
@@ -31,6 +33,15 @@ public static class ServiceRegistration
 
         services.AddHttpContextAccessor();
         services.AddScoped<ICurrentIdentity, HttpCurrentIdentity>();
+        var stripeConnect = configuration.GetSection("StripeConnect").Get<StripeConnectOptions>() ?? new StripeConnectOptions();
+        if (!requireAuthenticationConfiguration && string.IsNullOrWhiteSpace(stripeConnect.FrontendBaseUrl))
+            stripeConnect.FrontendBaseUrl = "http://localhost:3000";
+        services.AddSingleton(stripeConnect);
+        services.AddHttpClient("StripeConnectApi", client => client.BaseAddress = new Uri("https://api.stripe.com/"));
+        services.AddHttpClient("StripeConnectOAuth", client => client.BaseAddress = new Uri("https://connect.stripe.com/"));
+        services.AddScoped<IStripeConnectProvider, StripeConnectProvider>();
+        services.AddScoped<IStripeConnectRepository, StripeConnectRepository>();
+        services.AddScoped<StripeConnectHandler>();
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
         {
             if (Uri.TryCreate(issuer, UriKind.Absolute, out var issuerUri) &&

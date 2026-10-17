@@ -3878,5 +3878,49 @@
       "forbidden": "Vous n’avez pas l’autorisation de modifier les paramètres de retrait.",
       "unauthorized": "Votre session a expiré. Reconnectez-vous pour continuer."
     }
+  },
+  "StripeConnect": {
+    "title": "Connexion du compte Stripe",
+    "description": "Connectez le compte Stripe existant de ce restaurant. WhitePlate ne prélève aucun frais de plateforme. Cette connexion n’active pas le paiement en ligne.",
+    "connect": "Connecter un compte Stripe",
+    "connecting": "Ouverture de Stripe…",
+    "openDashboard": "Ouvrir le Dashboard Stripe",
+    "refresh": "Actualiser le statut",
+    "refreshing": "Vérification auprès de Stripe…",
+    "unavailable": "Statut indisponible",
+    "unavailableDescription": "Le statut Stripe n’a pas pu être confirmé. Réessayez.",
+    "notVerifiedYet": "Stripe n’a pas encore fourni de vérification réussie.",
+    "mode": "Mode : {mode}",
+    "lastVerified": "Dernière vérification par Stripe : {date} UTC",
+    "readinessLabel": "État du compte : {state}",
+    "modes": {
+      "test": "Test",
+      "live": "Réel"
+    },
+    "connection": {
+      "not_connected": "Non connecté",
+      "connected": "Connecté",
+      "disconnected": "Déconnecté"
+    },
+    "readiness": {
+      "unknown": "Inconnu",
+      "onboarding": "Configuration requise",
+      "action_required": "Action requise dans Stripe",
+      "pending_verification": "Stripe examine vos informations",
+      "restricted": "Restreint",
+      "verified": "Prêt pour les paiements par carte Stripe"
+    },
+    "callback": {
+      "connected": "Vous êtes revenu de Stripe. Le statut ci-dessous est vérifié auprès de Stripe.",
+      "canceled": "Vous avez annulé la connexion. Aucun compte n’a été lié.",
+      "existing_account_required": "Stripe a créé un nouveau compte pendant la configuration. WhitePlate l’a déconnecté ; connectez plutôt un compte existant.",
+      "owner_required": "Un propriétaire de l’organisation doit terminer la connexion Stripe.",
+      "failed": "La connexion Stripe n’a pas pu être confirmée. Vérifiez le statut ci-dessous ou recommencez."
+    },
+    "errors": {
+      "access": "Vous n’avez plus l’autorisation de gérer la connexion Stripe de ce restaurant.",
+      "alreadyConnected": "Ce restaurant possède déjà un compte Stripe actif. Contactez l’assistance Stripe avant de changer de compte.",
+      "unavailable": "Stripe est momentanément inaccessible. Réessayez dans un instant."
+    }
   }
 }

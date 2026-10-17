@@ -67,6 +67,22 @@ An HTTP-only API run may warn that it cannot determine the HTTPS port. This does
 
 ## Configuration
 
+### S5 Stripe Connect test-mode setup
+
+The API selects one mode per deployment with `StripeConnect:ActiveMode` (`Test` locally; set `Live` explicitly for production). Configure an existing Stripe Connect platform account's test API secret key (`sk_test_…`), Connect client ID, exact registered OAuth callback URL, and test webhook signing secret through .NET User Secrets. Keep these values out of source control and all frontend/`NEXT_PUBLIC_*` environment variables. The production API also requires an HTTPS `StripeConnect:FrontendBaseUrl`; Development defaults to `http://localhost:3000`.
+
+For the default local API profile, register this exact callback in Stripe and configure a matching test-mode webhook for `account.updated` and `account.application.deauthorized` at `http://localhost:5182/api/v1/stripe-connect/webhooks/test` (use a reachable HTTPS tunnel for hosted webhook delivery):
+
+```powershell
+dotnet user-secrets set "StripeConnect:ActiveMode" "Test" --project apps/api/WhitePlate.Api/WhitePlate.Api.csproj
+dotnet user-secrets set "StripeConnect:Test:ApiKey" "sk_test_REPLACE_WITH_TEST_SECRET" --project apps/api/WhitePlate.Api/WhitePlate.Api.csproj
+dotnet user-secrets set "StripeConnect:Test:ClientId" "ca_REPLACE_WITH_TEST_CLIENT_ID" --project apps/api/WhitePlate.Api/WhitePlate.Api.csproj
+dotnet user-secrets set "StripeConnect:Test:CallbackUri" "http://localhost:5182/api/v1/stripe-connect/oauth/callback" --project apps/api/WhitePlate.Api/WhitePlate.Api.csproj
+dotnet user-secrets set "StripeConnect:Test:WebhookSecret" "whsec_REPLACE_WITH_TEST_SIGNING_SECRET" --project apps/api/WhitePlate.Api/WhitePlate.Api.csproj
+```
+
+The callback URI must exactly match the Stripe Connect client configuration. OAuth codes are single-use, so an interrupted or uncertain exchange requires a fresh Connect attempt. The callback only redirects back to the Payments settings screen; that screen reads the connection and readiness from Stripe again. Stripe test credentials must be used with the Test Connect client and test webhook secret. A live deployment uses the separate `StripeConnect:Live:*` values and `StripeConnect:ActiveMode=Live`. The API validates the key prefix against the configured mode. This scope connects an existing Standard account and does not accept or create payments.
+
 ### Brand media storage (T1)
 
 The API uses private S3-compatible storage. Supply server-only environment variables `Media__Endpoint` (HTTPS origin), `Media__Region` (signing region, including provider-specific `auto` where supported), `Media__Bucket`, `Media__AccessKey`, and `Media__SecretKey`. `Media__ForcePathStyle` defaults to `true`; adjust for your provider. `Media__AllowLocalHttp=true` permits only loopback HTTP for a local emulator. For a private Docker-network MinIO endpoint, set `Media__AllowPrivateHttp=true` and use an internal HTTP service address; this is for a trusted private network only and cannot be combined with Cloudflare Access service-token credentials. When the S3 endpoint is protected by Cloudflare Access, configure both `Media__AccessServiceToken__ClientId` and `Media__AccessServiceToken__ClientSecret` as server-only secrets and add a matching Service Auth policy to that Access application. The API sends those headers on S3 requests; leave both unset for endpoints that do not use Access. A partial pair disables storage rather than sending incomplete credentials. Do not expose these settings through frontend environment variables. No bucket is provisioned automatically and no public ACL is written.

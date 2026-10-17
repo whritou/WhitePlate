@@ -1245,6 +1245,169 @@ namespace WhitePlate.Infrastructure.Persistence.Migrations
                     b.ToTable("OrderOutboxMessages", (string)null);
                 });
 
+            modelBuilder.Entity("WhitePlate.Infrastructure.Persistence.StripeConnectConnectionRecord", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("CardPaymentsCapabilityStatus")
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.Property<bool>("ChargesEnabled")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTimeOffset>("ConnectedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("ConnectionState")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("CurrentlyDueCount")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("DetailsSubmitted")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTimeOffset?>("LastAppliedEventAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset?>("LastVerifiedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Mode")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("PastDueCount")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("PayoutsEnabled")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("PendingVerificationCount")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ReadinessState")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("StripeAccountId")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Mode", "StripeAccountId")
+                        .IsUnique()
+                        .HasDatabaseName("UX_StripeConnectConnections_Mode_Account");
+
+                    b.HasIndex("TenantId", "Mode")
+                        .IsUnique()
+                        .HasDatabaseName("UX_StripeConnectConnections_Tenant_Mode");
+
+                    b.ToTable("StripeConnectConnections", (string)null);
+                });
+
+            modelBuilder.Entity("WhitePlate.Infrastructure.Persistence.StripeConnectOAuthStateRecord", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("ConsumedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Locale")
+                        .IsRequired()
+                        .HasMaxLength(2)
+                        .HasColumnType("character varying(2)");
+
+                    b.Property<int>("Mode")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("OwnerIssuer")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("OwnerSubject")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("StateHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StateHash")
+                        .IsUnique()
+                        .HasDatabaseName("UX_StripeConnectOAuthStates_StateHash");
+
+                    b.HasIndex("TenantId");
+
+                    b.HasIndex("ExpiresAt", "ConsumedAt")
+                        .HasDatabaseName("IX_StripeConnectOAuthStates_Expiry_Consumed");
+
+                    b.ToTable("StripeConnectOAuthStates", (string)null);
+                });
+
+            modelBuilder.Entity("WhitePlate.Infrastructure.Persistence.StripeConnectWebhookEventRecord", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("EventCreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("EventId")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<string>("EventType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<int>("Mode")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset>("ReceivedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("StripeAccountId")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Mode", "EventId")
+                        .IsUnique()
+                        .HasDatabaseName("UX_StripeConnectWebhookEvents_Mode_Event");
+
+                    b.HasIndex("Mode", "StripeAccountId", "EventCreatedAt")
+                        .HasDatabaseName("IX_StripeConnectWebhookEvents_Mode_Account_Created");
+
+                    b.ToTable("StripeConnectWebhookEvents", (string)null);
+                });
+
             modelBuilder.Entity("WhitePlate.Domain.Catalog.CatalogPublicationHead", b =>
                 {
                     b.HasOne("WhitePlate.Domain.Tenants.Tenant", null)
@@ -1446,6 +1609,24 @@ namespace WhitePlate.Infrastructure.Persistence.Migrations
                         .WithMany()
                         .HasForeignKey("TenantId")
                         .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("WhitePlate.Infrastructure.Persistence.StripeConnectConnectionRecord", b =>
+                {
+                    b.HasOne("WhitePlate.Domain.Tenants.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("WhitePlate.Infrastructure.Persistence.StripeConnectOAuthStateRecord", b =>
+                {
+                    b.HasOne("WhitePlate.Domain.Tenants.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
 

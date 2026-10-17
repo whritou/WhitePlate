@@ -8,6 +8,7 @@ import {
   getTenantLegalProfile,
 } from "@/services/establishment-settings"
 import { getOrderEmailSettings } from "@/services/order-email-settings"
+import { getStripeConnectStatus } from "@/services/stripe-connect"
 
 export default async function RestaurantSettingsPage({
   searchParams,
@@ -29,19 +30,37 @@ export default async function RestaurantSettingsPage({
     )
   }
 
-  const [settings, legalProfile, emailSettings] = await Promise.all([
-    getEstablishmentSettings(restaurant.id),
-    getTenantLegalProfile(restaurant.id),
-    getOrderEmailSettings(restaurant.id),
-  ])
   const section =
     typeof params.section === "string" &&
-    ["establishment", "legal", "hours", "pickup", "notifications"].includes(
-      params.section
-    )
+    [
+      "establishment",
+      "legal",
+      "hours",
+      "pickup",
+      "notifications",
+      "payments",
+    ].includes(params.section)
       ? (params.section as
-          "establishment" | "legal" | "hours" | "pickup" | "notifications")
+          | "establishment"
+          | "legal"
+          | "hours"
+          | "pickup"
+          | "notifications"
+          | "payments")
       : "establishment"
+  const [settings, legalProfile, emailSettings, stripeStatus] =
+    await Promise.all([
+      getEstablishmentSettings(restaurant.id),
+      getTenantLegalProfile(restaurant.id),
+      getOrderEmailSettings(restaurant.id),
+      section === "payments"
+        ? getStripeConnectStatus(restaurant.id)
+        : Promise.resolve(null),
+    ])
+  const callbackOutcome =
+    typeof params.stripeConnectResult === "string"
+      ? params.stripeConnectResult
+      : undefined
 
   return (
     <RestaurantSettings
@@ -51,6 +70,8 @@ export default async function RestaurantSettingsPage({
       legalProfile={legalProfile.ok ? legalProfile.data : null}
       emailSettings={emailSettings.ok ? emailSettings.data : null}
       section={section}
+      stripeConnectStatus={stripeStatus?.ok ? stripeStatus.data : null}
+      stripeConnectCallbackOutcome={callbackOutcome}
     />
   )
 }

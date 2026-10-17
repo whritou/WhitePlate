@@ -2,6 +2,14 @@
 
 This is the runbook for the user-approved, single hosted development stack ([decision 0005](../architecture/decisions/0005-coolify-hosting.md)). Runtime credentials belong in Coolify/Vercel settings, never this file, client code or `NEXT_PUBLIC_*` variables. The migration is tracked in [issue #17](https://github.com/whritou/WhitePlate/issues/17).
 
+## S5 Stripe Connect schema rollout — 2026-10-17
+
+Before applying migration `20261017134031_StripeConnect`, Coolify Production resource `whiteplate-postgresql-main` was checked through the PostgreSQL container terminal. Database `whiteplate` was current, the latest history row was `20261017104323_OrderEmailNotifications`, two tenants and zero orders existed, and all three S5 tables were absent. A custom-format dump at `/tmp/whiteplate-before-stripe-connect-s5-20261017.dump` was 92,754 bytes; `pg_restore --list` recognized its 13,641-byte listing. This temporary container-local backup is not an off-host copy or restore test.
+
+The migration DDL, EF history row (`10.0.12`), and `whiteplate_api` `SELECT`, `INSERT`, `UPDATE`, and `DELETE` grants on all three tables were applied in one transaction with a 5-second lock timeout and 30-second statement timeout. The transaction checked the target database and absence of prior migration history/tables before creating schema. Post-checks confirmed latest migration `20261017134031_StripeConnect`, all three tables present with zero rows, ten indexes including primary keys, and all twelve expected API-role privileges. Tenant and order counts remained unchanged. No existing business rows were modified.
+
+The schema was applied before merging PR #122 so the additive database changes precede the connected API version. Stripe credentials were not read or used; the Standard test-account OAuth/webhook lifecycle and hosted acceptance remain open. See [S5 API contract](../api/api-contracts.md#s5-stripe-connect--2026-10-17), [schema](../database/database-schema.md#s5-stripe-connect--2026-10-17), and [functional checks](../functional-test-plan.md#s5-stripe-connect--2026-10-17).
+
 ## S4 transactional order-email schema rollout — 2026-10-17
 
 Preflight on Coolify Production resource `whiteplate-postgresql-main` confirmed database `whiteplate`, latest migration `20261016222355_M3CatalogTranslationWorkflow`, two tenants, zero orders, and no S4 columns/table/history row. A custom-format backup was created at `/tmp/whiteplate-before-order-email-20261017.dump` inside the PostgreSQL container (86.6 KiB); `pg_restore --list` recognized the archive with 186 entries. This temporary container-local dump is not an off-host backup or restore test.
