@@ -1,6 +1,6 @@
 # Live analytics page matching the demo
 
-**Status:** Draft for product review
+**Status:** Approved by product owner
 **Date:** 2026-10-17
 **Scope:** Authenticated organization analytics page and its API/data support
 
@@ -24,6 +24,7 @@ These rules were confirmed by the product owner during design:
 - Customer fingerprints are HMACs of normalized email and are scoped to a tenant. Never match identities across tenants.
 - Analytics consent is separate from order-update email consent, optional, and unchecked by default.
 - Analytics fingerprints expire within 365 days. Provide a customer-accessible withdrawal control that accepts the email used at checkout, computes its fingerprint transiently, and deletes retained fingerprints for that tenant.
+- Persist a fingerprint only for the current HMAC key version on each new order. During lookup, compute hashes for the current and retained previous key versions so returning-customer matching and withdrawal work across rotation without extending old-key retention.
 - In multi-currency views, sum counts and quantities, but keep monetary totals and trends grouped by currency. Preserve restaurant identity in dish rows.
 
 ## Page requirements
@@ -47,7 +48,7 @@ All new user-visible copy must be localized in English and French. The page must
 - Order counts and cancellations count orders by creation time, including cancelled orders. Trend counts, channel counts, and peak-hour counts follow that rule.
 - Revenue is the stored order total for non-cancelled orders, grouped by currency and creation date. It is an order-value measure, not collected or settled payment volume.
 - Average order value is non-cancelled order total divided by non-cancelled order count, per currency.
-- Returning-customer rate is the number of distinct consented customer fingerprints with at least one non-cancelled order in the selected range and a qualifying previous order in the 365 days before an in-range order, divided by distinct consented fingerprints with a non-cancelled order in the selected range. Both numerator and denominator use only consented order records. Store a per-order repeat indicator when an order is placed, and recompute affected indicators if a prior order is later cancelled. This honors the 365-day retention limit without retaining fingerprints for up to 455 days. Return “unavailable” when the selected range has no eligible consented customers (zero denominator); do not present that as a measured 0%.
+- Returning-customer rate is the number of distinct consented customer fingerprints with at least one non-cancelled order in the selected range and a qualifying previous order in the 365 days before an in-range order, divided by distinct consented fingerprints with a non-cancelled order in the selected range. Both numerator and denominator use only consented order records. Store a per-order repeat indicator and short-lived prior-order links when a new order is placed; these links let cancellation recompute affected indicators even after the prior fingerprint expires. Delete links on withdrawal and expire them with the candidate order's analytics retention (365 days). This honors the 365-day fingerprint limit without retaining fingerprints for up to 455 days. Return “unavailable” when the selected range has no eligible consented customers (zero denominator); do not present that as a measured 0%.
 - Best-selling dish quantity and revenue use immutable order-line snapshots from non-cancelled orders. Preserve restaurant and currency on each row.
 - Preparation duration is the elapsed time from preparation start to ready time, using only non-cancelled orders with valid timestamps; fastest, slowest, and average use eligible orders in the selected period. On-time pickup is the percentage of completed scheduled pickups whose completed order ClosedAt timestamp is no later than its scheduled PickupAt time, using only scheduled pickups with valid timestamps. Missing or invalid timestamps are excluded and reported as unavailable when no qualifying records exist.
 - “Accepted < 1 min” is the percentage of eligible orders whose preparation start is within 60 seconds of creation, using orders with both valid timestamps. Cancelled orders may be included if both timestamps were recorded.
@@ -79,19 +80,19 @@ The CSV export must use the same authorized, complete result currently shown by 
 
 ## Checkout attribution and consent
 
-- Attribute new orders to `web` by default or `qr` when opened through the restaurant's generated QR storefront URL. Accept only the documented channel values. A QR query parameter is attribution metadata, not proof of identity or authorization.
+- When analytics consent is selected, attribute new orders to `web` by default or `qr` when opened through the restaurant's generated QR storefront URL. Accept only the documented channel values. Without analytics consent, do not persist channel attribution. A QR query parameter is attribution metadata, not proof of identity or authorization.
 - Do not infer a channel for existing orders or phone orders. Label them unattributed/untracked.
 - Add a separate optional analytics-consent control to checkout, unchecked by default. Do not couple it to order-update email consent. If analytics consent is selected, require the email needed to create the fingerprint and explain the purpose and withdrawal option in localized copy.
 - Normalize the email consistently and compute a tenant-scoped HMAC using a server-only analytics privacy key. Use a separate key and purpose prefix from order-email tracking. Never persist or return the raw email for analytics-only consent.
 - Persist consent and the HMAC only for that order. Do not apply new consent retroactively to historical orders. Include analytics consent in request validation and idempotency handling without changing the existing email-update semantics.
 - If the privacy key is unavailable, do not silently accept and then lose an analytics opt-in: reject the opted-in analytics processing with a clear checkout error, while non-consenting orders continue normally.
-- Store the HMAC key only in server-side secret configuration (Analytics:PrivacyKey), separate from order-email tracking. Version the key. Keep prior key versions available for no longer than the 365-day retention window so cross-order comparisons and withdrawals work during rotation; document a controlled rotation procedure.
+- Store the HMAC key only in server-side secret configuration (Analytics:PrivacyKey), separate from order-email tracking. Version the key. Persist only the current version's fingerprint for new orders; use prior versions only for transient lookup. Keep prior key versions available for no longer than the 365-day retention window so cross-order comparisons and withdrawals work during rotation; document a controlled rotation procedure.
 
 ### Withdrawal control
 
 Expose a localized withdrawal form from the checkout confirmation and a public privacy route scoped to the restaurant tenant. The customer can use it from any device by entering the same email used at checkout. The form sends the email over HTTPS in the POST body to the public endpoint POST /api/v1/tenants/{tenantId}/analytics/withdrawal; the API normalizes it and computes the tenant-scoped HMAC transiently. Do not persist the submitted email or write it to logs.
 
-The narrowly scoped endpoint deletes all retained analytics fingerprints, consent flags, and repeat indicators matching that email in that tenant. It does not alter order-update email consent or other order data. Return the same generic success response whether or not a fingerprint matched, so the endpoint does not reveal customer or order existence. Rate-limit requests and keep the endpoint out of shared caches. The operation is idempotent. Future orders are tracked only if the customer explicitly opts in again; consent is never preselected.
+The narrowly scoped endpoint deletes all retained analytics fingerprints, consent flags, repeat indicators, and repeat-dependency links matching that email in that tenant. It does not alter order-update email consent or other order data. Return the same generic success response whether or not a fingerprint matched, so the endpoint does not reveal customer or order existence. Rate-limit requests and keep the endpoint out of shared caches. The operation is idempotent. Future orders are tracked only if the customer explicitly opts in again; consent is never preselected.
 
 No customer account or withdrawal token is required. Because fingerprints are tenant-scoped, a withdrawal applies to the restaurant tenant shown by the control. Explain this scope in localized copy.
 

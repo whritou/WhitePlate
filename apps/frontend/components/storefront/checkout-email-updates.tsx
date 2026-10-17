@@ -9,8 +9,10 @@ import { useTranslations } from "next-intl"
 export function CheckoutEmailUpdates({
   customerEmail,
   emailUpdatesConsented,
+  analyticsConsented = false,
   changeCustomerEmail,
   changeEmailUpdatesConsent,
+  changeAnalyticsConsent,
 }: CheckoutEmailUpdatesProps) {
   const c = useTranslations("Checkout")
 
@@ -36,7 +38,25 @@ export function CheckoutEmailUpdates({
         {c("emailUpdatesPrivacy")}
       </p>
 
-      {emailUpdatesConsented && (
+      <Label
+        htmlFor="analytics-consent"
+        className="flex min-h-11 items-center gap-3 text-sm font-medium"
+      >
+        <Checkbox
+          id="analytics-consent"
+          checked={analyticsConsented}
+          aria-describedby="analytics-consent-help"
+          onCheckedChange={(checked) => changeAnalyticsConsent?.(checked === true)}
+        />
+
+        {c("analyticsConsent")}
+      </Label>
+
+      <p id="analytics-consent-help" className="text-sm text-muted-foreground">
+        {c("analyticsConsentPrivacy")}
+      </p>
+
+      {(emailUpdatesConsented || analyticsConsented) && (
         <Label className="grid gap-1.5 font-medium" htmlFor="customer-email">
           {c("customerEmail")}
 

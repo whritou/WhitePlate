@@ -18,6 +18,7 @@ export function StorefrontShortcuts({
 }) {
   const [showQr, setShowQr] = useState(false)
   const [copyStatus, setCopyStatus] = useState("")
+  const qrUrl = url ? withQrAttribution(url) : ""
 
   async function copyUrl() {
     if (!url) return
@@ -106,7 +107,7 @@ export function StorefrontShortcuts({
           className="grid justify-items-center gap-2 border bg-card p-3"
         >
           <QRCodeSVG
-            value={url}
+            value={qrUrl}
             size={176}
             level="M"
             title={labels.shopQrLabel}
@@ -114,10 +115,18 @@ export function StorefrontShortcuts({
           />
 
           <p className="max-w-56 text-center text-xs break-all text-muted-foreground">
-            {url}
+            {qrUrl}
           </p>
         </div>
       )}
     </div>
   )
+}
+
+function withQrAttribution(value: string): string {
+  const url = new URL(value)
+
+  url.searchParams.set("source", "qr")
+
+  return url.toString()
 }

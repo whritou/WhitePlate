@@ -15,17 +15,27 @@ import {
   XAxis,
   YAxis,
 } from "recharts"
-import { C, eur } from "./analytics-shared"
+import { C, eur, formatCurrency } from "./analytics-shared"
 import { useAnalyticsPageView } from "./analytics-AnalyticsPage-context"
+import { AnalyticsPageKitchen } from "./analytics-AnalyticsPage-kitchen"
+import { useLocale, useTranslations } from "next-intl"
 export function AnalyticsPageSection1() {
-  const { rest, metric, setMetric, d, kpis, maxDish } = useAnalyticsPageView()
+  const { metric, setMetric, d, kpis, maxDish, pageMode, dishBarMetric } = useAnalyticsPageView()
+  const t = useTranslations("AnalyticsLive")
+  const locale = useLocale()
+  const liveLabel = (key: Parameters<typeof t>[0], demo: string) =>
+    pageMode === "live" ? t(key) : demo
+  const currencies = [...new Set(d.series.flatMap(point => [
+    ...Object.keys(point.revenueByCurrency ?? {}), ...Object.keys(point.previousRevenueByCurrency ?? {}),
+  ]))]
+  const chartColors = [C.primary, C.accent, C.ink]
 
   return (
     <main className="space-y-6 px-6 pb-12">
       <div className="grid grid-cols-2 gap-px border bg-foreground md:grid-cols-3 xl:grid-cols-6">
-        <Copy>
-          {kpis.map((x) => {
-            const good = x.invert ? x.delta < 0 : x.delta > 0
+            <Copy>
+              {kpis.map((x) => {
+            const good = x.delta !== null && (x.invert ? x.delta < 0 : x.delta > 0)
 
             return (
               <div key={x.k} className="bg-background p-5">
@@ -41,8 +51,8 @@ export function AnalyticsPageSection1() {
                   className={`label-mono mt-1 ${x.note ? "text-primary" : good ? "text-primary" : "text-destructive"}`}
                 >
                   <Copy>
-                    {x.note ??
-                      `${x.delta > 0 ? "▲" : "▼"} ${Math.abs(x.delta).toFixed(1)}% vs previous`}
+                    {x.note ?? (x.delta === null ? t("comparisonUnavailable") :
+                      `${x.delta > 0 ? "▲" : "▼"} ${Math.abs(x.delta).toFixed(1)}% ${liveLabel("vsPrevious", "vs previous")}`)}
                   </Copy>
                 </p>
               </div>
@@ -54,8 +64,8 @@ export function AnalyticsPageSection1() {
       <div className="card-hard bg-background">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b px-5 py-3">
           <p className="font-display text-lg font-bold">
-            <Copy>{metric === "revenue" ? "Revenue" : "Orders"}</Copy>{" "}
-            <Copy> over time</Copy>
+            <Copy>{metric === "revenue" ? liveLabel("revenue", "Revenue") : liveLabel("orders", "Orders")}</Copy>{" "}
+            <Copy>{liveLabel("overTime", "over time")}</Copy>
           </p>
 
           <div className="flex border">
@@ -64,9 +74,10 @@ export function AnalyticsPageSection1() {
                 <SourceButton
                   key={m}
                   onClick={() => setMetric(m)}
+                  aria-pressed={metric === m}
                   className={`label-mono px-3 py-1.5 ${metric === m ? "bg-foreground text-background" : ""}`}
                 >
-                  <Copy>{m}</Copy>
+                  <Copy>{m === "revenue" ? liveLabel("revenue", "revenue") : liveLabel("orders", "orders")}</Copy>
                 </SourceButton>
               ))}
             </Copy>
@@ -101,7 +112,7 @@ export function AnalyticsPageSection1() {
                 width={50}
                 tickFormatter={(v) =>
                   metric === "revenue"
-                    ? `€${v >= 1000 ? `${(v / 1000).toFixed(1)}k` : v}`
+                    ? `${currencies.length === 1 ? `${currencies[0]} ` : currencies.length === 0 ? "€" : ""}${v >= 1000 ? `${(v / 1000).toFixed(1)}k` : v}`
                     : v
                 }
               />
@@ -113,40 +124,52 @@ export function AnalyticsPageSection1() {
                   background: "var(--color-background)",
                 }}
                 formatter={(v: number, n: string) => [
-                  metric === "revenue" ? eur(v) : v,
-                  n === "prev" ? "Previous period" : metric,
+                  metric === "revenue" && currencies.length > 1
+                    ? `${v.toLocaleString(locale)} ${n.split(" · ")[0]}`
+                    : metric === "revenue" ? formatCurrency(v, currencies[0] ?? "EUR", locale) : v,
+                  n,
                 ]}
               />
 
-              <Copy>
-                {metric === "revenue" && (
-                  <Area
-                    type="monotone"
-                    dataKey="prev"
-                    stroke={C.muted}
-                    strokeDasharray="4 4"
-                    fill="none"
-                    strokeWidth={1.5}
-                  />
-                )}
-              </Copy>
+              {metric === "revenue" && currencies.length > 0 ? currencies.map((currency, index) => (
+                <Copy key={currency}>
+                  <Area type="monotone" dataKey={(row: { previousRevenueByCurrency?: Record<string, number> }) =>
+                    row.previousRevenueByCurrency?.[currency] ?? 0} name={`${currency} · ${t("previousPeriod")}`}
+                    stroke={chartColors[index % chartColors.length]} strokeDasharray="4 4"
+                    fill="none" strokeWidth={1.5} />
 
-              <Area
-                type="monotone"
-                dataKey={metric}
-                stroke={C.primary}
-                fill="url(#g)"
-                strokeWidth={2.5}
-              />
+                  <Area type="monotone" dataKey={(row: { revenueByCurrency?: Record<string, number> }) =>
+                    row.revenueByCurrency?.[currency] ?? 0} name={currency}
+                    stroke={chartColors[index % chartColors.length]} fill={index === 0 ? "url(#g)" : "none"}
+                    strokeWidth={2.5} />
+                </Copy>
+              )) : <>
+                <Copy>{metric === "revenue" && <Area type="monotone" dataKey="prev" name={liveLabel("previousPeriod", "Previous period")}
+                  stroke={C.muted} strokeDasharray="4 4" fill="none" strokeWidth={1.5} />}</Copy>
+
+                <Area type="monotone" dataKey={metric} name={metric === "revenue"
+                  ? liveLabel("revenue", "revenue") : liveLabel("orders", "orders")} stroke={C.primary}
+                  fill="url(#g)" strokeWidth={2.5} />
+              </>}
             </AreaChart>
           </ResponsiveContainer>
         </div>
+
+        {metric === "revenue" && currencies.length > 1 && (
+          <ul className="flex flex-wrap gap-4 border-t px-5 py-3 text-xs text-muted-foreground">
+            {currencies.map((currency, index) => <li key={currency} className="flex items-center gap-2">
+              <span className="h-2 w-2" style={{ background: chartColors[index % chartColors.length] }} />
+
+              {currency}
+            </li>)}
+          </ul>
+        )}
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="card-hard bg-background lg:col-span-2">
           <p className="border-b px-5 py-3 font-display text-lg font-bold">
-            <Copy>Peak hours</Copy>
+            <Copy>{liveLabel("peakHours", "Peak hours")}</Copy>
           </p>
 
           <div className="h-64 p-4">
@@ -205,7 +228,7 @@ export function AnalyticsPageSection1() {
 
         <div className="card-hard bg-background">
           <p className="border-b px-5 py-3 font-display text-lg font-bold">
-            <Copy>Order channels</Copy>
+            <Copy>{liveLabel("orderChannels", "Order channels")}</Copy>
           </p>
 
           <div className="h-44">
@@ -255,7 +278,7 @@ export function AnalyticsPageSection1() {
                   </span>
 
                   <span className="font-bold">
-                    <Copy>{c.value}</Copy>%
+                    <Copy>{c.state === "unavailable" ? "—" : c.state === "untracked" ? t("untracked") : `${c.value}%`}</Copy>
                   </span>
                 </li>
               ))}
@@ -267,7 +290,7 @@ export function AnalyticsPageSection1() {
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="card-hard bg-background lg:col-span-2">
           <p className="border-b px-5 py-3 font-display text-lg font-bold">
-            <Copy>Best-selling dishes</Copy>
+            <Copy>{liveLabel("bestSellingDishes", "Best-selling dishes")}</Copy>
           </p>
 
           <div className="overflow-x-auto">
@@ -277,17 +300,17 @@ export function AnalyticsPageSection1() {
                   <th className="px-5 py-2">#</th>
 
                   <th>
-                    <Copy>Dish</Copy>
+                    <Copy>{liveLabel("dish", "Dish")}</Copy>
                   </th>
 
                   <th className="w-1/3" />
 
                   <th className="text-right">
-                    <Copy>Sold</Copy>
+                    <Copy>{liveLabel("sold", "Sold")}</Copy>
                   </th>
 
                   <th className="px-5 text-right">
-                    <Copy>Revenue</Copy>
+                    <Copy>{liveLabel("revenue", "Revenue")}</Copy>
                   </th>
                 </tr>
               </thead>
@@ -295,20 +318,21 @@ export function AnalyticsPageSection1() {
               <tbody>
                 <Copy>
                   {d.dishes.map((x, i) => (
-                    <tr key={x.n} className="border-b last:border-0">
+                    <tr key={`${x.tenantId ?? "demo"}-${x.n}`} className="border-b last:border-0">
                       <td className="px-5 py-2.5 font-display font-bold">
-                        <Copy>{i + 1}</Copy>
+                        <Copy>{x.rank ?? i + 1}</Copy>
                       </td>
 
                       <td className="font-semibold">
-                        <Copy>{x.n}</Copy>
+                        <Copy>{x.restaurant ? `${x.n} · ${x.restaurant}` : x.n}</Copy>
                       </td>
 
                       <td className="pr-4">
                         <div className="h-2 bg-secondary">
                           <div
                             className="h-2 bg-primary"
-                            style={{ width: `${(x.rev / maxDish) * 100}%` }}
+                            style={{ width: `${((dishBarMetric === "quantity" ? x.q :
+                              dishBarMetric === "normalized" ? x.barValue ?? 0 : x.rev) / maxDish) * 100}%` }}
                           />
                         </div>
                       </td>
@@ -318,74 +342,21 @@ export function AnalyticsPageSection1() {
                       </td>
 
                       <td className="px-5 text-right font-bold">
-                        <Copy>{eur(x.rev)}</Copy>
+                        <Copy>{x.currency ? formatCurrency(x.rev, x.currency, locale) : eur(x.rev)}</Copy>
                       </td>
                     </tr>
                   ))}
+
+                  {d.dishes.length === 0 && (
+                    <tr><td colSpan={5} className="px-5 py-6 text-sm text-muted-foreground">{t("noDishData")}</td></tr>
+                  )}
                 </Copy>
               </tbody>
             </table>
           </div>
         </div>
 
-        <div className="card-hard bg-ink text-ink-foreground">
-          <p className="border-b border-ink-foreground/20 px-5 py-3 font-display text-lg font-bold">
-            <Copy>Kitchen performance</Copy>
-          </p>
-
-          <div className="space-y-5 p-5">
-            <Copy>
-              {[
-                ["On-time pickups", 94 - rest, "%"],
-                ["Accepted < 1 min", 88 + rest, "%"],
-                ["Cancelled orders", 2 + rest * 0.3, "%"],
-              ].map(([k, v, u]) => (
-                <div key={k as string}>
-                  <div className="flex justify-between text-sm">
-                    <span>
-                      <Copy>{k}</Copy>
-                    </span>
-
-                    <span className="font-bold">
-                      <Copy>
-                        {(v as number).toFixed(0)}
-
-                        <Copy></Copy>
-
-                        {u}
-                      </Copy>
-                    </span>
-                  </div>
-
-                  <div className="mt-1.5 h-2 bg-ink-foreground/15">
-                    <div className="h-2 bg-accent" style={{ width: `${v}%` }} />
-                  </div>
-                </div>
-              ))}
-            </Copy>
-
-            <div className="grid grid-cols-2 gap-px border border-ink-foreground/20 bg-ink-foreground/20">
-              <Copy>
-                {[
-                  ["Fastest", `${6 + rest} min`],
-                  ["Slowest", `${24 + rest} min`],
-                  ["Discount uses", `${42 - rest * 6}`],
-                  ["Refunds", eur(86 - rest * 10)],
-                ].map(([k, v]) => (
-                  <div key={k} className="bg-ink p-3">
-                    <p className="label-mono opacity-60">
-                      <Copy>{k}</Copy>
-                    </p>
-
-                    <p className="font-display text-xl font-bold">
-                      <Copy>{v}</Copy>
-                    </p>
-                  </div>
-                ))}
-              </Copy>
-            </div>
-          </div>
-        </div>
+        <AnalyticsPageKitchen />
       </div>
     </main>
   )

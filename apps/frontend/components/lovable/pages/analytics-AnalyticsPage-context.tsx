@@ -1,10 +1,9 @@
 "use client"
 import { createContext, useContext, type ReactNode } from "react"
-import { useAnalyticsPageModel } from "./analytics-AnalyticsPage-model"
+import type { AnalyticsPageViewModel } from "@/types/analytics"
+export type { AnalyticsPageViewModel, AnalyticsRange } from "@/types/analytics"
 
-const Context = createContext<ReturnType<typeof useAnalyticsPageModel> | null>(
-  null
-)
+const Context = createContext<AnalyticsPageViewModel | null>(null)
 
 export function useAnalyticsPageView() {
   const model = useContext(Context)
@@ -18,7 +17,7 @@ export function AnalyticsPageProvider({
   model,
   children,
 }: {
-  model: ReturnType<typeof useAnalyticsPageModel>
+  model: AnalyticsPageViewModel
   children: ReactNode
 }) {
   return <Context.Provider value={model}>{children}</Context.Provider>

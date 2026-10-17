@@ -578,6 +578,18 @@ namespace WhitePlate.Infrastructure.Persistence.Migrations
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid");
 
+                    b.Property<DateTimeOffset?>("AnalyticsConsentedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("AnalyticsReturningCustomer")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
+
+                    b.Property<string>("AnalyticsSource")
+                        .HasMaxLength(8)
+                        .HasColumnType("character varying(8)");
+
                     b.Property<DateTimeOffset?>("ArchivedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -700,6 +712,64 @@ namespace WhitePlate.Infrastructure.Persistence.Migrations
                     b.HasIndex("TenantId", "CreatedAtTicks", "Id");
 
                     b.ToTable("Orders", (string)null);
+                });
+
+            modelBuilder.Entity("WhitePlate.Domain.Orders.OrderAnalyticsFingerprint", b =>
+                {
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("OrderId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("KeyVersion")
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.Property<DateTimeOffset>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("FingerprintHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.HasKey("TenantId", "OrderId", "KeyVersion");
+
+                    b.HasIndex("ExpiresAt");
+
+                    b.HasIndex("OrderId");
+
+                    b.HasIndex("TenantId", "KeyVersion", "FingerprintHash");
+
+                    b.ToTable("OrderAnalyticsFingerprints", (string)null);
+                });
+
+            modelBuilder.Entity("WhitePlate.Domain.Orders.OrderAnalyticsRepeatLink", b =>
+                {
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("OrderId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("PriorOrderId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("TenantId", "OrderId", "PriorOrderId");
+
+                    b.HasIndex("ExpiresAt");
+
+                    b.HasIndex("OrderId");
+
+                    b.HasIndex("PriorOrderId");
+
+                    b.HasIndex("TenantId", "PriorOrderId", "ExpiresAt");
+
+                    b.ToTable("OrderAnalyticsRepeatLinks", (string)null);
                 });
 
             modelBuilder.Entity("WhitePlate.Domain.Orders.OrderLine", b =>
@@ -1526,6 +1596,30 @@ namespace WhitePlate.Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict);
                 });
 
+            modelBuilder.Entity("WhitePlate.Domain.Orders.OrderAnalyticsFingerprint", b =>
+                {
+                    b.HasOne("WhitePlate.Domain.Orders.Order", null)
+                        .WithMany("AnalyticsFingerprints")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("WhitePlate.Domain.Orders.OrderAnalyticsRepeatLink", b =>
+                {
+                    b.HasOne("WhitePlate.Domain.Orders.Order", null)
+                        .WithMany("AnalyticsRepeatLinks")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("WhitePlate.Domain.Orders.Order", null)
+                        .WithMany()
+                        .HasForeignKey("PriorOrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("WhitePlate.Domain.Orders.OrderLine", b =>
                 {
                     b.HasOne("WhitePlate.Domain.Orders.Order", null)
@@ -1636,6 +1730,10 @@ namespace WhitePlate.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("WhitePlate.Domain.Orders.Order", b =>
                 {
+                    b.Navigation("AnalyticsFingerprints");
+
+                    b.Navigation("AnalyticsRepeatLinks");
+
                     b.Navigation("Lines");
                 });
 

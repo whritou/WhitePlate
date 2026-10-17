@@ -84,6 +84,7 @@ export function useGuestCheckout(menu: StorefrontMenu) {
     customerName,
     customerEmail,
     emailUpdatesConsented,
+    analyticsConsented,
     discountCode,
     error,
     submitting,
@@ -104,8 +105,11 @@ export function useGuestCheckout(menu: StorefrontMenu) {
 
     const input = {
       customerName,
-      customerEmail: emailUpdatesConsented ? customerEmail : "",
+      customerEmail: emailUpdatesConsented || analyticsConsented ? customerEmail : "",
       emailUpdatesConsented,
+      analyticsConsented: analyticsConsented ?? false,
+      analyticsSource: typeof window !== "undefined" &&
+        new URLSearchParams(window.location.search).get("source") === "qr" ? "qr" as const : "web" as const,
       discountCode: discountCode || null,
       menuLocale: menu.locale,
       pickupAt: selectedPickupAt === "asap" ? null : selectedPickupAt,
@@ -172,6 +176,8 @@ export function useGuestCheckout(menu: StorefrontMenu) {
     customerName,
     customerEmail,
     emailUpdatesConsented,
+    analyticsConsented: analyticsConsented ?? false,
+    changeAnalyticsConsent: state.changeAnalyticsConsent,
     discountCode,
     error,
     submitting,

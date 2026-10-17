@@ -551,7 +551,10 @@ public sealed class OrderRepository(WhitePlateDbContext database,
         {
             var previousVersion = order.Version;
             if (status == WhitePlate.Domain.Orders.OrderStatus.Cancelled && cancellationReason is { } reason)
+            {
                 order.Cancel(now, reason);
+                await RecalculateAnalyticsReturningFlagsAsync(order, now, cancellationToken);
+            }
             else if (status == WhitePlate.Domain.Orders.OrderStatus.Cancelled)
                 throw new WhitePlate.Domain.Orders.InvalidOrderTransitionException();
             else order.TransitionTo(status, now);
@@ -599,6 +602,34 @@ public sealed class OrderRepository(WhitePlateDbContext database,
             database.ChangeTracker.Clear();
             return Result<OrderReceiptDto>.Failure(new ApplicationError(ErrorCode.PreconditionFailed));
         }
+    }
+
+    private async Task RecalculateAnalyticsReturningFlagsAsync(WhitePlate.Domain.Orders.Order cancelled,
+        DateTimeOffset now, CancellationToken cancellationToken)
+    {
+        var affectedOrderIds = await database.OrderAnalyticsRepeatLinks.AsNoTracking()
+            .Where(link => link.TenantId == cancelled.TenantId && link.PriorOrderId == cancelled.Id &&
+                link.ExpiresAt > now)
+            .Select(link => link.OrderId).Distinct().ToArrayAsync(cancellationToken);
+        if (affectedOrderIds.Length == 0) return;
+
+        var affected = await database.Orders.Where(order => affectedOrderIds.Contains(order.Id) &&
+                order.TenantId == cancelled.TenantId && order.AnalyticsConsentedAt != null)
+            .ToListAsync(cancellationToken);
+        var candidateIds = affected.Select(order => order.Id).ToArray();
+        var remainingLinks = await database.OrderAnalyticsRepeatLinks.AsNoTracking()
+            .Where(link => link.TenantId == cancelled.TenantId && candidateIds.Contains(link.OrderId) &&
+                link.PriorOrderId != cancelled.Id && link.ExpiresAt > now)
+            .Select(link => new { link.OrderId, link.PriorOrderId }).ToListAsync(cancellationToken);
+        var remainingPriorIds = remainingLinks.Select(link => link.PriorOrderId).Distinct().ToArray();
+        var activePriorIds = await database.Orders.AsNoTracking().Where(order =>
+                remainingPriorIds.Contains(order.Id) && order.TenantId == cancelled.TenantId &&
+                order.Status != WhitePlate.Domain.Orders.OrderStatus.Cancelled)
+            .Select(order => order.Id).ToHashSetAsync(cancellationToken);
+        var returningOrderIds = remainingLinks.Where(link => activePriorIds.Contains(link.PriorOrderId))
+            .Select(link => link.OrderId).ToHashSet();
+        foreach (var candidate in affected)
+            candidate.SetAnalyticsReturningCustomer(returningOrderIds.Contains(candidate.Id));
     }
 
     public Task<int> DeleteExpiredIdempotencyRecordsAsync(DateTimeOffset now,
