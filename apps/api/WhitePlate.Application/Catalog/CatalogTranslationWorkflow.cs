@@ -4,6 +4,7 @@ using WhitePlate.Application.Common.Results;
 using WhitePlate.Application.Identity;
 using WhitePlate.Domain.Common;
 using WhitePlate.Domain.Identity;
+using WhitePlate.Domain.Tenants;
 
 namespace WhitePlate.Application.Catalog;
 
@@ -39,7 +40,7 @@ public interface ICatalogTranslationWorkflowRepository
         CancellationToken cancellationToken);
 
     Task<CatalogTranslationDecisionOutcome> DecideAsync(Guid tenantId, Guid reviewId, int expectedVersion,
-        bool approve, ExternalIdentity reviewer, CancellationToken cancellationToken);
+        bool approve, ExternalIdentity reviewer, bool allowAuthorReview, CancellationToken cancellationToken);
 
     Task<IReadOnlyList<CatalogTranslationGlossaryTerm>> GetGlossaryAsync(Guid tenantId, string? sourceLocale,
         string? targetLocale, CancellationToken cancellationToken);
@@ -78,13 +79,14 @@ public sealed class CatalogTranslationWorkflowHandler(IStaffMembershipRepository
     public async Task<Result<IReadOnlyList<CatalogTranslationReviewDto>>> GetLatestReviewsAsync(Guid tenantId,
         ExternalIdentity identity, CancellationToken cancellationToken)
     {
-        if (!await CanManageAsync(tenantId, identity, cancellationToken))
+        var canReview = await CanSelfReviewAsync(tenantId, identity, cancellationToken);
+        if (!canReview)
             return Result<IReadOnlyList<CatalogTranslationReviewDto>>.Failure(new ApplicationError(ErrorCode.NotFound));
         var entries = await workflow.GetLatestReviewsAsync(tenantId, cancellationToken);
         IReadOnlyList<CatalogTranslationReviewDto> result = entries.Select(entry => new CatalogTranslationReviewDto(
             entry.Review.Id, entry.Review.EntityType, entry.Review.EntityId, entry.Review.Locale,
             entry.Review.Name, entry.Review.Description, entry.SourceName, entry.SourceDescription,
-            entry.Review.Version, entry.Review.Status.ToString(), CanReview(entry.Review, identity),
+            entry.Review.Version, entry.Review.Status.ToString(), canReview,
             entry.GlossaryWarnings, entry.Review.CreatedAt)).ToArray();
         return Result<IReadOnlyList<CatalogTranslationReviewDto>>.Success(result);
     }
@@ -92,13 +94,14 @@ public sealed class CatalogTranslationWorkflowHandler(IStaffMembershipRepository
     public async Task<Result<bool>> DecideAsync(Guid tenantId, Guid reviewId, int expectedVersion, bool approve,
         ExternalIdentity identity, CancellationToken cancellationToken)
     {
-        if (!await CanManageAsync(tenantId, identity, cancellationToken))
+        var canSelfReview = await CanSelfReviewAsync(tenantId, identity, cancellationToken);
+        if (!canSelfReview)
             return Result<bool>.Failure(new ApplicationError(ErrorCode.NotFound));
         if (expectedVersion < 1)
             return Result<bool>.Failure(new ApplicationError(ErrorCode.ValidationFailed,
                 new ValidationIssue("expectedVersion", "invalid_value", "A positive review version is required.")));
         var result = await workflow.DecideAsync(tenantId, reviewId, expectedVersion, approve, identity,
-            cancellationToken);
+            allowAuthorReview: canSelfReview, cancellationToken);
         return result switch
         {
             CatalogTranslationDecisionOutcome.Succeeded => Result<bool>.Success(true),
@@ -165,8 +168,10 @@ public sealed class CatalogTranslationWorkflowHandler(IStaffMembershipRepository
     private Task<bool> CanManageAsync(Guid tenantId, ExternalIdentity identity, CancellationToken cancellationToken) =>
         CatalogAccess.CanManageAsync(memberships, tenantId, identity, cancellationToken);
 
-    private static bool CanReview(CatalogTranslationReview review, ExternalIdentity identity) =>
-        !(review.AuthorIssuer == identity.Issuer && review.AuthorSubject == identity.Subject);
+    private async Task<bool> CanSelfReviewAsync(Guid tenantId, ExternalIdentity identity,
+        CancellationToken cancellationToken) =>
+        await memberships.IsOrganizationOwnerOfTenantAsync(tenantId, identity, cancellationToken) ||
+        await memberships.HasRestaurantRoleAsync(tenantId, identity, RestaurantRole.Manager, cancellationToken);
 
     private static CatalogTranslationGlossaryTermDto ToDto(CatalogTranslationGlossaryTerm term) =>
         new(term.Id, term.SourceLocale, term.TargetLocale, term.SourceTerm, term.TargetTerm,

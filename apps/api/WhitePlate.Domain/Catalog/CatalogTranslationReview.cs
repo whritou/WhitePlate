@@ -79,16 +79,18 @@ public sealed class CatalogTranslationReview
         };
     }
 
-    public void Approve(ExternalIdentity reviewer, int expectedVersion, DateTimeOffset reviewedAt)
+    public void Approve(ExternalIdentity reviewer, int expectedVersion, DateTimeOffset reviewedAt,
+        bool allowAuthorReview = false)
     {
-        EnsureReviewable(reviewer, expectedVersion);
+        EnsureReviewable(reviewer, expectedVersion, allowAuthorReview);
         Status = CatalogTranslationReviewStatus.Approved;
         SetReviewer(reviewer, reviewedAt);
     }
 
-    public void Reject(ExternalIdentity reviewer, int expectedVersion, DateTimeOffset reviewedAt)
+    public void Reject(ExternalIdentity reviewer, int expectedVersion, DateTimeOffset reviewedAt,
+        bool allowAuthorReview = false)
     {
-        EnsureReviewable(reviewer, expectedVersion);
+        EnsureReviewable(reviewer, expectedVersion, allowAuthorReview);
         Status = CatalogTranslationReviewStatus.Rejected;
         SetReviewer(reviewer, reviewedAt);
     }
@@ -108,13 +110,13 @@ public sealed class CatalogTranslationReview
             Status = CatalogTranslationReviewStatus.Superseded;
     }
 
-    private void EnsureReviewable(ExternalIdentity reviewer, int expectedVersion)
+    private void EnsureReviewable(ExternalIdentity reviewer, int expectedVersion, bool allowAuthorReview)
     {
         ArgumentNullException.ThrowIfNull(reviewer);
         if (Version != expectedVersion || Status != CatalogTranslationReviewStatus.Pending)
             throw new DomainRuleException("translation_review_conflict", "version",
                 "This translation review has changed. Refresh and try again.");
-        if (string.Equals(AuthorIssuer, reviewer.Issuer, StringComparison.Ordinal) &&
+        if (!allowAuthorReview && string.Equals(AuthorIssuer, reviewer.Issuer, StringComparison.Ordinal) &&
             string.Equals(AuthorSubject, reviewer.Subject, StringComparison.Ordinal))
             throw new DomainRuleException("self_review_not_allowed", "reviewer",
                 "A translation author cannot review their own change.");

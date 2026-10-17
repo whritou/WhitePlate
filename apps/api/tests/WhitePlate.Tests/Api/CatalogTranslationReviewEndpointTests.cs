@@ -11,13 +11,17 @@ namespace WhitePlate.Tests.Api;
 
 public sealed partial class OrdersEndpointTests
 {
-    [Fact]
-    public async Task ChangedTranslationWaitsForASecondManagerBeforeUpdatingCatalog()
+    [Theory]
+    [InlineData("manager")]
+    [InlineData("owner")]
+    public async Task ManagerOrOwnerCanApproveTheirOwnTranslation(string role)
     {
         using var factory = new OrdersFactory();
         var seeded = await factory.SeedAsync();
-        await factory.SeedMembershipAsync(seeded.TenantId, "author", RestaurantRole.Manager);
-        await factory.SeedMembershipAsync(seeded.TenantId, "reviewer", RestaurantRole.Manager);
+        if (role == "owner")
+            await factory.SeedOwnerAsync(seeded.OrganizationId, "author");
+        else
+            await factory.SeedMembershipAsync(seeded.TenantId, "author", RestaurantRole.Manager);
         using var author = factory.CreateClient();
         author.DefaultRequestHeaders.Authorization = new("Bearer", "author");
 
@@ -38,6 +42,15 @@ public sealed partial class OrdersEndpointTests
         Assert.Equal("Pending", submissionJson.RootElement.GetProperty("status").GetString());
         Assert.False(submissionJson.RootElement.GetProperty("unchanged").GetBoolean());
 
+        using var reviews = await author.GetAsync(
+            $"/api/v1/tenants/{seeded.TenantId}/catalog/translation-reviews",
+            TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.OK, reviews.StatusCode);
+        using var reviewsJson = JsonDocument.Parse(await reviews.Content.ReadAsStringAsync(
+            TestContext.Current.CancellationToken));
+        Assert.True(reviewsJson.RootElement.EnumerateArray().Single(item =>
+            item.GetProperty("id").GetGuid() == reviewId).GetProperty("canReview").GetBoolean());
+
         using (var scope = factory.Services.CreateScope())
         {
             var database = scope.ServiceProvider.GetRequiredService<WhitePlateDbContext>();
@@ -52,14 +65,7 @@ public sealed partial class OrdersEndpointTests
         using var selfApproval = await author.PostAsJsonAsync(
             $"/api/v1/tenants/{seeded.TenantId}/catalog/translation-reviews/{reviewId}/approve",
             new { expectedVersion = 1 }, TestContext.Current.CancellationToken);
-        Assert.Equal(HttpStatusCode.Forbidden, selfApproval.StatusCode);
-
-        using var reviewer = factory.CreateClient();
-        reviewer.DefaultRequestHeaders.Authorization = new("Bearer", "reviewer");
-        using var approval = await reviewer.PostAsJsonAsync(
-            $"/api/v1/tenants/{seeded.TenantId}/catalog/translation-reviews/{reviewId}/approve",
-            new { expectedVersion = 1 }, TestContext.Current.CancellationToken);
-        Assert.Equal(HttpStatusCode.NoContent, approval.StatusCode);
+        Assert.Equal(HttpStatusCode.NoContent, selfApproval.StatusCode);
 
         using var finalScope = factory.Services.CreateScope();
         var finalDatabase = finalScope.ServiceProvider.GetRequiredService<WhitePlateDbContext>();

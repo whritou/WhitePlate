@@ -96,7 +96,8 @@ public sealed class CatalogTranslationWorkflowRepository(WhitePlateDbContext dat
     }
 
     public async Task<CatalogTranslationDecisionOutcome> DecideAsync(Guid tenantId, Guid reviewId,
-        int expectedVersion, bool approve, ExternalIdentity reviewer, CancellationToken cancellationToken)
+        int expectedVersion, bool approve, ExternalIdentity reviewer, bool allowAuthorReview,
+        CancellationToken cancellationToken)
     {
         await using var transaction = await database.Database.BeginTransactionAsync(cancellationToken);
         var review = await database.CatalogTranslationReviews.SingleOrDefaultAsync(item => item.TenantId == tenantId &&
@@ -122,12 +123,12 @@ public sealed class CatalogTranslationWorkflowRepository(WhitePlateDbContext dat
         {
             if (approve)
             {
-                review.Approve(reviewer, expectedVersion, DateTimeOffset.UtcNow);
+                review.Approve(reviewer, expectedVersion, DateTimeOffset.UtcNow, allowAuthorReview);
                 item.ApplyTranslation(review.Locale, review.Name, review.Description);
             }
             else
             {
-                review.Reject(reviewer, expectedVersion, DateTimeOffset.UtcNow);
+                review.Reject(reviewer, expectedVersion, DateTimeOffset.UtcNow, allowAuthorReview);
             }
         }
         catch (DomainRuleException exception) when (exception.Code == "self_review_not_allowed")

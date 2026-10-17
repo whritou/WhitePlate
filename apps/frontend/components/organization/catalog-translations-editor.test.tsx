@@ -112,11 +112,11 @@ it("keeps the saved translation visible while a changed candidate waits for anot
   expect(html).toContain("Nouvelle soupe")
   expect(html).toContain("Nouvelle description")
   expect(html).toContain("Pending human review")
-  expect(html).toContain("cannot approve it")
+  expect(html).toContain("Your role cannot review translations")
   expect(html).not.toContain(">Approve</button>")
 })
 
-it("shows decision controls only when the current manager may review a pending candidate", () => {
+it("shows decision controls when an authorized manager or owner may review a pending candidate", () => {
   const html = renderToStaticMarkup(
     <NextIntlClientProvider
       locale="en"
