@@ -1,5 +1,11 @@
 # Database schema and tenant model
 
+## Organization-managed restaurant roles
+
+Migration `20261017222900_OrganizationRoleGrants` adds `OrganizationRoleGrants`, keyed by `(OrganizationId, Role)` and cascaded with its organization. `Permissions` is a `bigint` bitset and `Version` is a positive optimistic-concurrency token. The migration seeds one row for each editable role on every existing organization; organization provisioning creates the same defaults for new organizations. There is no startup migration, and this migration has not been applied to a shared or production database.
+
+Editable role rows are `Manager`, `Staff`, `Kitchen`, and `Accountant`. Their initial grants are respectively all permissions except billing, `orders.manage` plus `kitchen.display`, `kitchen.display`, and `analytics.view` plus `billing.manage`. `OrganizationOwner` is a protected synthetic role with all grants; it is never stored or editable through the role-grant API. The permission catalog is defined in the domain and serialized as stable string keys by the API.
+
 ## S5 Stripe Connect — 2026-10-17
 
 Generated migration `20261017134031_StripeConnect` adds three tenant/mode-aware tables:

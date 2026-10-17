@@ -19,7 +19,35 @@ export type Organization = {
 }
 
 export type OrganizationTeamRole =
-  "OrganizationOwner" | "RestaurantManager" | "KitchenStaff"
+  | "OrganizationOwner"
+  | "RestaurantManager"
+  | "KitchenStaff"
+  | "RestaurantStaff"
+  | "Accountant"
+
+export type RestaurantPermissionKey =
+  | "orders.manage"
+  | "kitchen.display"
+  | "catalog.manage"
+  | "discounts.manage"
+  | "analytics.view"
+  | "storefront.manage"
+  | "staff.manage"
+  | "billing.manage"
+
+export type OrganizationRoleGrant = {
+  role: "OrganizationOwner" | "Manager" | "Kitchen" | "Staff" | "Accountant"
+  permissions: RestaurantPermissionKey[]
+  version: number
+  isProtected: boolean
+}
+
+export type OrganizationRoleGrantInput = {
+  organizationId: string
+  role: Exclude<OrganizationRoleGrant["role"], "OrganizationOwner">
+  permissions: RestaurantPermissionKey[]
+  version: number
+}
 
 export type OrganizationInvitationStatus =
   "Pending" | "Accepted" | "Revoked" | "Expired"
@@ -45,7 +73,13 @@ export type OrganizationTeamDirectoryProps = {
   organizationId: string
   members: OrganizationTeamMember[] | null
   invitations: OrganizationTeamInvitation[] | null
+  roleGrants: OrganizationRoleGrant[] | null
+  isOrganizationOwner: boolean
 }
+
+export type OrganizationRoleGrantSaveResult =
+  | { ok: true; grant: OrganizationRoleGrant }
+  | { ok: false; message: ActionErrorMessage }
 
 export type CurrentUser = {
   restaurants: { id: string; name: string; role: string }[]

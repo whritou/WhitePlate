@@ -1,5 +1,16 @@
 # API contracts
 
+## Organization-managed restaurant roles
+
+`GET /api/v1/me` includes a `permissions` array on each restaurant membership, alongside its `role`. An organization owner receives every permission. Restaurant grants are resolved from the persisted organization role and are evaluated server-side for each protected operation; missing grant data fails closed. The current permission keys are `orders.manage`, `kitchen.display`, `catalog.manage`, `discounts.manage`, `analytics.view`, `storefront.manage`, `staff.manage`, and `billing.manage`.
+
+| Method/path | Access and request | Success |
+| --- | --- | --- |
+| GET `/api/v1/organizations/{organizationId}/roles` | Organization owner | 200 array of `{ role, permissions, version, isProtected }`; owner is protected and has version 0 |
+| PUT `/api/v1/organizations/{organizationId}/roles` | Organization owner; `{ role, permissions, version }` | 200 updated grant with incremented version |
+
+Only `Manager`, `Staff`, `Kitchen`, and `Accountant` are editable. Unknown or duplicate permission keys fail validation. A stale version returns `412 precondition_failed`, and foreign/non-owner access returns the standard not-found response. Role reads and writes use `Cache-Control: no-store`. Existing organization role defaults are seeded by additive migration `20261017222900_OrganizationRoleGrants`; new organizations receive defaults during provisioning. The migration is generated source only and has not been applied to a shared or production database. Stripe connection and OAuth account linking remain owner-only even when `billing.manage` grants billing visibility.
+
 ## S5 Stripe Connect — 2026-10-17
 
 | Method and route | Access and behavior |
