@@ -3536,7 +3536,6 @@
     "addRestaurant": "Add restaurant",
     "paymentsUnavailable": "No verified Stripe account. Online payments and payouts are not implemented.",
     "connectStripe": "Connect Stripe",
-    "sampleAnalytics": "Reporting is not available in the API yet. These charts contain fictitious data.",
     "appearance": "Design",
     "brandMedia": "Brand & Details",
     "studioTabs": "Studio sections",

@@ -16,7 +16,7 @@ The original pass targeted the real application. Its verification below is histo
 | Settings | Restaurant navigation reaches the existing seven-section source settings shell with organization and restaurant context retained. Actual organization operations remain; unsupported billing/payments/domains/notification controls retain their disclosures. |
 | Orders | Existing source lane/ticket composition retained. Real Cancelled lane, transition/version guards and recovery remain required contract differences. |
 | History | Existing shared demo/real history composition retained, including filters, paging, snapshots and export. |
-| Analytics | Existing source chart composition retained; fictitious reporting remains explicitly labeled pending real aggregates. |
+| Analytics | The real route now uses D2 metrics from the tenant-scoped API; fictional reporting remains in `/demo/analytics`. Hosted real-order and browser acceptance remain open. |
 | Studio | Existing source appearance editor/customer previews and actual brand-media editing retained. Theme publication remains a local draft, not a backend save. |
 | Customer menu, checkout and tracking | Existing source customer shell and real cart/receipt/tracking adapters retained. Real catalog data and uploaded assets are authoritative. Unsupported service/payment fields remain disclosed. |
 

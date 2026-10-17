@@ -2,13 +2,27 @@
 
 ## Implemented in source
 
-The restaurant dashboard reads tenant-scoped server aggregates from `GET /api/v1/tenants/{tenantId}/dashboard/metrics`. It compares today with the previous calendar day in the tenant's saved IANA time zone. Order volume includes every retained order by `CreatedAt`, including cancelled orders; archived orders remain included. Order value sums saved `Order.Total` for currently non-cancelled orders, including tax and discounts. It is not payment revenue.
+The restaurant dashboard and real-workspace analytics page read tenant-scoped server aggregates from `GET /api/v1/tenants/{tenantId}/dashboard/metrics`. It compares today with the previous calendar day in the tenant's saved IANA time zone. Order volume includes every retained order by `CreatedAt`, including cancelled orders; archived orders remain included. Order value sums saved `Order.Total` for currently non-cancelled orders, including tax and discounts. It is not payment revenue.
 
 The current queue counts Pending, Preparing, and Ready orders across all creation dates. Hourly volume uses the local hour for the two compared dates. Top sellers use the saved product ID/name and quantity in order-line snapshots for today's non-cancelled orders. Preparation averages use nonnegative `PreparingAt` to `ReadyAt` intervals whose ready time falls on the business date; legacy rows without timestamps do not contribute. Empty samples return a null average and a zero sample count.
 
 Owners and managers receive the two order-value aggregates. Kitchen responses contain null values; they do not receive those monetary figures. The same-origin BFF checks membership, both API and BFF responses are `no-store`, and the browser query key includes account, tenant, locale, and role. The chart includes a screen-reader-accessible hourly table. English and French explain the comparison dates, zone, cancellation treatment, and saved order-value meaning.
 
 The API lifecycle now records nullable `PreparingAt` and `ReadyAt` fields on transitions. Generated migrations `20261014122001_DashboardMetricsPreparationTimestamps` and `20261014122436_DashboardMetricsTenantStatusIndex` add those fields and the aggregate indexes. Existing orders are not backfilled, and the app does not apply migrations at startup.
+
+## Real-workspace analytics integration — 2026-10-17
+
+`/[locale]/organization/analytics` now loads the authorized restaurant's initial metrics through the server-only API service and reuses the D2 metrics panel. The panel refreshes through the membership-checking same-origin BFF every 30 seconds, with account/tenant/locale/role-scoped query state, retry/error handling, and role-based monetary display. The screen presents only values supplied by D2. The fictional range, restaurant, channel, repeat-customer, commission, and unsupported kitchen-performance figures remain in `/[locale]/demo/analytics` only. No API contract, schema, or C# code changed. Hosted browser acceptance against real orders remains open.
+
+| Check | Result |
+| --- | --- |
+| `node node_modules/typescript/bin/tsc --noEmit` | Passed. |
+| `node node_modules/eslint/bin/eslint.js .` | Passed with 0 errors and 19 existing `<img>` warnings. |
+| Targeted Prettier check for the analytics page/loading state and both locale catalogs | Passed. |
+| `node node_modules/next/dist/bin/next build --webpack` with process-only HTTPS dummy endpoints | Passed. Build output included existing PostgreSQL SSL-mode warnings from `pg-connection-string`. |
+| `git diff --check` | Passed. |
+
+`npm run typecheck` could not start because the configured global `npm-cli.js` is missing; the installed local TypeScript, ESLint, Prettier, and Next.js CLIs were used directly. The first build attempt hit Windows `EPERM` on the generated `.next` cache; it passed when retried with cache-write permission. Automated tests and hosted real-order browser acceptance were not run for this page integration.
 
 ## PostgreSQL migration rollout — 2026-10-14
 

@@ -3536,7 +3536,6 @@
     "addRestaurant": "Ajouter un restaurant",
     "paymentsUnavailable": "Aucun compte Stripe vérifié. Les paiements en ligne et les virements ne sont pas implémentés.",
     "connectStripe": "Connecter Stripe",
-    "sampleAnalytics": "L’API ne fournit pas encore de rapports. Ces graphiques contiennent des données fictives.",
     "appearance": "Design",
     "brandMedia": "Marque et détails",
     "studioTabs": "Sections du Studio",

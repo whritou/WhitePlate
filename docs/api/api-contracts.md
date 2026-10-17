@@ -127,7 +127,7 @@ The board measures elapsed time from saved `createdAt`, pickup countdown/urgency
 
 Order sound is muted by default and enabled only by a user gesture. It alerts on a deduplicated `order.created` event newer than the latest REST snapshot, with an accessible announcement; replayed, duplicate, status-only, and foreign-tenant events do not alert. The preference lasts for the mounted board session. Persisted preparation stages, stations, pickup shelves, and rush-adjusted deadlines are not represented by the current order/API model and are not shown as if they were saved facts.
 
-## D2 restaurant dashboard metrics — implemented in source, migration rollout pending
+## D2 restaurant dashboard metrics — implemented in source, schema applied
 
 `GET /api/v1/tenants/{tenantId}/dashboard/metrics` requires a current owner, manager, or kitchen membership for that tenant and returns a no-store response. Owners and managers receive `orderValue` and `comparisonOrderValue`; Kitchen receives both as `null`. Order value is the saved `Order.Total` after product tax and applied discount, excluding currently cancelled orders. It is an order total, not captured payment revenue. `currency` comes from the restaurant.
 
