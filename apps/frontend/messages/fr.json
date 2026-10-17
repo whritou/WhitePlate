@@ -3881,7 +3881,7 @@
   },
   "StripeConnect": {
     "title": "Connexion du compte Stripe",
-    "description": "Connectez le compte Stripe existant de ce restaurant. WhitePlate ne prélève aucun frais de plateforme. Cette connexion n’active pas le paiement en ligne.",
+    "description": "Connectez le compte Stripe de ce restaurant, ou créez-en un pendant la configuration. WhitePlate ne prélève aucun frais de plateforme. Cette connexion n’active pas le paiement en ligne.",
     "connect": "Connecter un compte Stripe",
     "connecting": "Ouverture de Stripe…",
     "openDashboard": "Ouvrir le Dashboard Stripe",
@@ -3913,7 +3913,6 @@
     "callback": {
       "connected": "Vous êtes revenu de Stripe. Le statut ci-dessous est vérifié auprès de Stripe.",
       "canceled": "Vous avez annulé la connexion. Aucun compte n’a été lié.",
-      "existing_account_required": "Stripe a créé un nouveau compte pendant la configuration. WhitePlate l’a déconnecté ; connectez plutôt un compte existant.",
       "owner_required": "Un propriétaire de l’organisation doit terminer la connexion Stripe.",
       "failed": "La connexion Stripe n’a pas pu être confirmée. Vérifiez le statut ci-dessous ou recommencez."
     },

@@ -21,7 +21,6 @@ import type { StripeConnectStatus } from "@/types/stripe-connect"
 const callbackOutcomes = [
   "connected",
   "canceled",
-  "existing_account_required",
   "owner_required",
   "failed",
 ] as const

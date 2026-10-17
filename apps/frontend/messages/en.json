@@ -3881,7 +3881,7 @@
   },
   "StripeConnect": {
     "title": "Stripe account connection",
-    "description": "Connect this restaurant’s existing Stripe account. WhitePlate does not charge an application fee. This connection does not enable online checkout.",
+    "description": "Connect or create this restaurant’s Stripe account. WhitePlate does not charge an application fee. This connection does not enable online checkout.",
     "connect": "Connect Stripe account",
     "connecting": "Opening Stripe…",
     "openDashboard": "Open Stripe Dashboard",
@@ -3913,7 +3913,6 @@
     "callback": {
       "connected": "You returned from Stripe. The connection status below is checked against Stripe.",
       "canceled": "You canceled the connection. No account was linked.",
-      "existing_account_required": "Stripe created a new account during setup. WhitePlate disconnected it; connect an existing account instead.",
       "owner_required": "An organization owner must complete the Stripe connection.",
       "failed": "The Stripe connection could not be confirmed. Check the status below or start a new connection."
     },

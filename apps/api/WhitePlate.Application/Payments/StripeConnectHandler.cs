@@ -125,11 +125,6 @@ public sealed class StripeConnectHandler(IStaffMembershipRepository memberships,
             var account = await provider.GetAccountAsync(consumed.Mode, exchange.StripeAccountId, cancellationToken);
             if (account.LiveMode != exchange.LiveMode || account.Id != exchange.StripeAccountId)
                 return fallback;
-            if (account.CreatedAt.ToUnixTimeSeconds() >= consumed.CreatedAt.ToUnixTimeSeconds())
-            {
-                await provider.DeauthorizeAsync(consumed.Mode, account.Id, cancellationToken);
-                return fallback with { Outcome = "existing_account_required" };
-            }
             if (!string.Equals(account.Type, "standard", StringComparison.OrdinalIgnoreCase))
                 return fallback;
 

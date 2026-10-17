@@ -189,11 +189,11 @@ Decisions and limits:
 
 Reference: settings. Dependencies: S1.
 
-Implemented in source: the Payments settings section connects each restaurant's existing Standard account through server-side OAuth in a server-selected Stripe test/live mode. Owners manage the connection; owners/managers read Stripe-sourced connection/readiness status. WhitePlate adds no application fee and S5 does not create payments or charges.
+Implemented in source: the Payments settings section connects each restaurant's Standard account through server-side OAuth in a server-selected Stripe test/live mode. Owners can select an existing account or create one during OAuth; owners manage the connection and owners/managers read Stripe-sourced connection/readiness status. WhitePlate adds no application fee and S5 does not create payments or charges.
 
 Acceptance criteria:
 
-- [x] Use Standard OAuth to connect the exact existing account; persist one account per tenant and mode; bind one-use state to tenant, initiating owner, mode and locale; recheck owner membership before code exchange.
+- [x] Use Standard OAuth to connect the selected Standard account, whether it existed before OAuth or was created during setup; persist one account per tenant and mode; bind one-use state to tenant, initiating owner, mode and locale; recheck owner membership before code exchange.
 - [x] Show connection and Stripe readiness states from live Stripe account fields and signed webhooks; a callback redirect never proves connection or verification.
 - [x] Verify webhook signatures, deduplicate events, ignore stale updates and prevent account.updated from restoring a disconnected connection. Deny foreign-tenant access and keep secrets, tokens, bank data and requirement details server-side.
 - [x] Provide a fixed mode-correct Stripe Dashboard link for owners; managers receive read-only status. Do not show balances, bank data or payment methods.
@@ -203,7 +203,7 @@ Acceptance criteria:
 
 Decisions and limits:
 
-- Resolved for S5: existing Standard account via OAuth; Stripe processing fees remain with the restaurant; WhitePlate takes no application fee; no in-app unlink or active-account replacement; no payment execution.
+- Resolved for S5: Standard account via OAuth (existing or created during setup); Stripe processing fees remain with the restaurant; WhitePlate takes no application fee; no in-app unlink or active-account replacement; no payment execution.
 - Guest checkout, direct-charge execution, refunds, reconciliation, paid-order semantics, countries/currencies and live deployment require separate implementation and acceptance before WhitePlate processes payments.
 
 ### D1 — Restaurant Dashboard: live operations overview from existing orders

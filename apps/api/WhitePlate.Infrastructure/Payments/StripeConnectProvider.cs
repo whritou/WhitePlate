@@ -97,23 +97,6 @@ public sealed class StripeConnectProvider(IHttpClientFactory clients, StripeConn
             ReadBoolean(root, "livemode"), readiness);
     }
 
-    public async Task DeauthorizeAsync(StripeConnectMode mode, string accountId,
-        CancellationToken cancellationToken)
-    {
-        var settings = options.For(mode);
-        using var client = clients.CreateClient("StripeConnectOAuth");
-        using var request = new HttpRequestMessage(HttpMethod.Post, "oauth/deauthorize")
-        {
-            Content = new FormUrlEncodedContent(new Dictionary<string, string>
-            {
-                ["client_id"] = settings.ClientId,
-                ["stripe_user_id"] = accountId,
-                ["client_secret"] = settings.ApiKey
-            })
-        };
-        using var response = await SendAsync(client, request, cancellationToken);
-    }
-
     public StripeConnectWebhookEvent? VerifyWebhook(StripeConnectMode mode, string rawBody, string signature)
     {
         var secret = options.For(mode).WebhookSecret;

@@ -81,7 +81,7 @@ dotnet user-secrets set "StripeConnect:Test:CallbackUri" "http://localhost:5182/
 dotnet user-secrets set "StripeConnect:Test:WebhookSecret" "whsec_REPLACE_WITH_TEST_SIGNING_SECRET" --project apps/api/WhitePlate.Api/WhitePlate.Api.csproj
 ```
 
-The callback URI must exactly match the Stripe Connect client configuration. OAuth codes are single-use, so an interrupted or uncertain exchange requires a fresh Connect attempt. The callback only redirects back to the Payments settings screen; that screen reads the connection and readiness from Stripe again. Stripe test credentials must be used with the Test Connect client and test webhook secret. A live deployment uses the separate `StripeConnect:Live:*` values and `StripeConnect:ActiveMode=Live`. The API validates the key prefix against the configured mode. This scope connects an existing Standard account and does not accept or create payments.
+The callback URI must exactly match the Stripe Connect client configuration. OAuth codes are single-use, so an interrupted or uncertain exchange requires a fresh Connect attempt. The callback only redirects back to the Payments settings screen; that screen reads the connection and readiness from Stripe again. Stripe test credentials must be used with the Test Connect client and test webhook secret. A live deployment uses the separate `StripeConnect:Live:*` values and `StripeConnect:ActiveMode=Live`. The API validates the key prefix against the configured mode. The owner can select an existing Standard account or create one during OAuth; an incomplete account is linked with its current Stripe readiness. This scope does not accept or create payments.
 
 ### Brand media storage (T1)
 
