@@ -1,7 +1,7 @@
-import { getTranslations } from "next-intl/server"
+import { getLocale, getTranslations } from "next-intl/server"
 import { getManagedWorkspaceRestaurant } from "@/services/live-workspace"
-import { AnalyticsPage } from "@/components/lovable/pages/analytics"
-import { MissingFeatureNotice } from "@/components/organization/missing-feature-notice"
+import { getDashboardMetrics } from "@/services/orders"
+import { DashboardMetricsPanel } from "@/components/organization/dashboard-metrics-panel"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import type { SearchParams } from "@/types/navigation"
 export default async function AnalyticsWorkspacePage({
@@ -9,10 +9,12 @@ export default async function AnalyticsWorkspacePage({
 }: {
   searchParams: Promise<SearchParams>
 }) {
-  const restaurant = await getManagedWorkspaceRestaurant(
-    (await searchParams).tenantId
-  )
-  const t = await getTranslations("LiveWorkspace")
+  const params = await searchParams
+  const restaurant = await getManagedWorkspaceRestaurant(params.tenantId)
+  const [locale, t] = await Promise.all([
+    getLocale(),
+    getTranslations("LiveWorkspace"),
+  ])
 
   if (!restaurant)
     return (
@@ -25,17 +27,27 @@ export default async function AnalyticsWorkspacePage({
       </main>
     )
 
+  const metricsResponse = await getDashboardMetrics(restaurant.id)
+
   return (
-    <div className="min-w-0">
-      <div className="grid gap-3 px-6 pt-6">
-        <MissingFeatureNotice />
+    <main className="mx-auto max-w-[1600px] min-w-0 px-6 pb-12">
+      <header className="py-8">
+        <p className="label-mono text-muted-foreground">{restaurant.name}</p>
 
-        <p className="text-sm text-muted-foreground">
-          {restaurant.name} · {t("sampleAnalytics")}
-        </p>
-      </div>
+        <h1 className="mt-2 font-display text-4xl font-bold">
+          {t("analytics")}
+        </h1>
+      </header>
 
-      <AnalyticsPage />
-    </div>
+      <DashboardMetricsPanel
+        userId={restaurant.userId}
+        tenantId={restaurant.id}
+        locale={locale}
+        role={restaurant.role}
+        initialMetrics={
+          metricsResponse.ok ? (metricsResponse.data ?? null) : null
+        }
+      />
+    </main>
   )
 }
