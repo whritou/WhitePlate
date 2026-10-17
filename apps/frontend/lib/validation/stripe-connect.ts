@@ -31,7 +31,9 @@ export function parseStripeConnectStatus(
 
   if (
     !modes.includes(value.mode as StripeConnectMode) ||
-    !connectionStates.includes(value.connectionState as StripeConnectionState) ||
+    !connectionStates.includes(
+      value.connectionState as StripeConnectionState
+    ) ||
     !readinessStates.includes(value.readinessState as StripeReadinessState) ||
     typeof value.canManage !== "boolean" ||
     !isValidTimestamp(lastVerifiedAt)
@@ -48,8 +50,7 @@ export function parseStripeConnectStatus(
       ? "https://dashboard.stripe.com/test"
       : "https://dashboard.stripe.com/"
 
-  if (dashboardUrl !== null && dashboardUrl !== expectedDashboard)
-    return null
+  if (dashboardUrl !== null && dashboardUrl !== expectedDashboard) return null
 
   return {
     mode,
@@ -61,7 +62,9 @@ export function parseStripeConnectStatus(
   }
 }
 
-export function parseStripeConnectStart(value: unknown): StripeConnectStart | null {
+export function parseStripeConnectStart(
+  value: unknown
+): StripeConnectStart | null {
   if (
     !isRecord(value) ||
     !modes.includes(value.mode as StripeConnectMode) ||
@@ -85,7 +88,10 @@ export function parseStripeConnectStart(value: unknown): StripeConnectStart | nu
     )
       return null
 
-    return { mode: value.mode as StripeConnectMode, authorizationUrl: url.toString() }
+    return {
+      mode: value.mode as StripeConnectMode,
+      authorizationUrl: url.toString(),
+    }
   } catch {
     return null
   }

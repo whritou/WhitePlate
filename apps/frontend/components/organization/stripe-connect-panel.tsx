@@ -95,9 +95,10 @@ export function StripeConnectPanel({
   const statusLabel = status
     ? t(`connection.${status.connectionState}`)
     : t("unavailable")
-  const readinessLabel = status?.connectionState === "connected"
-    ? t(`readiness.${status.readinessState}`)
-    : null
+  const readinessLabel =
+    status?.connectionState === "connected"
+      ? t(`readiness.${status.readinessState}`)
+      : null
 
   return (
     <Card>
@@ -128,7 +129,9 @@ export function StripeConnectPanel({
         >
           <h3 className="font-semibold">{statusLabel}</h3>
 
-          {readinessLabel && <p>{t("readinessLabel", { state: readinessLabel })}</p>}
+          {readinessLabel && (
+            <p>{t("readinessLabel", { state: readinessLabel })}</p>
+          )}
 
           {status?.mode && (
             <p className="text-sm text-muted-foreground">
@@ -147,7 +150,9 @@ export function StripeConnectPanel({
               })}
             </p>
           ) : status?.connectionState === "connected" ? (
-            <p className="text-sm text-muted-foreground">{t("notVerifiedYet")}</p>
+            <p className="text-sm text-muted-foreground">
+              {t("notVerifiedYet")}
+            </p>
           ) : null}
 
           {unavailable && <p>{t("unavailableDescription")}</p>}
@@ -166,14 +171,23 @@ export function StripeConnectPanel({
               role="link"
               variant="outline"
               render={
-                <a href={status.dashboardUrl} target="_blank" rel="noreferrer" />
+                <a
+                  href={status.dashboardUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                />
               }
             >
               {t("openDashboard")}
             </Button>
           )}
 
-          <Button type="button" variant="outline" onClick={refreshStatus} disabled={pending}>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={refreshStatus}
+            disabled={pending}
+          >
             {pending ? t("refreshing") : t("refresh")}
           </Button>
         </div>

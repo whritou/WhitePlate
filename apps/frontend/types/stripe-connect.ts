@@ -1,5 +1,6 @@
 export type StripeConnectMode = "test" | "live"
-export type StripeConnectionState = "not_connected" | "connected" | "disconnected"
+export type StripeConnectionState =
+  "not_connected" | "connected" | "disconnected"
 export type StripeReadinessState =
   | "unknown"
   | "onboarding"

@@ -32,7 +32,14 @@ export default async function RestaurantSettingsPage({
 
   const section =
     typeof params.section === "string" &&
-    ["establishment", "legal", "hours", "pickup", "notifications", "payments"].includes(params.section)
+    [
+      "establishment",
+      "legal",
+      "hours",
+      "pickup",
+      "notifications",
+      "payments",
+    ].includes(params.section)
       ? (params.section as
           | "establishment"
           | "legal"
@@ -41,14 +48,15 @@ export default async function RestaurantSettingsPage({
           | "notifications"
           | "payments")
       : "establishment"
-  const [settings, legalProfile, emailSettings, stripeStatus] = await Promise.all([
-    getEstablishmentSettings(restaurant.id),
-    getTenantLegalProfile(restaurant.id),
-    getOrderEmailSettings(restaurant.id),
-    section === "payments"
-      ? getStripeConnectStatus(restaurant.id)
-      : Promise.resolve(null),
-  ])
+  const [settings, legalProfile, emailSettings, stripeStatus] =
+    await Promise.all([
+      getEstablishmentSettings(restaurant.id),
+      getTenantLegalProfile(restaurant.id),
+      getOrderEmailSettings(restaurant.id),
+      section === "payments"
+        ? getStripeConnectStatus(restaurant.id)
+        : Promise.resolve(null),
+    ])
   const callbackOutcome =
     typeof params.stripeConnectResult === "string"
       ? params.stripeConnectResult
