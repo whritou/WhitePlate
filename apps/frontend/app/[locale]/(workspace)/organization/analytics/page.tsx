@@ -14,12 +14,26 @@ export default async function AnalyticsWorkspacePage({
     getRestaurantMemberships(),
   ])
 
-  if (!memberships.ok || memberships.data === null) return <AnalyticsWorkspaceClient restaurants={[]} locale={locale}
-    initialErrorStatus={memberships.ok ? 502 : memberships.status} />
+  if (!memberships.ok || memberships.data === null)
+    return (
+      <AnalyticsWorkspaceClient
+        restaurants={[]}
+        locale={locale}
+        initialErrorStatus={memberships.ok ? 502 : memberships.status}
+      />
+    )
 
-  const restaurants = memberships.data.filter(item =>
-    item.role === "OrganizationOwner" || item.role === "Manager")
-  const requestedTenantId = typeof params.tenantId === "string" ? params.tenantId : undefined
+  const restaurants = memberships.data.filter(
+    (item) => item.role === "OrganizationOwner" || item.role === "Manager"
+  )
+  const requestedTenantId =
+    typeof params.tenantId === "string" ? params.tenantId : undefined
 
-  return <AnalyticsWorkspaceClient restaurants={restaurants} locale={locale} requestedTenantId={requestedTenantId} />
+  return (
+    <AnalyticsWorkspaceClient
+      restaurants={restaurants}
+      locale={locale}
+      requestedTenantId={requestedTenantId}
+    />
+  )
 }

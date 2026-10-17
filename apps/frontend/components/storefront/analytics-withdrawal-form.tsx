@@ -19,10 +19,13 @@ export function AnalyticsWithdrawalForm({ tenantId }: { tenantId: string }) {
     setPending(true)
     setState("idle")
     try {
-      const result = await browserRequest<{ ok: boolean }>("/api/public/analytics-withdrawal", {
-        method: "POST",
-        body: { tenantId, email: email.trim() },
-      })
+      const result = await browserRequest<{ ok: boolean }>(
+        "/api/public/analytics-withdrawal",
+        {
+          method: "POST",
+          body: { tenantId, email: email.trim() },
+        }
+      )
 
       if (!result.ok || !result.data?.ok) {
         setState("error")
@@ -44,11 +47,16 @@ export function AnalyticsWithdrawalForm({ tenantId }: { tenantId: string }) {
       <div>
         <h3 className="font-semibold">{t("withdrawTitle")}</h3>
 
-        <p className="mt-1 text-sm text-muted-foreground">{t("withdrawDescription")}</p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {t("withdrawDescription")}
+        </p>
       </div>
 
       <form onSubmit={withdraw} className="grid gap-3 sm:grid-cols-[1fr_auto]">
-        <Label className="grid gap-1.5 text-sm font-medium" htmlFor={`analytics-withdrawal-${tenantId}`}>
+        <Label
+          className="grid gap-1.5 text-sm font-medium"
+          htmlFor={`analytics-withdrawal-${tenantId}`}
+        >
           {t("emailLabel")}
 
           <Input
@@ -59,18 +67,28 @@ export function AnalyticsWithdrawalForm({ tenantId }: { tenantId: string }) {
             maxLength={254}
             required
             value={email}
-            onChange={event => setEmail(event.target.value)}
+            onChange={(event) => setEmail(event.target.value)}
           />
         </Label>
 
-        <Button className="self-end" type="submit" variant="outline" disabled={pending}>
+        <Button
+          className="self-end"
+          type="submit"
+          variant="outline"
+          disabled={pending}
+        >
           {pending ? t("withdrawing") : t("withdrawAction")}
         </Button>
       </form>
 
       {state !== "idle" && (
-        <Alert variant={state === "success" ? "info" : "destructive"} role="status">
-          <AlertDescription>{t(state === "success" ? "withdrawSuccess" : "withdrawError")}</AlertDescription>
+        <Alert
+          variant={state === "success" ? "info" : "destructive"}
+          role="status"
+        >
+          <AlertDescription>
+            {t(state === "success" ? "withdrawSuccess" : "withdrawError")}
+          </AlertDescription>
         </Alert>
       )}
     </div>

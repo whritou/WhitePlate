@@ -14,11 +14,19 @@ export async function GET(request: Request) {
   const restaurant = query.get("restaurant") ?? "all"
   const days = Number(query.get("days") ?? "30")
 
-  if (query.getAll("restaurant").length > 1 || query.getAll("days").length > 1 ||
-      !(restaurant === "all" || isValidTenantId(restaurant)) || ![7, 30, 90].includes(days))
+  if (
+    query.getAll("restaurant").length > 1 ||
+    query.getAll("days").length > 1 ||
+    !(restaurant === "all" || isValidTenantId(restaurant)) ||
+    ![7, 30, 90].includes(days)
+  )
     return respond({ ok: false, error: "invalid" }, 400)
 
-  const response = await getOrganizationAnalytics(restaurant, days, request.signal)
+  const response = await getOrganizationAnalytics(
+    restaurant,
+    days,
+    request.signal
+  )
 
   return respond(response, response.status)
 }

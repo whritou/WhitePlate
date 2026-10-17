@@ -10,7 +10,8 @@ import { useAnalyticsPageView } from "./analytics-AnalyticsPage-context"
 import { AnalyticsPageSection1 } from "./analytics-AnalyticsPage-section-1"
 import { useTranslations } from "next-intl"
 export function AnalyticsPageView() {
-  const { range, setRange, rest, setRest, restOptions, exportCsv, pageMode } = useAnalyticsPageView()
+  const { range, setRange, rest, setRest, restOptions, exportCsv, pageMode } =
+    useAnalyticsPageView()
   const t = useTranslations("AnalyticsLive")
 
   return (
@@ -18,8 +19,14 @@ export function AnalyticsPageView() {
       <section className="flex flex-wrap items-end justify-between gap-4 px-6 pt-8 pb-6">
         <div>
           <p className="label-mono flex items-center gap-2 text-muted-foreground">
-            <span className={`h-2 w-2 ${pageMode === "demo" ? "animate-pulse bg-primary" : "bg-primary"}`} />{" "}
-            {pageMode === "demo" ? <Copy>Sample data · browser demo</Copy> : t("liveData")}
+            <span
+              className={`h-2 w-2 ${pageMode === "demo" ? "animate-pulse bg-primary" : "bg-primary"}`}
+            />{" "}
+            {pageMode === "demo" ? (
+              <Copy>Sample data · browser demo</Copy>
+            ) : (
+              t("liveData")
+            )}
           </p>
 
           <h1 className="mt-1 font-display text-4xl font-bold">
@@ -52,7 +59,17 @@ export function AnalyticsPageView() {
                   aria-pressed={range === k}
                   className={`label-mono px-3 py-2.5 ${range === k ? "bg-accent" : ""}`}
                 >
-                  <Copy>{pageMode === "live" ? t(k === "7" ? "range7" : k === "30" ? "range30" : "range90") : l}</Copy>
+                  <Copy>
+                    {pageMode === "live"
+                      ? t(
+                          k === "7"
+                            ? "range7"
+                            : k === "30"
+                              ? "range30"
+                              : "range90"
+                        )
+                      : l}
+                  </Copy>
                 </SourceButton>
               ))}
             </Copy>

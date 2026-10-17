@@ -49,8 +49,15 @@ export async function submitGuestOrder(
     signal: AbortSignal.timeout(15_000),
   })
 
-  if (!result.ok) return { ok: false, error: result.error === "invalid" &&
-    result.validationFields?.includes("analyticsConsent") ? "analytics_unavailable" : result.error }
+  if (!result.ok)
+    return {
+      ok: false,
+      error:
+        result.error === "invalid" &&
+        result.validationFields?.includes("analyticsConsent")
+          ? "analytics_unavailable"
+          : result.error,
+    }
 
   return isOrderReceipt(result.data)
     ? { ok: true, receipt: result.data }

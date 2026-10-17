@@ -1,4 +1,8 @@
-export type AnalyticsPeriod = { startDate: string; endDate: string; days: number }
+export type AnalyticsPeriod = {
+  startDate: string
+  endDate: string
+  days: number
+}
 export type AnalyticsMoneyValue = {
   currency: string
   value: number | null
@@ -73,16 +77,43 @@ export type AnalyticsPageViewModel = {
   metric: "revenue" | "orders"
   setMetric: (metric: "revenue" | "orders") => void
   d: {
-    series: { day: string; orders: number; revenue: number; prev: number;
-      revenueByCurrency?: Record<string, number>; previousRevenueByCurrency?: Record<string, number> }[]
+    series: {
+      day: string
+      orders: number
+      revenue: number
+      prev: number
+      revenueByCurrency?: Record<string, number>
+      previousRevenueByCurrency?: Record<string, number>
+    }[]
     hours: { hour: string; orders: number }[]
     channels: { name: string; value: number; state?: string }[]
-    dishes: { n: string; q: number; rev: number; currency?: string;
-      tenantId?: string; restaurant?: string; rank?: number; barValue?: number }[]
+    dishes: {
+      n: string
+      q: number
+      rev: number
+      currency?: string
+      tenantId?: string
+      restaurant?: string
+      rank?: number
+      barValue?: number
+    }[]
   }
-  kpis: { k: string; v: string; delta: number | null; invert?: boolean; note?: string }[]
-  kitchen: { onTime: number | null; accepted: number | null; cancelled: number | null;
-    fastest: string; slowest: string; discountUses: string; refunds: string }
+  kpis: {
+    k: string
+    v: string
+    delta: number | null
+    invert?: boolean
+    note?: string
+  }[]
+  kitchen: {
+    onTime: number | null
+    accepted: number | null
+    cancelled: number | null
+    fastest: string
+    slowest: string
+    discountUses: string
+    refunds: string
+  }
   maxDish: number
   pageMode: "demo" | "live"
   dishBarMetric?: "revenue" | "quantity" | "normalized"

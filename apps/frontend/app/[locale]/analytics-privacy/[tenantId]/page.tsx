@@ -29,7 +29,10 @@ export default async function AnalyticsPrivacyPage({
         <AnalyticsWithdrawalForm tenantId={tenantId} />
       </section>
 
-      <Link className="min-h-11 text-sm underline-offset-4 hover:underline" href="/">
+      <Link
+        className="min-h-11 text-sm underline-offset-4 hover:underline"
+        href="/"
+      >
         {t("backToRestaurant")}
       </Link>
     </main>

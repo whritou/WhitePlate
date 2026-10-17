@@ -105,11 +105,15 @@ export function useGuestCheckout(menu: StorefrontMenu) {
 
     const input = {
       customerName,
-      customerEmail: emailUpdatesConsented || analyticsConsented ? customerEmail : "",
+      customerEmail:
+        emailUpdatesConsented || analyticsConsented ? customerEmail : "",
       emailUpdatesConsented,
       analyticsConsented: analyticsConsented ?? false,
-      analyticsSource: typeof window !== "undefined" &&
-        new URLSearchParams(window.location.search).get("source") === "qr" ? "qr" as const : "web" as const,
+      analyticsSource:
+        typeof window !== "undefined" &&
+        new URLSearchParams(window.location.search).get("source") === "qr"
+          ? ("qr" as const)
+          : ("web" as const),
       discountCode: discountCode || null,
       menuLocale: menu.locale,
       pickupAt: selectedPickupAt === "asap" ? null : selectedPickupAt,

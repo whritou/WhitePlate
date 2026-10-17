@@ -1,6 +1,12 @@
 "use client"
 import { useMemo, useState } from "react"
-import { useThemeColors, build, eur, pct, RESTAURANTS } from "./analytics-shared"
+import {
+  useThemeColors,
+  build,
+  eur,
+  pct,
+  RESTAURANTS,
+} from "./analytics-shared"
 export function useAnalyticsPageModel() {
   const [range, setRange] = useState<"7" | "30" | "90">("30")
   const [rest, setRest] = useState(0)

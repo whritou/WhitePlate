@@ -25,17 +25,19 @@ export const createGuestCheckoutStore = createStoreFactory<
   changeEmailUpdatesConsent: (emailUpdatesConsented) =>
     set((state) => ({
       emailUpdatesConsented,
-      customerEmail: emailUpdatesConsented || state.analyticsConsented
-        ? state.customerEmail
-        : "",
+      customerEmail:
+        emailUpdatesConsented || state.analyticsConsented
+          ? state.customerEmail
+          : "",
       error: null,
     })),
   changeAnalyticsConsent: (analyticsConsented) =>
     set((state) => ({
       analyticsConsented,
-      customerEmail: analyticsConsented || state.emailUpdatesConsented
-        ? state.customerEmail
-        : "",
+      customerEmail:
+        analyticsConsented || state.emailUpdatesConsented
+          ? state.customerEmail
+          : "",
       error: null,
     })),
   changeDiscountCode: (discountCode) => set({ discountCode, error: null }),

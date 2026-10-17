@@ -46,7 +46,9 @@ export function CheckoutEmailUpdates({
           id="analytics-consent"
           checked={analyticsConsented}
           aria-describedby="analytics-consent-help"
-          onCheckedChange={(checked) => changeAnalyticsConsent?.(checked === true)}
+          onCheckedChange={(checked) =>
+            changeAnalyticsConsent?.(checked === true)
+          }
         />
 
         {c("analyticsConsent")}

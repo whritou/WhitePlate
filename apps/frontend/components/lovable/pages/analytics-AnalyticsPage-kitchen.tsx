@@ -19,9 +19,21 @@ export function AnalyticsPageKitchen() {
       <div className="space-y-5 p-5">
         <Copy>
           {[
-            [liveLabel("onTimePickups", "On-time pickups"), kitchen.onTime, "%"],
-            [liveLabel("acceptedUnderOneMinute", "Accepted < 1 min"), kitchen.accepted, "%"],
-            [liveLabel("cancelledOrders", "Cancelled orders"), kitchen.cancelled, "%"],
+            [
+              liveLabel("onTimePickups", "On-time pickups"),
+              kitchen.onTime,
+              "%",
+            ],
+            [
+              liveLabel("acceptedUnderOneMinute", "Accepted < 1 min"),
+              kitchen.accepted,
+              "%",
+            ],
+            [
+              liveLabel("cancelledOrders", "Cancelled orders"),
+              kitchen.cancelled,
+              "%",
+            ],
           ].map(([k, v, u]) => (
             <div key={k as string}>
               <div className="flex justify-between text-sm">
@@ -30,12 +42,21 @@ export function AnalyticsPageKitchen() {
                 </span>
 
                 <span className="font-bold">
-                  <Copy>{v === null ? t("unavailable") : `${(v as number).toFixed(0)}${u}`}</Copy>
+                  <Copy>
+                    {v === null
+                      ? t("unavailable")
+                      : `${(v as number).toFixed(0)}${u}`}
+                  </Copy>
                 </span>
               </div>
 
               <div className="mt-1.5 h-2 bg-ink-foreground/15">
-                <div className="h-2 bg-accent" style={{ width: `${Math.min(100, Math.max(0, (v as number | null) ?? 0))}%` }} />
+                <div
+                  className="h-2 bg-accent"
+                  style={{
+                    width: `${Math.min(100, Math.max(0, (v as number | null) ?? 0))}%`,
+                  }}
+                />
               </div>
             </div>
           ))}
@@ -46,8 +67,14 @@ export function AnalyticsPageKitchen() {
             {[
               [liveLabel("fastest", "Fastest"), kitchen.fastest],
               [liveLabel("slowest", "Slowest"), kitchen.slowest],
-              [liveLabel("discountUses", "Discount uses"), kitchen.discountUses],
-              [liveLabel("refunds", "Refunds"), pageMode === "live" ? t("unavailable") : kitchen.refunds],
+              [
+                liveLabel("discountUses", "Discount uses"),
+                kitchen.discountUses,
+              ],
+              [
+                liveLabel("refunds", "Refunds"),
+                pageMode === "live" ? t("unavailable") : kitchen.refunds,
+              ],
             ].map(([k, v]) => (
               <div key={k} className="bg-ink p-3">
                 <p className="label-mono opacity-60">
