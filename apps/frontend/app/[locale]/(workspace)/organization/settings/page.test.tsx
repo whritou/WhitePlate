@@ -31,6 +31,10 @@ vi.mock("@/services/organization-queries", () => ({
   getOrganizations,
   getOrganizationRestaurants,
 }))
+vi.mock("@/services/stripe-connect", () => ({
+  getStripeConnectStatus: vi.fn(),
+}))
+vi.mock("server-only", () => ({}))
 
 vi.mock("@/i18n/navigation", async () => {
   const React = await import("react")
