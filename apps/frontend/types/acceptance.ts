@@ -43,4 +43,5 @@ export type AcceptanceApiInput = {
   orderId: string
   version: number
   status: string
+  cancellationReason?: string
 }

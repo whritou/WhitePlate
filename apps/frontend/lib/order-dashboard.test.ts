@@ -77,6 +77,8 @@ const page = {
       pickupMode: null,
       total: 19.25,
       status: "Pending",
+      cancellationReason: null,
+      emailNotifications: [],
       version: 1,
       createdAt: "2026-10-01T18:00:00Z",
       pickupAt: "2026-10-01T18:30:00Z",
@@ -114,6 +116,39 @@ it("accepts a paginated order history response and rejects invalid page metadata
 
 it("parses server order snapshots and paged cursors", () => {
   expect(parseOrderPage(page)).toEqual(page)
+})
+
+it("parses cancellation reasons and safe email delivery states", () => {
+  const cancelled = {
+    ...page.items[0]!,
+    status: "Cancelled",
+    cancellationReason: "ItemUnavailable",
+    emailNotifications: [
+      {
+        eventType: "order.created",
+        status: "Accepted",
+        createdAt: "2026-10-01T18:00:00Z",
+        acceptedAt: "2026-10-01T18:00:03Z",
+      },
+    ],
+  }
+
+  expect(parseOrderPage({ ...page, items: [cancelled] })?.items[0]).toEqual({
+    ...cancelled,
+  })
+  expect(
+    parseOrderPage({
+      ...page,
+      items: [
+        {
+          ...cancelled,
+          emailNotifications: [
+            { ...cancelled.emailNotifications[0], status: "Delivered" },
+          ],
+        },
+      ],
+    })
+  ).toBeNull()
 })
 
 it("maps legacy order snapshots without a locale to an unknown locale", () => {

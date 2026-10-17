@@ -419,19 +419,19 @@ Decisions and limits:
 
 Reference: live-orders. Dependencies: K1, S5.
 
-Extend cancelled/completed KDS ticket details with recorded cancellation reasons and accurate notification/payment/refund information shown in the Stitch reference.
+Implemented in source: terminal ticket details record new cancellation reasons, display only actual S4 email-delivery states, and state clearly that WhitePlate has no online payment record and does not track offline settlement/refunds. The nullable reason migration is generated but unapplied; hosted PostgreSQL/browser/provider acceptance remains open.
 
 Acceptance criteria:
 
-- [ ] Record validated cancellation reasons through the existing permitted lifecycle transition, preserving role restrictions, concurrency checks and historical ticket details.
-- [ ] Show notification status only from actual delivery records from S4, and payment/refund status only from verified provider-backed records; no hard-coded sent, paid or 100%-refunded labels.
-- [ ] Define the guest-payment/refund ledger and webhook reconciliation before any financial mutation; a Stripe Connect account connection alone is insufficient to charge or refund.
-- [ ] Keep order cancellation and payment refund as distinct authoritative outcomes with safe pending/failed/partial states, audit evidence and tenant/account binding.
-- [ ] Verify cancelled/unpaid orders without Stripe, provider event retries, duplicate/partial/failed refunds where implemented, role permissions and two-tenant isolation; protect financial/recipient details from unauthorized viewers.
+- [x] Record validated cancellation reasons through the existing permitted lifecycle transition, preserving role restrictions, concurrency checks and legacy null history.
+- [x] Show notification status only from actual S4 delivery records; distinguish provider acceptance from inbox delivery and avoid exposing recipient/provider details.
+- [x] When no guest-payment/refund ledger exists, state that no online payment record exists and offline activity is untracked; do not emit payment status claims.
+- [ ] Define and approve the guest-payment/refund ledger and webhook reconciliation before any future financial mutation; a Stripe Connect account connection alone is insufficient to charge or refund.
+- [ ] Complete hosted PostgreSQL/browser acceptance, including two-tenant role/privacy checks and delivery-event retry states.
 
 Decisions and limits:
 
-- Actual guest payments/refunds require a separately approved payment-flow design, capture/cancel/refund policy, liability model and test-mode verification. Until then implement truthful unpaid/not-supported states and reason storage only; don't fabricate refunds, credits, Stripe voids, SMS or card settlement.
+- Actual guest payments/refunds require a separately approved payment-flow design, capture/cancel/refund policy, liability model and test-mode verification. Until then show only the not-supported capability disclosure and reason storage; do not claim an order is unpaid or fabricate refunds, credits, Stripe voids, SMS or card settlement.
 
 ## Verification of this planning change
 

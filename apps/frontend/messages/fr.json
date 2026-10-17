@@ -298,6 +298,43 @@
       "Completed": "Terminer la commande",
       "Cancelled": "Annuler la commande"
     },
+    "cancellationDialog": {
+      "title": "Annuler la commande",
+      "description": "Indiquez pourquoi cette commande est annulée. Ce motif sera enregistré avec la commande.",
+      "reasonLabel": "Motif d’annulation",
+      "dismiss": "Conserver la commande",
+      "confirm": "Confirmer l’annulation"
+    },
+    "cancellationReasons": {
+      "CustomerRequest": "Demande du client",
+      "ItemUnavailable": "Article indisponible",
+      "RestaurantUnableToFulfill": "Le restaurant ne peut pas honorer la commande",
+      "DuplicateOrder": "Commande en double",
+      "Other": "Autre"
+    },
+    "emailEvents": {
+      "created": "E-mail de confirmation de commande",
+      "preparing": "Mise à jour sur la préparation",
+      "ready": "Mise à jour indiquant que la commande est prête"
+    },
+    "emailStatuses": {
+      "Pending": "En attente",
+      "Sending": "Envoi en cours",
+      "Accepted": "Accepté par le fournisseur d’e-mail",
+      "Failed": "Échec"
+    },
+    "serviceDetails": {
+      "title": "Détails du service",
+      "cancellationReason": "Motif d’annulation",
+      "reasonNotRecorded": "Non renseigné pour cette commande",
+      "emailSection": "Mises à jour par e-mail",
+      "noEmailEvents": "Aucune trace de mise à jour par e-mail n’est disponible. Cela ne permet pas de savoir si ces mises à jour ont été demandées.",
+      "eventCreatedAt": "Événement créé le {time}",
+      "acceptedAt": "Accepté par le fournisseur d’e-mail le {time}",
+      "acceptedCaveat": "Le fournisseur d’e-mail a accepté ce message ; sa réception dans la boîte du client n’est pas confirmée.",
+      "paymentSection": "Paiement et remboursement",
+      "paymentUnavailable": "WhitePlate ne dispose d’aucune trace de paiement en ligne pour cette commande. Les paiements ou remboursements hors ligne ne sont pas suivis."
+    },
     "roles": {
       "OrganizationOwner": "Propriétaire",
       "Manager": "Responsable",

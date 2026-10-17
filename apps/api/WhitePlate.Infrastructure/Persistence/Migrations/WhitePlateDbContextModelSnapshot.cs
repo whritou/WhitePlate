@@ -581,6 +581,10 @@ namespace WhitePlate.Infrastructure.Persistence.Migrations
                     b.Property<DateTimeOffset?>("ArchivedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("CancellationReason")
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)");
+
                     b.Property<DateTimeOffset?>("ClosedAt")
                         .HasColumnType("timestamp with time zone");
 

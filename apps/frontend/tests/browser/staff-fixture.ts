@@ -230,12 +230,13 @@ export function transition({
   orderId,
   version,
   status,
+  cancellationReason,
 }: AcceptanceApiInput) {
   return request.patch(
     `${localApi}/api/v1/tenants/${tenantId}/orders/${orderId}/status`,
     {
       headers: { Authorization: `Bearer ${token}`, "If-Match": `"${version}"` },
-      data: { status },
+      data: { status, ...(cancellationReason ? { cancellationReason } : {}) },
     }
   )
 }

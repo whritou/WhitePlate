@@ -36,7 +36,8 @@ public interface IOrderRepository
     Task<int> ArchiveClosedOrdersBeforeAsync(DateTimeOffset cutoff, CancellationToken cancellationToken);
 
     Task<Result<OrderReceiptDto>> TransitionAsync(Guid tenantId, Guid orderId, int expectedVersion,
-        OrderStatus status, DateTimeOffset now, CancellationToken cancellationToken);
+        OrderStatus status, OrderCancellationReason? cancellationReason, DateTimeOffset now,
+        CancellationToken cancellationToken);
 
     Task<int> DeleteExpiredIdempotencyRecordsAsync(DateTimeOffset now, CancellationToken cancellationToken);
 

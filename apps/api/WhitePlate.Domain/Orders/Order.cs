@@ -20,6 +20,7 @@ public sealed class Order
     public decimal TaxAmount { get; private set; }
     public decimal Total { get; private set; }
     public OrderStatus Status { get; private set; }
+    public OrderCancellationReason? CancellationReason { get; private set; }
     public int Version { get; private set; }
     public DateTimeOffset CreatedAt { get; private set; }
     public DateTimeOffset? PickupAt { get; private set; }
@@ -139,9 +140,13 @@ public sealed class Order
         Version++;
     }
 
-    public void Cancel(DateTimeOffset occurredAt)
+    public void Cancel(DateTimeOffset occurredAt, OrderCancellationReason reason)
     {
+        if (!Enum.IsDefined(reason))
+            throw new DomainRuleException("invalid_cancellation_reason", "cancellationReason",
+                "Select a valid cancellation reason.");
         if (Status is OrderStatus.Completed or OrderStatus.Cancelled) throw new InvalidOrderTransitionException();
+        CancellationReason = reason;
         Status = OrderStatus.Cancelled;
         ClosedAt = occurredAt;
         ClosedAtTicks = occurredAt.UtcDateTime.Ticks;

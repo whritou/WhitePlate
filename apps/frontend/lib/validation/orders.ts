@@ -1,5 +1,8 @@
 import { isRecord, isUuid } from "./common"
-import type { UpdateOrderStatusInput } from "@/types/orders"
+import {
+  ORDER_CANCELLATION_REASONS,
+  type UpdateOrderStatusInput,
+} from "@/types/orders"
 
 export function parseOrderStatusUpdate(
   value: unknown
@@ -18,10 +21,29 @@ export function parseOrderStatusUpdate(
   )
     return null
 
+  const isCancellation = value.status === "Cancelled"
+  const hasValidReason =
+    typeof value.cancellationReason === "string" &&
+    ORDER_CANCELLATION_REASONS.includes(
+      value.cancellationReason as (typeof ORDER_CANCELLATION_REASONS)[number]
+    )
+
+  if (
+    (isCancellation && !hasValidReason) ||
+    (!isCancellation && value.cancellationReason !== undefined)
+  )
+    return null
+
   return {
     tenantId: value.tenantId,
     orderId: value.orderId,
     version: value.version,
     status: value.status as UpdateOrderStatusInput["status"],
+    ...(hasValidReason
+      ? {
+          cancellationReason:
+            value.cancellationReason as UpdateOrderStatusInput["cancellationReason"],
+        }
+      : {}),
   }
 }

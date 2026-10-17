@@ -287,6 +287,9 @@ public sealed class OrderRepository(WhitePlateDbContext database,
                         PickupTimeZone = order.PickupTimeZone,
                         PickupMode = order.PickupMode.HasValue
                             ? order.PickupMode.Value.ToString()
+                            : null,
+                        CancellationReason = order.CancellationReason.HasValue
+                            ? order.CancellationReason.Value.ToString()
                             : null
                     },
                 order.CreatedAtTicks
@@ -297,7 +300,13 @@ public sealed class OrderRepository(WhitePlateDbContext database,
         var nextCursor = hasMore && rows.Count > 0
             ? new OrderPageCursor(rows[^1].CreatedAtTicks, rows[^1].Item.Id)
             : null;
-        return new OrderPageData(rows.Select(row => row.Item).ToArray(), nextCursor);
+        var notifications = await GetEmailNotificationsAsync(tenantId,
+            rows.Select(row => row.Item.Id).ToArray(), cancellationToken);
+        var items = rows.Select(row => row.Item with
+        {
+            EmailNotifications = notifications.GetValueOrDefault(row.Item.Id, [])
+        }).ToArray();
+        return new OrderPageData(items, nextCursor);
     }
 
     public async Task<DashboardMetricsDto?> GetDashboardMetricsAsync(Guid tenantId, DateTimeOffset now,
@@ -450,9 +459,42 @@ public sealed class OrderRepository(WhitePlateDbContext database,
                 PickupTimeZone = order.PickupTimeZone,
                 PickupMode = order.PickupMode.HasValue
                     ? order.PickupMode.Value.ToString()
+                    : null,
+                CancellationReason = order.CancellationReason.HasValue
+                    ? order.CancellationReason.Value.ToString()
                     : null
             }).ToListAsync(cancellationToken);
-        return new OrderHistoryPageData(items, totalCount);
+        var notifications = await GetEmailNotificationsAsync(tenantId,
+            items.Select(item => item.Id).ToArray(), cancellationToken);
+        return new OrderHistoryPageData(items.Select(item => item with
+        {
+            EmailNotifications = notifications.GetValueOrDefault(item.Id, [])
+        }).ToArray(), totalCount);
+    }
+
+    private async Task<Dictionary<Guid, IReadOnlyList<OrderEmailNotificationDto>>> GetEmailNotificationsAsync(
+        Guid tenantId, IReadOnlyCollection<Guid> orderIds, CancellationToken cancellationToken)
+    {
+        if (orderIds.Count == 0) return [];
+
+        var rows = await database.OrderEmailDeliveries.AsNoTracking()
+            .Where(delivery => delivery.TenantId == tenantId && orderIds.Contains(delivery.OrderId))
+            .Select(delivery => new
+            {
+                delivery.Id,
+                delivery.OrderId,
+                delivery.EventType,
+                delivery.Status,
+                delivery.CreatedAt,
+                delivery.AcceptedAt
+            })
+            .ToListAsync(cancellationToken);
+
+        return rows.OrderBy(row => row.CreatedAt).ThenBy(row => row.Id)
+            .GroupBy(row => row.OrderId).ToDictionary(group => group.Key,
+            group => (IReadOnlyList<OrderEmailNotificationDto>)group.Select(row =>
+                new OrderEmailNotificationDto(row.EventType, row.Status.ToString(), row.CreatedAt,
+                    row.AcceptedAt)).ToArray());
     }
 
     public async Task<PublicOrderTrackingDto?> GetPublicTrackingAsync(Guid tenantId, Guid orderId,
@@ -487,7 +529,8 @@ public sealed class OrderRepository(WhitePlateDbContext database,
     }
 
     public async Task<Result<OrderReceiptDto>> TransitionAsync(Guid tenantId, Guid orderId,
-        int expectedVersion, WhitePlate.Domain.Orders.OrderStatus status, DateTimeOffset now,
+        int expectedVersion, WhitePlate.Domain.Orders.OrderStatus status,
+        WhitePlate.Domain.Orders.OrderCancellationReason? cancellationReason, DateTimeOffset now,
         CancellationToken cancellationToken)
     {
         await using var transaction = await database.Database.BeginTransactionAsync(cancellationToken);
@@ -507,7 +550,10 @@ public sealed class OrderRepository(WhitePlateDbContext database,
         try
         {
             var previousVersion = order.Version;
-            if (status == WhitePlate.Domain.Orders.OrderStatus.Cancelled) order.Cancel(now);
+            if (status == WhitePlate.Domain.Orders.OrderStatus.Cancelled && cancellationReason is { } reason)
+                order.Cancel(now, reason);
+            else if (status == WhitePlate.Domain.Orders.OrderStatus.Cancelled)
+                throw new WhitePlate.Domain.Orders.InvalidOrderTransitionException();
             else order.TransitionTo(status, now);
             if (order.Version == previousVersion)
             {

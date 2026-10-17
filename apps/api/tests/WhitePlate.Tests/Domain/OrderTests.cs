@@ -87,7 +87,7 @@ public sealed class OrderTests
         order.TransitionTo(OrderStatus.Ready, now);
         order.TransitionTo(OrderStatus.Completed, now);
 
-        Assert.Throws<InvalidOrderTransitionException>(() => order.Cancel(now));
+        Assert.Throws<InvalidOrderTransitionException>(() => order.Cancel(now, OrderCancellationReason.CustomerRequest));
     }
 
     [Fact]
@@ -135,10 +135,26 @@ public sealed class OrderTests
             new OrderLineSnapshot(Guid.NewGuid(), "Soup", 10m, 0m, 1, [])
         ], null, 0m, DateTimeOffset.Parse("2026-10-06T23:59:00Z"));
 
-        order.Cancel(cancelledAt);
+        order.Cancel(cancelledAt, OrderCancellationReason.ItemUnavailable);
 
         Assert.Equal(cancelledAt, order.ClosedAt);
+        Assert.Equal(OrderCancellationReason.ItemUnavailable, order.CancellationReason);
         Assert.Null(order.ArchivedAt);
+    }
+
+    [Fact]
+    public void CancellationRejectsUndefinedReasons()
+    {
+        var order = Order.Create(Guid.NewGuid(), "EUR", "Ada", [
+            new OrderLineSnapshot(Guid.NewGuid(), "Soup", 10m, 0m, 1, [])
+        ], null, 0m, DateTimeOffset.UtcNow);
+
+        var exception = Assert.Throws<DomainRuleException>(() =>
+            order.Cancel(DateTimeOffset.UtcNow, (OrderCancellationReason)99));
+
+        Assert.Equal("invalid_cancellation_reason", exception.Code);
+        Assert.Null(order.CancellationReason);
+        Assert.Equal(OrderStatus.Pending, order.Status);
     }
 
     [Fact]
