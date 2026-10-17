@@ -3486,6 +3486,7 @@
     "dashboard": "Vue d’ensemble",
     "analytics": "Statistiques",
     "paymentsPending": "Stripe · Non connecté",
+    "stripeSettings": "Paramètres Stripe",
     "realOrders": "Commandes · API réelle",
     "sampleNotice": "Données fictives · Cette fonction n’est pas encore raccordée au backend. Les modifications restent dans ce navigateur ; aucun paiement, e-mail, changement DNS ou publication n’est effectué.",
     "saveDraft": "Enregistrer le brouillon local",
@@ -3882,6 +3883,13 @@
   "StripeConnect": {
     "title": "Connexion du compte Stripe",
     "description": "Connectez le compte Stripe de ce restaurant, ou créez-en un pendant la configuration. WhitePlate ne prélève aucun frais de plateforme. Cette connexion n’active pas le paiement en ligne.",
+    "organizationOverview": {
+      "title": "Stripe par restaurant",
+      "description": "Consultez l’état de connexion et de configuration Stripe de chaque restaurant. Gérez chaque connexion dans les paramètres de paiement du restaurant.",
+      "empty": "Cette organisation ne possède pas encore de restaurant.",
+      "unavailable": "Les restaurants et leurs statuts Stripe n’ont pas pu être chargés. Réessayez plus tard.",
+      "openSettings": "Paramètres de paiement du restaurant"
+    },
     "connect": "Connecter un compte Stripe",
     "connecting": "Ouverture de Stripe…",
     "openDashboard": "Ouvrir le Dashboard Stripe",

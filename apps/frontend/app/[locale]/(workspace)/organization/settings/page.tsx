@@ -13,6 +13,7 @@ import type { SearchParams } from "@/types/navigation"
 import { getLocale, getTranslations } from "next-intl/server"
 import { headers } from "next/headers"
 import { redirect } from "next/navigation"
+import { getStripeConnectStatus } from "@/services/stripe-connect"
 
 export default async function OrganizationSettingsPage({
   searchParams,
@@ -65,6 +66,26 @@ export default async function OrganizationSettingsPage({
   }
 
   const restaurants = await getOrganizationRestaurants(organization.id)
+  const stripeOverview =
+    params.section === "payments" && restaurants.ok && restaurants.data
+      ? await Promise.all(
+          restaurants.data.map(async (restaurant) => {
+            const result = await getStripeConnectStatus(restaurant.id)
+
+            return {
+              restaurantId: restaurant.id,
+              status:
+                result.ok && result.data
+                  ? {
+                      mode: result.data.mode,
+                      connectionState: result.data.connectionState,
+                      readinessState: result.data.readinessState,
+                    }
+                  : null,
+            }
+          })
+        )
+      : undefined
 
   return (
     <LiveSettings
@@ -72,6 +93,7 @@ export default async function OrganizationSettingsPage({
       organization={organization}
       userId={session.user.id}
       restaurants={restaurants}
+      stripeOverview={stripeOverview}
     >
       <OrganizationSettingsForm
         key={`${organization.id}:${organization.name}`}

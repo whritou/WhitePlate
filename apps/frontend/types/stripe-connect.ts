@@ -18,6 +18,16 @@ export type StripeConnectStatus = {
   dashboardUrl: string | null
 }
 
+export type StripeConnectOverviewStatus = Pick<
+  StripeConnectStatus,
+  "mode" | "connectionState" | "readinessState"
+>
+
+export type StripeConnectOverviewEntry = {
+  restaurantId: string
+  status: StripeConnectOverviewStatus | null
+}
+
 export type StripeConnectStart = {
   mode: StripeConnectMode
   authorizationUrl: string

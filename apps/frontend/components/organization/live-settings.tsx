@@ -14,12 +14,14 @@ import { MissingFeatureNotice } from "./missing-feature-notice"
 import { OrganizationArchiveAction } from "./organization-archive-action"
 import type { LiveSettingsProps } from "@/types/live-workspace"
 import { OrganizationLegalProfileForm } from "./organization-legal-profile-form"
+import { StripeConnectOrganizationOverview } from "./stripe-connect-organization-overview"
 
 export function LiveSettings({
   organization,
   userId,
   children,
   restaurants,
+  stripeOverview,
 }: LiveSettingsProps) {
   const t = useTranslations("LiveWorkspace")
   const errorText = useTranslations("OrganizationSettings")
@@ -27,12 +29,7 @@ export function LiveSettings({
     `whiteplate-live-draft:${userId}:${organization.id}:settings`
   )
   const contentRef = useRef<HTMLDivElement>(null)
-  const simulated = [
-    "payments",
-    "billing",
-    "domains",
-    "notifications",
-  ].includes(model.sec)
+  const simulated = ["billing", "domains", "notifications"].includes(model.sec)
 
   function select(section: typeof model.sec) {
     model.setSec(section)
@@ -211,47 +208,10 @@ export function LiveSettings({
             )}
 
             {model.sec === "payments" && (
-              <Card
-                title="Stripe Connect"
-                sub="Payments go straight to your own Stripe account. WhitePlate takes 0% per order."
-              >
-                <div className="flex flex-wrap items-center justify-between gap-4 border p-5">
-                  <div>
-                    <p className="font-display text-lg font-bold">
-                      <Copy>Not connected</Copy>
-                    </p>
-
-                    <p className="mt-2 text-sm text-muted-foreground">
-                      {t("paymentsUnavailable")}
-                    </p>
-                  </div>
-
-                  <SourceButton disabled className="btn-primary">
-                    {t("connectStripe")}
-                  </SourceButton>
-                </div>
-
-                <div className="mt-4 grid grid-cols-1 border sm:grid-cols-3">
-                  {[
-                    ["WhitePlate fee", "0%"],
-                    ["Stripe fee", "By account"],
-                    ["Payout", "Unavailable"],
-                  ].map(([label, value], index) => (
-                    <div
-                      key={label}
-                      className={`p-4 ${index ? "border-t sm:border-t-0 sm:border-l" : ""}`}
-                    >
-                      <p className="label-mono text-muted-foreground">
-                        <Copy>{label}</Copy>
-                      </p>
-
-                      <p className="font-display text-2xl font-bold">
-                        <Copy>{value}</Copy>
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </Card>
+              <StripeConnectOrganizationOverview
+                restaurants={restaurants}
+                stripeOverview={stripeOverview}
+              />
             )}
 
             <SettingsPanel3 />

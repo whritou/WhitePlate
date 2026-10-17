@@ -43,20 +43,19 @@ export function WorkspaceShell({
 
   const query = localeSearch.toString()
   const currentHref = `${pathname}${query ? `?${query}` : ""}`
-  const restaurantOrganization =
+  const selectedRestaurant =
     context?.type === "restaurant"
-      ? organizations.find(
-          (item) =>
-            item.id ===
-            restaurants.find((item) => item.id === context.id)?.organizationId
-        )
+      ? restaurants.find((item) => item.id === context.id)
       : undefined
   const settingsHref =
     context?.type === "organization"
       ? `/organization/settings?organizationId=${context.id}&section=payments`
-      : restaurantOrganization
-        ? `/organization/settings?organizationId=${restaurantOrganization.id}&tenantId=${context?.id}&section=payments`
+      : selectedRestaurant && selectedRestaurant.role !== "Kitchen"
+        ? `/organization/restaurant-settings?tenantId=${selectedRestaurant.id}&section=payments`
         : "/organization"
+  const canOpenPaymentSettings =
+    context?.type === "organization" ||
+    (selectedRestaurant !== undefined && selectedRestaurant.role !== "Kitchen")
   const overviewHref =
     context?.type === "organization"
       ? `/organization?organizationId=${context.id}`
@@ -136,7 +135,7 @@ export function WorkspaceShell({
             </div>
 
             <div className="flex max-w-full flex-wrap items-center gap-2">
-              {(context?.type === "organization" || restaurantOrganization) && (
+              {canOpenPaymentSettings && (
                 <Button
                   nativeButton={false}
                   role="link"
@@ -146,7 +145,7 @@ export function WorkspaceShell({
                   <CreditCard />
 
                   <span className="max-[39.99rem]:sr-only">
-                    {v("paymentsPending")}
+                    {v("stripeSettings")}
                   </span>
                 </Button>
               )}
