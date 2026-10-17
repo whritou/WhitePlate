@@ -41,7 +41,7 @@ Some historical documents and completed card bodies retain older In review/In pr
 
 The Lovable Menu workspace (M1) and existing five-lane Orders screen (K1) provide the implemented foundations. Product metadata (M2) depends on M1; product photos are a separate task (M5), depending on M1 and T1; human translation review (M3) and catalog publication/history (M4) build on M1 after their decisions. KDS operational features (K2) and cancellation/payment details (K3) extend existing Orders behavior, with scheduling, media, metrics, notification and financial dependencies gated to actual runtime support.
 
-Start remaining establishment identity (S1) and hosted media acceptance (T1); the Lovable Dashboard overview exists, while any remaining D1 gaps must be confirmed against source. Follow with persistent theme controls (T2), opening hours (S2), theme preview/publication (T3), slot enforcement (S3), metrics (D2) and availability (D4). Rush/pause (D3) depends on slot enforcement. S4 transactional email has a source implementation, resolved consent/event/provider decisions and an applied Coolify Production migration; provider and hosted acceptance remain open. Stripe connection (S5) still needs establishment identity and explicit product/provider decisions.
+Start remaining establishment identity (S1) and hosted media acceptance (T1); the Lovable Dashboard overview exists, while any remaining D1 gaps must be confirmed against source. Follow with persistent theme controls (T2), opening hours (S2), theme preview/publication (T3), slot enforcement (S3), metrics (D2) and availability (D4). Rush/pause (D3) depends on slot enforcement. S4 transactional email has a source implementation, resolved consent/event/provider decisions and an applied Coolify Production migration; provider and hosted acceptance remain open. S5 Stripe Connect is implemented and its Coolify Production schema is applied; test credentials and hosted OAuth/webhook acceptance remain open.
 
 All feature cards start in Backlog. Move a card to Ready when its listed decisions and dependencies are settled; completion requires implementation and verification.
 
@@ -198,7 +198,8 @@ Acceptance criteria:
 - [x] Verify webhook signatures, deduplicate events, ignore stale updates and prevent account.updated from restoring a disconnected connection. Deny foreign-tenant access and keep secrets, tokens, bank data and requirement details server-side.
 - [x] Provide a fixed mode-correct Stripe Dashboard link for owners; managers receive read-only status. Do not show balances, bank data or payment methods.
 - [x] Add localized EN/FR Payments settings and document test/live server configuration. S5 does not activate checkout or create charges.
-- [ ] Complete manual OAuth/webhook acceptance with a configured Stripe test client, `sk_test_…` key, `whsec_…` secret and reachable callback, then apply the reviewed additive migration to each intended runtime database before deployment.
+- [x] Apply the reviewed additive migration to Coolify Production before merging/deploying the connected API version; verify history, tables, indexes, empty rows and API-role grants. See [S5 rollout evidence](../deployment/coolify.md#s5-stripe-connect-schema-rollout--2026-10-17).
+- [ ] Complete manual OAuth/webhook acceptance with a configured Stripe test client, `sk_test_…` key, `whsec_…` secret and reachable callback.
 
 Decisions and limits:
 

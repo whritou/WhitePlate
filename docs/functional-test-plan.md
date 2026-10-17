@@ -10,7 +10,7 @@ Automated API tests cover owner-only OAuth start, manager status reads, owner re
 - Deliver valid signed `account.updated` and `account.application.deauthorized` events. Check invalid signatures/mode mismatches fail, duplicate IDs are acknowledged without duplicate updates, stale updates do not regress status, and a later account update does not restore a revoked connection.
 - Check all readiness precedence states, localized EN/FR messages, status-refresh outage behavior, safe Dashboard target and owner-only actions at mobile/desktop widths and keyboard use. Confirm no balance, bank, identity, charge or payment information appears.
 
-The implementation and migration are source-only. No Stripe credentials/API calls, live Stripe test-account flow, shared-database migration, deployment or hosted acceptance were run as part of source changes. Complete the manual lifecycle above once configured test credentials and a reachable callback/webhook endpoint are available.
+The migration is applied to Coolify Production; see [rollout evidence](deployment/coolify.md#s5-stripe-connect-schema-rollout--2026-10-17). Automated tests use fake Stripe responses and do not call Stripe. No Stripe credentials were read or used, and the real test-account OAuth/webhook lifecycle and hosted acceptance remain unverified. Complete the manual lifecycle above once server-side test credentials and a reachable callback/webhook endpoint are configured.
 
 ## S1 establishment settings — local implementation acceptance
 

@@ -8,7 +8,7 @@ Generated migration `20261017134031_StripeConnect` adds three tenant/mode-aware 
 - `StripeConnectOAuthStates` stores only the SHA-256 state digest, tenant, initiating owner issuer/subject, mode, locale, creation/expiry and optional consumption timestamp. The digest and expiry/consumption lookup are indexed; a callback atomically consumes it before any code exchange.
 - `StripeConnectWebhookEvents` records mode, event ID/type, optional connected account ID and event/received timestamps. Unique `(Mode, EventId)` makes signed Stripe retries idempotent.
 
-Test and live rows are independent. Disconnected rows remain to preserve account uniqueness and audit the prior association; a later owner OAuth can update that tenant/mode row after Stripe revokes it. The migration is generated source only and has not been applied to a shared database. No startup migration is configured.
+Test and live rows are independent. Disconnected rows remain to preserve account uniqueness and audit the prior association; a later owner OAuth can update that tenant/mode row after Stripe revokes it. Migration `20261017134031_StripeConnect` was applied to Coolify Production on 17 October 2026 before merging PR #122. Post-checks found all three tables empty, the EF history row, ten indexes (including primary keys), and the API role's twelve table-level CRUD grants. No startup migration is configured. See [Coolify rollout evidence](../deployment/coolify.md#s5-stripe-connect-schema-rollout--2026-10-17).
 
 ## S4 transactional order email — 2026-10-17
 
