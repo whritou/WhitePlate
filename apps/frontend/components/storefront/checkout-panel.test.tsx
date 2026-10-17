@@ -14,6 +14,8 @@ it("shows the server pause and rush buffer in an existing guest cart", () => {
   const state = {
     cart: [{ productId: "product-1", quantity: 1, optionIds: [] }],
     customerName: "Ada",
+    customerEmail: "",
+    emailUpdatesConsented: false,
     discountCode: "",
     error: null,
     submitting: false,
@@ -25,6 +27,8 @@ it("shows the server pause and rush buffer in an existing guest cart", () => {
     changeCart: vi.fn(),
     checkout: vi.fn(),
     changeCustomerName: vi.fn(),
+    changeCustomerEmail: vi.fn(),
+    changeEmailUpdatesConsent: vi.fn(),
     changeDiscountCode: vi.fn(),
     pickupSlots: [],
     pickupSlotsLoading: false,
@@ -44,4 +48,6 @@ it("shows the server pause and rush buffer in an existing guest cart", () => {
 
   expect(html).toContain("ordersPaused")
   expect(html).toContain("rushBufferNotice")
+  expect(html).toContain('id="email-updates-consent"')
+  expect(html).not.toContain('id="customer-email"')
 })

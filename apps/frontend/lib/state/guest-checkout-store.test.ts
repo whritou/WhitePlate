@@ -20,11 +20,15 @@ describe("guest checkout store", () => {
     const store = createGuestCheckoutStore("tenant-a")
 
     store.getState().changeCustomerName("Guest")
+    store.getState().changeCustomerEmail("ada@example.com")
+    store.getState().changeEmailUpdatesConsent(true)
     store.getState().changeDiscountCode("SAVE")
     store.getState().setAttempt({
       key: "idempotency-key",
       input: {
         customerName: "Guest",
+        customerEmail: "",
+        emailUpdatesConsented: false,
         discountCode: "SAVE",
         menuLocale: "en",
         trackingToken: "a".repeat(43),
@@ -35,6 +39,8 @@ describe("guest checkout store", () => {
     store.getState().startNewOrder()
 
     expect(store.getState().customerName).toBe("")
+    expect(store.getState().customerEmail).toBe("")
+    expect(store.getState().emailUpdatesConsented).toBe(false)
     expect(store.getState().discountCode).toBe("")
     expect(store.getState().attempt).toBeNull()
   })

@@ -140,4 +140,39 @@ public sealed class OrderTests
         Assert.Equal(cancelledAt, order.ClosedAt);
         Assert.Null(order.ArchivedAt);
     }
+
+    [Fact]
+    public void OrderEmailRequiresExplicitConsentAndIsClearedWhenTheOrderCloses()
+    {
+        var createdAt = DateTimeOffset.Parse("2026-10-17T10:00:00Z");
+        var order = Order.Create(Guid.NewGuid(), "EUR", "Ada", [
+            new OrderLineSnapshot(Guid.NewGuid(), "Soup", 10m, 0m, 1, [])
+        ], null, 0m, createdAt, customerEmail: " Ada@example.com ", emailUpdatesConsentedAt: createdAt,
+            emailTrackingTokenHash: new string('a', 64), trackingTokenExpiresAt: createdAt.AddDays(30));
+
+        Assert.Equal("ada@example.com", order.CustomerEmail);
+        Assert.Equal(createdAt, order.EmailUpdatesConsentedAt);
+        Assert.Equal(new string('a', 64), order.EmailTrackingTokenHash);
+
+        order.TransitionTo(OrderStatus.Preparing, createdAt.AddMinutes(1));
+        order.TransitionTo(OrderStatus.Ready, createdAt.AddMinutes(2));
+        order.TransitionTo(OrderStatus.Completed, createdAt.AddMinutes(3));
+
+        Assert.Null(order.CustomerEmail);
+        Assert.Null(order.EmailUpdatesConsentedAt);
+        Assert.Equal(new string('a', 64), order.EmailTrackingTokenHash);
+
+        order.ClearExpiredEmailData(createdAt.AddDays(30));
+        Assert.Null(order.EmailTrackingTokenHash);
+    }
+
+    [Fact]
+    public void OrderEmailCannotBeStoredWithoutConsent()
+    {
+        var exception = Assert.Throws<DomainRuleException>(() => Order.Create(Guid.NewGuid(), "EUR", "Ada", [
+            new OrderLineSnapshot(Guid.NewGuid(), "Soup", 10m, 0m, 1, [])
+        ], null, 0m, DateTimeOffset.UtcNow, customerEmail: "ada@example.com"));
+
+        Assert.Equal("emailUpdatesConsent", exception.Field);
+    }
 }

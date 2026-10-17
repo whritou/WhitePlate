@@ -82,6 +82,7 @@ public sealed class OrderOutboxDispatcherTests
     private sealed class NoOpOrderRepository : IOrderRepository
     {
         public Task<int> DeleteExpiredIdempotencyRecordsAsync(DateTimeOffset now, CancellationToken cancellationToken) => Task.FromResult(0);
+        public Task<int> CleanExpiredOrderEmailDataAsync(DateTimeOffset now, CancellationToken cancellationToken) => Task.FromResult(0);
         public Task<IdempotencyResult> FindIdempotentOrderAsync(Guid tenantId, string keyHash, string requestHash, DateTimeOffset now, CancellationToken cancellationToken) => throw new NotSupportedException();
         public Task<CheckoutLocaleDto?> ResolveCheckoutLocaleAsync(Guid tenantId, string? requestedLocale,
             CancellationToken cancellationToken) => throw new NotSupportedException();

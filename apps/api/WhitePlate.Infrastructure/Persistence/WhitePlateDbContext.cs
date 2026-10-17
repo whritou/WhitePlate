@@ -29,6 +29,7 @@ public sealed class WhitePlateDbContext(DbContextOptions<WhitePlateDbContext> op
     public DbSet<OutboxMessage> OrderOutboxMessages => Set<OutboxMessage>();
     public DbSet<PickupSlotUsage> PickupSlotUsages => Set<PickupSlotUsage>();
     public DbSet<PickupSlotReservation> PickupSlotReservations => Set<PickupSlotReservation>();
+    public DbSet<OrderEmailDelivery> OrderEmailDeliveries => Set<OrderEmailDelivery>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder) =>
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(WhitePlateDbContext).Assembly);

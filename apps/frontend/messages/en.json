@@ -413,6 +413,9 @@
     "priceNote": "Menu prices are before tax and discounts. Your receipt will show the final total calculated by the restaurant.",
     "estimatedSubtotal": "Estimated subtotal",
     "customerName": "Your name",
+    "emailUpdatesConsent": "Email me updates about this order",
+    "emailUpdatesPrivacy": "We’ll use your email only for updates about this order and delete it after the tracking period.",
+    "customerEmail": "Email address",
     "pickupTime": "Pickup time",
     "asapPickup": "ASAP — earliest available",
     "noPickupSlots": "Online pickup is unavailable right now. Please try again later.",
@@ -3476,6 +3479,7 @@
     "legalSettingsCategory": "Legal and tax",
     "openingHoursCategory": "Opening hours",
     "pickupSchedulingCategory": "Pickup scheduling",
+    "notificationsSettingsCategory": "Order emails",
     "context": "Workspace context",
     "organizations": "Organizations",
     "restaurants": "Restaurants",
@@ -3790,6 +3794,43 @@
       "friday": "Friday",
       "saturday": "Saturday",
       "sunday": "Sunday"
+    }
+  },
+  "OrderEmailSettings": {
+    "title": "Order update emails",
+    "description": "Choose the copy guests receive after they opt in to updates at checkout.",
+    "senderNote": "WhitePlate sends these messages from its verified platform address. Your restaurant name, published logo, banner and colors, order summary, pickup time and instructions appear in the email when available.",
+    "editorTitle": "Template editor",
+    "editorDescription": "Templates are plain text. Supported placeholders are escaped before they are added to the branded email.",
+    "language": "Menu language",
+    "event": "Order event",
+    "events": {
+      "orderCreated": "Order received",
+      "preparing": "Preparing",
+      "ready": "Ready for pickup"
+    },
+    "subject": "Email subject",
+    "heading": "Email heading",
+    "body": "Message",
+    "variables": "Available placeholders",
+    "preview": "Email preview",
+    "previewDescription": "Sample order content. The email uses the restaurant’s published colors, logo and banner when available.",
+    "previewSize": "Email preview size",
+    "previewMobile": "Mobile",
+    "previewDesktop": "Desktop",
+    "save": "Save templates",
+    "saving": "Saving templates…",
+    "discard": "Discard changes",
+    "resetEvent": "Reset this event",
+    "saved": "Order email templates saved.",
+    "unavailable": "Order email settings could not be loaded. Reload this page before editing.",
+    "errors": {
+      "invalid": "Check the message text and supported placeholders, then try again.",
+      "conflict": "These templates changed elsewhere. Reload the page before saving again.",
+      "unavailable": "Templates could not be saved. Your edits are still here.",
+      "forbidden": "You do not have permission to change order email templates.",
+      "unauthorized": "Your session expired. Sign in again to continue.",
+      "not_found": "Order email settings are unavailable for this restaurant."
     }
   },
   "CollectionInformation": {

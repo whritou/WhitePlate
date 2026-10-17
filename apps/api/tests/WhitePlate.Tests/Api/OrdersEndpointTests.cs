@@ -940,6 +940,7 @@ public sealed partial class OrdersEndpointTests
         private readonly SqliteConnection connection = new("Data Source=:memory:");
         private readonly ManualTimeProvider timeProvider = new(new DateTimeOffset(2026, 1, 1, 0, 0, 0, TimeSpan.Zero));
         private readonly int checkoutPermitLimit;
+        public DateTimeOffset CurrentTime => timeProvider.GetUtcNow();
 
         public OrdersFactory(int checkoutPermitLimit = 10) => this.checkoutPermitLimit = checkoutPermitLimit;
 
@@ -954,13 +955,20 @@ public sealed partial class OrdersEndpointTests
                 new Dictionary<string, string?>
                 {
                     ["CheckoutRateLimit:PermitLimit"] = checkoutPermitLimit.ToString(),
-                    ["CheckoutRateLimit:WindowSeconds"] = "60"
+                    ["CheckoutRateLimit:WindowSeconds"] = "60",
+                    ["OrderEmails:TrackingSigningKey"] = Convert.ToBase64String(Enumerable.Repeat((byte)9, 32).ToArray()),
+                    ["OrderEmails:StorefrontUrlTemplate"] = "https://{subdomain}.example.test",
+                    ["RESEND_API_KEY"] = string.Empty,
+                    ["RESEND_FROM_EMAIL"] = string.Empty
                 }));
             builder.ConfigureServices(services =>
             {
                 var dispatcher = services.FirstOrDefault(descriptor => descriptor.ServiceType == typeof(IHostedService) &&
                     descriptor.ImplementationType == typeof(OrderOutboxDispatcher));
                 if (dispatcher is not null) services.Remove(dispatcher);
+                var emailDispatcher = services.FirstOrDefault(descriptor => descriptor.ServiceType == typeof(IHostedService) &&
+                    descriptor.ImplementationType == typeof(OrderEmailOutboxDispatcher));
+                if (emailDispatcher is not null) services.Remove(emailDispatcher);
                 var archiveDispatcher = services.FirstOrDefault(descriptor => descriptor.ServiceType == typeof(IHostedService) &&
                     descriptor.ImplementationType == typeof(OrderArchiveDispatcher));
                 if (archiveDispatcher is not null) services.Remove(archiveDispatcher);

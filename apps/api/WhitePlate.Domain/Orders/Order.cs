@@ -1,5 +1,6 @@
 using WhitePlate.Domain.Common;
 using WhitePlate.Domain.Tenants;
+using System.Net.Mail;
 
 namespace WhitePlate.Domain.Orders;
 
@@ -9,6 +10,9 @@ public sealed class Order
     public Guid TenantId { get; private set; }
     public string Currency { get; private set; } = null!;
     public string CustomerName { get; private set; } = null!;
+    public string? CustomerEmail { get; private set; }
+    public DateTimeOffset? EmailUpdatesConsentedAt { get; private set; }
+    public string? EmailTrackingTokenHash { get; private set; }
     public string? MenuLocale { get; private set; }
     public string? DiscountCode { get; private set; }
     public decimal Subtotal { get; private set; }
@@ -39,7 +43,9 @@ public sealed class Order
         IReadOnlyList<OrderLineSnapshot>? lines, string? discountCode, decimal discountAmount,
         DateTimeOffset createdAt, string? menuLocale = null, string? trackingTokenHash = null,
         DateTimeOffset? trackingTokenExpiresAt = null, DateTimeOffset? pickupAt = null,
-        string? pickupTimeZone = null, PickupMode? pickupMode = null)
+        string? pickupTimeZone = null, PickupMode? pickupMode = null, string? customerEmail = null,
+        DateTimeOffset? emailUpdatesConsentedAt = null, string? emailTrackingTokenHash = null,
+        Guid? id = null)
     {
         var normalizedCurrency = currency?.ToUpperInvariant();
         var normalizedName = customerName?.Trim();
@@ -73,14 +79,28 @@ public sealed class Order
         }
         var normalizedMenuLocale = menuLocale is null ? null : WhitePlate.Domain.Tenants.MenuLocale.Create(menuLocale).Value;
         if (trackingTokenHash is not null && (trackingTokenHash.Length != 64 ||
-            trackingTokenHash.Any(character => !Uri.IsHexDigit(character)) || !trackingTokenExpiresAt.HasValue ||
-            trackingTokenExpiresAt <= createdAt))
+            trackingTokenHash.Any(character => !Uri.IsHexDigit(character))))
             throw new DomainRuleException("invalid_tracking_token", "trackingToken", "The order tracking token is invalid.");
-        if (trackingTokenHash is null && trackingTokenExpiresAt.HasValue)
+        if ((trackingTokenHash is not null || emailTrackingTokenHash is not null) &&
+            (!trackingTokenExpiresAt.HasValue || trackingTokenExpiresAt <= createdAt))
             throw new DomainRuleException("invalid_tracking_token", "trackingToken", "The order tracking token is invalid.");
+        if (trackingTokenHash is null && emailTrackingTokenHash is null && trackingTokenExpiresAt.HasValue)
+            throw new DomainRuleException("invalid_tracking_token", "trackingToken", "The order tracking token is invalid.");
+        var normalizedEmail = NormalizeEmail(customerEmail);
+        if ((normalizedEmail is null && (emailUpdatesConsentedAt is not null || emailTrackingTokenHash is not null)) ||
+            (normalizedEmail is not null && emailUpdatesConsentedAt is null))
+            throw new DomainRuleException("email_consent_required", "emailUpdatesConsent",
+                "An email address can only be stored after the guest opts in to order updates.");
+        if (normalizedEmail is not null && emailUpdatesConsentedAt != createdAt)
+            throw new DomainRuleException("invalid_email_consent", "emailUpdatesConsent", "The order email consent time is invalid.");
+        if (emailTrackingTokenHash is not null && (emailTrackingTokenHash.Length != 64 ||
+            emailTrackingTokenHash.Any(character => !Uri.IsHexDigit(character))))
+            throw new DomainRuleException("invalid_email_tracking_token", "emailUpdatesConsent", "The email tracking token is invalid.");
         return new Order
         {
-            Id = Guid.NewGuid(), TenantId = tenantId, Currency = normalizedCurrency, CustomerName = normalizedName,
+            Id = id ?? Guid.NewGuid(), TenantId = tenantId, Currency = normalizedCurrency, CustomerName = normalizedName,
+            CustomerEmail = normalizedEmail, EmailUpdatesConsentedAt = emailUpdatesConsentedAt,
+            EmailTrackingTokenHash = emailTrackingTokenHash?.ToLowerInvariant(),
             MenuLocale = normalizedMenuLocale,
             DiscountCode = string.IsNullOrWhiteSpace(discountCode) ? null : discountCode.Trim().ToUpperInvariant(),
             Subtotal = subtotal, DiscountAmount = discountAmount, TaxAmount = orderLines.Sum(line => line.TaxAmount),
@@ -114,6 +134,7 @@ public sealed class Order
         {
             ClosedAt = occurredAt;
             ClosedAtTicks = occurredAt.UtcDateTime.Ticks;
+            ClearEmailUpdates();
         }
         Version++;
     }
@@ -124,6 +145,41 @@ public sealed class Order
         Status = OrderStatus.Cancelled;
         ClosedAt = occurredAt;
         ClosedAtTicks = occurredAt.UtcDateTime.Ticks;
+        ClearEmailUpdates();
         Version++;
     }
+
+    public void ClearExpiredEmailData(DateTimeOffset now)
+    {
+        if ((TrackingTokenExpiresAt ?? CreatedAt.AddDays(30)) > now) return;
+        ClearEmailUpdates();
+        EmailTrackingTokenHash = null;
+    }
+
+    private void ClearEmailUpdates()
+    {
+        CustomerEmail = null;
+        EmailUpdatesConsentedAt = null;
+    }
+
+    private static string? NormalizeEmail(string? email)
+    {
+        if (email is null) return null;
+        var normalized = email.Trim();
+        if (normalized.Length is 0 or > 254) throw InvalidEmail();
+        try
+        {
+            var parsed = new MailAddress(normalized);
+            if (!string.Equals(parsed.Address, normalized, StringComparison.OrdinalIgnoreCase) ||
+                parsed.DisplayName.Length != 0 || normalized.Any(char.IsWhiteSpace)) throw InvalidEmail();
+        }
+        catch (FormatException)
+        {
+            throw InvalidEmail();
+        }
+        return normalized.ToLowerInvariant();
+    }
+
+    private static DomainRuleException InvalidEmail() => new("invalid_customer_email", "customerEmail",
+        "Enter a valid email address.");
 }

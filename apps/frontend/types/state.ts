@@ -15,6 +15,8 @@ export type TenantSelectionState = {
 export type GuestCheckoutState = {
   cart: CartItem[]
   customerName: string
+  customerEmail: string
+  emailUpdatesConsented: boolean
   discountCode: string
   error: ApiError | null
   submitting: boolean
@@ -24,6 +26,8 @@ export type GuestCheckoutState = {
   inFlight: boolean
   changeCart: (item: CartItem) => void
   changeCustomerName: (value: string) => void
+  changeCustomerEmail: (value: string) => void
+  changeEmailUpdatesConsent: (value: boolean) => void
   changeDiscountCode: (value: string) => void
   setError: (error: ApiError | null) => void
   setSubmitting: (submitting: boolean) => void

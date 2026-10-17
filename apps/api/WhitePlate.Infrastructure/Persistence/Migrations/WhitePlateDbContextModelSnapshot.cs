@@ -598,6 +598,10 @@ namespace WhitePlate.Infrastructure.Persistence.Migrations
                         .HasMaxLength(3)
                         .HasColumnType("character varying(3)");
 
+                    b.Property<string>("CustomerEmail")
+                        .HasMaxLength(254)
+                        .HasColumnType("character varying(254)");
+
                     b.Property<string>("CustomerName")
                         .IsRequired()
                         .HasMaxLength(160)
@@ -610,6 +614,13 @@ namespace WhitePlate.Infrastructure.Persistence.Migrations
                     b.Property<string>("DiscountCode")
                         .HasMaxLength(32)
                         .HasColumnType("character varying(32)");
+
+                    b.Property<string>("EmailTrackingTokenHash")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<DateTimeOffset?>("EmailUpdatesConsentedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("MenuLocale")
                         .HasMaxLength(128)
@@ -995,6 +1006,18 @@ namespace WhitePlate.Infrastructure.Persistence.Migrations
                     b.Property<string>("OpeningHoursJson")
                         .HasColumnType("jsonb");
 
+                    b.Property<string>("OrderEmailTemplatesJson")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("jsonb")
+                        .HasDefaultValue("{}");
+
+                    b.Property<int>("OrderEmailTemplatesVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(1);
+
                     b.Property<int>("OrderingOperationsVersion")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
@@ -1107,6 +1130,74 @@ namespace WhitePlate.Infrastructure.Persistence.Migrations
                         .IsUnique();
 
                     b.ToTable("OrderIdempotencyRecords", (string)null);
+                });
+
+            modelBuilder.Entity("WhitePlate.Infrastructure.Persistence.OrderEmailDelivery", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("AcceptedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("AttemptCount")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("EventType")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<string>("HtmlSnapshot")
+                        .HasColumnType("text");
+
+                    b.Property<string>("LastFailureCode")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<DateTimeOffset?>("LeaseUntil")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("NextAttemptAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("OrderId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ProviderMessageId")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("RecipientEmail")
+                        .HasMaxLength(254)
+                        .HasColumnType("character varying(254)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)");
+
+                    b.Property<string>("SubjectSnapshot")
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("TextSnapshot")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrderId");
+
+                    b.HasIndex("Status", "NextAttemptAt", "LeaseUntil");
+
+                    b.HasIndex("TenantId", "OrderId", "CreatedAt");
+
+                    b.ToTable("OrderEmailDeliveries", (string)null);
                 });
 
             modelBuilder.Entity("WhitePlate.Infrastructure.Persistence.OutboxMessage", b =>
@@ -1336,6 +1427,15 @@ namespace WhitePlate.Infrastructure.Persistence.Migrations
                     b.HasOne("WhitePlate.Domain.Tenants.Tenant", null)
                         .WithMany()
                         .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("WhitePlate.Infrastructure.Persistence.OrderEmailDelivery", b =>
+                {
+                    b.HasOne("WhitePlate.Domain.Orders.Order", null)
+                        .WithMany()
+                        .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

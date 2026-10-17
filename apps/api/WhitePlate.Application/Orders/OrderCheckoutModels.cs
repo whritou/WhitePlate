@@ -30,7 +30,15 @@ public sealed record PickupAvailabilityDto(string State, string? TimeZone, IRead
 public sealed record CreateOrderItem(Guid ProductId, int Quantity, IReadOnlyList<Guid>? OptionIds);
 public sealed record CreateOrderCommand(Guid TenantId, string? CustomerName, string? DiscountCode,
     string? MenuLocale, IReadOnlyList<CreateOrderItem>? Items, string? IdempotencyKey,
-    string? TrackingToken = null, DateTimeOffset? PickupAt = null);
+    string? TrackingToken = null, DateTimeOffset? PickupAt = null, string? CustomerEmail = null,
+    bool EmailUpdatesConsented = false);
+
+public sealed record EmailTrackingCapability(string Token, string TokenHash);
+
+public interface IEmailTrackingCapability
+{
+    EmailTrackingCapability? Create(Guid tenantId, Guid orderId, DateTimeOffset expiresAt);
+}
 
 public sealed record OrderLineOptionDto(Guid OptionId, string Name, decimal PriceAdjustment);
 public sealed record OrderLineReceiptDto(Guid ProductId, string ProductName, decimal BaseUnitPrice,

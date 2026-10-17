@@ -89,6 +89,8 @@ public static class ServiceRegistration
         services.AddScoped<EstablishmentSettingsHandler>();
         services.AddScoped<OrderingOperationsHandler>();
         services.AddScoped<IThemeSettingsRepository, ThemeSettingsRepository>();
+        services.AddScoped<IOrderEmailSettingsRepository, OrderEmailSettingsRepository>();
+        services.AddScoped<OrderEmailSettingsHandler>();
         services.AddScoped<ThemeSettingsHandler>();
         services.AddScoped<IThemePublicationRepository, ThemePublicationRepository>();
         services.AddScoped<ThemePublicationHandler>();
@@ -97,6 +99,9 @@ public static class ServiceRegistration
         services.AddScoped<ICatalogRepository, CatalogRepository>();
         services.AddScoped<IOrderRepository, OrderRepository>();
         services.AddScoped<CreateOrderCommandHandler>();
+        services.AddSingleton<IEmailTrackingCapability, HmacEmailTrackingCapability>();
+        services.AddSingleton<ResendOrderEmailSender>();
+        services.AddHttpClient();
         services.AddScoped<GetPublicOrderTrackingQueryHandler>();
         services.AddScoped<ListOrdersQueryHandler>();
         services.AddScoped<ListOrderHistoryQueryHandler>();
@@ -108,6 +113,7 @@ public static class ServiceRegistration
         services.AddScoped<IOrderEventPublisher, SignalRKitchenEventPublisher>();
         services.AddSignalR();
         services.AddHostedService<OrderOutboxDispatcher>();
+        services.AddHostedService<OrderEmailOutboxDispatcher>();
         services.AddHostedService<OrderArchiveDispatcher>();
         services.AddScoped<GetMenuQueryHandler>();
         services.AddScoped<CreateCategoryCommandHandler>();

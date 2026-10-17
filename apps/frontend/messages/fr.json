@@ -413,6 +413,9 @@
     "priceNote": "Les prix du menu sont hors taxes et réductions. Votre reçu indiquera le montant final calculé par le restaurant.",
     "estimatedSubtotal": "Sous-total estimé",
     "customerName": "Votre nom",
+    "emailUpdatesConsent": "Recevoir les nouvelles de cette commande par e-mail",
+    "emailUpdatesPrivacy": "Votre adresse sera utilisée uniquement pour cette commande et supprimée à la fin de la période de suivi.",
+    "customerEmail": "Adresse e-mail",
     "pickupTime": "Heure de retrait",
     "asapPickup": "Dès que possible — premier créneau disponible",
     "noPickupSlots": "Le retrait en ligne est indisponible pour le moment. Réessayez plus tard.",
@@ -3476,6 +3479,7 @@
     "legalSettingsCategory": "Juridique et fiscal",
     "openingHoursCategory": "Heures d’ouverture",
     "pickupSchedulingCategory": "Créneaux de retrait",
+    "notificationsSettingsCategory": "E-mails de commande",
     "context": "Contexte de travail",
     "organizations": "Organisations",
     "restaurants": "Restaurants",
@@ -3790,6 +3794,43 @@
       "friday": "Vendredi",
       "saturday": "Samedi",
       "sunday": "Dimanche"
+    }
+  },
+  "OrderEmailSettings": {
+    "title": "E-mails de suivi des commandes",
+    "description": "Choisissez le texte envoyé aux clients qui acceptent de recevoir les nouvelles de leur commande.",
+    "senderNote": "WhitePlate envoie ces messages depuis son adresse de plateforme vérifiée. L’e-mail reprend le nom du restaurant, son logo, sa bannière et ses couleurs publiés lorsqu’ils sont disponibles, le récapitulatif de commande, l’heure et les consignes de retrait.",
+    "editorTitle": "Éditeur de modèles",
+    "editorDescription": "Les modèles sont en texte brut. Les variables autorisées sont échappées avant leur insertion dans l’e-mail avec votre identité visuelle.",
+    "language": "Langue du menu",
+    "event": "Événement de commande",
+    "events": {
+      "orderCreated": "Commande reçue",
+      "preparing": "En préparation",
+      "ready": "Prête à retirer"
+    },
+    "subject": "Objet de l’e-mail",
+    "heading": "Titre de l’e-mail",
+    "body": "Message",
+    "variables": "Variables disponibles",
+    "preview": "Aperçu de l’e-mail",
+    "previewDescription": "Exemple de commande. L’e-mail reprend les couleurs, le logo et la bannière publiés du restaurant lorsqu’ils sont disponibles.",
+    "previewSize": "Taille de l’aperçu de l’e-mail",
+    "previewMobile": "Mobile",
+    "previewDesktop": "Ordinateur",
+    "save": "Enregistrer les modèles",
+    "saving": "Enregistrement des modèles…",
+    "discard": "Annuler les modifications",
+    "resetEvent": "Réinitialiser cet événement",
+    "saved": "Les modèles d’e-mail ont été enregistrés.",
+    "unavailable": "Impossible de charger les paramètres d’e-mail. Rechargez cette page avant de modifier les modèles.",
+    "errors": {
+      "invalid": "Vérifiez le texte et les variables autorisées, puis réessayez.",
+      "conflict": "Ces modèles ont changé ailleurs. Rechargez la page avant de les enregistrer.",
+      "unavailable": "Impossible d’enregistrer les modèles. Vos modifications sont conservées.",
+      "forbidden": "Vous n’avez pas l’autorisation de modifier les modèles d’e-mail.",
+      "unauthorized": "Votre session a expiré. Reconnectez-vous pour continuer.",
+      "not_found": "Les paramètres d’e-mail sont indisponibles pour ce restaurant."
     }
   },
   "CollectionInformation": {
