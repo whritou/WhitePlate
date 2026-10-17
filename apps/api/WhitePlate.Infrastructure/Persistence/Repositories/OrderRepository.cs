@@ -607,6 +607,8 @@ public sealed class OrderRepository(WhitePlateDbContext database,
     private async Task RecalculateAnalyticsReturningFlagsAsync(WhitePlate.Domain.Orders.Order cancelled,
         DateTimeOffset now, CancellationToken cancellationToken)
     {
+        if (cancelled.AnalyticsConsentedAt is null) return;
+
         var affectedOrderIds = await database.OrderAnalyticsRepeatLinks.AsNoTracking()
             .Where(link => link.TenantId == cancelled.TenantId && link.PriorOrderId == cancelled.Id &&
                 link.ExpiresAt > now)

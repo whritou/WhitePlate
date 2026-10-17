@@ -61,12 +61,17 @@ export function prepareCheckout(
 ): CheckoutAttempt {
   const normalized = {
     customerName: input.customerName.trim(),
-    customerEmail: input.emailUpdatesConsented || input.analyticsConsented
-      ? input.customerEmail.trim()
-      : "",
+    customerEmail:
+      input.emailUpdatesConsented || input.analyticsConsented
+        ? input.customerEmail.trim()
+        : "",
     emailUpdatesConsented: input.emailUpdatesConsented,
-    analyticsConsented: input.analyticsConsented ?? false,
-    analyticsSource: input.analyticsSource ?? "web",
+    ...(input.analyticsConsented
+      ? {
+          analyticsConsented: true,
+          analyticsSource: input.analyticsSource ?? "web",
+        }
+      : {}),
     discountCode: input.discountCode?.trim().toUpperCase() || null,
     menuLocale: input.menuLocale,
     ...(input.pickupAt ? { pickupAt: input.pickupAt } : {}),
@@ -83,8 +88,12 @@ export function prepareCheckout(
         customerName: previous.input.customerName,
         customerEmail: previous.input.customerEmail,
         emailUpdatesConsented: previous.input.emailUpdatesConsented,
-        analyticsConsented: previous.input.analyticsConsented ?? false,
-        analyticsSource: previous.input.analyticsSource ?? "web",
+        ...(previous.input.analyticsConsented
+          ? {
+              analyticsConsented: true,
+              analyticsSource: previous.input.analyticsSource ?? "web",
+            }
+          : {}),
         discountCode: previous.input.discountCode,
         menuLocale: previous.input.menuLocale,
         ...(previous.input.pickupAt
@@ -120,11 +129,15 @@ export function validateOrderInput(input: unknown): input is OrderInput {
     typeof value.customerEmail !== "string" ||
     value.customerEmail.length > 254 ||
     typeof value.emailUpdatesConsented !== "boolean" ||
-    (value.analyticsConsented !== undefined && typeof value.analyticsConsented !== "boolean") ||
-    (value.analyticsSource !== undefined && !["web", "qr"].includes(String(value.analyticsSource))) ||
+    (value.analyticsConsented !== undefined &&
+      typeof value.analyticsConsented !== "boolean") ||
+    (value.analyticsSource !== undefined &&
+      !["web", "qr"].includes(String(value.analyticsSource))) ||
     ((value.emailUpdatesConsented || value.analyticsConsented) &&
       !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.customerEmail.trim())) ||
-    (!value.emailUpdatesConsented && !value.analyticsConsented && value.customerEmail.length > 0) ||
+    (!value.emailUpdatesConsented &&
+      !value.analyticsConsented &&
+      value.customerEmail.length > 0) ||
     (value.discountCode !== null &&
       (typeof value.discountCode !== "string" ||
         value.discountCode.length > 64)) ||
