@@ -3,6 +3,7 @@ using WhitePlate.Application.Common.Results;
 using WhitePlate.Application.Identity;
 using WhitePlate.Application.Orders;
 using WhitePlate.Domain.Common;
+using WhitePlate.Domain.Organizations;
 using WhitePlate.Domain.Identity;
 using WhitePlate.Domain.Tenants;
 
@@ -65,10 +66,9 @@ public sealed class OrderingOperationsHandler(IStaffMembershipRepository members
         }
     }
 
-    private async Task<bool> CanManageAsync(Guid tenantId, ExternalIdentity identity,
+    private Task<bool> CanManageAsync(Guid tenantId, ExternalIdentity identity,
         CancellationToken cancellationToken) =>
-        await memberships.IsOrganizationOwnerOfTenantAsync(tenantId, identity, cancellationToken) ||
-        await memberships.HasRestaurantRoleAsync(tenantId, identity, RestaurantRole.Manager, cancellationToken);
+        memberships.HasPermissionAsync(tenantId, identity, RestaurantPermission.OrdersManage, cancellationToken);
 
     private static OrderingOperationsDto ToDto(Tenant tenant) => new(tenant.AcceptingOrders,
         tenant.RushHoldEnabled, tenant.RushHoldEnabled ? Tenant.RushHoldBufferMinutes : 0,

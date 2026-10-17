@@ -6,7 +6,10 @@ import { getLocale } from "next-intl/server"
 import { headers } from "next/headers"
 import { redirect } from "next/navigation"
 
-export async function getManagedWorkspaceRestaurant(tenantId: unknown) {
+export async function getManagedWorkspaceRestaurant(
+  tenantId: unknown,
+  requiredPermissions: string[]
+) {
   const locale = await getLocale()
   const session = await auth.api.getSession({ headers: await headers() })
 
@@ -19,7 +22,11 @@ export async function getManagedWorkspaceRestaurant(tenantId: unknown) {
   if (!response.ok) return null
 
   const restaurant = response.data?.find(
-    (item) => item.id === tenantId && item.role !== "Kitchen"
+    (item) =>
+      item.id === tenantId &&
+      requiredPermissions.every((permission) =>
+        item.permissions.includes(permission)
+      )
   )
 
   return restaurant ? { ...restaurant, userId: session.user.id } : null

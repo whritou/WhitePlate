@@ -34,7 +34,7 @@ it("renders saved localized preparation notes and accessible pickup timing", () 
           },
         ],
       },
-      role: "Kitchen",
+      permissions: ["kitchen.display"],
       locale: "en",
       now: Date.parse("2026-10-01T18:00:00.000Z"),
       pending: null,

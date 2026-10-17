@@ -81,6 +81,7 @@ public sealed class SignalRKitchenEventPublisherTests
             CancellationToken cancellationToken) => Task.FromResult(false);
         public Task<bool> HasRestaurantRoleAsync(Guid tenantId, ExternalIdentity identity, RestaurantRole role,
             CancellationToken cancellationToken) => Task.FromResult(role == RestaurantRole.Kitchen && authorize());
+        public Task<bool> HasPermissionAsync(Guid tenantId, ExternalIdentity identity, WhitePlate.Domain.Organizations.RestaurantPermission permission, CancellationToken cancellationToken) => Task.FromResult(permission == WhitePlate.Domain.Organizations.RestaurantPermission.KitchenDisplay && authorize());
     }
 
     private sealed class RecordingHub : IHubContext<KitchenHub>, IHubClients, IGroupManager

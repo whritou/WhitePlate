@@ -10,6 +10,8 @@ const {
   getOrganizationRestaurants,
   getOrganizationMembers,
   getOrganizationInvitations,
+  getOrganizationRoleGrants,
+  getRestaurantMemberships,
 } = vi.hoisted(() => ({
   getLocale: vi.fn(),
   getTranslations: vi.fn(),
@@ -17,6 +19,8 @@ const {
   getOrganizationRestaurants: vi.fn(),
   getOrganizationMembers: vi.fn(),
   getOrganizationInvitations: vi.fn(),
+  getOrganizationRoleGrants: vi.fn(),
+  getRestaurantMemberships: vi.fn(),
 }))
 
 vi.mock("next-intl/server", () => ({ getLocale, getTranslations }))
@@ -46,7 +50,9 @@ vi.mock("@/services/organization-queries", () => ({
   getOrganizationRestaurants,
   getOrganizationMembers,
   getOrganizationInvitations,
+  getOrganizationRoleGrants,
 }))
+vi.mock("@/services/orders", () => ({ getRestaurantMemberships }))
 vi.mock("@/components/auth/staff-invitation-form", () => ({
   StaffInvitationForm: () => createElement("form", null, "Invitation form"),
 }))
@@ -135,6 +141,29 @@ beforeEach(() => {
       },
     ],
   })
+  getOrganizationRoleGrants.mockResolvedValue({
+    ok: true,
+    data: [
+      {
+        role: "OrganizationOwner",
+        permissions: ["orders.manage", "kitchen.display", "catalog.manage", "discounts.manage", "analytics.view", "storefront.manage", "staff.manage", "billing.manage"],
+        version: 0,
+        isProtected: true,
+      },
+      ...[
+        ["Manager", ["orders.manage"]],
+        ["Kitchen", ["kitchen.display"]],
+        ["Staff", ["orders.manage", "kitchen.display"]],
+        ["Accountant", ["analytics.view", "billing.manage"]],
+      ].map(([role, permissions]) => ({
+        role,
+        permissions,
+        version: 1,
+        isProtected: false,
+      })),
+    ],
+  })
+  getRestaurantMemberships.mockResolvedValue({ ok: true, data: [] })
 })
 
 it("renders the organization roster and invitation status beside the invitation form", async () => {

@@ -10,6 +10,10 @@ import type {
   StaffInvitationInput,
   StaffRole,
 } from "@/types/actions"
+import type {
+  OrganizationRoleGrantInput,
+  RestaurantPermissionKey,
+} from "@/types/organization"
 
 export function parseMenuLanguages(input: unknown): MenuLanguagesInput | null {
   if (
@@ -91,6 +95,44 @@ const isLocaleTag = (value: unknown): value is string =>
   typeof value === "string" &&
   value.length <= 128 &&
   /^[A-Za-z]{2,8}(?:-[A-Za-z0-9]{1,8})*$/.test(value)
+
+const permissionKeys: RestaurantPermissionKey[] = [
+  "orders.manage",
+  "kitchen.display",
+  "catalog.manage",
+  "discounts.manage",
+  "analytics.view",
+  "storefront.manage",
+  "staff.manage",
+  "billing.manage",
+]
+
+export function parseOrganizationRoleGrant(
+  input: unknown
+): OrganizationRoleGrantInput | null {
+  const roles = ["Manager", "Staff", "Kitchen", "Accountant"]
+
+  if (
+    !isRecord(input) ||
+    !isUuid(input.organizationId) ||
+    typeof input.role !== "string" ||
+    !roles.includes(input.role) ||
+    !Array.isArray(input.permissions) ||
+    !input.permissions.every((value) => permissionKeys.includes(value as RestaurantPermissionKey)) ||
+    new Set(input.permissions).size !== input.permissions.length ||
+    typeof input.version !== "number" ||
+    !Number.isSafeInteger(input.version) ||
+    input.version < 1
+  )
+    return null
+
+  return {
+    organizationId: input.organizationId,
+    role: input.role as OrganizationRoleGrantInput["role"],
+    permissions: input.permissions as RestaurantPermissionKey[],
+    version: input.version,
+  }
+}
 
 export function parseCatalogTranslationDecision(
   input: unknown
@@ -228,9 +270,13 @@ export function parseStaffInvitation(
     !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ||
     email.length > 254 ||
     typeof role !== "string" ||
-    !["OrganizationOwner", "RestaurantManager", "KitchenStaff"].includes(
-      role
-    ) ||
+    ![
+      "OrganizationOwner",
+      "RestaurantManager",
+      "KitchenStaff",
+      "RestaurantStaff",
+      "Accountant",
+    ].includes(role) ||
     (role === "OrganizationOwner" ? tenantId !== null : tenantId === null)
   )
     return null

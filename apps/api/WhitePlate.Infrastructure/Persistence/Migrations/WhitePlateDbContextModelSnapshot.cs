@@ -889,6 +889,27 @@ namespace WhitePlate.Infrastructure.Persistence.Migrations
                     b.ToTable("OrganizationOwnerMemberships", (string)null);
                 });
 
+            modelBuilder.Entity("WhitePlate.Domain.Organizations.OrganizationRoleGrantSet", b =>
+                {
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Role")
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.Property<long>("Permissions")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("Version")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer");
+
+                    b.HasKey("OrganizationId", "Role");
+
+                    b.ToTable("OrganizationRoleGrants", (string)null);
+                });
+
             modelBuilder.Entity("WhitePlate.Domain.Tenants.RestaurantMembership", b =>
                 {
                     b.Property<Guid>("TenantId")
@@ -1559,6 +1580,15 @@ namespace WhitePlate.Infrastructure.Persistence.Migrations
                 });
 
             modelBuilder.Entity("WhitePlate.Domain.Organizations.OrganizationOwnerMembership", b =>
+                {
+                    b.HasOne("WhitePlate.Domain.Organizations.Organization", null)
+                        .WithMany()
+                        .HasForeignKey("OrganizationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("WhitePlate.Domain.Organizations.OrganizationRoleGrantSet", b =>
                 {
                     b.HasOne("WhitePlate.Domain.Organizations.Organization", null)
                         .WithMany()

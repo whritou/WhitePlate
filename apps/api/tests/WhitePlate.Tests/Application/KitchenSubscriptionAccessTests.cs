@@ -47,5 +47,6 @@ public sealed class KitchenSubscriptionAccessTests
 
         public Task<bool> HasRestaurantRoleAsync(Guid tenantId, ExternalIdentity identity, RestaurantRole role,
             CancellationToken cancellationToken) => Task.FromResult(Roles.Contains((tenantId, identity.Subject, role)));
+        public Task<bool> HasPermissionAsync(Guid tenantId, ExternalIdentity identity, WhitePlate.Domain.Organizations.RestaurantPermission permission, CancellationToken cancellationToken) => Task.FromResult(Owners.Contains((tenantId, identity.Subject)) || (permission != WhitePlate.Domain.Organizations.RestaurantPermission.BillingManage && Roles.Contains((tenantId, identity.Subject, RestaurantRole.Manager))) || (permission == WhitePlate.Domain.Organizations.RestaurantPermission.KitchenDisplay && Roles.Contains((tenantId, identity.Subject, RestaurantRole.Kitchen))));
     }
 }

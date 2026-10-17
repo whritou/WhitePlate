@@ -6,7 +6,9 @@ namespace WhitePlate.Domain.Tenants;
 public enum RestaurantRole
 {
     Manager = 1,
-    Kitchen = 2
+    Kitchen = 2,
+    Staff = 3,
+    Accountant = 4
 }
 
 public sealed class RestaurantMembership

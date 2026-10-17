@@ -996,6 +996,8 @@ public sealed partial class OrdersEndpointTests
             await database.Database.EnsureCreatedAsync(TestContext.Current.CancellationToken);
             var organization = Organization.Create("Orders Test");
             database.Organizations.Add(organization);
+            database.OrganizationRoleGrants.AddRange(Enum.GetValues<RestaurantRole>()
+                .Select(role => OrganizationRoleGrantSet.CreateDefault(organization.Id, role)));
             var tenant = Tenant.Create(organization.Id, "Bistro", "bistro", "EUR");
             if (timeZone != "UTC") tenant.UpdateEstablishment(new EstablishmentInput(tenant.Name, TimeZone: timeZone));
             if (includeOpeningHours)

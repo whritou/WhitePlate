@@ -7,10 +7,12 @@ export function TeamDirectoryTabs({
   children,
   heading,
   action,
+  showRoles = true,
 }: {
   children: ReactNode
   heading?: ReactNode
   action?: ReactNode
+  showRoles?: boolean
 }) {
   const [summary, members, invitations, roles] = Children.toArray(children)
   const t = useTranslations("LiveParity")
@@ -40,9 +42,11 @@ export function TeamDirectoryTabs({
             <Copy>Invitations</Copy>
           </TabsTrigger>
 
-          <TabsTrigger value="roles">
-            <Copy>Roles & permissions</Copy>
-          </TabsTrigger>
+          {showRoles && (
+            <TabsTrigger value="roles">
+              <Copy>Roles & permissions</Copy>
+            </TabsTrigger>
+          )}
 
           <TabsTrigger value="activity">{t("activity")}</TabsTrigger>
         </TabsList>
@@ -55,9 +59,11 @@ export function TeamDirectoryTabs({
           {invitations}
         </TabsContent>
 
-        <TabsContent keepMounted value="roles" className="pt-6">
-          {roles}
-        </TabsContent>
+        {showRoles && (
+          <TabsContent keepMounted value="roles" className="pt-6">
+            {roles}
+          </TabsContent>
+        )}
 
         <TabsContent
           value="activity"

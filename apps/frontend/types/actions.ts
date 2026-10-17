@@ -39,7 +39,11 @@ export type CatalogTranslationGlossaryDeleteInput = {
   id: string
 }
 export type StaffRole =
-  "OrganizationOwner" | "RestaurantManager" | "KitchenStaff"
+  | "OrganizationOwner"
+  | "RestaurantManager"
+  | "KitchenStaff"
+  | "RestaurantStaff"
+  | "Accountant"
 export type StaffInvitationInput = {
   organizationId: string
   tenantId: string | null

@@ -219,7 +219,7 @@ export function LiveDashboardOrderContent(
             </Badge>
           </div>
 
-          {props.role !== "Kitchen" && (
+          {props.permissions.includes("billing.manage") && (
             <div className="border-y py-4">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <h3 className="flex items-center gap-2 font-bold">
@@ -254,14 +254,16 @@ export function LiveDashboardOrderContent(
             </div>
           )}
 
-          <OrderingOperationsSummary
-            presentation="compact"
-            counts={{
-              Pending: page ? counts.Pending : undefined,
-              Preparing: page ? counts.Preparing : undefined,
-              Ready: page ? counts.Ready : undefined,
-            }}
-          />
+          {props.permissions.includes("orders.manage") && (
+            <OrderingOperationsSummary
+              presentation="compact"
+              counts={{
+                Pending: page ? counts.Pending : undefined,
+                Preparing: page ? counts.Preparing : undefined,
+                Ready: page ? counts.Ready : undefined,
+              }}
+            />
+          )}
         </section>
       </div>
 

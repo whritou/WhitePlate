@@ -61,6 +61,17 @@ export default async function KitchenOrdersPage({
       />
     )
 
+  if (
+    !membership.permissions.includes("orders.manage") &&
+    !membership.permissions.includes("kitchen.display")
+  )
+    return (
+      <PageMessage
+        title={t("accessDeniedTitle")}
+        message={t("errors.forbidden")}
+      />
+    )
+
   const statusResult = parseOrderStatusFilter(
     singleValue(params.status, params.status !== undefined)
   )
@@ -114,6 +125,7 @@ export default async function KitchenOrdersPage({
         tenantId={membership.id}
         tenantName={membership.name}
         role={membership.role}
+        permissions={membership.permissions}
         locale={locale}
         selectedStatus={statusResult.ok ? statusResult.status : null}
         cursor={cursorResult.ok ? cursorResult.cursor : null}

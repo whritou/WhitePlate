@@ -14,6 +14,7 @@ public sealed class WhitePlateDbContext(DbContextOptions<WhitePlateDbContext> op
     public DbSet<Organization> Organizations => Set<Organization>();
     public DbSet<OrganizationOwnerMembership> OrganizationOwnerMemberships => Set<OrganizationOwnerMembership>();
     public DbSet<RestaurantMembership> RestaurantMemberships => Set<RestaurantMembership>();
+    public DbSet<WhitePlate.Domain.Organizations.OrganizationRoleGrantSet> OrganizationRoleGrants => Set<WhitePlate.Domain.Organizations.OrganizationRoleGrantSet>();
     public DbSet<StaffInvitation> StaffInvitations => Set<StaffInvitation>();
     public DbSet<Tenant> Tenants => Set<Tenant>();
     public DbSet<MenuCategory> MenuCategories => Set<MenuCategory>();

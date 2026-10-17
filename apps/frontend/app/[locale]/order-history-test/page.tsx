@@ -57,6 +57,7 @@ export default async function OrderHistoryTestPage() {
           role: "Manager",
           organizationId: "11111111-1111-4111-8111-111111111111",
           subdomain: "maisonverte",
+          permissions: ["orders.manage"],
         },
       ]}
     >

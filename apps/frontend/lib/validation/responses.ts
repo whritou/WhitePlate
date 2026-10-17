@@ -16,6 +16,8 @@ import type {
   OrganizationTeamInvitation,
   OrganizationTeamMember,
   OrganizationTeamRole,
+  OrganizationRoleGrant,
+  RestaurantPermissionKey,
   Restaurant,
 } from "@/types/organization"
 
@@ -85,7 +87,68 @@ const organizationTeamRoles: OrganizationTeamRole[] = [
   "OrganizationOwner",
   "RestaurantManager",
   "KitchenStaff",
+  "RestaurantStaff",
+  "Accountant",
 ]
+
+const restaurantPermissionKeys: RestaurantPermissionKey[] = [
+  "orders.manage",
+  "kitchen.display",
+  "catalog.manage",
+  "discounts.manage",
+  "analytics.view",
+  "storefront.manage",
+  "staff.manage",
+  "billing.manage",
+]
+
+const organizationRoles: OrganizationRoleGrant["role"][] = [
+  "OrganizationOwner",
+  "Manager",
+  "Kitchen",
+  "Staff",
+  "Accountant",
+]
+
+export function parseOrganizationRoleGrants(
+  value: unknown
+): OrganizationRoleGrant[] | null {
+  if (!Array.isArray(value)) return null
+
+  const grants: OrganizationRoleGrant[] = []
+  const roles = new Set<string>()
+
+  for (const item of value) {
+    if (
+      !isRecord(item) ||
+      typeof item.role !== "string" ||
+      !organizationRoles.includes(item.role as OrganizationRoleGrant["role"]) ||
+      roles.has(item.role) ||
+      !Array.isArray(item.permissions) ||
+      !item.permissions.every((permission) =>
+        restaurantPermissionKeys.includes(permission as RestaurantPermissionKey)
+      ) ||
+      new Set(item.permissions).size !== item.permissions.length ||
+      typeof item.version !== "number" ||
+      !Number.isSafeInteger(item.version) ||
+      item.version < 0 ||
+      typeof item.isProtected !== "boolean"
+    )
+      return null
+
+    if (item.role === "OrganizationOwner" && !item.isProtected) return null
+    if (item.role !== "OrganizationOwner" && item.isProtected) return null
+    roles.add(item.role)
+    grants.push({
+      role: item.role as OrganizationRoleGrant["role"],
+      permissions: item.permissions as RestaurantPermissionKey[],
+      version: item.version,
+      isProtected: item.isProtected,
+    })
+  }
+
+  return grants.length === organizationRoles.length ? grants : null
+}
 
 function isOrganizationTeamMember(
   value: unknown

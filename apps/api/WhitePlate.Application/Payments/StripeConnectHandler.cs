@@ -4,6 +4,7 @@ using WhitePlate.Application.Common.Errors;
 using WhitePlate.Application.Common.Results;
 using WhitePlate.Application.Identity;
 using WhitePlate.Domain.Identity;
+using WhitePlate.Domain.Organizations;
 using WhitePlate.Domain.Payments;
 using WhitePlate.Domain.Tenants;
 
@@ -19,9 +20,9 @@ public sealed class StripeConnectHandler(IStaffMembershipRepository memberships,
         CancellationToken cancellationToken)
     {
         var isOwner = await memberships.IsOrganizationOwnerOfTenantAsync(tenantId, identity, cancellationToken);
-        var isManager = isOwner || await memberships.HasRestaurantRoleAsync(tenantId, identity,
-            RestaurantRole.Manager, cancellationToken);
-        if (!isManager)
+        var canViewBilling = await memberships.HasPermissionAsync(tenantId, identity,
+            RestaurantPermission.BillingManage, cancellationToken);
+        if (!canViewBilling)
             return Result<StripeConnectStatusDto>.Failure(new ApplicationError(ErrorCode.NotFound));
 
         var mode = options.ActiveMode;

@@ -205,6 +205,8 @@ public sealed partial class BrandAssetsEndpointTests
             var foreign = Organization.Create("Other group");
             var tenant = Tenant.Create(org.Id, "Bistro", "bistro", "EUR");
             db.Organizations.AddRange(org, foreign);
+            db.OrganizationRoleGrants.AddRange(Enum.GetValues<RestaurantRole>().Select(role => OrganizationRoleGrantSet.CreateDefault(org.Id, role)));
+            db.OrganizationRoleGrants.AddRange(Enum.GetValues<RestaurantRole>().Select(role => OrganizationRoleGrantSet.CreateDefault(foreign.Id, role)));
             db.Tenants.AddRange(tenant, Tenant.Create(foreign.Id, "Other", "other", "EUR"));
             db.OrganizationOwnerMemberships.Add(OrganizationOwnerMembership.Create(foreign.Id, ExternalIdentity.Create("https://identity.example.test/", "foreign")));
             db.OrganizationOwnerMemberships.Add(OrganizationOwnerMembership.Create(org.Id, ExternalIdentity.Create("https://identity.example.test/", "owner")));

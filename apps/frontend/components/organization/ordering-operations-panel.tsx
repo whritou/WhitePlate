@@ -24,10 +24,10 @@ export function OrderingOperationsPanel(
 
 export function OrderingOperationsPauseAction() {
   const t = useTranslations("LiveWorkspace")
-  const { role, state, requestChange } = useOrderingOperationsController()
+  const { canManage, state, requestChange } = useOrderingOperationsController()
   const operations = state.operations
 
-  if (role === "Kitchen" || !operations) return null
+  if (!canManage || !operations) return null
 
   return (
     <Button

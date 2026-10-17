@@ -8,6 +8,7 @@ namespace WhitePlate.Api.Controllers;
 [ApiController]
 [Route("api/v1/me")]
 [Authorize]
+[ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
 public sealed class CurrentUserController(ICurrentIdentity currentIdentity, GetCurrentUserQueryHandler getCurrentUser) : ControllerBase
 {
     [HttpGet]

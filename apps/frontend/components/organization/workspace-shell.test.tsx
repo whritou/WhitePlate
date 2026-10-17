@@ -124,6 +124,7 @@ it("renders verified workspace context, active links, and locale-preserving cont
             id: tenantId,
             name: "Owner Restaurant",
             role: "OrganizationOwner",
+            permissions: ["orders.manage", "kitchen.display", "catalog.manage", "discounts.manage", "analytics.view", "storefront.manage", "staff.manage", "billing.manage"],
           },
         ],
       },

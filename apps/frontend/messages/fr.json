@@ -101,6 +101,7 @@
     "backToOrganizations": "Toutes les organisations",
     "teamTitle": "Équipe et invitations",
     "teamDescription": "Consultez les membres de votre organisation, gérez les invitations et ajoutez des collègues vérifiés.",
+    "teamAccessDenied": "Vous devez disposer du droit de gestion de l’équipe pour consulter cette organisation.",
     "teamRosterTitle": "Membres de l’équipe",
     "teamRosterDescription": "Personnes ayant accès à cette organisation et à ses restaurants.",
     "teamRosterEmpty": "Aucun membre de l’équipe n’est disponible pour le moment.",
@@ -113,7 +114,9 @@
     "teamRoles": {
       "OrganizationOwner": "Propriétaire de l’organisation",
       "RestaurantManager": "Responsable de restaurant",
-      "KitchenStaff": "Équipe de cuisine"
+      "KitchenStaff": "Équipe de cuisine",
+      "RestaurantStaff": "Employé du restaurant",
+      "Accountant": "Comptable"
     },
     "invitationStatus": {
       "Pending": "En attente",
@@ -137,6 +140,8 @@
     "cancel": "Annuler",
     "staffRole": "Rôle dans l’équipe",
     "kitchenStaff": "Équipe de cuisine",
+    "restaurantStaff": "Employé du restaurant",
+    "accountant": "Comptable",
     "restaurantManager": "Responsable de restaurant",
     "organizationOwner": "Propriétaire de l’organisation",
     "restaurant": "Restaurant",
@@ -3472,6 +3477,36 @@
     "warmCream": "Crème chaleureux",
     "bistroNoir": "Bistro noir",
     "fromLogo": "Depuis votre logo"
+  },
+  "RolePermissions": {
+    "title": "Rôles et autorisations",
+    "description": "Choisissez les pages et actions accessibles à chaque rôle dans le restaurant. Les changements s’appliquent aux membres actuels et futurs de ce rôle.",
+    "role": "Rôle",
+    "actions": "Actions",
+    "save": "Enregistrer",
+    "saving": "Enregistrement…",
+    "saved": "Les autorisations du rôle sont enregistrées.",
+    "saveError": "Impossible d’enregistrer ces autorisations. Actualisez puis réessayez.",
+    "fixed": "Fixe",
+    "ownerProtected": "Le propriétaire conserve tous les accès et ce rôle ne peut pas être modifié.",
+    "togglePermission": "{permission} pour {role}",
+    "roles": {
+      "OrganizationOwner": "Propriétaire de l’organisation",
+      "Manager": "Responsable de restaurant",
+      "Kitchen": "Équipe de cuisine",
+      "Staff": "Employé du restaurant",
+      "Accountant": "Comptable"
+    },
+    "permissions": {
+      "orders": { "manage": "Gérer les commandes" },
+      "kitchen": { "display": "Affichage cuisine" },
+      "catalog": { "manage": "Gérer le menu" },
+      "discounts": { "manage": "Gérer les réductions" },
+      "analytics": { "view": "Voir les statistiques" },
+      "storefront": { "manage": "Gérer la vitrine" },
+      "staff": { "manage": "Gérer l’équipe" },
+      "billing": { "manage": "Gérer la facturation" }
+    }
   },
   "LiveWorkspace": {
     "settingsSections": "Catégories des paramètres du restaurant",

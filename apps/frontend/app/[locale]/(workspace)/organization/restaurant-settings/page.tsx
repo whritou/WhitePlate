@@ -16,20 +16,6 @@ export default async function RestaurantSettingsPage({
   searchParams: Promise<SearchParams>
 }) {
   const params = await searchParams
-  const restaurant = await getManagedWorkspaceRestaurant(params.tenantId)
-
-  if (!restaurant) {
-    const t = await getTranslations("LiveWorkspace")
-
-    return (
-      <main className="live-page">
-        <Alert variant="destructive">
-          <AlertDescription>{t("unavailable")}</AlertDescription>
-        </Alert>
-      </main>
-    )
-  }
-
   const section =
     typeof params.section === "string" &&
     [
@@ -48,11 +34,39 @@ export default async function RestaurantSettingsPage({
           | "notifications"
           | "payments")
       : "establishment"
+  const requiredPermission =
+    section === "notifications"
+      ? "orders.manage"
+      : section === "payments"
+        ? "billing.manage"
+        : "storefront.manage"
+  const restaurant = await getManagedWorkspaceRestaurant(params.tenantId, [
+    requiredPermission,
+  ])
+
+  if (!restaurant) {
+    const t = await getTranslations("LiveWorkspace")
+
+    return (
+      <main className="live-page">
+        <Alert variant="destructive">
+          <AlertDescription>{t("unavailable")}</AlertDescription>
+        </Alert>
+      </main>
+    )
+  }
+
   const [settings, legalProfile, emailSettings, stripeStatus] =
     await Promise.all([
-      getEstablishmentSettings(restaurant.id),
-      getTenantLegalProfile(restaurant.id),
-      getOrderEmailSettings(restaurant.id),
+      ["establishment", "hours", "pickup"].includes(section)
+        ? getEstablishmentSettings(restaurant.id)
+        : Promise.resolve(null),
+      section === "legal"
+        ? getTenantLegalProfile(restaurant.id)
+        : Promise.resolve(null),
+      section === "notifications"
+        ? getOrderEmailSettings(restaurant.id)
+        : Promise.resolve(null),
       section === "payments"
         ? getStripeConnectStatus(restaurant.id)
         : Promise.resolve(null),
@@ -66,9 +80,9 @@ export default async function RestaurantSettingsPage({
     <RestaurantSettings
       restaurant={restaurant}
       userId={restaurant.userId}
-      initial={settings.ok ? settings.data : null}
-      legalProfile={legalProfile.ok ? legalProfile.data : null}
-      emailSettings={emailSettings.ok ? emailSettings.data : null}
+      initial={settings?.ok ? settings.data : null}
+      legalProfile={legalProfile?.ok ? legalProfile.data : null}
+      emailSettings={emailSettings?.ok ? emailSettings.data : null}
       section={section}
       stripeConnectStatus={stripeStatus?.ok ? stripeStatus.data : null}
       stripeConnectCallbackOutcome={callbackOutcome}

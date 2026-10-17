@@ -44,7 +44,7 @@ export default async function OrderHistoryPage({
     (item) => item.id.toLowerCase() === tenantId.toLowerCase()
   )
 
-  if (!restaurant || restaurant.role === "Kitchen")
+  if (!restaurant || !restaurant.permissions.includes("orders.manage"))
     return (
       <PageError title={t("accessDeniedTitle")} message={t("accessDenied")} />
     )

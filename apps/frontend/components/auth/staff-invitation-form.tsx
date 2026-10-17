@@ -17,11 +17,13 @@ import { ResultMessage } from "./result-message"
 export function StaffInvitationForm({
   organizationId,
   restaurants,
+  allowOwnerInvitation = true,
   onPendingChange,
   onSuccess,
 }: EditorCallbacks & {
   organizationId: string
   restaurants: { id: string; name: string }[]
+  allowOwnerInvitation?: boolean
 }) {
   const t = useTranslations("Auth")
   const toast = useWorkspaceToast()
@@ -29,7 +31,11 @@ export function StaffInvitationForm({
   const locale = useLocale()
   const [tenantId, setTenantId] = useState(restaurants[0]?.id ?? "")
   const [role, setRole] = useState<
-    "OrganizationOwner" | "RestaurantManager" | "KitchenStaff"
+    | "OrganizationOwner"
+    | "RestaurantManager"
+    | "KitchenStaff"
+    | "RestaurantStaff"
+    | "Accountant"
   >(restaurants.length ? "KitchenStaff" : "OrganizationOwner")
   const [state, setState] = useState<ActionState>({ status: "idle" })
 
@@ -90,15 +96,23 @@ export function StaffInvitationForm({
                 {t("kitchenStaff")}
               </NativeSelectOption>
 
+              <NativeSelectOption value="RestaurantStaff">
+                {t("restaurantStaff")}
+              </NativeSelectOption>
+
+              <NativeSelectOption value="Accountant">
+                {t("accountant")}
+              </NativeSelectOption>
+
               <NativeSelectOption value="RestaurantManager">
                 {t("restaurantManager")}
               </NativeSelectOption>
             </>
-          ) : (
+          ) : allowOwnerInvitation ? (
             <NativeSelectOption value="OrganizationOwner">
               {t("organizationOwner")}
             </NativeSelectOption>
-          )}
+          ) : null}
         </NativeSelect>
       </Label>
 
@@ -119,14 +133,22 @@ export function StaffInvitationForm({
               const nextTenantId = event.target.value
 
               setTenantId(nextTenantId)
-              setRole(nextTenantId ? "KitchenStaff" : "OrganizationOwner")
+              setRole(
+                nextTenantId
+                  ? "KitchenStaff"
+                  : allowOwnerInvitation
+                    ? "OrganizationOwner"
+                    : "KitchenStaff"
+              )
             }}
             className="w-full"
             selectClassName="px-3"
           >
-            <NativeSelectOption value="">
-              {t("organizationScope")}
-            </NativeSelectOption>
+            {allowOwnerInvitation && (
+              <NativeSelectOption value="">
+                {t("organizationScope")}
+              </NativeSelectOption>
+            )}
 
             {restaurants.map((restaurant) => (
               <NativeSelectOption key={restaurant.id} value={restaurant.id}>

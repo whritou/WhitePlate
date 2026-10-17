@@ -1053,6 +1053,8 @@ public sealed class OrganizationEndpointTests
             var organization = Organization.Create("Test Organization");
             var identity = ExternalIdentity.Create("https://identity.example.test/", subject);
             database.Organizations.Add(organization);
+            database.OrganizationRoleGrants.AddRange(Enum.GetValues<RestaurantRole>()
+                .Select(role => OrganizationRoleGrantSet.CreateDefault(organization.Id, role)));
             database.OrganizationOwnerMemberships.Add(OrganizationOwnerMembership.Create(organization.Id, identity));
             await database.SaveChangesAsync(TestContext.Current.CancellationToken);
             return (organization.Id, identity);

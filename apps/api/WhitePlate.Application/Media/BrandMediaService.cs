@@ -2,6 +2,8 @@ using WhitePlate.Application.Catalog;
 using WhitePlate.Application.Common.Errors;
 using WhitePlate.Application.Common.Results;
 using WhitePlate.Application.Identity;
+using WhitePlate.Application.Tenants;
+using WhitePlate.Domain.Organizations;
 using WhitePlate.Domain.Identity;
 using WhitePlate.Domain.Media;
 
@@ -11,7 +13,7 @@ public sealed class BrandMediaService(IStaffMembershipRepository memberships, IM
     IMediaStorage storage, IMediaImageProcessor images, TimeProvider clock)
 {
     public Task<bool> CanManageAsync(Guid tenantId, ExternalIdentity identity, CancellationToken ct) =>
-        CatalogAccess.CanManageAsync(memberships, tenantId, identity, ct);
+        StorefrontAccess.CanManageAsync(memberships, tenantId, identity, ct);
 
     public async Task<Result<BrandAssetsDto>> ListAsync(Guid tenantId, ExternalIdentity identity, CancellationToken ct)
     {

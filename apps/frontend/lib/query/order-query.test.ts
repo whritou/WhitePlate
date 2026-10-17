@@ -4,7 +4,7 @@ import { orderQueryKeys } from "./order-query"
 
 it("isolates order pages by account, tenant, locale, status, and cursor", () => {
   const client = createQueryClient()
-  const scope = { userId: "alice", tenantId: "bistro", locale: "en" }
+  const scope = { userId: "alice", tenantId: "bistro", locale: "en", permissions: ["orders.manage"] }
   const first = orderQueryKeys.page(scope, null, null)
 
   client.setQueryData(first, { items: ["private order"], nextCursor: null })
@@ -24,7 +24,7 @@ it("isolates order pages by account, tenant, locale, status, and cursor", () => 
 
 it("invalidates every page for only the selected account and tenant", async () => {
   const client = createQueryClient()
-  const scope = { userId: "alice", tenantId: "bistro", locale: "en" }
+  const scope = { userId: "alice", tenantId: "bistro", locale: "en", permissions: ["orders.manage"] }
   const current = orderQueryKeys.page(scope, null, null)
   const older = orderQueryKeys.page(
     { ...scope, locale: "fr" },

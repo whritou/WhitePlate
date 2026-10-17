@@ -7,9 +7,11 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 export function StaffInviteDialog({
   organizationId,
   restaurants,
+  allowOwnerInvitation = true,
 }: {
   organizationId: string
   restaurants: { id: string; name: string }[] | null
+  allowOwnerInvitation?: boolean
 }) {
   const t = useTranslations("Auth")
   const v = useTranslations("LiveParity")
@@ -31,6 +33,7 @@ export function StaffInviteDialog({
           <StaffInvitationForm
             organizationId={organizationId}
             restaurants={restaurants}
+            allowOwnerInvitation={allowOwnerInvitation}
             {...callbacks}
           />
         )

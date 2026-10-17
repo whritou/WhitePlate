@@ -100,6 +100,7 @@ const props: OrderDashboardProps = {
   tenantId: "11111111-1111-4111-8111-111111111111",
   tenantName: "Bistro",
   role: "Kitchen",
+  permissions: ["kitchen.display"],
   locale: "en",
   selectedStatus: null,
   cursor: null,

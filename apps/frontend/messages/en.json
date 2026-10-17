@@ -101,6 +101,7 @@
     "backToOrganizations": "All organizations",
     "teamTitle": "Team and invitations",
     "teamDescription": "Review your organization’s members, manage invitations, and add verified teammates.",
+    "teamAccessDenied": "You need staff management permission for this organization to view its team.",
     "teamRosterTitle": "Team roster",
     "teamRosterDescription": "People with access to this organization and its restaurants.",
     "teamRosterEmpty": "No team members are available yet.",
@@ -113,7 +114,9 @@
     "teamRoles": {
       "OrganizationOwner": "Organization owner",
       "RestaurantManager": "Restaurant manager",
-      "KitchenStaff": "Kitchen staff"
+      "KitchenStaff": "Kitchen staff",
+      "RestaurantStaff": "Restaurant staff",
+      "Accountant": "Accountant"
     },
     "invitationStatus": {
       "Pending": "Pending",
@@ -137,6 +140,8 @@
     "cancel": "Cancel",
     "staffRole": "Team role",
     "kitchenStaff": "Kitchen staff",
+    "restaurantStaff": "Restaurant staff",
+    "accountant": "Accountant",
     "restaurantManager": "Restaurant manager",
     "organizationOwner": "Organization owner",
     "restaurant": "Restaurant",
@@ -3472,6 +3477,36 @@
     "warmCream": "Warm Cream",
     "bistroNoir": "Bistro Noir",
     "fromLogo": "From your logo"
+  },
+  "RolePermissions": {
+    "title": "Roles & permissions",
+    "description": "Choose which restaurant pages and actions each role can access. Changes apply to current and future members of that role.",
+    "role": "Role",
+    "actions": "Actions",
+    "save": "Save",
+    "saving": "Saving…",
+    "saved": "Role permissions saved.",
+    "saveError": "We couldn’t save these permissions. Refresh and try again.",
+    "fixed": "Fixed",
+    "ownerProtected": "Owner access is always full and cannot be changed.",
+    "togglePermission": "{permission} for {role}",
+    "roles": {
+      "OrganizationOwner": "Organization owner",
+      "Manager": "Restaurant manager",
+      "Kitchen": "Kitchen staff",
+      "Staff": "Restaurant staff",
+      "Accountant": "Accountant"
+    },
+    "permissions": {
+      "orders": { "manage": "Manage orders" },
+      "kitchen": { "display": "Kitchen display" },
+      "catalog": { "manage": "Manage menu" },
+      "discounts": { "manage": "Manage discounts" },
+      "analytics": { "view": "View analytics" },
+      "storefront": { "manage": "Manage storefront" },
+      "staff": { "manage": "Manage staff" },
+      "billing": { "manage": "Manage billing" }
+    }
   },
   "LiveWorkspace": {
     "settingsSections": "Restaurant settings categories",

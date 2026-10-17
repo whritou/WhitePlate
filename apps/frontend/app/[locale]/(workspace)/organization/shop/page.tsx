@@ -4,6 +4,7 @@ import { redirect } from "next/navigation"
 import { auth } from "@/lib/auth"
 import { getRestaurantMemberships } from "@/services/orders"
 import { restaurantShopUrl } from "@/lib/restaurant-shop-url"
+import { restaurantWorkspaceHref } from "@/lib/live-workspace-navigation"
 import { Link } from "@/i18n/navigation"
 import { Button } from "@/components/ui/button"
 import { Alert, AlertDescription } from "@/components/ui/alert"
@@ -54,7 +55,7 @@ export default async function ShopPage({
           <Link
             href={
               restaurant
-                ? `/organization/${restaurant.role === "Kitchen" ? "orders" : "dashboard"}?tenantId=${restaurant.id}`
+                ? restaurantWorkspaceHref(restaurant)
                 : "/organization"
             }
           />

@@ -20,12 +20,13 @@ export function useOrderDashboard(props: OrderDashboardProps) {
     tenantId,
     locale,
     role,
+    permissions,
     selectedStatus,
     cursor,
     page,
     loadError,
   } = props
-  const scope = { userId, tenantId, locale }
+  const scope = { userId, tenantId, locale, permissions }
   const client = useQueryClient()
   const router = useRouter()
   const t = useTranslations("KitchenOrders")
@@ -50,7 +51,7 @@ export function useOrderDashboard(props: OrderDashboardProps) {
   const refresh = useCallback(async () => {
     await Promise.all([
       client.invalidateQueries({
-        queryKey: orderQueryKeys.tenant({ userId, tenantId, locale }),
+        queryKey: orderQueryKeys.tenant({ userId, tenantId, locale, permissions }),
       }),
       client.invalidateQueries({
         queryKey: dashboardMetricsQueryKeys.tenant({
@@ -58,10 +59,11 @@ export function useOrderDashboard(props: OrderDashboardProps) {
           tenantId,
           locale,
           role,
+          permissions,
         }),
       }),
     ])
-  }, [client, userId, tenantId, locale, role])
+  }, [client, userId, tenantId, locale, role, permissions])
   const mutation = useMutation({
     mutationFn: async (input: UpdateOrderStatusInput) => {
       const result = await updateOrderStatusAction(input)
@@ -96,11 +98,11 @@ export function useOrderDashboard(props: OrderDashboardProps) {
     if (error !== "unauthorized" && error !== "forbidden") return
     // Keep the failed active query disabled, while removing every inactive page.
     client.removeQueries({
-      queryKey: orderQueryKeys.tenant({ userId, tenantId, locale }),
+      queryKey: orderQueryKeys.tenant({ userId, tenantId, locale, permissions }),
       type: "inactive",
     })
     if (error === "unauthorized") router.push("/sign-in")
-  }, [client, error, router, userId, tenantId, locale])
+  }, [client, error, router, userId, tenantId, locale, permissions])
 
   async function updateStatus(input: Omit<UpdateOrderStatusInput, "tenantId">) {
     if (

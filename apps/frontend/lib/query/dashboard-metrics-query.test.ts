@@ -6,6 +6,7 @@ const scope = {
   tenantId: "11111111-1111-4111-8111-111111111111",
   locale: "en",
   role: "Manager" as const,
+  permissions: ["orders.manage", "analytics.view"],
 }
 
 it("scopes cached dashboard metrics by account, tenant and locale", () => {

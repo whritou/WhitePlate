@@ -107,5 +107,6 @@ public sealed class CatalogTranslationWorkflowHandlerTests
         public Task<bool> HasRestaurantRoleAsync(Guid candidateTenantId, ExternalIdentity candidate,
             RestaurantRole requestedRole, CancellationToken cancellationToken) => Task.FromResult(
             candidateTenantId == tenantId && candidate == identity && requestedRole == role);
+        public Task<bool> HasPermissionAsync(Guid candidateTenantId, ExternalIdentity candidate, WhitePlate.Domain.Organizations.RestaurantPermission permission, CancellationToken cancellationToken) => Task.FromResult(candidateTenantId == tenantId && candidate == identity && role == RestaurantRole.Manager && permission != WhitePlate.Domain.Organizations.RestaurantPermission.BillingManage);
     }
 }

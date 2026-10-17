@@ -6,9 +6,44 @@ import {
   parseMenuLanguageSettings,
   parseCatalog,
   parseRestaurantDescriptionTranslations,
+  parseOrganizationRoleGrants,
 } from "./responses"
 
 const id = "11111111-1111-4111-8111-111111111111"
+
+it("parses all persisted organization roles and keeps owner grants protected", () => {
+  const editable = ["Manager", "Kitchen", "Staff", "Accountant"].map(
+    (role) => ({ role, permissions: ["orders.manage"], version: 1, isProtected: false })
+  )
+  const owner = {
+    role: "OrganizationOwner",
+    permissions: [
+      "orders.manage",
+      "kitchen.display",
+      "catalog.manage",
+      "discounts.manage",
+      "analytics.view",
+      "storefront.manage",
+      "staff.manage",
+      "billing.manage",
+    ],
+    version: 0,
+    isProtected: true,
+  }
+
+  expect(parseOrganizationRoleGrants([owner, ...editable])).toHaveLength(5)
+  expect(parseOrganizationRoleGrants([owner, ...editable.slice(0, 3)])).toBeNull()
+  expect(
+    parseOrganizationRoleGrants([{ ...owner, isProtected: false }, ...editable])
+  ).toBeNull()
+  expect(
+    parseOrganizationRoleGrants([
+      owner,
+      ...editable,
+      { ...editable[0], role: "Manager" },
+    ])
+  ).toBeNull()
+})
 
 it("validates public menu JSON before interactive rendering", () => {
   const menu = {

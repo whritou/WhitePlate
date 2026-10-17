@@ -21,6 +21,7 @@ public sealed class OrganizationsController(
     CreateOrganizationCommandHandler createOrganization,
     CreateStaffInvitationCommandHandler createInvitation,
     RevokeStaffInvitationCommandHandler revokeInvitation,
+    OrganizationRolePermissionsHandler rolePermissions,
     IOrganizationRepository organizations,
     RenameOrganizationCommandHandler renameOrganization,
     SetOrganizationActiveCommandHandler setOrganizationActive,
@@ -97,6 +98,38 @@ public sealed class OrganizationsController(
             : Ok(invitations);
     }
 
+
+    [HttpGet("{organizationId:guid}/roles")]
+    [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+    [ProducesResponseType<OrganizationRoleGrantDto[]>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status404NotFound, "application/problem+json")]
+    public async Task<ActionResult<IReadOnlyList<OrganizationRoleGrantDto>>> GetRolePermissions(Guid organizationId,
+        CancellationToken cancellationToken)
+    {
+        var identity = currentIdentity.Identity;
+        if (identity is null) return Unauthorized();
+        var result = await rolePermissions.GetAsync(organizationId, identity, cancellationToken);
+        if (!result.IsSuccess) return errors.ToActionResult(errors.Create(HttpContext, result.Error));
+        Response.Headers.CacheControl = "no-store";
+        return Ok(result.Value);
+    }
+
+    [HttpPut("{organizationId:guid}/roles")]
+    [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+    [ProducesResponseType<OrganizationRoleGrantDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status404NotFound, "application/problem+json")]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status412PreconditionFailed, "application/problem+json")]
+    public async Task<ActionResult<OrganizationRoleGrantDto>> ReplaceRolePermissions(Guid organizationId,
+        UpdateOrganizationRoleGrantsRequest request, CancellationToken cancellationToken)
+    {
+        var identity = currentIdentity.Identity;
+        if (identity is null) return Unauthorized();
+        var result = await rolePermissions.ReplaceAsync(organizationId, request.Role, request.Permissions,
+            request.Version, identity, cancellationToken);
+        if (!result.IsSuccess) return errors.ToActionResult(errors.Create(HttpContext, result.Error));
+        Response.Headers.CacheControl = "no-store";
+        return Ok(result.Value);
+    }
     [HttpPatch("{organizationId:guid}")]
     [ProducesResponseType<OrganizationDto>(StatusCodes.Status200OK)]
     public async Task<ActionResult<OrganizationDto>> Rename(Guid organizationId, RenameOrganizationRequest request,
@@ -237,6 +270,8 @@ public sealed class OrganizationsController(
             "OrganizationOwner" => InvitationRole.OrganizationOwner,
             "RestaurantManager" => InvitationRole.RestaurantManager,
             "KitchenStaff" => InvitationRole.KitchenStaff,
+            "RestaurantStaff" => InvitationRole.RestaurantStaff,
+            "Accountant" => InvitationRole.Accountant,
             _ => 0
         };
         return Enum.IsDefined(role);

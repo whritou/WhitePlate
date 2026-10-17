@@ -16,12 +16,14 @@ export function useDashboardMetrics({
   tenantId,
   locale,
   role,
+  permissions,
   initialMetrics,
 }: {
   userId: string
   tenantId: string
   locale: string
   role: RestaurantRole
+  permissions: string[]
   initialMetrics: DashboardMetrics | null
 }) {
   const client = useQueryClient()
@@ -31,6 +33,7 @@ export function useDashboardMetrics({
     tenantId,
     locale,
     role,
+    permissions,
   })
   const query = useQuery({
     queryKey,
@@ -58,11 +61,12 @@ export function useDashboardMetrics({
           tenantId,
           locale,
           role,
+          permissions,
         }),
         type: "inactive",
       })
     }
-  }, [client, error, locale, role, router, tenantId, userId])
+  }, [client, error, locale, permissions, role, router, tenantId, userId])
 
   return {
     metrics:
@@ -73,6 +77,6 @@ export function useDashboardMetrics({
     isInitialLoading: query.isPending && !query.data,
     isFetching: query.isFetching,
     retry: query.refetch,
-    canViewOrderValue: role !== "Kitchen",
+    canViewOrderValue: permissions.includes("analytics.view"),
   }
 }

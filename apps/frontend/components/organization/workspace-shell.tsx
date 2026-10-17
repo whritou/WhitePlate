@@ -13,7 +13,10 @@ import {
 } from "@/components/ui/native-select"
 import { VisualScopeProvider } from "@/components/ui/visual-scope"
 import { Link, usePathname, useRouter } from "@/i18n/navigation"
-import { liveWorkspaceLinks } from "@/lib/live-workspace-navigation"
+import {
+  liveWorkspaceLinks,
+  restaurantWorkspaceHref,
+} from "@/lib/live-workspace-navigation"
 import {
   isWorkspaceLinkActive,
   resolveWorkspaceContext,
@@ -47,31 +50,32 @@ export function WorkspaceShell({
     context?.type === "restaurant"
       ? restaurants.find((item) => item.id === context.id)
       : undefined
+  const selectedRestaurantHref = selectedRestaurant
+    ? restaurantWorkspaceHref(selectedRestaurant)
+    : "/organization"
   const settingsHref =
     context?.type === "organization"
       ? `/organization/settings?organizationId=${context.id}&section=payments`
-      : selectedRestaurant && selectedRestaurant.role !== "Kitchen"
+      : selectedRestaurant?.permissions.includes("billing.manage")
         ? `/organization/restaurant-settings?tenantId=${selectedRestaurant.id}&section=payments`
         : "/organization"
   const canOpenPaymentSettings =
     context?.type === "organization" ||
-    (selectedRestaurant !== undefined && selectedRestaurant.role !== "Kitchen")
+    (selectedRestaurant?.permissions.includes("billing.manage") ?? false)
   const overviewHref =
     context?.type === "organization"
       ? `/organization?organizationId=${context.id}`
       : context?.type === "restaurant"
-        ? `/organization/${restaurants.find((item) => item.id === context.id)?.role === "Kitchen" ? "orders" : "dashboard"}?tenantId=${context.id}`
+        ? selectedRestaurantHref
         : "/organization"
 
   function changeContext(value: string) {
     const [type, id] = value.split(":")
 
     if (type === "restaurant" && restaurants.some((item) => item.id === id)) {
-      const role = restaurants.find((item) => item.id === id)!.role
+      const restaurant = restaurants.find((item) => item.id === id)!
 
-      router.push(
-        `/organization/${role === "Kitchen" ? "orders" : "dashboard"}?tenantId=${id}`
-      )
+      router.push(restaurantWorkspaceHref(restaurant))
     } else if (
       type === "organization" &&
       organizations.some((item) => item.id === id)

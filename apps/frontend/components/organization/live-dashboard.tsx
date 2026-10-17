@@ -14,7 +14,8 @@ export async function LiveDashboard(props: LiveDashboardProps) {
   const { tenantName, tenantId, userId, role, locale } = props
   const t = await getTranslations("LiveWorkspace")
   const parity = await getTranslations("LiveParity")
-  const canManageStorefront = role !== "Kitchen"
+  const canManageStorefront = props.permissions.includes("storefront.manage")
+  const canManageCatalog = props.permissions.includes("catalog.manage")
 
   return (
     <OrderingOperationsController
@@ -22,6 +23,7 @@ export async function LiveDashboard(props: LiveDashboardProps) {
       tenantId={tenantId}
       locale={locale}
       role={role}
+      permissions={props.permissions}
       initialOperations={props.initialOrderingOperations ?? null}
     >
       <main className="mx-auto max-w-[1600px] px-6 pb-12">
@@ -56,6 +58,7 @@ export async function LiveDashboard(props: LiveDashboardProps) {
           tenantId={tenantId}
           locale={locale}
           role={role}
+          permissions={props.permissions}
           initialMetrics={props.initialDashboardMetrics ?? null}
         />
 
@@ -65,6 +68,7 @@ export async function LiveDashboard(props: LiveDashboardProps) {
             <StorefrontSection
               {...props}
               canManageStorefront={canManageStorefront}
+              canManageCatalog={canManageCatalog}
             />
           }
         />
@@ -80,7 +84,11 @@ async function StorefrontSection({
   catalog,
   storefrontUrl,
   canManageStorefront,
-}: LiveDashboardProps & { canManageStorefront: boolean }) {
+  canManageCatalog,
+}: LiveDashboardProps & {
+  canManageStorefront: boolean
+  canManageCatalog: boolean
+}) {
   const t = await getTranslations("LiveWorkspace")
   const parity = await getTranslations("LiveParity")
 
@@ -131,31 +139,35 @@ async function StorefrontSection({
         <span>{t("paymentsPending")}</span>
       </p>
 
-      {canManageStorefront && (
+          {(canManageStorefront || canManageCatalog) && (
         <div className="mt-5 flex flex-wrap gap-2">
-          <Button
-            nativeButton={false}
-            role="link"
-            variant="outline"
-            render={
-              <Link href={`/organization/theming?tenantId=${tenantId}`} />
-            }
-          >
-            {t("openStudio")}
+          {canManageStorefront && (
+            <Button
+              nativeButton={false}
+              role="link"
+              variant="outline"
+              render={
+                <Link href={`/organization/theming?tenantId=${tenantId}`} />
+              }
+            >
+              {t("openStudio")}
 
-            <ArrowRight aria-hidden="true" />
-          </Button>
+              <ArrowRight aria-hidden="true" />
+            </Button>
+          )}
 
-          <Button
-            nativeButton={false}
-            role="link"
-            variant="ghost"
-            render={
-              <Link href={`/organization/catalog?tenantId=${tenantId}`} />
-            }
-          >
-            {t("openMenu")}
-          </Button>
+          {canManageCatalog && (
+            <Button
+              nativeButton={false}
+              role="link"
+              variant="ghost"
+              render={
+                <Link href={`/organization/catalog?tenantId=${tenantId}`} />
+              }
+            >
+              {t("openMenu")}
+            </Button>
+          )}
         </div>
       )}
 

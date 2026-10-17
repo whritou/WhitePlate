@@ -40,7 +40,7 @@ public sealed class OrganizationProvisioningRepository(WhitePlateDbContext datab
     public async Task<IReadOnlyList<OrganizationMemberDto>?> ListMembersOwnedAsync(Guid organizationId,
         ExternalIdentity identity, CancellationToken cancellationToken)
     {
-        if (!await IsOwnerAsync(organizationId, identity, cancellationToken)) return null;
+        if (!await CanManageStaffAsync(organizationId, identity, cancellationToken)) return null;
 
         var owners = await database.OrganizationOwnerMemberships.AsNoTracking()
             .Where(member => member.OrganizationId == organizationId)
@@ -73,9 +73,14 @@ public sealed class OrganizationProvisioningRepository(WhitePlateDbContext datab
                     member.Issuer, member.Subject, identity), null, null))
             .Concat(restaurantMembers.Select(member =>
             {
-                var invitationRole = member.Role == RestaurantRole.Manager
-                    ? InvitationRole.RestaurantManager
-                    : InvitationRole.KitchenStaff;
+                var invitationRole = member.Role switch
+                {
+                    RestaurantRole.Manager => InvitationRole.RestaurantManager,
+                    RestaurantRole.Kitchen => InvitationRole.KitchenStaff,
+                    RestaurantRole.Staff => InvitationRole.RestaurantStaff,
+                    RestaurantRole.Accountant => InvitationRole.Accountant,
+                    _ => throw new InvalidOperationException("Unsupported restaurant role.")
+                };
                 return new OrganizationMemberDto(invitationRole.ToString(),
                     FindMemberEmail(acceptedInvitations, invitationRole, member.TenantId,
                         member.Issuer, member.Subject, identity), member.TenantId, member.TenantName);
@@ -88,13 +93,14 @@ public sealed class OrganizationProvisioningRepository(WhitePlateDbContext datab
     public async Task<IReadOnlyList<OrganizationInvitationSummaryDto>?> ListInvitationsOwnedAsync(Guid organizationId,
         ExternalIdentity identity, DateTimeOffset now, CancellationToken cancellationToken)
     {
-        if (!await IsOwnerAsync(organizationId, identity, cancellationToken)) return null;
+        if (!await CanManageStaffAsync(organizationId, identity, cancellationToken)) return null;
 
+        var isOwner = await IsOwnerAsync(organizationId, identity, cancellationToken);
         var tenantNames = await database.Tenants.AsNoTracking()
             .Where(tenant => tenant.OrganizationId == organizationId)
             .ToDictionaryAsync(tenant => tenant.Id, tenant => tenant.Name, cancellationToken);
         var invitations = await database.StaffInvitations.AsNoTracking()
-            .Where(invitation => invitation.OrganizationId == organizationId)
+            .Where(invitation => invitation.OrganizationId == organizationId && (isOwner || invitation.Role != InvitationRole.OrganizationOwner))
             .OrderBy(invitation => invitation.Id)
             .Select(invitation => new
             {
@@ -115,6 +121,18 @@ public sealed class OrganizationProvisioningRepository(WhitePlateDbContext datab
                 invitation.ExpiresAt, now))).ToArray();
     }
 
+    private async Task<bool> CanManageStaffAsync(Guid organizationId, ExternalIdentity identity,
+        CancellationToken cancellationToken)
+    {
+        if (await IsOwnerAsync(organizationId, identity, cancellationToken)) return true;
+        return await database.RestaurantMemberships.AsNoTracking()
+            .Join(database.Tenants.AsNoTracking().Where(tenant => tenant.OrganizationId == organizationId),
+                member => member.TenantId, tenant => tenant.Id, (member, tenant) => member)
+            .AnyAsync(member => member.Issuer == identity.Issuer && member.Subject == identity.Subject &&
+                database.OrganizationRoleGrants.Any(grant => grant.OrganizationId == organizationId &&
+                    grant.Role == member.Role && (grant.Permissions & RestaurantPermission.StaffManage) != RestaurantPermission.None),
+                cancellationToken);
+    }
     private Task<bool> IsOwnerAsync(Guid organizationId, ExternalIdentity identity, CancellationToken cancellationToken) =>
         database.OrganizationOwnerMemberships.AsNoTracking().AnyAsync(member =>
             member.OrganizationId == organizationId && member.Issuer == identity.Issuer &&
@@ -145,6 +163,8 @@ public sealed class OrganizationProvisioningRepository(WhitePlateDbContext datab
     {
         database.Organizations.Add(organization);
         database.OrganizationOwnerMemberships.Add(owner);
+        database.OrganizationRoleGrants.AddRange(Enum.GetValues<RestaurantRole>()
+            .Select(role => OrganizationRoleGrantSet.CreateDefault(organization.Id, role)));
         await database.SaveChangesAsync(cancellationToken);
     }
 }

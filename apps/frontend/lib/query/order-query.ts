@@ -1,8 +1,14 @@
 import type { OrderQueryScope, OrderStatus } from "@/types/orders"
 
 export const orderQueryKeys = {
-  tenant: ({ userId, tenantId }: OrderQueryScope) =>
-    ["whiteplate", "orders", userId, tenantId.toLowerCase()] as const,
+  tenant: ({ userId, tenantId, permissions }: OrderQueryScope) =>
+    [
+      "whiteplate",
+      "orders",
+      userId,
+      tenantId.toLowerCase(),
+      [...permissions].sort().join(","),
+    ] as const,
   page: (
     scope: OrderQueryScope,
     status: OrderStatus | null,

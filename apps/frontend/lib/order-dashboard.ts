@@ -144,10 +144,20 @@ export function parseRestaurantMemberships(
       !isRestaurantRole(candidate.role)
     )
       return null
+
+    const permissions =
+      candidate.permissions === undefined ? [] : candidate.permissions
+    if (
+      !Array.isArray(permissions) ||
+      !permissions.every(isRestaurantPermission)
+    )
+      return null
+
     restaurants.push({
       id: candidate.id,
       name: candidate.name,
       role: candidate.role,
+      permissions: [...permissions],
       ...(candidate.organizationId
         ? { organizationId: candidate.organizationId as string }
         : {}),
@@ -190,15 +200,15 @@ export function resolveOrderHubUrl(
 }
 
 export function getAvailableOrderTransitions(
-  role: RestaurantRole,
-  status: OrderStatus
+  status: OrderStatus,
+  permissions: string[] = []
 ): UpdateableOrderStatus[] {
   const result: UpdateableOrderStatus[] = []
   const next = nextStatus[status]
 
   if (next) result.push(next)
   if (
-    (role === "OrganizationOwner" || role === "Manager") &&
+    permissions.includes("orders.manage") &&
     status !== "Completed" &&
     status !== "Cancelled"
   )
@@ -335,9 +345,27 @@ function isValidOrderCursor(
   )
 }
 
+const restaurantPermissionKeys = new Set([
+  "orders.manage",
+  "kitchen.display",
+  "catalog.manage",
+  "discounts.manage",
+  "analytics.view",
+  "storefront.manage",
+  "staff.manage",
+  "billing.manage",
+])
+
+function isRestaurantPermission(value: unknown): value is string {
+  return typeof value === "string" && restaurantPermissionKeys.has(value)
+}
 function isRestaurantRole(value: unknown): value is RestaurantRole {
   return (
-    value === "OrganizationOwner" || value === "Manager" || value === "Kitchen"
+    value === "OrganizationOwner" ||
+    value === "Manager" ||
+    value === "Kitchen" ||
+    value === "Staff" ||
+    value === "Accountant"
   )
 }
 

@@ -6,7 +6,9 @@ public enum InvitationRole
 {
     OrganizationOwner = 1,
     RestaurantManager = 2,
-    KitchenStaff = 3
+    KitchenStaff = 3,
+    RestaurantStaff = 4,
+    Accountant = 5
 }
 
 public sealed class StaffInvitation

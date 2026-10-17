@@ -61,6 +61,7 @@ it("renders formatted totals and a screen-reader hourly data table", () => {
       tenantId: "22222222-2222-4222-8222-222222222222",
       locale: "en",
       role: "Manager",
+      permissions: ["analytics.view"],
       initialMetrics: metrics,
     })
   )
@@ -87,6 +88,7 @@ it("does not render monetary values to Kitchen staff", () => {
       tenantId: "22222222-2222-4222-8222-222222222222",
       locale: "fr",
       role: "Kitchen",
+      permissions: ["kitchen.display"],
       initialMetrics: {
         ...metrics,
         orderValue: null,

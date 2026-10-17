@@ -141,6 +141,8 @@ public static class ServiceRegistration
         services.AddScoped<CatalogTranslationWorkflowHandler>();
         services.AddScoped<CreateProductCommandHandler>();
         services.AddScoped<IStaffMembershipRepository, StaffMembershipRepository>();
+        services.AddScoped<IOrganizationRoleGrantRepository, OrganizationRoleGrantRepository>();
+        services.AddScoped<OrganizationRolePermissionsHandler>();
         services.AddScoped<IStaffDirectoryRepository, StaffDirectoryRepository>();
         services.AddScoped<GetCurrentUserQueryHandler>();
         services.AddScoped<IOrganizationProvisioningRepository, OrganizationProvisioningRepository>();

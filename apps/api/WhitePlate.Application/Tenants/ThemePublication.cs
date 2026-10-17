@@ -30,7 +30,7 @@ public sealed class ThemePublicationHandler(IStaffMembershipRepository membershi
     public async Task<Result<ThemePublicationDto>> GetAsync(Guid tenantId, ExternalIdentity identity,
         CancellationToken ct)
     {
-        if (!await CatalogAccess.CanManageAsync(memberships, tenantId, identity, ct))
+        if (!await StorefrontAccess.CanManageAsync(memberships, tenantId, identity, ct))
             return Fail<ThemePublicationDto>(ErrorCode.NotFound);
         var tenant = await repository.GetAsync(tenantId, ct);
         return tenant is null ? Fail<ThemePublicationDto>(ErrorCode.NotFound) :
@@ -40,7 +40,7 @@ public sealed class ThemePublicationHandler(IStaffMembershipRepository membershi
     public async Task<Result<ThemePublicationDto>> PublishAsync(Guid tenantId, ExternalIdentity identity,
         PublishThemeRequest request, int? expectedPublicationVersion, CancellationToken ct)
     {
-        if (!await CatalogAccess.CanManageAsync(memberships, tenantId, identity, ct))
+        if (!await StorefrontAccess.CanManageAsync(memberships, tenantId, identity, ct))
             return Fail<ThemePublicationDto>(ErrorCode.NotFound);
         if (expectedPublicationVersion is null) return Fail<ThemePublicationDto>(ErrorCode.PreconditionRequired);
         if (request.DraftVersion < 1) return Fail<ThemePublicationDto>(ErrorCode.ValidationFailed);

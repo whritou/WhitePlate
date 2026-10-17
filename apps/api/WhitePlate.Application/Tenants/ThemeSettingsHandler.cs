@@ -14,7 +14,7 @@ public sealed class ThemeSettingsHandler(IStaffMembershipRepository memberships,
 {
     public async Task<Result<ThemeDraftDto>> GetAsync(Guid tenantId, ExternalIdentity identity, CancellationToken ct)
     {
-        if (!await CatalogAccess.CanManageAsync(memberships, tenantId, identity, ct)) return Fail<ThemeDraftDto>(ErrorCode.NotFound);
+        if (!await StorefrontAccess.CanManageAsync(memberships, tenantId, identity, ct)) return Fail<ThemeDraftDto>(ErrorCode.NotFound);
         var tenant = await repository.GetAsync(tenantId, ct);
         return tenant is null ? Fail<ThemeDraftDto>(ErrorCode.NotFound) : Result<ThemeDraftDto>.Success(ToDto(tenant));
     }
@@ -22,7 +22,7 @@ public sealed class ThemeSettingsHandler(IStaffMembershipRepository memberships,
     public async Task<Result<ThemeDraftDto>> SaveAsync(Guid tenantId, ExternalIdentity identity,
         ThemeAppearance theme, int? expectedVersion, CancellationToken ct)
     {
-        if (!await CatalogAccess.CanManageAsync(memberships, tenantId, identity, ct)) return Fail<ThemeDraftDto>(ErrorCode.NotFound);
+        if (!await StorefrontAccess.CanManageAsync(memberships, tenantId, identity, ct)) return Fail<ThemeDraftDto>(ErrorCode.NotFound);
         var tenant = await repository.GetAsync(tenantId, ct);
         if (tenant is null) return Fail<ThemeDraftDto>(ErrorCode.NotFound);
         if (expectedVersion is null) return Fail<ThemeDraftDto>(ErrorCode.PreconditionRequired);
@@ -31,7 +31,7 @@ public sealed class ThemeSettingsHandler(IStaffMembershipRepository memberships,
         {
             tenant.SetThemeDraft(theme);
             if (!await repository.SaveAsync(tenant, identity, expectedVersion.Value, ct))
-                return await CatalogAccess.CanManageAsync(memberships, tenantId, identity, ct)
+                return await StorefrontAccess.CanManageAsync(memberships, tenantId, identity, ct)
                     ? Fail<ThemeDraftDto>(ErrorCode.PreconditionFailed) : Fail<ThemeDraftDto>(ErrorCode.NotFound);
             return Result<ThemeDraftDto>.Success(ToDto(tenant));
         }

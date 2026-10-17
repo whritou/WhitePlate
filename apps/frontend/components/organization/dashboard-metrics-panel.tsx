@@ -21,12 +21,14 @@ export function DashboardMetricsPanel({
   tenantId,
   locale,
   role,
+  permissions,
   initialMetrics,
 }: {
   userId: string
   tenantId: string
   locale: string
   role: RestaurantRole
+  permissions: string[]
   initialMetrics: DashboardMetrics | null
 }) {
   const t = useTranslations("LiveWorkspace")
@@ -35,6 +37,7 @@ export function DashboardMetricsPanel({
     tenantId,
     locale,
     role,
+    permissions,
     initialMetrics,
   })
   const metrics = dashboard.metrics

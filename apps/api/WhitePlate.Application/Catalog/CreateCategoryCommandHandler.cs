@@ -4,6 +4,7 @@ using WhitePlate.Application.Identity;
 using WhitePlate.Domain.Catalog;
 using WhitePlate.Domain.Common;
 using WhitePlate.Domain.Identity;
+using WhitePlate.Domain.Organizations;
 using WhitePlate.Domain.Tenants;
 
 namespace WhitePlate.Application.Catalog;
@@ -33,13 +34,16 @@ public sealed class CreateCategoryCommandHandler(IStaffMembershipRepository memb
 
 internal static class CatalogAccess
 {
-    public static async Task<bool> CanManageAsync(IStaffMembershipRepository memberships, Guid tenantId,
+    public static Task<bool> CanManageAsync(IStaffMembershipRepository memberships, Guid tenantId,
         ExternalIdentity identity, CancellationToken cancellationToken) =>
-        await memberships.IsOrganizationOwnerOfTenantAsync(tenantId, identity, cancellationToken) ||
-        await memberships.HasRestaurantRoleAsync(tenantId, identity, RestaurantRole.Manager, cancellationToken);
+        memberships.HasPermissionAsync(tenantId, identity, RestaurantPermission.CatalogManage, cancellationToken);
 
-    public static async Task<bool> CanManageAvailabilityAsync(IStaffMembershipRepository memberships, Guid tenantId,
+    public static Task<bool> CanManageDiscountsAsync(IStaffMembershipRepository memberships, Guid tenantId,
         ExternalIdentity identity, CancellationToken cancellationToken) =>
-        await CanManageAsync(memberships, tenantId, identity, cancellationToken) ||
-        await memberships.HasRestaurantRoleAsync(tenantId, identity, RestaurantRole.Kitchen, cancellationToken);
+        memberships.HasPermissionAsync(tenantId, identity, RestaurantPermission.DiscountsManage, cancellationToken);
+
+    public static Task<bool> CanManageAvailabilityAsync(IStaffMembershipRepository memberships, Guid tenantId,
+        ExternalIdentity identity, CancellationToken cancellationToken) =>
+        RestaurantPermissionAccess.HasAnyAsync(memberships, tenantId, identity, cancellationToken,
+            RestaurantPermission.CatalogManage, RestaurantPermission.KitchenDisplay);
 }

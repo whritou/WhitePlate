@@ -4,6 +4,7 @@ using Npgsql;
 using WhitePlate.Application.Tenants;
 using WhitePlate.Domain.Identity;
 using WhitePlate.Domain.Media;
+using WhitePlate.Domain.Organizations;
 using WhitePlate.Domain.Tenants;
 
 namespace WhitePlate.Infrastructure.Persistence.Repositories;
@@ -36,8 +37,10 @@ public sealed class ThemePublicationRepository(WhitePlateDbContext database) : I
                 membership.OrganizationId == tenant.OrganizationId && membership.Issuer == identity.Issuer &&
                 membership.Subject == identity.Subject, ct);
             var manager = await database.RestaurantMemberships.AnyAsync(membership => membership.TenantId == tenantId &&
-                membership.Role == RestaurantRole.Manager && membership.Issuer == identity.Issuer &&
-                membership.Subject == identity.Subject, ct);
+                membership.Issuer == identity.Issuer && membership.Subject == identity.Subject &&
+                database.OrganizationRoleGrants.Any(grant => grant.OrganizationId == tenant.OrganizationId &&
+                    grant.Role == membership.Role &&
+                    (grant.Permissions & RestaurantPermission.StorefrontManage) == RestaurantPermission.StorefrontManage), ct);
             if (!owner && !manager) return new(ThemePublicationWriteResult.NotFound);
             if (tenant.ThemeDraftVersion != draftVersion || tenant.ThemePublicationVersion != publicationVersion)
                 return new(ThemePublicationWriteResult.PreconditionFailed);

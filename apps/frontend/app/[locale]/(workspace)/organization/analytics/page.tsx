@@ -10,7 +10,9 @@ export default async function AnalyticsWorkspacePage({
   searchParams: Promise<SearchParams>
 }) {
   const params = await searchParams
-  const restaurant = await getManagedWorkspaceRestaurant(params.tenantId)
+  const restaurant = await getManagedWorkspaceRestaurant(params.tenantId, [
+    "analytics.view",
+  ])
   const [locale, t] = await Promise.all([
     getLocale(),
     getTranslations("LiveWorkspace"),
@@ -44,6 +46,7 @@ export default async function AnalyticsWorkspacePage({
         tenantId={restaurant.id}
         locale={locale}
         role={restaurant.role}
+        permissions={restaurant.permissions}
         initialMetrics={
           metricsResponse.ok ? (metricsResponse.data ?? null) : null
         }

@@ -1,8 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using WhitePlate.Application.Tenants;
 using WhitePlate.Domain.Tenants;
-using WhitePlate.Domain.Identity;
 using WhitePlate.Domain.Organizations;
+using WhitePlate.Domain.Identity;
 
 namespace WhitePlate.Infrastructure.Persistence.Repositories;
 
@@ -22,8 +22,12 @@ public sealed class EstablishmentSettingsRepository(WhitePlateDbContext database
         string expectedDefaultLocale, CancellationToken cancellationToken) =>
         await Active(tenant.Id).Where(row => (database.OrganizationOwnerMemberships.Any(membership =>
                 membership.OrganizationId == row.OrganizationId && membership.Issuer == identity.Issuer && membership.Subject == identity.Subject) ||
-            database.RestaurantMemberships.Any(membership => membership.TenantId == row.Id && membership.Role == RestaurantRole.Manager &&
-                membership.Issuer == identity.Issuer && membership.Subject == identity.Subject)) && row.EstablishmentVersion == expectedVersion &&
+            database.RestaurantMemberships.Any(membership => membership.TenantId == row.Id &&
+                membership.Issuer == identity.Issuer && membership.Subject == identity.Subject &&
+                database.OrganizationRoleGrants.Any(grant => grant.OrganizationId == row.OrganizationId &&
+                    grant.Role == membership.Role &&
+                    (grant.Permissions & RestaurantPermission.StorefrontManage) == RestaurantPermission.StorefrontManage))) &&
+            row.EstablishmentVersion == expectedVersion &&
             row.MenuLocalesJson == expectedLocales && row.DefaultMenuLocale == expectedDefaultLocale)
             .ExecuteUpdateAsync(setters => setters
                 .SetProperty(row => row.Name, tenant.Name).SetProperty(row => row.Phone, tenant.Phone)
@@ -40,8 +44,12 @@ public sealed class EstablishmentSettingsRepository(WhitePlateDbContext database
         CancellationToken cancellationToken) =>
         await Active(tenant.Id).Where(row => (database.OrganizationOwnerMemberships.Any(membership =>
                 membership.OrganizationId == row.OrganizationId && membership.Issuer == identity.Issuer && membership.Subject == identity.Subject) ||
-            database.RestaurantMemberships.Any(membership => membership.TenantId == row.Id && membership.Role == RestaurantRole.Manager &&
-                membership.Issuer == identity.Issuer && membership.Subject == identity.Subject)) && row.LegalProfileVersion == expectedVersion)
+            database.RestaurantMemberships.Any(membership => membership.TenantId == row.Id &&
+                membership.Issuer == identity.Issuer && membership.Subject == identity.Subject &&
+                database.OrganizationRoleGrants.Any(grant => grant.OrganizationId == row.OrganizationId &&
+                    grant.Role == membership.Role &&
+                    (grant.Permissions & RestaurantPermission.StorefrontManage) == RestaurantPermission.StorefrontManage))) &&
+            row.LegalProfileVersion == expectedVersion)
             .ExecuteUpdateAsync(setters => setters.SetProperty(row => row.LegalProfileMode, tenant.LegalProfileMode)
                 .SetProperty(row => row.LegalCountryCode, tenant.LegalCountryCode).SetProperty(row => row.LegalName, tenant.LegalName)
                 .SetProperty(row => row.LegalRegistrationNumber, tenant.LegalRegistrationNumber)

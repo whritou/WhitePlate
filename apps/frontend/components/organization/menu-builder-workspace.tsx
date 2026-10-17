@@ -24,16 +24,26 @@ export function MenuBuilderWorkspace({
   translationGlossary,
   translationWorkflowUnavailable,
   initialView = "products",
+  canManageCatalog = true,
+  canManageDiscounts = true,
 }: MenuBuilderProps) {
   const t = useTranslations("MenuBuilder")
   const v = useTranslations("LiveParity")
   const router = useRouter()
-  const [view, setView] = useState<MenuBuilderView>(
+  const availableViews: MenuBuilderView[] = [
+    ...(canManageCatalog ? ["products", "languages", "versions"] as const : []),
+    ...(canManageDiscounts ? ["discounts"] as const : []),
+  ]
+  const safeInitialView =
     initialView === "translations"
       ? "languages"
       : initialView === "categories"
         ? "products"
         : initialView
+  const [view, setView] = useState<MenuBuilderView>(
+    availableViews.includes(safeInitialView)
+      ? safeInitialView
+      : (availableViews[0] ?? "products")
   )
   const [categoryId, setCategoryId] = useState(
     catalog.categories
@@ -45,9 +55,7 @@ export function MenuBuilderWorkspace({
   function changeView(value: unknown) {
     if (
       pending ||
-      !["products", "discounts", "languages", "versions"].includes(
-        String(value)
-      )
+      !availableViews.includes(value as MenuBuilderView)
     )
       return
     setView(value as MenuBuilderView)
@@ -84,14 +92,14 @@ export function MenuBuilderWorkspace({
           aria-label={t("sections")}
           className="h-auto max-w-full flex-wrap bg-background p-0"
         >
-          {(
-            [
+            {(
+              [
               ["products", "dishes"],
               ["discounts", "discounts"],
               ["languages", "languages"],
               ["versions", "versionsTab"],
             ] as const
-          ).map(([value, label]) => (
+            ).filter(([value]) => availableViews.includes(value)).map(([value, label]) => (
             <TabsTrigger
               key={value}
               value={value}
@@ -103,7 +111,7 @@ export function MenuBuilderWorkspace({
           ))}
         </TabsList>
 
-        {view === "products" && (
+        {view === "products" && canManageCatalog && (
           <div className="flex flex-wrap items-center gap-3 py-2">
             <CatalogPublicationPanel
               mode="actions"
@@ -137,28 +145,32 @@ export function MenuBuilderWorkspace({
         )}
       </div>
 
-      <TabsContent value="products" keepMounted>
-        <MenuBuilderCatalog
-          userId={userId}
-          catalog={catalog}
-          pending={pending}
-          onPendingChange={setPending}
-          categoryId={categoryId}
-          onCategoryChange={setCategoryId}
-        />
-      </TabsContent>
-
-      <TabsContent value="discounts" keepMounted>
-        <div className="mx-auto max-w-[96rem] p-6">
-          <DiscountsEditor
-            tenantId={catalog.tenantId}
-            currency={catalog.currency}
-            discounts={catalog.discounts}
+      {canManageCatalog && (
+        <TabsContent value="products" keepMounted>
+          <MenuBuilderCatalog
+            userId={userId}
+            catalog={catalog}
+            pending={pending}
+            onPendingChange={setPending}
+            categoryId={categoryId}
+            onCategoryChange={setCategoryId}
           />
-        </div>
-      </TabsContent>
+        </TabsContent>
+      )}
 
-      <TabsContent value="languages" keepMounted>
+      {canManageDiscounts && (
+        <TabsContent value="discounts" keepMounted>
+          <div className="mx-auto max-w-[96rem] p-6">
+            <DiscountsEditor
+              tenantId={catalog.tenantId}
+              currency={catalog.currency}
+              discounts={catalog.discounts}
+            />
+          </div>
+        </TabsContent>
+      )}
+
+      {canManageCatalog && <TabsContent value="languages" keepMounted>
         <div className="mx-auto grid max-w-5xl gap-6 p-6">
           <h2 className="font-display text-2xl font-bold">{v("languages")}</h2>
 
@@ -192,9 +204,9 @@ export function MenuBuilderWorkspace({
             </Alert>
           )}
         </div>
-      </TabsContent>
+      </TabsContent>}
 
-      <TabsContent value="versions">
+      {canManageCatalog && <TabsContent value="versions">
         <CatalogPublicationPanel
           mode="manager"
           tenantId={catalog.tenantId}
@@ -202,7 +214,7 @@ export function MenuBuilderWorkspace({
           publication={catalog.publication}
           pending={pending}
         />
-      </TabsContent>
+      </TabsContent>}
     </Tabs>
   )
 }

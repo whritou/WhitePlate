@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Link } from "@/i18n/navigation"
+import { restaurantWorkspaceHref } from "@/lib/live-workspace-navigation"
 import type { Organization } from "@/types/organization"
 import type { RestaurantMembership } from "@/types/orders"
 import { OrganizationArchiveAction } from "./organization-archive-action"
@@ -169,7 +170,7 @@ export function OrganizationOverview({
                       role="link"
                       render={
                         <Link
-                          href={`/organization/${restaurant.role === "Kitchen" ? "orders" : "dashboard"}?tenantId=${restaurant.id}`}
+                          href={restaurantWorkspaceHref(restaurant)}
                         />
                       }
                     >
