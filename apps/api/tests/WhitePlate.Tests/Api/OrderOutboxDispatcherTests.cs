@@ -101,6 +101,7 @@ public sealed class OrderOutboxDispatcherTests
         public Task<PublicOrderTrackingDto?> GetPublicTrackingAsync(Guid tenantId, Guid orderId, string tokenHash,
             DateTimeOffset now, CancellationToken cancellationToken) => throw new NotSupportedException();
         public Task<int> ArchiveClosedOrdersBeforeAsync(DateTimeOffset cutoff, CancellationToken cancellationToken) => throw new NotSupportedException();
-        public Task<Result<OrderReceiptDto>> TransitionAsync(Guid tenantId, Guid orderId, int expectedVersion, OrderStatus status, DateTimeOffset now, CancellationToken cancellationToken) => throw new NotSupportedException();
+        public Task<Result<OrderReceiptDto>> TransitionAsync(Guid tenantId, Guid orderId, int expectedVersion, OrderStatus status,
+            OrderCancellationReason? cancellationReason, DateTimeOffset now, CancellationToken cancellationToken) => throw new NotSupportedException();
     }
 }

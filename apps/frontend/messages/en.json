@@ -298,6 +298,43 @@
       "Completed": "Complete order",
       "Cancelled": "Cancel order"
     },
+    "cancellationDialog": {
+      "title": "Cancel order",
+      "description": "Choose why this order is being cancelled. This reason will be saved with the order.",
+      "reasonLabel": "Cancellation reason",
+      "dismiss": "Keep order",
+      "confirm": "Confirm cancellation"
+    },
+    "cancellationReasons": {
+      "CustomerRequest": "Customer request",
+      "ItemUnavailable": "Item unavailable",
+      "RestaurantUnableToFulfill": "Restaurant unable to fulfill",
+      "DuplicateOrder": "Duplicate order",
+      "Other": "Other"
+    },
+    "emailEvents": {
+      "created": "Order confirmation email",
+      "preparing": "Preparation update",
+      "ready": "Ready update"
+    },
+    "emailStatuses": {
+      "Pending": "Pending",
+      "Sending": "Sending",
+      "Accepted": "Accepted by email provider",
+      "Failed": "Failed"
+    },
+    "serviceDetails": {
+      "title": "Service details",
+      "cancellationReason": "Cancellation reason",
+      "reasonNotRecorded": "Not recorded for this order",
+      "emailSection": "Email updates",
+      "noEmailEvents": "No email update records are available. This does not show whether email updates were requested.",
+      "eventCreatedAt": "Event created {time}",
+      "acceptedAt": "Accepted by email provider at {time}",
+      "acceptedCaveat": "The email provider accepted this message; delivery to the guest’s inbox is not confirmed.",
+      "paymentSection": "Payment and refund",
+      "paymentUnavailable": "WhitePlate has no online payment record for this order. Offline payment or refund activity is not tracked."
+    },
     "roles": {
       "OrganizationOwner": "Owner",
       "Manager": "Manager",

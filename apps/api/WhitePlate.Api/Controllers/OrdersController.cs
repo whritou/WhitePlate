@@ -160,8 +160,24 @@ public sealed class OrdersController(ICurrentTenant currentTenant, ICurrentIdent
             return errors.ToActionResult(errors.Create(HttpContext, new ApplicationError(ErrorCode.ValidationFailed,
                 new ValidationIssue("status", "invalid_status", "The order status is invalid."))));
 
+        WhitePlate.Domain.Orders.OrderCancellationReason? cancellationReason = null;
+        if (status == OrderStatus.Cancelled)
+        {
+            if (!Enum.TryParse<WhitePlate.Domain.Orders.OrderCancellationReason>(request.CancellationReason,
+                    ignoreCase: false, out var parsedReason) || !Enum.IsDefined(parsedReason))
+                return errors.ToActionResult(errors.Create(HttpContext, new ApplicationError(ErrorCode.ValidationFailed,
+                    new ValidationIssue("cancellationReason", "invalid_reason", "Select a valid cancellation reason."))));
+            cancellationReason = parsedReason;
+        }
+        else if (request.CancellationReason is not null)
+        {
+            return errors.ToActionResult(errors.Create(HttpContext, new ApplicationError(ErrorCode.ValidationFailed,
+                new ValidationIssue("cancellationReason", "unexpected_value",
+                    "A cancellation reason can only be supplied when cancelling an order."))));
+        }
+
         var result = await updateStatus.HandleAsync(new UpdateOrderStatusCommand(tenantId, orderId,
-            expectedVersion, status, identity), cancellationToken);
+            expectedVersion, status, cancellationReason, identity), cancellationToken);
         if (!result.IsSuccess) return errors.ToActionResult(errors.Create(HttpContext, result.Error));
         Response.Headers["ETag"] = $"\"{result.Value.Version}\"";
         return Ok(result.Value);

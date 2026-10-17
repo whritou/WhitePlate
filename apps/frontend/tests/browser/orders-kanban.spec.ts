@@ -86,10 +86,17 @@ test("card buttons do not start a drag", async ({ page }) => {
   await expect(page.locator('[data-order-lane="Pending"]')).toContainText("Ada")
 })
 
-test("owner can drag to Cancelled; rejected saves leave the ticket in its original lane", async ({
+test("owner must choose a reason before cancelling; dismissing leaves the ticket unchanged", async ({
   page,
 }) => {
   await page.goto("/en/orders-kanban-test?role=OrganizationOwner")
+  await dragOrder(page, "Cancelled")
+  await expect(page.getByRole("dialog")).toBeVisible()
+  await expect(page.getByTestId("mutation-count")).toHaveText("0")
+  await page.keyboard.press("Escape")
+  await expect(page.getByRole("dialog")).toHaveCount(0)
+  await expect(page.locator('[data-order-lane="Pending"]')).toContainText("Ada")
+
   await page.getByRole("checkbox", { name: "Reject updates" }).check()
   await dragOrder(page, "Preparing")
   await expect(
@@ -100,10 +107,33 @@ test("owner can drag to Cancelled; rejected saves leave the ticket in its origin
   await expect(page.locator(`[data-order-id="${orderId}"]`)).toBeVisible()
   await expect(page.locator('[data-order-lane="Pending"]')).toContainText("Ada")
   await page.getByRole("checkbox", { name: "Reject updates" }).uncheck()
-  await dragOrder(page, "Cancelled")
+  await page
+    .getByRole("button", { name: "Cancel order — order 22222222" })
+    .click()
+  await page.getByRole("radio", { name: "Item unavailable" }).check()
+  await page.getByRole("button", { name: "Confirm cancellation" }).click()
   await expect(page.locator('[data-order-lane="Cancelled"]')).toContainText(
     "Ada"
   )
+  await expect(
+    page.locator('[data-order-id="22222222-2222-4222-8222-222222222222"]')
+  ).toContainText("Item unavailable")
+})
+
+test("dragging to Cancelled requires a reason before saving", async ({
+  page,
+}) => {
+  await page.goto("/en/orders-kanban-test?role=OrganizationOwner")
+  await dragOrder(page, "Cancelled")
+  await expect(page.getByRole("dialog")).toBeVisible()
+  await page.getByRole("radio", { name: "Duplicate order" }).check()
+  await page.getByRole("button", { name: "Confirm cancellation" }).click()
+  await expect(page.locator('[data-order-lane="Cancelled"]')).toContainText(
+    "Ada"
+  )
+  await expect(
+    page.locator('[data-order-id="22222222-2222-4222-8222-222222222222"]')
+  ).toContainText("Duplicate order")
 })
 
 test("Escape cancels a drag without submitting an update", async ({ page }) => {
@@ -243,7 +273,17 @@ for (const locale of ["en", "fr"]) {
         const firstRow = lanes.filter(
           (lane) => Math.abs(lane.top - lanes[0].top) < 2
         )
-        const expectedColumns = width >= 1280 ? 4 : width >= 768 ? 2 : 1
+        const horizontalPadding = width >= 1024 ? 48 : width >= 640 ? 32 : 24
+        const minimumLaneWidth = Math.min(width - horizontalPadding, 288)
+        const expectedColumns = Math.min(
+          5,
+          Math.max(
+            1,
+            Math.floor(
+              (width - horizontalPadding + 16) / (minimumLaneWidth + 16)
+            )
+          )
+        )
 
         expect(firstRow).toHaveLength(expectedColumns)
         expect(

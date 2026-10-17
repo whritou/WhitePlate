@@ -18,6 +18,26 @@ export type OrderFilterToolbarProps = OrderDashboardViewFilters & {
 
 export type UpdateableOrderStatus = Exclude<OrderStatus, "Pending">
 
+export const ORDER_CANCELLATION_REASONS = [
+  "CustomerRequest",
+  "ItemUnavailable",
+  "RestaurantUnableToFulfill",
+  "DuplicateOrder",
+  "Other",
+] as const
+export type OrderCancellationReason =
+  (typeof ORDER_CANCELLATION_REASONS)[number]
+export type OrderEmailEventType =
+  "order.created" | "order.preparing" | "order.ready"
+export type OrderEmailDeliveryStatus =
+  "Pending" | "Sending" | "Accepted" | "Failed"
+export type OrderEmailNotification = {
+  eventType: OrderEmailEventType
+  status: OrderEmailDeliveryStatus
+  createdAt: string
+  acceptedAt: string | null
+}
+
 export type OrderSummaryOption = { optionId: string; name: string }
 
 export type OrderSummaryLine = {
@@ -41,6 +61,8 @@ export type OrderSummary = {
   pickupAt?: string | null
   pickupTimeZone?: string | null
   pickupMode?: OrderPickupMode | null
+  cancellationReason?: OrderCancellationReason | null
+  emailNotifications?: OrderEmailNotification[]
   lines: OrderSummaryLine[]
 }
 
@@ -129,6 +151,7 @@ export type UpdateOrderStatusInput = {
   orderId: string
   version: number
   status: UpdateableOrderStatus
+  cancellationReason?: OrderCancellationReason
 }
 
 export type OrderTicketProps = {

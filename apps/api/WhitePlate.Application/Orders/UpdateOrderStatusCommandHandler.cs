@@ -16,9 +16,13 @@ public sealed class UpdateOrderStatusCommandHandler(IOrderRepository orders, ISt
         ArgumentNullException.ThrowIfNull(command.Identity);
         cancellationToken.ThrowIfCancellationRequested();
         if (command.TenantId == Guid.Empty || command.OrderId == Guid.Empty || command.ExpectedVersion < 1 ||
-            !Enum.IsDefined(command.Status))
+            !Enum.IsDefined(command.Status) ||
+            command.Status == OrderStatus.Cancelled &&
+                (!command.CancellationReason.HasValue || !Enum.IsDefined(command.CancellationReason.Value)) ||
+            command.Status != OrderStatus.Cancelled && command.CancellationReason.HasValue)
             return Result<OrderReceiptDto>.Failure(new ApplicationError(ErrorCode.ValidationFailed,
-                new ValidationIssue("status", "invalid_value", "The order status request is invalid.")));
+                new ValidationIssue(command.Status == OrderStatus.Cancelled ? "cancellationReason" : "status",
+                    "invalid_value", "The order status request is invalid.")));
 
         var canUpdate = command.Status == OrderStatus.Cancelled
             ? await OrderStaffAccess.CanCancelAsync(memberships, command.TenantId, command.Identity, cancellationToken)
@@ -26,6 +30,6 @@ public sealed class UpdateOrderStatusCommandHandler(IOrderRepository orders, ISt
         if (!canUpdate) return Result<OrderReceiptDto>.Failure(new ApplicationError(ErrorCode.Forbidden));
 
         return await orders.TransitionAsync(command.TenantId, command.OrderId, command.ExpectedVersion,
-            command.Status, timeProvider.GetUtcNow(), cancellationToken);
+            command.Status, command.CancellationReason, timeProvider.GetUtcNow(), cancellationToken);
     }
 }

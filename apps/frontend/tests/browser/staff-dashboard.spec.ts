@@ -69,6 +69,7 @@ test("staff roles, stale versions, revocation and tenant boundaries on the live 
       orderId: order.id,
       version: order.version,
       status: "Cancelled",
+      cancellationReason: "Other",
     })
 
     expect(denied.status()).toBe(403)
@@ -137,6 +138,10 @@ test("staff roles, stale versions, revocation and tenant boundaries on the live 
         exact: true,
       })
       .click()
+    await managerPage.getByRole("radio", { name: "Item unavailable" }).check()
+    await managerPage
+      .getByRole("button", { name: "Confirm cancellation" })
+      .click()
     await expect(
       managerPage
         .getByRole("status")
@@ -156,6 +161,17 @@ test("staff roles, stale versions, revocation and tenant boundaries on the live 
           }),
         })
         .getByText("Annulée", { exact: true })
+    ).toBeVisible()
+    await expect(
+      ownerPage
+        .locator("article")
+        .filter({
+          has: ownerPage.getByRole("heading", {
+            name: `Commande ${cancelledOrder.id.slice(0, 8)}`,
+            exact: true,
+          }),
+        })
+        .getByText("Article indisponible", { exact: true })
     ).toBeVisible()
 
     await ownerPage

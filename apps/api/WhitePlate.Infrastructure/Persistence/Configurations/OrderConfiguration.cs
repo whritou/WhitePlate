@@ -23,6 +23,7 @@ public sealed class OrderConfiguration : IEntityTypeConfiguration<Order>
         builder.Property(order => order.TaxAmount).HasPrecision(12, 2);
         builder.Property(order => order.Total).HasPrecision(12, 2);
         builder.Property(order => order.Status).HasConversion<string>().HasMaxLength(16);
+        builder.Property(order => order.CancellationReason).HasConversion<string>().HasMaxLength(40);
         builder.Property(order => order.Version).IsConcurrencyToken();
         builder.Property(order => order.CreatedAt).IsRequired();
         builder.Property(order => order.CreatedAtTicks).IsRequired();
