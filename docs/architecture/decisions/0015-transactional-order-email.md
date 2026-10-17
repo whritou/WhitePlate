@@ -1,7 +1,7 @@
 # Decision 0015: Transactional order email
 
 - Date: 2026-10-17
-- Status: accepted; source implementation complete, rollout verification pending
+- Status: accepted; source implementation complete and Coolify Production schema applied; provider and hosted verification pending
 - Scope: S4 guest order notifications and restaurant-managed email templates
 
 ## Context
@@ -29,7 +29,7 @@ S4 needs to add email without coupling provider failures to kitchen event delive
 
 ## Consequences
 
-The implementation adds guest email consent fields, tenant template settings with optimistic concurrency, an independent order-email delivery table and worker, a provider adapter, and an API configuration contract. It adds no payment, marketing, SMS, or invitation-email behavior. It must update the checkout, API, database, and acceptance documentation together. Source-level tests can prove tenant isolation, transactionality, retry, and rendering behavior; actual Resend delivery and hosted tenant acceptance remain environment checks.
+The implementation adds guest email consent fields, tenant template settings with optimistic concurrency, an independent order-email delivery table and worker, a provider adapter, and an API configuration contract. Its additive schema was applied to Coolify Production with the `whiteplate_api` grants verified; the API code has not been deployed. It adds no payment, marketing, SMS, or invitation-email behavior. Source-level tests can prove tenant isolation, transactionality, retry, and rendering behavior; actual Resend delivery, PostgreSQL concurrency and hosted tenant acceptance remain environment checks.
 
 ## Affected documents
 

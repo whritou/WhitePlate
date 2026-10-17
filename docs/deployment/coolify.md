@@ -2,6 +2,14 @@
 
 This is the runbook for the user-approved, single hosted development stack ([decision 0005](../architecture/decisions/0005-coolify-hosting.md)). Runtime credentials belong in Coolify/Vercel settings, never this file, client code or `NEXT_PUBLIC_*` variables. The migration is tracked in [issue #17](https://github.com/whritou/WhitePlate/issues/17).
 
+## S4 transactional order-email schema rollout — 2026-10-17
+
+Preflight on Coolify Production resource `whiteplate-postgresql-main` confirmed database `whiteplate`, latest migration `20261016222355_M3CatalogTranslationWorkflow`, two tenants, zero orders, and no S4 columns/table/history row. A custom-format backup was created at `/tmp/whiteplate-before-order-email-20261017.dump` inside the PostgreSQL container (86.6 KiB); `pg_restore --list` recognized the archive with 186 entries. This temporary container-local dump is not an off-host backup or restore test.
+
+The guarded additive `20261017104323_OrderEmailNotifications` DDL, EF history row (`10.0.12`), and `whiteplate_api` `SELECT`, `INSERT`, `UPDATE`, and `DELETE` grants on `OrderEmailDeliveries` were applied in one transaction with a 5-second lock timeout and 30-second statement timeout. Post-checks confirmed the history row, both tenant template columns and defaults, all three nullable order columns, the delivery table, its three indexes and order foreign key, and all four runtime-role privileges. Counts remained at two tenants and zero orders; the delivery table is empty. No existing order or tenant data was otherwise edited.
+
+The API has not been deployed or restarted. Configure the API-side Resend sender, stable tracking signing key and HTTPS storefront URL before deployment; controlled provider delivery and hosted tenant acceptance remain open. See [S4 schema](../database/database-schema.md#s4-transactional-order-email--2026-10-17) and the [functional test plan](../functional-test-plan.md#s4-transactional-order-email).
+
 ## M3 translation-review schema rollout — 2026-10-17
 
 After PR [#116](https://github.com/whritou/WhitePlate/pull/116) merged as `36da90c`, the Coolify Production preflight found `20261016155331_CatalogPublicationHistory` as the latest migration, two tenants, two publication heads, and no M3 tables. A custom-format backup was created at `/tmp/whiteplate-before-m3-translation-20261017.dump` inside the PostgreSQL container (81,505 bytes); `pg_restore --list` validated it. This temporary in-container file is not an off-host backup or restore test.
