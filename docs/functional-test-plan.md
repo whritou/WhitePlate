@@ -574,7 +574,7 @@ Check EN/FR, light/dark, 320/375/390/768/1024/1440/1920px, keyboard upload/confi
 
 ## D5 live organization analytics — 2026-10-17
 
-The source contract and UI are implemented; the D5 migration is not applied to a shared database. No D5 tests have been added or run. After an operator-reviewed migration and API-only privacy-key configuration, verify in a disposable PostgreSQL branch and browser:
+The source contract and UI are implemented, and both D5 migrations have been applied to Coolify Production. Preflight and post-checks are recorded in the [Coolify runbook](deployment/coolify.md#d5-live-analytics-schema-rollout--2026-10-17): the backup is container-local, Production has two tenants and zero orders, and no historical rows were backfilled. CI on PR head `f410185` passed frontend tests, lint, typecheck, formatting, production build and API tests; dedicated hosted acceptance and a real-order flow have not been run. Before treating D5 as hosted-accepted, verify API privacy-key configuration without exposing its value, deploy the matching API/frontend, then exercise:
 
 - Owner and manager can read only their current restaurant memberships; Kitchen, anonymous, foreign-tenant and revoked identities are denied. The same-origin BFF must ignore browser-provided membership lists and return no-store responses.
 - For each 7/30/90-day selection, compare local calendar boundaries and equal-length prior periods across DST changes. Check order count includes cancellations; revenue/AOV/sellers exclude them; orders with missing sources remain unattributed; new source attribution is retained only when analytics consent is given; old orders remain non-consented with no fabricated channel.
@@ -583,4 +583,4 @@ The source contract and UI are implemented; the D5 migration is not applied to a
 - Withdraw on another device using the checkout email. Confirm generic response for matched and unmatched addresses, rate limiting, no email in logs, all matching key versions/fingerprints and repeat flags are deleted only in the selected tenant, and order-update consent remains unchanged.
 - In English and French, compare the live page structure and interactions with `/demo/analytics`, verify loading/empty/error/retry and preserved data after refresh failure, check restaurant selectors and QR/web source attribution, keyboard operation and narrow screens, then export and compare CSV values/currency/tenant IDs with the visible result.
 
-Local verification for this implementation is limited to the commands recorded in its PR handoff. Hosted acceptance, PostgreSQL persistence, API deployment and applying the migration remain outstanding until explicitly performed.
+The Coolify Production schema migration is complete and verified. The API deployment, authenticated hosted metrics, consented real-order attribution, withdrawal, and real-order analytics acceptance remain outstanding until explicitly performed. Neon `test` has not received these migrations.

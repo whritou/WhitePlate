@@ -1,6 +1,6 @@
 # WhitePlate frontend architecture
 
-The approved Lovable design now also covers real workspaces, tenant customer shells and account screens. See [real routes, connected operations and explicit fictitious drafts](../lovable-live-workspace.md). Existing operations remain authoritative; D5 adds a live analytics contract and checkout consent flow, with hosted acceptance separate.
+The approved Lovable design now also covers real workspaces, tenant customer shells and account screens. See [real routes, connected operations and explicit fictitious drafts](../lovable-live-workspace.md). Existing operations remain authoritative; D5 adds a live analytics contract and checkout consent flow. Its database schema is applied to Coolify Production; hosted real-order acceptance remains separate.
 
 Public marketing and `/[locale]/demo` routes now use the scoped Lovable components. Thin App Router entries render isolated client models/views; existing tenant-host routing and real authenticated/guest services remain unchanged. The demo layout uses its own sample BackofficeProvider, and browser storage is explicitly demo-prefixed. See [route mapping, design, assets and backend connections](../lovable-migration.md). Earlier Stitch landing/demo descriptions below are superseded only for those routes; retained shared components still serve real screens.
 
