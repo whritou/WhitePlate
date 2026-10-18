@@ -2,14 +2,19 @@
 
 import { useLocale, useTranslations } from "next-intl"
 import { establishmentLinks } from "@/lib/establishment-links"
-import type { PublicEstablishment } from "@/types/establishment-settings"
+import type {
+  OpeningHoursSchedule,
+  PublicEstablishment,
+} from "@/types/establishment-settings"
 
 export function CollectionInformation({
   establishment,
   current = false,
+  compact = false,
 }: {
   establishment: PublicEstablishment
   current?: boolean
+  compact?: boolean
 }) {
   const t = useTranslations("CollectionInformation")
   const hours = useTranslations("OpeningHours")
@@ -23,6 +28,72 @@ export function CollectionInformation({
     establishment.region,
     establishment.countryCode ? countries.of(establishment.countryCode) : null,
   ].filter(Boolean)
+
+  if (compact)
+    return (
+      <section
+        className="grid gap-px border-y border-border bg-border sm:grid-cols-3"
+        aria-label={t("title")}
+      >
+        <div className="grid content-start gap-2 bg-background px-6 py-4">
+          <h3 className="text-xs font-bold tracking-wider text-muted-foreground uppercase">
+            {t("addressLabel")}
+          </h3>
+
+          {lines.length > 0 ? (
+            <address className="text-sm font-semibold not-italic">
+              {lines.map((line, index) => (
+                <span key={index} className="block">
+                  {line}
+                </span>
+              ))}
+            </address>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              {t("missingAddress")}
+            </p>
+          )}
+        </div>
+
+        <div className="grid content-start gap-2 bg-background px-6 py-4">
+          <h3 className="text-xs font-bold tracking-wider text-muted-foreground uppercase">
+            {t("hoursLabel")}
+          </h3>
+
+          <p className="text-sm font-semibold whitespace-pre-line">
+            {summarizeHours(
+              establishment.openingHours,
+              locale,
+              hours("closed"),
+              hours("notConfigured")
+            )}
+          </p>
+
+          {establishment.openingHours && (
+            <p className="text-xs text-muted-foreground">
+              {hours("localTime", { timeZone: establishment.timeZone })}
+            </p>
+          )}
+        </div>
+
+        <div className="grid content-start gap-2 bg-background px-6 py-4">
+          <h3 className="text-xs font-bold tracking-wider text-muted-foreground uppercase">
+            {t("phoneLabel")}
+          </h3>
+
+          {links.phone ? (
+            <a
+              className="text-sm font-semibold underline underline-offset-4"
+              href={links.phone}
+            >
+              {establishment.phone}
+            </a>
+          ) : (
+            <p className="text-sm text-muted-foreground">{t("notProvided")}</p>
+          )}
+        </div>
+      </section>
+    )
 
   return (
     <section className="grid min-w-0 gap-3 break-words" aria-label={t("title")}>
@@ -138,4 +209,37 @@ export function CollectionInformation({
       </div>
     </section>
   )
+}
+
+function summarizeHours(
+  schedule: OpeningHoursSchedule | null,
+  locale: string,
+  closedLabel: string,
+  notConfiguredLabel: string
+) {
+  if (!schedule) return notConfiguredLabel
+
+  const groups: { days: string[]; hours: string }[] = []
+
+  schedule.days.forEach((day, index) => {
+    const weekday = new Intl.DateTimeFormat(locale, {
+      weekday: "short",
+      timeZone: "UTC",
+    }).format(new Date(Date.UTC(2024, 0, index + 1)))
+    const hours = day.isClosed
+      ? closedLabel
+      : day.windows.map((window) => `${window.start}–${window.end}`).join(", ")
+    const previous = groups.at(-1)
+
+    if (previous?.hours === hours) previous.days.push(weekday)
+    else groups.push({ days: [weekday], hours })
+  })
+
+  return groups
+    .map(({ days, hours }) => {
+      const dayRange = days.length > 1 ? `${days[0]}–${days.at(-1)}` : days[0]
+
+      return `${dayRange} · ${hours}`
+    })
+    .join("\n")
 }

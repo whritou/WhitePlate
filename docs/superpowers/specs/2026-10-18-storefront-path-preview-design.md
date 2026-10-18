@@ -2,9 +2,11 @@
 
 **Date:** 2026-10-18
 
-**Status:** Approved; implementation is in source, deployment acceptance remains open
+**Status:** Approved; route and customer-screen source changes are implemented, deployment acceptance remains open
 
 **Conversational design:** Approved 2026-10-18
+
+**Scope amendment:** On 2026-10-18 the user added two requirements: every existing localized app page must remain outside restaurant alias routing, and the live menu, checkout, receipt, and order tracking must follow the existing demo customer composition. This amendment supersedes the original design-refresh non-goal.
 
 **Related work:** [Build localized restaurant storefront and menu browsing](https://github.com/users/whritou/projects/1/views/1?pane=issue&itemId=257764842)
 
@@ -28,6 +30,7 @@ The route locale controls WhitePlate interface copy. The restaurant's menu-langu
 - Keep all current public API behavior, validation, server-side price calculation, rate limiting, idempotency, media checks, and tracking-capability checks.
 - Preserve the existing restaurant-subdomain frontend route and its host-based API flow without redirecting or removing it.
 - Keep tenant selection separate from authorization: a slug selects public restaurant data and never grants staff access.
+- Match the existing demo storefront composition across live menu, checkout, receipt, and order tracking while keeping restaurant data and supported operations authoritative.
 
 ## Non-goals
 
@@ -35,7 +38,8 @@ The route locale controls WhitePlate interface copy. The restaurant's menu-langu
 - Replacing the current restaurant-subdomain route or its API host-resolution behavior.
 - Adding anonymous access to staff, organization, catalog-management, or other protected endpoints.
 - Changing the database schema, tenant slug rules, published catalog/theme behavior, checkout pricing, payments, or order tracking capabilities.
-- Adding a storefront design refresh; the existing menu, checkout, and receipt components are reused.
+- Adding demo-only menu items, order lines, pickup slots, contact fields, or payment capabilities to live screens.
+- Changing public API contracts, order tracking data, or final restaurant-subdomain behavior for the visual update.
 
 ## URL and locale behavior
 
@@ -104,12 +108,14 @@ All public BFF responses remain `no-store`. The BFF does not forward a browser-s
 4. Invalid, unknown, or inactive slugs return the generic not-found/unavailable state; no request falls back to another tenant.
 5. Direct calls to the slug-scoped API routes can access only the corresponding public operations. Anonymous callers cannot use the slug routes to access protected staff or organization data; existing identity/membership authorization tests and routes remain unchanged.
 6. `/en` and `/fr` marketing routes on the shared Vercel host, and existing `restaurantname.whiteplate/en` and `/fr` subdomain storefronts, keep their current behavior.
-7. Reserved paths and malformed/mismatched selectors do not enter another tenant's storefront or tracking flow.
+7. Every existing static top-level localized page path stays in next-intl routing and cannot be rewritten as a restaurant, including `/en/demo` and `/fr/demo`; a route-inventory test detects newly added pages missing from the reservation list.
 8. Automated tests cover both `/en/{restaurantSlug}` and `/fr/{restaurantSlug}` for menu routing, localized interface copy, slug and locale preservation through checkout/receipt/tracking, and unchanged localized marketing and restaurant-subdomain routing. Menu-language selection is tested independently from the route locale.
+9. The live menu follows the demo customer composition: sticky restaurant header, published hero only when configured, compact real establishment summary, selectable category chips, real product cards, and a cart action. Missing photos and banners stay honest empty states without large blank reservations.
+10. Live checkout, receipt, and tracking use the demo's responsive customer shell and summary composition. Checkout and receipt retain server-priced order data; tracking displays only fields returned by the capability-protected status contract and never invents line items.
 
 ## Verification and documentation
 
-The implementation uses the existing frontend Vitest and API .NET test suites. API tests cover slug-versus-host tenant resolution, generic unknown/inactive behavior, public-only operations, localized establishment, pickup slots, published theme and media, checkout tenant scoping, tracking capability, and unchanged host routes. Frontend tests cover exact-host rewriting for both `en` and `fr`, invalid locale/path handling, localized marketing and tenant-host fallback, central-versus-host API selection, BFF selector validation, media, checkout and tracking slug propagation, and menu-language independence. The repository does not configure Playwright browser tests as a runnable project, so no browser-level coverage is claimed. Manual acceptance of a real restaurant on the configured Vercel host and confirmation that the existing tenant-subdomain URL remains available are still open.
+Frontend Vitest covers exact-host rewriting for both locales, all static top-level localized route segments discovered under `app/[locale]`, central-versus-host API selection, selector validation, media, checkout/tracking slug propagation, and menu-language independence. The Playwright `storefront-customer-parity` project uses a development-only fixture to check `/en/demo`, `/fr/demo`, and live menu, checkout, and tracking composition in English and French at mobile width. Existing .NET tests cover the slug-scoped public API routes and unchanged host behavior; they were not rerun for this frontend-only amendment. Manual acceptance of a real restaurant on the configured Vercel host and confirmation that the existing tenant-subdomain URL remains available are still open.
 
 The API contract, frontend and backend architecture, tenant isolation/security notes, development configuration guide, functional test plan, and existing storefront kanban card distinguish implemented behavior from remaining deployment acceptance. This approved follow-up extends [decision 0003](../../architecture/decisions/0003-catalog-localization-and-tenant-domain-policy.md). No schema migration is expected. The separate implementation-plan document was skipped at the user's direction.
 

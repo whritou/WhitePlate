@@ -1,4 +1,7 @@
 import { describe, expect, it } from "vitest"
+import { readdirSync } from "node:fs"
+import { join } from "node:path"
+import { fileURLToPath } from "node:url"
 import {
   appendRestaurantSlugQuery,
   createPublicStorefrontApiTarget,
@@ -14,7 +17,54 @@ const domains = {
   pathBaseDomain: "white-plate.vercel.app",
 }
 
+const localeAppDirectory = fileURLToPath(
+  new URL("../app/[locale]", import.meta.url)
+)
+
+function hasPageFile(directory: string): boolean {
+  return readdirSync(directory, { withFileTypes: true }).some((entry) => {
+    const path = join(directory, entry.name)
+
+    return entry.isFile()
+      ? /^page\.(tsx|ts|jsx|js)$/.test(entry.name)
+      : entry.isDirectory() && hasPageFile(path)
+  })
+}
+
+function localizedRootPageSegments(directory = localeAppDirectory): string[] {
+  return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
+    if (!entry.isDirectory()) return []
+
+    const routeGroup = entry.name.startsWith("(") && entry.name.endsWith(")")
+    const path = join(directory, entry.name)
+
+    if (routeGroup) return localizedRootPageSegments(path)
+    if (entry.name.startsWith("[") && hasPageFile(path))
+      throw new Error(
+        `Dynamic localized root route ${entry.name} may overlap restaurant aliases`
+      )
+    if (!hasPageFile(path)) return []
+
+    return [entry.name]
+  })
+}
+
 describe("localized storefront preview routing", () => {
+  it.each(["en", "fr"])(
+    "does not treat any existing /%s top-level page as a restaurant slug",
+    (locale) => {
+      for (const segment of localizedRootPageSegments())
+        expect(
+          getStorefrontPreviewRewrite(
+            "white-plate.vercel.app",
+            `/${locale}/${segment}`,
+            domains.pathBaseDomain
+          ),
+          `/${locale}/${segment} must stay on its existing application page`
+        ).toBeNull()
+    }
+  )
+
   it.each(["en", "fr"])(
     "rewrites /%s/{slug} only on the configured shared host",
     (locale) => {

@@ -14,6 +14,8 @@ export function LiveCustomerShell({
   homeHref,
   children,
   headerActions,
+  showCover = false,
+  stickyHeader = false,
 }: {
   name?: string
   theme?: StoreTheme
@@ -21,6 +23,8 @@ export function LiveCustomerShell({
   homeHref?: string
   children: ReactNode
   headerActions?: ReactNode
+  showCover?: boolean
+  stickyHeader?: boolean
 }) {
   const t = useTranslations("BrandAssets")
   const style = themeVariables(theme)
@@ -34,7 +38,9 @@ export function LiveCustomerShell({
         data-button-style={theme.buttonStyle}
         style={style}
       >
-        <header className="flex flex-wrap items-center justify-between gap-3 border-b px-[var(--customer-padding)] py-3">
+        <header
+          className={`flex flex-wrap items-center justify-between gap-3 border-b bg-background px-[var(--customer-padding)] py-3 ${stickyHeader ? "sticky top-0 z-30" : ""}`}
+        >
           <Link
             href={homeHref ?? (restaurantSlug ? `/${restaurantSlug}` : "/")}
             className="flex max-w-full min-w-0 items-center gap-3"
@@ -60,6 +66,17 @@ export function LiveCustomerShell({
 
           {headerActions}
         </header>
+
+        {showCover && theme.showBanner && theme.banner && (
+          <div className="customer-cover overflow-hidden">
+            <BrandAssetImage
+              src={theme.banner}
+              label={t("bannerFallback")}
+              cover
+              className="h-full w-full"
+            />
+          </div>
+        )}
 
         {children}
 
