@@ -1,12 +1,13 @@
 import { TeamMembersTable } from "./team-members-table"
 import { TeamDirectoryTabs } from "./team-directory-tabs"
 import type { ReactNode } from "react"
-import { LovableRolePreview } from "./lovable-role-preview"
+import { RolePermissionsEditor } from "./role-permissions-editor"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import type {
   OrganizationInvitationStatus,
   OrganizationTeamDirectoryProps,
+  OrganizationTeamRole,
 } from "@/types/organization"
 import { getLocale, getTranslations } from "next-intl/server"
 import { RevokeInvitationButton } from "./revoke-invitation-button"
@@ -19,10 +20,21 @@ function statusVariant(status: OrganizationInvitationStatus) {
       : "destructive"
 }
 
+const teamRoleByBuiltInKey: Record<string, OrganizationTeamRole> = {
+  OrganizationOwner: "OrganizationOwner",
+  Manager: "RestaurantManager",
+  Kitchen: "KitchenStaff",
+  Staff: "RestaurantStaff",
+  Accountant: "Accountant",
+}
+
 export async function OrganizationTeamDirectory({
   organizationId,
   members,
   invitations,
+  roleGrants,
+  roleOptions,
+  isOrganizationOwner,
   heading,
   action,
 }: OrganizationTeamDirectoryProps & {
@@ -36,7 +48,11 @@ export async function OrganizationTeamDirectory({
   ])
 
   return (
-    <TeamDirectoryTabs heading={heading} action={action}>
+    <TeamDirectoryTabs
+      heading={heading}
+      action={action}
+      showRoles={isOrganizationOwner}
+    >
       <div className="grid max-w-full grid-cols-3 border">
         {[
           [v("members"), members?.length ?? "—"],
@@ -45,7 +61,7 @@ export async function OrganizationTeamDirectory({
             invitations?.filter((item) => item.status === "Pending").length ??
               "—",
           ],
-          [v("roles"), 3],
+          [v("roles"), roleGrants?.length ?? "—"],
         ].map(([label, value], index) => (
           <div key={label} className={`px-5 py-3 ${index ? "border-l" : ""}`}>
             <p className="label-mono text-muted-foreground">{label}</p>
@@ -55,7 +71,12 @@ export async function OrganizationTeamDirectory({
         ))}
       </div>
 
-      <TeamMembersTable members={members} />
+      <TeamMembersTable
+        organizationId={organizationId}
+        members={members}
+        roleOptions={roleOptions}
+        allowRoleChanges={isOrganizationOwner}
+      />
 
       <section className="min-w-0">
         <header className="sr-only">
@@ -87,8 +108,13 @@ export async function OrganizationTeamDirectory({
                   <p className="font-bold">{invitation.email}</p>
 
                   <p className="label-mono text-muted-foreground">
-                    {t(`teamRoles.${invitation.role}`)} ·{" "}
-                    {invitation.tenantName ?? t("organizationScope")}
+                    {invitation.builtInKey
+                      ? t(
+                          `teamRoles.${teamRoleByBuiltInKey[invitation.builtInKey] ?? invitation.role}`
+                        )
+                      : (invitation.roleName ??
+                        t(`teamRoles.${invitation.role}`))}{" "}
+                    · {invitation.tenantName ?? t("organizationScope")}
                   </p>
 
                   <p className="mt-1 text-sm text-muted-foreground">
@@ -119,7 +145,16 @@ export async function OrganizationTeamDirectory({
         )}
       </section>
 
-      <LovableRolePreview />
+      {isOrganizationOwner && roleGrants ? (
+        <RolePermissionsEditor
+          organizationId={organizationId}
+          initialGrants={roleGrants}
+        />
+      ) : isOrganizationOwner ? (
+        <Alert variant="destructive" role="alert">
+          <AlertDescription>{t("serviceError")}</AlertDescription>
+        </Alert>
+      ) : null}
     </TeamDirectoryTabs>
   )
 }

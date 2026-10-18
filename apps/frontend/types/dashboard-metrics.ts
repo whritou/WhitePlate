@@ -42,6 +42,7 @@ export type DashboardMetricsScope = {
   tenantId: string
   locale: string
   role: RestaurantRole
+  permissions: string[]
 }
 
 export type DashboardMetricsStripProps = DashboardMetricsScope & {

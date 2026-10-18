@@ -22,7 +22,11 @@ export async function GET(request: Request) {
     return respond({ ok: false, error: memberships.error }, memberships.status)
   if (
     !memberships.data?.some(
-      (item) => item.id.toLowerCase() === tenantId.toLowerCase()
+      (item) =>
+        item.id.toLowerCase() === tenantId.toLowerCase() &&
+        ["orders.manage", "kitchen.display", "analytics.view"].some(
+          (permission) => item.permissions.includes(permission)
+        )
     )
   )
     return respond({ ok: false, error: "forbidden" }, 403)

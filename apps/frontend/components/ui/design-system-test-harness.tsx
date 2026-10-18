@@ -158,7 +158,7 @@ export function DesignSystemTestHarness() {
                 key={status}
                 locale={locale}
                 now={Date.parse("2026-10-06T10:42:00Z")}
-                role="OrganizationOwner"
+                permissions={["orders.manage"]}
                 pending={null}
                 onUpdate={async () => {}}
                 order={{

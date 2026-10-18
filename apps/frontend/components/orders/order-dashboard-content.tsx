@@ -86,7 +86,7 @@ export function OrderDashboardContent({
             {orders.length > 0 && (
               <OrderKanban
                 orders={orders}
-                role={props.role}
+                permissions={props.permissions}
                 locale={props.locale}
                 serverTime={page.serverTime}
                 pending={pending}

@@ -43,6 +43,7 @@ it("shows live ordering status and controls to a manager", () => {
       tenantId: "22222222-2222-4222-8222-222222222222",
       locale: "en",
       role: "Manager",
+      permissions: ["orders.manage"],
       initialOperations: null,
     })
   )
@@ -61,6 +62,7 @@ it("shows current status to Kitchen without mutation controls", () => {
       tenantId: "22222222-2222-4222-8222-222222222222",
       locale: "fr",
       role: "Kitchen",
+      permissions: ["kitchen.display"],
       initialOperations: null,
     })
   )

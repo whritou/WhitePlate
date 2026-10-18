@@ -66,5 +66,6 @@ public sealed class CreateRestaurantTests
 
         public Task<bool> HasRestaurantRoleAsync(Guid tenantId, ExternalIdentity candidateIdentity, RestaurantRole role,
             CancellationToken cancellationToken) => Task.FromResult(false);
+        public Task<bool> HasPermissionAsync(Guid tenantId, ExternalIdentity candidateIdentity, WhitePlate.Domain.Organizations.RestaurantPermission permission, CancellationToken cancellationToken) => Task.FromResult(false);
     }
 }

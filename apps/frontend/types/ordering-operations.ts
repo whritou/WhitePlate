@@ -13,6 +13,7 @@ export type OrderingOperationsScope = {
   tenantId: string
   locale: string
   role: RestaurantRole
+  permissions: string[]
 }
 
 export type OrderingOperationsUpdate = {
@@ -27,12 +28,14 @@ export type OrderingOperationsControllerProps = {
   tenantId: string
   locale: string
   role: RestaurantRole
+  permissions: string[]
   initialOperations: OrderingOperations | null
   children?: ReactNode
 }
 
 export type OrderingOperationsControllerValue = {
   role: RestaurantRole
+  canManage: boolean
   requestedChange: RequestedOrderingOperationsChange
   state: {
     operations: OrderingOperations | null

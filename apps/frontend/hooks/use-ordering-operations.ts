@@ -17,12 +17,14 @@ export function useOrderingOperations({
   tenantId,
   locale,
   role,
+  permissions,
   initialOperations,
 }: {
   userId: string
   tenantId: string
   locale: string
   role: RestaurantRole
+  permissions: string[]
   initialOperations: OrderingOperations | null
 }) {
   const client = useQueryClient()
@@ -32,11 +34,13 @@ export function useOrderingOperations({
     tenantId,
     locale,
     role,
+    permissions,
   })
   const query = useQuery({
     queryKey,
     queryFn: ({ signal }) => fetchOrderingOperations(tenantId, signal),
     initialData: initialOperations ?? undefined,
+    enabled: permissions.includes("orders.manage"),
     staleTime: 0,
     refetchInterval: 15_000,
     retry: false,
@@ -101,11 +105,12 @@ export function useOrderingOperations({
           tenantId,
           locale,
           role,
+          permissions,
         }),
         type: "inactive",
       })
     }
-  }, [client, error, locale, role, router, tenantId, userId])
+  }, [client, error, locale, permissions, role, router, tenantId, userId])
 
   return {
     operations:

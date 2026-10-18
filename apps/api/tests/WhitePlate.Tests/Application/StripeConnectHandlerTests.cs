@@ -38,7 +38,7 @@ public sealed class StripeConnectHandlerTests
     }
 
     [Fact]
-    public async Task ManagerCanReadStatusButCannotStartOAuth()
+    public async Task ManagerWithoutBillingGrantCannotReadStatusOrStartOAuth()
     {
         var memberships = new Memberships { Manager = Manager };
         var handler = CreateHandler(memberships, new Store(), new Provider());
@@ -46,8 +46,20 @@ public sealed class StripeConnectHandlerTests
         var status = await handler.GetStatusAsync(tenantId, Manager, TestContext.Current.CancellationToken);
         var start = await handler.StartOAuthAsync(tenantId, Manager, "en", TestContext.Current.CancellationToken);
 
+        Assert.False(status.IsSuccess);
+        Assert.False(start.IsSuccess);
+    }
+
+    [Fact]
+    public async Task BillingGrantAllowsStatusButDoesNotDelegateOwnerOnlyOAuth()
+    {
+        var memberships = new Memberships { Manager = Manager, BillingManager = Manager };
+        var handler = CreateHandler(memberships, new Store(), new Provider());
+
+        var status = await handler.GetStatusAsync(tenantId, Manager, TestContext.Current.CancellationToken);
+        var start = await handler.StartOAuthAsync(tenantId, Manager, "en", TestContext.Current.CancellationToken);
+
         Assert.True(status.IsSuccess);
-        Assert.Equal("not_connected", status.Value.ConnectionState);
         Assert.False(status.Value.CanManage);
         Assert.False(start.IsSuccess);
     }
@@ -168,6 +180,7 @@ public sealed class StripeConnectHandlerTests
     {
         public ExternalIdentity? Owner { get; init; }
         public ExternalIdentity? Manager { get; init; }
+        public ExternalIdentity? BillingManager { get; init; }
 
         public Task<bool> IsOrganizationOwnerAsync(Guid organizationId, ExternalIdentity identity, CancellationToken cancellationToken) =>
             Task.FromResult(Owner == identity);
@@ -175,6 +188,7 @@ public sealed class StripeConnectHandlerTests
             Task.FromResult(candidateTenantId == Guid.Empty ? false : Owner == identity);
         public Task<bool> HasRestaurantRoleAsync(Guid candidateTenantId, ExternalIdentity identity, RestaurantRole role, CancellationToken cancellationToken) =>
             Task.FromResult(role == RestaurantRole.Manager && Manager == identity);
+        public Task<bool> HasPermissionAsync(Guid candidateTenantId, ExternalIdentity identity, WhitePlate.Domain.Organizations.RestaurantPermission permission, CancellationToken cancellationToken) => Task.FromResult(permission == WhitePlate.Domain.Organizations.RestaurantPermission.BillingManage && (Owner == identity || BillingManager == identity));
     }
 
     private sealed class Store : IStripeConnectRepository

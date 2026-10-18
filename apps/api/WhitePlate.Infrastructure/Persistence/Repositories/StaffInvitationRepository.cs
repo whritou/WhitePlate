@@ -12,6 +12,11 @@ public sealed class StaffInvitationRepository(WhitePlateDbContext database) : IS
         CancellationToken cancellationToken) => database.Tenants.AsNoTracking().AnyAsync(
         tenant => tenant.OrganizationId == organizationId && tenant.Id == tenantId, cancellationToken);
 
+    public Task<bool> RoleBelongsToOrganizationAsync(Guid organizationId, string roleId,
+        CancellationToken cancellationToken) => database.OrganizationRoleGrants.AsNoTracking().AnyAsync(
+        role => role.OrganizationId == organizationId && role.RoleId == roleId && !role.IsArchived,
+        cancellationToken);
+
     public async Task AddAsync(StaffInvitation invitation, CancellationToken cancellationToken)
     {
         database.StaffInvitations.Add(invitation);
@@ -24,8 +29,15 @@ public sealed class StaffInvitationRepository(WhitePlateDbContext database) : IS
         var invitation = await database.StaffInvitations.SingleOrDefaultAsync(
             item => item.TokenHash == tokenHash, cancellationToken);
         if (invitation is null || !await database.Organizations.AsNoTracking().AnyAsync(
-                organization => organization.Id == invitation.OrganizationId && organization.IsActive, cancellationToken) ||
-            !invitation.TryAccept(identity, now)) return false;
+                organization => organization.Id == invitation.OrganizationId && organization.IsActive, cancellationToken))
+            return false;
+
+        var roleGrant = invitation.Role == InvitationRole.OrganizationOwner ? null :
+            await database.OrganizationRoleGrants.AsNoTracking().SingleOrDefaultAsync(grant =>
+                grant.OrganizationId == invitation.OrganizationId && grant.RoleId == invitation.RoleId &&
+                !grant.IsArchived, cancellationToken);
+        if (invitation.Role != InvitationRole.OrganizationOwner && roleGrant is null) return false;
+        if (!invitation.TryAccept(identity, now)) return false;
 
         if (invitation.Role == InvitationRole.OrganizationOwner)
         {
@@ -37,12 +49,12 @@ public sealed class StaffInvitationRepository(WhitePlateDbContext database) : IS
         }
         else
         {
-            var role = invitation.Role == InvitationRole.RestaurantManager ? RestaurantRole.Manager : RestaurantRole.Kitchen;
             var exists = await database.RestaurantMemberships.AnyAsync(member =>
                 member.TenantId == invitation.TenantId && member.Issuer == identity.Issuer &&
                 member.Subject == identity.Subject, cancellationToken);
             if (!exists) database.RestaurantMemberships.Add(
-                RestaurantMembership.Create(invitation.TenantId!.Value, identity, role));
+                RestaurantMembership.Create(invitation.OrganizationId, invitation.TenantId!.Value, identity,
+                    roleGrant!.RoleId, roleGrant.Role));
         }
 
         try
@@ -64,10 +76,23 @@ public sealed class StaffInvitationRepository(WhitePlateDbContext database) : IS
             member.OrganizationId == organizationId && member.Issuer == identity.Issuer &&
             member.Subject == identity.Subject && database.Organizations.Any(organization =>
                 organization.Id == member.OrganizationId && organization.IsActive), cancellationToken);
-        if (!isOwner) return false;
         var invitation = await database.StaffInvitations.SingleOrDefaultAsync(item =>
             item.OrganizationId == organizationId && item.Id == invitationId, cancellationToken);
-        if (invitation is null || !invitation.TryRevoke(now)) return false;
+        if (invitation is null) return false;
+        if (!isOwner)
+        {
+            if (invitation.Role == InvitationRole.OrganizationOwner || invitation.TenantId is not { } tenantId)
+                return false;
+            var canManage = await database.RestaurantMemberships.AsNoTracking()
+                .Where(member => member.TenantId == tenantId && member.Issuer == identity.Issuer &&
+                    member.Subject == identity.Subject)
+                .AnyAsync(member => database.OrganizationRoleGrants.Any(grant => grant.OrganizationId == organizationId &&
+                    grant.RoleId == member.RoleId && !grant.IsArchived &&
+                    (grant.Permissions & RestaurantPermission.StaffManage) != RestaurantPermission.None),
+                    cancellationToken);
+            if (!canManage) return false;
+        }
+        if (!invitation.TryRevoke(now)) return false;
         await database.SaveChangesAsync(cancellationToken);
         return true;
     }

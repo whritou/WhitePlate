@@ -8,7 +8,11 @@ import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
 import { useWorkspaceToast } from "@/components/ui/toast"
 import { useRouter } from "@/i18n/navigation"
 import type { EditorCallbacks } from "@/types/editor"
-import type { ActionState } from "@/types/organization"
+import type {
+  ActionState,
+  OrganizationRoleAssignmentOption,
+  OrganizationTeamRole,
+} from "@/types/organization"
 import { ArrowRight, LoaderCircle } from "lucide-react"
 import { useLocale, useTranslations } from "next-intl"
 import { useState, type FormEvent } from "react"
@@ -17,21 +21,44 @@ import { ResultMessage } from "./result-message"
 export function StaffInvitationForm({
   organizationId,
   restaurants,
+  roleOptions,
+  allowOwnerInvitation = true,
   onPendingChange,
   onSuccess,
 }: EditorCallbacks & {
   organizationId: string
   restaurants: { id: string; name: string }[]
+  roleOptions: OrganizationRoleAssignmentOption[]
+  allowOwnerInvitation?: boolean
 }) {
   const t = useTranslations("Auth")
   const toast = useWorkspaceToast()
   const router = useRouter()
   const locale = useLocale()
   const [tenantId, setTenantId] = useState(restaurants[0]?.id ?? "")
-  const [role, setRole] = useState<
-    "OrganizationOwner" | "RestaurantManager" | "KitchenStaff"
-  >(restaurants.length ? "KitchenStaff" : "OrganizationOwner")
+  const defaultRole =
+    roleOptions.find((option) => option.builtInKey === "Kitchen")?.role ??
+    roleOptions[0]?.role ??
+    ""
+  const [role, setRole] = useState(
+    restaurants.length ? defaultRole : "OrganizationOwner"
+  )
   const [state, setState] = useState<ActionState>({ status: "idle" })
+
+  function roleLabel(option: OrganizationRoleAssignmentOption) {
+    if (!option.builtInKey) return option.name
+
+    const roleKeys: Record<string, OrganizationTeamRole> = {
+      Manager: "RestaurantManager",
+      Kitchen: "KitchenStaff",
+      Staff: "RestaurantStaff",
+      Accountant: "Accountant",
+    }
+
+    return roleKeys[option.builtInKey]
+      ? t(roleKeys[option.builtInKey])
+      : option.name
+  }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -80,25 +107,21 @@ export function StaffInvitationForm({
           name="role"
           disabled={state.status === "pending"}
           value={role}
-          onChange={(event) => setRole(event.target.value as typeof role)}
+          onChange={(event) => setRole(event.target.value)}
           className="w-full"
           selectClassName="px-3"
         >
           {tenantId ? (
-            <>
-              <NativeSelectOption value="KitchenStaff">
-                {t("kitchenStaff")}
+            roleOptions.map((option) => (
+              <NativeSelectOption key={option.role} value={option.role}>
+                {roleLabel(option)}
               </NativeSelectOption>
-
-              <NativeSelectOption value="RestaurantManager">
-                {t("restaurantManager")}
-              </NativeSelectOption>
-            </>
-          ) : (
+            ))
+          ) : allowOwnerInvitation ? (
             <NativeSelectOption value="OrganizationOwner">
               {t("organizationOwner")}
             </NativeSelectOption>
-          )}
+          ) : null}
         </NativeSelect>
       </Label>
 
@@ -119,14 +142,22 @@ export function StaffInvitationForm({
               const nextTenantId = event.target.value
 
               setTenantId(nextTenantId)
-              setRole(nextTenantId ? "KitchenStaff" : "OrganizationOwner")
+              setRole(
+                nextTenantId
+                  ? defaultRole
+                  : allowOwnerInvitation
+                    ? "OrganizationOwner"
+                    : defaultRole
+              )
             }}
             className="w-full"
             selectClassName="px-3"
           >
-            <NativeSelectOption value="">
-              {t("organizationScope")}
-            </NativeSelectOption>
+            {allowOwnerInvitation && (
+              <NativeSelectOption value="">
+                {t("organizationScope")}
+              </NativeSelectOption>
+            )}
 
             {restaurants.map((restaurant) => (
               <NativeSelectOption key={restaurant.id} value={restaurant.id}>
@@ -139,6 +170,12 @@ export function StaffInvitationForm({
             {t("restaurantScopeHint")}
           </span>
         </Label>
+      )}
+
+      {tenantId && roleOptions.length === 0 && (
+        <p role="alert" className="text-sm text-destructive">
+          {t("noAssignableRoles")}
+        </p>
       )}
 
       <ResultMessage
@@ -155,7 +192,13 @@ export function StaffInvitationForm({
         }
       />
 
-      <Button type="submit" disabled={state.status === "pending"}>
+      <Button
+        type="submit"
+        disabled={
+          state.status === "pending" ||
+          (tenantId !== "" && roleOptions.length === 0)
+        }
+      >
         {state.status === "pending" ? (
           <LoaderCircle className="size-4 animate-spin" />
         ) : (

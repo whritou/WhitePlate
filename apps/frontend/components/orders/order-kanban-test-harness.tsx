@@ -106,7 +106,9 @@ export function OrderKanbanTestHarness({ role }: { role: RestaurantRole }) {
           orders={orders.filter(
             (order) => status === null || order.status === status
           )}
-          role={role}
+          permissions={
+            role === "Kitchen" ? ["kitchen.display"] : ["orders.manage"]
+          }
           locale={locale}
           serverTime="2026-10-01T18:00:00Z"
           pending={pending}

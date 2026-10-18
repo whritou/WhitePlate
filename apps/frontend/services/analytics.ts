@@ -3,6 +3,7 @@ import {
   parseAnalyticsMetrics,
   aggregateAnalytics,
 } from "@/lib/analytics-metrics"
+import { selectAnalyticsMemberships } from "@/lib/analytics-access"
 import { whitePlateApi } from "@/lib/api"
 import { getRestaurantMemberships } from "@/services/orders"
 import type { AnalyticsMetrics } from "@/types/analytics"
@@ -43,9 +44,7 @@ export async function getOrganizationAnalytics(
   if (!membershipResult.data)
     return { ok: false, status: 502, error: "unavailable" }
 
-  const memberships = membershipResult.data.filter(
-    (item) => item.role === "OrganizationOwner" || item.role === "Manager"
-  )
+  const memberships = selectAnalyticsMemberships(membershipResult.data)
   const selected =
     restaurant === "all"
       ? memberships

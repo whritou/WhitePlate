@@ -60,7 +60,10 @@ export default async function DashboardPage({
   }
 
   const restaurant = memberships.data?.find(
-    (item) => item.id.toLowerCase() === tenantId.toLowerCase()
+    (item) =>
+      item.id.toLowerCase() === tenantId.toLowerCase() &&
+      (item.permissions.includes("orders.manage") ||
+        item.permissions.includes("kitchen.display"))
   )
 
   if (!restaurant)
@@ -71,21 +74,29 @@ export default async function DashboardPage({
       />
     )
 
+  const canManageOrders = restaurant.permissions.includes("orders.manage")
+  const canManageCatalog = restaurant.permissions.includes("catalog.manage")
   const [orderResponse, metricsResponse, operationsResponse, catalogResponse] =
     await Promise.all([
       getOrderPage(restaurant.id, null, null),
       getDashboardMetrics(restaurant.id),
-      getOrderingOperations(restaurant.id),
-      restaurant.role === "Kitchen"
-        ? Promise.resolve(null)
-        : getManagedCatalog(restaurant.id),
+      canManageOrders
+        ? getOrderingOperations(restaurant.id)
+        : Promise.resolve(null),
+      canManageCatalog
+        ? getManagedCatalog(restaurant.id)
+        : Promise.resolve(null),
     ])
 
   if (!orderResponse.ok && orderResponse.status === 401)
     redirect(`/${locale}/sign-in`)
   if (!metricsResponse.ok && metricsResponse.status === 401)
     redirect(`/${locale}/sign-in`)
-  if (!operationsResponse.ok && operationsResponse.status === 401)
+  if (
+    operationsResponse &&
+    !operationsResponse.ok &&
+    operationsResponse.status === 401
+  )
     redirect(`/${locale}/sign-in`)
 
   let page: OrderPage | null = null
@@ -109,6 +120,7 @@ export default async function DashboardPage({
     tenantId: restaurant.id,
     tenantName: restaurant.name,
     role: restaurant.role,
+    permissions: restaurant.permissions,
     locale,
     selectedStatus: null,
     cursor: null,
@@ -127,7 +139,7 @@ export default async function DashboardPage({
         metricsResponse.ok ? (metricsResponse.data ?? null) : null
       }
       initialOrderingOperations={
-        operationsResponse.ok ? (operationsResponse.data ?? null) : null
+        operationsResponse?.ok ? (operationsResponse.data ?? null) : null
       }
       catalog={
         catalogResponse?.ok ? (catalogResponse.data ?? undefined) : undefined

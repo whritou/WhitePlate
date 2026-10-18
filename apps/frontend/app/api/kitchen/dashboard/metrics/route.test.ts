@@ -48,7 +48,14 @@ it("returns validated metrics without caching authenticated responses", async ()
   vi.mocked(getRestaurantMemberships).mockResolvedValue({
     ok: true,
     status: 200,
-    data: [{ id: tenantId, name: "Bistro", role: "Kitchen" }],
+    data: [
+      {
+        id: tenantId,
+        name: "Bistro",
+        role: "Kitchen",
+        permissions: ["kitchen.display"],
+      },
+    ],
   })
   vi.mocked(getDashboardMetrics).mockResolvedValue({
     ok: true,

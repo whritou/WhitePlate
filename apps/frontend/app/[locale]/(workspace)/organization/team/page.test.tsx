@@ -10,6 +10,9 @@ const {
   getOrganizationRestaurants,
   getOrganizationMembers,
   getOrganizationInvitations,
+  getOrganizationRoleGrants,
+  getOrganizationAssignableRoles,
+  getRestaurantMemberships,
 } = vi.hoisted(() => ({
   getLocale: vi.fn(),
   getTranslations: vi.fn(),
@@ -17,6 +20,9 @@ const {
   getOrganizationRestaurants: vi.fn(),
   getOrganizationMembers: vi.fn(),
   getOrganizationInvitations: vi.fn(),
+  getOrganizationRoleGrants: vi.fn(),
+  getOrganizationAssignableRoles: vi.fn(),
+  getRestaurantMemberships: vi.fn(),
 }))
 
 vi.mock("next-intl/server", () => ({ getLocale, getTranslations }))
@@ -46,7 +52,10 @@ vi.mock("@/services/organization-queries", () => ({
   getOrganizationRestaurants,
   getOrganizationMembers,
   getOrganizationInvitations,
+  getOrganizationRoleGrants,
+  getOrganizationAssignableRoles,
 }))
+vi.mock("@/services/orders", () => ({ getRestaurantMemberships }))
 vi.mock("@/components/auth/staff-invitation-form", () => ({
   StaffInvitationForm: () => createElement("form", null, "Invitation form"),
 }))
@@ -135,6 +144,54 @@ beforeEach(() => {
       },
     ],
   })
+  getOrganizationRoleGrants.mockResolvedValue({
+    ok: true,
+    data: [
+      {
+        role: "OrganizationOwner",
+        name: "Owner",
+        builtInKey: "OrganizationOwner",
+        permissions: [
+          "orders.manage",
+          "kitchen.display",
+          "catalog.manage",
+          "discounts.manage",
+          "analytics.view",
+          "storefront.manage",
+          "staff.manage",
+          "billing.manage",
+        ],
+        version: 0,
+        isProtected: true,
+        isBuiltIn: true,
+        isArchived: false,
+      },
+      ...[
+        ["Manager", ["orders.manage"]],
+        ["Kitchen", ["kitchen.display"]],
+        ["Staff", ["orders.manage", "kitchen.display"]],
+        ["Accountant", ["analytics.view", "billing.manage"]],
+      ].map(([role, permissions]) => ({
+        role,
+        name: role === "Kitchen" ? "Kitchen staff" : role,
+        builtInKey: role,
+        permissions,
+        version: 1,
+        isProtected: false,
+        isBuiltIn: true,
+        isArchived: false,
+      })),
+    ],
+  })
+  getOrganizationAssignableRoles.mockResolvedValue({
+    ok: true,
+    data: [
+      { role: "Manager", name: "Manager", builtInKey: "Manager" },
+      { role: "Kitchen", name: "Kitchen staff", builtInKey: "Kitchen" },
+      { role: "Accountant", name: "Accountant", builtInKey: "Accountant" },
+    ],
+  })
+  getRestaurantMemberships.mockResolvedValue({ ok: true, data: [] })
 })
 
 it("renders the organization roster and invitation status beside the invitation form", async () => {

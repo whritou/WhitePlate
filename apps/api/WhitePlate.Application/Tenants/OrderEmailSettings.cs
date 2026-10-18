@@ -6,6 +6,7 @@ using WhitePlate.Application.Common.Results;
 using WhitePlate.Application.Identity;
 using WhitePlate.Domain.Common;
 using WhitePlate.Domain.Identity;
+using WhitePlate.Domain.Organizations;
 using WhitePlate.Domain.Tenants;
 
 namespace WhitePlate.Application.Tenants;
@@ -77,7 +78,7 @@ public sealed class OrderEmailSettingsHandler(IStaffMembershipRepository members
     public async Task<Result<OrderEmailSettingsDto>> GetAsync(Guid tenantId, ExternalIdentity identity,
         CancellationToken ct)
     {
-        if (!await CatalogAccess.CanManageAsync(memberships, tenantId, identity, ct)) return Missing();
+        if (!await memberships.HasPermissionAsync(tenantId, identity, RestaurantPermission.OrdersManage, ct)) return Missing();
         var tenant = await repository.GetAsync(tenantId, ct);
         return tenant is null ? Missing() : Result<OrderEmailSettingsDto>.Success(ToDto(tenant));
     }
@@ -85,7 +86,7 @@ public sealed class OrderEmailSettingsHandler(IStaffMembershipRepository members
     public async Task<Result<OrderEmailSettingsDto>> SaveAsync(Guid tenantId, ExternalIdentity identity,
         IReadOnlyList<OrderEmailLocaleTemplatesDto>? templates, int? expectedVersion, CancellationToken ct)
     {
-        if (!await CatalogAccess.CanManageAsync(memberships, tenantId, identity, ct)) return Missing();
+        if (!await memberships.HasPermissionAsync(tenantId, identity, RestaurantPermission.OrdersManage, ct)) return Missing();
         var tenant = await repository.GetAsync(tenantId, ct);
         if (tenant is null) return Missing();
         if (expectedVersion is null) return Fail(ErrorCode.PreconditionRequired);
@@ -94,7 +95,7 @@ public sealed class OrderEmailSettingsHandler(IStaffMembershipRepository members
 
         tenant.SetOrderEmailTemplates(JsonSerializer.Serialize(templates, JsonOptions));
         if (!await repository.SaveAsync(tenant, identity, expectedVersion.Value, ct))
-            return await CatalogAccess.CanManageAsync(memberships, tenantId, identity, ct)
+            return await memberships.HasPermissionAsync(tenantId, identity, RestaurantPermission.OrdersManage, ct)
                 ? Fail(ErrorCode.PreconditionFailed) : Missing();
         return Result<OrderEmailSettingsDto>.Success(ToDto(tenant));
     }

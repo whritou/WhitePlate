@@ -1,16 +1,12 @@
-import type {
-  OrderSummary,
-  RestaurantRole,
-  UpdateOrderStatusInput,
-} from "@/types/orders"
+import type { OrderSummary, UpdateOrderStatusInput } from "@/types/orders"
 import { getAvailableOrderTransitions } from "@/lib/order-dashboard"
 
 export function resolveOrderDrop(
   snapshot: OrderSummary,
   orders: OrderSummary[],
-  role: RestaurantRole,
   destination: string | null,
-  blocked: boolean
+  blocked: boolean,
+  permissions: string[] = []
 ): Omit<UpdateOrderStatusInput, "tenantId"> | null {
   const current = orders.find((order) => order.id === snapshot.id)
 
@@ -23,7 +19,7 @@ export function resolveOrderDrop(
   )
     return null
 
-  const status = getAvailableOrderTransitions(role, current.status).find(
+  const status = getAvailableOrderTransitions(current.status, permissions).find(
     (status) => status === destination
   )
 

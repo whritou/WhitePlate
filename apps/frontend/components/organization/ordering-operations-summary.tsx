@@ -31,9 +31,8 @@ export function OrderingOperationsSummary({
 }) {
   const t = useTranslations("LiveWorkspace")
   const k = useTranslations("KitchenOrders")
-  const { role, state, requestChange } = useOrderingOperationsController()
+  const { canManage, state, requestChange } = useOrderingOperationsController()
   const operations = state.operations
-  const canManage = role === "OrganizationOwner" || role === "Manager"
 
   if (state.isInitialLoading)
     return (

@@ -30,9 +30,14 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
       ? memberships.data?.find(
           (item) =>
             item.id === query.tenantId &&
-            (item.role === "OrganizationOwner" || item.role === "Manager")
+            (item.permissions.includes("catalog.manage") ||
+              item.permissions.includes("discounts.manage"))
         )
       : null
+  const canManageCatalog =
+    restaurant?.permissions.includes("catalog.manage") ?? false
+  const canManageDiscounts =
+    restaurant?.permissions.includes("discounts.manage") ?? false
   const [
     response,
     languages,
@@ -42,10 +47,18 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
   ] = restaurant
     ? await Promise.all([
         getManagedCatalog(restaurant.id),
-        getMenuLanguageSettings(restaurant.id),
-        getRestaurantDescriptionTranslations(restaurant.id),
-        getCatalogTranslationReviews(restaurant.id),
-        getCatalogTranslationGlossary(restaurant.id),
+        canManageCatalog
+          ? getMenuLanguageSettings(restaurant.id)
+          : Promise.resolve(null),
+        canManageCatalog
+          ? getRestaurantDescriptionTranslations(restaurant.id)
+          : Promise.resolve(null),
+        canManageCatalog
+          ? getCatalogTranslationReviews(restaurant.id)
+          : Promise.resolve(null),
+        canManageCatalog
+          ? getCatalogTranslationGlossary(restaurant.id)
+          : Promise.resolve(null),
       ])
     : [null, null, null, null, null]
   const catalog = response?.ok ? response.data : null
@@ -72,6 +85,8 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
         userId={session.user.id}
         key={`${session.user.id}:${catalog.tenantId}`}
         catalog={catalog}
+        canManageCatalog={canManageCatalog}
+        canManageDiscounts={canManageDiscounts}
         restaurantName={restaurant.name}
         settings={languages?.ok ? (languages.data ?? undefined) : undefined}
         description={
@@ -88,20 +103,23 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
             : undefined
         }
         translationWorkflowUnavailable={
-          !translationReviews?.ok || !translationGlossary?.ok
+          canManageCatalog &&
+          (!translationReviews?.ok || !translationGlossary?.ok)
         }
         initialView={
-          query.view === "discounts"
+          !canManageCatalog
             ? "discounts"
-            : query.view === "languages"
-              ? "languages"
-              : query.view === "versions"
-                ? "versions"
-                : query.view === "categories"
-                  ? "categories"
-                  : query.view === "translations"
-                    ? "translations"
-                    : "products"
+            : query.view === "discounts"
+              ? "discounts"
+              : query.view === "languages"
+                ? "languages"
+                : query.view === "versions"
+                  ? "versions"
+                  : query.view === "categories"
+                    ? "categories"
+                    : query.view === "translations"
+                      ? "translations"
+                      : "products"
         }
       />
     </main>

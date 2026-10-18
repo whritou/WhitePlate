@@ -8,6 +8,8 @@ import {
   parseOrganizations,
   parseOrganizationInvitations,
   parseOrganizationMembers,
+  parseOrganizationRoleGrants,
+  parseOrganizationRoleAssignmentOptions,
   parseRestaurants,
 } from "@/lib/validation/responses"
 import {
@@ -53,6 +55,20 @@ export async function getOrganizationInvitations(organizationId: string) {
   return readResource(
     `/api/v1/organizations/${organizationId}/invitations`,
     parseOrganizationInvitations
+  )
+}
+
+export async function getOrganizationRoleGrants(organizationId: string) {
+  return readResource(
+    `/api/v1/organizations/${organizationId}/roles`,
+    parseOrganizationRoleGrants
+  )
+}
+
+export async function getOrganizationAssignableRoles(organizationId: string) {
+  return readResource(
+    `/api/v1/organizations/${organizationId}/assignable-roles`,
+    parseOrganizationRoleAssignmentOptions
   )
 }
 

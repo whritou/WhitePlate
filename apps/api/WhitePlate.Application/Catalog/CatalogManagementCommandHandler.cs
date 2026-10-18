@@ -101,7 +101,7 @@ public sealed class CatalogManagementCommandHandler(IStaffMembershipRepository m
     public async Task<Result<PromotionDiscountDto>> UpdateDiscountAsync(UpdateDiscountCommand command,
         CancellationToken cancellationToken)
     {
-        if (!await CanManageAsync(command.TenantId, command.Identity, cancellationToken))
+        if (!await CatalogAccess.CanManageDiscountsAsync(memberships, command.TenantId, command.Identity, cancellationToken))
             return NotFound<PromotionDiscountDto>();
         try
         {
@@ -151,7 +151,7 @@ public sealed class CatalogManagementCommandHandler(IStaffMembershipRepository m
     public async Task<Result<bool>> ReorderAsync(ReorderCatalogCommand command,
         CancellationToken cancellationToken)
     {
-        if (!await CanManageAsync(command.TenantId, command.Identity, cancellationToken))
+        if (!await CatalogAccess.CanManageDiscountsAsync(memberships, command.TenantId, command.Identity, cancellationToken))
             return Result<bool>.Failure(new ApplicationError(ErrorCode.NotFound));
         if (command.OrderedIds.Count is < 1 or > 500 || command.OrderedIds.Any(id => id == Guid.Empty) ||
             command.OrderedIds.Distinct().Count() != command.OrderedIds.Count)

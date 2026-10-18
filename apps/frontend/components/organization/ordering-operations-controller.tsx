@@ -35,7 +35,7 @@ export function OrderingOperationsController({
   function requestChange(
     kind: NonNullable<RequestedOrderingOperationsChange>["kind"]
   ) {
-    if (!operations || scope.role === "Kitchen") return
+    if (!operations || !scope.permissions.includes("orders.manage")) return
     state.clearUpdateFeedback()
     setRequestedChange({
       kind,
@@ -69,6 +69,7 @@ export function OrderingOperationsController({
 
   const value: OrderingOperationsControllerValue = {
     role: scope.role,
+    canManage: scope.permissions.includes("orders.manage"),
     requestedChange,
     state,
     requestChange,

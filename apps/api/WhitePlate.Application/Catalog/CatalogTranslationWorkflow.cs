@@ -4,6 +4,7 @@ using WhitePlate.Application.Common.Results;
 using WhitePlate.Application.Identity;
 using WhitePlate.Domain.Common;
 using WhitePlate.Domain.Identity;
+using WhitePlate.Domain.Organizations;
 using WhitePlate.Domain.Tenants;
 
 namespace WhitePlate.Application.Catalog;
@@ -168,10 +169,9 @@ public sealed class CatalogTranslationWorkflowHandler(IStaffMembershipRepository
     private Task<bool> CanManageAsync(Guid tenantId, ExternalIdentity identity, CancellationToken cancellationToken) =>
         CatalogAccess.CanManageAsync(memberships, tenantId, identity, cancellationToken);
 
-    private async Task<bool> CanSelfReviewAsync(Guid tenantId, ExternalIdentity identity,
+    private Task<bool> CanSelfReviewAsync(Guid tenantId, ExternalIdentity identity,
         CancellationToken cancellationToken) =>
-        await memberships.IsOrganizationOwnerOfTenantAsync(tenantId, identity, cancellationToken) ||
-        await memberships.HasRestaurantRoleAsync(tenantId, identity, RestaurantRole.Manager, cancellationToken);
+        memberships.HasPermissionAsync(tenantId, identity, RestaurantPermission.CatalogManage, cancellationToken);
 
     private static CatalogTranslationGlossaryTermDto ToDto(CatalogTranslationGlossaryTerm term) =>
         new(term.Id, term.SourceLocale, term.TargetLocale, term.SourceTerm, term.TargetTerm,

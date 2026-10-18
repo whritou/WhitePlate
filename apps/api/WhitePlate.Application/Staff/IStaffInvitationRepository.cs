@@ -5,6 +5,8 @@ namespace WhitePlate.Application.Staff;
 public interface IStaffInvitationRepository
 {
     Task<bool> TenantBelongsToOrganizationAsync(Guid organizationId, Guid tenantId, CancellationToken cancellationToken);
+    Task<bool> RoleBelongsToOrganizationAsync(Guid organizationId, string roleId,
+        CancellationToken cancellationToken) => Task.FromResult(roleId is "Manager" or "Kitchen" or "Staff" or "Accountant");
     Task AddAsync(StaffInvitation invitation, CancellationToken cancellationToken);
     Task<bool> AcceptAsync(string tokenHash, ExternalIdentity identity, DateTimeOffset now,
         CancellationToken cancellationToken);

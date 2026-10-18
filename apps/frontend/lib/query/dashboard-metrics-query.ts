@@ -1,7 +1,13 @@
 import type { DashboardMetricsScope } from "@/types/dashboard-metrics"
 
 export const dashboardMetricsQueryKeys = {
-  tenant: ({ userId, tenantId, locale, role }: DashboardMetricsScope) =>
+  tenant: ({
+    userId,
+    tenantId,
+    locale,
+    role,
+    permissions,
+  }: DashboardMetricsScope) =>
     [
       "whiteplate",
       "dashboard-metrics",
@@ -9,5 +15,6 @@ export const dashboardMetricsQueryKeys = {
       tenantId.toLowerCase(),
       locale,
       role,
+      [...permissions].sort().join(","),
     ] as const,
 }

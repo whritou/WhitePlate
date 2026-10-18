@@ -51,7 +51,7 @@ const emailEventKeys = {
 
 export function OrderTicket({
   order,
-  role,
+  permissions,
   locale,
   now,
   pending,
@@ -69,7 +69,7 @@ export function OrderTicket({
     dateStyle: "short",
     timeStyle: "short",
   }).format(new Date(order.createdAt))
-  const transitions = getAvailableOrderTransitions(role, order.status)
+  const transitions = getAvailableOrderTransitions(order.status, permissions)
   const { variant, Icon } = statusPresentation[order.status]
   const isActive = order.status !== "Completed" && order.status !== "Cancelled"
   const timing = getOrderTiming(order, now)

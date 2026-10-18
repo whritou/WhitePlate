@@ -124,6 +124,16 @@ it("renders verified workspace context, active links, and locale-preserving cont
             id: tenantId,
             name: "Owner Restaurant",
             role: "OrganizationOwner",
+            permissions: [
+              "orders.manage",
+              "kitchen.display",
+              "catalog.manage",
+              "discounts.manage",
+              "analytics.view",
+              "storefront.manage",
+              "staff.manage",
+              "billing.manage",
+            ],
           },
         ],
       },
@@ -150,6 +160,31 @@ it("renders verified workspace context, active links, and locale-preserving cont
   expect(html).toContain("overflow-x-auto")
   expect(html).toContain(`/organization/dashboard?tenantId=${tenantId}`)
   expect(html).toContain("Sign out")
+})
+
+it("hides the restaurant orders shortcut when the selected role has no order access", () => {
+  const html = renderToStaticMarkup(
+    createElement(
+      WorkspaceShell,
+      {
+        organizations: [
+          { id: organizationId, name: "White Plate Group", isActive: true },
+        ],
+        restaurants: [
+          {
+            id: tenantId,
+            name: "Accountant Restaurant",
+            role: "Accountant",
+            permissions: ["analytics.view", "billing.manage"],
+          },
+        ],
+      },
+      createElement("main", null, "Workspace content")
+    )
+  )
+
+  expect(html).not.toContain("realOrders")
+  expect(html).not.toContain(`/organization/orders?tenantId=${tenantId}`)
 })
 
 it("does not display an unverified URL selection as workspace context", () => {

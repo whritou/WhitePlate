@@ -20,13 +20,45 @@ it("retains verified restaurant organization and subdomain for navigation", () =
   }
 
   expect(parseRestaurantMemberships({ restaurants: [restaurant] })).toEqual([
-    restaurant,
+    { ...restaurant, permissions: [] },
   ])
   expect(
     parseRestaurantMemberships({
       restaurants: [{ ...restaurant, subdomain: "foreign.example" }],
     })
   ).toBeNull()
+})
+
+it("accepts custom restaurant role IDs and preserves their permission list", () => {
+  const roleId = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  const tenantId = "22222222-2222-4222-8222-222222222222"
+  const organizationId = "11111111-1111-4111-8111-111111111111"
+
+  expect(
+    parseRestaurantMemberships({
+      restaurants: [
+        {
+          id: tenantId,
+          organizationId,
+          name: "Bistro",
+          role: roleId,
+          roleId,
+          roleName: "Pastry chef",
+          permissions: ["kitchen.display"],
+        },
+      ],
+    })
+  ).toEqual([
+    {
+      id: tenantId,
+      organizationId,
+      name: "Bistro",
+      role: roleId,
+      roleId,
+      roleName: "Pastry chef",
+      permissions: ["kitchen.display"],
+    },
+  ])
 })
 
 it("bounds the event tracker after more than 512 different orders", () => {
@@ -220,19 +252,21 @@ it("builds a browser hub URL and requires HTTPS in production", () => {
   ).toBeNull()
 })
 
-it("allows kitchen staff only forward transitions and manager cancellation", () => {
-  expect(getAvailableOrderTransitions("Kitchen", "Pending")).toEqual([
+it("allows forward transitions and cancellation only with orders.manage", () => {
+  expect(getAvailableOrderTransitions("Pending", ["kitchen.display"])).toEqual([
     "Preparing",
   ])
-  expect(getAvailableOrderTransitions("Manager", "Pending")).toEqual([
+  expect(getAvailableOrderTransitions("Pending", ["orders.manage"])).toEqual([
     "Preparing",
     "Cancelled",
   ])
-  expect(getAvailableOrderTransitions("OrganizationOwner", "Ready")).toEqual([
+  expect(getAvailableOrderTransitions("Ready", ["orders.manage"])).toEqual([
     "Completed",
     "Cancelled",
   ])
-  expect(getAvailableOrderTransitions("Kitchen", "Completed")).toEqual([])
+  expect(
+    getAvailableOrderTransitions("Completed", ["kitchen.display"])
+  ).toEqual([])
 })
 
 it("refreshes only for new, newer events from the selected tenant", () => {
@@ -344,6 +378,7 @@ it("validates the restaurant membership response before offering tenant navigati
       id: "11111111-1111-4111-8111-111111111111",
       name: "Bistro",
       role: "Kitchen",
+      permissions: [],
     },
   ])
   expect(

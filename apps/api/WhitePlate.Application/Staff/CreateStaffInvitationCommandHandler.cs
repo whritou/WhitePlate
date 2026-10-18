@@ -2,6 +2,7 @@ using WhitePlate.Application.Common.Errors;
 using WhitePlate.Application.Common.Results;
 using WhitePlate.Application.Identity;
 using WhitePlate.Domain.Identity;
+using WhitePlate.Domain.Organizations;
 
 namespace WhitePlate.Application.Staff;
 
@@ -15,15 +16,24 @@ public sealed class CreateStaffInvitationCommandHandler(IStaffMembershipReposito
         cancellationToken.ThrowIfCancellationRequested();
         if (!command.Identity.EmailVerified || string.IsNullOrWhiteSpace(command.Identity.Email))
             return Result<StaffInvitationDto>.Failure(new ApplicationError(ErrorCode.Forbidden));
-        if (!await memberships.IsOrganizationOwnerAsync(command.OrganizationId, command.Identity, cancellationToken))
+
+        var isOwner = await memberships.IsOrganizationOwnerAsync(command.OrganizationId, command.Identity,
+            cancellationToken);
+        if (!isOwner && (command.Role == InvitationRole.OrganizationOwner || command.TenantId is not { } tenantId ||
+            !await memberships.HasPermissionAsync(tenantId, command.Identity, RestaurantPermission.StaffManage,
+                cancellationToken)))
             return Result<StaffInvitationDto>.Failure(new ApplicationError(ErrorCode.NotFound));
 
         if ((command.Role == InvitationRole.OrganizationOwner) != (command.TenantId is null) ||
             command.TenantId == Guid.Empty)
             return Result<StaffInvitationDto>.Failure(new ApplicationError(ErrorCode.ValidationFailed,
                 new ValidationIssue("tenantId", "invalid_invitation_scope", "Invitation role and restaurant scope do not match.")));
-        if (command.TenantId is Guid tenantId &&
-            !await invitations.TenantBelongsToOrganizationAsync(command.OrganizationId, tenantId, cancellationToken))
+        if (command.TenantId is Guid targetTenantId &&
+            !await invitations.TenantBelongsToOrganizationAsync(command.OrganizationId, targetTenantId, cancellationToken))
+            return Result<StaffInvitationDto>.Failure(new ApplicationError(ErrorCode.NotFound));
+        if (command.Role != InvitationRole.OrganizationOwner &&
+            (command.RoleId is not { } roleId || !await invitations.RoleBelongsToOrganizationAsync(
+                command.OrganizationId, roleId, cancellationToken)))
             return Result<StaffInvitationDto>.Failure(new ApplicationError(ErrorCode.NotFound));
 
         var now = timeProvider.GetUtcNow();
@@ -31,7 +41,7 @@ public sealed class CreateStaffInvitationCommandHandler(IStaffMembershipReposito
         StaffInvitation invitation;
         try
         {
-            invitation = StaffInvitation.Create(command.OrganizationId, command.TenantId, command.Role,
+            invitation = StaffInvitation.Create(command.OrganizationId, command.TenantId, command.Role, command.RoleId,
                 command.RecipientEmail, hash, now.AddDays(7), now);
         }
         catch (WhitePlate.Domain.Common.DomainRuleException exception)

@@ -33,7 +33,10 @@ export async function GET(request: Request) {
     return respond({ ok: false, error: memberships.error }, memberships.status)
   if (
     !memberships.data?.some(
-      (item) => item.id.toLowerCase() === tenantId.toLowerCase()
+      (item) =>
+        item.id.toLowerCase() === tenantId.toLowerCase() &&
+        (item.permissions.includes("orders.manage") ||
+          item.permissions.includes("kitchen.display"))
     )
   ) {
     return respond({ ok: false, error: "forbidden" }, 403)

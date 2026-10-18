@@ -27,6 +27,178 @@ namespace WhitePlate.Tests.Api;
 public sealed class OrganizationEndpointTests
 {
     [Fact]
+    public async Task OwnerCanReadTheDefaultRolesAvailableForStaffAssignments()
+    {
+        using var factory = new OrganizationFactory();
+        var (_, ownerIdentity) = await factory.SeedOwnerAsync();
+        using var client = factory.CreateClient();
+        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue(
+            "Bearer", ownerIdentity.Subject);
+
+        using var created = await client.PostAsJsonAsync("/api/v1/organizations",
+            new { name = "New Organization", legalCountryCode = "FR" }, TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.Created, created.StatusCode);
+        using var createdJson = JsonDocument.Parse(await created.Content.ReadAsStringAsync(
+            TestContext.Current.CancellationToken));
+        var organizationId = createdJson.RootElement.GetProperty("id").GetGuid();
+        using var response = await client.GetAsync($"/api/v1/organizations/{organizationId}/assignable-roles",
+            TestContext.Current.CancellationToken);
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        using var json = JsonDocument.Parse(await response.Content.ReadAsStringAsync(
+            TestContext.Current.CancellationToken));
+        var roleNames = json.RootElement.EnumerateArray()
+            .Select(item => item.GetProperty("name").GetString()).ToArray();
+        Assert.Equal(["Accountant", "Kitchen staff", "Manager"], roleNames);
+    }
+
+    [Fact]
+    public async Task OwnerCanInviteStaffToACustomRoleAndReassignThePersistedMember()
+    {
+        using var factory = new OrganizationFactory();
+        var (_, ownerIdentity) = await factory.SeedOwnerAsync();
+        using var client = factory.CreateClient();
+        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue(
+            "Bearer", ownerIdentity.Subject);
+        var ct = TestContext.Current.CancellationToken;
+
+        using var organizationResponse = await client.PostAsJsonAsync("/api/v1/organizations",
+            new { name = "Custom Roles", legalCountryCode = "FR" }, ct);
+        using var organizationJson = JsonDocument.Parse(await organizationResponse.Content.ReadAsStringAsync(ct));
+        var organizationId = organizationJson.RootElement.GetProperty("id").GetGuid();
+        using var restaurantResponse = await client.PostAsJsonAsync(
+            $"/api/v1/organizations/{organizationId}/restaurants",
+            new { name = "Bistro", subdomain = "custom-roles", currency = "EUR" }, ct);
+        using var restaurantJson = JsonDocument.Parse(await restaurantResponse.Content.ReadAsStringAsync(ct));
+        var tenantId = restaurantJson.RootElement.GetProperty("id").GetGuid();
+
+        using var roleResponse = await client.PostAsJsonAsync(
+            $"/api/v1/organizations/{organizationId}/roles",
+            new { name = "Pastry chef", permissions = new[] { "kitchen.display" } }, ct);
+        Assert.Equal(HttpStatusCode.Created, roleResponse.StatusCode);
+        using var roleJson = JsonDocument.Parse(await roleResponse.Content.ReadAsStringAsync(ct));
+        var roleId = roleJson.RootElement.GetProperty("role").GetString();
+
+        using var invitationResponse = await client.PostAsJsonAsync(
+            $"/api/v1/organizations/{organizationId}/invitations",
+            new { tenantId, email = "pastry@example.test", role = roleId }, ct);
+        Assert.Equal(HttpStatusCode.Created, invitationResponse.StatusCode);
+        using var invitationJson = JsonDocument.Parse(await invitationResponse.Content.ReadAsStringAsync(ct));
+        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue(
+            "Bearer", "pastry");
+        using var accepted = await client.PostAsJsonAsync("/api/v1/invitations/accept",
+            new { token = invitationJson.RootElement.GetProperty("token").GetString() }, ct);
+        Assert.True(accepted.StatusCode == HttpStatusCode.NoContent,
+            await accepted.Content.ReadAsStringAsync(ct));
+
+        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue(
+            "Bearer", ownerIdentity.Subject);
+        using var membersResponse = await client.GetAsync($"/api/v1/organizations/{organizationId}/members", ct);
+        using var membersJson = JsonDocument.Parse(await membersResponse.Content.ReadAsStringAsync(ct));
+        var member = membersJson.RootElement.EnumerateArray().Single(item =>
+            item.GetProperty("email").GetString() == "pastry@example.test");
+        Assert.Equal(roleId, member.GetProperty("roleId").GetString());
+        Assert.Equal("Pastry chef", member.GetProperty("roleName").GetString());
+
+        using var reassigned = await client.PutAsJsonAsync(
+            $"/api/v1/organizations/{organizationId}/members/{member.GetProperty("memberId").GetGuid()}/role",
+            new { roleId = "Manager" }, ct);
+        Assert.Equal(HttpStatusCode.NoContent, reassigned.StatusCode);
+        using var refreshedMembers = await client.GetAsync($"/api/v1/organizations/{organizationId}/members", ct);
+        using var refreshedJson = JsonDocument.Parse(await refreshedMembers.Content.ReadAsStringAsync(ct));
+        var updatedMember = refreshedJson.RootElement.EnumerateArray().Single(item =>
+            item.GetProperty("email").GetString() == "pastry@example.test");
+        Assert.Equal("Manager", updatedMember.GetProperty("roleId").GetString());
+        Assert.Equal("Manager", updatedMember.GetProperty("roleName").GetString());
+    }
+
+    [Fact]
+    public async Task OwnerCanEditCustomRoleAndUpdatedPermissionsControlApiActions()
+    {
+        using var factory = new OrganizationFactory();
+        var (_, ownerIdentity) = await factory.SeedOwnerAsync();
+        using var client = factory.CreateClient();
+        var ct = TestContext.Current.CancellationToken;
+        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue(
+            "Bearer", ownerIdentity.Subject);
+
+        using var organizationResponse = await client.PostAsJsonAsync("/api/v1/organizations",
+            new { name = "Role Grant Changes", legalCountryCode = "FR" }, ct);
+        using var organizationJson = JsonDocument.Parse(await organizationResponse.Content.ReadAsStringAsync(ct));
+        var organizationId = organizationJson.RootElement.GetProperty("id").GetGuid();
+        using var restaurantResponse = await client.PostAsJsonAsync(
+            $"/api/v1/organizations/{organizationId}/restaurants",
+            new { name = "Bistro", subdomain = "role-grant-changes", currency = "EUR" }, ct);
+        using var restaurantJson = JsonDocument.Parse(await restaurantResponse.Content.ReadAsStringAsync(ct));
+        var tenantId = restaurantJson.RootElement.GetProperty("id").GetGuid();
+
+        using var roleResponse = await client.PostAsJsonAsync(
+            $"/api/v1/organizations/{organizationId}/roles",
+            new { name = "Kitchen helper", permissions = new[] { "kitchen.display" } }, ct);
+        Assert.Equal(HttpStatusCode.Created, roleResponse.StatusCode);
+        using var roleJson = JsonDocument.Parse(await roleResponse.Content.ReadAsStringAsync(ct));
+        var roleId = roleJson.RootElement.GetProperty("role").GetString()!;
+        using var pendingInvitationResponse = await client.PostAsJsonAsync(
+            $"/api/v1/organizations/{organizationId}/invitations",
+            new { tenantId, email = "waiting@example.test", role = roleId }, ct);
+        Assert.Equal(HttpStatusCode.Created, pendingInvitationResponse.StatusCode);
+        using var pendingInvitationJson = JsonDocument.Parse(
+            await pendingInvitationResponse.Content.ReadAsStringAsync(ct));
+        var pendingInvitationId = pendingInvitationJson.RootElement.GetProperty("id").GetGuid();
+        using var invitationResponse = await client.PostAsJsonAsync(
+            $"/api/v1/organizations/{organizationId}/invitations",
+            new { tenantId, email = "grant-check@example.test", role = roleId }, ct);
+        Assert.Equal(HttpStatusCode.Created, invitationResponse.StatusCode);
+        using var invitationJson = JsonDocument.Parse(await invitationResponse.Content.ReadAsStringAsync(ct));
+
+        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue(
+            "Bearer", "grant-check");
+        using var accepted = await client.PostAsJsonAsync("/api/v1/invitations/accept",
+            new { token = invitationJson.RootElement.GetProperty("token").GetString() }, ct);
+        Assert.Equal(HttpStatusCode.NoContent, accepted.StatusCode);
+        using var deniedCatalog = await client.GetAsync($"/api/v1/tenants/{tenantId}/catalog", ct);
+        Assert.Equal(HttpStatusCode.NotFound, deniedCatalog.StatusCode);
+
+        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue(
+            "Bearer", ownerIdentity.Subject);
+        using var update = await client.PutAsJsonAsync($"/api/v1/organizations/{organizationId}/roles",
+            new { role = roleId, name = "Kitchen and menu", permissions = new[] { "kitchen.display", "catalog.manage" }, version = 1 }, ct);
+        Assert.Equal(HttpStatusCode.OK, update.StatusCode);
+        using var updatedRoleJson = JsonDocument.Parse(await update.Content.ReadAsStringAsync(ct));
+        Assert.Equal(2, updatedRoleJson.RootElement.GetProperty("version").GetInt32());
+
+        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue(
+            "Bearer", "grant-check");
+        using var allowedCatalog = await client.GetAsync($"/api/v1/tenants/{tenantId}/catalog", ct);
+        Assert.Equal(HttpStatusCode.OK, allowedCatalog.StatusCode);
+
+        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue(
+            "Bearer", ownerIdentity.Subject);
+        using var membersResponse = await client.GetAsync($"/api/v1/organizations/{organizationId}/members", ct);
+        using var membersJson = JsonDocument.Parse(await membersResponse.Content.ReadAsStringAsync(ct));
+        var memberId = membersJson.RootElement.EnumerateArray().Single(item =>
+            item.GetProperty("email").GetString() == "grant-check@example.test")
+            .GetProperty("memberId").GetGuid();
+        using var assignedArchive = await client.PostAsJsonAsync(
+            $"/api/v1/organizations/{organizationId}/roles/{roleId}/archive", new { version = 2 }, ct);
+        Assert.Equal(HttpStatusCode.Conflict, assignedArchive.StatusCode);
+
+        using var reassigned = await client.PutAsJsonAsync(
+            $"/api/v1/organizations/{organizationId}/members/{memberId}/role", new { roleId = "Manager" }, ct);
+        Assert.Equal(HttpStatusCode.NoContent, reassigned.StatusCode);
+        using var pendingArchive = await client.PostAsJsonAsync(
+            $"/api/v1/organizations/{organizationId}/roles/{roleId}/archive", new { version = 2 }, ct);
+        Assert.Equal(HttpStatusCode.Conflict, pendingArchive.StatusCode);
+        using var revoked = await client.DeleteAsync(
+            $"/api/v1/organizations/{organizationId}/invitations/{pendingInvitationId}", ct);
+        Assert.Equal(HttpStatusCode.NoContent, revoked.StatusCode);
+        using var archived = await client.PostAsJsonAsync(
+            $"/api/v1/organizations/{organizationId}/roles/{roleId}/archive", new { version = 2 }, ct);
+        Assert.True(archived.StatusCode == HttpStatusCode.NoContent,
+            $"Expected role archive but got {(int)archived.StatusCode}: {await archived.Content.ReadAsStringAsync(ct)}");
+    }
+
+    [Fact]
     public async Task ProductCategoryMovePersistsAndRejectsForeignArchivedOrMissingCategories()
     {
         using var factory = new OrganizationFactory();
@@ -356,7 +528,8 @@ public sealed class OrganizationEndpointTests
         using var invitationResponse = await client.PostAsJsonAsync($"/api/v1/organizations/{organizationId}/invitations",
             new { tenantId = restaurant!.Id, email = "kitchen-1@example.test", role = "KitchenStaff" }, TestContext.Current.CancellationToken);
 
-        Assert.Equal(HttpStatusCode.Created, invitationResponse.StatusCode);
+        Assert.True(invitationResponse.StatusCode == HttpStatusCode.Created,
+            $"Expected invitation creation but got {(int)invitationResponse.StatusCode}: {await invitationResponse.Content.ReadAsStringAsync(TestContext.Current.CancellationToken)}");
         using var invitationJson = JsonDocument.Parse(await invitationResponse.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
         var token = invitationJson.RootElement.GetProperty("token").GetString()!;
         Assert.Equal(64, token.Length);
@@ -389,6 +562,8 @@ public sealed class OrganizationEndpointTests
         using var invitationResponse = await client.PostAsJsonAsync($"/api/v1/organizations/{organizationId}/invitations",
             new { tenantId = restaurant!.Id, email = "invited@example.test", role = "KitchenStaff" },
             TestContext.Current.CancellationToken);
+        Assert.True(invitationResponse.StatusCode == HttpStatusCode.Created,
+            $"Expected invitation creation but got {(int)invitationResponse.StatusCode}: {await invitationResponse.Content.ReadAsStringAsync(TestContext.Current.CancellationToken)}");
         using var invitationJson = JsonDocument.Parse(await invitationResponse.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
         var token = invitationJson.RootElement.GetProperty("token").GetString();
 
@@ -540,6 +715,93 @@ public sealed class OrganizationEndpointTests
     }
 
     [Fact]
+    public async Task ManagerCannotReadOrganizationTeamAfterOrganizationIsArchived()
+    {
+        using var factory = new OrganizationFactory();
+        var (organizationId, ownerIdentity) = await factory.SeedOwnerAsync();
+        var tenantId = await factory.SeedRestaurantAsync(organizationId);
+        await factory.AddRestaurantMemberAsync(tenantId, "manager", RestaurantRole.Manager);
+
+        using var client = factory.CreateClient();
+        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue(
+            "Bearer", ownerIdentity.Subject);
+        using var invitation = await client.PostAsJsonAsync($"/api/v1/organizations/{organizationId}/invitations",
+            new { tenantId, email = "staff@example.test", role = "KitchenStaff" },
+            TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.Created, invitation.StatusCode);
+        using var archive = await client.PostAsync($"/api/v1/organizations/{organizationId}/archive", null,
+            TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.NoContent, archive.StatusCode);
+
+        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue(
+            "Bearer", "manager");
+        using var managerMembers = await client.GetAsync($"/api/v1/organizations/{organizationId}/members",
+            TestContext.Current.CancellationToken);
+        using var managerInvitations = await client.GetAsync($"/api/v1/organizations/{organizationId}/invitations",
+            TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.NotFound, managerMembers.StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, managerInvitations.StatusCode);
+
+        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue(
+            "Bearer", ownerIdentity.Subject);
+        using var ownerMembers = await client.GetAsync($"/api/v1/organizations/{organizationId}/members",
+            TestContext.Current.CancellationToken);
+        using var ownerInvitations = await client.GetAsync($"/api/v1/organizations/{organizationId}/invitations",
+            TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.OK, ownerMembers.StatusCode);
+        Assert.Equal(HttpStatusCode.OK, ownerInvitations.StatusCode);
+    }
+
+    [Fact]
+    public async Task ManagerTeamReadsAreLimitedToRestaurantsWhereTheyHaveStaffManagement()
+    {
+        using var factory = new OrganizationFactory();
+        var (organizationId, ownerIdentity) = await factory.SeedOwnerAsync();
+        var managedTenantId = await factory.SeedRestaurantAsync(organizationId);
+        using var client = factory.CreateClient();
+        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue(
+            "Bearer", ownerIdentity.Subject);
+        using var otherRestaurantResponse = await client.PostAsJsonAsync(
+            $"/api/v1/organizations/{organizationId}/restaurants",
+            new { name = "Annex", subdomain = "annex", currency = "EUR" },
+            TestContext.Current.CancellationToken);
+        var otherRestaurant = await otherRestaurantResponse.Content.ReadFromJsonAsync<WhitePlate.Api.Contracts.TenantResponse>(
+            TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.Created, otherRestaurantResponse.StatusCode);
+        await factory.AddRestaurantMemberAsync(managedTenantId, "manager", RestaurantRole.Manager);
+        await factory.AddRestaurantMemberAsync(otherRestaurant!.Id, "other-staff", RestaurantRole.Kitchen);
+
+        async Task CreateInvitation(Guid tenantId, string email)
+        {
+            using var response = await client.PostAsJsonAsync($"/api/v1/organizations/{organizationId}/invitations",
+                new { tenantId, email, role = "KitchenStaff" }, TestContext.Current.CancellationToken);
+            Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+        }
+
+        await CreateInvitation(managedTenantId, "managed-staff@example.test");
+        await CreateInvitation(otherRestaurant.Id, "private-staff@example.test");
+
+        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue(
+            "Bearer", "manager");
+        using var membersResponse = await client.GetAsync($"/api/v1/organizations/{organizationId}/members",
+            TestContext.Current.CancellationToken);
+        using var membersJson = JsonDocument.Parse(await membersResponse.Content.ReadAsStringAsync(
+            TestContext.Current.CancellationToken));
+        using var invitationsResponse = await client.GetAsync($"/api/v1/organizations/{organizationId}/invitations",
+            TestContext.Current.CancellationToken);
+        using var invitationsJson = JsonDocument.Parse(await invitationsResponse.Content.ReadAsStringAsync(
+            TestContext.Current.CancellationToken));
+
+        Assert.Equal(HttpStatusCode.OK, membersResponse.StatusCode);
+        Assert.All(membersJson.RootElement.EnumerateArray(), member =>
+            Assert.Equal(managedTenantId, member.GetProperty("tenantId").GetGuid()));
+        Assert.Equal(HttpStatusCode.OK, invitationsResponse.StatusCode);
+        var invitationEmails = invitationsJson.RootElement.EnumerateArray()
+            .Select(invitation => invitation.GetProperty("email").GetString()).ToArray();
+        Assert.Equal(["managed-staff@example.test"], invitationEmails);
+    }
+
+    [Fact]
     public async Task OrganizationOwnerCannotRevokeAcceptedOrExpiredInvitations()
     {
         using var factory = new OrganizationFactory();
@@ -551,6 +813,8 @@ public sealed class OrganizationEndpointTests
             $"/api/v1/organizations/{organizationId}/invitations",
             new { tenantId = (Guid?)null, email = "accepted@example.test", role = "OrganizationOwner" },
             TestContext.Current.CancellationToken);
+        Assert.True(acceptedInvitationResponse.StatusCode == HttpStatusCode.Created,
+            $"Expected invitation creation but got {(int)acceptedInvitationResponse.StatusCode}: {await acceptedInvitationResponse.Content.ReadAsStringAsync(TestContext.Current.CancellationToken)}");
         using var acceptedInvitationJson = JsonDocument.Parse(
             await acceptedInvitationResponse.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
         var acceptedInvitationId = acceptedInvitationJson.RootElement.GetProperty("id").GetGuid();
@@ -597,6 +861,8 @@ public sealed class OrganizationEndpointTests
         var restaurant = await restaurantResponse.Content.ReadFromJsonAsync<WhitePlate.Api.Contracts.TenantResponse>(TestContext.Current.CancellationToken);
         using var invitationResponse = await client.PostAsJsonAsync($"/api/v1/organizations/{organizationId}/invitations",
             new { tenantId = restaurant!.Id, email = "manager-1@example.test", role = "RestaurantManager" }, TestContext.Current.CancellationToken);
+        Assert.True(invitationResponse.StatusCode == HttpStatusCode.Created,
+            $"Expected invitation creation but got {(int)invitationResponse.StatusCode}: {await invitationResponse.Content.ReadAsStringAsync(TestContext.Current.CancellationToken)}");
         using var inviteJson = JsonDocument.Parse(await invitationResponse.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
         var token = inviteJson.RootElement.GetProperty("token").GetString();
         client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", "manager-1");
@@ -1053,6 +1319,8 @@ public sealed class OrganizationEndpointTests
             var organization = Organization.Create("Test Organization");
             var identity = ExternalIdentity.Create("https://identity.example.test/", subject);
             database.Organizations.Add(organization);
+            database.OrganizationRoleGrants.AddRange(Enum.GetValues<RestaurantRole>()
+                .Select(role => OrganizationRoleGrantSet.CreateDefault(organization.Id, role)));
             database.OrganizationOwnerMemberships.Add(OrganizationOwnerMembership.Create(organization.Id, identity));
             await database.SaveChangesAsync(TestContext.Current.CancellationToken);
             return (organization.Id, identity);

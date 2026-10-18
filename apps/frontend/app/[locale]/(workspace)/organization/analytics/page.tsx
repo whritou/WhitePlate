@@ -1,5 +1,6 @@
 import { getLocale } from "next-intl/server"
 import { AnalyticsWorkspaceClient } from "@/components/organization/analytics-workspace-client"
+import { selectAnalyticsMemberships } from "@/lib/analytics-access"
 import { getRestaurantMemberships } from "@/services/orders"
 import type { SearchParams } from "@/types/navigation"
 
@@ -23,9 +24,7 @@ export default async function AnalyticsWorkspacePage({
       />
     )
 
-  const restaurants = memberships.data.filter(
-    (item) => item.role === "OrganizationOwner" || item.role === "Manager"
-  )
+  const restaurants = selectAnalyticsMemberships(memberships.data)
   const requestedTenantId =
     typeof params.tenantId === "string" ? params.tenantId : undefined
 

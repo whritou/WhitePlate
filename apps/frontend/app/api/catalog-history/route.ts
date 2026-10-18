@@ -35,7 +35,7 @@ export async function GET(request: Request) {
     !memberships.data?.some(
       (item) =>
         item.id.toLowerCase() === tenantId.toLowerCase() &&
-        (item.role === "OrganizationOwner" || item.role === "Manager")
+        item.permissions.includes("catalog.manage")
     )
   )
     return respond({ ok: false, error: "forbidden" }, 403)

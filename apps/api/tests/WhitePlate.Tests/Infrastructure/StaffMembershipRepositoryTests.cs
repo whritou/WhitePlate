@@ -11,6 +11,44 @@ namespace WhitePlate.Tests.Infrastructure;
 public sealed class StaffMembershipRepositoryTests
 {
     [Fact]
+    public async Task ResolvesCustomMembershipPermissionsByRoleIdInsteadOfCompatibilityRole()
+    {
+        await using var connection = new SqliteConnection("Data Source=:memory:");
+        await connection.OpenAsync(TestContext.Current.CancellationToken);
+        await using var database = new WhitePlateDbContext(new DbContextOptionsBuilder<WhitePlateDbContext>()
+            .UseSqlite(connection).Options);
+        await database.Database.EnsureCreatedAsync(TestContext.Current.CancellationToken);
+
+        var organization = Organization.Create("Custom roles");
+        var restaurant = Tenant.Create(organization.Id, "Bistro", "custom-bistro", "EUR");
+        var identity = ExternalIdentity.Create("https://id.example.test/", "custom-kitchen");
+        var ordersIdentity = ExternalIdentity.Create("https://id.example.test/", "custom-orders");
+        var customRole = OrganizationRoleGrantSet.CreateCustom(organization.Id, "Prep team",
+            [RestaurantPermissionCatalog.KitchenDisplay]);
+        var ordersRole = OrganizationRoleGrantSet.CreateCustom(organization.Id, "Order team",
+            [RestaurantPermissionCatalog.OrdersManage]);
+        database.Organizations.Add(organization);
+        database.Tenants.Add(restaurant);
+        database.OrganizationRoleGrants.AddRange(customRole, ordersRole);
+        database.RestaurantMemberships.Add(RestaurantMembership.Create(organization.Id, restaurant.Id,
+            identity, customRole.RoleId, RestaurantRole.Staff));
+        database.RestaurantMemberships.Add(RestaurantMembership.Create(organization.Id, restaurant.Id,
+            ordersIdentity, ordersRole.RoleId, RestaurantRole.Staff));
+        await database.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+        var repository = new StaffMembershipRepository(database);
+
+        Assert.True(await repository.HasPermissionAsync(restaurant.Id, identity, RestaurantPermission.KitchenDisplay,
+            TestContext.Current.CancellationToken));
+        Assert.False(await repository.HasPermissionAsync(restaurant.Id, identity, RestaurantPermission.OrdersManage,
+            TestContext.Current.CancellationToken));
+        Assert.True(await repository.HasPermissionAsync(restaurant.Id, ordersIdentity, RestaurantPermission.OrdersManage,
+            TestContext.Current.CancellationToken));
+        Assert.False(await repository.HasPermissionAsync(restaurant.Id, ordersIdentity, RestaurantPermission.KitchenDisplay,
+            TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
     public async Task ResolvesOwnerAndRestaurantRolesOnlyWithinTheirScopes()
     {
         await using var connection = new SqliteConnection("Data Source=:memory:");

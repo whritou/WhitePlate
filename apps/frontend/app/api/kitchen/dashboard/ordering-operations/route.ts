@@ -34,7 +34,9 @@ async function authorizeTenant(
     }
 
   const membership = memberships.data?.find(
-    (item) => item.id.toLowerCase() === tenantId.toLowerCase()
+    (item) =>
+      item.id.toLowerCase() === tenantId.toLowerCase() &&
+      item.permissions.includes("orders.manage")
   )
 
   return membership

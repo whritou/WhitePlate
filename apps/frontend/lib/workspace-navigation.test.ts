@@ -21,9 +21,29 @@ const restaurants: RestaurantMembership[] = [
     id: ownerRestaurantId,
     name: "Owner Restaurant",
     role: "OrganizationOwner",
+    permissions: [
+      "orders.manage",
+      "kitchen.display",
+      "catalog.manage",
+      "discounts.manage",
+      "analytics.view",
+      "storefront.manage",
+      "staff.manage",
+      "billing.manage",
+    ],
   },
-  { id: managerRestaurantId, name: "Manager Restaurant", role: "Manager" },
-  { id: kitchenRestaurantId, name: "Kitchen Restaurant", role: "Kitchen" },
+  {
+    id: managerRestaurantId,
+    name: "Manager Restaurant",
+    role: "Manager",
+    permissions: ["orders.manage", "catalog.manage", "storefront.manage"],
+  },
+  {
+    id: kitchenRestaurantId,
+    name: "Kitchen Restaurant",
+    role: "Kitchen",
+    permissions: ["kitchen.display"],
+  },
 ]
 
 function getLinks(

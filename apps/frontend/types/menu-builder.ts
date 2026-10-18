@@ -25,6 +25,8 @@ export type MenuBuilderProps = {
   translationGlossary?: CatalogTranslationGlossaryTerm[]
   translationWorkflowUnavailable?: boolean
   initialView?: MenuBuilderView
+  canManageCatalog?: boolean
+  canManageDiscounts?: boolean
 }
 
 export type CategoryVisibilityInput = {

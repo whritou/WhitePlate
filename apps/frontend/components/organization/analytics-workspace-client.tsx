@@ -43,7 +43,10 @@ export function AnalyticsWorkspaceClient({
   const [metric, setMetric] = useState<"revenue" | "orders">("revenue")
   const selector = rest === 0 ? "all" : (restaurants[rest - 1]?.id ?? "all")
   const scope = restaurants
-    .map((item) => `${item.id}:${item.role}`)
+    .map(
+      (item) =>
+        `${item.id}:${item.role}:${[...item.permissions].sort().join(",")}`
+    )
     .sort()
     .join("|")
   const queryKey = [

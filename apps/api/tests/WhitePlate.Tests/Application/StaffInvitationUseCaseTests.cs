@@ -59,6 +59,7 @@ public sealed class StaffInvitationUseCaseTests
 
         public Task<bool> HasRestaurantRoleAsync(Guid tenantId, ExternalIdentity candidateIdentity, RestaurantRole role,
             CancellationToken cancellationToken) => Task.FromResult(false);
+        public Task<bool> HasPermissionAsync(Guid tenantId, ExternalIdentity candidateIdentity, WhitePlate.Domain.Organizations.RestaurantPermission permission, CancellationToken cancellationToken) => Task.FromResult(false);
     }
 
     private sealed class InvitationRepositoryStub(Guid organizationId, Guid tenantId) : IStaffInvitationRepository
@@ -78,6 +79,7 @@ public sealed class StaffInvitationUseCaseTests
 
         public Task<bool> AcceptAsync(string tokenHash, ExternalIdentity identity, DateTimeOffset now,
             CancellationToken cancellationToken) => Task.FromResult(false);
+        public Task<bool> HasPermissionAsync(Guid tenantId, ExternalIdentity candidateIdentity, WhitePlate.Domain.Organizations.RestaurantPermission permission, CancellationToken cancellationToken) => Task.FromResult(false);
 
         public Task<bool> RevokeAsync(Guid organizationId, Guid invitationId, ExternalIdentity identity,
             DateTimeOffset now, CancellationToken cancellationToken) => Task.FromResult(false);

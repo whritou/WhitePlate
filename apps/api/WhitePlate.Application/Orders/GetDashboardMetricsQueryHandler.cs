@@ -2,7 +2,7 @@ using WhitePlate.Application.Common.Errors;
 using WhitePlate.Application.Common.Results;
 using WhitePlate.Application.Identity;
 using WhitePlate.Domain.Identity;
-using WhitePlate.Domain.Tenants;
+using WhitePlate.Domain.Organizations;
 
 namespace WhitePlate.Application.Orders;
 
@@ -16,11 +16,13 @@ public sealed class GetDashboardMetricsQueryHandler(IOrderRepository orders,
         ArgumentNullException.ThrowIfNull(identity);
         cancellationToken.ThrowIfCancellationRequested();
 
-        var includeOrderValue = await OrderStaffAccess.CanViewHistoryAsync(memberships,
-            query.TenantId, identity, cancellationToken);
-        if (!includeOrderValue && !await memberships.HasRestaurantRoleAsync(query.TenantId, identity,
-                RestaurantRole.Kitchen, cancellationToken))
+        var canViewDashboard = await RestaurantPermissionAccess.HasAnyAsync(memberships, query.TenantId,
+            identity, cancellationToken, RestaurantPermission.OrdersManage, RestaurantPermission.KitchenDisplay,
+            RestaurantPermission.AnalyticsView);
+        if (!canViewDashboard)
             return Result<DashboardMetricsDto>.Failure(new ApplicationError(ErrorCode.Forbidden));
+        var includeOrderValue = await memberships.HasPermissionAsync(query.TenantId, identity,
+            RestaurantPermission.AnalyticsView, cancellationToken);
 
         var metrics = await orders.GetDashboardMetricsAsync(query.TenantId, timeProvider.GetUtcNow(),
             includeOrderValue, cancellationToken);

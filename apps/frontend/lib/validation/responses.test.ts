@@ -6,9 +6,197 @@ import {
   parseMenuLanguageSettings,
   parseCatalog,
   parseRestaurantDescriptionTranslations,
+  parseOrganizationRoleGrants,
+  parseOrganizationRoleGrant,
+  parseOrganizationMembers,
+  parseOrganizationInvitations,
+  parseOrganizationRoleAssignmentOptions,
 } from "./responses"
 
 const id = "11111111-1111-4111-8111-111111111111"
+
+it("parses all persisted organization roles and keeps owner grants protected", () => {
+  const editable = ["Manager", "Kitchen", "Staff", "Accountant"].map(
+    (role) => ({
+      role,
+      name: role,
+      builtInKey: role,
+      permissions: ["orders.manage"],
+      version: 1,
+      isProtected: false,
+      isBuiltIn: true,
+      isArchived: false,
+    })
+  )
+  const owner = {
+    role: "OrganizationOwner",
+    name: "Owner",
+    builtInKey: "OrganizationOwner",
+    permissions: [
+      "orders.manage",
+      "kitchen.display",
+      "catalog.manage",
+      "discounts.manage",
+      "analytics.view",
+      "storefront.manage",
+      "staff.manage",
+      "billing.manage",
+    ],
+    version: 0,
+    isProtected: true,
+    isBuiltIn: true,
+    isArchived: false,
+  }
+
+  expect(parseOrganizationRoleGrants([owner, ...editable])).toHaveLength(5)
+  expect(
+    parseOrganizationRoleGrants([owner, ...editable.slice(0, 3)])
+  ).toBeNull()
+  expect(
+    parseOrganizationRoleGrants([{ ...owner, isProtected: false }, ...editable])
+  ).toBeNull()
+  expect(
+    parseOrganizationRoleGrants([
+      owner,
+      ...editable,
+      { ...editable[0], role: "Manager" },
+    ])
+  ).toBeNull()
+})
+
+it("parses a custom role without assuming the role id is a built-in enum", () => {
+  const roleId = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  const grants = [
+    {
+      role: "OrganizationOwner",
+      name: "Owner",
+      builtInKey: "OrganizationOwner",
+      permissions: [
+        "orders.manage",
+        "kitchen.display",
+        "catalog.manage",
+        "discounts.manage",
+        "analytics.view",
+        "storefront.manage",
+        "staff.manage",
+        "billing.manage",
+      ],
+      version: 0,
+      isProtected: true,
+      isBuiltIn: true,
+      isArchived: false,
+    },
+    {
+      role: "Manager",
+      name: "Manager",
+      builtInKey: "Manager",
+      permissions: ["orders.manage"],
+      version: 1,
+      isProtected: false,
+      isBuiltIn: true,
+      isArchived: false,
+    },
+    {
+      role: "Kitchen",
+      name: "Kitchen staff",
+      builtInKey: "Kitchen",
+      permissions: ["kitchen.display"],
+      version: 1,
+      isProtected: false,
+      isBuiltIn: true,
+      isArchived: false,
+    },
+    {
+      role: "Accountant",
+      name: "Accountant",
+      builtInKey: "Accountant",
+      permissions: ["analytics.view", "billing.manage"],
+      version: 1,
+      isProtected: false,
+      isBuiltIn: true,
+      isArchived: false,
+    },
+    {
+      role: roleId,
+      name: "Pastry chef",
+      builtInKey: null,
+      permissions: ["kitchen.display"],
+      version: 1,
+      isProtected: false,
+      isBuiltIn: false,
+      isArchived: false,
+    },
+  ]
+
+  const parsed = parseOrganizationRoleGrants(grants)
+
+  expect(parsed?.find((grant) => grant.role === roleId)).toEqual({
+    role: roleId,
+    name: "Pastry chef",
+    builtInKey: null,
+    permissions: ["kitchen.display"],
+    version: 1,
+    isProtected: false,
+    isBuiltIn: false,
+    isArchived: false,
+  })
+})
+
+it("parses a single role returned from a versioned save request", () => {
+  const grant = {
+    role: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    name: "Pastry chef",
+    builtInKey: null,
+    permissions: ["kitchen.display"],
+    version: 2,
+    isProtected: false,
+    isBuiltIn: false,
+    isArchived: false,
+  }
+
+  expect(parseOrganizationRoleGrant(grant)).toEqual(grant)
+})
+
+it("preserves custom role names and assignment identifiers in team data", () => {
+  const member = {
+    role: "RestaurantStaff",
+    email: "pastry@example.test",
+    tenantId: "22222222-2222-4222-8222-222222222222",
+    tenantName: "Bistro",
+    memberId: "33333333-3333-4333-8333-333333333333",
+    roleId: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    roleName: "Pastry chef",
+    builtInKey: null,
+  }
+  const invitation = {
+    id: "44444444-4444-4444-8444-444444444444",
+    role: "RestaurantStaff",
+    roleId: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    roleName: "Pastry chef",
+    builtInKey: null,
+    email: "new-pastry@example.test",
+    tenantId: "22222222-2222-4222-8222-222222222222",
+    tenantName: "Bistro",
+    expiresAt: "2026-10-20T12:00:00.000Z",
+    status: "Pending",
+  }
+
+  expect(parseOrganizationMembers([member])).toEqual([member])
+  expect(parseOrganizationInvitations([invitation])).toEqual([invitation])
+})
+
+it("parses active custom roles for staff assignment selectors", () => {
+  const options = [
+    { role: "Manager", name: "Manager", builtInKey: "Manager" },
+    {
+      role: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      name: "Pastry chef",
+      builtInKey: null,
+    },
+  ]
+
+  expect(parseOrganizationRoleAssignmentOptions(options)).toEqual(options)
+})
 
 it("validates public menu JSON before interactive rendering", () => {
   const menu = {

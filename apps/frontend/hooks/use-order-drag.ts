@@ -57,7 +57,7 @@ export function useOrderDrag(
     return (
       !saving.current &&
       !props.pending &&
-      getAvailableOrderTransitions(props.role, order.status).length > 0
+      getAvailableOrderTransitions(order.status, props.permissions).length > 0
     )
   }
 
@@ -193,9 +193,9 @@ export function useOrderDrag(
     const input = resolveOrderDrop(
       snapshot.order,
       props.orders,
-      props.role,
       destination(x, y),
-      props.pending !== null || saving.current
+      props.pending !== null || saving.current,
+      props.permissions
     )
 
     if (!input) return

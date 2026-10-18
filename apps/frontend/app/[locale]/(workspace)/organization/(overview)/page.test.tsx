@@ -58,6 +58,7 @@ beforeEach(() => {
         name: "Bistro",
         role: "OrganizationOwner",
         organizationId,
+        permissions: ["orders.manage"],
       },
     ],
   })

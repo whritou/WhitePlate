@@ -2,8 +2,7 @@ import { getLocale, getTranslations } from "next-intl/server"
 import { headers } from "next/headers"
 import { redirect } from "next/navigation"
 import { auth } from "@/lib/auth"
-import { isUuid } from "@/lib/validation/common"
-import { getRestaurantMemberships } from "@/services/orders"
+import { getManagedWorkspaceRestaurant } from "@/services/live-workspace"
 import { getBrandAssets } from "@/services/brand-assets"
 import { getThemeDraft } from "@/services/theme-settings"
 import { getThemePublication } from "@/services/theme-publication"
@@ -23,13 +22,9 @@ export default async function ThemingPage({ searchParams }: BrandPageProps) {
   if (!session.user.emailVerified) redirect(`/${locale}/verify-email`)
 
   const t = await getTranslations("BrandAssets")
-  const memberships = await getRestaurantMemberships()
-  const restaurant =
-    memberships.ok && isUuid(query.tenantId)
-      ? memberships.data?.find(
-          (item) => item.id === query.tenantId && item.role !== "Kitchen"
-        )
-      : undefined
+  const restaurant = await getManagedWorkspaceRestaurant(query.tenantId, [
+    "storefront.manage",
+  ])
   const [initial, theme, publication] = restaurant
     ? await Promise.all([
         getBrandAssets(restaurant.id),
@@ -55,9 +50,7 @@ export default async function ThemingPage({ searchParams }: BrandPageProps) {
       ) : (
         <>
           <Alert variant="destructive" role="alert">
-            <AlertDescription>
-              {t(memberships.ok ? "errors.forbidden" : "loadFailed")}
-            </AlertDescription>
+            <AlertDescription>{t("errors.forbidden")}</AlertDescription>
           </Alert>
 
           <MenuBuilderRetry />

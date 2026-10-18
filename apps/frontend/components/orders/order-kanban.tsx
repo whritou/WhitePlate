@@ -37,7 +37,7 @@ const laneColors = {
 }
 
 export function OrderKanban(props: OrderKanbanProps) {
-  const { orders, role, locale, serverTime, pending, onUpdate } = props
+  const { orders, permissions, locale, serverTime, pending, onUpdate } = props
   const t = useTranslations("KitchenOrders")
   const container = useRef<HTMLDivElement>(null)
   const [cancellationRequest, setCancellationRequest] = useState<{
@@ -140,7 +140,7 @@ export function OrderKanban(props: OrderKanbanProps) {
     touchEnd,
   } = useOrderDrag({ ...props, onUpdate: update }, container)
   const available = drag
-    ? getAvailableOrderTransitions(role, drag.order.status)
+    ? getAvailableOrderTransitions(drag.order.status, permissions)
     : []
 
   return (
@@ -205,14 +205,14 @@ export function OrderKanban(props: OrderKanbanProps) {
                   >
                     <OrderTicket
                       order={order}
-                      role={role}
+                      permissions={permissions}
                       locale={locale}
                       now={now}
                       pending={pending}
                       onUpdate={update}
                       headingLevel="h3"
                       dragAffordance={
-                        getAvailableOrderTransitions(role, order.status)
+                        getAvailableOrderTransitions(order.status, permissions)
                           .length > 0 ? (
                           <span
                             aria-hidden="true"
@@ -223,7 +223,7 @@ export function OrderKanban(props: OrderKanbanProps) {
                         ) : undefined
                       }
                       dragHandlers={
-                        getAvailableOrderTransitions(role, order.status)
+                        getAvailableOrderTransitions(order.status, permissions)
                           .length > 0 && pending === null
                           ? {
                               onPointerDown: (event) => start(event, order),

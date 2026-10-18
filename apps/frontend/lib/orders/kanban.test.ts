@@ -14,48 +14,40 @@ const order: OrderSummary = {
   lines: [],
 }
 
-it("accepts only the next lifecycle stage and role-authorized cancellation", () => {
+it("accepts only the next lifecycle stage and permission-authorized cancellation", () => {
   expect(
-    resolveOrderDrop(order, [order], "Kitchen", "Preparing", false)
+    resolveOrderDrop(order, [order], "Preparing", false, ["kitchen.display"])
   ).toEqual({
     orderId: order.id,
     version: 4,
     status: "Preparing",
   })
-  expect(resolveOrderDrop(order, [order], "Kitchen", "Ready", false)).toBeNull()
   expect(
-    resolveOrderDrop(order, [order], "Kitchen", "Cancelled", false)
+    resolveOrderDrop(order, [order], "Ready", false, ["kitchen.display"])
   ).toBeNull()
   expect(
-    resolveOrderDrop(order, [order], "Manager", "Cancelled", false)?.status
+    resolveOrderDrop(order, [order], "Cancelled", false, ["kitchen.display"])
+  ).toBeNull()
+  expect(
+    resolveOrderDrop(order, [order], "Cancelled", false, ["orders.manage"])
+      ?.status
   ).toBe("Cancelled")
 })
 
 it("rejects a moved, removed or version-changed ticket and pending mutations", () => {
-  expect(resolveOrderDrop(order, [], "Kitchen", "Preparing", false)).toBeNull()
+  expect(resolveOrderDrop(order, [], "Preparing", false)).toBeNull()
   expect(
-    resolveOrderDrop(
-      order,
-      [{ ...order, version: 5 }],
-      "Kitchen",
-      "Preparing",
-      false
-    )
+    resolveOrderDrop(order, [{ ...order, version: 5 }], "Preparing", false)
   ).toBeNull()
   expect(
     resolveOrderDrop(
       order,
       [{ ...order, status: "Preparing" }],
-      "Kitchen",
       "Preparing",
       false
     )
   ).toBeNull()
-  expect(
-    resolveOrderDrop(order, [order], "Kitchen", "Preparing", true)
-  ).toBeNull()
-  expect(resolveOrderDrop(order, [order], "Kitchen", "bogus", false)).toBeNull()
-  expect(
-    resolveOrderDrop(order, [order], "Kitchen", "Pending", false)
-  ).toBeNull()
+  expect(resolveOrderDrop(order, [order], "Preparing", true)).toBeNull()
+  expect(resolveOrderDrop(order, [order], "bogus", false)).toBeNull()
+  expect(resolveOrderDrop(order, [order], "Pending", false)).toBeNull()
 })

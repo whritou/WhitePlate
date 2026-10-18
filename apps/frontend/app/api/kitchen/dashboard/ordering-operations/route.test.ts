@@ -51,7 +51,14 @@ it("returns current state with authenticated no-store headers", async () => {
   vi.mocked(getRestaurantMemberships).mockResolvedValue({
     ok: true,
     status: 200,
-    data: [{ id: tenantId, name: "Bistro", role: "Kitchen" }],
+    data: [
+      {
+        id: tenantId,
+        name: "Bistro",
+        role: "Manager",
+        permissions: ["orders.manage"],
+      },
+    ],
   })
   vi.mocked(getOrderingOperations).mockResolvedValue({
     ok: true,

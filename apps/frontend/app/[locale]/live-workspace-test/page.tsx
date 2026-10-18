@@ -93,6 +93,16 @@ export default async function LiveWorkspaceFixture({
           role: "Manager",
           organizationId: organization.id,
           subdomain: "maisonverte",
+          permissions: [
+            "orders.manage",
+            "kitchen.display",
+            "catalog.manage",
+            "discounts.manage",
+            "analytics.view",
+            "storefront.manage",
+            "staff.manage",
+            "billing.manage",
+          ],
         },
       ]}
     >
@@ -110,6 +120,16 @@ export default async function LiveWorkspaceFixture({
               name: "Maison Verte Restaurant",
               role: "Manager",
               organizationId: organization.id,
+              permissions: [
+                "orders.manage",
+                "kitchen.display",
+                "catalog.manage",
+                "discounts.manage",
+                "analytics.view",
+                "storefront.manage",
+                "staff.manage",
+                "billing.manage",
+              ],
             },
           ]}
         />
@@ -125,12 +145,29 @@ export default async function LiveWorkspaceFixture({
             name: "Maison Verte",
             role: "Manager",
             subdomain: "maisonverte",
+            permissions: [
+              "storefront.manage",
+              "catalog.manage",
+              "orders.manage",
+              "billing.manage",
+            ],
           }}
         />
       ) : query.view === "team" ? (
         <main className="min-w-0 bg-background px-6 pt-8 pb-12">
           {await OrganizationTeamDirectory({
             organizationId: organization.id,
+            roleGrants: null,
+            roleOptions: [
+              { role: "Manager", name: "Manager", builtInKey: "Manager" },
+              { role: "Kitchen", name: "Kitchen staff", builtInKey: "Kitchen" },
+              {
+                role: "Accountant",
+                name: "Accountant",
+                builtInKey: "Accountant",
+              },
+            ],
+            isOrganizationOwner: false,
             heading: (
               <div>
                 <p className="label-mono text-muted-foreground">
@@ -146,6 +183,19 @@ export default async function LiveWorkspaceFixture({
               <StaffInviteDialog
                 organizationId={organization.id}
                 restaurants={[{ id: tenantId, name: organization.name }]}
+                roleOptions={[
+                  { role: "Manager", name: "Manager", builtInKey: "Manager" },
+                  {
+                    role: "Kitchen",
+                    name: "Kitchen staff",
+                    builtInKey: "Kitchen",
+                  },
+                  {
+                    role: "Accountant",
+                    name: "Accountant",
+                    builtInKey: "Accountant",
+                  },
+                ]}
               />
             ),
             members: [
@@ -190,6 +240,7 @@ export default async function LiveWorkspaceFixture({
             tenantId={tenantId}
             tenantName={organization.name}
             role="Manager"
+            permissions={["orders.manage", "kitchen.display"]}
             locale={await getLocale()}
             selectedStatus={null}
             cursor={null}
@@ -227,6 +278,16 @@ export default async function LiveWorkspaceFixture({
           tenantId,
           tenantName: organization.name,
           role: "OrganizationOwner",
+          permissions: [
+            "orders.manage",
+            "kitchen.display",
+            "catalog.manage",
+            "discounts.manage",
+            "analytics.view",
+            "storefront.manage",
+            "staff.manage",
+            "billing.manage",
+          ],
           locale: await getLocale(),
           selectedStatus: null,
           cursor: null,

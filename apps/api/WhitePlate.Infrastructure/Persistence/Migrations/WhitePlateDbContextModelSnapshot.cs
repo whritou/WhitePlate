@@ -481,6 +481,10 @@ namespace WhitePlate.Infrastructure.Persistence.Migrations
                         .HasMaxLength(32)
                         .HasColumnType("character varying(32)");
 
+                    b.Property<string>("RoleId")
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)");
+
                     b.Property<Guid?>("TenantId")
                         .HasColumnType("uuid");
 
@@ -493,6 +497,8 @@ namespace WhitePlate.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("TokenHash")
                         .IsUnique();
+
+                    b.HasIndex("OrganizationId", "RoleId");
 
                     b.HasIndex("OrganizationId", "TenantId");
 
@@ -963,25 +969,87 @@ namespace WhitePlate.Infrastructure.Persistence.Migrations
                     b.ToTable("OrganizationOwnerMemberships", (string)null);
                 });
 
-            modelBuilder.Entity("WhitePlate.Domain.Tenants.RestaurantMembership", b =>
+            modelBuilder.Entity("WhitePlate.Domain.Organizations.OrganizationRoleGrantSet", b =>
                 {
-                    b.Property<Guid>("TenantId")
+                    b.Property<Guid>("OrganizationId")
                         .HasColumnType("uuid");
 
-                    b.Property<string>("Issuer")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
+                    b.Property<string>("RoleId")
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)");
 
-                    b.Property<string>("Subject")
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
+                    b.Property<bool>("IsArchived")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)");
+
+                    b.Property<string>("NormalizedName")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)");
+
+                    b.Property<long>("Permissions")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Role")
                         .IsRequired()
                         .HasMaxLength(32)
                         .HasColumnType("character varying(32)");
 
-                    b.HasKey("TenantId", "Issuer", "Subject");
+                    b.Property<int>("Version")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer");
+
+                    b.HasKey("OrganizationId", "RoleId");
+
+                    b.HasIndex("OrganizationId", "NormalizedName")
+                        .IsUnique();
+
+                    b.ToTable("OrganizationRoleGrants", (string)null);
+                });
+
+            modelBuilder.Entity("WhitePlate.Domain.Tenants.RestaurantMembership", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Issuer")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<Guid?>("OrganizationId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.Property<string>("RoleId")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)");
+
+                    b.Property<string>("Subject")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrganizationId", "RoleId");
+
+                    b.HasIndex("OrganizationId", "TenantId");
+
+                    b.HasIndex("TenantId", "Issuer", "Subject")
+                        .IsUnique();
 
                     b.ToTable("RestaurantMemberships", (string)null);
                 });
@@ -1574,6 +1642,11 @@ namespace WhitePlate.Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("WhitePlate.Domain.Organizations.OrganizationRoleGrantSet", null)
+                        .WithMany()
+                        .HasForeignKey("OrganizationId", "RoleId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("WhitePlate.Domain.Tenants.Tenant", null)
                         .WithMany()
                         .HasForeignKey("OrganizationId", "TenantId")
@@ -1665,6 +1738,15 @@ namespace WhitePlate.Infrastructure.Persistence.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("WhitePlate.Domain.Organizations.OrganizationRoleGrantSet", b =>
+                {
+                    b.HasOne("WhitePlate.Domain.Organizations.Organization", null)
+                        .WithMany()
+                        .HasForeignKey("OrganizationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("WhitePlate.Domain.Tenants.RestaurantMembership", b =>
                 {
                     b.HasOne("WhitePlate.Domain.Tenants.Tenant", null)
@@ -1672,6 +1754,17 @@ namespace WhitePlate.Infrastructure.Persistence.Migrations
                         .HasForeignKey("TenantId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("WhitePlate.Domain.Organizations.OrganizationRoleGrantSet", null)
+                        .WithMany()
+                        .HasForeignKey("OrganizationId", "RoleId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("WhitePlate.Domain.Tenants.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("OrganizationId", "TenantId")
+                        .HasPrincipalKey("OrganizationId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict);
                 });
 
             modelBuilder.Entity("WhitePlate.Domain.Tenants.Tenant", b =>

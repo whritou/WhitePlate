@@ -52,7 +52,7 @@ public sealed class CreateDiscountCommandHandler(IStaffMembershipRepository memb
 {
     public async Task<Result<Guid>> HandleAsync(CreateDiscountCommand command, CancellationToken cancellationToken)
     {
-        if (!await CatalogAccess.CanManageAsync(memberships, command.TenantId, command.Identity, cancellationToken))
+        if (!await CatalogAccess.CanManageDiscountsAsync(memberships, command.TenantId, command.Identity, cancellationToken))
             return Result<Guid>.Failure(new ApplicationError(ErrorCode.NotFound));
         try
         {

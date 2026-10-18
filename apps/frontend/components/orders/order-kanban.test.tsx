@@ -29,7 +29,7 @@ it("renders all five lanes with auto-fit 18rem responsive tracks", () => {
   const html = renderToStaticMarkup(
     createElement(OrderKanban, {
       orders: [],
-      role: "Manager",
+      permissions: ["orders.manage"],
       locale: "en",
       serverTime: "2026-10-01T18:00:00Z",
       pending: null,

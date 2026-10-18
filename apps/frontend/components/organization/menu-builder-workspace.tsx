@@ -24,16 +24,28 @@ export function MenuBuilderWorkspace({
   translationGlossary,
   translationWorkflowUnavailable,
   initialView = "products",
+  canManageCatalog = true,
+  canManageDiscounts = true,
 }: MenuBuilderProps) {
   const t = useTranslations("MenuBuilder")
   const v = useTranslations("LiveParity")
   const router = useRouter()
-  const [view, setView] = useState<MenuBuilderView>(
+  const availableViews: MenuBuilderView[] = [
+    ...(canManageCatalog
+      ? (["products", "languages", "versions"] as const)
+      : []),
+    ...(canManageDiscounts ? (["discounts"] as const) : []),
+  ]
+  const safeInitialView =
     initialView === "translations"
       ? "languages"
       : initialView === "categories"
         ? "products"
         : initialView
+  const [view, setView] = useState<MenuBuilderView>(
+    availableViews.includes(safeInitialView)
+      ? safeInitialView
+      : (availableViews[0] ?? "products")
   )
   const [categoryId, setCategoryId] = useState(
     catalog.categories
@@ -43,13 +55,7 @@ export function MenuBuilderWorkspace({
   const [pending, setPending] = useState(false)
 
   function changeView(value: unknown) {
-    if (
-      pending ||
-      !["products", "discounts", "languages", "versions"].includes(
-        String(value)
-      )
-    )
-      return
+    if (pending || !availableViews.includes(value as MenuBuilderView)) return
     setView(value as MenuBuilderView)
 
     const url = new URL(window.location.href)
@@ -91,19 +97,21 @@ export function MenuBuilderWorkspace({
               ["languages", "languages"],
               ["versions", "versionsTab"],
             ] as const
-          ).map(([value, label]) => (
-            <TabsTrigger
-              key={value}
-              value={value}
-              disabled={pending}
-              className="label-mono px-4 py-3"
-            >
-              {v(label)}
-            </TabsTrigger>
-          ))}
+          )
+            .filter(([value]) => availableViews.includes(value))
+            .map(([value, label]) => (
+              <TabsTrigger
+                key={value}
+                value={value}
+                disabled={pending}
+                className="label-mono px-4 py-3"
+              >
+                {v(label)}
+              </TabsTrigger>
+            ))}
         </TabsList>
 
-        {view === "products" && (
+        {view === "products" && canManageCatalog && (
           <div className="flex flex-wrap items-center gap-3 py-2">
             <CatalogPublicationPanel
               mode="actions"
@@ -137,72 +145,82 @@ export function MenuBuilderWorkspace({
         )}
       </div>
 
-      <TabsContent value="products" keepMounted>
-        <MenuBuilderCatalog
-          userId={userId}
-          catalog={catalog}
-          pending={pending}
-          onPendingChange={setPending}
-          categoryId={categoryId}
-          onCategoryChange={setCategoryId}
-        />
-      </TabsContent>
-
-      <TabsContent value="discounts" keepMounted>
-        <div className="mx-auto max-w-[96rem] p-6">
-          <DiscountsEditor
-            tenantId={catalog.tenantId}
-            currency={catalog.currency}
-            discounts={catalog.discounts}
+      {canManageCatalog && (
+        <TabsContent value="products" keepMounted>
+          <MenuBuilderCatalog
+            userId={userId}
+            catalog={catalog}
+            pending={pending}
+            onPendingChange={setPending}
+            categoryId={categoryId}
+            onCategoryChange={setCategoryId}
           />
-        </div>
-      </TabsContent>
+        </TabsContent>
+      )}
 
-      <TabsContent value="languages" keepMounted>
-        <div className="mx-auto grid max-w-5xl gap-6 p-6">
-          <h2 className="font-display text-2xl font-bold">{v("languages")}</h2>
+      {canManageDiscounts && (
+        <TabsContent value="discounts" keepMounted>
+          <div className="mx-auto max-w-[96rem] p-6">
+            <DiscountsEditor
+              tenantId={catalog.tenantId}
+              currency={catalog.currency}
+              discounts={catalog.discounts}
+            />
+          </div>
+        </TabsContent>
+      )}
 
-          {settings ? (
-            <>
-              <MenuLanguageSettings {...settings} />
+      {canManageCatalog && (
+        <TabsContent value="languages" keepMounted>
+          <div className="mx-auto grid max-w-5xl gap-6 p-6">
+            <h2 className="font-display text-2xl font-bold">
+              {v("languages")}
+            </h2>
 
-              {description && (
-                <RestaurantDescriptionEditor
-                  {...description}
+            {settings ? (
+              <>
+                <MenuLanguageSettings {...settings} />
+
+                {description && (
+                  <RestaurantDescriptionEditor
+                    {...description}
+                    onPendingChange={setPending}
+                  />
+                )}
+
+                <CatalogTranslationsEditor
+                  {...settings}
+                  catalog={catalog}
+                  reviews={translationReviews}
+                  glossary={translationGlossary}
+                  workflowUnavailable={translationWorkflowUnavailable}
                   onPendingChange={setPending}
                 />
-              )}
+              </>
+            ) : (
+              <Alert variant="destructive">
+                <AlertDescription>{t("languagesUnavailable")}</AlertDescription>
 
-              <CatalogTranslationsEditor
-                {...settings}
-                catalog={catalog}
-                reviews={translationReviews}
-                glossary={translationGlossary}
-                workflowUnavailable={translationWorkflowUnavailable}
-                onPendingChange={setPending}
-              />
-            </>
-          ) : (
-            <Alert variant="destructive">
-              <AlertDescription>{t("languagesUnavailable")}</AlertDescription>
+                <Button variant="outline" onClick={() => router.refresh()}>
+                  {t("retry")}
+                </Button>
+              </Alert>
+            )}
+          </div>
+        </TabsContent>
+      )}
 
-              <Button variant="outline" onClick={() => router.refresh()}>
-                {t("retry")}
-              </Button>
-            </Alert>
-          )}
-        </div>
-      </TabsContent>
-
-      <TabsContent value="versions">
-        <CatalogPublicationPanel
-          mode="manager"
-          tenantId={catalog.tenantId}
-          userId={userId}
-          publication={catalog.publication}
-          pending={pending}
-        />
-      </TabsContent>
+      {canManageCatalog && (
+        <TabsContent value="versions">
+          <CatalogPublicationPanel
+            mode="manager"
+            tenantId={catalog.tenantId}
+            userId={userId}
+            publication={catalog.publication}
+            pending={pending}
+          />
+        </TabsContent>
+      )}
     </Tabs>
   )
 }

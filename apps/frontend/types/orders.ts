@@ -99,14 +99,17 @@ export type OrderHistoryTableProps = {
   page: OrderHistoryPage
 }
 
-export type RestaurantRole = "OrganizationOwner" | "Manager" | "Kitchen"
+export type RestaurantRole = string
 
 export type RestaurantMembership = {
   id: string
   name: string
   role: RestaurantRole
+  roleId?: string | null
+  roleName?: string | null
   organizationId?: string
   subdomain?: string
+  permissions: string[]
 }
 
 export type OrderActionError =
@@ -122,6 +125,7 @@ export type OrderDashboardProps = {
   tenantId: string
   tenantName: string
   role: RestaurantRole
+  permissions: string[]
   locale: string
   selectedStatus: OrderStatus | null
   cursor: string | null
@@ -145,6 +149,7 @@ export type OrderQueryScope = {
   userId: string
   tenantId: string
   locale: string
+  permissions: string[]
 }
 export type UpdateOrderStatusInput = {
   tenantId: string
@@ -156,7 +161,7 @@ export type UpdateOrderStatusInput = {
 
 export type OrderTicketProps = {
   order: OrderSummary
-  role: RestaurantRole
+  permissions: string[]
   locale: string
   now: number
   pending: UpdateOrderStatusInput | null
@@ -179,7 +184,7 @@ export type OrderTicketProps = {
 
 export type OrderKanbanProps = {
   orders: OrderSummary[]
-  role: RestaurantRole
+  permissions: string[]
   locale: string
   serverTime: string
   pending: UpdateOrderStatusInput | null

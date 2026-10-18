@@ -64,7 +64,12 @@ export type AnalyticsMetrics = {
   refunds: AnalyticsNumberValue
   timeZones: { tenantId: string; restaurant: string; timeZone: string }[]
 }
-export type AnalyticsRestaurant = { id: string; name: string; role: string }
+export type AnalyticsRestaurant = {
+  id: string
+  name: string
+  role: string
+  permissions: string[]
+}
 
 export type AnalyticsRange = "7" | "30" | "90"
 
