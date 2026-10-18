@@ -37,6 +37,9 @@ export function ProductOrdering({
   const [optionIds, setOptionIds] = useState<string[]>(item?.optionIds ?? [])
   const [quantity, setQuantity] = useState(item?.quantity ?? 1)
   const [selectionError, setSelectionError] = useState(false)
+  const hasUnavailableRequiredOptions = product.optionGroups.some(
+    (group) => group.minimumSelections > 0 && group.options.length === 0
+  )
 
   function showDialog(next: boolean) {
     if (next) {
@@ -49,6 +52,8 @@ export function ProductOrdering({
   }
 
   function save() {
+    if (hasUnavailableRequiredOptions) return
+
     if (!validProductSelection(product, optionIds)) {
       setSelectionError(true)
 
@@ -113,39 +118,45 @@ export function ProductOrdering({
                   </span>
                 </legend>
 
-                {group.options.map((option) => (
-                  <Label
-                    key={option.id}
-                    className="flex min-h-11 items-center justify-between gap-4 rounded-md border border-border px-3 py-2"
-                  >
-                    <span className="flex items-center gap-3">
-                      <Checkbox
-                        aria-label={option.name}
-                        checked={optionIds.includes(option.id)}
-                        onCheckedChange={(checked) => {
-                          const next = checked
-                            ? [...optionIds, option.id]
-                            : optionIds.filter((id) => id !== option.id)
+                {group.options.length === 0 && group.minimumSelections > 0 ? (
+                  <p role="alert" className="text-sm text-destructive">
+                    {t("unavailableOptions")}
+                  </p>
+                ) : (
+                  group.options.map((option) => (
+                    <Label
+                      key={option.id}
+                      className="flex min-h-11 items-center justify-between gap-4 rounded-md border border-border px-3 py-2"
+                    >
+                      <span className="flex items-center gap-3">
+                        <Checkbox
+                          aria-label={option.name}
+                          checked={optionIds.includes(option.id)}
+                          onCheckedChange={(checked) => {
+                            const next = checked
+                              ? [...optionIds, option.id]
+                              : optionIds.filter((id) => id !== option.id)
 
-                          setOptionIds(next)
-                          setSelectionError(false)
-                        }}
-                      />
+                            setOptionIds(next)
+                            setSelectionError(false)
+                          }}
+                        />
 
-                      {option.name}
-                    </span>
-
-                    {option.priceAdjustment !== 0 && (
-                      <span className="text-sm text-muted-foreground tabular-nums">
-                        +{price.format(option.priceAdjustment)}
+                        {option.name}
                       </span>
-                    )}
-                  </Label>
-                ))}
+
+                      {option.priceAdjustment !== 0 && (
+                        <span className="text-sm text-muted-foreground tabular-nums">
+                          +{price.format(option.priceAdjustment)}
+                        </span>
+                      )}
+                    </Label>
+                  ))
+                )}
               </fieldset>
             ))}
 
-            {selectionError && (
+            {selectionError && !hasUnavailableRequiredOptions && (
               <p role="alert" className="text-sm text-destructive">
                 {t("invalidOptions")}
               </p>
@@ -179,7 +190,11 @@ export function ProductOrdering({
             {t("cancel")}
           </DialogClose>
 
-          <Button type="button" onClick={save}>
+          <Button
+            type="button"
+            onClick={save}
+            disabled={hasUnavailableRequiredOptions}
+          >
             {item
               ? t("saveChanges")
               : t("addProduct", { product: product.name })}

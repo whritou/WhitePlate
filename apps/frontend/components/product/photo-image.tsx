@@ -16,6 +16,7 @@ export function ProductPhotoImage({
   size = 640,
   className = "",
   square = false,
+  fitContainerRatio = false,
 }: {
   productId: string
   photo?: ProductPhoto
@@ -24,6 +25,7 @@ export function ProductPhotoImage({
   size?: number
   className?: string
   square?: boolean
+  fitContainerRatio?: boolean
 }) {
   const t = useTranslations("ProductPhotos")
   const [failed, setFailed] = useState(false)
@@ -36,7 +38,7 @@ export function ProductPhotoImage({
     <div
       className={`relative flex items-center justify-center overflow-hidden rounded-md bg-muted text-muted-foreground ${className}`}
       style={
-        square
+        square || fitContainerRatio
           ? undefined
           : { aspectRatio: photo ? `${photo.width}/${photo.height}` : "4/3" }
       }

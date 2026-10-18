@@ -15,9 +15,12 @@ import { MissingFeatureNotice } from "@/components/workspace/shared/missing-feat
 import { LiveDashboard } from "@/components/workspace/dashboard/live-dashboard"
 import { RestaurantMenu } from "@/components/storefront/restaurant-menu"
 import { OrderTracking } from "@/components/storefront/order-tracking"
-import { publishedStoreTheme } from "@/lib/lovable/storeTheme"
 import type { SearchParams } from "@/types/navigation"
-import { establishment, storeThemeFixture } from "./fixture-data"
+import {
+  establishment,
+  storeProductFixture,
+  storeThemeFixture,
+} from "./fixture-data"
 export const dynamic = "force-dynamic"
 
 const organization = {
@@ -43,7 +46,7 @@ export default async function LiveWorkspaceFixture({
       <OrderTracking
         orderId="44444444-4444-4444-8444-444444444444"
         name="Maison Verte"
-        theme={publishedStoreTheme("Maison Verte", null, "maison-verte")}
+        theme={storeThemeFixture(query)}
         restaurantSlug="maison-verte"
       />
     )
@@ -76,22 +79,7 @@ export default async function LiveWorkspaceFixture({
                 id: "c1",
                 name: "Entrées",
                 sortOrder: 0,
-                products: [
-                  {
-                    id: "33333333-3333-4333-8333-333333333333",
-                    name:
-                      query.long === "1"
-                        ? "BurrataSuperLongProductName".repeat(6)
-                        : "Burrata & tomates anciennes",
-                    description:
-                      query.long === "1"
-                        ? "SeasonalIngredientsAndDescription".repeat(20)
-                        : "Basilic et tomates",
-                    basePrice: 11,
-                    isAvailable: true,
-                    optionGroups: [],
-                  },
-                ],
+                products: [storeProductFixture(query)],
               },
               {
                 id: "c2",
