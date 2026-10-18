@@ -90,7 +90,7 @@ All public BFF responses remain `no-store`. The BFF does not forward a browser-s
 
 ## Error and cache behavior
 
-- Invalid route shapes and reserved segments continue through existing localized routing or the current not-found behavior; they are never treated as arbitrary tenant paths.
+- Invalid route shapes and segments already used by top-level localized application routes continue through existing localized routing or the current not-found behavior; they are never treated as restaurant paths. This reserves routes such as sign-in, sign-up, organization, demo, and the existing fixture routes on the shared host.
 - Invalid, unknown, or inactive restaurant slugs produce the generic not-found/unavailable experience without exposing registry details or falling back to another tenant.
 - Central API connection failures use the existing safe unavailable response. They do not silently retry against the host-based template.
 - Media, public data, checkout failures, and tracking keep existing status/error mapping and no-store headers. Tenant-specific responses are never placed in a shared cache.
