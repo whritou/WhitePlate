@@ -67,6 +67,8 @@
     "chooseLegalCountry": "Choisir un pays juridique",
     "cancelLegalProfile": "Annuler",
     "legalName": "Raison sociale",
+    "legalRegistration": "Numéro d’immatriculation",
+    "legalTax": "Identifiant fiscal",
     "legalRegistrationNumber": "Numéro d’immatriculation (SIREN / registre / EIN)",
     "taxIdentifier": "Identifiant fiscal (TVA ou EIN)",
     "legalRegistrationFR": "SIREN (9 chiffres)",
