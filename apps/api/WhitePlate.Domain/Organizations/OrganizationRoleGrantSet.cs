@@ -1,5 +1,7 @@
 using WhitePlate.Domain.Common;
 using WhitePlate.Domain.Tenants;
+using System.Text;
+using System.Text.RegularExpressions;
 
 namespace WhitePlate.Domain.Organizations;
 
@@ -76,10 +78,23 @@ public static class RestaurantPermissionCatalog
 public sealed class OrganizationRoleGrantSet
 {
     public Guid OrganizationId { get; private set; }
+    public string RoleId { get; private set; } = null!;
     public RestaurantRole Role { get; private set; }
+    public string Name { get; private set; } = null!;
+    public string NormalizedName { get; private set; } = null!;
+    public bool IsArchived { get; private set; }
     public RestaurantPermission Permissions { get; private set; }
     public int Version { get; private set; }
+    public string? BuiltInKey => string.Equals(RoleId, Role.ToString(), StringComparison.Ordinal)
+        ? Role.ToString()
+        : null;
+    public bool IsBuiltIn => BuiltInKey is not null;
     public IReadOnlyList<string> PermissionKeys => RestaurantPermissionCatalog.ToKeys(Permissions);
+
+    private static readonly HashSet<string> ReservedNames = new(StringComparer.Ordinal)
+    {
+        "MANAGER", "KITCHEN", "KITCHEN STAFF", "STAFF", "ACCOUNTANT", "OWNER", "ORGANIZATIONOWNER"
+    };
 
     private OrganizationRoleGrantSet() { }
 
@@ -96,9 +111,34 @@ public sealed class OrganizationRoleGrantSet
         return new OrganizationRoleGrantSet
         {
             OrganizationId = organizationId,
+            RoleId = role.ToString(),
             Role = role,
+            Name = DefaultName(role),
+            NormalizedName = NormalizeName(DefaultName(role)),
             Permissions = RestaurantPermissionCatalog.ParseKeys(permissionKeys),
             Version = version
+        };
+    }
+
+    public static OrganizationRoleGrantSet CreateCustom(Guid organizationId, string? name,
+        IEnumerable<string> permissionKeys)
+    {
+        if (organizationId == Guid.Empty)
+            throw new DomainRuleException("invalid_organization", "organizationId", "An organization is required.");
+        var displayName = ValidateName(name);
+        var normalizedName = NormalizeName(displayName);
+        if (ReservedNames.Contains(normalizedName))
+            throw new DomainRuleException("reserved_role_name", "name", "This role name is reserved.");
+
+        return new OrganizationRoleGrantSet
+        {
+            OrganizationId = organizationId,
+            RoleId = Guid.NewGuid().ToString("N"),
+            Role = RestaurantRole.Staff,
+            Name = displayName,
+            NormalizedName = normalizedName,
+            Permissions = RestaurantPermissionCatalog.ParseKeys(permissionKeys),
+            Version = 1
         };
     }
 
@@ -109,11 +149,71 @@ public sealed class OrganizationRoleGrantSet
 
     public void Replace(IEnumerable<string> permissionKeys, int expectedVersion)
     {
-        if (expectedVersion != Version)
-            throw new DomainRuleException("role_grant_version_conflict", "version", "Role grants have changed. Reload and try again.");
+        Update(null, permissionKeys, expectedVersion);
+    }
+
+    public void Update(string? name, IEnumerable<string> permissionKeys, int expectedVersion)
+    {
+        EnsureVersion(expectedVersion);
+        if (name is not null)
+        {
+            if (IsBuiltIn)
+            {
+                if (!string.Equals(name.Trim(), Name, StringComparison.Ordinal))
+                    throw new DomainRuleException("fixed_role_name", "name", "Built-in role names cannot be changed.");
+            }
+            else
+            {
+                var displayName = ValidateName(name);
+                var normalizedName = NormalizeName(displayName);
+                if (ReservedNames.Contains(normalizedName))
+                    throw new DomainRuleException("reserved_role_name", "name", "This role name is reserved.");
+                Name = displayName;
+                NormalizedName = normalizedName;
+            }
+        }
+        if (IsArchived)
+            throw new DomainRuleException("archived_role", "roleId", "Archived roles cannot be changed.");
         Permissions = RestaurantPermissionCatalog.ParseKeys(permissionKeys);
         Version++;
     }
+
+    public void Archive(int expectedVersion)
+    {
+        EnsureVersion(expectedVersion);
+        if (IsBuiltIn)
+            throw new DomainRuleException("protected_role", "roleId", "Built-in roles cannot be archived.");
+        if (IsArchived)
+            throw new DomainRuleException("archived_role", "roleId", "This role is already archived.");
+        IsArchived = true;
+        Version++;
+    }
+
+    public static string NormalizeName(string value) => Regex.Replace(
+        value.Normalize(NormalizationForm.FormKC).Trim(), @"\s+", " ").ToUpperInvariant();
+
+    private static string ValidateName(string? value)
+    {
+        var displayName = Regex.Replace((value ?? string.Empty).Normalize(NormalizationForm.FormKC).Trim(), @"\s+", " ");
+        if (displayName.Length is < 1 or > 60 || displayName.Any(char.IsControl))
+            throw new DomainRuleException("invalid_role_name", "name", "Role name must contain 1 to 60 valid characters.");
+        return displayName;
+    }
+
+    private void EnsureVersion(int expectedVersion)
+    {
+        if (expectedVersion != Version)
+            throw new DomainRuleException("role_grant_version_conflict", "version", "Role grants have changed. Reload and try again.");
+    }
+
+    private static string DefaultName(RestaurantRole role) => role switch
+    {
+        RestaurantRole.Manager => "Manager",
+        RestaurantRole.Kitchen => "Kitchen staff",
+        RestaurantRole.Staff => "Staff",
+        RestaurantRole.Accountant => "Accountant",
+        _ => throw new DomainRuleException("invalid_role", "role", "Restaurant role is not supported.")
+    };
 
     private static RestaurantPermission DefaultPermissions(RestaurantRole role) => role switch
     {

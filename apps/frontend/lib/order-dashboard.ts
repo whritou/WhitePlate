@@ -134,6 +134,19 @@ export function parseRestaurantMemberships(
       !isRecord(candidate) ||
       !isUuid(candidate.id) ||
       typeof candidate.name !== "string" ||
+      (candidate.roleId !== undefined &&
+        !(
+          candidate.roleId === null ||
+          (typeof candidate.roleId === "string" &&
+            /^[A-Za-z0-9_-]{1,80}$/.test(candidate.roleId))
+        )) ||
+      (candidate.roleName !== undefined &&
+        !(
+          candidate.roleName === null ||
+          (typeof candidate.roleName === "string" &&
+            candidate.roleName.trim().length > 0 &&
+            candidate.roleName.trim().length <= 60)
+        )) ||
       (candidate.organizationId !== undefined &&
         !isUuid(candidate.organizationId)) ||
       (candidate.subdomain !== undefined &&
@@ -147,6 +160,7 @@ export function parseRestaurantMemberships(
 
     const permissions =
       candidate.permissions === undefined ? [] : candidate.permissions
+
     if (
       !Array.isArray(permissions) ||
       !permissions.every(isRestaurantPermission)
@@ -157,6 +171,12 @@ export function parseRestaurantMemberships(
       id: candidate.id,
       name: candidate.name,
       role: candidate.role,
+      ...(candidate.roleId !== undefined
+        ? { roleId: candidate.roleId as string | null }
+        : {}),
+      ...(candidate.roleName !== undefined
+        ? { roleName: candidate.roleName as string | null }
+        : {}),
       permissions: [...permissions],
       ...(candidate.organizationId
         ? { organizationId: candidate.organizationId as string }
@@ -359,14 +379,9 @@ const restaurantPermissionKeys = new Set([
 function isRestaurantPermission(value: unknown): value is string {
   return typeof value === "string" && restaurantPermissionKeys.has(value)
 }
+
 function isRestaurantRole(value: unknown): value is RestaurantRole {
-  return (
-    value === "OrganizationOwner" ||
-    value === "Manager" ||
-    value === "Kitchen" ||
-    value === "Staff" ||
-    value === "Accountant"
-  )
+  return typeof value === "string" && /^[A-Za-z0-9_-]{1,80}$/.test(value)
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

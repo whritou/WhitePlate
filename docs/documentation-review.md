@@ -1,5 +1,23 @@
 # Documentation review baseline — 2026-09-28
 
+## Custom organization staff roles — 2026-10-18
+
+Branch `feat/staff-role-permissions`, existing GitHub Project task: implement persisted, owner-managed staff roles and permission enforcement across the organization workspace. New organizations receive editable `Manager`, `Kitchen staff`, and `Accountant` defaults. Owners can customize grants, create and rename custom roles, and assign roles to members and invitations. Stable organization-scoped role IDs back server authorization and the frontend hides unavailable pages, tabs, sections, and actions while retaining the established UI style. Existing organizations retain their legacy `Staff` role and assignments. A role cannot be archived while an active member or pending invitation uses it; the synthetic owner role remains protected and has all permissions.
+
+The EF migration and PostgreSQL SQL were generated and reviewed, but the migration has not been applied to a shared or production database. Hosted authentication, migration rollout, and browser acceptance against a deployed database remain pending. TDD first exposed a legacy invitation-role compatibility gap and a SQLite-incompatible invitation-expiry query during role archival; both were corrected and covered by regressions.
+
+| Check | Actual result |
+| --- | --- |
+| `dotnet test apps/api/WhitePlate.slnx --no-restore` | Passed: 354 tests. Includes organization role creation/editing/assignment, default provisioning, legacy invitation aliases, API permission revocation, and archive protections. |
+| Frontend `vitest run` | Passed: 102 files / 618 tests, including role editor, member assignment, and permission-filtered navigation coverage. |
+| Frontend `tsc --noEmit` | Passed. |
+| Frontend `eslint .` | Passed with 0 errors and 19 existing `<img>` warnings in Lovable components. |
+| Prettier check on changed TypeScript/TSX files | Passed. |
+| `next build --webpack` | Passed compilation, type checking, and generation of all 101 pages. Better Auth emitted expected schema-connection diagnostics because the build used an intentionally unavailable local database URL; no real database was contacted. |
+| `dotnet ef migrations has-pending-model-changes` | Passed: the EF model snapshot matches the current model. |
+| `dotnet ef migrations script 20261017222900_OrganizationRoleGrants 20261018103516_CustomOrganizationRoles` | Passed: generated migration SQL. Migration remains unapplied. |
+| `git diff --check` | Passed; Windows checkout may report line-ending conversion notices. |
+
 ## Orders kanban — 2026-10-06
 
 Branch `feat/orders-kanban`, [issue #30](https://github.com/whritou/WhitePlate/issues/30): replaces the staff ticket grid with five status lanes and shadcn-compatible Base UI status tabs, inspired by the requested [kanban reference](https://shadcnuikit.com/blocks/application-ui/kanban-board). Mouse/touch handles and existing next-step buttons call the same versioned mutation; stale, skipped, pending and role-disallowed drops are rejected. Saved order snapshots, REST authority, tenant/account query isolation, filter/cursor navigation, error feedback and SignalR refresh behavior remain in place. Counts describe the loaded page. Kitchen controls meet 48px targets, lanes wrap without page overflow, and keyboard focus returns to a moved ticket. Initial and route skeletons match the lanes; both translation catalogs are updated. The canonical kitchen design now records this approved layout and behavior.

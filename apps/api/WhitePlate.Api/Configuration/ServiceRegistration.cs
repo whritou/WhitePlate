@@ -143,6 +143,8 @@ public static class ServiceRegistration
         services.AddScoped<IStaffMembershipRepository, StaffMembershipRepository>();
         services.AddScoped<IOrganizationRoleGrantRepository, OrganizationRoleGrantRepository>();
         services.AddScoped<OrganizationRolePermissionsHandler>();
+        services.AddScoped<IRestaurantMembershipRoleRepository, RestaurantMembershipRoleRepository>();
+        services.AddScoped<ChangeRestaurantMemberRoleHandler>();
         services.AddScoped<IStaffDirectoryRepository, StaffDirectoryRepository>();
         services.AddScoped<GetCurrentUserQueryHandler>();
         services.AddScoped<IOrganizationProvisioningRepository, OrganizationProvisioningRepository>();

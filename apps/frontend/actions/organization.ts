@@ -11,6 +11,9 @@ import {
   parseOrganizationLegalProfile,
   parseOrganizationRename,
   parseStaffInvitation,
+  parseOrganizationRoleCreate,
+  parseOrganizationRoleArchive,
+  parseRestaurantMemberRoleChange,
   parseOrganizationRoleGrant,
 } from "@/lib/validation/organization"
 import {
@@ -27,11 +30,15 @@ import {
   acceptStaffInvitation,
   setOrganizationActive,
   saveOrganizationRoleGrant,
+  createOrganizationRole,
+  archiveOrganizationRole,
+  changeRestaurantMemberRole,
 } from "@/services/organization"
 import type {
   ActionResult,
   CatalogTranslationSaveResult,
   OrganizationRoleGrantSaveResult,
+  OrganizationRoleGrantCreateResult,
 } from "@/types/organization"
 
 export async function updateMenuLanguagesAction(
@@ -171,6 +178,36 @@ export async function saveOrganizationRoleGrantAction(
 
   return value
     ? saveOrganizationRoleGrant(value)
+    : { ok: false, message: "invalid" }
+}
+
+export async function createOrganizationRoleAction(
+  input: unknown
+): Promise<OrganizationRoleGrantCreateResult> {
+  const value = parseOrganizationRoleCreate(input)
+
+  return value
+    ? createOrganizationRole(value)
+    : { ok: false, message: "invalid" }
+}
+
+export async function archiveOrganizationRoleAction(
+  input: unknown
+): Promise<ActionResult> {
+  const value = parseOrganizationRoleArchive(input)
+
+  return value
+    ? archiveOrganizationRole(value)
+    : { ok: false, message: "invalid" }
+}
+
+export async function changeRestaurantMemberRoleAction(
+  input: unknown
+): Promise<ActionResult> {
+  const value = parseRestaurantMemberRoleChange(input)
+
+  return value
+    ? changeRestaurantMemberRole(value)
     : { ok: false, message: "invalid" }
 }
 

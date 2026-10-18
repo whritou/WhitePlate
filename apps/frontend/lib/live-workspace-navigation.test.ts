@@ -54,15 +54,47 @@ it("shows only links covered by persisted grants", () => {
     [],
     [{ ...restaurants[0], role: "Kitchen", permissions: ["kitchen.display"] }]
   )
+
   expect(links.map((link) => link.key)).toEqual(["dashboard", "orders"])
+})
+
+it("hides analytics, settings, and catalog for a custom kitchen role without those grants", () => {
+  const customRoleId = "a1b2c3d4e5f64789a0b1c2d3e4f56789"
+  const links = liveWorkspaceLinks(
+    new URLSearchParams({ tenantId: id }),
+    [],
+    [
+      {
+        ...restaurants[0],
+        role: "RestaurantStaff",
+        roleId: customRoleId,
+        roleName: "Kitchen assistant",
+        permissions: ["kitchen.display"],
+      },
+    ]
+  )
+
+  expect(links.map((link) => link.key)).toEqual(["dashboard", "orders"])
+  expect(
+    links.some((link) =>
+      ["analytics", "settings", "catalog"].includes(link.key)
+    )
+  ).toBe(false)
 })
 
 it("shows only analytics for an accountant without order access", () => {
   const links = liveWorkspaceLinks(
     new URLSearchParams({ tenantId: id }),
     [],
-    [{ ...restaurants[0], role: "Accountant", permissions: ["analytics.view", "billing.manage"] }]
+    [
+      {
+        ...restaurants[0],
+        role: "Accountant",
+        permissions: ["analytics.view", "billing.manage"],
+      },
+    ]
   )
+
   expect(links.map((link) => link.key)).toEqual(["analytics", "settings"])
 })
 
@@ -110,6 +142,8 @@ it("organization links preserve the authorized organization context", () => {
     "createRestaurant",
   ])
   expect(
-    links.every((link) => link.href.includes(`organizationId=${organizationId}`))
+    links.every((link) =>
+      link.href.includes(`organizationId=${organizationId}`)
+    )
   ).toBe(true)
 })

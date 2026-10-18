@@ -29,6 +29,38 @@ it("retains verified restaurant organization and subdomain for navigation", () =
   ).toBeNull()
 })
 
+it("accepts custom restaurant role IDs and preserves their permission list", () => {
+  const roleId = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  const tenantId = "22222222-2222-4222-8222-222222222222"
+  const organizationId = "11111111-1111-4111-8111-111111111111"
+
+  expect(
+    parseRestaurantMemberships({
+      restaurants: [
+        {
+          id: tenantId,
+          organizationId,
+          name: "Bistro",
+          role: roleId,
+          roleId,
+          roleName: "Pastry chef",
+          permissions: ["kitchen.display"],
+        },
+      ],
+    })
+  ).toEqual([
+    {
+      id: tenantId,
+      organizationId,
+      name: "Bistro",
+      role: roleId,
+      roleId,
+      roleName: "Pastry chef",
+      permissions: ["kitchen.display"],
+    },
+  ])
+})
+
 it("bounds the event tracker after more than 512 different orders", () => {
   // Fail fast on invalid eviction rather than freezing this test's worker.
   const originalDelete = Map.prototype.delete
@@ -197,7 +229,9 @@ it("allows forward transitions and cancellation only with orders.manage", () => 
     "Completed",
     "Cancelled",
   ])
-  expect(getAvailableOrderTransitions("Completed", ["kitchen.display"])).toEqual([])
+  expect(
+    getAvailableOrderTransitions("Completed", ["kitchen.display"])
+  ).toEqual([])
 })
 
 it("refreshes only for new, newer events from the selected tenant", () => {

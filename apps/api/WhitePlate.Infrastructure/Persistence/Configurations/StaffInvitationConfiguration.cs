@@ -14,6 +14,7 @@ public sealed class StaffInvitationConfiguration : IEntityTypeConfiguration<Staf
         builder.HasKey(invitation => invitation.Id);
         builder.Property(invitation => invitation.Id).ValueGeneratedNever();
         builder.Property(invitation => invitation.Role).HasConversion<string>().HasMaxLength(32).IsRequired();
+        builder.Property(invitation => invitation.RoleId).HasMaxLength(80);
         builder.Property(invitation => invitation.RecipientEmail).HasMaxLength(254);
         builder.Property(invitation => invitation.TokenHash).IsRequired().HasMaxLength(64);
         builder.HasIndex(invitation => invitation.TokenHash).IsUnique();
@@ -26,6 +27,9 @@ public sealed class StaffInvitationConfiguration : IEntityTypeConfiguration<Staf
         builder.HasOne<Tenant>().WithMany()
             .HasPrincipalKey(tenant => new { tenant.OrganizationId, Id = tenant.Id })
             .HasForeignKey(invitation => new { invitation.OrganizationId, Id = invitation.TenantId })
+            .OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne<OrganizationRoleGrantSet>().WithMany()
+            .HasForeignKey(invitation => new { invitation.OrganizationId, invitation.RoleId })
             .OnDelete(DeleteBehavior.Restrict);
     }
 }

@@ -23,7 +23,7 @@ public sealed class OrderingOperationsRepository(WhitePlateDbContext database) :
             database.RestaurantMemberships.Any(membership => membership.TenantId == row.Id &&
                 membership.Issuer == identity.Issuer && membership.Subject == identity.Subject &&
                 database.OrganizationRoleGrants.Any(grant => grant.OrganizationId == row.OrganizationId &&
-                    grant.Role == membership.Role &&
+                    grant.RoleId == membership.RoleId && !grant.IsArchived &&
                     (grant.Permissions & RestaurantPermission.OrdersManage) == RestaurantPermission.OrdersManage))) &&
             row.OrderingOperationsVersion == expectedVersion)
             .ExecuteUpdateAsync(setters => setters.SetProperty(row => row.AcceptingOrders, tenant.AcceptingOrders)

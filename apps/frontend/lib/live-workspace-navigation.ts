@@ -43,6 +43,7 @@ export function liveWorkspaceLinks(
   if (has(permission.orders, permission.kitchen)) {
     pages.push(["dashboard", "dashboard"], ["orders", "orders"])
   }
+
   if (has(permission.orders)) pages.push(["order-history", "orderHistory"])
   if (has(permission.analytics)) pages.push(["analytics", "analytics"])
   if (has(permission.catalog, permission.discounts))
@@ -59,11 +60,13 @@ export function liveWorkspaceLinks(
       : has(permission.orders)
         ? "notifications"
         : "payments"
+
     pages.push([`restaurant-settings?section=${section}`, "settings"])
   }
 
   return pages.map(([path, key]) => {
     if (path.startsWith("/")) return { href: `/organization${path}`, key }
+
     const [route, query] = path.split("?", 2)
 
     return {
@@ -79,7 +82,8 @@ export function restaurantWorkspaceHref(restaurant: RestaurantMembership) {
 
   if (granted.has(permission.orders)) return `/organization/dashboard${query}`
   if (granted.has(permission.kitchen)) return `/organization/orders${query}`
-  if (granted.has(permission.analytics)) return `/organization/analytics${query}`
+  if (granted.has(permission.analytics))
+    return `/organization/analytics${query}`
   if (granted.has(permission.catalog) || granted.has(permission.discounts))
     return `/organization/catalog${query}`
   if (granted.has(permission.storefront)) return `/organization/theming${query}`

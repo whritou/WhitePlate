@@ -77,12 +77,14 @@ export type OrderHistoryTableProps = {
   page: OrderHistoryPage
 }
 
-export type RestaurantRole = "OrganizationOwner" | "Manager" | "Kitchen" | "Staff" | "Accountant"
+export type RestaurantRole = string
 
 export type RestaurantMembership = {
   id: string
   name: string
   role: RestaurantRole
+  roleId?: string | null
+  roleName?: string | null
   organizationId?: string
   subdomain?: string
   permissions: string[]

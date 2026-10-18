@@ -22,6 +22,7 @@ public sealed class OrganizationsController(
     CreateStaffInvitationCommandHandler createInvitation,
     RevokeStaffInvitationCommandHandler revokeInvitation,
     OrganizationRolePermissionsHandler rolePermissions,
+    ChangeRestaurantMemberRoleHandler changeMemberRole,
     IOrganizationRepository organizations,
     RenameOrganizationCommandHandler renameOrganization,
     SetOrganizationActiveCommandHandler setOrganizationActive,
@@ -114,6 +115,35 @@ public sealed class OrganizationsController(
         return Ok(result.Value);
     }
 
+    [HttpGet("{organizationId:guid}/assignable-roles")]
+    [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+    [ProducesResponseType<OrganizationRoleAssignmentOptionDto[]>(StatusCodes.Status200OK)]
+    public async Task<ActionResult<IReadOnlyList<OrganizationRoleAssignmentOptionDto>>> GetAssignableRoles(
+        Guid organizationId, CancellationToken cancellationToken)
+    {
+        var identity = currentIdentity.Identity;
+        if (identity is null) return Unauthorized();
+        var result = await rolePermissions.GetAssignableAsync(organizationId, identity, cancellationToken);
+        if (!result.IsSuccess) return errors.ToActionResult(errors.Create(HttpContext, result.Error));
+        Response.Headers.CacheControl = "no-store";
+        return Ok(result.Value);
+    }
+
+    [HttpPost("{organizationId:guid}/roles")]
+    [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+    [ProducesResponseType<OrganizationRoleGrantDto>(StatusCodes.Status201Created)]
+    public async Task<ActionResult<OrganizationRoleGrantDto>> CreateRole(Guid organizationId,
+        CreateOrganizationRoleRequest request, CancellationToken cancellationToken)
+    {
+        var identity = currentIdentity.Identity;
+        if (identity is null) return Unauthorized();
+        var result = await rolePermissions.CreateAsync(organizationId, request.Name, request.Permissions,
+            identity, cancellationToken);
+        if (!result.IsSuccess) return errors.ToActionResult(errors.Create(HttpContext, result.Error));
+        Response.Headers.CacheControl = "no-store";
+        return StatusCode(StatusCodes.Status201Created, result.Value);
+    }
+
     [HttpPut("{organizationId:guid}/roles")]
     [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
     [ProducesResponseType<OrganizationRoleGrantDto>(StatusCodes.Status200OK)]
@@ -124,11 +154,41 @@ public sealed class OrganizationsController(
     {
         var identity = currentIdentity.Identity;
         if (identity is null) return Unauthorized();
-        var result = await rolePermissions.ReplaceAsync(organizationId, request.Role, request.Permissions,
-            request.Version, identity, cancellationToken);
+        var result = await rolePermissions.UpdateAsync(organizationId, request.Role, request.Name,
+            request.Permissions, request.Version, identity, cancellationToken);
         if (!result.IsSuccess) return errors.ToActionResult(errors.Create(HttpContext, result.Error));
         Response.Headers.CacheControl = "no-store";
         return Ok(result.Value);
+    }
+
+    [HttpPost("{organizationId:guid}/roles/{roleId}/archive")]
+    [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public async Task<IActionResult> ArchiveRole(Guid organizationId, string roleId,
+        ArchiveOrganizationRoleRequest request, CancellationToken cancellationToken)
+    {
+        var identity = currentIdentity.Identity;
+        if (identity is null) return Unauthorized();
+        var result = await rolePermissions.ArchiveAsync(organizationId, roleId, request.Version,
+            identity, timeProvider.GetUtcNow(), cancellationToken);
+        if (!result.IsSuccess) return errors.ToActionResult(errors.Create(HttpContext, result.Error));
+        Response.Headers.CacheControl = "no-store";
+        return NoContent();
+    }
+
+    [HttpPut("{organizationId:guid}/members/{memberId:guid}/role")]
+    [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public async Task<IActionResult> ChangeMemberRole(Guid organizationId, Guid memberId,
+        ChangeRestaurantMemberRoleRequest request, CancellationToken cancellationToken)
+    {
+        var identity = currentIdentity.Identity;
+        if (identity is null) return Unauthorized();
+        var result = await changeMemberRole.HandleAsync(organizationId, memberId, request.RoleId,
+            identity, cancellationToken);
+        if (!result.IsSuccess) return errors.ToActionResult(errors.Create(HttpContext, result.Error));
+        Response.Headers.CacheControl = "no-store";
+        return NoContent();
     }
     [HttpPatch("{organizationId:guid}")]
     [ProducesResponseType<OrganizationDto>(StatusCodes.Status200OK)]
@@ -242,11 +302,11 @@ public sealed class OrganizationsController(
     {
         var identity = currentIdentity.Identity;
         if (identity is null) return Unauthorized();
-        if (!TryParseRole(request.Role, out var role))
+        if (string.IsNullOrWhiteSpace(request.Role))
             return errors.ToActionResult(errors.Create(HttpContext, new ApplicationError(ErrorCode.ValidationFailed,
                 new ValidationIssue("role", "invalid_role", "Invitation role is not supported."))));
         var result = await createInvitation.HandleAsync(new CreateStaffInvitationCommand(organizationId,
-            request.TenantId, request.Email, role, identity), cancellationToken);
+            request.TenantId, request.Email, request.Role, identity), cancellationToken);
         if (!result.IsSuccess) return errors.ToActionResult(errors.Create(HttpContext, result.Error));
         var invitation = result.Value;
         return StatusCode(StatusCodes.Status201Created,
@@ -263,17 +323,4 @@ public sealed class OrganizationsController(
         return result.IsSuccess ? NoContent() : errors.ToActionResult(errors.Create(HttpContext, result.Error));
     }
 
-    private static bool TryParseRole(string value, out InvitationRole role)
-    {
-        role = value switch
-        {
-            "OrganizationOwner" => InvitationRole.OrganizationOwner,
-            "RestaurantManager" => InvitationRole.RestaurantManager,
-            "KitchenStaff" => InvitationRole.KitchenStaff,
-            "RestaurantStaff" => InvitationRole.RestaurantStaff,
-            "Accountant" => InvitationRole.Accountant,
-            _ => 0
-        };
-        return Enum.IsDefined(role);
-    }
 }

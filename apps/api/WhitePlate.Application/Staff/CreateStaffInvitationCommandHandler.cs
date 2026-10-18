@@ -31,13 +31,17 @@ public sealed class CreateStaffInvitationCommandHandler(IStaffMembershipReposito
         if (command.TenantId is Guid targetTenantId &&
             !await invitations.TenantBelongsToOrganizationAsync(command.OrganizationId, targetTenantId, cancellationToken))
             return Result<StaffInvitationDto>.Failure(new ApplicationError(ErrorCode.NotFound));
+        if (command.Role != InvitationRole.OrganizationOwner &&
+            (command.RoleId is not { } roleId || !await invitations.RoleBelongsToOrganizationAsync(
+                command.OrganizationId, roleId, cancellationToken)))
+            return Result<StaffInvitationDto>.Failure(new ApplicationError(ErrorCode.NotFound));
 
         var now = timeProvider.GetUtcNow();
         var (token, hash) = InvitationToken.Create();
         StaffInvitation invitation;
         try
         {
-            invitation = StaffInvitation.Create(command.OrganizationId, command.TenantId, command.Role,
+            invitation = StaffInvitation.Create(command.OrganizationId, command.TenantId, command.Role, command.RoleId,
                 command.RecipientEmail, hash, now.AddDays(7), now);
         }
         catch (WhitePlate.Domain.Common.DomainRuleException exception)

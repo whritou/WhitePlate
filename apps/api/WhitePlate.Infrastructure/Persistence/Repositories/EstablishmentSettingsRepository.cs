@@ -25,7 +25,7 @@ public sealed class EstablishmentSettingsRepository(WhitePlateDbContext database
             database.RestaurantMemberships.Any(membership => membership.TenantId == row.Id &&
                 membership.Issuer == identity.Issuer && membership.Subject == identity.Subject &&
                 database.OrganizationRoleGrants.Any(grant => grant.OrganizationId == row.OrganizationId &&
-                    grant.Role == membership.Role &&
+                    grant.RoleId == membership.RoleId && !grant.IsArchived &&
                     (grant.Permissions & RestaurantPermission.StorefrontManage) == RestaurantPermission.StorefrontManage))) &&
             row.EstablishmentVersion == expectedVersion &&
             row.MenuLocalesJson == expectedLocales && row.DefaultMenuLocale == expectedDefaultLocale)
@@ -47,7 +47,7 @@ public sealed class EstablishmentSettingsRepository(WhitePlateDbContext database
             database.RestaurantMemberships.Any(membership => membership.TenantId == row.Id &&
                 membership.Issuer == identity.Issuer && membership.Subject == identity.Subject &&
                 database.OrganizationRoleGrants.Any(grant => grant.OrganizationId == row.OrganizationId &&
-                    grant.Role == membership.Role &&
+                    grant.RoleId == membership.RoleId && !grant.IsArchived &&
                     (grant.Permissions & RestaurantPermission.StorefrontManage) == RestaurantPermission.StorefrontManage))) &&
             row.LegalProfileVersion == expectedVersion)
             .ExecuteUpdateAsync(setters => setters.SetProperty(row => row.LegalProfileMode, tenant.LegalProfileMode)

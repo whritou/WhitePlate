@@ -21,7 +21,7 @@ public sealed class ThemeSettingsRepository(WhitePlateDbContext database) : IThe
             database.RestaurantMemberships.Any(member => member.TenantId == row.Id &&
                 member.Issuer == identity.Issuer && member.Subject == identity.Subject &&
                 database.OrganizationRoleGrants.Any(grant => grant.OrganizationId == row.OrganizationId &&
-                    grant.Role == member.Role &&
+                    grant.RoleId == member.RoleId && !grant.IsArchived &&
                     (grant.Permissions & RestaurantPermission.StorefrontManage) == RestaurantPermission.StorefrontManage))))
             .ExecuteUpdateAsync(setters => setters.SetProperty(row => row.ThemeDraftJson, tenant.ThemeDraftJson)
                 .SetProperty(row => row.ThemeDraftVersion, tenant.ThemeDraftVersion), ct) == 1;

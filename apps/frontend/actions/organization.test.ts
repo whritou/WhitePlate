@@ -307,3 +307,134 @@ it("requires restaurant roles to have a restaurant scope", async () => {
   })
   expect(whitePlateApi.post).not.toHaveBeenCalled()
 })
+
+it("creates a custom role with only the submitted name and permission grants", async () => {
+  const createRole = (
+    organizationActions as unknown as Record<
+      string,
+      (input: unknown) => Promise<unknown>
+    >
+  ).createOrganizationRoleAction
+  const grant = {
+    role: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    name: "Pastry chef",
+    builtInKey: null,
+    permissions: ["kitchen.display"],
+    version: 1,
+    isProtected: false,
+    isBuiltIn: false,
+    isArchived: false,
+  }
+
+  vi.mocked(whitePlateApi.post).mockResolvedValue({
+    ok: true,
+    status: 201,
+    data: grant,
+  })
+
+  expect(
+    await createRole({
+      organizationId: id,
+      name: "Pastry chef",
+      permissions: ["kitchen.display"],
+    })
+  ).toEqual({ ok: true, grant })
+  expect(whitePlateApi.post).toHaveBeenCalledWith(
+    `/api/v1/organizations/${id}/roles`,
+    { name: "Pastry chef", permissions: ["kitchen.display"] }
+  )
+})
+
+it("saves a custom role name and exact permission grants with its stable id", async () => {
+  const saveRole = (
+    organizationActions as unknown as Record<
+      string,
+      (input: unknown) => Promise<unknown>
+    >
+  ).saveOrganizationRoleGrantAction
+  const roleId = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  const grant = {
+    role: roleId,
+    name: "Pastry chef",
+    builtInKey: null,
+    permissions: ["kitchen.display"],
+    version: 2,
+    isProtected: false,
+    isBuiltIn: false,
+    isArchived: false,
+  }
+
+  vi.mocked(whitePlateApi.put).mockResolvedValue({
+    ok: true,
+    status: 200,
+    data: grant,
+  })
+
+  expect(
+    await saveRole({
+      organizationId: id,
+      role: roleId,
+      name: "Pastry chef",
+      permissions: ["kitchen.display"],
+      version: 1,
+    })
+  ).toEqual({ ok: true, grant })
+  expect(whitePlateApi.put).toHaveBeenCalledWith(
+    `/api/v1/organizations/${id}/roles`,
+    {
+      role: roleId,
+      name: "Pastry chef",
+      permissions: ["kitchen.display"],
+      version: 1,
+    }
+  )
+})
+
+it("archives a custom role and reassigns members using stable role ids", async () => {
+  const archiveRole = (
+    organizationActions as unknown as Record<
+      string,
+      (input: unknown) => Promise<unknown>
+    >
+  ).archiveOrganizationRoleAction
+  const changeMemberRole = (
+    organizationActions as unknown as Record<
+      string,
+      (input: unknown) => Promise<unknown>
+    >
+  ).changeRestaurantMemberRoleAction
+
+  vi.mocked(whitePlateApi.post).mockResolvedValue({
+    ok: true,
+    status: 204,
+    data: undefined,
+  })
+  vi.mocked(whitePlateApi.put).mockResolvedValue({
+    ok: true,
+    status: 204,
+    data: undefined,
+  })
+
+  expect(
+    await archiveRole({
+      organizationId: id,
+      roleId: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      version: 2,
+    })
+  ).toEqual({ ok: true })
+  expect(whitePlateApi.post).toHaveBeenCalledWith(
+    `/api/v1/organizations/${id}/roles/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/archive`,
+    { version: 2 }
+  )
+  expect(
+    await changeMemberRole({
+      organizationId: id,
+      memberId: "22222222-2222-4222-8222-222222222222",
+      roleId: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    })
+  ).toEqual({ ok: true })
+  expect(whitePlateApi.put).toHaveBeenCalledWith(
+    `/api/v1/organizations/${id}/members/22222222-2222-4222-8222-222222222222/role`,
+    { roleId: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" }
+  )
+})

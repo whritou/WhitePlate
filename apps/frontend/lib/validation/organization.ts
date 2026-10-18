@@ -5,6 +5,9 @@ import type {
   CatalogTranslationGlossaryInput,
   CatalogTranslationGlossaryDeleteInput,
   MenuLanguagesInput,
+  OrganizationRoleArchiveInput,
+  OrganizationRoleCreateInput,
+  RestaurantMemberRoleInput,
   RestaurantDescriptionTranslationInput,
   OrganizationRenameInput,
   StaffInvitationInput,
@@ -107,18 +110,90 @@ const permissionKeys: RestaurantPermissionKey[] = [
   "billing.manage",
 ]
 
+export function parseOrganizationRoleCreate(
+  input: unknown
+): OrganizationRoleCreateInput | null {
+  if (
+    !isRecord(input) ||
+    !isUuid(input.organizationId) ||
+    typeof input.name !== "string" ||
+    !input.name.trim() ||
+    input.name.trim().length > 60 ||
+    /[\u0000-\u001f\u007f]/.test(input.name) ||
+    !Array.isArray(input.permissions) ||
+    !input.permissions.every((value) =>
+      permissionKeys.includes(value as RestaurantPermissionKey)
+    ) ||
+    new Set(input.permissions).size !== input.permissions.length
+  )
+    return null
+
+  return {
+    organizationId: input.organizationId,
+    name: input.name.trim().replace(/\s+/g, " "),
+    permissions: input.permissions as RestaurantPermissionKey[],
+  }
+}
+
+export function parseOrganizationRoleArchive(
+  input: unknown
+): OrganizationRoleArchiveInput | null {
+  if (
+    !isRecord(input) ||
+    !isUuid(input.organizationId) ||
+    typeof input.roleId !== "string" ||
+    !/^[A-Za-z0-9_-]{1,80}$/.test(input.roleId) ||
+    input.roleId === "OrganizationOwner" ||
+    typeof input.version !== "number" ||
+    !Number.isSafeInteger(input.version) ||
+    input.version < 1
+  )
+    return null
+
+  return {
+    organizationId: input.organizationId,
+    roleId: input.roleId,
+    version: input.version,
+  }
+}
+
+export function parseRestaurantMemberRoleChange(
+  input: unknown
+): RestaurantMemberRoleInput | null {
+  if (
+    !isRecord(input) ||
+    !isUuid(input.organizationId) ||
+    !isUuid(input.memberId) ||
+    typeof input.roleId !== "string" ||
+    !/^[A-Za-z0-9_-]{1,80}$/.test(input.roleId) ||
+    input.roleId === "OrganizationOwner"
+  )
+    return null
+
+  return {
+    organizationId: input.organizationId,
+    memberId: input.memberId,
+    roleId: input.roleId,
+  }
+}
+
 export function parseOrganizationRoleGrant(
   input: unknown
 ): OrganizationRoleGrantInput | null {
-  const roles = ["Manager", "Staff", "Kitchen", "Accountant"]
-
   if (
     !isRecord(input) ||
     !isUuid(input.organizationId) ||
     typeof input.role !== "string" ||
-    !roles.includes(input.role) ||
+    !/^[A-Za-z0-9_-]{1,80}$/.test(input.role) ||
+    input.role === "OrganizationOwner" ||
+    (input.name !== undefined &&
+      (typeof input.name !== "string" ||
+        !input.name.trim() ||
+        input.name.trim().length > 60)) ||
     !Array.isArray(input.permissions) ||
-    !input.permissions.every((value) => permissionKeys.includes(value as RestaurantPermissionKey)) ||
+    !input.permissions.every((value) =>
+      permissionKeys.includes(value as RestaurantPermissionKey)
+    ) ||
     new Set(input.permissions).size !== input.permissions.length ||
     typeof input.version !== "number" ||
     !Number.isSafeInteger(input.version) ||
@@ -128,7 +203,8 @@ export function parseOrganizationRoleGrant(
 
   return {
     organizationId: input.organizationId,
-    role: input.role as OrganizationRoleGrantInput["role"],
+    role: input.role,
+    ...(typeof input.name === "string" ? { name: input.name.trim() } : {}),
     permissions: input.permissions as RestaurantPermissionKey[],
     version: input.version,
   }
@@ -270,13 +346,7 @@ export function parseStaffInvitation(
     !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ||
     email.length > 254 ||
     typeof role !== "string" ||
-    ![
-      "OrganizationOwner",
-      "RestaurantManager",
-      "KitchenStaff",
-      "RestaurantStaff",
-      "Accountant",
-    ].includes(role) ||
+    !/^[A-Za-z0-9_-]{1,80}$/.test(role) ||
     (role === "OrganizationOwner" ? tenantId !== null : tenantId === null)
   )
     return null

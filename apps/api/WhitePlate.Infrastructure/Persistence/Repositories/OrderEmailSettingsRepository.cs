@@ -21,7 +21,7 @@ public sealed class OrderEmailSettingsRepository(WhitePlateDbContext database) :
              database.RestaurantMemberships.Any(member => member.TenantId == row.Id &&
                 member.Issuer == identity.Issuer && member.Subject == identity.Subject &&
                 database.OrganizationRoleGrants.Any(grant => grant.OrganizationId == row.OrganizationId &&
-                    grant.Role == member.Role &&
+                    grant.RoleId == member.RoleId && !grant.IsArchived &&
                     (grant.Permissions & RestaurantPermission.OrdersManage) == RestaurantPermission.OrdersManage))))
             .ExecuteUpdateAsync(setters => setters.SetProperty(row => row.OrderEmailTemplatesJson, tenant.OrderEmailTemplatesJson)
                 .SetProperty(row => row.OrderEmailTemplatesVersion, tenant.OrderEmailTemplatesVersion), ct) == 1;

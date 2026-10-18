@@ -7,6 +7,7 @@ import {
   getOrganizationInvitations,
   getOrganizationMembers,
   getOrganizationRoleGrants,
+  getOrganizationAssignableRoles,
   getOrganizations,
 } from "@/services/organization-queries"
 import { getRestaurantMemberships } from "@/services/orders"
@@ -59,7 +60,8 @@ export default async function OrganizationTeamPage({
       (!query.tenantId || item.id === query.tenantId)
   )
   const isOrganizationOwner = ownerOrganization !== undefined
-  const organization = ownerOrganization ??
+  const organization =
+    ownerOrganization ??
     (staffMembership?.organizationId
       ? { id: staffMembership.organizationId, name: staffMembership.name }
       : undefined)
@@ -74,17 +76,23 @@ export default async function OrganizationTeamPage({
     )
   }
 
-  const [restaurantsResponse, membersResponse, invitationsResponse, roleResponse] =
-    await Promise.all([
-      isOrganizationOwner
-        ? getOrganizationRestaurants(organization.id)
-        : Promise.resolve(null),
-      getOrganizationMembers(organization.id),
-      getOrganizationInvitations(organization.id),
-      isOrganizationOwner
-        ? getOrganizationRoleGrants(organization.id)
-        : Promise.resolve(null),
-    ])
+  const [
+    restaurantsResponse,
+    membersResponse,
+    invitationsResponse,
+    roleResponse,
+    roleOptionsResponse,
+  ] = await Promise.all([
+    isOrganizationOwner
+      ? getOrganizationRestaurants(organization.id)
+      : Promise.resolve(null),
+    getOrganizationMembers(organization.id),
+    getOrganizationInvitations(organization.id),
+    isOrganizationOwner
+      ? getOrganizationRoleGrants(organization.id)
+      : Promise.resolve(null),
+    getOrganizationAssignableRoles(organization.id),
+  ])
   const restaurants = isOrganizationOwner
     ? restaurantsResponse?.ok
       ? restaurantsResponse.data
@@ -97,12 +105,14 @@ export default async function OrganizationTeamPage({
         )
         .map(({ id, name }) => ({ id, name }))
   const roleGrants = roleResponse?.ok ? roleResponse.data : null
+  const roleOptions = roleOptionsResponse.ok ? roleOptionsResponse.data : null
   const v = await getTranslations("LiveParity")
   const teamDirectory = await OrganizationTeamDirectory({
     organizationId: organization.id,
     members: membersResponse.ok ? membersResponse.data : null,
     invitations: invitationsResponse.ok ? invitationsResponse.data : null,
     roleGrants,
+    roleOptions,
     isOrganizationOwner,
     heading: (
       <div>
@@ -117,6 +127,7 @@ export default async function OrganizationTeamPage({
       <StaffInviteDialog
         organizationId={organization.id}
         restaurants={restaurants}
+        roleOptions={roleOptions}
         allowOwnerInvitation={isOrganizationOwner}
       />
     ),

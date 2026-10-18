@@ -5,10 +5,11 @@ import { whitePlateApi } from "@/lib/api"
 import type {
   ActionResult,
   CatalogTranslationSaveResult,
+  OrganizationRoleGrantCreateResult,
   OrganizationRoleGrantSaveResult,
 } from "@/types/organization"
 import type { OrganizationRoleGrantInput } from "@/types/organization"
-import { parseOrganizationRoleGrants } from "@/lib/validation/responses"
+import { parseOrganizationRoleGrant } from "@/lib/validation/responses"
 import type { ApiResult } from "@/types/api"
 import type {
   CatalogTranslationInput,
@@ -18,6 +19,9 @@ import type {
   MenuLanguagesInput,
   RestaurantDescriptionTranslationInput,
   OrganizationRenameInput,
+  OrganizationRoleArchiveInput,
+  OrganizationRoleCreateInput,
+  RestaurantMemberRoleInput,
   RevokeStaffInvitationInput,
   StaffInvitationInput,
 } from "@/types/actions"
@@ -176,6 +180,7 @@ export async function saveOrganizationRoleGrant(
     `/api/v1/organizations/${input.organizationId}/roles`,
     {
       role: input.role,
+      ...(input.name !== undefined ? { name: input.name } : {}),
       permissions: input.permissions,
       version: input.version,
     }
@@ -187,11 +192,58 @@ export async function saveOrganizationRoleGrant(
     return result.ok ? { ok: false, message: "unavailable" } : result
   }
 
-  const [grant] = parseOrganizationRoleGrants([response.data]) ?? []
+  const grant = parseOrganizationRoleGrant(response.data)
 
   return grant && !grant.isProtected
     ? { ok: true, grant }
     : { ok: false, message: "unavailable" }
+}
+
+export async function createOrganizationRole(
+  input: OrganizationRoleCreateInput
+): Promise<OrganizationRoleGrantCreateResult> {
+  const response = await whitePlateApi.post<unknown>(
+    `/api/v1/organizations/${input.organizationId}/roles`,
+    { name: input.name, permissions: input.permissions }
+  )
+
+  if (!response.ok) {
+    const result = actionResult(response)
+
+    return result.ok ? { ok: false, message: "unavailable" } : result
+  }
+
+  const grant = parseOrganizationRoleGrant(response.data)
+
+  return grant && !grant.isProtected
+    ? { ok: true, grant }
+    : { ok: false, message: "unavailable" }
+}
+
+export async function archiveOrganizationRole({
+  organizationId,
+  roleId,
+  version,
+}: OrganizationRoleArchiveInput): Promise<ActionResult> {
+  return actionResult(
+    await whitePlateApi.post(
+      `/api/v1/organizations/${organizationId}/roles/${roleId}/archive`,
+      { version }
+    )
+  )
+}
+
+export async function changeRestaurantMemberRole({
+  organizationId,
+  memberId,
+  roleId,
+}: RestaurantMemberRoleInput): Promise<ActionResult> {
+  return actionResult(
+    await whitePlateApi.put(
+      `/api/v1/organizations/${organizationId}/members/${memberId}/role`,
+      { roleId }
+    )
+  )
 }
 
 export async function renameOrganization({

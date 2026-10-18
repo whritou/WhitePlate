@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import type {
   OrganizationInvitationStatus,
   OrganizationTeamDirectoryProps,
+  OrganizationTeamRole,
 } from "@/types/organization"
 import { getLocale, getTranslations } from "next-intl/server"
 import { RevokeInvitationButton } from "./revoke-invitation-button"
@@ -19,11 +20,20 @@ function statusVariant(status: OrganizationInvitationStatus) {
       : "destructive"
 }
 
+const teamRoleByBuiltInKey: Record<string, OrganizationTeamRole> = {
+  OrganizationOwner: "OrganizationOwner",
+  Manager: "RestaurantManager",
+  Kitchen: "KitchenStaff",
+  Staff: "RestaurantStaff",
+  Accountant: "Accountant",
+}
+
 export async function OrganizationTeamDirectory({
   organizationId,
   members,
   invitations,
   roleGrants,
+  roleOptions,
   isOrganizationOwner,
   heading,
   action,
@@ -61,7 +71,12 @@ export async function OrganizationTeamDirectory({
         ))}
       </div>
 
-      <TeamMembersTable members={members} />
+      <TeamMembersTable
+        organizationId={organizationId}
+        members={members}
+        roleOptions={roleOptions}
+        allowRoleChanges={isOrganizationOwner}
+      />
 
       <section className="min-w-0">
         <header className="sr-only">
@@ -93,8 +108,13 @@ export async function OrganizationTeamDirectory({
                   <p className="font-bold">{invitation.email}</p>
 
                   <p className="label-mono text-muted-foreground">
-                    {t(`teamRoles.${invitation.role}`)} ·{" "}
-                    {invitation.tenantName ?? t("organizationScope")}
+                    {invitation.builtInKey
+                      ? t(
+                          `teamRoles.${teamRoleByBuiltInKey[invitation.builtInKey] ?? invitation.role}`
+                        )
+                      : (invitation.roleName ??
+                        t(`teamRoles.${invitation.role}`))}{" "}
+                    · {invitation.tenantName ?? t("organizationScope")}
                   </p>
 
                   <p className="mt-1 text-sm text-muted-foreground">

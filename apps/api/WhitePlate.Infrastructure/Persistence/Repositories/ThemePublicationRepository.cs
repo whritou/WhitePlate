@@ -39,7 +39,7 @@ public sealed class ThemePublicationRepository(WhitePlateDbContext database) : I
             var manager = await database.RestaurantMemberships.AnyAsync(membership => membership.TenantId == tenantId &&
                 membership.Issuer == identity.Issuer && membership.Subject == identity.Subject &&
                 database.OrganizationRoleGrants.Any(grant => grant.OrganizationId == tenant.OrganizationId &&
-                    grant.Role == membership.Role &&
+                    grant.RoleId == membership.RoleId && !grant.IsArchived &&
                     (grant.Permissions & RestaurantPermission.StorefrontManage) == RestaurantPermission.StorefrontManage), ct);
             if (!owner && !manager) return new(ThemePublicationWriteResult.NotFound);
             if (tenant.ThemeDraftVersion != draftVersion || tenant.ThemePublicationVersion != publicationVersion)
