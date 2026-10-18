@@ -17,7 +17,7 @@ vi.mock("next-intl/server", () => ({ getTranslations }))
 const routeLoaders = [
   ["overview", OrganizationLoading, "overview-organizations"],
   ["organizationSignUp", OrganizationSignUpLoading, "organization-signup-card"],
-  ["team", TeamLoading, "team-invitation-form"],
+  ["team", TeamLoading, "team-members"],
   ["restaurant", NewRestaurantLoading, "restaurant-fields"],
   ["catalog", CatalogLoading, "catalog-list"],
   ["menuLanguages", MenuLanguagesLoading, "languages-translations"],
@@ -32,12 +32,12 @@ beforeEach(() => {
   )
 })
 
-it("reserves separate team roster and invitation sections in its loading layout", async () => {
+it("reserves the team directory and member table in its loading layout", async () => {
   const loading = await TeamLoading()
   const html = renderToStaticMarkup(createElement(() => loading))
 
-  expect(html).toContain('data-skeleton-region="team-roster"')
-  expect(html).toContain('data-skeleton-region="team-invitations"')
+  expect(html).toContain('data-skeleton-region="team-directory"')
+  expect(html).toContain('data-skeleton-region="team-members"')
 })
 
 it.each(routeLoaders)(
@@ -56,11 +56,10 @@ it.each(routeLoaders)(
   }
 )
 
-it("reserves the overview's independent restaurant and organization sections", async () => {
+it("reserves the overview's organization and restaurant sections", async () => {
   const loading = await OrganizationLoading()
   const html = renderToStaticMarkup(createElement(() => loading))
 
-  expect(html).toContain('data-skeleton-region="overview-restaurant-orders"')
-  expect(html).toContain('data-skeleton-region="overview-menu-settings"')
   expect(html).toContain('data-skeleton-region="overview-organizations"')
+  expect(html).toContain('data-skeleton-region="overview-restaurants"')
 })

@@ -4,7 +4,7 @@ export function OrderKanbanSkeleton() {
   return (
     <div
       aria-hidden="true"
-      className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5"
+      className="grid min-w-0 [grid-template-columns:repeat(auto-fit,minmax(min(100%,18rem),1fr))] items-stretch gap-4"
     >
       {Array.from({ length: 5 }, (_, index) => (
         <div key={index} className="grid content-start gap-3">

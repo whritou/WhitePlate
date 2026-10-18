@@ -25,7 +25,7 @@ Open `/en` or `/fr` on `http://localhost:3000`. Press `d` outside text-entry con
 | `npm run auth:dev-token` | Print a 15-minute API bearer token for local Swagger testing using the test account in `.env.local` |
 | `npm run typecheck` | TypeScript check without emitted JavaScript |
 | `npm run format` | Rewrite all matching TS/TSX files with Prettier; not a read-only check |
-| `npm run format:check` | Read-only formatting check, also required by CI |
+| `npm run format:check` | Read-only repository-wide formatting check; CI checks changed frontend TS/TSX files |
 
 Vitest uses `vitest.config.ts` for the frontend alias and browser-test exclusion. Playwright is installed but has no browser-test configuration yet. Local/CI references are Node 24.19.0 (`.nvmrc`) and npm 11.17.0 (`packageManager`). `npm ci` enforces compatible Node 24/npm 11 ranges from those minimums, permitting Vercel's rolling minor/patch updates while rejecting unsupported majors. `.npmrc` retains the Next.js React plugin peer dependency until its metadata accepts ESLint 10; `@eslint/compat` adapts its legacy rule context. The root `global.json` selects the supported .NET 10 feature band for API tests. The GitHub Actions workflow runs these checks from a clean checkout.
 

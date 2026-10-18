@@ -1,6 +1,8 @@
 import { createElement } from "react"
 import { renderToStaticMarkup } from "react-dom/server"
+import { NextIntlClientProvider } from "next-intl"
 import { expect, it, vi } from "vitest"
+import messages from "@/messages/en.json"
 import NotFoundPage from "./not-found"
 
 vi.mock("next-intl/server", () => ({
@@ -14,7 +16,11 @@ vi.mock("@/i18n/navigation", () => ({
 
 it("renders the WhitePlate localized not-found presentation", async () => {
   const page = await NotFoundPage()
-  const html = renderToStaticMarkup(createElement(() => page))
+  const html = renderToStaticMarkup(
+    <NextIntlClientProvider locale="en" messages={messages}>
+      {page}
+    </NextIntlClientProvider>
+  )
 
   expect(html).toContain('data-not-found-page="localized"')
   expect(html).toContain(">404</p>")

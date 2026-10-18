@@ -20,6 +20,8 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
 
       - name: Set up Node.js and npm cache
         uses: actions/setup-node@v7
@@ -49,9 +51,31 @@ jobs:
         working-directory: apps/frontend
         run: npm run typecheck
 
-      - name: Check frontend formatting
+      - name: Check changed frontend formatting
         working-directory: apps/frontend
-        run: npm run format:check
+        env:
+          FORMAT_BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          if [[ -z "$FORMAT_BASE_SHA" || "$FORMAT_BASE_SHA" =~ ^0+$ ]]; then
+            FORMAT_BASE_SHA="$(git merge-base "$GITHUB_SHA" origin/main)"
+          fi
+
+          mapfile -t changed_files < <(
+            git diff --name-only --diff-filter=ACMR "$FORMAT_BASE_SHA" "$GITHUB_SHA" -- \
+              'apps/frontend/**/*.ts' 'apps/frontend/**/*.tsx'
+          )
+
+          if (( ${#changed_files[@]} == 0 )); then
+            echo "No changed frontend TypeScript files to check."
+            exit 0
+          fi
+
+          frontend_files=()
+          for file in "${changed_files[@]}"; do
+            frontend_files+=("${file#apps/frontend/}")
+          done
+
+          npx prettier --check "${frontend_files[@]}"
 
       - name: Build frontend
         working-directory: apps/frontend

@@ -8,9 +8,7 @@ it("matches the overview content width and renders wrapping action placeholders"
     createElement(WorkspaceLoadingSkeleton, { label: "Loading workspace" })
   )
 
-  expect(html).toContain("max-w-7xl")
+  expect(html).toContain('class="live-page grid gap-8"')
   expect(html).toContain('data-skeleton-page="overview"')
-  expect(
-    html.match(/flex[^\"]*flex-wrap[^\"]*gap-3/g)?.length
-  ).toBeGreaterThanOrEqual(2)
+  expect(html.match(/flex flex-wrap gap-2/g)?.length).toBe(1)
 })

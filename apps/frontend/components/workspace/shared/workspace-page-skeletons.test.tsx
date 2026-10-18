@@ -5,16 +5,7 @@ import { WorkspacePageSkeleton } from "./workspace-page-skeletons"
 
 const expectedRegions = {
   organizationSignUp: ["organization-signup-card"],
-  team: [
-    "team-card",
-    "team-header",
-    "team-actions",
-    "team-restaurants",
-    "team-directory",
-    "team-roster",
-    "team-invitations",
-    "team-invitation-form",
-  ],
+  team: ["team-header", "team-summary", "team-directory", "team-members"],
   restaurant: [
     "restaurant-card",
     "restaurant-header",
@@ -28,8 +19,8 @@ const expectedRegions = {
     "languages-translations",
   ],
   settings: [
-    "settings-card",
     "settings-header",
+    "settings-sections",
     "settings-fields",
     "settings-submit",
     "settings-archive",
@@ -82,7 +73,7 @@ describe("WorkspacePageSkeleton", () => {
   })
 
   it.each(["orders", "orderHistory"] as const)(
-    "uses the full workspace width for the %s skeleton",
+    "matches the %s page's wide workspace container",
     (page) => {
       const html = renderToStaticMarkup(
         createElement(WorkspacePageSkeleton, {
@@ -91,18 +82,22 @@ describe("WorkspacePageSkeleton", () => {
         })
       )
 
-      expect(html).toContain("w-full max-w-none")
+      expect(html).toContain("w-full max-w-[1600px]")
       expect(html).not.toContain("max-w-5xl")
     }
   )
 
   it.each([
-    ["team", "max-w-3xl", "team-card"],
-    ["settings", "max-w-3xl", "settings-card"],
-    ["restaurant", "max-w-2xl", "restaurant-card"],
+    ["team", "min-w-0 bg-background px-6 pt-8 pb-12", "team-directory"],
+    ["settings", "live-settings min-w-0 bg-background", "settings-sections"],
+    [
+      "restaurant",
+      "live-create-page mx-auto min-h-[70vh] max-w-3xl px-6 py-8",
+      "restaurant-card",
+    ],
   ] as const)(
-    "matches the %s page's width and enclosing card",
-    (page, width, card) => {
+    "matches the %s page's container and leading content region",
+    (page, container, region) => {
       const html = renderToStaticMarkup(
         createElement(WorkspacePageSkeleton, {
           page,
@@ -110,8 +105,8 @@ describe("WorkspacePageSkeleton", () => {
         })
       )
 
-      expect(html).toContain(width)
-      expect(html).toContain(`data-skeleton-region="${card}"`)
+      expect(html).toContain(container)
+      expect(html).toContain(`data-skeleton-region="${region}"`)
     }
   )
 })

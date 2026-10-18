@@ -1,10 +1,20 @@
-import type { WorkspaceLoadingPage, WorkspacePageSkeletonProps } from "@/types/workspace-loading"
+import type {
+  WorkspaceLoadingPage,
+  WorkspacePageSkeletonProps,
+} from "@/types/workspace-loading"
 import { AnalyticsSkeleton } from "./skeletons/analytics"
 import { CatalogSkeleton, MenuLanguagesSkeleton } from "./skeletons/catalog"
 import { DashboardSkeleton } from "./skeletons/dashboard"
 import { OrderHistorySkeleton, OrdersSkeleton } from "./skeletons/orders"
-import { OrganizationSettingsSkeleton, RestaurantSettingsSkeleton } from "./skeletons/settings"
-import { OrganizationSignUpSkeleton, OverviewSkeleton, RestaurantCreateSkeleton } from "./skeletons/overview"
+import {
+  OrganizationSettingsSkeleton,
+  RestaurantSettingsSkeleton,
+} from "./skeletons/settings"
+import {
+  OrganizationSignUpSkeleton,
+  OverviewSkeleton,
+  RestaurantCreateSkeleton,
+} from "./skeletons/overview"
 import { TeamSkeleton } from "./skeletons/team"
 import { ThemingSkeleton } from "./skeletons/studio"
 function pageContainerClass(page: WorkspaceLoadingPage) {
@@ -21,7 +31,7 @@ function pageContainerClass(page: WorkspaceLoadingPage) {
     case "restaurantSettings":
       return "live-page grid gap-6"
     case "orders":
-      return "live-page grid w-full max-w-none gap-5"
+      return "mx-auto min-h-[70vh] w-full max-w-[1600px] min-w-0 px-6 py-8"
     case "orderHistory":
       return "live-history mx-auto grid min-h-[70vh] w-full max-w-[1600px] min-w-0 gap-5 px-6 py-8"
     case "theming":
@@ -32,7 +42,7 @@ function pageContainerClass(page: WorkspaceLoadingPage) {
     case "organizationSignUp":
       return "live-create-page mx-auto min-h-[70vh] max-w-3xl px-6 py-8"
     case "restaurant":
-      return "live-create-page mx-auto min-h-[70vh] max-w-5xl px-6 py-8"
+      return "live-create-page mx-auto min-h-[70vh] max-w-3xl px-6 py-8"
   }
 }
 

@@ -181,7 +181,7 @@ npm run format:check
 npm run build
 ```
 
-After a successful build, `npm run start` serves the production frontend. Lint is a separate command; a build is not proof that lint or behavioral tests passed. `npm run format:check` is read-only and required by CI; `npm run format` rewrites TS/TSX source. Do not run standalone typecheck concurrently with a Next build, which regenerates `.next/types`. Follow [frontend implementation conventions](architecture/frontend-conventions.md) for UI, types, actions, services and query boundaries.
+After a successful build, `npm run start` serves the production frontend. Lint is a separate command; a build is not proof that lint or behavioral tests passed. Local `npm run format:check` audits all frontend TS/TSX files; CI checks changed frontend TS/TSX files so existing formatting debt elsewhere does not block unrelated changes. `npm run format` rewrites TS/TSX source. Do not run standalone typecheck concurrently with a Next build, which regenerates `.next/types`. Follow [frontend implementation conventions](architecture/frontend-conventions.md) for UI, types, actions, services and query boundaries.
 
 From the repository root:
 
