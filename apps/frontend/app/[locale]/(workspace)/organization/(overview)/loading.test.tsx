@@ -31,7 +31,5 @@ it.each([
   expect(html).toContain('aria-busy="true"')
   expect(html).toContain('aria-hidden="true"')
   expect(html).toContain("motion-reduce:animate-none")
-  expect(html.indexOf('role="status"')).toBeLessThan(
-    html.indexOf('aria-busy="true"')
-  )
+  expect(html).toMatch(/<main[^>]*aria-busy="true"[^>]*>.*?<p role="status"/)
 })
