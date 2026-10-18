@@ -8,9 +8,11 @@ import { ProductPhotoImage } from "./photo-image"
 
 export function ProductPhotoGallery({
   productId,
+  restaurantSlug,
   photos = [],
 }: {
   productId: string
+  restaurantSlug?: string
   photos?: ProductPhoto[]
 }) {
   const t = useTranslations("ProductPhotos")
@@ -24,6 +26,7 @@ export function ProductPhotoGallery({
       <ProductPhotoImage
         key={photo?.id ?? "fallback"}
         productId={productId}
+        restaurantSlug={restaurantSlug}
         photo={photo}
         size={1200}
         fitContainerRatio
@@ -43,6 +46,7 @@ export function ProductPhotoGallery({
             >
               <ProductPhotoImage
                 productId={productId}
+                restaurantSlug={restaurantSlug}
                 photo={item}
                 size={320}
                 square

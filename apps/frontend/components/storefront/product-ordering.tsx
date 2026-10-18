@@ -21,12 +21,14 @@ import { ProductPhotoGallery } from "@/components/product/photo-gallery"
 
 export function ProductOrdering({
   product,
+  restaurantSlug,
   item,
   locked,
   price,
   onSave,
 }: {
   product: Product
+  restaurantSlug?: string
   item?: CartItem
   locked: boolean
   price: Intl.NumberFormat
@@ -102,6 +104,7 @@ export function ProductOrdering({
           <div className="grid gap-6">
             <ProductPhotoGallery
               productId={product.id}
+              restaurantSlug={restaurantSlug}
               photos={product.photos}
             />
 

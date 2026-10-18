@@ -16,6 +16,7 @@ import { LiveDashboard } from "@/components/workspace/dashboard/live-dashboard"
 import { RestaurantMenu } from "@/components/storefront/restaurant-menu"
 import { OrderTracking } from "@/components/storefront/order-tracking"
 import type { SearchParams } from "@/types/navigation"
+import { themeAppearance } from "@/lib/validation/theme-appearance"
 import {
   establishment,
   storeProductFixture,
@@ -235,6 +236,11 @@ export default async function LiveWorkspaceFixture({
           userId={userId}
           tenantId={tenantId}
           restaurantName={organization.name}
+          initialTheme={
+            query.theme === "parity"
+              ? { theme: themeAppearance(storeThemeFixture(query)), version: 1 }
+              : undefined
+          }
           initialData={{ assets: [], storageAvailable: false }}
         />
       ) : query.view === "analytics" ? (

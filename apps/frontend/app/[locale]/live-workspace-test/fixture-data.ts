@@ -26,9 +26,32 @@ export const establishment: PublicEstablishment = {
   },
 }
 
+export const STORE_THEME_PARITY_FIXTURE = {
+  ...publishedStoreTheme("Maison Verte", null, "maison-verte"),
+  bg: "#fffdf7",
+  text: "#1b1b1b",
+  primary: "#b3261e",
+  accent: "#ffd23f",
+  font: "DM Sans",
+  headingFont: "Fraunces",
+  headingWeight: 600,
+  bodyWeight: 400,
+  textScale: 1.1,
+  lineHeight: 1.6,
+  buttonStyle: "outline" as const,
+  spacing: "airy" as const,
+  imageRatio: "wide" as const,
+  bannerOverlay: 42,
+  radius: 14,
+  buttonRadius: 8,
+  layout: "grid" as const,
+}
+
 export function storeThemeFixture(query: SearchParams) {
   const layout = Array.isArray(query.layout) ? query.layout[0] : query.layout
   const custom = Array.isArray(query.theme) ? query.theme[0] : query.theme
+
+  if (custom === "parity") return STORE_THEME_PARITY_FIXTURE
 
   return {
     ...publishedStoreTheme("Maison Verte", null, "maison-verte"),
