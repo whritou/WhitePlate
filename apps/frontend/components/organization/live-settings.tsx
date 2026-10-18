@@ -154,31 +154,33 @@ export function LiveSettings({
                   restaurants.data?.map((restaurant) => (
                     <div
                       key={restaurant.id}
-                      className="mb-4 flex flex-wrap items-center justify-between gap-4 border p-5"
+                      className="mb-4 grid min-w-0 gap-4 border p-5 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center"
                     >
-                      <div>
-                        <p className="font-display text-lg font-bold">
+                      <div className="min-w-0">
+                        <p className="break-words font-display text-lg font-bold">
                           {restaurant.name}
                         </p>
 
                         <p className="mt-1 text-sm text-muted-foreground">
-                          {restaurant.subdomain} � {restaurant.currency}
+                          {restaurant.subdomain} · {restaurant.currency}
                         </p>
                       </div>
 
-                      <Link
-                        className="btn-outline"
-                        href={`/organization/restaurant-settings?tenantId=${restaurant.id}`}
-                      >
-                        {t("restaurantSettings")}
-                      </Link>
+                      <div className="flex min-w-0 flex-wrap items-center gap-3 sm:justify-end">
+                        <Link
+                          className="btn-outline min-h-11"
+                          href={`/organization/restaurant-settings?tenantId=${restaurant.id}`}
+                        >
+                          {t("restaurantSettings")}
+                        </Link>
 
-                      <Link
-                        className="btn-outline"
-                        href={`/organization/catalog?tenantId=${restaurant.id}`}
-                      >
-                        {t("openMenu")}
-                      </Link>
+                        <Link
+                          className="btn-outline min-h-11"
+                          href={`/organization/catalog?tenantId=${restaurant.id}`}
+                        >
+                          {t("openMenu")}
+                        </Link>
+                      </div>
                     </div>
                   ))}
 
