@@ -44,3 +44,21 @@ it("uses the actual host rather than forwarded tenant headers", async () => {
     error: "not_found",
   })
 })
+
+it("passes the preview slug through only when the request host is the path host", async () => {
+  vi.stubEnv("STOREFRONT_PATH_BASE_DOMAIN", "white-plate.vercel.app")
+  vi.stubEnv("API_BASE_URL", "https://api.whiteplate.test")
+  vi.mocked(headers).mockResolvedValue(
+    new Headers({
+      host: "white-plate.vercel.app",
+      origin: "https://white-plate.vercel.app",
+    }) as Awaited<ReturnType<typeof headers>>
+  )
+
+  expect(await checkoutGuestOrder({}, "checkout-key-123456", "bistro")).toEqual(
+    { ok: false, error: "invalid" }
+  )
+  expect(
+    await checkoutGuestOrder({}, "checkout-key-123456", "../other")
+  ).toEqual({ ok: false, error: "not_found" })
+})

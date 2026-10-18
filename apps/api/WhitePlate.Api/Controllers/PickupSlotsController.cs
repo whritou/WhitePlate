@@ -22,4 +22,12 @@ public sealed class PickupSlotsController(ICurrentTenant currentTenant, IOrderRe
         Response.Headers.CacheControl = "no-store";
         return Ok(await orders.GetPickupSlotsAsync(tenant.Id, timeProvider.GetUtcNow(), cancellationToken));
     }
+
+    [HttpGet("/api/v1/public/restaurants/{restaurantSlug}/pickup-slots")]
+    [RequireTenantBySlug]
+    [AllowAnonymous]
+    [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+    [ProducesResponseType<PickupAvailabilityDto>(StatusCodes.Status200OK)]
+    public Task<ActionResult<PickupAvailabilityDto>> GetByRestaurantSlug(CancellationToken cancellationToken) =>
+        Get(cancellationToken);
 }

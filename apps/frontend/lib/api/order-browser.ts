@@ -3,6 +3,7 @@ import { browserRequest } from "./browser-request"
 import { parseOrderPage } from "@/lib/order-dashboard"
 import { parseDashboardMetrics } from "@/lib/dashboard-metrics"
 import { parsePublicOrderTracking } from "@/lib/validation/public-order-tracking"
+import { appendRestaurantSlugQuery } from "@/lib/storefront-preview-routing"
 import type { DashboardMetrics } from "@/types/dashboard-metrics"
 import type { PublicOrderTracking } from "@/types/checkout"
 import type { OrderPage, OrderActionError, OrderStatus } from "@/types/orders"
@@ -97,10 +98,14 @@ export class PublicOrderTrackingError extends Error {
 export async function fetchPublicOrderTracking(
   orderId: string,
   token: string,
-  signal: AbortSignal
+  signal: AbortSignal,
+  restaurantSlug?: string
 ): Promise<PublicOrderTracking> {
   const response = await browserRequest<unknown>(
-    `/api/public/orders/${orderId}/tracking`,
+    appendRestaurantSlugQuery(
+      `/api/public/orders/${orderId}/tracking`,
+      restaurantSlug
+    ),
     { method: "POST", body: { token }, signal }
   )
 

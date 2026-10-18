@@ -21,7 +21,9 @@ const params = {
 
 function configure(host: string) {
   vi.stubEnv("STOREFRONT_BASE_DOMAIN", "example.test")
+  vi.stubEnv("STOREFRONT_PATH_BASE_DOMAIN", "white-plate.vercel.app")
   vi.stubEnv("PUBLIC_TENANT_API_URL_TEMPLATE", "https://{tenant}.example.test")
+  vi.stubEnv("API_BASE_URL", "https://api.example.test")
   vi.mocked(headers).mockResolvedValue(new Headers({ Host: host }) as never)
 }
 
@@ -39,6 +41,39 @@ it.each(["example.test", "nested.bistro.example.test", "bistro.evil.test"])(
     expect(createApiRequestFactory).not.toHaveBeenCalled()
   }
 )
+
+it("loads a preview photo through the central API with the selected slug", async () => {
+  configure("white-plate.vercel.app")
+
+  const image = vi.fn().mockResolvedValue({
+    ok: true,
+    status: 200,
+    data: new Blob([new Uint8Array([1])], { type: "image/webp" }),
+  })
+
+  vi.mocked(createApiRequestFactory).mockReturnValue({ image } as never)
+
+  const result = await GET(
+    new Request(
+      `https://white-plate.vercel.app/api/public/product-photos/${params.productId}/${params.assetId}/320?restaurantSlug=bistro`,
+      { headers: { host: "white-plate.vercel.app" } }
+    ),
+    { params: Promise.resolve(params) }
+  )
+
+  expect(createApiRequestFactory).toHaveBeenCalledWith(
+    expect.objectContaining({
+      baseUrl: "https://api.example.test",
+      public: true,
+    })
+  )
+  expect(image).toHaveBeenCalledWith(
+    `/api/v1/public/restaurants/bistro/products/${params.productId}/photos/${params.assetId}/320`,
+    expect.anything()
+  )
+  expect(result.status).toBe(200)
+  expect(result.headers.get("cache-control")).toBe("no-store")
+})
 
 it("ignores browser tenant selectors and prevents host-shared image caching", async () => {
   configure("bistro.example.test")

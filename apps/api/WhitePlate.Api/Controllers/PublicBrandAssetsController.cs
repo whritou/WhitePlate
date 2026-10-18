@@ -23,4 +23,12 @@ public sealed class PublicBrandAssetsController(ICurrentTenant tenant, BrandMedi
         Response.Headers.XContentTypeOptions = "nosniff";
         return result.IsSuccess ? File(result.Value.Bytes, result.Value.ContentType) : errors.ToActionResult(errors.Create(HttpContext, result.Error));
     }
+
+    [HttpGet("/api/v1/public/restaurants/{restaurantSlug}/brand-assets/{slot}")]
+    [RequireTenantBySlug]
+    [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+    [ProducesResponseType<byte[]>(StatusCodes.Status200OK, "image/png", "image/webp")]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status404NotFound, "application/problem+json")]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status503ServiceUnavailable, "application/problem+json")]
+    public Task<IActionResult> GetByRestaurantSlug(string slot, CancellationToken ct) => Get(slot, ct);
 }

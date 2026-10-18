@@ -10,13 +10,16 @@ import type { OrderReceipt } from "@/types/checkout"
 import { Link } from "@/i18n/navigation"
 import { useLocale, useTranslations } from "next-intl"
 import { CurrentCollectionInformation } from "./current-collection-information"
+import { getStorefrontTrackingHref } from "@/lib/storefront-preview-routing"
 
 export function Receipt({
   receipt,
   trackingToken,
+  restaurantSlug,
 }: {
   receipt: OrderReceipt
   trackingToken: string | null
+  restaurantSlug?: string
 }) {
   const t = useTranslations("Checkout")
   const locale = useLocale()
@@ -68,7 +71,11 @@ export function Receipt({
         {trackingToken && (
           <p className="mt-4">
             <Link
-              href={`/order/${receipt.id}#${trackingToken}`}
+              href={getStorefrontTrackingHref(
+                restaurantSlug,
+                receipt.id,
+                trackingToken
+              )}
               locale={locale}
               referrerPolicy="no-referrer"
               className="font-medium text-brand-text underline underline-offset-4"
@@ -119,7 +126,10 @@ export function Receipt({
           ))}
         </dl>
 
-        <CurrentCollectionInformation locale={receipt.menuLocale ?? locale} />
+        <CurrentCollectionInformation
+          locale={receipt.menuLocale ?? locale}
+          restaurantSlug={restaurantSlug}
+        />
       </CardContent>
     </section>
   )

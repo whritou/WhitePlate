@@ -18,6 +18,7 @@ export function LiveCheckout({
   state,
   name,
   establishment,
+  restaurantSlug,
   price,
   estimate,
   onBack,
@@ -26,6 +27,7 @@ export function LiveCheckout({
   state: GuestCheckoutController
   name: string
   establishment?: PublicEstablishment | null
+  restaurantSlug?: string
   price: Intl.NumberFormat
   estimate: string
   onBack: () => void
@@ -37,7 +39,11 @@ export function LiveCheckout({
   if (state.receipt)
     return (
       <section className="customer-rounded mx-auto my-8 max-w-2xl border p-6">
-        <Receipt receipt={state.receipt} trackingToken={state.trackingToken} />
+        <Receipt
+          receipt={state.receipt}
+          trackingToken={state.trackingToken}
+          restaurantSlug={restaurantSlug}
+        />
 
         <Button className="mt-6" onClick={onNewOrder}>
           {c("newOrder")}

@@ -9,13 +9,17 @@ public sealed class TenantResolutionMiddleware(RequestDelegate next)
     public async Task InvokeAsync(HttpContext context, TenantHostResolver hosts, CurrentTenant current,
         ApiErrorMapper errors)
     {
-        if (context.GetEndpoint()?.Metadata.GetMetadata<RequireTenantAttribute>() is null)
+        var endpoint = context.GetEndpoint();
+        var resolveBySlug = endpoint?.Metadata.GetMetadata<RequireTenantBySlugAttribute>() is not null;
+        if (!resolveBySlug && endpoint?.Metadata.GetMetadata<RequireTenantAttribute>() is null)
         {
             await next(context);
             return;
         }
 
-        var subdomain = hosts.Resolve(context.Request.Host);
+        var subdomain = resolveBySlug
+            ? context.Request.RouteValues["restaurantSlug"] as string
+            : hosts.Resolve(context.Request.Host);
         if (subdomain is null)
         {
             await errors.WriteAsync(context, errors.Create(context, new ApplicationError(ErrorCode.NotFound)), context.RequestAborted);

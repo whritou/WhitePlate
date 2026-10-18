@@ -6,7 +6,8 @@ import type { CheckoutResult } from "@/types/checkout"
 
 export async function checkoutGuestOrder(
   input: unknown,
-  key: unknown
+  key: unknown,
+  restaurantSlug?: unknown
 ): Promise<CheckoutResult> {
   const requestHeaders = await headers()
   const host = requestHeaders.get("host")
@@ -31,8 +32,16 @@ export async function checkoutGuestOrder(
     {
       baseDomain: process.env.STOREFRONT_BASE_DOMAIN,
       apiTemplate: process.env.PUBLIC_TENANT_API_URL_TEMPLATE,
+      pathBaseDomain: process.env.STOREFRONT_PATH_BASE_DOMAIN,
+      centralApiUrl: process.env.API_BASE_URL,
     },
     input,
-    key
+    key,
+    undefined,
+    restaurantSlug === undefined
+      ? undefined
+      : typeof restaurantSlug === "string"
+        ? restaurantSlug
+        : null
   )
 }

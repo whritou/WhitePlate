@@ -7,6 +7,7 @@ import {
 } from "@/lib/validation/establishment-settings"
 import type { ApiError } from "@/types/api"
 import type { EstablishmentRead } from "@/types/establishment-settings"
+import { appendRestaurantSlugQuery } from "@/lib/storefront-preview-routing"
 
 export class EstablishmentRequestError extends Error {
   constructor(readonly code: ApiError) {
@@ -40,12 +41,14 @@ export async function fetchEstablishmentSettings(
 
 export async function fetchPublicEstablishment(
   locale: string,
-  signal: AbortSignal
+  signal: AbortSignal,
+  restaurantSlug?: string
 ) {
-  const response = await browserRequest(
+  const path = appendRestaurantSlugQuery(
     `/api/public/establishment?${new URLSearchParams({ locale })}`,
-    { signal }
+    restaurantSlug
   )
+  const response = await browserRequest(path, { signal })
   const result = response.ok ? parsePublicEstablishment(response.data) : null
 
   if (!result) throw new EstablishmentRequestError("unavailable")

@@ -1,7 +1,7 @@
 # Decision 0003: Catalog localization and tenant domain policy
 
 - Date: 2026-09-30
-- Status: Accepted; implementation is in source, database rollout remains pending
+- Status: Accepted; host-based tenant routing is implemented, and a temporary localized path preview is an approved additive follow-up
 
 ## Context
 
@@ -18,7 +18,7 @@ The storefront interface supports English (`en`) and French (`fr`), while each r
 
 ## Implementation status
 
-Tenant languages/defaults and catalog translations are persisted by EF Core; the `CatalogLocalization` migration adds the required columns and backfills existing tenants to English with empty translation documents. It is applied to Neon `test` and Coolify Production; hosted tenant storefront and checkout acceptance remain separate. API routes enforce owner/manager access to language settings and translation writes. The public storefront resolves configured subdomains, renders the menu, exposes available languages, and marks unavailable products.
+Tenant languages/defaults and catalog translations are persisted by EF Core; the `CatalogLocalization` migration adds the required columns and backfills existing tenants to English with empty translation documents. It is applied to Neon `test` and Coolify Production; hosted tenant storefront and checkout acceptance remain separate. API routes enforce owner/manager access to language settings and translation writes. The final public storefront resolves configured subdomains, renders the menu, exposes available languages, and marks unavailable products. A temporary preview additionally supports `/en/{restaurantSlug}` and `/fr/{restaurantSlug}` on an exact server-configured shared frontend hostname, using explicit public central-API slug routes. It does not change the host-based final domain or use the route locale as the menu language.
 
 ## Consequences and remaining work
 
@@ -26,6 +26,7 @@ Tenant languages/defaults and catalog translations are persisted by EF Core; the
 - Checkout snapshots now have an approved behavior in [decision 0004](0004-localized-order-snapshots.md). That follow-up is not yet implemented or migrated; the existing runtime still does not record menu locale.
 - Custom domains, tenant-specific branding, cart, and payment remain out of this slice.
 - Product language values are not authorization. Every management query and write remains scoped by tenant ID and membership.
+- The optional `/en/{restaurantSlug}` and `/fr/{restaurantSlug}` preview is enabled only on `STOREFRONT_PATH_BASE_DOMAIN`; its slug selects only public storefront operations. Central API route aliases resolve the active restaurant and reuse existing handlers. Vercel environment configuration, deployment and live restaurant acceptance remain operational work; see the [preview spec](../../superpowers/specs/2026-10-18-storefront-path-preview-design.md).
 
 ## Alternatives considered
 

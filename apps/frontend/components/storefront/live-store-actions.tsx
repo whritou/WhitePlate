@@ -1,6 +1,7 @@
 "use client"
-import { useTranslations } from "next-intl"
+import { useLocale, useTranslations } from "next-intl"
 import { useRouter } from "@/i18n/navigation"
+import { getStorefrontMenuHref } from "@/lib/storefront-preview-routing"
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
 import { DialogTrigger } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
@@ -8,18 +9,21 @@ import type { StorefrontMenu } from "@/types/storefront"
 import type { GuestCheckoutController } from "@/types/checkout"
 export function LiveStoreActions({
   menu,
+  restaurantSlug,
   checkoutState,
   count,
   amount,
   checkoutView,
 }: {
   menu: StorefrontMenu
+  restaurantSlug?: string
   checkoutState: GuestCheckoutController
   count: number
   amount: string
   checkoutView: boolean
 }) {
   const t = useTranslations("Storefront")
+  const locale = useLocale()
   const router = useRouter()
 
   return (
@@ -34,8 +38,12 @@ export function LiveStoreActions({
           onChange={(event) =>
             checkoutState.startLanguageChange(() =>
               router.replace(
-                { pathname: "/", query: { menuLocale: event.target.value } },
-                { scroll: false }
+                getStorefrontMenuHref(
+                  restaurantSlug,
+                  event.target.value,
+                  checkoutView ? "checkout" : "shop"
+                ),
+                { locale, scroll: false }
               )
             )
           }

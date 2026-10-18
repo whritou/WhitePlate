@@ -25,6 +25,15 @@ public sealed class TenantsController(ICurrentTenant currentTenant, IEstablishme
         return PublicEstablishmentResponse.FromDto(establishment);
     }
 
+    [HttpGet("/api/v1/public/restaurants/{restaurantSlug}/establishment")]
+    [RequireTenantBySlug]
+    [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+    [ProducesResponseType<PublicEstablishmentResponse>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status404NotFound, "application/problem+json")]
+    public Task<ActionResult<PublicEstablishmentResponse>> GetEstablishmentByRestaurantSlug(
+        [FromQuery] string? locale,
+        CancellationToken ct) => GetEstablishment(locale, ct);
+
     [HttpGet]
     [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
     [ProducesResponseType<TenantResponse>(StatusCodes.Status200OK)]

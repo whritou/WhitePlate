@@ -1,10 +1,15 @@
 import { browserRequest } from "./browser-request"
 import type { PickupAvailability, PickupSlot } from "@/types/checkout"
+import { appendRestaurantSlugQuery } from "@/lib/storefront-preview-routing"
 
-export async function loadPublicPickupSlots(signal: AbortSignal) {
-  const response = await browserRequest<unknown>("/api/public/pickup-slots", {
-    signal,
-  })
+export async function loadPublicPickupSlots(
+  signal: AbortSignal,
+  restaurantSlug?: string
+) {
+  const response = await browserRequest<unknown>(
+    appendRestaurantSlugQuery("/api/public/pickup-slots", restaurantSlug),
+    { signal }
+  )
 
   if (!response.ok) return { ok: false as const, error: response.error }
   if (!isAvailability(response.data))

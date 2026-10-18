@@ -118,6 +118,19 @@ public sealed class TenantEndpointTests
         using var menu = await client.GetAsync("https://first.example.test/api/v1/menu?locale=fr", TestContext.Current.CancellationToken);
         using var menuJson = System.Text.Json.JsonDocument.Parse(await menu.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
         Assert.Equal("Counter", menuJson.RootElement.GetProperty("establishment").GetProperty("pickupInstruction").GetString());
+        using var pathScoped = await client.GetAsync("https://api.example.test/api/v1/public/restaurants/first/establishment?locale=fr",
+            TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.OK, pathScoped.StatusCode);
+        using var pathScopedJson = System.Text.Json.JsonDocument.Parse(await pathScoped.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
+        Assert.Equal("First", pathScopedJson.RootElement.GetProperty("name").GetString());
+        Assert.Equal("Counter", pathScopedJson.RootElement.GetProperty("pickupInstruction").GetString());
+        Assert.True(pathScoped.Headers.CacheControl?.NoStore);
+        foreach (var slug in new[] { "inactive", "unknown" })
+        {
+            using var unavailable = await client.GetAsync($"https://api.example.test/api/v1/public/restaurants/{slug}/establishment",
+                TestContext.Current.CancellationToken);
+            Assert.Equal(HttpStatusCode.NotFound, unavailable.StatusCode);
+        }
         foreach (var host in new[] { "inactive", "unknown" })
         {
             using var unavailable = await client.GetAsync($"https://{host}.example.test/api/v1/tenant/establishment", TestContext.Current.CancellationToken);

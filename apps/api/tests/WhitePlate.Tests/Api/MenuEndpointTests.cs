@@ -93,6 +93,42 @@ public sealed class MenuEndpointTests
     }
 
     [Fact]
+    public async Task PublicMenuResolvesRestaurantSlugOnTheCentralApiHost()
+    {
+        using var factory = new MenuFactory();
+        await factory.SeedAsync();
+        using var client = factory.CreateClient();
+
+        using var response = await client.GetAsync(
+            "https://api.example.test/api/v1/public/restaurants/bistro/menu?locale=fr",
+            TestContext.Current.CancellationToken);
+        using var json = JsonDocument.Parse(await response.Content.ReadAsStringAsync(
+            TestContext.Current.CancellationToken));
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal("Bienvenue au Bistro", json.RootElement.GetProperty("restaurantDescription").GetString());
+    }
+
+    [Fact]
+    public async Task PublicMenuSlugRouteReturnsNotFoundForUnknownOrInactiveTenants()
+    {
+        using var factory = new MenuFactory();
+        var organizationId = await factory.SeedAsync();
+        using var client = factory.CreateClient();
+
+        using var unknown = await client.GetAsync(
+            "https://api.example.test/api/v1/public/restaurants/unknown/menu",
+            TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.NotFound, unknown.StatusCode);
+
+        await factory.ArchiveOrganizationAsync(organizationId);
+        using var inactive = await client.GetAsync(
+            "https://api.example.test/api/v1/public/restaurants/bistro/menu",
+            TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.NotFound, inactive.StatusCode);
+    }
+
+    [Fact]
     public async Task PublicMenuIsUnavailableWhenItsOrganizationIsArchived()
     {
         using var factory = new MenuFactory();
@@ -101,8 +137,12 @@ public sealed class MenuEndpointTests
         using var client = factory.CreateClient();
 
         using var response = await client.GetAsync("https://bistro.example.test/api/v1/menu", TestContext.Current.CancellationToken);
+        using var slugResponse = await client.GetAsync(
+            "https://api.example.test/api/v1/public/restaurants/bistro/menu",
+            TestContext.Current.CancellationToken);
 
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, slugResponse.StatusCode);
     }
 
     private sealed class MenuFactory : WebApplicationFactory<Program>

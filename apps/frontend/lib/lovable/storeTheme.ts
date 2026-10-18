@@ -1,6 +1,7 @@
 import type { StoreTheme } from "@/types/lovable/storeTheme"
 import type { PublishedTheme } from "@/types/theme"
 import type { CSSProperties } from "react"
+import { appendRestaurantSlugQuery } from "@/lib/storefront-preview-routing"
 export type { StoreTheme } from "@/types/lovable/storeTheme"
 
 const logo = "/lovable/store/logo.png"
@@ -43,11 +44,17 @@ export const DEFAULT_THEME: StoreTheme = {
 
 export function publishedStoreTheme(
   restaurantName: string,
-  publication: PublishedTheme | null
+  publication: PublishedTheme | null,
+  restaurantSlug?: string
 ): StoreTheme {
   const version = publication?.version ?? 1
   const assetUrl = (slot: "logo" | "banner" | "favicon", available: boolean) =>
-    available ? `/api/public/brand-assets/${slot}?v=${version}` : ""
+    available
+      ? appendRestaurantSlugQuery(
+          `/api/public/brand-assets/${slot}?v=${version}`,
+          restaurantSlug
+        )
+      : ""
 
   return {
     ...DEFAULT_THEME,

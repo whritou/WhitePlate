@@ -392,3 +392,19 @@ The response contains per-currency revenue, average order value and commission v
 New checkout requests optionally include `analyticsConsented` and `analyticsSource` (`web` or `qr`). The source defaults to `web` but is stored only when analytics consent is selected; otherwise the order remains unattributed. Historical orders with no source remain unattributed. Analytics consent is separate from email-update consent and unchecked by default. If consent is selected, the server computes tenant-scoped, versioned HMAC fingerprints from the checkout email; analytics-only email is not stored on the order. A new order persists only the current key version's fingerprint; retained prior keys are used transiently for matching and withdrawal. `Analytics:PrivacyKey` must be a server-only Base64 key of at least 32 bytes and `Analytics:PrivacyKeyVersion` must be a unique version identifier. Optional prior keys are configured under `Analytics:PreviousPrivacyKeys:{version}`. During rotation, retain each prior key only through the 365-day fingerprint lifetime, then remove it. Never put these values in browser configuration or logs.
 
 `POST /api/v1/tenants/{tenantId}/analytics/withdrawal` accepts `{ "email": "…" }` without authentication. The public customer route sends the email in a POST body over the configured API transport; the API normalizes it transiently, computes all configured versioned hashes and deletes matching fingerprints, consent flags, repeat indicators, and repeat-dependency links touching the customer's matched orders in that tenant. It does not alter order-update email consent. Responses use a generic success body whether or not a record matched, with rate limiting and no-store headers. Missing privacy-key configuration returns 503, and rate-limit rejection returns 429. The outbox worker removes expired fingerprints, links and derived indicators; the API does not apply migrations on startup.
+## Temporary localized storefront path preview — 2026-10-18
+
+The temporary shared-host preview uses only explicitly public slug-scoped API routes. Each route resolves `{restaurantSlug}` through the active-tenant registry, sets request-scoped tenant context, then delegates to the same public handler as its host-based counterpart. The slug is a public data selector and grants no staff access. Unknown and inactive slugs return the same `404`; no route falls back to a tenant chosen from the API host.
+
+| Method and route | Behavior |
+| --- | --- |
+| `GET /api/v1/public/restaurants/{restaurantSlug}/menu?locale={menuLocale}` | Published public menu and effective menu locale; no-store |
+| `GET /api/v1/public/restaurants/{restaurantSlug}/theme` | Published public appearance and asset availability; no-store |
+| `GET /api/v1/public/restaurants/{restaurantSlug}/brand-assets/{slot}` | Published public logo, banner, or favicon bytes; no-store and `nosniff` |
+| `GET /api/v1/public/restaurants/{restaurantSlug}/products/{productId}/photos/{assetId}/{size}` | Current public product-photo bytes; no-store and `nosniff` |
+| `GET /api/v1/public/restaurants/{restaurantSlug}/establishment?locale={interfaceLocale}` | Current public collection information in the requested locale; no-store |
+| `GET /api/v1/public/restaurants/{restaurantSlug}/pickup-slots` | Current public pickup availability; no-store |
+| `POST /api/v1/public/restaurants/{restaurantSlug}/orders` | Existing validated, server-priced, idempotent guest checkout and rate limit |
+| `POST /api/v1/public/restaurants/{restaurantSlug}/orders/{orderId}/tracking` | Existing capability-protected status-only tracking response; no-store |
+
+Existing host-based routes and protected membership checks remain unchanged. The API tests cover slug-scoped menu/localized establishment, pickup slots, product photos, published theme and brand media, checkout/tracking, unknown/inactive slug denial, and host-based public routes. No schema change or migration is required.

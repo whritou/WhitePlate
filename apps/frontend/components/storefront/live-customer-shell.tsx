@@ -10,11 +10,15 @@ import type { StoreTheme } from "@/types/lovable/storeTheme"
 export function LiveCustomerShell({
   name,
   theme = DEFAULT_THEME,
+  restaurantSlug,
+  homeHref,
   children,
   headerActions,
 }: {
   name?: string
   theme?: StoreTheme
+  restaurantSlug?: string
+  homeHref?: string
   children: ReactNode
   headerActions?: ReactNode
 }) {
@@ -31,7 +35,10 @@ export function LiveCustomerShell({
         style={style}
       >
         <header className="flex flex-wrap items-center justify-between gap-3 border-b px-[var(--customer-padding)] py-3">
-          <Link href="/" className="flex max-w-full min-w-0 items-center gap-3">
+          <Link
+            href={homeHref ?? (restaurantSlug ? `/${restaurantSlug}` : "/")}
+            className="flex max-w-full min-w-0 items-center gap-3"
+          >
             {name && theme.logo && (
               <BrandAssetImage
                 src={theme.logo}
@@ -57,7 +64,11 @@ export function LiveCustomerShell({
         {children}
 
         <footer className="border-t px-6 py-6 text-xs text-muted-foreground">
-          <Link href="/">WhitePlate · Click & collect</Link>
+          <Link
+            href={homeHref ?? (restaurantSlug ? `/${restaurantSlug}` : "/")}
+          >
+            WhitePlate · Click & collect
+          </Link>
         </footer>
       </div>
     </VisualScopeProvider>

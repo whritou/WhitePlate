@@ -6,12 +6,19 @@ import { fetchPublicEstablishment } from "@/lib/api/establishment-browser"
 import { Button } from "@/components/ui/button"
 import { CollectionInformation } from "./collection-information"
 
-export function CurrentCollectionInformation({ locale }: { locale: string }) {
+export function CurrentCollectionInformation({
+  locale,
+  restaurantSlug,
+}: {
+  locale: string
+  restaurantSlug?: string
+}) {
   const t = useTranslations("CollectionInformation")
   const host = typeof window === "undefined" ? "" : window.location.host
   const query = useQuery({
-    queryKey: ["public-establishment", host, locale],
-    queryFn: ({ signal }) => fetchPublicEstablishment(locale, signal),
+    queryKey: ["public-establishment", host, locale, restaurantSlug],
+    queryFn: ({ signal }) =>
+      fetchPublicEstablishment(locale, signal, restaurantSlug),
     retry: false,
     staleTime: 0,
   })

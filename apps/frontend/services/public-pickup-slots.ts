@@ -1,30 +1,38 @@
 import "server-only"
 import { createApiRequestFactory } from "@/lib/api/request-factory"
-import { getTenantSlug, getTenantApiBaseUrl } from "@/lib/api/tenant-routing"
+import { createPublicStorefrontApiTarget } from "@/lib/storefront-preview-routing"
 import type { PickupAvailability, PickupSlot } from "@/types/checkout"
 
 export async function getPublicPickupSlots(
   host: string | null,
-  signal?: AbortSignal
+  signal?: AbortSignal,
+  restaurantSlug?: string
 ) {
-  const slug = getTenantSlug(host, process.env.STOREFRONT_BASE_DOMAIN)
-  const baseUrl = slug
-    ? getTenantApiBaseUrl(
-        slug,
-        process.env.PUBLIC_TENANT_API_URL_TEMPLATE,
-        process.env.STOREFRONT_BASE_DOMAIN
-      )
-    : null
+  const target = createPublicStorefrontApiTarget(host, restaurantSlug, {
+    baseDomain: process.env.STOREFRONT_BASE_DOMAIN,
+    apiTemplate: process.env.PUBLIC_TENANT_API_URL_TEMPLATE,
+    pathBaseDomain: process.env.STOREFRONT_PATH_BASE_DOMAIN,
+    centralApiUrl: process.env.API_BASE_URL,
+  })
 
-  if (!baseUrl)
+  if (!target)
     return { ok: false as const, status: 404, error: "not_found" as const }
+  if (!target.apiBaseUrl)
+    return {
+      ok: false as const,
+      status: target.kind === "path" ? 503 : 404,
+      error:
+        target.kind === "path"
+          ? ("unavailable" as const)
+          : ("not_found" as const),
+    }
 
   const api = createApiRequestFactory({
-    baseUrl,
+    baseUrl: target.apiBaseUrl,
     getToken: async () => null,
     public: true,
   })
-  const response = await api.get<unknown>("/api/v1/pickup-slots", {
+  const response = await api.get<unknown>(`${target.apiPrefix}/pickup-slots`, {
     signal: signal
       ? AbortSignal.any([signal, AbortSignal.timeout(10_000)])
       : AbortSignal.timeout(10_000),

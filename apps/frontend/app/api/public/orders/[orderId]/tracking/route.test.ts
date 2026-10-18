@@ -73,3 +73,48 @@ it("forwards only the capability body to the validated restaurant API host", asy
     createdAt: "2026-10-08T08:00:00Z",
   })
 })
+
+it("loads path-preview tracking through the central slug-scoped API", async () => {
+  vi.stubEnv("STOREFRONT_BASE_DOMAIN", "restaurants.example.test")
+  vi.stubEnv("STOREFRONT_PATH_BASE_DOMAIN", "white-plate.vercel.app")
+  vi.stubEnv(
+    "PUBLIC_TENANT_API_URL_TEMPLATE",
+    "https://{tenant}.restaurants.example.test"
+  )
+  vi.stubEnv("API_BASE_URL", "https://api.example.test")
+
+  const calls: { url: string; init?: RequestInit }[] = []
+
+  vi.stubGlobal("fetch", async (url: string | URL, init?: RequestInit) => {
+    calls.push({ url: String(url), init })
+
+    return Response.json({
+      id: orderId,
+      status: "Ready",
+      version: 3,
+      createdAt: "2026-10-08T08:00:00Z",
+    })
+  })
+
+  const response = await POST(
+    new Request(
+      `https://white-plate.vercel.app/api/public/orders/${orderId}/tracking?restaurantSlug=bistro`,
+      {
+        method: "POST",
+        headers: {
+          host: "white-plate.vercel.app",
+          origin: "https://white-plate.vercel.app",
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({ token }),
+      }
+    ),
+    { params: Promise.resolve({ orderId }) }
+  )
+
+  expect(calls[0]?.url).toBe(
+    `https://api.example.test/api/v1/public/restaurants/bistro/orders/${orderId}/tracking`
+  )
+  expect(response.status).toBe(200)
+  expect(response.headers.get("cache-control")).toBe("no-store")
+})

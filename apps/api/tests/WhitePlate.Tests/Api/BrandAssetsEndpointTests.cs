@@ -61,6 +61,30 @@ public sealed partial class BrandAssetsEndpointTests
         Assert.Equal(draft.Id, Assert.Single(readBack!.Assets).Id);
         using var publicImage = await client.GetAsync("https://bistro.example.test/api/v1/brand-assets/logo", Ct);
         Assert.Equal(HttpStatusCode.NotFound, publicImage.StatusCode);
+        using (var scope = factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<WhitePlateDbContext>();
+            var tenantEntity = await db.Tenants.SingleAsync(item => item.Id == tenant, Ct);
+            Assert.True(tenantEntity.SetPublishedTheme(new WhitePlate.Domain.Tenants.ThemePublicationSnapshot(
+                tenantEntity.GetThemeDraft(), draft.Id, null, null, tenantEntity.ThemeDraftVersion,
+                factory.Clock.GetUtcNow()), tenantEntity.ThemeDraftVersion, tenantEntity.ThemePublicationVersion));
+            var publishedAsset = await db.MediaAssets.SingleAsync(item => item.Id == draft.Id, Ct);
+            publishedAsset.SetInPublishedTheme(true, factory.Clock.GetUtcNow());
+            await db.SaveChangesAsync(Ct);
+        }
+        using var publicTheme = await client.GetAsync("https://api.example.test/api/v1/public/restaurants/bistro/theme", Ct);
+        Assert.Equal(HttpStatusCode.OK, publicTheme.StatusCode);
+        Assert.True(publicTheme.Headers.CacheControl?.NoStore);
+        using var pathImage = await client.GetAsync("https://api.example.test/api/v1/public/restaurants/bistro/brand-assets/logo", Ct);
+        Assert.Equal(HttpStatusCode.OK, pathImage.StatusCode);
+        Assert.True(pathImage.Headers.CacheControl?.NoStore);
+        using (var scope = factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<WhitePlateDbContext>();
+            var publishedAsset = await db.MediaAssets.SingleAsync(item => item.Id == draft.Id, Ct);
+            publishedAsset.SetInPublishedTheme(false, factory.Clock.GetUtcNow());
+            await db.SaveChangesAsync(Ct);
+        }
         factory.Storage.FailWrites = true;
         using var failed = await client.PostAsync($"{path}/logo/uploads", Binary(ImageBytes()), Ct);
         Assert.Equal(HttpStatusCode.ServiceUnavailable, failed.StatusCode);
