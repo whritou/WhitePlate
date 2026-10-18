@@ -1,5 +1,5 @@
-import { LiveSettings } from "@/components/organization/live-settings"
-import { OrganizationSettingsForm } from "@/components/organization/organization-settings-form"
+import { LiveSettings } from "@/components/workspace/settings/live-settings"
+import { OrganizationSettingsForm } from "@/components/workspace/settings/organization/organization-settings-form"
 
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Card } from "@/components/ui/card"

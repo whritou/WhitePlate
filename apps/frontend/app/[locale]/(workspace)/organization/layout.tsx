@@ -1,4 +1,4 @@
-import { WorkspaceShell } from "@/components/organization/workspace-shell"
+import { WorkspaceShell } from "@/components/workspace/shared/workspace-shell"
 import { auth } from "@/lib/auth"
 import { getRestaurantMemberships } from "@/services/orders"
 import { getOrganizations } from "@/services/organization-queries"

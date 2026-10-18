@@ -1,5 +1,5 @@
 import { Suspense } from "react"
-import { TrackingPage } from "@/components/lovable/pages/tracking"
+import { TrackingPage } from "@/components/storefront/demo/pages/tracking"
 export default function Page() {
   return (
     <Suspense>

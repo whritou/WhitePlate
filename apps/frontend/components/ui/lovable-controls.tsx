@@ -6,7 +6,7 @@ import { Input } from "./input"
 import { Textarea } from "./textarea"
 import { Label } from "./label"
 import { NativeSelect, NativeSelectOption } from "./native-select"
-import { useLovableText } from "@/components/lovable/copy"
+import { useLovableText } from "@/components/shared/translated-copy"
 import { cn } from "@/lib/utils"
 
 export function SourceButton({

@@ -1,5 +1,5 @@
 import { Suspense } from "react"
-import { HistoryPage } from "@/components/lovable/pages/history"
+import { HistoryPage } from "@/components/demo/workspace/history/page"
 export default function Page() {
   return (
     <Suspense>

@@ -1,5 +1,5 @@
 import { OrderDashboard } from "@/components/orders/order-dashboard"
-import { BackLink } from "@/components/organization/back-link"
+import { BackLink } from "@/components/workspace/shared/back-link"
 import { Card } from "@/components/ui/card"
 import { auth } from "@/lib/auth"
 import {

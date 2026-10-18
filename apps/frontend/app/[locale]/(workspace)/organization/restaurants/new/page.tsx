@@ -1,5 +1,5 @@
-import { RestaurantForm } from "@/components/organization/restaurant-form"
-import { BackLink } from "@/components/organization/back-link"
+import { RestaurantForm } from "@/components/workspace/restaurants/create/restaurant-form"
+import { BackLink } from "@/components/workspace/shared/back-link"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import {
   Card,

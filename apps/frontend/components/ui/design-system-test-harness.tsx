@@ -2,7 +2,7 @@
 
 import { useLocale, useTranslations } from "next-intl"
 import { OrderTicket } from "@/components/orders/order-ticket"
-import { WorkspaceShell } from "@/components/organization/workspace-shell"
+import { WorkspaceShell } from "@/components/workspace/shared/workspace-shell"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"

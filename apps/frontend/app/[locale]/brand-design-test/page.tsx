@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation"
-import { BrandAssetsWorkspace } from "@/components/organization/brand-assets-workspace"
-import { WorkspaceShell } from "@/components/organization/workspace-shell"
+import { BrandAssetsWorkspace } from "@/components/workspace/studio/appearance/brand-assets-workspace"
+import { WorkspaceShell } from "@/components/workspace/shared/workspace-shell"
 import { FixtureReady } from "../catalog-design-test/ready"
 
 export const dynamic = "force-dynamic"

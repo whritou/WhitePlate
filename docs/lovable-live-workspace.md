@@ -25,10 +25,10 @@ Creation, invitation acceptance and authentication URLs remain available. Auth s
 
 ## Design and component ownership
 
-- `components/lovable/lovable.css` and `fonts.css` remain the recovered source reference; local assets/fonts/licenses remain under `public/lovable`.
-- `components/lovable/live.css` maps existing shared control aliases onto source tokens within `.lovable-surface.lovable-live`. No global Culinary Commerce palette is replaced. Backoffice surfaces stay light and square; customer scope uses the source default customer theme, including rounded cards.
-- `components/organization/workspace-shell.tsx` owns the real horizontal navigation. `lib/live-workspace-navigation.ts` is its pure context-aware URL mapping.
-- `components/organization/live-settings.tsx`, `live-studio.tsx`, `live-dashboard.tsx` reuse or adapt recovered source recipes to actual contracts. `components/orders/order-overview.tsx` composes the shared order query, connection status and ticket actions without duplicating the Orders Kanban. `missing-feature-notice.tsx` discloses fictitious behavior in both catalogs.
+- `components/theme/landing-demo.css` and `landing-fonts.css` contain the recovered source reference; local assets/fonts/licenses remain under `public/lovable`.
+- `components/theme/workspace-visuals.css` maps existing shared control aliases onto source tokens within `.lovable-surface.lovable-live`. No global Culinary Commerce palette is replaced. Backoffice surfaces stay light and square; customer scope uses the source default customer theme, including rounded cards.
+- `components/workspace/shared/workspace-shell.tsx` owns the real horizontal navigation. `lib/live-workspace-navigation.ts` is its pure context-aware URL mapping.
+- `components/workspace/settings/live-settings.tsx`, `studio/appearance/live-studio.tsx` and `dashboard/live-dashboard.tsx` reuse or adapt recovered source recipes to actual contracts. `components/orders/order-overview.tsx` composes the shared order query, connection status and ticket actions without duplicating the Orders Kanban. `workspace/shared/missing-feature-notice.tsx` discloses fictitious behavior in both catalogs.
 - `components/storefront/live-customer-shell.tsx`, `live-restaurant-identity.tsx` and `live-store-actions.tsx` adapt customer recipes around existing guest controls. Uploaded restaurant/product images remain authoritative; missing assets show neutral fallbacks.
 - `components/ui/visual-scope.tsx` carries scoped classes/theme variables through shared Dialog, Sheet and AlertDialog portals. Base UI continues to manage keyboard focus and Escape.
 - The dashboard route checks a verified session and current restaurant membership before reading orders; Kitchen does not receive catalog data. Analytics remains owner/manager-only. Browser context is never authorization.

@@ -2,8 +2,8 @@
 
 import { useState } from "react"
 import { useTranslations } from "next-intl"
-import { EstablishmentForm } from "@/components/organization/establishment-form"
-import { EstablishmentEditor } from "@/components/organization/establishment-editor"
+import { EstablishmentForm } from "@/components/workspace/settings/restaurants/establishment-form"
+import { EstablishmentEditor } from "@/components/workspace/settings/restaurants/establishment-editor"
 import { Button } from "@/components/ui/button"
 import { Receipt } from "@/components/storefront/receipt"
 import { parseEstablishmentInput } from "@/lib/validation/establishment-settings"

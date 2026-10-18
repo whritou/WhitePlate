@@ -1,5 +1,5 @@
 import { Suspense } from "react"
-import { StudioPage } from "@/components/lovable/pages/studio"
+import { StudioPage } from "@/components/demo/workspace/studio/page"
 export default function Page() {
   return (
     <Suspense>

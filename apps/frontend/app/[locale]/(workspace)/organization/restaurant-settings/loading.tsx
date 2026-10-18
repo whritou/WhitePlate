@@ -1,16 +1,13 @@
+import { WorkspacePageSkeleton } from "@/components/workspace/shared/workspace-page-skeletons"
 import { getTranslations } from "next-intl/server"
-import { Skeleton } from "@/components/ui/skeleton"
 
-export default async function Loading() {
+export default async function RestaurantSettingsLoading() {
   const t = await getTranslations("EstablishmentSettings")
 
   return (
-    <main className="live-page grid gap-6" role="status">
-      <p>{t("loading")}</p>
-
-      <Skeleton className="h-12 w-full" />
-
-      <Skeleton className="h-64 w-full" />
-    </main>
+    <WorkspacePageSkeleton
+      page="restaurantSettings"
+      label={t("loading")}
+    />
   )
 }

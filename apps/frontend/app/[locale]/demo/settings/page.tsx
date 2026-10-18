@@ -1,5 +1,5 @@
 import { Suspense } from "react"
-import { SettingsPage } from "@/components/lovable/pages/settings"
+import { SettingsPage } from "@/components/demo/workspace/settings/page"
 export default function Page() {
   return (
     <Suspense>

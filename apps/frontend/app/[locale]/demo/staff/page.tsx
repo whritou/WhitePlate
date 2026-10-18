@@ -1,5 +1,5 @@
 import { Suspense } from "react"
-import { StaffPage } from "@/components/lovable/pages/staff"
+import { StaffPage } from "@/components/demo/workspace/team/page"
 export default function Page() {
   return (
     <Suspense>

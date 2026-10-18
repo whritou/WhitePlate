@@ -1,12 +1,17 @@
 export type WorkspaceLoadingPage =
+  | "overview"
+  | "analytics"
+  | "dashboard"
   | "organizationSignUp"
   | "team"
   | "restaurant"
   | "catalog"
   | "menuLanguages"
   | "settings"
+  | "restaurantSettings"
   | "orders"
   | "orderHistory"
+  | "theming"
 
 export type WorkspaceLoadingTranslationKey =
   | "organizationSignUp"

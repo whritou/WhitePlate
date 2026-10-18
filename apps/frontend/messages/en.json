@@ -67,6 +67,8 @@
     "chooseLegalCountry": "Choose a legal country",
     "cancelLegalProfile": "Cancel",
     "legalName": "Legal business name",
+    "legalRegistration": "Registration number",
+    "legalTax": "Tax identifier",
     "legalRegistrationNumber": "Company registration number (SIREN / register / EIN)",
     "taxIdentifier": "Tax identifier (VAT ID or EIN)",
     "legalRegistrationFR": "SIREN (9 digits)",

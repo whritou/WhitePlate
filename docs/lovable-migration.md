@@ -25,14 +25,15 @@ The four original demo URLs remain. Additional pages make the export's navigatio
 
 The canonical [design system](design-system/README.md) now includes a scoped Lovable reference. `.lovable-surface` preserves Space Grotesk, kelp green/lime/ink, square backoffice borders, original hero overlay and source spacing/layout. The real workspace/customer extension is documented separately; Culinary Commerce remains the default for authentication and unscoped screens. The source is light: these scoped pages stay light even when the application theme is dark; restaurant presets can supply their own dark palette.
 
-- `components/lovable/lovable.css`: scoped source tokens/component/customer CSS, plus explicit container widths to avoid existing Tailwind spacing alias collisions.
-- `components/lovable/fonts.css`: local font faces for all twelve original Studio families and presets. Google font binaries were recovered because the archive includes font URLs but no binaries. OFL licenses accompany them.
+- `components/theme/landing-demo.css`: scoped source tokens/component/customer CSS, plus explicit container widths to avoid existing Tailwind spacing alias collisions.
+- `components/theme/landing-fonts.css`: local font faces for all twelve original Studio families and presets. Google font binaries were recovered because the archive includes font URLs but no binaries. OFL licenses accompany them.
 - `public/lovable/`: original hero/restaurant assets and bundled fonts. Rendering/build do not fetch Google Fonts. Studio uploads remain browser data URLs.
-- `components/lovable/landing-*`: original marketing sections, pricing/FAQ and interactive previews.
-- `components/lovable/pages/`: original backoffice designs split into model/context/view/section files to satisfy the repository's file-size limit.
-- CustomerShell, Storefront, CustomerCheckout, CustomerTracking and ProductThemePreview are shared with Studio.
+- `components/marketing/landing/`: original marketing sections, pricing/FAQ and interactive previews, grouped under `sections/` and `previews/`.
+- `components/demo/workspace/<area>/`: illustrative back-office pages grouped by dashboard, history, menu, orders, settings, team and studio.
+- `components/storefront/demo/`: illustrative storefront, checkout, tracking and shared customer-shell modules, separate from live tenant storefronts.
+- `components/workspace/<area>/`: real workspace modules grouped by analytics, catalog, dashboard, orders, overview, restaurants, settings, studio and team. Catalog/settings/team subareas are split into their page sections.
 - `components/ui/lovable-*`: Base UI adapters preserving original classes and existing control conventions. Dialogs add focus/Escape behavior; 44px touch targets can enlarge source controls.
-- `navigation.tsx` maps source navigation to localized routes. `copy.tsx` resolves original phrases through `LovableOriginal`/`Lovable` in both catalogs.
+- `components/demo/shared/navigation.tsx` maps source navigation to localized routes. `components/shared/translated-copy.tsx` resolves original phrases through `LovableOriginal`/`Lovable` in both catalogs.
 - Product/category/option translations and editor content use the original menu language resolver directly. The customer menu initially follows the interface locale when available; its language selector then controls menu content independently. It waits for hydration before accepting changes.
 - `lib/lovable`, `hooks/lovable`, `types/lovable`: isolated sample data, browser drafts, hydration and types. Storage keys start with `whiteplate-lovable-demo-`.
 

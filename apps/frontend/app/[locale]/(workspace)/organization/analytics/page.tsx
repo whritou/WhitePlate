@@ -1,5 +1,5 @@
 import { getLocale } from "next-intl/server"
-import { AnalyticsWorkspaceClient } from "@/components/organization/analytics-workspace-client"
+import { AnalyticsWorkspaceClient } from "@/components/workspace/analytics/analytics-workspace-client"
 import { selectAnalyticsMemberships } from "@/lib/analytics-access"
 import { getRestaurantMemberships } from "@/services/orders"
 import type { SearchParams } from "@/types/navigation"

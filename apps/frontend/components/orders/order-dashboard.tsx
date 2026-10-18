@@ -3,7 +3,7 @@
 import { Volume2, VolumeX } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { BackLink } from "@/components/organization/back-link"
+import { BackLink } from "@/components/workspace/shared/back-link"
 import { useMemo, useState } from "react"
 import { useOrderDashboard } from "@/hooks/use-order-dashboard"
 import { useRouter } from "@/i18n/navigation"

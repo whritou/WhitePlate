@@ -1,5 +1,5 @@
 "use client"
-import { Copy } from "@/components/lovable/copy"
+import { Copy } from "@/components/shared/translated-copy"
 import type { Order } from "@/types/lovable/backoffice"
 import { createContext, useContext, useState, type ReactNode } from "react"
 export type { Status, Order } from "@/types/lovable/backoffice"

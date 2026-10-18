@@ -30,7 +30,7 @@ vi.mock("@/services/orders", () => ({ getRestaurantMemberships }))
 vi.mock("@/components/auth/sign-out-button", () => ({
   SignOutButton: () => createElement("button", null, "Sign out"),
 }))
-vi.mock("@/components/organization/organization-archive-action", () => ({
+vi.mock("@/components/workspace/overview/organization-archive-action", () => ({
   OrganizationArchiveAction: () =>
     createElement("button", null, "restoreOrganization"),
 }))

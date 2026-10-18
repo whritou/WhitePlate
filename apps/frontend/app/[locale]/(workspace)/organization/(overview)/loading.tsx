@@ -1,4 +1,4 @@
-import { WorkspaceLoadingSkeleton } from "@/components/organization/workspace-loading-skeleton"
+import { WorkspaceLoadingSkeleton } from "@/components/workspace/shared/workspace-loading-skeleton"
 import { getTranslations } from "next-intl/server"
 
 export default async function OrganizationLoading() {

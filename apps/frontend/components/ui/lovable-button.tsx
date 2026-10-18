@@ -4,7 +4,7 @@ import { isValidElement } from "react"
 import { Button as BaseButton } from "./button"
 import { cn } from "@/lib/utils"
 import type { LovableButtonProps } from "@/types/lovable-adapters"
-import { useLovableText } from "@/components/lovable/copy"
+import { useLovableText } from "@/components/shared/translated-copy"
 
 export function Button({
   asChild,

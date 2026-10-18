@@ -49,15 +49,16 @@ export function StaffInvitationForm({
     if (!option.builtInKey) return option.name
 
     const roleKeys: Record<string, OrganizationTeamRole> = {
+      OrganizationOwner: "OrganizationOwner",
       Manager: "RestaurantManager",
       Kitchen: "KitchenStaff",
       Staff: "RestaurantStaff",
       Accountant: "Accountant",
     }
 
-    return roleKeys[option.builtInKey]
-      ? t(roleKeys[option.builtInKey])
-      : option.name
+    const roleKey = roleKeys[option.builtInKey]
+
+    return roleKey ? t(`teamRoles.${roleKey}`) : option.name
   }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
