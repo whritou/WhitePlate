@@ -169,9 +169,7 @@ export function OrganizationOverview({
                       nativeButton={false}
                       role="link"
                       render={
-                        <Link
-                          href={restaurantWorkspaceHref(restaurant)}
-                        />
+                        <Link href={restaurantWorkspaceHref(restaurant)} />
                       }
                     >
                       {v("openRestaurant")}

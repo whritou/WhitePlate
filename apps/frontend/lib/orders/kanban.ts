@@ -1,7 +1,4 @@
-import type {
-  OrderSummary,
-  UpdateOrderStatusInput,
-} from "@/types/orders"
+import type { OrderSummary, UpdateOrderStatusInput } from "@/types/orders"
 import { getAvailableOrderTransitions } from "@/lib/order-dashboard"
 
 export function resolveOrderDrop(

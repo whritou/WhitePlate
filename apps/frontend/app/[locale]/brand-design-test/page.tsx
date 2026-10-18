@@ -14,7 +14,21 @@ export default function BrandDesignFixture() {
     <WorkspaceShell
       organizations={[]}
       restaurants={[
-        { id: tenantId, name: "Bistro Madeleine", role: "OrganizationOwner", permissions: ["orders.manage", "kitchen.display", "catalog.manage", "discounts.manage", "analytics.view", "storefront.manage", "staff.manage", "billing.manage"] },
+        {
+          id: tenantId,
+          name: "Bistro Madeleine",
+          role: "OrganizationOwner",
+          permissions: [
+            "orders.manage",
+            "kitchen.display",
+            "catalog.manage",
+            "discounts.manage",
+            "analytics.view",
+            "storefront.manage",
+            "staff.manage",
+            "billing.manage",
+          ],
+        },
       ]}
     >
       <main className="mx-auto w-full max-w-[100rem] min-w-0 p-4 sm:p-6 lg:p-8">

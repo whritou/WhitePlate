@@ -25,35 +25,50 @@ const id = "22222222-2222-4222-8222-222222222222"
 
 beforeEach(() => {
   vi.clearAllMocks()
-  mocks.getSession.mockResolvedValue({ user: { id: "user-a", emailVerified: true } })
+  mocks.getSession.mockResolvedValue({
+    user: { id: "user-a", emailVerified: true },
+  })
   mocks.getRestaurantMemberships.mockResolvedValue({
     ok: true,
-    data: [{ id, name: "Real", role: "Manager", permissions: ["storefront.manage"] }],
+    data: [
+      { id, name: "Real", role: "Manager", permissions: ["storefront.manage"] },
+    ],
   })
 })
 it("rejects anonymous and unverified users before accessing API data", async () => {
   mocks.getSession.mockResolvedValue(null)
-  await expect(getManagedWorkspaceRestaurant(id, ["storefront.manage"])).rejects.toThrow("/fr/sign-in")
+  await expect(
+    getManagedWorkspaceRestaurant(id, ["storefront.manage"])
+  ).rejects.toThrow("/fr/sign-in")
   expect(mocks.getRestaurantMemberships).not.toHaveBeenCalled()
   mocks.getSession.mockResolvedValue({ user: { emailVerified: false } })
-  await expect(getManagedWorkspaceRestaurant(id, ["storefront.manage"])).rejects.toThrow(
-    "/fr/verify-email"
-  )
+  await expect(
+    getManagedWorkspaceRestaurant(id, ["storefront.manage"])
+  ).rejects.toThrow("/fr/verify-email")
 })
 it("does not use unknown, repeated or kitchen tenant selections as management access", async () => {
-  expect(await getManagedWorkspaceRestaurant([id, id], ["storefront.manage"])).toBeNull()
+  expect(
+    await getManagedWorkspaceRestaurant([id, id], ["storefront.manage"])
+  ).toBeNull()
   expect(mocks.getRestaurantMemberships).not.toHaveBeenCalled()
   expect(
-    await getManagedWorkspaceRestaurant("11111111-1111-4111-8111-111111111111", ["storefront.manage"])
+    await getManagedWorkspaceRestaurant(
+      "11111111-1111-4111-8111-111111111111",
+      ["storefront.manage"]
+    )
   ).toBeNull()
   mocks.getRestaurantMemberships.mockResolvedValue({
     ok: true,
     data: [{ id, role: "Kitchen", permissions: ["kitchen.display"] }],
   })
-  expect(await getManagedWorkspaceRestaurant(id, ["storefront.manage"])).toBeNull()
+  expect(
+    await getManagedWorkspaceRestaurant(id, ["storefront.manage"])
+  ).toBeNull()
 })
 it("returns only authorized API membership data and never substitutes fixtures on failure", async () => {
-  expect(await getManagedWorkspaceRestaurant(id, ["storefront.manage"])).toEqual({
+  expect(
+    await getManagedWorkspaceRestaurant(id, ["storefront.manage"])
+  ).toEqual({
     id,
     name: "Real",
     role: "Manager",
@@ -61,5 +76,7 @@ it("returns only authorized API membership data and never substitutes fixtures o
     userId: "user-a",
   })
   mocks.getRestaurantMemberships.mockResolvedValue({ ok: false, status: 503 })
-  expect(await getManagedWorkspaceRestaurant(id, ["storefront.manage"])).toBeNull()
+  expect(
+    await getManagedWorkspaceRestaurant(id, ["storefront.manage"])
+  ).toBeNull()
 })

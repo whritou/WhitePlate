@@ -50,9 +50,7 @@ export default async function ThemingPage({ searchParams }: BrandPageProps) {
       ) : (
         <>
           <Alert variant="destructive" role="alert">
-            <AlertDescription>
-              {t("errors.forbidden")}
-            </AlertDescription>
+            <AlertDescription>{t("errors.forbidden")}</AlertDescription>
           </Alert>
 
           <MenuBuilderRetry />

@@ -1,7 +1,13 @@
 import type { OrderingOperationsScope } from "@/types/ordering-operations"
 
 export const orderingOperationsQueryKeys = {
-  tenant: ({ userId, tenantId, locale, role, permissions }: OrderingOperationsScope) =>
+  tenant: ({
+    userId,
+    tenantId,
+    locale,
+    role,
+    permissions,
+  }: OrderingOperationsScope) =>
     [
       "whiteplate",
       "ordering-operations",

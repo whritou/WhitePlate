@@ -139,7 +139,7 @@ async function StorefrontSection({
         <span>{t("paymentsPending")}</span>
       </p>
 
-          {(canManageStorefront || canManageCatalog) && (
+      {(canManageStorefront || canManageCatalog) && (
         <div className="mt-5 flex flex-wrap gap-2">
           {canManageStorefront && (
             <Button

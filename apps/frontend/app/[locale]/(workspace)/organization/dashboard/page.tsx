@@ -92,7 +92,11 @@ export default async function DashboardPage({
     redirect(`/${locale}/sign-in`)
   if (!metricsResponse.ok && metricsResponse.status === 401)
     redirect(`/${locale}/sign-in`)
-  if (operationsResponse && !operationsResponse.ok && operationsResponse.status === 401)
+  if (
+    operationsResponse &&
+    !operationsResponse.ok &&
+    operationsResponse.status === 401
+  )
     redirect(`/${locale}/sign-in`)
 
   let page: OrderPage | null = null

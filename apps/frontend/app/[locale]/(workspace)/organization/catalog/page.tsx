@@ -103,22 +103,23 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
             : undefined
         }
         translationWorkflowUnavailable={
-          canManageCatalog && (!translationReviews?.ok || !translationGlossary?.ok)
+          canManageCatalog &&
+          (!translationReviews?.ok || !translationGlossary?.ok)
         }
         initialView={
           !canManageCatalog
             ? "discounts"
             : query.view === "discounts"
-            ? "discounts"
-            : query.view === "languages"
-              ? "languages"
-              : query.view === "versions"
-                ? "versions"
-                : query.view === "categories"
-                  ? "categories"
-                  : query.view === "translations"
-                    ? "translations"
-                    : "products"
+              ? "discounts"
+              : query.view === "languages"
+                ? "languages"
+                : query.view === "versions"
+                  ? "versions"
+                  : query.view === "categories"
+                    ? "categories"
+                    : query.view === "translations"
+                      ? "translations"
+                      : "products"
         }
       />
     </main>

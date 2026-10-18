@@ -22,24 +22,22 @@ it("accepts only the next lifecycle stage and permission-authorized cancellation
     version: 4,
     status: "Preparing",
   })
-  expect(resolveOrderDrop(order, [order], "Ready", false, ["kitchen.display"])).toBeNull()
+  expect(
+    resolveOrderDrop(order, [order], "Ready", false, ["kitchen.display"])
+  ).toBeNull()
   expect(
     resolveOrderDrop(order, [order], "Cancelled", false, ["kitchen.display"])
   ).toBeNull()
   expect(
-    resolveOrderDrop(order, [order], "Cancelled", false, ["orders.manage"])?.status
+    resolveOrderDrop(order, [order], "Cancelled", false, ["orders.manage"])
+      ?.status
   ).toBe("Cancelled")
 })
 
 it("rejects a moved, removed or version-changed ticket and pending mutations", () => {
   expect(resolveOrderDrop(order, [], "Preparing", false)).toBeNull()
   expect(
-    resolveOrderDrop(
-      order,
-      [{ ...order, version: 5 }],
-      "Preparing",
-      false
-    )
+    resolveOrderDrop(order, [{ ...order, version: 5 }], "Preparing", false)
   ).toBeNull()
   expect(
     resolveOrderDrop(
@@ -49,11 +47,7 @@ it("rejects a moved, removed or version-changed ticket and pending mutations", (
       false
     )
   ).toBeNull()
-  expect(
-    resolveOrderDrop(order, [order], "Preparing", true)
-  ).toBeNull()
+  expect(resolveOrderDrop(order, [order], "Preparing", true)).toBeNull()
   expect(resolveOrderDrop(order, [order], "bogus", false)).toBeNull()
-  expect(
-    resolveOrderDrop(order, [order], "Pending", false)
-  ).toBeNull()
+  expect(resolveOrderDrop(order, [order], "Pending", false)).toBeNull()
 })

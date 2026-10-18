@@ -31,8 +31,10 @@ export function MenuBuilderWorkspace({
   const v = useTranslations("LiveParity")
   const router = useRouter()
   const availableViews: MenuBuilderView[] = [
-    ...(canManageCatalog ? ["products", "languages", "versions"] as const : []),
-    ...(canManageDiscounts ? ["discounts"] as const : []),
+    ...(canManageCatalog
+      ? (["products", "languages", "versions"] as const)
+      : []),
+    ...(canManageDiscounts ? (["discounts"] as const) : []),
   ]
   const safeInitialView =
     initialView === "translations"
@@ -53,11 +55,7 @@ export function MenuBuilderWorkspace({
   const [pending, setPending] = useState(false)
 
   function changeView(value: unknown) {
-    if (
-      pending ||
-      !availableViews.includes(value as MenuBuilderView)
-    )
-      return
+    if (pending || !availableViews.includes(value as MenuBuilderView)) return
     setView(value as MenuBuilderView)
 
     const url = new URL(window.location.href)
@@ -92,23 +90,25 @@ export function MenuBuilderWorkspace({
           aria-label={t("sections")}
           className="h-auto max-w-full flex-wrap bg-background p-0"
         >
-            {(
-              [
+          {(
+            [
               ["products", "dishes"],
               ["discounts", "discounts"],
               ["languages", "languages"],
               ["versions", "versionsTab"],
             ] as const
-            ).filter(([value]) => availableViews.includes(value)).map(([value, label]) => (
-            <TabsTrigger
-              key={value}
-              value={value}
-              disabled={pending}
-              className="label-mono px-4 py-3"
-            >
-              {v(label)}
-            </TabsTrigger>
-          ))}
+          )
+            .filter(([value]) => availableViews.includes(value))
+            .map(([value, label]) => (
+              <TabsTrigger
+                key={value}
+                value={value}
+                disabled={pending}
+                className="label-mono px-4 py-3"
+              >
+                {v(label)}
+              </TabsTrigger>
+            ))}
         </TabsList>
 
         {view === "products" && canManageCatalog && (
@@ -170,51 +170,57 @@ export function MenuBuilderWorkspace({
         </TabsContent>
       )}
 
-      {canManageCatalog && <TabsContent value="languages" keepMounted>
-        <div className="mx-auto grid max-w-5xl gap-6 p-6">
-          <h2 className="font-display text-2xl font-bold">{v("languages")}</h2>
+      {canManageCatalog && (
+        <TabsContent value="languages" keepMounted>
+          <div className="mx-auto grid max-w-5xl gap-6 p-6">
+            <h2 className="font-display text-2xl font-bold">
+              {v("languages")}
+            </h2>
 
-          {settings ? (
-            <>
-              <MenuLanguageSettings {...settings} />
+            {settings ? (
+              <>
+                <MenuLanguageSettings {...settings} />
 
-              {description && (
-                <RestaurantDescriptionEditor
-                  {...description}
+                {description && (
+                  <RestaurantDescriptionEditor
+                    {...description}
+                    onPendingChange={setPending}
+                  />
+                )}
+
+                <CatalogTranslationsEditor
+                  {...settings}
+                  catalog={catalog}
+                  reviews={translationReviews}
+                  glossary={translationGlossary}
+                  workflowUnavailable={translationWorkflowUnavailable}
                   onPendingChange={setPending}
                 />
-              )}
+              </>
+            ) : (
+              <Alert variant="destructive">
+                <AlertDescription>{t("languagesUnavailable")}</AlertDescription>
 
-              <CatalogTranslationsEditor
-                {...settings}
-                catalog={catalog}
-                reviews={translationReviews}
-                glossary={translationGlossary}
-                workflowUnavailable={translationWorkflowUnavailable}
-                onPendingChange={setPending}
-              />
-            </>
-          ) : (
-            <Alert variant="destructive">
-              <AlertDescription>{t("languagesUnavailable")}</AlertDescription>
+                <Button variant="outline" onClick={() => router.refresh()}>
+                  {t("retry")}
+                </Button>
+              </Alert>
+            )}
+          </div>
+        </TabsContent>
+      )}
 
-              <Button variant="outline" onClick={() => router.refresh()}>
-                {t("retry")}
-              </Button>
-            </Alert>
-          )}
-        </div>
-      </TabsContent>}
-
-      {canManageCatalog && <TabsContent value="versions">
-        <CatalogPublicationPanel
-          mode="manager"
-          tenantId={catalog.tenantId}
-          userId={userId}
-          publication={catalog.publication}
-          pending={pending}
-        />
-      </TabsContent>}
+      {canManageCatalog && (
+        <TabsContent value="versions">
+          <CatalogPublicationPanel
+            mode="manager"
+            tenantId={catalog.tenantId}
+            userId={userId}
+            publication={catalog.publication}
+            pending={pending}
+          />
+        </TabsContent>
+      )}
     </Tabs>
   )
 }

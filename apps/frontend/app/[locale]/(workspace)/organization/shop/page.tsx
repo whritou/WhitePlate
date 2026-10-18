@@ -54,9 +54,7 @@ export default async function ShopPage({
         render={
           <Link
             href={
-              restaurant
-                ? restaurantWorkspaceHref(restaurant)
-                : "/organization"
+              restaurant ? restaurantWorkspaceHref(restaurant) : "/organization"
             }
           />
         }

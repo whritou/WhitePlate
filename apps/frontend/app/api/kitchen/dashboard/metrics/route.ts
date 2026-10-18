@@ -24,8 +24,8 @@ export async function GET(request: Request) {
     !memberships.data?.some(
       (item) =>
         item.id.toLowerCase() === tenantId.toLowerCase() &&
-        ["orders.manage", "kitchen.display", "analytics.view"].some((permission) =>
-          item.permissions.includes(permission)
+        ["orders.manage", "kitchen.display", "analytics.view"].some(
+          (permission) => item.permissions.includes(permission)
         )
     )
   )

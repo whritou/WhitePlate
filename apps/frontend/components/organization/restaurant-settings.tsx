@@ -43,20 +43,29 @@ export function RestaurantSettings({
   const a = useTranslations("Auth")
   const legal = useTranslations("RestaurantLegal")
   const router = useRouter()
-  const canManageStorefront = restaurant.permissions.includes("storefront.manage")
+  const canManageStorefront =
+    restaurant.permissions.includes("storefront.manage")
   const canManageOrders = restaurant.permissions.includes("orders.manage")
   const canManageBilling = restaurant.permissions.includes("billing.manage")
   const sections: { id: RestaurantSettingsSection; label: string }[] = [
     ...(canManageStorefront
       ? [
-          { id: "establishment" as const, label: t("establishmentSettingsCategory") },
+          {
+            id: "establishment" as const,
+            label: t("establishmentSettingsCategory"),
+          },
           { id: "legal" as const, label: t("legalSettingsCategory") },
           { id: "hours" as const, label: t("openingHoursCategory") },
           { id: "pickup" as const, label: t("pickupSchedulingCategory") },
         ]
       : []),
     ...(canManageOrders
-      ? [{ id: "notifications" as const, label: t("notificationsSettingsCategory") }]
+      ? [
+          {
+            id: "notifications" as const,
+            label: t("notificationsSettingsCategory"),
+          },
+        ]
       : []),
     ...(canManageBilling
       ? [{ id: "payments" as const, label: t("paymentSettings") }]
@@ -156,30 +165,34 @@ export function RestaurantSettings({
                   </dl>
 
                   <div className="flex flex-wrap gap-3">
-                    {restaurant.permissions.includes("catalog.manage") && <Button
-                      nativeButton={false}
-                      role="link"
-                      render={
-                        <Link
-                          href={`/organization/catalog?view=translations&tenantId=${restaurant.id}`}
-                        />
-                      }
-                    >
-                      {a("editMenuLanguages")}
-                    </Button>}
+                    {restaurant.permissions.includes("catalog.manage") && (
+                      <Button
+                        nativeButton={false}
+                        role="link"
+                        render={
+                          <Link
+                            href={`/organization/catalog?view=translations&tenantId=${restaurant.id}`}
+                          />
+                        }
+                      >
+                        {a("editMenuLanguages")}
+                      </Button>
+                    )}
 
-                    {restaurant.permissions.includes("catalog.manage") && <Button
-                      variant="outline"
-                      nativeButton={false}
-                      role="link"
-                      render={
-                        <Link
-                          href={`/organization/catalog?tenantId=${restaurant.id}`}
-                        />
-                      }
-                    >
-                      {a("editCatalog")}
-                    </Button>}
+                    {restaurant.permissions.includes("catalog.manage") && (
+                      <Button
+                        variant="outline"
+                        nativeButton={false}
+                        role="link"
+                        render={
+                          <Link
+                            href={`/organization/catalog?tenantId=${restaurant.id}`}
+                          />
+                        }
+                      >
+                        {a("editCatalog")}
+                      </Button>
+                    )}
 
                     <Button
                       variant="outline"

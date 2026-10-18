@@ -51,7 +51,12 @@ export function useOrderDashboard(props: OrderDashboardProps) {
   const refresh = useCallback(async () => {
     await Promise.all([
       client.invalidateQueries({
-        queryKey: orderQueryKeys.tenant({ userId, tenantId, locale, permissions }),
+        queryKey: orderQueryKeys.tenant({
+          userId,
+          tenantId,
+          locale,
+          permissions,
+        }),
       }),
       client.invalidateQueries({
         queryKey: dashboardMetricsQueryKeys.tenant({
@@ -98,7 +103,12 @@ export function useOrderDashboard(props: OrderDashboardProps) {
     if (error !== "unauthorized" && error !== "forbidden") return
     // Keep the failed active query disabled, while removing every inactive page.
     client.removeQueries({
-      queryKey: orderQueryKeys.tenant({ userId, tenantId, locale, permissions }),
+      queryKey: orderQueryKeys.tenant({
+        userId,
+        tenantId,
+        locale,
+        permissions,
+      }),
       type: "inactive",
     })
     if (error === "unauthorized") router.push("/sign-in")
