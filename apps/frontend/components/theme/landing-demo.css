@@ -340,11 +340,26 @@
 }
 @container (max-width: 30rem) {
   .customer-product-list {
-    flex-direction: column;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto 1fr auto;
   }
   .customer-product-list .customer-product-image {
+    grid-column: 1;
+    grid-row: 1;
     width: 100%;
     aspect-ratio: 4 / 3;
+  }
+  .customer-product-list > [data-slot="card-header"] {
+    grid-column: 1;
+    grid-row: 2;
+  }
+  .customer-product-list > [data-slot="card-content"] {
+    grid-column: 1;
+    grid-row: 3;
+  }
+  .customer-product-list > [data-slot="card-footer"] {
+    grid-column: 1;
+    grid-row: 4;
   }
   .storefront-page .sm\:grid-cols-3 {
     grid-template-columns: 1fr;

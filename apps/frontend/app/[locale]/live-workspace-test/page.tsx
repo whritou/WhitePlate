@@ -17,7 +17,7 @@ import { RestaurantMenu } from "@/components/storefront/restaurant-menu"
 import { OrderTracking } from "@/components/storefront/order-tracking"
 import { publishedStoreTheme } from "@/lib/lovable/storeTheme"
 import type { SearchParams } from "@/types/navigation"
-import { establishment } from "./fixture-data"
+import { establishment, storeThemeFixture } from "./fixture-data"
 export const dynamic = "force-dynamic"
 
 const organization = {
@@ -60,7 +60,7 @@ export default async function LiveWorkspaceFixture({
 
         <RestaurantMenu
           step={query.step === "checkout" ? "checkout" : "shop"}
-          theme={publishedStoreTheme("Maison Verte", null, "maison-verte")}
+          theme={storeThemeFixture(query)}
           restaurantSlug="maison-verte"
           menu={{
             tenantId,
