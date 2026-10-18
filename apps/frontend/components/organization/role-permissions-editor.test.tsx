@@ -15,7 +15,9 @@ vi.mock("@/i18n/navigation", () => ({
 
 vi.mock("next-intl", () => ({
   useTranslations: () => (key: string, values?: Record<string, string>) =>
-    key === "archiveRole" ? `${key} ${values?.role}` : key,
+    key === "archiveRole" || key === "renameRole"
+      ? `${key} ${values?.role}`
+      : key,
 }))
 
 it("offers the owner a form to create a custom role", () => {
@@ -60,6 +62,7 @@ it("shows custom role names and offers an archive action only for custom roles",
   )
 
   expect(html).toContain("Pastry chef")
+  expect(html).toContain('aria-label="renameRole Pastry chef"')
   expect(html).toContain('aria-label="archiveRole Pastry chef"')
   expect(html).not.toContain('aria-label="archiveRole Manager"')
 })

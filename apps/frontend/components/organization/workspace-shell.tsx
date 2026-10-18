@@ -62,6 +62,11 @@ export function WorkspaceShell({
   const canOpenPaymentSettings =
     context?.type === "organization" ||
     (selectedRestaurant?.permissions.includes("billing.manage") ?? false)
+  const canOpenOrders =
+    selectedRestaurant?.permissions.some(
+      (permission) =>
+        permission === "orders.manage" || permission === "kitchen.display"
+    ) ?? false
   const overviewHref =
     context?.type === "organization"
       ? `/organization?organizationId=${context.id}`
@@ -154,7 +159,7 @@ export function WorkspaceShell({
                 </Button>
               )}
 
-              {context?.type === "restaurant" && (
+              {context?.type === "restaurant" && canOpenOrders && (
                 <Button
                   nativeButton={false}
                   role="link"

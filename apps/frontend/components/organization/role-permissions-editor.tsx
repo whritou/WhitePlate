@@ -13,15 +13,8 @@ import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import {
-  AlertDialog,
-  AlertDialogBackdrop,
-  AlertDialogClose,
-  AlertDialogDescription,
-  AlertDialogPopup,
-  AlertDialogPortal,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
+import { RoleNameInput } from "./role-name-input"
+import { RoleArchiveDialog } from "./role-archive-dialog"
 import {
   Table,
   TableBody,
@@ -98,6 +91,7 @@ export function RolePermissionsEditor({
     const result = await saveOrganizationRoleGrantAction({
       organizationId,
       role: grant.role,
+      ...(!grant.isBuiltIn ? { name: grant.name } : {}),
       permissions: grant.permissions,
       version: grant.version,
     }).catch(() => ({ ok: false as const, message: "unavailable" as const }))
@@ -201,7 +195,18 @@ export function RolePermissionsEditor({
             {grants.map((grant) => (
               <TableRow key={grant.role}>
                 <TableCell className="font-semibold">
-                  {roleName(grant)}
+                  {grant.isBuiltIn || grant.isArchived ? (
+                    roleName(grant)
+                  ) : (
+                    <RoleNameInput
+                      role={grant.role}
+                      name={grant.name}
+                      ariaLabel={t("renameRole", { role: roleName(grant) })}
+                      disabled={savingRole !== null || archivingRole !== null}
+                      setGrants={setGrants}
+                      onEdit={() => setFeedback(null)}
+                    />
+                  )}
 
                   {grant.isProtected && (
                     <span className="mt-1 block text-xs font-normal text-muted-foreground">
@@ -332,54 +337,18 @@ export function RolePermissionsEditor({
         </div>
       </form>
 
-      <AlertDialog
+      <RoleArchiveDialog
         open={archiveTarget !== null}
+        archiving={archivingRole !== null}
+        error={archiveError}
+        roleName={archiveTarget ? roleName(archiveTarget) : ""}
         onOpenChange={(open) => {
           if (!open && archivingRole === null) setArchiveTarget(null)
         }}
-      >
-        <AlertDialogPortal>
-          <AlertDialogBackdrop />
-
-          <AlertDialogPopup>
-            <div className="grid gap-1">
-              <AlertDialogTitle>{t("archiveDialogTitle")}</AlertDialogTitle>
-
-              <AlertDialogDescription>
-                {t("archiveDialogDescription", {
-                  role: archiveTarget ? roleName(archiveTarget) : "",
-                })}
-              </AlertDialogDescription>
-            </div>
-
-            {archiveError && (
-              <p role="alert" className="text-sm text-destructive">
-                {t("archiveError")}
-              </p>
-            )}
-
-            <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
-              <AlertDialogClose
-                disabled={archivingRole !== null}
-                render={<Button type="button" variant="outline" />}
-              >
-                {t("cancel")}
-              </AlertDialogClose>
-
-              <Button
-                type="button"
-                variant="destructive"
-                disabled={!archiveTarget || archivingRole !== null}
-                onClick={() => {
-                  if (archiveTarget) void archiveRole(archiveTarget)
-                }}
-              >
-                {archivingRole ? t("archiving") : t("confirmArchive")}
-              </Button>
-            </div>
-          </AlertDialogPopup>
-        </AlertDialogPortal>
-      </AlertDialog>
+        onConfirm={() => {
+          if (archiveTarget) void archiveRole(archiveTarget)
+        }}
+      />
 
       {feedback && !feedback.ok && (
         <Alert variant="destructive" role="alert" className="m-5">
