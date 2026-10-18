@@ -50,7 +50,7 @@ export function AnalyticsPageTrend() {
                 key={m}
                 onClick={() => setMetric(m)}
                 aria-pressed={metric === m}
-                className={`label-mono px-3 py-1.5 ${metric === m ? "bg-foreground text-background" : ""}`}
+                className={`label-mono px-3 py-1.5 ${metric === m ? "bg-foreground text-background hover:bg-foreground hover:text-background" : "text-foreground hover:bg-secondary hover:text-secondary-foreground"}`}
               >
                 <Copy>
                   {m === "revenue"
