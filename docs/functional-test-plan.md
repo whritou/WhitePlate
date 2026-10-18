@@ -562,6 +562,12 @@ The source implementation is complete. The additive migration is generated but h
 6. Publish a replacement asset and confirm the retired published object remains readable until the snapshot releases it; after release, verify the seven-day retention policy and cleanup retry behavior. Confirm the migration backfill selects each existing tenant's active T1 slot without publishing its unsaved T2 appearance.
 7. Check 320, 375, 390, 768, 1024, 1440 and 1920px widths; switch the preview between 390px mobile and desktop modes; verify EN/FR, keyboard tab and arrow navigation, focus visibility, status announcements, 200% text zoom, and reduced motion. Verify public theme/media responses are no-store and one tenant's URLs or cache cannot expose another tenant's snapshot.
 
+### Live storefront parity — local frontend verification
+
+The real storefront maps the saved appearance to page, card and popover foreground/background tokens, typography, sizing, spacing, radius, layout and image ratio. Outline controls preserve readable text on the theme background and expose visible hover, pressed and focus states. Checkout uses the same theme scope. `storefront-theme-parity.spec.ts` feeds the same saved appearance into the real Studio component and published-store route, compares shared theme variables, and exercises EN/FR at 320, 390, 768, 1024, 1440 and 1920px. It also checks page overflow and outline hover/pressed states. The real store's content and behavior remain distinct from Studio's illustrative sample. This fixture verifies frontend application parity; it does not establish hosted tenant publication or production persistence.
+
+The local parity changes and browser evidence are recorded in [storefront-Studio theme parity](audits/storefront-studio-theme-parity.md). Complete the hosted guest-store acceptance in steps 2–3 above after the publication schema and API deployment are ready.
+
 ## T1 brand assets acceptance
 
 T2 theme draft coverage is recorded in [theme-controls](audits/theme-controls.md). Run frontend unit/lint/type/format/build checks, Playwright `--project=theme-studio` on the existing localhost dev server, and the API solution. Hosted acceptance must verify real PostgreSQL versioned saves, separate-device read-back, owner/manager/Kitchen/foreign/revoked access, actual logo storage failure and tenant isolation. Draft saves must not alter the public storefront or demo storage; publication acceptance is listed in the T3 section above.

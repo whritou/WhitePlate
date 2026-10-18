@@ -461,6 +461,8 @@
     "priceNote": "Menu prices are before tax and discounts. Your receipt will show the final total calculated by the restaurant.",
     "estimatedSubtotal": "Estimated subtotal",
     "customerName": "Your name",
+    "customerDetails": "Your details",
+    "collectionAt": "Collect at {name}",
     "emailUpdatesConsent": "Email me updates about this order",
     "emailUpdatesPrivacy": "We’ll use your email only for updates about this order and delete it after the tracking period.",
     "analyticsConsent": "Allow optional analytics about order source and repeat orders",

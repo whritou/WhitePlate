@@ -55,7 +55,7 @@ export function MenuProductCard({
         className={`${layout === "grid" ? "col-start-1 row-start-2" : "col-start-2 row-start-1"} min-w-0 px-4 pt-4 pb-0`}
       >
         <CardTitle>
-          <h3 className="font-heading text-base font-bold wrap-anywhere">
+          <h3 className="customer-product-title text-base wrap-anywhere">
             {product.name}
           </h3>
         </CardTitle>
@@ -136,7 +136,7 @@ export function MenuProductCard({
       <CardFooter
         className={`${layout === "grid" ? "col-start-1 row-start-4" : "col-start-2 row-start-3"} flex-wrap justify-between gap-3 border-t-0 p-4`}
       >
-        <span className="font-heading text-headline-sm tabular-nums">
+        <span className="customer-product-price text-base tabular-nums">
           {price.format(product.basePrice)}
         </span>
 
@@ -144,6 +144,7 @@ export function MenuProductCard({
           <ProductOrdering
             key={`${product.id}-${orderRound}`}
             product={product}
+            restaurantSlug={restaurantSlug}
             item={item}
             locked={locked}
             price={price}

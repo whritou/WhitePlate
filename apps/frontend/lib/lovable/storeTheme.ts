@@ -193,6 +193,10 @@ export function themeVariables(t: StoreTheme): CSSProperties {
   return {
     "--background": t.bg,
     "--foreground": t.text,
+    "--card": t.bg,
+    "--card-foreground": t.text,
+    "--popover": t.bg,
+    "--popover-foreground": t.text,
     "--primary": t.primary,
     "--primary-foreground": t.bg,
     "--accent": t.accent,

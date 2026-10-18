@@ -54,6 +54,7 @@ The currently recorded Coolify API image (`e13860e`) predates merge `8a2f835` (P
 | [Full Stitch redesign handoff](redesign-handoff.md) | Public landing, illustrative screen routes, visual adoption and verification |
 | [Landing and demo responsive audit](audits/landing-demo-responsive.md) | Responsive defects, fixes, captured walkthrough and browser verification for the public landing and menu |
 | [Frontend interaction and density audit](audits/ui-state-density.md) | Project-wide source findings and contrast evidence for hover/pressed states, readable brand text, category width and shared spacing |
+| [Storefront–Studio theme parity](audits/storefront-studio-theme-parity.md) | Live storefront theme mapping, outline interactions, checkout controls and responsive Studio/store fixture verification |
 | [Live Orders K1 and K3 verification](audits/live-orders.md) | Pickup intent snapshots, cancellation reasons, safe email status details, five-lane layout and migration rollout gates |
 | [KDS K2 verification](audits/kds-operational-features.md) | Server-anchored order timers, pickup urgency, user-enabled sound, saved preparation guidance and remaining browser acceptance |
 | [Documentation review](documentation-review.md) | Audit findings, verification evidence, and remaining blockers |

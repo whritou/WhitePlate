@@ -104,7 +104,7 @@ for (const locale of ["en", "fr"]) {
     await expect(productDialog).toHaveAttribute("data-button-style", "outline")
     await expect(productDialog.locator("button.bg-primary").last()).toHaveCSS(
       "background-color",
-      "rgba(0, 0, 0, 0)"
+      "rgb(247, 248, 244)"
     )
     await expect(
       productDialog.getByRole("region", {
@@ -193,7 +193,7 @@ for (const locale of ["en", "fr"]) {
     )
     await expect(page.locator(".customer-summary button.bg-primary")).toHaveCSS(
       "background-color",
-      "rgba(0, 0, 0, 0)"
+      "rgb(247, 248, 244)"
     )
 
     const orderId = "44444444-4444-4444-8444-444444444444"
@@ -249,7 +249,7 @@ for (const locale of ["en", "fr"]) {
     await expect(page.getByText(/product|produit/i)).toHaveCount(0)
     await expect(
       page.locator(".customer-summary a.bg-primary").last()
-    ).toHaveCSS("background-color", "rgba(0, 0, 0, 0)")
+    ).toHaveCSS("background-color", "rgb(247, 248, 244)")
 
     const trackingBounds = await tracking
       .locator("aside")

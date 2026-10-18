@@ -155,13 +155,24 @@
 }
 
 /* Studio previews and full pages respond to their own available width. */
-.customer-two-column > * { min-width: 0; }
+.customer-two-column > * {
+  min-width: 0;
+}
 @container customer-shell (min-width: 40rem) {
-  .customer-shell-content { padding-inline: 2rem; }
+  .customer-shell-content {
+    padding-inline: 2rem;
+  }
 }
 @container customer-shell (min-width: 48rem) {
-  .customer-two-column { grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); }
-  .customer-summary { border-top: 0; border-left: 1px solid var(--border); padding-top: 0; padding-left: 2rem; }
+  .customer-two-column {
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  }
+  .customer-summary {
+    border-top: 0;
+    border-left: 1px solid var(--border);
+    padding-top: 0;
+    padding-left: 2rem;
+  }
 }
 .customer-page h1,
 .customer-page h2,
@@ -180,6 +191,67 @@
 }
 .customer-page button:not(.customer-product-image) {
   border-radius: var(--customer-button-radius) !important;
+}
+.lovable-live.storefront-page .text-base {
+  font-size: calc(1rem * var(--customer-text-scale));
+}
+.lovable-live.storefront-page .text-body-sm {
+  font-size: calc(var(--text-body-sm) * var(--customer-text-scale));
+}
+.lovable-live.storefront-page .text-body-md {
+  font-size: calc(var(--text-body-md) * var(--customer-text-scale));
+}
+.lovable-live.storefront-page .text-body-lg {
+  font-size: calc(var(--text-body-lg) * var(--customer-text-scale));
+}
+.lovable-live.storefront-page .text-headline-sm {
+  font-size: calc(var(--text-headline-sm) * var(--customer-text-scale));
+}
+.lovable-live.storefront-page .text-headline-md {
+  font-size: calc(var(--text-headline-md) * var(--customer-text-scale));
+}
+.lovable-live.storefront-page .text-headline-lg {
+  font-size: calc(var(--text-headline-lg) * var(--customer-text-scale));
+}
+.lovable-live.storefront-page .customer-product-grid {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr));
+}
+.lovable-live.storefront-page
+  .customer-product-grid:has(> li:nth-child(-n + 2):last-child) {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 20rem));
+  justify-content: start;
+}
+.lovable-live.storefront-page [data-slot="card"] {
+  border-radius: var(--customer-radius);
+}
+.lovable-live.storefront-page [data-slot="card-header"],
+.lovable-live.storefront-page [data-slot="card-content"] {
+  padding-inline: var(--customer-padding);
+}
+.lovable-live.storefront-page [data-slot="card-footer"] {
+  padding: var(--customer-padding);
+}
+.lovable-live.storefront-page .customer-image-ratio img {
+  object-fit: cover;
+}
+.lovable-live.storefront-page .customer-product-title {
+  font-family: var(--customer-font);
+  font-weight: 700;
+}
+.lovable-live.storefront-page .customer-product-price {
+  color: var(--primary);
+  font-family: var(--customer-font);
+  font-weight: 700;
+}
+.lovable-live.storefront-page .customer-products,
+.lovable-live.storefront-page .customer-product-grid {
+  gap: var(--customer-gap);
+}
+.lovable-live.storefront-page .customer-product-image img {
+  object-fit: cover;
+}
+.lovable-live.storefront-page .customer-collection-summary > div {
+  padding: var(--customer-padding);
 }
 .customer-page .text-xs {
   font-size: calc(0.75rem * var(--customer-text-scale));
@@ -209,14 +281,54 @@
 }
 .customer-page[data-button-style="outline"] button.bg-primary,
 .customer-page[data-button-style="outline"] a.bg-primary {
-  background: transparent;
+  background: var(--background);
   border: 1px solid var(--primary);
   color: var(--primary);
+  transition:
+    background-color 120ms ease,
+    box-shadow 120ms ease,
+    transform 120ms ease;
+}
+.customer-page[data-button-style="outline"]
+  button.bg-primary:hover:not(:disabled),
+.customer-page[data-button-style="outline"] a.bg-primary:hover,
+.customer-page[data-button-style="outline"]
+  button.bg-primary[aria-pressed="true"] {
+  background: var(--background);
+  box-shadow: inset 0 0 0 2px var(--primary);
+}
+.customer-page[data-button-style="outline"]
+  button.bg-primary:active:not(:disabled),
+.customer-page[data-button-style="outline"] a.bg-primary:active {
+  background: var(--background);
+  box-shadow: inset 0 0 0 3px var(--primary);
+  transform: scale(0.98);
+}
+.customer-page[data-button-style="outline"] button.bg-primary:focus-visible,
+.customer-page[data-button-style="outline"] a.bg-primary:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 3px;
 }
 .storefront-page[data-button-style="outline"] > header button:last-child {
   background: transparent !important;
   border: 1px solid var(--primary);
   color: var(--primary) !important;
+}
+.storefront-page[data-button-style="outline"]
+  > header
+  button:last-child:hover:not(:disabled),
+.storefront-page[data-button-style="outline"]
+  > header
+  button:last-child[aria-expanded="true"] {
+  background: var(--background) !important;
+  box-shadow: inset 0 0 0 2px var(--primary);
+}
+.storefront-page[data-button-style="outline"]
+  > header
+  button:last-child:active:not(:disabled) {
+  background: var(--background) !important;
+  box-shadow: inset 0 0 0 3px var(--primary);
+  transform: scale(0.98);
 }
 .customer-cover {
   height: calc(var(--customer-banner-height) * 0.48);

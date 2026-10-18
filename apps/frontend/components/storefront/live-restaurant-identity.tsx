@@ -22,7 +22,7 @@ export function LiveRestaurantIdentity({
   return (
     <section className="relative border-b">
       <div
-        className={`customer-banner relative flex overflow-hidden ${hasBanner ? "items-end" : "items-center"} ${theme.bannerAlign === "center" ? "justify-center text-center" : "text-left"}`}
+        className={`customer-banner relative flex items-center overflow-hidden px-6 py-8 ${theme.bannerAlign === "center" ? "justify-center text-center" : "text-left"}`}
         style={{
           minHeight: hasBanner ? "var(--customer-banner-height)" : "auto",
           backgroundColor: hasBanner ? undefined : "var(--background)",
@@ -40,13 +40,13 @@ export function LiveRestaurantIdentity({
 
             <div
               className="absolute inset-0 bg-black"
-              style={{ opacity: Math.max(65, theme.bannerOverlay) / 100 }}
+              style={{ opacity: theme.bannerOverlay / 100 }}
             />
           </>
         )}
 
-        <div className="relative flex flex-col gap-3 p-6 sm:p-8">
-          <h1 className="font-display text-4xl font-bold wrap-anywhere">
+        <div className="relative">
+          <h1 className="mt-4 font-heading text-4xl leading-tight font-bold wrap-anywhere md:text-5xl">
             {name}
           </h1>
 

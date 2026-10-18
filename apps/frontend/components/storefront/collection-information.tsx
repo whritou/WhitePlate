@@ -32,7 +32,7 @@ export function CollectionInformation({
   if (compact)
     return (
       <section
-        className="grid gap-px border-y border-border bg-border sm:grid-cols-3"
+        className="customer-collection-summary grid gap-px border-y border-border bg-border sm:grid-cols-3"
         aria-label={t("title")}
       >
         <div className="grid content-start gap-2 bg-background px-6 py-4">

@@ -1,12 +1,13 @@
 "use client"
 
 import { ArrowRight } from "lucide-react"
-import { useLocale, useTranslations } from "next-intl"
+import { useTranslations } from "next-intl"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
+import { AnalyticsWithdrawalForm } from "./analytics-withdrawal-form"
+import { Link } from "@/i18n/navigation"
 import type { PublicEstablishment } from "@/types/establishment-settings"
 import type { GuestCheckoutController } from "@/types/checkout"
 import { LiveCheckoutDetails } from "./live-checkout-details"
@@ -33,7 +34,6 @@ export function LiveCheckout({
 }) {
   const checkout = useTranslations("Checkout")
   const tracking = useTranslations("OrderTracking")
-  const locale = useLocale()
 
   if (state.receipt)
     return (
@@ -43,6 +43,17 @@ export function LiveCheckout({
           trackingToken={state.trackingToken}
           restaurantSlug={restaurantSlug}
         />
+
+        <div className="mt-8 border-t pt-6">
+          <AnalyticsWithdrawalForm tenantId={state.receipt.tenantId} />
+
+          <Link
+            className="mt-3 inline-flex min-h-11 items-center text-sm text-primary underline-offset-4 hover:underline"
+            href={`/analytics-privacy/${state.receipt.tenantId}`}
+          >
+            {checkout("analyticsPrivacyLink")}
+          </Link>
+        </div>
 
         <div className="mt-8 flex justify-end">
           <Button onClick={onNewOrder}>{checkout("newOrder")}</Button>
@@ -191,51 +202,6 @@ export function LiveCheckout({
               onChange={(event) => state.changeDiscountCode(event.target.value)}
             />
           </Label>
-
-          <Label className="mt-4 grid gap-2 text-sm" htmlFor="pickup-time">
-            {checkout("pickupTime")}
-
-            <NativeSelect
-              id="pickup-time"
-              value={state.selectedPickupAt}
-              onChange={(event) =>
-                state.changePickupAt(event.currentTarget.value)
-              }
-              disabled={
-                state.locked ||
-                state.pickupSlotsLoading ||
-                state.pickupSlots.length === 0
-              }
-            >
-              <NativeSelectOption value="asap">
-                {checkout("asapPickup")}
-              </NativeSelectOption>
-
-              {state.pickupSlots.map((slot) => (
-                <NativeSelectOption key={slot.startsAt} value={slot.startsAt}>
-                  {new Intl.DateTimeFormat(locale, {
-                    weekday: "short",
-                    month: "short",
-                    day: "numeric",
-                    hour: "numeric",
-                    minute: "2-digit",
-                    timeZone: slot.timeZone,
-                    timeZoneName: "shortOffset",
-                  }).format(new Date(slot.startsAt))}
-                </NativeSelectOption>
-              ))}
-            </NativeSelect>
-          </Label>
-
-          {state.pickupSlots.length === 0 && !state.pickupSlotsLoading && (
-            <p role="status" className="mt-2 text-sm text-muted-foreground">
-              {checkout(
-                state.pickupAvailabilityState === "schedule_not_configured"
-                  ? "scheduleNotConfigured"
-                  : "noPickupSlots"
-              )}
-            </p>
-          )}
 
           <div className="mt-5 flex justify-between border-t pt-5 font-bold">
             <span>{checkout("estimatedSubtotal")}</span>

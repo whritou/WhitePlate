@@ -461,6 +461,8 @@
     "priceNote": "Les prix du menu sont hors taxes et réductions. Votre reçu indiquera le montant final calculé par le restaurant.",
     "estimatedSubtotal": "Sous-total estimé",
     "customerName": "Votre nom",
+    "customerDetails": "Vos coordonnées",
+    "collectionAt": "Retrait chez {name}",
     "emailUpdatesConsent": "Recevoir les nouvelles de cette commande par e-mail",
     "emailUpdatesPrivacy": "Votre adresse sera utilisée uniquement pour cette commande et supprimée à la fin de la période de suivi.",
     "analyticsConsent": "Autoriser les statistiques facultatives sur la source et les commandes récurrentes",
