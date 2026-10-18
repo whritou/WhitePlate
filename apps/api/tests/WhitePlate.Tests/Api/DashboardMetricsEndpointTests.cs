@@ -40,7 +40,9 @@ public sealed partial class OrdersEndpointTests
             using var request = new HttpRequestMessage(HttpMethod.Patch,
                 $"/api/v1/tenants/{seeded.TenantId}/orders/{orderId}/status")
             {
-                Content = JsonContent.Create(new { status })
+                Content = JsonContent.Create(status == "Cancelled"
+                    ? (object)new { status, cancellationReason = "Other" }
+                    : new { status })
             };
             request.Headers.TryAddWithoutValidation("If-Match", $"\"{version}\"");
             using var response = await client.SendAsync(request, TestContext.Current.CancellationToken);

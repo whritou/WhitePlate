@@ -21,6 +21,7 @@ public sealed class OrderOutboxDispatcherTests
         services.AddLogging();
         services.AddScoped<IOutboxStore>(_ => store);
         services.AddScoped<IOrderRepository>(_ => new NoOpOrderRepository());
+        services.AddScoped<IAnalyticsRepository>(_ => new NoOpAnalyticsRepository());
         services.AddScoped<IOrderEventPublisher>(_ => publisher);
         await using var provider = services.BuildServiceProvider();
         var dispatcher = new OrderOutboxDispatcher(provider.GetRequiredService<IServiceScopeFactory>(),
@@ -79,6 +80,23 @@ public sealed class OrderOutboxDispatcherTests
         }
     }
 
+    private sealed class NoOpAnalyticsRepository : IAnalyticsRepository
+    {
+        public Task<AnalyticsMetricsDto?> GetMetricsAsync(Guid tenantId, int days, DateTimeOffset now,
+            CancellationToken cancellationToken) => Task.FromResult<AnalyticsMetricsDto?>(null);
+
+        public Task<IReadOnlyList<Guid>> GetPriorConsentedOrderIdsAsync(Guid tenantId,
+            IReadOnlyList<(string KeyVersion, string Hash)> fingerprints, DateTimeOffset before,
+            DateTimeOffset after, CancellationToken cancellationToken) =>
+            Task.FromResult<IReadOnlyList<Guid>>([]);
+
+        public Task WithdrawAsync(Guid tenantId, IReadOnlyList<(string KeyVersion, string Hash)> fingerprints,
+            CancellationToken cancellationToken) => Task.CompletedTask;
+
+        public Task<int> CleanExpiredAsync(DateTimeOffset now, CancellationToken cancellationToken) =>
+            Task.FromResult(0);
+    }
+
     private sealed class NoOpOrderRepository : IOrderRepository
     {
         public Task<int> DeleteExpiredIdempotencyRecordsAsync(DateTimeOffset now, CancellationToken cancellationToken) => Task.FromResult(0);
@@ -101,6 +119,7 @@ public sealed class OrderOutboxDispatcherTests
         public Task<PublicOrderTrackingDto?> GetPublicTrackingAsync(Guid tenantId, Guid orderId, string tokenHash,
             DateTimeOffset now, CancellationToken cancellationToken) => throw new NotSupportedException();
         public Task<int> ArchiveClosedOrdersBeforeAsync(DateTimeOffset cutoff, CancellationToken cancellationToken) => throw new NotSupportedException();
-        public Task<Result<OrderReceiptDto>> TransitionAsync(Guid tenantId, Guid orderId, int expectedVersion, OrderStatus status, DateTimeOffset now, CancellationToken cancellationToken) => throw new NotSupportedException();
+        public Task<Result<OrderReceiptDto>> TransitionAsync(Guid tenantId, Guid orderId, int expectedVersion, OrderStatus status,
+            OrderCancellationReason? cancellationReason, DateTimeOffset now, CancellationToken cancellationToken) => throw new NotSupportedException();
     }
 }

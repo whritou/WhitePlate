@@ -13,6 +13,9 @@ public sealed class Order
     public string? CustomerEmail { get; private set; }
     public DateTimeOffset? EmailUpdatesConsentedAt { get; private set; }
     public string? EmailTrackingTokenHash { get; private set; }
+    public string? AnalyticsSource { get; private set; }
+    public DateTimeOffset? AnalyticsConsentedAt { get; private set; }
+    public bool AnalyticsReturningCustomer { get; private set; }
     public string? MenuLocale { get; private set; }
     public string? DiscountCode { get; private set; }
     public decimal Subtotal { get; private set; }
@@ -20,6 +23,7 @@ public sealed class Order
     public decimal TaxAmount { get; private set; }
     public decimal Total { get; private set; }
     public OrderStatus Status { get; private set; }
+    public OrderCancellationReason? CancellationReason { get; private set; }
     public int Version { get; private set; }
     public DateTimeOffset CreatedAt { get; private set; }
     public DateTimeOffset? PickupAt { get; private set; }
@@ -37,6 +41,8 @@ public sealed class Order
     public string? TrackingTokenHash { get; private set; }
     public DateTimeOffset? TrackingTokenExpiresAt { get; private set; }
     public List<OrderLine> Lines { get; private set; } = [];
+    public List<OrderAnalyticsFingerprint> AnalyticsFingerprints { get; private set; } = [];
+    public List<OrderAnalyticsRepeatLink> AnalyticsRepeatLinks { get; private set; } = [];
     private Order() { }
 
     public static Order Create(Guid tenantId, string? currency, string? customerName,
@@ -45,7 +51,9 @@ public sealed class Order
         DateTimeOffset? trackingTokenExpiresAt = null, DateTimeOffset? pickupAt = null,
         string? pickupTimeZone = null, PickupMode? pickupMode = null, string? customerEmail = null,
         DateTimeOffset? emailUpdatesConsentedAt = null, string? emailTrackingTokenHash = null,
-        Guid? id = null)
+        Guid? id = null, string? analyticsSource = null, DateTimeOffset? analyticsConsentedAt = null,
+        bool analyticsReturningCustomer = false, IReadOnlyList<(string KeyVersion, string Hash)>? analyticsFingerprints = null,
+        IReadOnlyList<Guid>? analyticsPriorOrderIds = null)
     {
         var normalizedCurrency = currency?.ToUpperInvariant();
         var normalizedName = customerName?.Trim();
@@ -96,11 +104,35 @@ public sealed class Order
         if (emailTrackingTokenHash is not null && (emailTrackingTokenHash.Length != 64 ||
             emailTrackingTokenHash.Any(character => !Uri.IsHexDigit(character))))
             throw new DomainRuleException("invalid_email_tracking_token", "emailUpdatesConsent", "The email tracking token is invalid.");
+        var normalizedAnalyticsSource = analyticsSource?.Trim().ToLowerInvariant();
+        if (normalizedAnalyticsSource is not (null or "web" or "qr"))
+            throw new DomainRuleException("invalid_analytics_source", "analyticsSource", "The analytics source is invalid.");
+        if ((analyticsConsentedAt is null) != (analyticsFingerprints is null || analyticsFingerprints.Count == 0) ||
+            analyticsConsentedAt is { } consentedAt && consentedAt != createdAt ||
+            analyticsFingerprints?.Any(fingerprint => string.IsNullOrWhiteSpace(fingerprint.KeyVersion) ||
+                fingerprint.KeyVersion.Length > 32 || fingerprint.Hash.Length != 64 ||
+                fingerprint.Hash.Any(character => !Uri.IsHexDigit(character))) == true)
+            throw new DomainRuleException("invalid_analytics_consent", "analyticsConsent", "Analytics consent is invalid.");
+        if (analyticsConsentedAt is null && analyticsReturningCustomer)
+            throw new DomainRuleException("invalid_analytics_consent", "analyticsConsent", "Analytics consent is invalid.");
+        if ((analyticsConsentedAt is null && analyticsPriorOrderIds is { Count: > 0 }) ||
+            analyticsConsentedAt.HasValue && analyticsReturningCustomer != ((analyticsPriorOrderIds?.Count ?? 0) > 0) ||
+            analyticsPriorOrderIds?.Any(priorOrderId => priorOrderId == Guid.Empty || priorOrderId == id) == true ||
+            analyticsPriorOrderIds?.Distinct().Count() != analyticsPriorOrderIds?.Count)
+            throw new DomainRuleException("invalid_analytics_consent", "analyticsConsent", "Analytics consent is invalid.");
         return new Order
         {
             Id = id ?? Guid.NewGuid(), TenantId = tenantId, Currency = normalizedCurrency, CustomerName = normalizedName,
             CustomerEmail = normalizedEmail, EmailUpdatesConsentedAt = emailUpdatesConsentedAt,
             EmailTrackingTokenHash = emailTrackingTokenHash?.ToLowerInvariant(),
+            AnalyticsSource = analyticsConsentedAt.HasValue ? normalizedAnalyticsSource : null,
+            AnalyticsConsentedAt = analyticsConsentedAt,
+            AnalyticsReturningCustomer = analyticsReturningCustomer,
+            AnalyticsFingerprints = analyticsFingerprints?.Select(fingerprint =>
+                new OrderAnalyticsFingerprint(tenantId, fingerprint.KeyVersion, fingerprint.Hash,
+                    createdAt.AddDays(365))).ToList() ?? [],
+            AnalyticsRepeatLinks = analyticsPriorOrderIds?.Select(priorOrderId =>
+                new OrderAnalyticsRepeatLink(tenantId, priorOrderId, createdAt.AddDays(365))).ToList() ?? [],
             MenuLocale = normalizedMenuLocale,
             DiscountCode = string.IsNullOrWhiteSpace(discountCode) ? null : discountCode.Trim().ToUpperInvariant(),
             Subtotal = subtotal, DiscountAmount = discountAmount, TaxAmount = orderLines.Sum(line => line.TaxAmount),
@@ -139,9 +171,13 @@ public sealed class Order
         Version++;
     }
 
-    public void Cancel(DateTimeOffset occurredAt)
+    public void Cancel(DateTimeOffset occurredAt, OrderCancellationReason reason)
     {
+        if (!Enum.IsDefined(reason))
+            throw new DomainRuleException("invalid_cancellation_reason", "cancellationReason",
+                "Select a valid cancellation reason.");
         if (Status is OrderStatus.Completed or OrderStatus.Cancelled) throw new InvalidOrderTransitionException();
+        CancellationReason = reason;
         Status = OrderStatus.Cancelled;
         ClosedAt = occurredAt;
         ClosedAtTicks = occurredAt.UtcDateTime.Ticks;
@@ -154,6 +190,18 @@ public sealed class Order
         if ((TrackingTokenExpiresAt ?? CreatedAt.AddDays(30)) > now) return;
         ClearEmailUpdates();
         EmailTrackingTokenHash = null;
+    }
+
+    public void SetAnalyticsReturningCustomer(bool value)
+    {
+        if (AnalyticsConsentedAt is not null) AnalyticsReturningCustomer = value;
+    }
+
+    public void ClearAnalyticsData()
+    {
+        AnalyticsFingerprints.Clear();
+        AnalyticsConsentedAt = null;
+        AnalyticsReturningCustomer = false;
     }
 
     private void ClearEmailUpdates()

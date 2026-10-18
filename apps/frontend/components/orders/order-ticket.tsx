@@ -25,7 +25,11 @@ import {
   getOrderTiming,
   resolvePreparationNote,
 } from "@/lib/orders/kds-timing"
-import type { OrderStatus, OrderTicketProps } from "@/types/orders"
+import type {
+  OrderCancellationReason,
+  OrderStatus,
+  OrderTicketProps,
+} from "@/types/orders"
 import { useTranslations } from "next-intl"
 
 const statusPresentation = {
@@ -38,6 +42,12 @@ const statusPresentation = {
   OrderStatus,
   { variant: string; Icon: typeof Clock }
 >
+
+const emailEventKeys = {
+  "order.created": "created",
+  "order.preparing": "preparing",
+  "order.ready": "ready",
+} as const
 
 export function OrderTicket({
   order,
@@ -82,6 +92,13 @@ export function OrderTicket({
         ? "warning"
         : "neutral"
   const PickupUrgencyIcon = urgency === "overdue" ? TriangleAlert : Clock
+  const emailNotifications = order.emailNotifications ?? []
+  const terminal = !isActive
+  const formatRecordedAt = (value: string) =>
+    new Intl.DateTimeFormat(locale, {
+      dateStyle: "medium",
+      timeStyle: "short",
+    }).format(new Date(value))
 
   return (
     <article
@@ -218,6 +235,87 @@ export function OrderTicket({
               )
             })}
           </ul>
+
+          {terminal && (
+            <section
+              aria-label={t("serviceDetails.title")}
+              className="mt-4 grid gap-3 border-t border-border pt-4"
+            >
+              <h3 className="font-semibold">{t("serviceDetails.title")}</h3>
+
+              {order.status === "Cancelled" && (
+                <p className="text-sm">
+                  <span className="font-semibold">
+                    {t("serviceDetails.cancellationReason")}:
+                  </span>{" "}
+                  {order.cancellationReason
+                    ? t(
+                        `cancellationReasons.${order.cancellationReason as OrderCancellationReason}`
+                      )
+                    : t("serviceDetails.reasonNotRecorded")}
+                </p>
+              )}
+
+              <div className="grid gap-2">
+                <h4 className="text-sm font-semibold">
+                  {t("serviceDetails.emailSection")}
+                </h4>
+
+                {emailNotifications.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">
+                    {t("serviceDetails.noEmailEvents")}
+                  </p>
+                ) : (
+                  <ul className="grid gap-2 text-sm">
+                    {emailNotifications.map((notification, index) => (
+                      <li
+                        key={`${notification.eventType}:${notification.createdAt}:${index}`}
+                        className="grid gap-1 border-s-2 border-border ps-3"
+                      >
+                        <p className="font-medium">
+                          {t(
+                            `emailEvents.${emailEventKeys[notification.eventType]}`
+                          )}{" "}
+                          · {t(`emailStatuses.${notification.status}`)}
+                        </p>
+
+                        <p className="text-muted-foreground">
+                          {t("serviceDetails.eventCreatedAt", {
+                            time: formatRecordedAt(notification.createdAt),
+                          })}
+                        </p>
+
+                        {notification.status === "Accepted" &&
+                          notification.acceptedAt && (
+                            <p className="text-muted-foreground">
+                              {t("serviceDetails.acceptedAt", {
+                                time: formatRecordedAt(notification.acceptedAt),
+                              })}
+                            </p>
+                          )}
+
+                        {notification.status === "Accepted" && (
+                          <p className="text-muted-foreground">
+                            {t("serviceDetails.acceptedCaveat")}
+                          </p>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+
+              <div className="grid gap-1 border-t border-border pt-3">
+                <h4 className="text-sm font-semibold">
+                  {t("serviceDetails.paymentSection")}
+                </h4>
+
+                <p className="text-sm text-muted-foreground">
+                  {t("serviceDetails.paymentUnavailable")}
+                </p>
+              </div>
+            </section>
+          )}
         </CardContent>
 
         <div className="flex items-center justify-between border-t px-4 py-3">

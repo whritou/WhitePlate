@@ -1,6 +1,12 @@
 "use client"
 import { useMemo, useState } from "react"
-import { useThemeColors, build, eur, pct } from "./analytics-shared"
+import {
+  useThemeColors,
+  build,
+  eur,
+  pct,
+  RESTAURANTS,
+} from "./analytics-shared"
 export function useAnalyticsPageModel() {
   const [range, setRange] = useState<"7" | "30" | "90">("30")
   const [rest, setRest] = useState(0)
@@ -42,6 +48,7 @@ export function useAnalyticsPageModel() {
     setRange,
     rest,
     setRest,
+    restOptions: RESTAURANTS,
     metric,
     setMetric,
     d,
@@ -51,6 +58,16 @@ export function useAnalyticsPageModel() {
     basket,
     kpis,
     maxDish,
+    kitchen: {
+      onTime: 94 - rest,
+      accepted: 88 + rest,
+      cancelled: 2 + rest * 0.3,
+      fastest: `${6 + rest} min`,
+      slowest: `${24 + rest} min`,
+      discountUses: `${42 - rest * 6}`,
+      refunds: eur(86 - rest * 10),
+    },
+    pageMode: "demo" as const,
     exportCsv,
   }
 }

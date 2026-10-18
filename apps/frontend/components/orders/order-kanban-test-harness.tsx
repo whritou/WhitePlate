@@ -62,7 +62,12 @@ export function OrderKanbanTestHarness({ role }: { role: RestaurantRole }) {
       setOrders((orders) =>
         orders.map((order) =>
           order.id === input.orderId
-            ? { ...order, status: input.status, version: order.version + 1 }
+            ? {
+                ...order,
+                status: input.status,
+                cancellationReason: input.cancellationReason ?? null,
+                version: order.version + 1,
+              }
             : order
         )
       )

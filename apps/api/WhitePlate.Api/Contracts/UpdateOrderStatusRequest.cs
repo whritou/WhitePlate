@@ -1,3 +1,3 @@
 namespace WhitePlate.Api.Contracts;
 
-public sealed record UpdateOrderStatusRequest(string Status);
+public sealed record UpdateOrderStatusRequest(string Status, string? CancellationReason = null);

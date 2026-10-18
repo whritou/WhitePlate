@@ -8,6 +8,10 @@ vi.mock("next-intl", () => ({
   useTranslations: () => (key: string) => key,
 }))
 
+vi.mock("@/i18n/navigation", () => ({
+  Link: () => null,
+}))
+
 vi.mock("./receipt", () => ({ Receipt: () => null }))
 
 it("shows the server pause and rush buffer in an existing guest cart", () => {

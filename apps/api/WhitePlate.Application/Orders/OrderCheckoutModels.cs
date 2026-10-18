@@ -31,7 +31,20 @@ public sealed record CreateOrderItem(Guid ProductId, int Quantity, IReadOnlyList
 public sealed record CreateOrderCommand(Guid TenantId, string? CustomerName, string? DiscountCode,
     string? MenuLocale, IReadOnlyList<CreateOrderItem>? Items, string? IdempotencyKey,
     string? TrackingToken = null, DateTimeOffset? PickupAt = null, string? CustomerEmail = null,
-    bool EmailUpdatesConsented = false);
+    bool EmailUpdatesConsented = false, bool AnalyticsConsented = false,
+    string AnalyticsSource = "web");
+
+public sealed record AnalyticsFingerprint(string KeyVersion, string Hash, DateTimeOffset ExpiresAt);
+
+public interface IAnalyticsPrivacyService
+{
+    AnalyticsFingerprintLookup CreateLookup(Guid tenantId, string? email);
+}
+
+public enum AnalyticsFingerprintLookupStatus { InvalidEmail, Unavailable, Available }
+
+public sealed record AnalyticsFingerprintLookup(AnalyticsFingerprintLookupStatus Status, string? CurrentKeyVersion,
+    IReadOnlyList<(string KeyVersion, string Hash)> Hashes);
 
 public sealed record EmailTrackingCapability(string Token, string TokenHash);
 
@@ -71,7 +84,11 @@ public sealed record OrderSummaryDto(Guid Id, string CustomerName, string Curren
     public DateTimeOffset? PickupAt { get; init; }
     public string? PickupTimeZone { get; init; }
     public string? PickupMode { get; init; }
+    public string? CancellationReason { get; init; }
+    public IReadOnlyList<OrderEmailNotificationDto> EmailNotifications { get; init; } = [];
 }
+public sealed record OrderEmailNotificationDto(string EventType, string Status, DateTimeOffset CreatedAt,
+    DateTimeOffset? AcceptedAt);
 public sealed record OrderPageDto(IReadOnlyList<OrderSummaryDto> Items, string? NextCursor, DateTimeOffset ServerTime);
 public sealed record OrderPageData(IReadOnlyList<OrderSummaryDto> Items, OrderPageCursor? NextCursor);
 public sealed record OrderHistoryPageDto(IReadOnlyList<OrderSummaryDto> Items, int Page, int PageSize, int TotalCount);
@@ -86,7 +103,8 @@ public sealed record ListOrdersQuery(Guid TenantId, OrderStatus? Status, string?
 public sealed record ListOrderHistoryQuery(Guid TenantId, OrderStatus? Status, string? Search, DateOnly? From,
     DateOnly? Through, string Sort, string Direction, int Page, int PageSize);
 public sealed record UpdateOrderStatusCommand(Guid TenantId, Guid OrderId, int ExpectedVersion,
-    OrderStatus Status, WhitePlate.Domain.Identity.ExternalIdentity Identity);
+    OrderStatus Status, OrderCancellationReason? CancellationReason,
+    WhitePlate.Domain.Identity.ExternalIdentity Identity);
 
 public enum IdempotencyOutcome { New, Replayed, Conflict }
 public sealed record IdempotencyResult(IdempotencyOutcome Outcome, OrderReceiptDto? Receipt = null);

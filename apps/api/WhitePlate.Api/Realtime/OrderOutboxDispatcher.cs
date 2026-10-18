@@ -21,6 +21,7 @@ public sealed class OrderOutboxDispatcher(IServiceScopeFactory scopeFactory, Tim
                 await using var scope = scopeFactory.CreateAsyncScope();
                 var store = scope.ServiceProvider.GetRequiredService<IOutboxStore>();
                 var orders = scope.ServiceProvider.GetRequiredService<IOrderRepository>();
+                var analytics = scope.ServiceProvider.GetRequiredService<IAnalyticsRepository>();
                 var publisher = scope.ServiceProvider.GetRequiredService<IOrderEventPublisher>();
                 var now = timeProvider.GetUtcNow();
                 if (nextIdempotencyCleanup is null || now >= nextIdempotencyCleanup)
@@ -28,6 +29,7 @@ public sealed class OrderOutboxDispatcher(IServiceScopeFactory scopeFactory, Tim
                     operation = "idempotency_cleanup";
                     await orders.DeleteExpiredIdempotencyRecordsAsync(now, stoppingToken);
                     await orders.CleanExpiredOrderEmailDataAsync(now, stoppingToken);
+                    await analytics.CleanExpiredAsync(now, stoppingToken);
                     nextIdempotencyCleanup = now.AddMinutes(1);
                 }
                 operation = "claim_batch";

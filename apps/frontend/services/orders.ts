@@ -106,10 +106,10 @@ export async function getOrderHistory(
 export async function updateOrderStatus(
   input: UpdateOrderStatusInput
 ): Promise<UpdateOrderStatusResult> {
-  const { tenantId, orderId, version, status } = input
+  const { tenantId, orderId, version, status, cancellationReason } = input
   const response = await whitePlateApi.patch<void>(
     `/api/v1/tenants/${tenantId}/orders/${orderId}/status`,
-    { status },
+    { status, ...(cancellationReason ? { cancellationReason } : {}) },
     { ifMatch: `"${version}"` }
   )
 

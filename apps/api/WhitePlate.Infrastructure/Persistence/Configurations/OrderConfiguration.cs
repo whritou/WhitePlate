@@ -16,6 +16,9 @@ public sealed class OrderConfiguration : IEntityTypeConfiguration<Order>
         builder.Property(order => order.CustomerName).HasMaxLength(160).IsRequired();
         builder.Property(order => order.CustomerEmail).HasMaxLength(254);
         builder.Property(order => order.EmailTrackingTokenHash).HasMaxLength(64);
+        builder.Property(order => order.AnalyticsSource).HasMaxLength(8);
+        builder.Property(order => order.AnalyticsConsentedAt);
+        builder.Property(order => order.AnalyticsReturningCustomer).HasDefaultValue(false).IsRequired();
         builder.Property(order => order.MenuLocale).HasMaxLength(128);
         builder.Property(order => order.DiscountCode).HasMaxLength(32);
         builder.Property(order => order.Subtotal).HasPrecision(12, 2);
@@ -23,6 +26,7 @@ public sealed class OrderConfiguration : IEntityTypeConfiguration<Order>
         builder.Property(order => order.TaxAmount).HasPrecision(12, 2);
         builder.Property(order => order.Total).HasPrecision(12, 2);
         builder.Property(order => order.Status).HasConversion<string>().HasMaxLength(16);
+        builder.Property(order => order.CancellationReason).HasConversion<string>().HasMaxLength(40);
         builder.Property(order => order.Version).IsConcurrencyToken();
         builder.Property(order => order.CreatedAt).IsRequired();
         builder.Property(order => order.CreatedAtTicks).IsRequired();
@@ -40,11 +44,51 @@ public sealed class OrderConfiguration : IEntityTypeConfiguration<Order>
         builder.Property(order => order.TrackingTokenHash).HasMaxLength(64);
         builder.Property(order => order.TrackingTokenExpiresAt);
         builder.HasMany(order => order.Lines).WithOne().HasForeignKey(line => line.OrderId).OnDelete(DeleteBehavior.Cascade);
+        builder.HasMany(order => order.AnalyticsFingerprints).WithOne().HasForeignKey(fingerprint => fingerprint.OrderId)
+            .OnDelete(DeleteBehavior.Cascade);
+        builder.HasMany(order => order.AnalyticsRepeatLinks).WithOne().HasForeignKey(link => link.OrderId)
+            .OnDelete(DeleteBehavior.Cascade);
         builder.HasIndex(order => new { order.TenantId, order.CreatedAt, order.Id });
         builder.HasIndex(order => new { order.TenantId, order.CreatedAtTicks, order.Id });
         builder.HasIndex(order => new { order.TenantId, order.Status });
         builder.HasIndex(order => new { order.TenantId, order.ReadyAtTicks });
         builder.HasIndex(order => new { order.Status, order.ClosedAtTicks, order.ArchivedAt });
+    }
+}
+
+public sealed class OrderAnalyticsFingerprintConfiguration : IEntityTypeConfiguration<OrderAnalyticsFingerprint>
+{
+    public void Configure(EntityTypeBuilder<OrderAnalyticsFingerprint> builder)
+    {
+        builder.ToTable("OrderAnalyticsFingerprints");
+        builder.HasKey(fingerprint => new { fingerprint.TenantId, fingerprint.OrderId, fingerprint.KeyVersion });
+        builder.Property(fingerprint => fingerprint.KeyVersion).HasMaxLength(32).IsRequired();
+        builder.Property(fingerprint => fingerprint.FingerprintHash).HasMaxLength(64).IsRequired();
+        builder.Property(fingerprint => fingerprint.ExpiresAt).IsRequired();
+        builder.HasIndex(fingerprint => new
+        {
+            fingerprint.TenantId,
+            fingerprint.KeyVersion,
+            fingerprint.FingerprintHash
+        });
+        builder.HasIndex(fingerprint => fingerprint.ExpiresAt);
+    }
+}
+
+public sealed class OrderAnalyticsRepeatLinkConfiguration : IEntityTypeConfiguration<OrderAnalyticsRepeatLink>
+{
+    public void Configure(EntityTypeBuilder<OrderAnalyticsRepeatLink> builder)
+    {
+        builder.ToTable("OrderAnalyticsRepeatLinks");
+        builder.HasKey(link => new { link.TenantId, link.OrderId, link.PriorOrderId });
+        builder.Property(link => link.TenantId).IsRequired();
+        builder.Property(link => link.OrderId).IsRequired();
+        builder.Property(link => link.PriorOrderId).IsRequired();
+        builder.Property(link => link.ExpiresAt).IsRequired();
+        builder.HasOne<Order>().WithMany().HasForeignKey(link => link.PriorOrderId)
+            .OnDelete(DeleteBehavior.Cascade);
+        builder.HasIndex(link => new { link.TenantId, link.PriorOrderId, link.ExpiresAt });
+        builder.HasIndex(link => link.ExpiresAt);
     }
 }
 

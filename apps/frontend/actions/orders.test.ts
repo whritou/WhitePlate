@@ -23,6 +23,13 @@ it.each([
   { ...input, version: 1.5 },
   { ...input, status: "Pending" },
   { ...input, status: "Cancelled\r\nAuthorization: attacker" },
+  { ...input, status: "Cancelled" },
+  {
+    ...input,
+    status: "Cancelled",
+    cancellationReason: "CustomerRequestWithNote",
+  },
+  { ...input, status: "Preparing", cancellationReason: "Other" },
 ])(
   "rejects malformed status input before calling the API: %o",
   async (value) => {
@@ -46,6 +53,30 @@ it("sends a status update with the version as If-Match", async () => {
   expect(whitePlateApi.patch).toHaveBeenCalledWith(
     `/api/v1/tenants/${input.tenantId}/orders/${input.orderId}/status`,
     { status: "Preparing" },
+    { ifMatch: '"1"' }
+  )
+})
+
+it("sends a required cancellation reason with the version as If-Match", async () => {
+  vi.mocked(whitePlateApi.patch).mockResolvedValue({
+    ok: true,
+    status: 200,
+    data: null,
+  })
+
+  const cancellation = {
+    ...input,
+    status: "Cancelled",
+    cancellationReason: "CustomerRequest",
+  }
+
+  await expect(updateOrderStatusAction(cancellation)).resolves.toEqual({
+    ok: true,
+  })
+
+  expect(whitePlateApi.patch).toHaveBeenCalledWith(
+    `/api/v1/tenants/${input.tenantId}/orders/${input.orderId}/status`,
+    { status: "Cancelled", cancellationReason: "CustomerRequest" },
     { ifMatch: '"1"' }
   )
 })
