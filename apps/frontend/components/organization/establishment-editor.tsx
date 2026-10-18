@@ -66,12 +66,57 @@ export function EstablishmentEditor({
     )
   if (query.isPending)
     return (
-      <div role="status" className="grid gap-4">
-        <p>{t("loading")}</p>
+      <div
+        aria-busy="true"
+        className="grid min-w-0 gap-6 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]"
+      >
+        <div className="grid content-start gap-6 border bg-background p-4 sm:p-6">
+          <p role="status" aria-live="polite" className="sr-only">
+            {t("loading")}
+          </p>
 
-        <Skeleton className="h-12 w-full" />
+          {section === "hours" ? (
+            <div className="grid gap-3">
+              {Array.from({ length: 7 }, (_, index) => (
+                <div
+                  key={index}
+                  className="grid items-center gap-3 border-b pb-3 sm:grid-cols-[minmax(8rem,1fr)_minmax(0,2fr)]"
+                >
+                  <Skeleton className="h-5 w-24 rounded-none" />
+                  <div className="grid grid-cols-2 gap-3">
+                    <Skeleton className="h-11 w-full rounded-none" />
+                    <Skeleton className="h-11 w-full rounded-none" />
+                  </div>
+                </div>
+              ))}
+              <Skeleton className="h-11 w-40 rounded-none" />
+            </div>
+          ) : (
+            <>
+              <div className="grid gap-5 sm:grid-cols-2">
+                {Array.from({ length: 6 }, (_, index) => (
+                  <div key={index} className="grid gap-2">
+                    <Skeleton className="h-4 w-32 max-w-full rounded-none" />
+                    <Skeleton className="h-12 w-full rounded-none" />
+                  </div>
+                ))}
+              </div>
+              <div className="flex flex-wrap gap-3 border-t pt-5">
+                <Skeleton className="h-12 w-32 rounded-none" />
+                <Skeleton className="h-12 w-28 rounded-none" />
+              </div>
+            </>
+          )}
+        </div>
 
-        <Skeleton className="h-48 w-full" />
+        {section === "establishment" && (
+          <aside className="grid h-fit gap-3 border p-4 sm:p-6">
+            <Skeleton className="h-7 w-36 rounded-none" />
+            <Skeleton className="h-4 w-full rounded-none" />
+            <Skeleton className="h-4 w-4/5 rounded-none" />
+            <Skeleton className="mt-2 h-28 w-full rounded-none" />
+          </aside>
+        )}
       </div>
     )
   if (!query.data)

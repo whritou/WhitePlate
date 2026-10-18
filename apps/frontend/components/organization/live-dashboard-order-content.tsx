@@ -113,11 +113,11 @@ export function LiveDashboardOrderContent(
             >
               {stages.map(({ key }) => (
                 <div key={key} className="grid gap-4 border p-4">
-                  <Skeleton className="h-4 w-2/3" />
+                  <Skeleton className="h-4 w-2/3 rounded-none" />
 
-                  <Skeleton className="h-10 w-1/3" />
+                  <Skeleton className="h-10 w-1/3 rounded-none" />
 
-                  <Skeleton className="h-4 w-4" />
+                  <Skeleton className="h-4 w-4 rounded-none" />
                 </div>
               ))}
             </div>

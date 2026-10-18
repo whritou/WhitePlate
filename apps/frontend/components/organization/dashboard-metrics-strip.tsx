@@ -81,11 +81,11 @@ export function DashboardMetricsStrip(props: DashboardMetricsStripProps) {
                 key={index}
                 className={`grid gap-3 border-b py-6 pe-6 xl:border-b-0 ${index ? "xl:border-s xl:ps-6" : ""}`}
               >
-                <Skeleton className="h-4 w-2/3" />
+                <Skeleton className="h-4 w-2/3 rounded-none" />
 
-                <Skeleton className="h-10 w-1/3" />
+                <Skeleton className="h-10 w-1/3 rounded-none" />
 
-                <Skeleton className="h-4 w-1/2" />
+                <Skeleton className="h-4 w-1/2 rounded-none" />
               </div>
             )
           )}

@@ -154,10 +154,10 @@ export function OrderOverview(props: OrderDashboardProps) {
               className="grid grid-cols-2 gap-2 sm:grid-cols-5"
             >
               {statuses.map((status) => (
-                <div key={status} className="grid gap-2 rounded-md border p-3">
-                  <Skeleton className="h-4 w-2/3" />
+                <div key={status} className="grid gap-2 border p-3">
+                  <Skeleton className="h-4 w-2/3 rounded-none" />
 
-                  <Skeleton className="h-6 w-1/3" />
+                  <Skeleton className="h-6 w-1/3 rounded-none" />
                 </div>
               ))}
             </div>

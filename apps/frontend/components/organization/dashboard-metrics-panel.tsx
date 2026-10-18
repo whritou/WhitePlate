@@ -250,19 +250,19 @@ function MetricsLoading() {
             key={tone}
             className={`grid gap-3 rounded-lg border p-4 ${tone}`}
           >
-            <Skeleton className="h-5 w-2/3" />
+            <Skeleton className="h-5 w-2/3 rounded-none" />
 
-            <Skeleton className="h-4 w-1/2" />
+            <Skeleton className="h-4 w-1/2 rounded-none" />
 
-            <Skeleton className="h-9 w-1/3" />
+            <Skeleton className="h-9 w-1/3 rounded-none" />
           </div>
         ))}
       </div>
 
       <div className="grid gap-3 xl:grid-cols-[minmax(0,1.6fr)_minmax(18rem,0.8fr)]">
-        <Skeleton className="h-64 rounded-lg" />
+        <Skeleton className="h-64 rounded-none" />
 
-        <Skeleton className="h-64 rounded-lg" />
+        <Skeleton className="h-64 rounded-none" />
       </div>
     </div>
   )

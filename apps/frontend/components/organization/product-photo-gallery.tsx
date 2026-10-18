@@ -41,7 +41,7 @@ export function ProductPhotoGallery({
           Array.from({ length: 3 }, (_, index) => (
             <Skeleton
               key={`photo-skeleton-${index}`}
-              className="aspect-square w-full"
+              className="aspect-square w-full rounded-none"
             />
           ))}
 
