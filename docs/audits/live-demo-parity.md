@@ -18,7 +18,7 @@ The original pass targeted the real application. Its verification below is histo
 | History | Existing shared demo/real history composition retained, including filters, paging, snapshots and export. |
 | Analytics | The real route now uses D2 metrics from the tenant-scoped API; fictional reporting remains in `/demo/analytics`. Hosted real-order and browser acceptance remain open. |
 | Studio | Existing source appearance editor/customer previews and actual brand-media editing retained. Theme publication remains a local draft, not a backend save. |
-| Customer menu, checkout and tracking | Existing source customer shell and real cart/receipt/tracking adapters retained. Real catalog data and uploaded assets are authoritative. Unsupported service/payment fields remain disclosed. |
+| Customer menu, checkout and tracking | Real adapters and data were wired, but the visual composition still differed from the demo; the 18 October follow-up below closes the identified gaps. Tracking remains status-only, and unavailable pickup/payment capabilities stay disclosed. |
 
 No new API schema, authorization permission or backend business feature is introduced. Real content and required error/loading/retry controls intentionally differ from sample data. This is composition parity, not a claim that every sample pixel or unsupported operation is available in production.
 
@@ -89,3 +89,20 @@ Commands below run from `apps/frontend` through package-local Node CLI entry poi
 | Root `py docs/design-system/verify.py` and `git diff --check` | Passed: 119 contrast pairs, runtime/token alignment, documentation links and whitespace. |
 
 The current comparison uses rendered fixtures and reference recipes, not a pixel-diff claim for differing restaurant data or disclosure text. No API/C# contract changes; backend tests were not rerun. Preserve the unrelated untracked `apps/api/brand-media-migrations.sql`. Deployment and authenticated hosted acceptance remain pending; keep #65 in review after the branch push. Backend-only roadmap items remain unconnected, as before.
+
+## Customer storefront follow-up — 18 October 2026
+
+The user reported that `/fr/demo` displayed the live storefront-unavailable message and that the live restaurant route did not resemble the demo, including checkout and order status. Comparing `origin/main` with the local route fix showed the cause: the deployed base branch rewrites every localized `/{slug}` path, so it mistakes `demo` for a restaurant. The first, separate commit `1cbc227` reserves all existing localized application pages. The parity branch adds route-tree inventory coverage and EN/FR browser checks for `/demo`; the production route still needs a deployment containing that commit.
+
+The live menu now uses the demo customer shell patterns: a sticky header, a compact no-image hero, a three-column real establishment summary, selectable category chips and a sticky cart action. Checkout drops the menu hero and uses the customer two-column layout; receipt details and status tracking follow the same responsive shell. The source API remains authoritative for menu, price, receipt and pickup data. Tracking still shows only the status/reference/timing/location fields in its capability-protected DTO; it does not fabricate the demo's order line summary.
+
+| Check | Result |
+| --- | --- |
+| `node node_modules/vitest/vitest.mjs run` | Passed: 110 files / 714 tests. Includes the `app/[locale]` route inventory in both locales and receipt layout. |
+| `node node_modules/@playwright/test/cli.js test --project storefront-customer-parity --reporter=line` | Passed: 4/4 EN/FR demo, menu, checkout and tracking scenarios at mobile width. |
+| `node node_modules/typescript/bin/tsc --noEmit` | Passed. |
+| `node node_modules/eslint/bin/eslint.js .` | Passed: 0 errors and 19 existing image warnings. |
+| Changed-file Prettier check | Passed. |
+| `node node_modules/next/dist/bin/next build --webpack` | Passed with process-only HTTPS placeholder origins for `BETTER_AUTH_URL` and `API_BASE_URL`; 102 routes generated. Existing PostgreSQL SSL notices and expected API 503 logs occurred while using local build configuration. |
+
+No API, database, or migration change was needed. The final restaurant subdomain path is preserved. A real Vercel deployment and hosted restaurant checkout/tracking acceptance remain open.

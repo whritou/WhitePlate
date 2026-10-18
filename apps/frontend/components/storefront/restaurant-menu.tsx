@@ -9,11 +9,13 @@ import {
   DialogContent,
   DialogDescription,
   DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog"
 import { Card, CardContent } from "@/components/ui/card"
 
 import { useGuestCheckout } from "@/hooks/use-guest-checkout"
 import { useRouter } from "@/i18n/navigation"
+import { useState } from "react"
 import type { StorefrontMenu } from "@/types/storefront"
 import type { StoreTheme } from "@/types/lovable/storeTheme"
 import { useLocale, useTranslations } from "next-intl"
@@ -21,6 +23,7 @@ import { CheckoutPanel } from "./checkout-panel"
 import { GuestCheckoutProvider } from "./guest-checkout-provider"
 import { MenuProductCard } from "./menu-product-card"
 import { CollectionInformation } from "./collection-information"
+import { Button } from "@/components/ui/button"
 import { publishedStoreTheme } from "@/lib/lovable/storeTheme"
 import { getStorefrontMenuHref } from "@/lib/storefront-preview-routing"
 
@@ -64,8 +67,15 @@ function RestaurantMenuContent({
   const locale = useLocale()
   const router = useRouter()
   const checkoutState = useGuestCheckout(menu, restaurantSlug)
+  const [activeCategoryId, setActiveCategoryId] = useState<string | null>(null)
   const { cart, orderRound, locked, changeCart, products } = checkoutState
   const checkoutView = step === "checkout"
+  const selectedCategoryExists = menu.categories.some(
+    (category) => category.id === activeCategoryId
+  )
+  const visibleCategories = selectedCategoryExists
+    ? menu.categories.filter((category) => category.id === activeCategoryId)
+    : menu.categories
   const price = new Intl.NumberFormat(locale, {
     style: "currency",
     currency: menu.currency,
@@ -92,6 +102,8 @@ function RestaurantMenuContent({
         theme={theme}
         restaurantSlug={restaurantSlug}
         homeHref={getStorefrontMenuHref(restaurantSlug, menu.locale)}
+        showCover={checkoutView}
+        stickyHeader={!checkoutView}
         headerActions={
           <LiveStoreActions
             menu={menu}
@@ -103,12 +115,16 @@ function RestaurantMenuContent({
           />
         }
       >
-        <main className="min-h-svh bg-background pb-24">
-          <RestaurantIdentity
-            name={menu.restaurantName}
-            description={menu.restaurantDescription}
-            theme={theme}
-          />
+        <main
+          className={`min-h-[60vh] bg-background ${checkoutView ? "" : "pb-24"}`}
+        >
+          {!checkoutView && (
+            <RestaurantIdentity
+              name={menu.restaurantName}
+              description={menu.restaurantDescription}
+              theme={theme}
+            />
+          )}
 
           <div className="mx-auto w-full px-6">
             {checkoutView ? (
@@ -136,25 +152,49 @@ function RestaurantMenuContent({
             ) : (
               <>
                 {theme.showRestaurantInfo && menu.establishment && (
-                  <div className="mx-auto my-6 max-w-[1120px] border p-4">
-                    <CollectionInformation establishment={menu.establishment} />
-                  </div>
+                  <CollectionInformation
+                    establishment={menu.establishment}
+                    compact
+                  />
                 )}
 
                 {menu.categories.length > 0 && (
                   <nav
                     aria-label={t("menuSections")}
-                    className="sticky top-0 z-20 -mx-6 mt-4 overflow-x-auto border-y border-border bg-background px-6 py-3"
+                    className="-mx-6 mt-4 overflow-x-auto px-6 py-4"
                   >
-                    <ul className="flex w-max gap-sm">
+                    <ul className="flex w-max gap-2">
+                      <li>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant={
+                            selectedCategoryExists ? "outline" : "default"
+                          }
+                          aria-pressed={!selectedCategoryExists}
+                          className="min-h-11 whitespace-nowrap"
+                          onClick={() => setActiveCategoryId(null)}
+                        >
+                          {t("allCategories")}
+                        </Button>
+                      </li>
+
                       {menu.categories.map((category) => (
                         <li key={category.id}>
-                          <a
-                            className="inline-flex min-h-11 items-center rounded-full border border-border bg-card px-md text-label-md whitespace-nowrap text-foreground transition-colors hover:border-input hover:bg-surface-variant focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring active:border-primary active:bg-surface-dim motion-reduce:transition-none"
-                            href={`#category-${category.id}`}
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant={
+                              activeCategoryId === category.id
+                                ? "default"
+                                : "outline"
+                            }
+                            aria-pressed={activeCategoryId === category.id}
+                            className="min-h-11 whitespace-nowrap"
+                            onClick={() => setActiveCategoryId(category.id)}
                           >
                             {category.name}
-                          </a>
+                          </Button>
                         </li>
                       ))}
                     </ul>
@@ -174,7 +214,7 @@ function RestaurantMenuContent({
                       </Card>
                     )}
 
-                    {menu.categories.map((category) => (
+                    {visibleCategories.map((category) => (
                       <section
                         key={category.id}
                         aria-labelledby={`category-${category.id}`}
@@ -252,6 +292,21 @@ function RestaurantMenuContent({
               </>
             )}
           </div>
+
+          {!checkoutView && itemCount > 0 && (
+            <DialogTrigger
+              render={
+                <Button className="sticky bottom-4 z-10 mx-6 flex w-[calc(100%-3rem)] items-center justify-between" />
+              }
+            >
+              <span>
+                {t("cartCount", { count: itemCount })} ·{" "}
+                {price.format(estimate)}
+              </span>
+
+              <span>{t("cartTitle")} →</span>
+            </DialogTrigger>
+          )}
         </main>
       </CustomerShell>
     </Dialog>

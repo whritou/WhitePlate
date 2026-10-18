@@ -14,7 +14,10 @@ import { AnalyticsPage } from "@/components/demo/workspace/analytics/page"
 import { MissingFeatureNotice } from "@/components/workspace/shared/missing-feature-notice"
 import { LiveDashboard } from "@/components/workspace/dashboard/live-dashboard"
 import { RestaurantMenu } from "@/components/storefront/restaurant-menu"
+import { OrderTracking } from "@/components/storefront/order-tracking"
+import { publishedStoreTheme } from "@/lib/lovable/storeTheme"
 import type { SearchParams } from "@/types/navigation"
+import { establishment } from "./fixture-data"
 export const dynamic = "force-dynamic"
 
 const organization = {
@@ -35,6 +38,16 @@ export default async function LiveWorkspaceFixture({
   const parity = await getTranslations("LiveParity")
   const userId = query.user === "b" ? "fixture-b" : "fixture-a"
 
+  if (query.view === "tracking")
+    return (
+      <OrderTracking
+        orderId="44444444-4444-4444-8444-444444444444"
+        name="Maison Verte"
+        theme={publishedStoreTheme("Maison Verte", null, "maison-verte")}
+        restaurantSlug="maison-verte"
+      />
+    )
+
   if (query.view === "store")
     return (
       <>
@@ -47,11 +60,14 @@ export default async function LiveWorkspaceFixture({
 
         <RestaurantMenu
           step={query.step === "checkout" ? "checkout" : "shop"}
+          theme={publishedStoreTheme("Maison Verte", null, "maison-verte")}
+          restaurantSlug="maison-verte"
           menu={{
             tenantId,
             restaurantName: "Maison Verte",
             restaurantDescription: "Cuisine de saison",
             currency: "EUR",
+            establishment,
             locale: "fr",
             defaultLocale: "fr",
             availableLocales: ["fr", "en"],

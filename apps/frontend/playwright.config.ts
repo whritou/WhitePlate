@@ -21,6 +21,10 @@ export default defineConfig({
     },
     { name: "live-demo-parity", testMatch: "live-demo-parity.spec.ts" },
     {
+      name: "storefront-customer-parity",
+      testMatch: "storefront-customer-parity.spec.ts",
+    },
+    {
       name: "workspace-regressions",
       testMatch: "workspace-regressions.spec.ts",
     },

@@ -6,6 +6,31 @@ import type {
 } from "@/types/storefront-preview"
 
 const restaurantSlugPattern = /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/
+// Keep aligned with top-level localized routes so Proxy does not shadow them.
+const reservedLocalizedPathSegments = new Set([
+  "analytics-privacy",
+  "brand-design-test",
+  "catalog-design-test",
+  "demo",
+  "design-system-test",
+  "establishment-design-test",
+  "forgot-password",
+  "invitations",
+  "live-workspace-test",
+  "order",
+  "order-history-test",
+  "orders-kanban-test",
+  "organization",
+  "photo-design-test",
+  "photo-guest-design-test",
+  "reset-password",
+  "sign-in",
+  "sign-up",
+  "storefront-preview",
+  "unauthorized",
+  "verify-email",
+  "workspace-toast-test",
+])
 
 export function getStorefrontPreviewRewrite(
   hostHeader: string | null,
@@ -18,7 +43,11 @@ export function getStorefrontPreviewRewrite(
   const locale = segments[1]
   const restaurantSlug = segments[2]
 
-  if ((locale !== "en" && locale !== "fr") || !isRestaurantSlug(restaurantSlug))
+  if (
+    (locale !== "en" && locale !== "fr") ||
+    !isRestaurantSlug(restaurantSlug) ||
+    reservedLocalizedPathSegments.has(restaurantSlug)
+  )
     return null
 
   if (segments.length === 3) {

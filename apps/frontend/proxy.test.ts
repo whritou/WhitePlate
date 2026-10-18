@@ -28,6 +28,45 @@ function makeRequest(url: string) {
 }
 
 describe("localized storefront path proxy", () => {
+  it.each(
+    [
+      "analytics-privacy",
+      "brand-design-test",
+      "catalog-design-test",
+      "demo",
+      "design-system-test",
+      "establishment-design-test",
+      "forgot-password",
+      "invitations",
+      "live-workspace-test",
+      "order",
+      "order-history-test",
+      "orders-kanban-test",
+      "organization",
+      "photo-design-test",
+      "photo-guest-design-test",
+      "reset-password",
+      "sign-in",
+      "sign-up",
+      "storefront-preview",
+      "unauthorized",
+      "verify-email",
+      "workspace-toast-test",
+    ].flatMap((segment) => ["en", "fr"].map((locale) => [locale, segment]))
+  )(
+    "keeps the existing /%s/%s route in localized routing",
+    async (locale, segment) => {
+      vi.stubEnv("STOREFRONT_PATH_BASE_DOMAIN", "white-plate.vercel.app")
+
+      const response = await proxy(
+        makeRequest(`https://white-plate.vercel.app/${locale}/${segment}`)
+      )
+
+      expect(response.headers.has("x-middleware-rewrite")).toBe(false)
+      expect(response.headers.get("x-middleware-next")).toBe("1")
+    }
+  )
+
   it.each(["en", "fr"])(
     "internally rewrites the %s menu alias",
     async (locale) => {

@@ -1,17 +1,15 @@
 "use client"
 
-import { Clock3, MapPin, CreditCard } from "lucide-react"
-import { useTranslations } from "next-intl"
-import { Copy } from "@/components/shared/translated-copy"
+import { ArrowRight } from "lucide-react"
+import { useLocale, useTranslations } from "next-intl"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
-import { Alert, AlertDescription } from "@/components/ui/alert"
 import type { PublicEstablishment } from "@/types/establishment-settings"
-import { CollectionInformation } from "./collection-information"
 import type { GuestCheckoutController } from "@/types/checkout"
+import { LiveCheckoutDetails } from "./live-checkout-details"
 import { Receipt } from "./receipt"
 
 export function LiveCheckout({
@@ -33,164 +31,72 @@ export function LiveCheckout({
   onBack: () => void
   onNewOrder: () => void
 }) {
-  const c = useTranslations("Checkout")
-  const v = useTranslations("LovableLive")
+  const checkout = useTranslations("Checkout")
+  const tracking = useTranslations("OrderTracking")
+  const locale = useLocale()
 
   if (state.receipt)
     return (
-      <section className="customer-rounded mx-auto my-8 max-w-2xl border p-6">
+      <div className="mx-auto max-w-5xl py-8">
         <Receipt
           receipt={state.receipt}
           trackingToken={state.trackingToken}
           restaurantSlug={restaurantSlug}
         />
 
-        <Button className="mt-6" onClick={onNewOrder}>
-          {c("newOrder")}
-        </Button>
-      </section>
+        <div className="mt-8 flex justify-end">
+          <Button onClick={onNewOrder}>{checkout("newOrder")}</Button>
+        </div>
+      </div>
     )
 
   return (
-    <div className="mx-auto max-w-[1120px] py-8">
+    <div className="mx-auto max-w-5xl py-8">
       <Button variant="ghost" onClick={onBack} disabled={state.locked}>
-        {c("backToMenu")}
+        {checkout("backToMenu")}
       </Button>
 
-      <h2 className="my-6 text-3xl font-bold">{c("checkoutTitle")}</h2>
+      <div className="mb-8 flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <p className="mb-2 text-sm font-semibold text-primary">
+            {tracking("clickCollect")}
+          </p>
+
+          <h1 className="text-3xl font-bold">{checkout("checkoutTitle")}</h1>
+        </div>
+
+        <ol
+          aria-label={checkout("checkoutTitle")}
+          className="flex items-center gap-2 text-sm text-muted-foreground"
+        >
+          <li>{checkout("cartTitle")}</li>
+
+          <ArrowRight size={14} aria-hidden="true" />
+
+          <li aria-current="step" className="font-semibold text-foreground">
+            {checkout("checkoutTitle")}
+          </li>
+        </ol>
+      </div>
 
       <form
         onSubmit={state.checkout}
         aria-busy={state.submitting}
-        className="live-checkout-layout grid items-start gap-10 md:grid-cols-[1.15fr_1fr]"
+        className="live-checkout-layout customer-two-column grid min-w-0 items-start gap-10"
       >
-        <div className="space-y-8">
-          <section>
-            <h3 className="mb-4 flex items-center gap-2 text-lg font-bold">
-              <MapPin size={20} className="text-primary" />
-              <Copy>Collect at</Copy> {name}
-            </h3>
+        <LiveCheckoutDetails
+          state={state}
+          name={name}
+          establishment={establishment}
+        />
 
-            {establishment ? (
-              <CollectionInformation establishment={establishment} />
-            ) : (
-              <p className="text-sm text-muted-foreground">
-                {v("checkoutUnavailable")}
-              </p>
-            )}
-          </section>
-
-          <section className="border-t pt-6">
-            <h3 className="mb-4 flex items-center gap-2 text-lg font-bold">
-              <Clock3 size={20} className="text-primary" />
-
-              {v("pickup")}
-            </h3>
-
-            <fieldset disabled className="grid gap-3 opacity-70">
-              <Label className="customer-rounded flex items-center gap-3 border p-4">
-                <Input
-                  type="radio"
-                  checked
-                  readOnly
-                  className="size-4 min-h-0 w-4"
-                />
-
-                <span>
-                  <Copy>As soon as possible</Copy>
-                  <span className="mt-1 block text-xs text-muted-foreground">
-                    {v("checkoutUnavailable")}
-                  </span>
-                </span>
-              </Label>
-
-              <Label className="customer-rounded flex items-center gap-3 border p-4">
-                <Input
-                  type="radio"
-                  checked={false}
-                  readOnly
-                  className="size-4 min-h-0 w-4"
-                />
-                <Copy>Choose a time</Copy>
-              </Label>
-            </fieldset>
-          </section>
-
-          <section className="border-t pt-6">
-            <h3 className="mb-4 flex items-center gap-2 text-lg font-bold">
-              <Copy>Your details</Copy>
-            </h3>
-
-            <fieldset
-              disabled={state.locked || state.cart.length === 0}
-              className="grid gap-4"
-            >
-              <Label className="grid gap-2" htmlFor="customer-name">
-                {c("customerName")}
-
-                <Input
-                  id="customer-name"
-                  name="customerName"
-                  autoComplete="name"
-                  maxLength={200}
-                  required
-                  value={state.customerName}
-                  onChange={(event) =>
-                    state.changeCustomerName(event.target.value)
-                  }
-                />
-              </Label>
-
-              <div className="grid gap-4">
-                <Label className="grid gap-2">
-                  <Copy>Email</Copy>
-                  <Input
-                    disabled
-                    placeholder="client@example.test"
-                    type="email"
-                  />
-                </Label>
-
-                <Label className="grid gap-2">
-                  <Copy>Phone number</Copy>
-                  <Input disabled placeholder="+33 6 00 00 00 00" type="tel" />
-                </Label>
-              </div>
-
-              <Label className="grid gap-2">
-                <span>
-                  <Copy>Order notes </Copy>
-                  <span className="font-normal text-muted-foreground">
-                    <Copy>(optional)</Copy>
-                  </span>
-                </span>
-
-                <Textarea disabled rows={2} maxLength={500} />
-              </Label>
-            </fieldset>
-          </section>
-
-          <section className="border-t pt-6">
-            <h3 className="mb-4 flex items-center gap-2 text-lg font-bold">
-              <CreditCard size={20} className="text-primary" />
-              <Copy>Payment</Copy>
-            </h3>
-
-            <div className="customer-rounded border border-primary bg-secondary p-4">
-              <p className="text-sm font-semibold">{v("paymentPending")}</p>
-
-              <p className="mt-2 text-sm text-muted-foreground">
-                {v("paymentUnavailable")}
-              </p>
-            </div>
-          </section>
-        </div>
-
-        <aside className="border-t pt-6 md:border-t-0 md:border-l md:pt-0 md:pl-8">
-          <h3 className="mb-5 text-lg font-bold">{c("cartTitle")}</h3>
+        <aside className="customer-summary min-w-0 border-t pt-6">
+          <h2 className="mb-5 text-lg font-bold">{checkout("cartTitle")}</h2>
 
           {state.cart.length === 0 ? (
-            <p className="text-sm text-muted-foreground">{c("emptyCart")}</p>
+            <p className="text-sm text-muted-foreground">
+              {checkout("emptyCart")}
+            </p>
           ) : (
             <ul className="divide-y divide-border">
               {state.cart.map((item) => {
@@ -226,7 +132,7 @@ export function LiveCheckout({
 
                     <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
                       <Label className="flex items-center gap-2 text-xs">
-                        {c("quantity")}
+                        {checkout("quantity")}
 
                         <Input
                           className="w-20"
@@ -236,7 +142,7 @@ export function LiveCheckout({
                           step={1}
                           value={item.quantity}
                           disabled={state.locked}
-                          aria-label={c("quantityFor", {
+                          aria-label={checkout("quantityFor", {
                             product: product?.name ?? "",
                           })}
                           onChange={(event) => {
@@ -257,14 +163,14 @@ export function LiveCheckout({
                         variant="ghost"
                         size="sm"
                         disabled={state.locked}
-                        aria-label={c("removeProduct", {
+                        aria-label={checkout("removeProduct", {
                           product: product?.name ?? "",
                         })}
                         onClick={() =>
                           state.changeCart({ ...item, quantity: 0 })
                         }
                       >
-                        {c("remove")}
+                        {checkout("remove")}
                       </Button>
                     </div>
                   </li>
@@ -274,7 +180,7 @@ export function LiveCheckout({
           )}
 
           <Label className="mt-4 grid gap-2 text-sm" htmlFor="discount-code">
-            {c("discountCode")}
+            {checkout("discountCode")}
 
             <Input
               id="discount-code"
@@ -287,7 +193,7 @@ export function LiveCheckout({
           </Label>
 
           <Label className="mt-4 grid gap-2 text-sm" htmlFor="pickup-time">
-            {c("pickupTime")}
+            {checkout("pickupTime")}
 
             <NativeSelect
               id="pickup-time"
@@ -302,12 +208,12 @@ export function LiveCheckout({
               }
             >
               <NativeSelectOption value="asap">
-                {c("asapPickup")}
+                {checkout("asapPickup")}
               </NativeSelectOption>
 
               {state.pickupSlots.map((slot) => (
                 <NativeSelectOption key={slot.startsAt} value={slot.startsAt}>
-                  {new Intl.DateTimeFormat(undefined, {
+                  {new Intl.DateTimeFormat(locale, {
                     weekday: "short",
                     month: "short",
                     day: "numeric",
@@ -323,7 +229,7 @@ export function LiveCheckout({
 
           {state.pickupSlots.length === 0 && !state.pickupSlotsLoading && (
             <p role="status" className="mt-2 text-sm text-muted-foreground">
-              {c(
+              {checkout(
                 state.pickupAvailabilityState === "schedule_not_configured"
                   ? "scheduleNotConfigured"
                   : "noPickupSlots"
@@ -332,16 +238,20 @@ export function LiveCheckout({
           )}
 
           <div className="mt-5 flex justify-between border-t pt-5 font-bold">
-            <span>{c("estimatedSubtotal")}</span>
+            <span>{checkout("estimatedSubtotal")}</span>
 
             <span>{estimate}</span>
           </div>
 
-          <p className="mt-3 text-xs text-muted-foreground">{c("priceNote")}</p>
+          <p className="mt-3 text-xs text-muted-foreground">
+            {checkout("priceNote")}
+          </p>
 
           {state.error && (
             <Alert variant="destructive" role="alert" className="mt-4">
-              <AlertDescription>{c(`errors.${state.error}`)}</AlertDescription>
+              <AlertDescription>
+                {checkout(`errors.${state.error}`)}
+              </AlertDescription>
             </Alert>
           )}
 
@@ -357,15 +267,15 @@ export function LiveCheckout({
             }
           >
             {state.submitting
-              ? c("placingOrder")
+              ? checkout("placingOrder")
               : state.error === "unavailable"
-                ? c("retryOrder")
-                : c("placeOrder")}
+                ? checkout("retryOrder")
+                : checkout("placeOrder")}
           </Button>
 
           {state.submitting && (
             <p role="status" className="mt-2 text-sm">
-              {c("placingOrder")}
+              {checkout("placingOrder")}
             </p>
           )}
         </aside>

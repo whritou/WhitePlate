@@ -17,14 +17,14 @@ export function LiveRestaurantIdentity({
   const t = useTranslations("BrandAssets")
   const hasBanner = theme.showBanner && Boolean(theme.banner)
 
+  if (!theme.showBanner) return null
+
   return (
     <section className="relative border-b">
       <div
         className={`customer-banner relative flex overflow-hidden ${hasBanner ? "items-end" : "items-center"} ${theme.bannerAlign === "center" ? "justify-center text-center" : "text-left"}`}
         style={{
-          minHeight: theme.showBanner
-            ? "var(--customer-banner-height)"
-            : "auto",
+          minHeight: hasBanner ? "var(--customer-banner-height)" : "auto",
           backgroundColor: hasBanner ? undefined : "var(--background)",
           color: hasBanner ? "white" : "var(--foreground)",
         }}
@@ -56,7 +56,11 @@ export function LiveRestaurantIdentity({
         </div>
       </div>
 
-      <div className="flex flex-wrap items-end gap-4 px-6 py-4">{children}</div>
+      {children && (
+        <div className="flex flex-wrap items-end gap-4 px-6 py-4">
+          {children}
+        </div>
+      )}
     </section>
   )
 }
