@@ -1,5 +1,6 @@
 import type { PublicEstablishment } from "@/types/establishment-settings"
 import type { SearchParams } from "@/types/navigation"
+import type { Product } from "@/types/storefront"
 import { publishedStoreTheme } from "@/lib/lovable/storeTheme"
 
 export const establishment: PublicEstablishment = {
@@ -40,5 +41,48 @@ export function storeThemeFixture(query: SearchParams) {
           imageRatio: "square" as const,
         }
       : {}),
+  }
+}
+
+export function storeProductFixture(query: SearchParams): Product {
+  const long =
+    query.long === "1" || (Array.isArray(query.long) && query.long[0] === "1")
+  const hasPhotos =
+    query.photos === "1" ||
+    (Array.isArray(query.photos) && query.photos[0] === "1")
+  const unavailableChoices =
+    query.choices === "empty" ||
+    (Array.isArray(query.choices) && query.choices.includes("empty"))
+
+  return {
+    id: "33333333-3333-4333-8333-333333333333",
+    name: long
+      ? "BurrataSuperLongProductName".repeat(6)
+      : "Burrata & tomates anciennes",
+    description: long
+      ? "SeasonalIngredientsAndDescription".repeat(20)
+      : "Basilic et tomates",
+    basePrice: 11,
+    isAvailable: true,
+    photos: hasPhotos
+      ? [{ id: "fixture-photo", width: 1600, height: 900, bytes: 1024 }]
+      : [],
+    optionGroups: [
+      {
+        id: "side-group",
+        name: "Accompagnement",
+        minimumSelections: 1,
+        maximumSelections: 1,
+        options: unavailableChoices
+          ? []
+          : [
+              {
+                id: "side-potatoes",
+                name: "Pommes de terre rôties",
+                priceAdjustment: 0.5,
+              },
+            ],
+      },
+    ],
   }
 }

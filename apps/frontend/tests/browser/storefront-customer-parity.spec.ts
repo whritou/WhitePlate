@@ -12,6 +12,32 @@ for (const locale of ["en", "fr"]) {
     )
   })
 
+  test(`${locale}: product photos follow the saved Studio image ratio`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 844 })
+    await page.goto(
+      `/${locale}/live-workspace-test?view=store&theme=custom&photos=1`
+    )
+    await page
+      .locator("main [data-slot=card]")
+      .first()
+      .getByRole("button")
+      .last()
+      .click()
+
+    const gallery = page
+      .getByRole("dialog")
+      .last()
+      .locator(".customer-image-ratio")
+      .first()
+
+    await expect(gallery).toBeVisible()
+    expect(
+      await gallery.evaluate((element) => getComputedStyle(element).aspectRatio)
+    ).toBe("1 / 1")
+  })
+
   test(`${locale}: live menu, checkout and tracking use the customer page recipes`, async ({
     page,
   }) => {
@@ -69,6 +95,60 @@ for (const locale of ["en", "fr"]) {
       )
     ).toBe("#b3261e")
 
+    const firstProductCard = page.locator("main [data-slot=card]").first()
+
+    await firstProductCard.getByRole("button").last().click()
+
+    const productDialog = page.getByRole("dialog").last()
+
+    await expect(productDialog).toHaveAttribute("data-button-style", "outline")
+    await expect(productDialog.locator("button.bg-primary").last()).toHaveCSS(
+      "background-color",
+      "rgba(0, 0, 0, 0)"
+    )
+    await expect(
+      productDialog.getByRole("region", {
+        name: locale === "en" ? "Product photo gallery" : "Galerie du produit",
+      })
+    ).toHaveCount(0)
+    await expect(
+      productDialog.getByRole("checkbox", { name: "Pommes de terre rôties" })
+    ).toBeVisible()
+    await productDialog
+      .getByRole("checkbox", { name: "Pommes de terre rôties" })
+      .click()
+    await productDialog.locator("button.bg-primary").last().click()
+    await expect(productDialog).toBeHidden()
+
+    await page.goto(
+      `/${locale}/live-workspace-test?view=store&theme=custom&choices=empty`
+    )
+
+    await page
+      .locator("main [data-slot=card]")
+      .first()
+      .getByRole("button")
+      .last()
+      .click()
+
+    const unavailableOptionsDialog = page.getByRole("dialog").last()
+
+    await expect(unavailableOptionsDialog.getByRole("alert")).toHaveText(
+      locale === "en"
+        ? "Choices for this product are temporarily unavailable. Please try again later."
+        : "Les choix pour ce produit sont temporairement indisponibles. Réessayez plus tard."
+    )
+    await expect(
+      unavailableOptionsDialog.locator("button.bg-primary").last()
+    ).toBeDisabled()
+    await expect(
+      unavailableOptionsDialog.getByText(
+        locale === "en"
+          ? "Check the number of choices required for each option group."
+          : "Vérifiez le nombre de choix requis pour chaque groupe d’options."
+      )
+    ).toHaveCount(0)
+
     const productCard = page.locator("main [data-slot=card]").first()
     const productImage = productCard.locator(":scope > div").first()
     const productCardWidth = await productCard.evaluate(
@@ -80,11 +160,17 @@ for (const locale of ["en", "fr"]) {
 
     expect(productImageWidth).toBeGreaterThan(productCardWidth * 0.9)
 
-    await page.goto(`/${locale}/live-workspace-test?view=store&step=checkout`)
+    await page.goto(
+      `/${locale}/live-workspace-test?view=store&step=checkout&theme=custom`
+    )
 
     const checkout = page.locator(".live-checkout-layout.customer-two-column")
 
     await expect(checkout).toBeVisible()
+    await expect(page.locator(".customer-page")).toHaveAttribute(
+      "data-button-style",
+      "outline"
+    )
     await expect(page.locator(".customer-banner")).toHaveCount(0)
     await expect(page.locator(".customer-page h1")).toBeVisible()
 
@@ -104,6 +190,10 @@ for (const locale of ["en", "fr"]) {
     expect(checkoutBounds.width).toBeGreaterThan(300)
     expect(checkoutBounds.top).toBeGreaterThanOrEqual(
       checkoutBounds.previousBottom
+    )
+    await expect(page.locator(".customer-summary button.bg-primary")).toHaveCSS(
+      "background-color",
+      "rgba(0, 0, 0, 0)"
     )
 
     const orderId = "44444444-4444-4444-8444-444444444444"
@@ -142,17 +232,24 @@ for (const locale of ["en", "fr"]) {
       })
     )
     await page.goto(
-      `/${locale}/live-workspace-test?view=tracking#${"a".repeat(43)}`
+      `/${locale}/live-workspace-test?view=tracking&theme=custom#${"a".repeat(43)}`
     )
 
     const tracking = page.locator(".customer-two-column")
 
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible()
     await expect(tracking).toBeVisible()
+    await expect(page.locator(".customer-page")).toHaveAttribute(
+      "data-button-style",
+      "outline"
+    )
     await expect(tracking.locator("aside.customer-summary")).toBeVisible()
     await expect(page.getByText("Entrez par la porte verte.")).toBeVisible()
     await expect(page.getByText("12 rue de la Roquette")).toBeVisible()
     await expect(page.getByText(/product|produit/i)).toHaveCount(0)
+    await expect(
+      page.locator(".customer-summary a.bg-primary").last()
+    ).toHaveCSS("background-color", "rgba(0, 0, 0, 0)")
 
     const trackingBounds = await tracking
       .locator("aside")
