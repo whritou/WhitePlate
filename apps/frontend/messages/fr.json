@@ -456,6 +456,7 @@
     "chooseOptions": "Choisissez les options souhaitées, puis confirmez votre sélection.",
     "selectionRule": "Choisissez {min}–{max}",
     "invalidOptions": "Vérifiez le nombre de choix requis pour chaque groupe d’options.",
+    "unavailableOptions": "Les choix pour ce produit sont temporairement indisponibles. Réessayez plus tard.",
     "inCart": "{count, plural, one {# dans votre commande} other {# dans votre commande}}. Modifiez les choix ici ou la quantité dans votre commande.",
     "priceNote": "Les prix du menu sont hors taxes et réductions. Votre reçu indiquera le montant final calculé par le restaurant.",
     "estimatedSubtotal": "Sous-total estimé",

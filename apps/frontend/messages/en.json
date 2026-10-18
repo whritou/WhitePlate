@@ -456,6 +456,7 @@
     "chooseOptions": "Choose any options, then confirm your selection.",
     "selectionRule": "Choose {min}–{max}",
     "invalidOptions": "Check the number of choices required for each option group.",
+    "unavailableOptions": "Choices for this product are temporarily unavailable. Please try again later.",
     "inCart": "{count, plural, one {# in your order} other {# in your order}}. Edit choices here or quantity in your order.",
     "priceNote": "Menu prices are before tax and discounts. Your receipt will show the final total calculated by the restaurant.",
     "estimatedSubtotal": "Estimated subtotal",

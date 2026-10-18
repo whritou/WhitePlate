@@ -33,7 +33,13 @@ export function LiveCustomerShell({
   const surfaceClassName = `lovable-surface lovable-live customer-page ${storefrontPage ? "storefront-page" : ""}`
 
   return (
-    <VisualScopeProvider value={{ className: surfaceClassName, style }}>
+    <VisualScopeProvider
+      value={{
+        className: surfaceClassName,
+        style,
+        buttonStyle: theme.buttonStyle,
+      }}
+    >
       <div
         className={`${surfaceClassName} min-h-screen`}
         data-button-style={theme.buttonStyle}

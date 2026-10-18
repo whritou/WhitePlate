@@ -17,6 +17,8 @@ export function ProductPhotoGallery({
   const [selected, setSelected] = useState(0)
   const photo = photos[selected] ?? photos[0]
 
+  if (photos.length === 0) return null
+
   return (
     <section aria-label={t("gallery")} className="grid min-w-0 gap-3">
       <ProductPhotoImage
@@ -24,8 +26,8 @@ export function ProductPhotoGallery({
         productId={productId}
         photo={photo}
         size={1200}
-        square
-        className="aspect-square w-full"
+        fitContainerRatio
+        className="customer-image-ratio w-full"
       />
 
       {photos.length > 1 && (

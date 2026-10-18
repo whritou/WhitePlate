@@ -26,6 +26,7 @@ function SheetContent({
       <Dialog.Popup
         data-slot="sheet-content"
         data-side={side}
+        data-button-style={scope.buttonStyle}
         className={cn(
           "fixed inset-y-0 z-40 flex w-[min(20rem,calc(100vw-2.5rem))] min-w-0 flex-col gap-6 overflow-y-auto overscroll-contain border-border bg-popover p-5 text-popover-foreground shadow-xl outline-none motion-reduce:transition-none [&[hidden]]:hidden",
           side === "left"
