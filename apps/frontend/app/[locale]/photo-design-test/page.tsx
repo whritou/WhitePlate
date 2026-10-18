@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation"
-import { MenuBuilderWorkspace } from "@/components/organization/menu-builder-workspace"
-import { WorkspaceShell } from "@/components/organization/workspace-shell"
+import { MenuBuilderWorkspace } from "@/components/workspace/catalog/builder/menu-builder-workspace"
+import { WorkspaceShell } from "@/components/workspace/shared/workspace-shell"
 import { FixtureReady } from "../catalog-design-test/ready"
 import type { ManagedCatalog } from "@/types/catalog-management"
 

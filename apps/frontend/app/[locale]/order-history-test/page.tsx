@@ -1,4 +1,4 @@
-import { WorkspaceShell } from "@/components/organization/workspace-shell"
+import { WorkspaceShell } from "@/components/workspace/shared/workspace-shell"
 import { notFound } from "next/navigation"
 import { OrderHistoryTable } from "@/components/orders/order-history-table"
 import type { OrderHistoryFilters, OrderHistoryPage } from "@/types/orders"

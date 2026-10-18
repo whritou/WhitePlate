@@ -12,7 +12,7 @@ const { getSession, getOrganizations, getOrganizationRestaurants } = vi.hoisted(
 )
 
 vi.mock("@/lib/auth", () => ({ auth: { api: { getSession } } }))
-vi.mock("@/components/organization/live-settings", async () => {
+vi.mock("@/components/workspace/settings/live-settings", async () => {
   const React = await import("react")
 
   return {

@@ -3,9 +3,9 @@
 import { useTranslations } from "next-intl"
 import { Link, usePathname } from "@/i18n/navigation"
 import { BackofficeProvider } from "@/lib/lovable/backoffice"
-import { BackofficeAppbar } from "@/components/lovable/BackofficeAppbar"
+import { BackofficeAppbar } from "@/components/demo/workspace/shell/backoffice-appbar"
 import { DemoNotice } from "./demo-notice"
-import { LocaleControl } from "@/components/lovable/locale-control"
+import { LocaleControl } from "@/components/demo/workspace/shell/locale-control"
 
 export function DemoLayout({ children }: { children: React.ReactNode }) {
   const t = useTranslations("Redesign")

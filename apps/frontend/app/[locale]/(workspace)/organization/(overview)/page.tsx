@@ -1,4 +1,4 @@
-import { OrganizationOverview } from "@/components/organization/organization-overview"
+import { OrganizationOverview } from "@/components/workspace/overview/organization-overview"
 import { auth } from "@/lib/auth"
 import { getRestaurantMemberships } from "@/services/orders"
 import { getOrganizations } from "@/services/organization-queries"

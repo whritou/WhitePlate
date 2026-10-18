@@ -2,7 +2,7 @@
 
 import { Clock3, MapPin, CreditCard } from "lucide-react"
 import { useTranslations } from "next-intl"
-import { Copy } from "@/components/lovable/copy"
+import { Copy } from "@/components/shared/translated-copy"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"

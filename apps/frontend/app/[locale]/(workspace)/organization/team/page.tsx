@@ -1,5 +1,5 @@
-import { StaffInviteDialog } from "@/components/organization/staff-invite-dialog"
-import { OrganizationTeamDirectory } from "@/components/organization/organization-team-directory"
+import { StaffInviteDialog } from "@/components/workspace/team/invitations/staff-invite-dialog"
+import { OrganizationTeamDirectory } from "@/components/workspace/team/members/organization-team-directory"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { auth } from "@/lib/auth"
 import {

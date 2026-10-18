@@ -32,8 +32,10 @@ export default async function NotFoundPage() {
           render={<Link href="/" />}
         >
           <Home aria-hidden="true" />
+
           {t("home")}
         </Button>
+
       </div>
     </AuthFrame>
   )

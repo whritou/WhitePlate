@@ -8,9 +8,9 @@ import {
 } from "@/services/orders"
 import { getOrderingOperations } from "@/services/ordering-operations"
 import { restaurantShopUrl } from "@/lib/restaurant-shop-url"
-import { LiveDashboard } from "@/components/organization/live-dashboard"
-import { BackLink } from "@/components/organization/back-link"
-import { MenuBuilderRetry } from "@/components/organization/menu-builder-retry"
+import { LiveDashboard } from "@/components/workspace/dashboard/live-dashboard"
+import { BackLink } from "@/components/workspace/shared/back-link"
+import { MenuBuilderRetry } from "@/components/workspace/catalog/builder/menu-builder-retry"
 import { Card } from "@/components/ui/card"
 import type {
   OrderDashboardProps,

@@ -1,5 +1,5 @@
-import { MenuBuilderWorkspace } from "@/components/organization/menu-builder-workspace"
-import { MenuBuilderRetry } from "@/components/organization/menu-builder-retry"
+import { MenuBuilderWorkspace } from "@/components/workspace/catalog/builder/menu-builder-workspace"
+import { MenuBuilderRetry } from "@/components/workspace/catalog/builder/menu-builder-retry"
 import { getLocale, getTranslations } from "next-intl/server"
 import { headers } from "next/headers"
 import { redirect } from "next/navigation"

@@ -1,6 +1,6 @@
 import { getTranslations } from "next-intl/server"
 import { getManagedWorkspaceRestaurant } from "@/services/live-workspace"
-import { RestaurantSettings } from "@/components/organization/restaurant-settings"
+import { RestaurantSettings } from "@/components/workspace/settings/restaurants/restaurant-settings"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import type { SearchParams } from "@/types/navigation"
 import {

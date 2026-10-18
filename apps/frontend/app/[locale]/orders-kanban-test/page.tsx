@@ -1,4 +1,4 @@
-import { WorkspaceShell } from "@/components/organization/workspace-shell"
+import { WorkspaceShell } from "@/components/workspace/shared/workspace-shell"
 import { notFound } from "next/navigation"
 import { OrderKanbanTestHarness } from "@/components/orders/order-kanban-test-harness"
 
