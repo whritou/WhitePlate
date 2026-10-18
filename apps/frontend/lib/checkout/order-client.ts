@@ -1,5 +1,5 @@
 import { createApiRequestFactory } from "../api/request-factory"
-import { getTenantApiBaseUrl, getTenantSlug } from "../api/tenant-routing"
+import { createPublicStorefrontApiTarget } from "../storefront-preview-routing"
 import { isUuid, prepareCheckout, validateOrderInput } from "./cart"
 import type {
   OrderReceipt,
@@ -12,11 +12,16 @@ export async function submitGuestOrder(
   configuration: CheckoutConfiguration,
   input: unknown,
   key: unknown,
-  fetcher: typeof fetch = fetch
+  fetcher: typeof fetch = fetch,
+  restaurantSlug?: string | null
 ): Promise<CheckoutResult> {
-  const slug = getTenantSlug(host, configuration.baseDomain)
+  const target = createPublicStorefrontApiTarget(host, restaurantSlug, {
+    ...configuration,
+    pathBaseDomain: configuration.pathBaseDomain,
+    centralApiUrl: configuration.centralApiUrl,
+  })
 
-  if (!slug) return { ok: false, error: "not_found" }
+  if (!target) return { ok: false, error: "not_found" }
   if (
     !validateOrderInput(input) ||
     typeof key !== "string" ||
@@ -30,24 +35,22 @@ export async function submitGuestOrder(
   if (new TextEncoder().encode(JSON.stringify(payload)).length > 16 * 1024)
     return { ok: false, error: "invalid" }
 
-  const baseUrl = getTenantApiBaseUrl(
-    slug,
-    configuration.apiTemplate,
-    configuration.baseDomain
-  )
-
-  if (!baseUrl) return { ok: false, error: "unavailable" }
+  if (!target.apiBaseUrl) return { ok: false, error: "unavailable" }
 
   const api = createApiRequestFactory({
-    baseUrl,
+    baseUrl: target.apiBaseUrl,
     public: true,
     getToken: async () => null,
     fetcher,
   })
-  const result = await api.post<unknown>("/api/v1/orders", payload, {
-    idempotencyKey: key,
-    signal: AbortSignal.timeout(15_000),
-  })
+  const result = await api.post<unknown>(
+    `${target.apiPrefix}/orders`,
+    payload,
+    {
+      idempotencyKey: key,
+      signal: AbortSignal.timeout(15_000),
+    }
+  )
 
   if (!result.ok)
     return {

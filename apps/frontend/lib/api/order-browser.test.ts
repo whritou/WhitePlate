@@ -4,6 +4,7 @@ import {
   fetchDashboardMetrics,
   getSignalRToken,
   OrderRequestError,
+  fetchPublicOrderTracking,
 } from "./order-browser"
 
 afterEach(() => vi.unstubAllGlobals())
@@ -147,4 +148,27 @@ it("rejects malformed order data instead of caching it as a successful page", as
   await expect(
     fetchOrderPage("tenant", null, null, new AbortController().signal)
   ).rejects.toEqual(new OrderRequestError("unavailable"))
+})
+
+it("retains the preview slug in capability tracking requests", async () => {
+  const orderId = "33333333-3333-4333-8333-333333333333"
+  const token = "A".repeat(43)
+  const signal = new AbortController().signal
+  const fetch = vi.fn().mockResolvedValue(
+    Response.json({
+      id: orderId,
+      status: "Ready",
+      version: 2,
+      createdAt: "2026-10-14T12:00:00Z",
+    })
+  )
+
+  vi.stubGlobal("fetch", fetch)
+
+  await fetchPublicOrderTracking(orderId, token, signal, "bistro")
+
+  expect(fetch).toHaveBeenCalledWith(
+    `/api/public/orders/${orderId}/tracking?restaurantSlug=bistro`,
+    expect.objectContaining({ method: "POST", signal })
+  )
 })

@@ -33,3 +33,22 @@ it("parses the paused ordering state and rush buffer from public availability", 
     },
   })
 })
+
+it("retains the selected restaurant slug for preview pickup slots", async () => {
+  browserRequest.mockResolvedValue({
+    ok: true,
+    status: 200,
+    data: {
+      state: "no_slots_available",
+      timeZone: null,
+      slots: [],
+    },
+  })
+
+  await loadPublicPickupSlots(new AbortController().signal, "bistro")
+
+  expect(browserRequest).toHaveBeenCalledWith(
+    "/api/public/pickup-slots?restaurantSlug=bistro",
+    expect.anything()
+  )
+})

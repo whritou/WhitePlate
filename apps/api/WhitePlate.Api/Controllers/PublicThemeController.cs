@@ -23,4 +23,10 @@ public sealed class PublicThemeController(ICurrentTenant tenant, ThemePublicatio
         Response.Headers.CacheControl = "no-store";
         return Ok(result.Value);
     }
+
+    [HttpGet("/api/v1/public/restaurants/{restaurantSlug}/theme")]
+    [RequireTenantBySlug]
+    [ProducesResponseType<PublicThemeDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status404NotFound, "application/problem+json")]
+    public Task<IActionResult> GetByRestaurantSlug(CancellationToken ct) => Get(ct);
 }

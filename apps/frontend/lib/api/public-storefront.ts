@@ -1,6 +1,6 @@
 import "server-only"
 import { createApiRequestFactory } from "./request-factory"
-import { getTenantSlug, getTenantApiBaseUrl } from "./tenant-routing"
+import { createPublicStorefrontApiTarget } from "@/lib/storefront-preview-routing"
 import { parseStorefrontMenu } from "@/lib/validation/responses"
 import type { PublicMenuResult } from "@/types/storefront"
 import { parsePublishedTheme } from "@/lib/validation/theme-publication"
@@ -8,61 +8,57 @@ import type { PublishedTheme } from "@/types/theme"
 
 export async function getPublicMenu(
   hostHeader: string | null,
-  requestedLocale?: string
+  requestedLocale?: string,
+  restaurantSlug?: string
 ): Promise<PublicMenuResult> {
-  const tenantSlug = getTenantSlug(
-    hostHeader,
-    process.env.STOREFRONT_BASE_DOMAIN
-  )
+  const target = createPublicStorefrontApiTarget(hostHeader, restaurantSlug, {
+    baseDomain: process.env.STOREFRONT_BASE_DOMAIN,
+    apiTemplate: process.env.PUBLIC_TENANT_API_URL_TEMPLATE,
+    pathBaseDomain: process.env.STOREFRONT_PATH_BASE_DOMAIN,
+    centralApiUrl: process.env.API_BASE_URL,
+  })
 
-  if (!tenantSlug) return { kind: "not-tenant" }
-
-  const baseUrl = getTenantApiBaseUrl(
-    tenantSlug,
-    process.env.PUBLIC_TENANT_API_URL_TEMPLATE,
-    process.env.STOREFRONT_BASE_DOMAIN
-  )
-
-  if (!baseUrl) return { kind: "unavailable" }
+  if (!target)
+    return restaurantSlug ? { kind: "unavailable" } : { kind: "not-tenant" }
+  if (!target.apiBaseUrl) return { kind: "unavailable" }
 
   const api = createApiRequestFactory({
-    baseUrl,
+    baseUrl: target.apiBaseUrl,
     getToken: async () => null,
     public: true,
   })
   const localeQuery = requestedLocale
     ? `?locale=${encodeURIComponent(requestedLocale)}`
     : ""
-  const response = await api.get<unknown>(`/api/v1/menu${localeQuery}`)
+  const response = await api.get<unknown>(
+    `${target.apiPrefix}/menu${localeQuery}`
+  )
   const menu = response.ok ? parseStorefrontMenu(response.data) : null
 
-  return menu ? { kind: "menu", tenantSlug, menu } : { kind: "unavailable" }
+  return menu
+    ? { kind: "menu", tenantSlug: target.restaurantSlug, menu }
+    : { kind: "unavailable" }
 }
 
 export async function getPublicTheme(
-  hostHeader: string | null
+  hostHeader: string | null,
+  restaurantSlug?: string
 ): Promise<PublishedTheme | null> {
-  const tenantSlug = getTenantSlug(
-    hostHeader,
-    process.env.STOREFRONT_BASE_DOMAIN
-  )
+  const target = createPublicStorefrontApiTarget(hostHeader, restaurantSlug, {
+    baseDomain: process.env.STOREFRONT_BASE_DOMAIN,
+    apiTemplate: process.env.PUBLIC_TENANT_API_URL_TEMPLATE,
+    pathBaseDomain: process.env.STOREFRONT_PATH_BASE_DOMAIN,
+    centralApiUrl: process.env.API_BASE_URL,
+  })
 
-  if (!tenantSlug) return null
-
-  const baseUrl = getTenantApiBaseUrl(
-    tenantSlug,
-    process.env.PUBLIC_TENANT_API_URL_TEMPLATE,
-    process.env.STOREFRONT_BASE_DOMAIN
-  )
-
-  if (!baseUrl) return null
+  if (!target?.apiBaseUrl) return null
 
   const api = createApiRequestFactory({
-    baseUrl,
+    baseUrl: target.apiBaseUrl,
     getToken: async () => null,
     public: true,
   })
-  const response = await api.get<unknown>("/api/v1/theme")
+  const response = await api.get<unknown>(`${target.apiPrefix}/theme`)
 
   return response.ok ? parsePublishedTheme(response.data) : null
 }

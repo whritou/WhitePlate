@@ -1,5 +1,8 @@
 import { createApiRequestFactory } from "@/lib/api/request-factory"
-import { getTenantApiBaseUrl, getTenantSlug } from "@/lib/api/tenant-routing"
+import {
+  createPublicStorefrontApiTarget,
+  getRestaurantSlugSelector,
+} from "@/lib/storefront-preview-routing"
 import { isUuid } from "@/lib/checkout/cart"
 import { parsePublicOrderTracking } from "@/lib/validation/public-order-tracking"
 
@@ -50,34 +53,44 @@ export async function POST(
       { status: 400, headers: noStoreHeaders }
     )
 
-  const host = request.headers.get("host")
-  const slug = getTenantSlug(host, process.env.STOREFRONT_BASE_DOMAIN)
+  const restaurantSlug = getRestaurantSlugSelector(request.url)
 
-  if (!slug)
+  if (restaurantSlug === null)
+    return Response.json(
+      { error: "invalid" },
+      { status: 400, headers: noStoreHeaders }
+    )
+
+  const target = createPublicStorefrontApiTarget(
+    request.headers.get("host"),
+    restaurantSlug,
+    {
+      baseDomain: process.env.STOREFRONT_BASE_DOMAIN,
+      apiTemplate: process.env.PUBLIC_TENANT_API_URL_TEMPLATE,
+      pathBaseDomain: process.env.STOREFRONT_PATH_BASE_DOMAIN,
+      centralApiUrl: process.env.API_BASE_URL,
+    }
+  )
+
+  if (!target)
     return Response.json(
       { error: "not_found" },
       { status: 404, headers: noStoreHeaders }
     )
 
-  const baseUrl = getTenantApiBaseUrl(
-    slug,
-    process.env.PUBLIC_TENANT_API_URL_TEMPLATE,
-    process.env.STOREFRONT_BASE_DOMAIN
-  )
-
-  if (!baseUrl)
+  if (!target.apiBaseUrl)
     return Response.json(
       { error: "unavailable" },
       { status: 503, headers: noStoreHeaders }
     )
 
   const api = createApiRequestFactory({
-    baseUrl,
+    baseUrl: target.apiBaseUrl,
     public: true,
     getToken: async () => null,
   })
   const result = await api.post<unknown>(
-    `/api/v1/orders/${orderId}/tracking`,
+    `${target.apiPrefix}/orders/${orderId}/tracking`,
     { token: body.token },
     { signal: AbortSignal.timeout(10_000) }
   )

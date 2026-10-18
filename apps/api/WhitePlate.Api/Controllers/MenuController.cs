@@ -20,4 +20,13 @@ public sealed class MenuController(ICurrentTenant currentTenant, GetMenuQueryHan
         var tenant = currentTenant.Tenant ?? throw new InvalidOperationException("Tenant resolution is required.");
         return Ok(await getMenu.HandleAsync(tenant, locale, cancellationToken));
     }
+
+    [HttpGet("/api/v1/public/restaurants/{restaurantSlug}/menu")]
+    [RequireTenantBySlug]
+    [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+    [ProducesResponseType<MenuDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status404NotFound, "application/problem+json")]
+    public Task<ActionResult<MenuDto>> GetByRestaurantSlug(
+        [FromQuery] string? locale,
+        CancellationToken cancellationToken) => Get(locale, cancellationToken);
 }

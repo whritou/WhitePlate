@@ -15,6 +15,7 @@ import { ProductOrdering } from "./product-ordering"
 
 export function MenuProductCard({
   product,
+  restaurantSlug,
   layout,
   item,
   locked,
@@ -23,6 +24,7 @@ export function MenuProductCard({
   onSave,
 }: {
   product: Product
+  restaurantSlug?: string
   layout: StoreTheme["layout"]
   imageIndex?: number
   item?: CartItem
@@ -43,6 +45,7 @@ export function MenuProductCard({
         key={product.photos?.[0]?.id ?? "fallback"}
         productId={product.id}
         photo={product.photos?.[0]}
+        restaurantSlug={restaurantSlug}
         size={640}
         square
         className={`${layout === "grid" ? "customer-image-ratio" : "row-span-3 h-full"} col-start-1 row-start-1 w-full`}

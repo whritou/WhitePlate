@@ -33,6 +33,10 @@ public sealed partial class BrandAssetsEndpointTests
         using var visible = await client.GetAsync($"https://bistro.example.test/api/v1/products/{product}/photos/{second}/640", Ct);
         Assert.Equal(HttpStatusCode.OK, visible.StatusCode);
         Assert.True(visible.Headers.CacheControl!.NoStore);
+        using var pathScopedPhoto = await client.GetAsync(
+            $"https://api.example.test/api/v1/public/restaurants/bistro/products/{product}/photos/{second}/640", Ct);
+        Assert.Equal(HttpStatusCode.OK, pathScopedPhoto.StatusCode);
+        Assert.True(pathScopedPhoto.Headers.CacheControl!.NoStore);
         factory.Storage.FailWrites = true;
         using var failed = await client.PostAsync($"{path}/uploads?aspect=1:1", Binary(ImageBytes()), Ct);
         Assert.Equal(HttpStatusCode.ServiceUnavailable, failed.StatusCode);

@@ -95,6 +95,8 @@ export type CheckoutResult =
 export type CheckoutConfiguration = {
   baseDomain: string | undefined
   apiTemplate: string | undefined
+  pathBaseDomain?: string | undefined
+  centralApiUrl?: string | undefined
 }
 
 export type GuestCheckoutController = ReturnType<

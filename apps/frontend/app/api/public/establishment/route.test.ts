@@ -23,7 +23,8 @@ it("uses only the incoming host and locale, ignoring browser tenant selectors", 
   expect(getPublicEstablishment).toHaveBeenCalledWith(
     "bistro.localhost",
     "fr",
-    request.signal
+    request.signal,
+    undefined
   )
   expect(response.headers.get("cache-control")).toBe("no-store")
 })
@@ -43,3 +44,36 @@ it.each(["locale=fr&locale=en", "locale=../private", "locale="])(
     expect(getPublicEstablishment).not.toHaveBeenCalled()
   }
 )
+
+it("passes an explicit restaurant slug to the localized establishment service", async () => {
+  vi.mocked(getPublicEstablishment).mockResolvedValue({
+    ok: false,
+    status: 404,
+    error: "not_found",
+  })
+
+  const request = new Request(
+    "https://white-plate.vercel.app/api/public/establishment?locale=fr&restaurantSlug=bistro",
+    { headers: { host: "white-plate.vercel.app" } }
+  )
+
+  await GET(request)
+
+  expect(getPublicEstablishment).toHaveBeenCalledWith(
+    "white-plate.vercel.app",
+    "fr",
+    request.signal,
+    "bistro"
+  )
+})
+
+it("rejects duplicate restaurant selectors", async () => {
+  const response = await GET(
+    new Request(
+      "https://white-plate.vercel.app/api/public/establishment?locale=fr&restaurantSlug=bistro&restaurantSlug=other"
+    )
+  )
+
+  expect(response.status).toBe(400)
+  expect(getPublicEstablishment).not.toHaveBeenCalled()
+})

@@ -22,21 +22,29 @@ import { GuestCheckoutProvider } from "./guest-checkout-provider"
 import { MenuProductCard } from "./menu-product-card"
 import { CollectionInformation } from "./collection-information"
 import { publishedStoreTheme } from "@/lib/lovable/storeTheme"
+import { getStorefrontMenuHref } from "@/lib/storefront-preview-routing"
 
 export function RestaurantMenu({
   menu,
   theme,
   step,
+  restaurantSlug,
 }: {
   menu: StorefrontMenu
   theme?: StoreTheme
   step: "shop" | "checkout"
+  restaurantSlug?: string
 }) {
   const currentTheme = theme ?? publishedStoreTheme(menu.restaurantName, null)
 
   return (
     <GuestCheckoutProvider tenantId={menu.tenantId}>
-      <RestaurantMenuContent menu={menu} theme={currentTheme} step={step} />
+      <RestaurantMenuContent
+        menu={menu}
+        theme={currentTheme}
+        step={step}
+        restaurantSlug={restaurantSlug}
+      />
     </GuestCheckoutProvider>
   )
 }
@@ -45,15 +53,17 @@ function RestaurantMenuContent({
   menu,
   theme,
   step,
+  restaurantSlug,
 }: {
   menu: StorefrontMenu
   theme: StoreTheme
   step: "shop" | "checkout"
+  restaurantSlug?: string
 }) {
   const t = useTranslations("Storefront")
   const locale = useLocale()
   const router = useRouter()
-  const checkoutState = useGuestCheckout(menu)
+  const checkoutState = useGuestCheckout(menu, restaurantSlug)
   const { cart, orderRound, locked, changeCart, products } = checkoutState
   const checkoutView = step === "checkout"
   const price = new Intl.NumberFormat(locale, {
@@ -80,9 +90,12 @@ function RestaurantMenuContent({
       <CustomerShell
         name={menu.restaurantName}
         theme={theme}
+        restaurantSlug={restaurantSlug}
+        homeHref={getStorefrontMenuHref(restaurantSlug, menu.locale)}
         headerActions={
           <LiveStoreActions
             menu={menu}
+            restaurantSlug={restaurantSlug}
             checkoutState={checkoutState}
             count={itemCount}
             amount={price.format(estimate)}
@@ -103,20 +116,21 @@ function RestaurantMenuContent({
                 state={checkoutState}
                 name={menu.restaurantName}
                 establishment={menu.establishment}
+                restaurantSlug={restaurantSlug}
                 price={price}
                 estimate={price.format(estimate)}
                 onNewOrder={() => {
                   checkoutState.startNewOrder()
-                  router.push({
-                    pathname: "/",
-                    query: { menuLocale: menu.locale },
-                  })
+                  router.push(
+                    getStorefrontMenuHref(restaurantSlug, menu.locale),
+                    { locale }
+                  )
                 }}
                 onBack={() =>
-                  router.push({
-                    pathname: "/",
-                    query: { menuLocale: menu.locale },
-                  })
+                  router.push(
+                    getStorefrontMenuHref(restaurantSlug, menu.locale),
+                    { locale }
+                  )
                 }
               />
             ) : (
@@ -185,6 +199,7 @@ function RestaurantMenuContent({
                               <li key={product.id} className="min-w-0">
                                 <MenuProductCard
                                   product={product}
+                                  restaurantSlug={restaurantSlug}
                                   layout={theme.layout}
                                   imageIndex={imageIndex}
                                   item={cart.find(
@@ -222,10 +237,14 @@ function RestaurantMenuContent({
                       estimatedSubtotal={price.format(estimate)}
                       onNewOrder={checkoutState.startNewOrder}
                       onContinue={() =>
-                        router.push({
-                          pathname: "/",
-                          query: { menuLocale: menu.locale, step: "checkout" },
-                        })
+                        router.push(
+                          getStorefrontMenuHref(
+                            restaurantSlug,
+                            menu.locale,
+                            "checkout"
+                          ),
+                          { locale }
+                        )
                       }
                     />
                   </div>

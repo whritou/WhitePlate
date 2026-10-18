@@ -77,6 +77,56 @@ describe("public guest checkout", () => {
     expect(JSON.parse(String(requests[0].init?.body))).toEqual(input)
   })
 
+  it("uses the central slug-scoped route for checkout from the localized path preview", async () => {
+    const requests: string[] = []
+    const fetcher: typeof fetch = async (url) => {
+      requests.push(String(url))
+
+      return Response.json(receipt, { status: 201 })
+    }
+
+    expect(
+      await submitGuestOrder(
+        "white-plate.vercel.app",
+        {
+          ...config,
+          pathBaseDomain: "white-plate.vercel.app",
+          centralApiUrl: "https://api.whiteplate.test",
+        },
+        input,
+        "checkout-path-preview-1",
+        fetcher,
+        "bistro"
+      )
+    ).toEqual({ ok: true, receipt })
+    expect(requests).toEqual([
+      "https://api.whiteplate.test/api/v1/public/restaurants/bistro/orders",
+    ])
+  })
+
+  it("rejects a path-preview selector on a different host without contacting an API", async () => {
+    let calls = 0
+    const result = await submitGuestOrder(
+      "attacker.test",
+      {
+        ...config,
+        pathBaseDomain: "white-plate.vercel.app",
+        centralApiUrl: "https://api.whiteplate.test",
+      },
+      input,
+      "checkout-path-preview-2",
+      async () => {
+        calls++
+
+        return Response.json(receipt)
+      },
+      "bistro"
+    )
+
+    expect(result).toEqual({ ok: false, error: "not_found" })
+    expect(calls).toBe(0)
+  })
+
   it.each([
     "localhost:3000",
     "bistro.attacker.test",

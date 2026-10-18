@@ -53,6 +53,20 @@ public sealed class OrdersController(ICurrentTenant currentTenant, ICurrentIdent
         return StatusCode(StatusCodes.Status201Created, result.Value);
     }
 
+    [HttpPost("/api/v1/public/restaurants/{restaurantSlug}/orders")]
+    [RequireTenantBySlug]
+    [RequestSizeLimit(16 * 1024)]
+    [AllowAnonymous]
+    [ProducesResponseType<OrderReceiptDto>(StatusCodes.Status201Created)]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status400BadRequest, "application/problem+json")]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status404NotFound, "application/problem+json")]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status409Conflict, "application/problem+json")]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status413PayloadTooLarge, "application/problem+json")]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status429TooManyRequests, "application/problem+json")]
+    public Task<ActionResult<OrderReceiptDto>> CreateByRestaurantSlug(
+        CreateOrderRequest request,
+        CancellationToken cancellationToken) => Create(request, cancellationToken);
+
     [HttpPost("{orderId:guid}/tracking")]
     [RequireTenant]
     [RequestSizeLimit(1024)]
@@ -67,6 +81,17 @@ public sealed class OrdersController(ICurrentTenant currentTenant, ICurrentIdent
         var result = await getPublicTracking.HandleAsync(tenant.Id, orderId, request.Token, cancellationToken);
         return result.IsSuccess ? Ok(result.Value) : errors.ToActionResult(errors.Create(HttpContext, result.Error));
     }
+
+    [HttpPost("/api/v1/public/restaurants/{restaurantSlug}/orders/{orderId:guid}/tracking")]
+    [RequireTenantBySlug]
+    [RequestSizeLimit(1024)]
+    [AllowAnonymous]
+    [ProducesResponseType<PublicOrderTrackingDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ApiProblemResponse>(StatusCodes.Status404NotFound, "application/problem+json")]
+    public Task<ActionResult<PublicOrderTrackingDto>> TrackByRestaurantSlug(
+        Guid orderId,
+        OrderTrackingRequest request,
+        CancellationToken cancellationToken) => Track(orderId, request, cancellationToken);
 
     [HttpGet("/api/v1/tenants/{tenantId:guid}/orders")]
     [Authorize]

@@ -2,7 +2,7 @@
 
 **Date:** 2026-10-18
 
-**Status:** Draft for written-spec review
+**Status:** Approved; implementation is in source, deployment acceptance remains open
 
 **Conversational design:** Approved 2026-10-18
 
@@ -109,9 +109,9 @@ All public BFF responses remain `no-store`. The BFF does not forward a browser-s
 
 ## Verification and documentation
 
-The implementation plan will use the existing frontend Vitest and API .NET test suites. API checks will cover path-versus-host tenant resolution, generic unknown/inactive behavior, public-only route metadata, checkout tenant scoping, and unchanged protected membership checks. Frontend tests will cover exact-host rewriting for both `en` and `fr`, invalid locale/path handling, localized marketing and tenant-host routing, locale and slug preservation through cart/checkout/tracking, same-origin validation, BFF tenant selection, localized interface copy, and menu-language independence. Manual acceptance will exercise a real active restaurant in both locales on the central Vercel host without restaurant wildcard DNS, then confirm the existing host route still loads independently. The implementation plan must verify which browser-test tooling is currently configured; it must not claim automated browser coverage from installed but unconfigured tooling.
+The implementation uses the existing frontend Vitest and API .NET test suites. API tests cover slug-versus-host tenant resolution, generic unknown/inactive behavior, public-only operations, localized establishment, pickup slots, published theme and media, checkout tenant scoping, tracking capability, and unchanged host routes. Frontend tests cover exact-host rewriting for both `en` and `fr`, invalid locale/path handling, localized marketing and tenant-host fallback, central-versus-host API selection, BFF selector validation, media, checkout and tracking slug propagation, and menu-language independence. The repository does not configure Playwright browser tests as a runnable project, so no browser-level coverage is claimed. Manual acceptance of a real restaurant on the configured Vercel host and confirmation that the existing tenant-subdomain URL remains available are still open.
 
-Update the API contract, frontend and backend architecture, tenant isolation/security notes, development configuration guide, functional test plan, and the existing storefront kanban card to distinguish implemented behavior from remaining deployment acceptance. Record the design as a follow-up to [decision 0003](../../architecture/decisions/0003-catalog-localization-and-tenant-domain-policy.md). No schema migration is expected.
+The API contract, frontend and backend architecture, tenant isolation/security notes, development configuration guide, functional test plan, and existing storefront kanban card distinguish implemented behavior from remaining deployment acceptance. This approved follow-up extends [decision 0003](../../architecture/decisions/0003-catalog-localization-and-tenant-domain-policy.md). No schema migration is expected. The separate implementation-plan document was skipped at the user's direction.
 
 ## Approaches considered
 
@@ -121,4 +121,4 @@ Update the API contract, frontend and backend architecture, tenant isolation/sec
 
 ## Open decisions
 
-The user clarified that the slug must always follow the app locale and both English and French routes must be included in automated test coverage. Therefore only `/en/{restaurantSlug}` and `/fr/{restaurantSlug}` are supported; an unprefixed `/{restaurantSlug}` alias is out of scope. The path host, full storefront scope, localized routes, and central API slug-resolution approach were approved conversationally on 2026-10-18. Written-spec review is pending.
+The user clarified that the slug must always follow the app locale and both English and French routes must be included in automated test coverage. Therefore only `/en/{restaurantSlug}` and `/fr/{restaurantSlug}` are supported; an unprefixed `/{restaurantSlug}` alias is out of scope. The path host, full storefront scope, localized routes, and central API slug-resolution approach were approved on 2026-10-18. The revised written spec was also approved before implementation.

@@ -12,6 +12,7 @@ export function ProductPhotoImage({
   productId,
   photo,
   tenantId,
+  restaurantSlug,
   size = 640,
   className = "",
   square = false,
@@ -19,6 +20,7 @@ export function ProductPhotoImage({
   productId: string
   photo?: ProductPhoto
   tenantId?: string
+  restaurantSlug?: string
   size?: number
   className?: string
   square?: boolean
@@ -26,7 +28,9 @@ export function ProductPhotoImage({
   const t = useTranslations("ProductPhotos")
   const [failed, setFailed] = useState(false)
   const [attempt, setAttempt] = useState(0)
-  const src = photo ? photoUrl(productId, photo.id, size, tenantId) : undefined
+  const src = photo
+    ? photoUrl(productId, photo.id, size, tenantId, restaurantSlug)
+    : undefined
 
   return (
     <div

@@ -46,6 +46,12 @@ describe("product gallery boundary", () => {
     expect(photoUrl("https://foreign.test", photo.id, 320)).toBeUndefined()
   })
 
+  it("adds the restaurant slug to public media requests for a path preview", () => {
+    expect(photoUrl(product, photo.id, 640, undefined, "bistro")).toBe(
+      `/api/public/product-photos/${product}/${photo.id}/640?restaurantSlug=bistro`
+    )
+  })
+
   it("rejects empty and over-limit browser files before upload", () => {
     expect(validatePhotoFile(new File([], "empty.png"))).toBe(false)
     expect(

@@ -15,7 +15,9 @@ afterEach(() => {
 
 function configure(host: string) {
   vi.stubEnv("STOREFRONT_BASE_DOMAIN", "example.test")
+  vi.stubEnv("STOREFRONT_PATH_BASE_DOMAIN", "white-plate.vercel.app")
   vi.stubEnv("PUBLIC_TENANT_API_URL_TEMPLATE", "https://{tenant}.example.test")
+  vi.stubEnv("API_BASE_URL", "https://api.example.test")
   vi.mocked(headers).mockResolvedValue(new Headers({ Host: host }) as never)
 }
 
@@ -34,6 +36,39 @@ it.each(["example.test", "nested.bistro.example.test", "bistro.evil.test"])(
   }
 )
 
+it("loads preview brand assets through the central API with the selected slug", async () => {
+  configure("white-plate.vercel.app")
+
+  const image = vi.fn().mockResolvedValue({
+    ok: true,
+    status: 200,
+    data: new Blob([new Uint8Array([1])], { type: "image/png" }),
+  })
+
+  vi.mocked(createApiRequestFactory).mockReturnValue({ image } as never)
+
+  const response = await GET(
+    new Request(
+      "https://white-plate.vercel.app/api/public/brand-assets/logo?restaurantSlug=bistro",
+      { headers: { host: "white-plate.vercel.app" } }
+    ),
+    { params: Promise.resolve({ slot: "logo" }) }
+  )
+
+  expect(createApiRequestFactory).toHaveBeenCalledWith(
+    expect.objectContaining({
+      baseUrl: "https://api.example.test",
+      public: true,
+    })
+  )
+  expect(image).toHaveBeenCalledWith(
+    "/api/v1/public/restaurants/bistro/brand-assets/logo",
+    expect.anything()
+  )
+  expect(response.status).toBe(200)
+  expect(response.headers.get("vary")).toBe("Host")
+})
+
 it("derives public delivery from the validated host and configured origin", async () => {
   configure("bistro.example.test")
 
@@ -47,7 +82,8 @@ it("derives public delivery from the validated host and configured origin", asyn
 
   const response = await GET(
     new Request(
-      "https://bistro.example.test/api/public/brand-assets/logo?tenantId=foreign"
+      "https://bistro.example.test/api/public/brand-assets/logo?tenantId=foreign",
+      { headers: { host: "bistro.example.test" } }
     ),
     { params: Promise.resolve({ slot: "logo" }) }
   )
@@ -75,7 +111,9 @@ it("falls back to the built-in favicon when the tenant has no saved favicon", as
   } as never)
 
   const response = await GET(
-    new Request("https://bistro.example.test/api/public/brand-assets/favicon"),
+    new Request("https://bistro.example.test/api/public/brand-assets/favicon", {
+      headers: { host: "bistro.example.test" },
+    }),
     { params: Promise.resolve({ slot: "favicon" }) }
   )
 

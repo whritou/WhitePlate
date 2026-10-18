@@ -95,6 +95,55 @@ public sealed partial class OrdersEndpointTests
     }
 
     [Fact]
+    public async Task PathScopedCheckoutAndTrackingResolveTheSameRestaurantOnTheCentralHost()
+    {
+        using var factory = new OrdersFactory();
+        var seeded = await factory.SeedAsync(enableFrenchLocale: true);
+        using var client = factory.CreateClient();
+        using var slots = await client.GetAsync(
+            "https://api.example.test/api/v1/public/restaurants/bistro/pickup-slots",
+            TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.OK, slots.StatusCode);
+        Assert.True(slots.Headers.CacheControl?.NoStore);
+        client.DefaultRequestHeaders.Add("Idempotency-Key", "path-checkout-0001");
+        var trackingToken = Convert.ToBase64String(Enumerable.Repeat((byte)7, 32).ToArray())
+            .Replace('+', '-').Replace('/', '_').TrimEnd('=');
+        var payload = new
+        {
+            customerName = "Ada",
+            menuLocale = "fr",
+            trackingToken,
+            items = new[] { new { productId = seeded.ProductId, quantity = 1, optionIds = new[] { seeded.OptionId } } }
+        };
+
+        using var created = await client.PostAsJsonAsync(
+            "https://api.example.test/api/v1/public/restaurants/bistro/orders",
+            payload, TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.Created, created.StatusCode);
+        using var createdJson = JsonDocument.Parse(await created.Content.ReadAsStringAsync(
+            TestContext.Current.CancellationToken));
+        var orderId = createdJson.RootElement.GetProperty("id").GetGuid();
+        Assert.Equal(seeded.TenantId, createdJson.RootElement.GetProperty("tenantId").GetGuid());
+        Assert.Equal("fr", createdJson.RootElement.GetProperty("menuLocale").GetString());
+
+        using var tracking = await client.PostAsJsonAsync(
+            $"https://api.example.test/api/v1/public/restaurants/bistro/orders/{orderId}/tracking",
+            new { token = trackingToken }, TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.OK, tracking.StatusCode);
+        Assert.Contains("no-store", tracking.Headers.CacheControl?.ToString());
+        using var trackingJson = JsonDocument.Parse(await tracking.Content.ReadAsStringAsync(
+            TestContext.Current.CancellationToken));
+        Assert.Equal(orderId, trackingJson.RootElement.GetProperty("id").GetGuid());
+        Assert.Equal("Pending", trackingJson.RootElement.GetProperty("status").GetString());
+        Assert.False(trackingJson.RootElement.TryGetProperty("customerName", out _));
+
+        using var wrongTenant = await client.PostAsJsonAsync(
+            $"https://api.example.test/api/v1/public/restaurants/other/orders/{orderId}/tracking",
+            new { token = trackingToken }, TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.NotFound, wrongTenant.StatusCode);
+    }
+
+    [Fact]
     public async Task PublicCheckoutRejectsDiscountWhenSubtotalIsBelowItsMinimum()
     {
         using var factory = new OrdersFactory();
@@ -989,7 +1038,7 @@ public sealed partial class OrdersEndpointTests
 
         public async Task<(Guid TenantId, Guid ProductId, Guid OptionId, Guid OtherTenantId, Guid OtherProductId, Guid OrganizationId)> SeedAsync(
             bool includeOpeningHours = true, string timeZone = "UTC", decimal discountMinimumOrderAmount = 0m,
-            DateOnly? discountExpiresOn = null)
+            DateOnly? discountExpiresOn = null, bool enableFrenchLocale = false)
         {
             using var scope = Services.CreateScope();
             var database = scope.ServiceProvider.GetRequiredService<WhitePlateDbContext>();
@@ -999,6 +1048,7 @@ public sealed partial class OrdersEndpointTests
             database.OrganizationRoleGrants.AddRange(Enum.GetValues<RestaurantRole>()
                 .Select(role => OrganizationRoleGrantSet.CreateDefault(organization.Id, role)));
             var tenant = Tenant.Create(organization.Id, "Bistro", "bistro", "EUR");
+            if (enableFrenchLocale) tenant.UpdateMenuLocales(["en", "fr"], "en");
             if (timeZone != "UTC") tenant.UpdateEstablishment(new EstablishmentInput(tenant.Name, TimeZone: timeZone));
             if (includeOpeningHours)
             {

@@ -21,6 +21,7 @@ import { useLocale, useTranslations } from "next-intl"
 import { useSyncExternalStore } from "react"
 import { CurrentCollectionInformation } from "./current-collection-information"
 import type { StoreTheme } from "@/types/lovable/storeTheme"
+import { getStorefrontMenuHref } from "@/lib/storefront-preview-routing"
 
 function subscribeToHash(onChange: () => void) {
   window.addEventListener("hashchange", onChange)
@@ -42,10 +43,12 @@ export function OrderTracking({
   orderId,
   name,
   theme,
+  restaurantSlug,
 }: {
   orderId: string
   name: string
   theme: StoreTheme
+  restaurantSlug?: string
 }) {
   const t = useTranslations("OrderTracking")
   const checkout = useTranslations("Checkout")
@@ -62,8 +65,9 @@ export function OrderTracking({
   )
 
   const tracking = useQuery({
-    queryKey: ["public-order-tracking", host, orderId],
-    queryFn: ({ signal }) => fetchPublicOrderTracking(orderId, token, signal),
+    queryKey: ["public-order-tracking", host, restaurantSlug, orderId],
+    queryFn: ({ signal }) =>
+      fetchPublicOrderTracking(orderId, token, signal, restaurantSlug),
     enabled: token.length > 0,
     refetchInterval: (query) =>
       query.state.data?.status === "Completed" ||
@@ -76,7 +80,15 @@ export function OrderTracking({
   const order = tracking.data
 
   return (
-    <CustomerShell name={name} theme={theme}>
+    <CustomerShell
+      name={name}
+      theme={theme}
+      restaurantSlug={restaurantSlug}
+      homeHref={getStorefrontMenuHref(
+        restaurantSlug,
+        order?.menuLocale ?? locale
+      )}
+    >
       <main className="mx-auto min-h-[60vh] max-w-[1120px] px-4 py-10 sm:px-8">
         <Card className="w-full gap-0 border-0 bg-transparent p-0 shadow-none">
           <CardHeader className="px-0">
@@ -163,7 +175,15 @@ export function OrderTracking({
                   <Button
                     type="button"
                     nativeButton={false}
-                    render={<Link href="/" locale={locale} />}
+                    render={
+                      <Link
+                        href={getStorefrontMenuHref(
+                          restaurantSlug,
+                          order?.menuLocale ?? locale
+                        )}
+                        locale={locale}
+                      />
+                    }
                   >
                     {t("backToMenu")}
                   </Button>
@@ -171,6 +191,7 @@ export function OrderTracking({
 
                 <CurrentCollectionInformation
                   locale={order.menuLocale ?? locale}
+                  restaurantSlug={restaurantSlug}
                 />
               </div>
             ) : null}

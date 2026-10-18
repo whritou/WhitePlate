@@ -1,4 +1,5 @@
 import { isUuid } from "./validation/common"
+import { appendRestaurantSlugQuery } from "./storefront-preview-routing"
 import type { ProductPhoto, ProductPhotos } from "@/types/product-photos"
 
 export function parseProductPhoto(value: unknown): ProductPhoto | null {
@@ -55,7 +56,8 @@ export function photoUrl(
   productId: string,
   id: string,
   size: number,
-  tenantId?: string
+  tenantId?: string,
+  restaurantSlug?: string
 ) {
   if (
     !isUuid(productId) ||
@@ -67,7 +69,10 @@ export function photoUrl(
 
   return tenantId
     ? `/api/product-photos?${new URLSearchParams({ tenantId, productId, assetId: id, size: String(size) })}`
-    : `/api/public/product-photos/${productId}/${id}/${size}`
+    : appendRestaurantSlugQuery(
+        `/api/public/product-photos/${productId}/${id}/${size}`,
+        restaurantSlug
+      )
 }
 
 export function validatePhotoFile(file: File) {

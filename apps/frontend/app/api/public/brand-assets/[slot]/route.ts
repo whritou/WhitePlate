@@ -1,6 +1,8 @@
-import { headers } from "next/headers"
 import { createApiRequestFactory } from "@/lib/api/request-factory"
-import { getTenantSlug, getTenantApiBaseUrl } from "@/lib/api/tenant-routing"
+import {
+  createPublicStorefrontApiTarget,
+  getRestaurantSlugSelector,
+} from "@/lib/storefront-preview-routing"
 import { isBrandSlot } from "@/lib/brand-assets"
 
 export async function GET(
@@ -8,30 +10,37 @@ export async function GET(
   context: { params: Promise<{ slot: string }> }
 ) {
   const { slot } = await context.params
-  const host = (await headers()).get("host")
-  const domain = process.env.STOREFRONT_BASE_DOMAIN
-  const slug = getTenantSlug(host, domain)
-  const baseUrl = slug
-    ? getTenantApiBaseUrl(
-        slug,
-        process.env.PUBLIC_TENANT_API_URL_TEMPLATE,
-        domain
-      )
-    : undefined
+  const host = request.headers.get("host")
+  const selector = getRestaurantSlugSelector(request.url)
+  const target =
+    selector === null
+      ? null
+      : createPublicStorefrontApiTarget(host, selector, {
+          baseDomain: process.env.STOREFRONT_BASE_DOMAIN,
+          apiTemplate: process.env.PUBLIC_TENANT_API_URL_TEMPLATE,
+          pathBaseDomain: process.env.STOREFRONT_PATH_BASE_DOMAIN,
+          centralApiUrl: process.env.API_BASE_URL,
+        })
   const responseHeaders = {
     "Cache-Control": "no-store",
     "X-Content-Type-Options": "nosniff",
+    Vary: "Host",
   }
 
-  if (!isBrandSlot(slot) || !baseUrl)
+  if (!isBrandSlot(slot) || !target)
     return new Response(null, { status: 404, headers: responseHeaders })
+  if (!target.apiBaseUrl)
+    return new Response(null, {
+      status: target.kind === "path" ? 503 : 404,
+      headers: responseHeaders,
+    })
 
   const api = createApiRequestFactory({
-    baseUrl,
+    baseUrl: target.apiBaseUrl,
     getToken: async () => null,
     public: true,
   })
-  const result = await api.image(`/api/v1/brand-assets/${slot}`, {
+  const result = await api.image(`${target.apiPrefix}/brand-assets/${slot}`, {
     signal: request.signal,
   })
 

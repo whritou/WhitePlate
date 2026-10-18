@@ -19,7 +19,10 @@ import {
 import type { CartItem, PickupAvailability } from "@/types/checkout"
 import type { StorefrontMenu } from "@/types/storefront"
 
-export function useGuestCheckout(menu: StorefrontMenu) {
+export function useGuestCheckout(
+  menu: StorefrontMenu,
+  restaurantSlug?: string
+) {
   const [changingLanguage, startLanguageChange] = useTransition()
   const state = useGuestCheckoutStore((state) => state)
   const [pickupSlotState, setPickupSlotState] = useState<{
@@ -37,7 +40,8 @@ export function useGuestCheckout(menu: StorefrontMenu) {
     async (signal?: AbortSignal) => {
       try {
         const result = await loadPublicPickupSlots(
-          signal ?? AbortSignal.timeout(10_000)
+          signal ?? AbortSignal.timeout(10_000),
+          restaurantSlug
         )
 
         setPickupSlotState({
@@ -58,13 +62,13 @@ export function useGuestCheckout(menu: StorefrontMenu) {
           setPickupSlotState({ tenantId: menu.tenantId, availability: null })
       }
     },
-    [menu.tenantId]
+    [menu.tenantId, restaurantSlug]
   )
 
   useEffect(() => {
     const controller = new AbortController()
 
-    loadPublicPickupSlots(controller.signal)
+    loadPublicPickupSlots(controller.signal, restaurantSlug)
       .then((result) =>
         setPickupSlotState({
           tenantId: menu.tenantId,
@@ -77,7 +81,7 @@ export function useGuestCheckout(menu: StorefrontMenu) {
       })
 
     return () => controller.abort()
-  }, [menu.tenantId])
+  }, [menu.tenantId, restaurantSlug])
 
   const {
     cart,
@@ -151,7 +155,11 @@ export function useGuestCheckout(menu: StorefrontMenu) {
     state.setSubmitting(true)
     state.setError(null)
     try {
-      const result = await checkoutGuestOrder(next.input, next.key)
+      const result = await checkoutGuestOrder(
+        next.input,
+        next.key,
+        restaurantSlug
+      )
 
       if (result.ok && result.receipt.tenantId === menu.tenantId) {
         state.setReceipt(result.receipt)

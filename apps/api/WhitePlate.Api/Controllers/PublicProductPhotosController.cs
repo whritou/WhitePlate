@@ -20,4 +20,13 @@ public sealed class PublicProductPhotosController(ICurrentTenant tenant, Product
         Response.Headers.XContentTypeOptions = "nosniff";
         return result.IsSuccess ? File(result.Value.Bytes, result.Value.ContentType) : errors.ToActionResult(errors.Create(HttpContext, result.Error));
     }
+
+    [HttpGet("/api/v1/public/restaurants/{restaurantSlug}/products/{productId:guid}/photos/{assetId:guid}/{size:int}")]
+    [RequireTenantBySlug]
+    [ProducesResponseType<byte[]>(200, "image/webp")]
+    public Task<IActionResult> GetByRestaurantSlug(
+        Guid productId,
+        Guid assetId,
+        int size,
+        CancellationToken ct) => Get(productId, assetId, size, ct);
 }
