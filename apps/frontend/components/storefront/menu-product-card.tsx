@@ -39,7 +39,7 @@ export function MenuProductCard({
   return (
     <Card
       size="sm"
-      className={`grid h-full gap-0 overflow-hidden p-0 shadow-none ${layout === "grid" ? "grid-cols-1 grid-rows-[auto_auto_1fr_auto]" : "grid-cols-[7rem_minmax(0,1fr)] grid-rows-[auto_1fr_auto]"}`}
+      className={`grid h-full gap-0 overflow-hidden p-0 shadow-none ${layout === "grid" ? "grid-cols-1 grid-rows-[auto_auto_1fr_auto]" : "customer-product-list grid-cols-[7rem_minmax(0,1fr)] grid-rows-[auto_1fr_auto]"}`}
     >
       <ProductPhotoImage
         key={product.photos?.[0]?.id ?? "fallback"}
@@ -48,7 +48,7 @@ export function MenuProductCard({
         restaurantSlug={restaurantSlug}
         size={640}
         square
-        className={`${layout === "grid" ? "customer-image-ratio" : "row-span-3 h-full"} col-start-1 row-start-1 w-full`}
+        className={`customer-product-image ${layout === "grid" ? "customer-image-ratio" : "row-span-3 h-full"} col-start-1 row-start-1 w-full`}
       />
 
       <CardHeader

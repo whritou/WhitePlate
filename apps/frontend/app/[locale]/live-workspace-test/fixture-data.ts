@@ -1,4 +1,6 @@
 import type { PublicEstablishment } from "@/types/establishment-settings"
+import type { SearchParams } from "@/types/navigation"
+import { publishedStoreTheme } from "@/lib/lovable/storeTheme"
 
 export const establishment: PublicEstablishment = {
   name: "Maison Verte",
@@ -21,4 +23,22 @@ export const establishment: PublicEstablishment = {
       windows: index === 6 ? [] : [{ start: "11:30", end: "14:30" }],
     })),
   },
+}
+
+export function storeThemeFixture(query: SearchParams) {
+  const layout = Array.isArray(query.layout) ? query.layout[0] : query.layout
+  const custom = Array.isArray(query.theme) ? query.theme[0] : query.theme
+
+  return {
+    ...publishedStoreTheme("Maison Verte", null, "maison-verte"),
+    ...(layout === "list" ? { layout: "list" as const } : {}),
+    ...(custom === "custom"
+      ? {
+          primary: "#b3261e",
+          buttonStyle: "outline" as const,
+          layout: "list" as const,
+          imageRatio: "square" as const,
+        }
+      : {}),
+  }
 }

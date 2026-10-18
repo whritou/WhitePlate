@@ -18,6 +18,8 @@ for (const locale of ["en", "fr"]) {
     await page.setViewportSize({ width: 390, height: 844 })
     await page.goto(`/${locale}/live-workspace-test?view=store`)
 
+    await expect(page.locator(".storefront-page")).toBeVisible()
+
     const banner = page.locator(".customer-banner")
 
     await expect(banner).toBeVisible()
@@ -34,6 +36,12 @@ for (const locale of ["en", "fr"]) {
     ).toBeVisible()
     await expect(page.getByText("12 rue de la Roquette")).toBeVisible()
     await expect(page.getByText("+33123456789")).toBeVisible()
+    await expect(
+      page.getByRole("button", { name: "Boissons", exact: true })
+    ).toHaveCount(0)
+    await expect(
+      page.getByRole("heading", { name: "Boissons", exact: true })
+    ).toHaveCount(0)
 
     const allCategories = page.getByRole("button", {
       name: locale === "en" ? "All" : "Tout",
@@ -47,6 +55,30 @@ for (const locale of ["en", "fr"]) {
 
     await category.click()
     await expect(category).toHaveAttribute("aria-pressed", "true")
+
+    await page.goto(
+      `/${locale}/live-workspace-test?view=store&layout=list&theme=custom`
+    )
+
+    const storefront = page.locator(".storefront-page")
+
+    await expect(storefront).toHaveAttribute("data-button-style", "outline")
+    expect(
+      await storefront.evaluate((element) =>
+        getComputedStyle(element).getPropertyValue("--primary").trim()
+      )
+    ).toBe("#b3261e")
+
+    const productCard = page.locator("main [data-slot=card]").first()
+    const productImage = productCard.locator(":scope > div").first()
+    const productCardWidth = await productCard.evaluate(
+      (element) => element.getBoundingClientRect().width
+    )
+    const productImageWidth = await productImage.evaluate(
+      (element) => element.getBoundingClientRect().width
+    )
+
+    expect(productImageWidth).toBeGreaterThan(productCardWidth * 0.9)
 
     await page.goto(`/${locale}/live-workspace-test?view=store&step=checkout`)
 

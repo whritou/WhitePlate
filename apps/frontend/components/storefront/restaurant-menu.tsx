@@ -70,12 +70,17 @@ function RestaurantMenuContent({
   const [activeCategoryId, setActiveCategoryId] = useState<string | null>(null)
   const { cart, orderRound, locked, changeCart, products } = checkoutState
   const checkoutView = step === "checkout"
-  const selectedCategoryExists = menu.categories.some(
+  const storefrontCategories = menu.categories.filter(
+    (category) => category.products.length > 0
+  )
+  const selectedCategoryExists = storefrontCategories.some(
     (category) => category.id === activeCategoryId
   )
   const visibleCategories = selectedCategoryExists
-    ? menu.categories.filter((category) => category.id === activeCategoryId)
-    : menu.categories
+    ? storefrontCategories.filter(
+        (category) => category.id === activeCategoryId
+      )
+    : storefrontCategories
   const price = new Intl.NumberFormat(locale, {
     style: "currency",
     currency: menu.currency,
@@ -104,6 +109,7 @@ function RestaurantMenuContent({
         homeHref={getStorefrontMenuHref(restaurantSlug, menu.locale)}
         showCover={checkoutView}
         stickyHeader={!checkoutView}
+        storefrontPage={!checkoutView}
         headerActions={
           <LiveStoreActions
             menu={menu}
@@ -158,7 +164,7 @@ function RestaurantMenuContent({
                   />
                 )}
 
-                {menu.categories.length > 0 && (
+                {storefrontCategories.length > 0 && (
                   <nav
                     aria-label={t("menuSections")}
                     className="-mx-6 mt-4 overflow-x-auto px-6 py-4"
@@ -179,7 +185,7 @@ function RestaurantMenuContent({
                         </Button>
                       </li>
 
-                      {menu.categories.map((category) => (
+                      {storefrontCategories.map((category) => (
                         <li key={category.id}>
                           <Button
                             type="button"
@@ -206,7 +212,7 @@ function RestaurantMenuContent({
                     className="grid min-w-0 content-start gap-[var(--customer-gap)]"
                     lang={menu.locale}
                   >
-                    {menu.categories.length === 0 && (
+                    {storefrontCategories.length === 0 && (
                       <Card size="sm" className="border-dashed">
                         <CardContent className="p-lg text-body-md text-muted-foreground">
                           {t("emptyMenu")}
@@ -227,33 +233,27 @@ function RestaurantMenuContent({
                           {category.name}
                         </h2>
 
-                        {category.products.length === 0 ? (
-                          <p className="text-body-sm text-muted-foreground">
-                            {t("emptyCategory")}
-                          </p>
-                        ) : (
-                          <ul
-                            className={`items-stretch gap-[var(--customer-gap)] ${theme.layout === "grid" ? "customer-product-grid grid" : "flex flex-col"}`}
-                          >
-                            {category.products.map((product, imageIndex) => (
-                              <li key={product.id} className="min-w-0">
-                                <MenuProductCard
-                                  product={product}
-                                  restaurantSlug={restaurantSlug}
-                                  layout={theme.layout}
-                                  imageIndex={imageIndex}
-                                  item={cart.find(
-                                    (item) => item.productId === product.id
-                                  )}
-                                  locked={locked}
-                                  orderRound={orderRound}
-                                  price={price}
-                                  onSave={changeCart}
-                                />
-                              </li>
-                            ))}
-                          </ul>
-                        )}
+                        <ul
+                          className={`items-stretch gap-[var(--customer-gap)] ${theme.layout === "grid" ? "customer-product-grid grid" : "flex flex-col"}`}
+                        >
+                          {category.products.map((product, imageIndex) => (
+                            <li key={product.id} className="min-w-0">
+                              <MenuProductCard
+                                product={product}
+                                restaurantSlug={restaurantSlug}
+                                layout={theme.layout}
+                                imageIndex={imageIndex}
+                                item={cart.find(
+                                  (item) => item.productId === product.id
+                                )}
+                                locked={locked}
+                                orderRound={orderRound}
+                                price={price}
+                                onSave={changeCart}
+                              />
+                            </li>
+                          ))}
+                        </ul>
                       </section>
                     ))}
                   </div>
