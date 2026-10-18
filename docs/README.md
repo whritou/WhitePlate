@@ -1,5 +1,7 @@
 # Documentation index
 
+18 October 2026: the [real storefront versus Studio review](audits/storefront-studio-parity-2026-10-18.md) records fresh Chrome evidence and source findings. The [proposed fixes](planning/real-store-studio-parity-fixes-2026-10-18.md) target only the real customer store; demo and Studio remain visual references. After publication, the real store must reproduce Studio styling at equivalent width. These fixes are not implemented or accepted by the review.
+
 Production availability was restored on 2026-10-10 after correcting unreadable permissions on the API container's mounted public PostgreSQL CA. Health probes, authenticated organization loading, restaurant navigation and the orders page were verified. See the [incident, recovery and mounted-certificate checks](deployment/coolify.md#availability-incident-and-recovery--2026-10-10); older deployment evidence below remains historical.
 
 The approved Lovable design now also covers real workspaces, tenant customer shells and account screens, using the restored ZIP reference. See [real routes, connected operations and explicit fictitious drafts](lovable-live-workspace.md). Existing operations remain authoritative; the live analytics contract is expanded in this feature, and hosted acceptance remains separate.

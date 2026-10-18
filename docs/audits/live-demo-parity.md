@@ -1,5 +1,7 @@
 # Real app and demo parity — 10 October 2026
 
+18 October hosted review: the prior composition checks below do not establish Studio-to-real-store styling fidelity. Fresh captures show oversized sparse product cards, different hero/card/dialog recipes and incomplete checkout capability wiring. See the [current source and UX review](storefront-studio-parity-2026-10-18.md) and [real-store-only fix plan](../planning/real-store-studio-parity-fixes-2026-10-18.md). Demo and Studio are references and must remain unchanged by this follow-up; local partial fixes and hosted acceptance are distinguished in that review.
+
 The original pass targeted the real application. Its verification below is historical; the broader follow-up at the end supersedes its visual-parity claims. The follow-up also fixes shared demo/live customer previews. The supplied `whiteplate.zip` and existing `/demo` pages provide the visual reference; archive documents are reference content, not repository instructions. This follow-up is tracked on [issue #65](https://github.com/whritou/WhitePlate/issues/65).
 
 ## Comparison and changes
