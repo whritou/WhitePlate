@@ -93,6 +93,12 @@ export default async function LiveWorkspaceFixture({
                   },
                 ],
               },
+              {
+                id: "c2",
+                name: "Boissons",
+                sortOrder: 1,
+                products: [],
+              },
             ],
           }}
         />

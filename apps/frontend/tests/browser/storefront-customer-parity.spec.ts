@@ -36,6 +36,12 @@ for (const locale of ["en", "fr"]) {
     ).toBeVisible()
     await expect(page.getByText("12 rue de la Roquette")).toBeVisible()
     await expect(page.getByText("+33123456789")).toBeVisible()
+    await expect(
+      page.getByRole("button", { name: "Boissons", exact: true })
+    ).toHaveCount(0)
+    await expect(
+      page.getByRole("heading", { name: "Boissons", exact: true })
+    ).toHaveCount(0)
 
     const allCategories = page.getByRole("button", {
       name: locale === "en" ? "All" : "Tout",
