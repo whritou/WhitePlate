@@ -104,6 +104,7 @@ function RestaurantMenuContent({
         homeHref={getStorefrontMenuHref(restaurantSlug, menu.locale)}
         showCover={checkoutView}
         stickyHeader={!checkoutView}
+        storefrontPage={!checkoutView}
         headerActions={
           <LiveStoreActions
             menu={menu}

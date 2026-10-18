@@ -16,6 +16,7 @@ export function LiveCustomerShell({
   headerActions,
   showCover = false,
   stickyHeader = false,
+  storefrontPage = false,
 }: {
   name?: string
   theme?: StoreTheme
@@ -25,16 +26,16 @@ export function LiveCustomerShell({
   headerActions?: ReactNode
   showCover?: boolean
   stickyHeader?: boolean
+  storefrontPage?: boolean
 }) {
   const t = useTranslations("BrandAssets")
   const style = themeVariables(theme)
+  const surfaceClassName = `lovable-surface lovable-live customer-page ${storefrontPage ? "storefront-page" : ""}`
 
   return (
-    <VisualScopeProvider
-      value={{ className: "lovable-surface lovable-live customer-page", style }}
-    >
+    <VisualScopeProvider value={{ className: surfaceClassName, style }}>
       <div
-        className="lovable-surface lovable-live customer-page min-h-screen"
+        className={`${surfaceClassName} min-h-screen`}
         data-button-style={theme.buttonStyle}
         style={style}
       >
