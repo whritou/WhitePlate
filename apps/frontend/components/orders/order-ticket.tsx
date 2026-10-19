@@ -142,6 +142,16 @@ export function OrderTicket({
         <CardContent className="px-4 py-3">
           <p className="mb-2 font-semibold">{order.customerName}</p>
 
+          {order.customerPhone && (
+            <p className="mb-2 text-sm">{order.customerPhone}</p>
+          )}
+
+          {order.orderNotes && (
+            <p className="mb-3 text-sm break-words whitespace-pre-wrap">
+              {order.orderNotes}
+            </p>
+          )}
+
           <p className="label-mono mb-3 text-muted-foreground">
             <time dateTime={order.createdAt}>{date}</time>
           </p>

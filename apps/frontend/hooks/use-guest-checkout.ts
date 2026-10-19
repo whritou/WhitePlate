@@ -86,6 +86,8 @@ export function useGuestCheckout(
   const {
     cart,
     customerName,
+    customerPhone,
+    orderNotes,
     customerEmail,
     emailUpdatesConsented,
     analyticsConsented,
@@ -109,6 +111,8 @@ export function useGuestCheckout(
 
     const input = {
       customerName,
+      customerPhone,
+      orderNotes,
       customerEmail:
         emailUpdatesConsented || analyticsConsented ? customerEmail : "",
       emailUpdatesConsented,
@@ -182,10 +186,14 @@ export function useGuestCheckout(
   }
 
   return {
+    tenantId: menu.tenantId,
+    menuLocale: menu.locale,
     changingLanguage,
     startLanguageChange,
     cart,
     customerName,
+    customerPhone,
+    orderNotes,
     customerEmail,
     emailUpdatesConsented,
     analyticsConsented: analyticsConsented ?? false,
@@ -208,6 +216,8 @@ export function useGuestCheckout(
     checkout,
     startNewOrder,
     changeCustomerName: state.changeCustomerName,
+    changeCustomerPhone: state.changeCustomerPhone,
+    changeOrderNotes: state.changeOrderNotes,
     changeCustomerEmail: state.changeCustomerEmail,
     changeEmailUpdatesConsent: state.changeEmailUpdatesConsent,
     changeDiscountCode: state.changeDiscountCode,

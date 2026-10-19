@@ -18,6 +18,9 @@ export function StorefrontSection3() {
     quickRemove,
     quickAdd,
     btn,
+    money,
+    cartLoaded,
+    binding,
   } = useStorefrontView()
 
   return (
@@ -40,6 +43,8 @@ export function StorefrontSection3() {
                 >
                   <SourceButton
                     onClick={() => setOpen(i)}
+                    disabled={!cartLoaded || binding?.locked}
+                    aria-label={tx(i, "n", lang)}
                     className={`customer-product-image relative block shrink-0 ${t.layout === "list" ? "w-28 sm:w-32" : "customer-image-ratio w-full"}`}
                   >
                     <Copy>
@@ -88,6 +93,7 @@ export function StorefrontSection3() {
                   <div className="customer-product-details flex min-w-0 flex-1 flex-wrap items-end justify-between gap-3">
                     <SourceButton
                       onClick={() => setOpen(i)}
+                      disabled={!cartLoaded || binding?.locked}
                       className="min-w-0 flex-1 basis-44 flex-col items-start text-left [overflow-wrap:anywhere]"
                     >
                       <p className="font-bold">{tx(i, "n", lang)}</p>
@@ -120,7 +126,7 @@ export function StorefrontSection3() {
                         className="mt-1 font-bold"
                         style={{ color: t.primary }}
                       >
-                        €<Copy>{i.p.toFixed(2)}</Copy>
+                        <Copy>{money(i.p)}</Copy>
                       </p>
                     </SourceButton>
 
@@ -128,6 +134,7 @@ export function StorefrontSection3() {
                       {q === 0 ? (
                         <SourceButton
                           onClick={() => quickAdd(i)}
+                          disabled={!cartLoaded || binding?.locked}
                           aria-label={`Add ${i.n}`}
                           className="h-9 w-9 shrink-0 text-lg font-bold"
                           style={btn}

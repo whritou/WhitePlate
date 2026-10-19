@@ -283,6 +283,8 @@ public sealed class OrderRepository(WhitePlateDbContext database,
                             line.PreparationNotesJson) ?? new()
                     }).ToArray())
                     {
+                        CustomerPhone = order.CustomerPhone,
+                        OrderNotes = order.OrderNotes,
                         PickupAt = order.PickupAt,
                         PickupTimeZone = order.PickupTimeZone,
                         PickupMode = order.PickupMode.HasValue
@@ -455,6 +457,8 @@ public sealed class OrderRepository(WhitePlateDbContext database,
                         line.PreparationNotesJson) ?? new()
                 }).ToArray())
             {
+                CustomerPhone = order.CustomerPhone,
+                OrderNotes = order.OrderNotes,
                 PickupAt = order.PickupAt,
                 PickupTimeZone = order.PickupTimeZone,
                 PickupMode = order.PickupMode.HasValue
@@ -505,14 +509,23 @@ public sealed class OrderRepository(WhitePlateDbContext database,
             .Select(item => new
             {
                 item.TrackingTokenHash, item.EmailTrackingTokenHash, item.TrackingTokenExpiresAt, item.Id,
-                item.Status, item.Version, item.CreatedAt, item.MenuLocale, item.PickupAt, item.PickupTimeZone
+                item.Status, item.Version, item.CreatedAt, item.MenuLocale, item.PickupAt, item.PickupTimeZone,
+                item.Currency, item.Subtotal, item.DiscountAmount, item.TaxAmount, item.Total,
+                Lines = item.Lines.Select(line => new PublicOrderLineDto(line.ProductId, line.ProductName,
+                    line.Quantity, line.Subtotal, line.Total,
+                    line.Options.Select(option => new OrderLineOptionDto(option.OptionId, option.Name,
+                        option.PriceAdjustment)).ToArray())).ToArray()
             }).SingleOrDefaultAsync(cancellationToken);
         if (order is null || order.TrackingTokenExpiresAt <= now ||
             !MatchesTokenHash(order.TrackingTokenHash, tokenHash) && !MatchesTokenHash(order.EmailTrackingTokenHash, tokenHash))
             return null;
 
         return new PublicOrderTrackingDto(order.Id, order.Status.ToString(), order.Version, order.CreatedAt, order.MenuLocale)
-            { PickupAt = order.PickupAt, PickupTimeZone = order.PickupTimeZone };
+            {
+                PickupAt = order.PickupAt, PickupTimeZone = order.PickupTimeZone,
+                Summary = new PublicOrderSummaryDto(order.Currency, order.Subtotal, order.DiscountAmount,
+                    order.TaxAmount, order.Total, order.Lines)
+            };
     }
 
     private static bool MatchesTokenHash(string? stored, string supplied) => stored is not null &&

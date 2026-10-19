@@ -1,21 +1,27 @@
 "use client"
 
-import { Clock3, MapPin } from "lucide-react"
+import { ShoppingBag } from "lucide-react"
+import { Copy } from "@/components/shared/translated-copy"
 import { useQuery } from "@tanstack/react-query"
 import { useLocale, useTranslations } from "next-intl"
 import { useSyncExternalStore } from "react"
-import { LiveCustomerShell as CustomerShell } from "./live-customer-shell"
-import { LiveTrackingProgress as TrackingProgress } from "./live-tracking-progress"
+import { LiveCustomerShell } from "./live-customer-shell"
+import { CustomerTracking } from "./demo/tracking/customer-tracking"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/lovable-button"
 import { Link } from "@/i18n/navigation"
 import {
   fetchPublicOrderTracking,
   PublicOrderTrackingError,
 } from "@/lib/api/order-browser"
+import { CustomerPickupLocation } from "./customer-pickup-location"
 import { CurrentCollectionInformation } from "./current-collection-information"
 import type { StoreTheme } from "@/types/lovable/storeTheme"
+import type { CustomerOrder } from "@/types/lovable/customerOrder"
+import type { StorefrontMenu } from "@/types/storefront"
+import { customerMenu } from "@/lib/checkout/customer-presentation"
+import { cartItemKey } from "@/lib/checkout/cart"
+import { customerAddressLines } from "@/lib/collection-presentation"
 import { getStorefrontMenuHref } from "@/lib/storefront-preview-routing"
 
 function subscribeToHash(onChange: () => void) {
@@ -30,24 +36,22 @@ function readTrackingToken() {
   return /^[A-Za-z0-9_-]{43}$/.test(token) ? token : ""
 }
 
-function readRestaurantHost() {
-  return window.location.host
-}
-
 export function OrderTracking({
   orderId,
   name,
   theme,
   restaurantSlug,
+  menu,
 }: {
   orderId: string
   name: string
   theme: StoreTheme
   restaurantSlug?: string
+  menu?: StorefrontMenu
 }) {
-  const t = useTranslations("OrderTracking")
+  const text = useTranslations("OrderTracking")
   const checkout = useTranslations("Checkout")
-  const collection = useTranslations("CollectionInformation")
+  const redesign = useTranslations("Redesign")
   const locale = useLocale()
   const token = useSyncExternalStore(
     subscribeToHash,
@@ -56,18 +60,16 @@ export function OrderTracking({
   )
   const host = useSyncExternalStore(
     subscribeToHash,
-    readRestaurantHost,
+    () => window.location.host,
     () => ""
   )
-
   const tracking = useQuery({
-    queryKey: ["public-order-tracking", host, restaurantSlug, orderId],
+    queryKey: ["public-order-tracking", host, restaurantSlug, orderId, token],
     queryFn: ({ signal }) =>
       fetchPublicOrderTracking(orderId, token, signal, restaurantSlug),
     enabled: token.length > 0,
     refetchInterval: (query) =>
-      query.state.data?.status === "Completed" ||
-      query.state.data?.status === "Cancelled"
+      ["Completed", "Cancelled"].includes(query.state.data?.status ?? "")
         ? false
         : 15_000,
     refetchIntervalInBackground: false,
@@ -78,174 +80,174 @@ export function OrderTracking({
     restaurantSlug,
     order?.menuLocale ?? locale
   )
-
-  return (
-    <CustomerShell
-      name={name}
-      theme={theme}
-      restaurantSlug={restaurantSlug}
-      homeHref={menuHref}
-      showCover
-      headerActions={
-        <Button
-          type="button"
-          variant="ghost"
-          nativeButton={false}
-          render={<Link href={menuHref} locale={locale} />}
-        >
-          {t("backToMenu")}
-        </Button>
-      }
+  const menuAction = (
+    <Link
+      href={menuHref}
+      locale={locale}
+      className="flex items-center gap-2 text-sm"
     >
-      <main className="customer-shell-content mx-auto min-h-[60vh] max-w-5xl px-5 py-8">
-        <header className="mb-8">
-          <p className="mb-2 text-sm font-semibold text-primary">
-            {t("clickCollect")}
-          </p>
+      <ShoppingBag size={16} />
+      <Copy> Click & collect</Copy>
+    </Link>
+  )
 
-          <h1 className="font-display text-3xl font-bold sm:text-4xl">
-            {t("title")}
-          </h1>
+  if (!token || tracking.isPending || tracking.error || !order)
+    return (
+      <LiveCustomerShell
+        name={name}
+        theme={theme}
+        homeHref={menuHref}
+        showCover
+        headerActions={menuAction}
+      >
+        <h1 className="mb-6 text-3xl font-bold">{text("title")}</h1>
 
-          <p className="mt-2 text-sm break-all text-muted-foreground">
-            {t("reference", { id: orderId })}
-          </p>
-        </header>
-
-        {!token ? (
+        {tracking.isPending && token ? (
+          <p role="status">{text("loading")}</p>
+        ) : (
           <Alert role="alert">
-            <AlertDescription>{t("missingLink")}</AlertDescription>
-          </Alert>
-        ) : tracking.isPending ? (
-          <p role="status" className="text-sm text-muted-foreground">
-            {t("loading")}
-          </p>
-        ) : tracking.error ? (
-          <Alert variant="destructive" role="alert">
             <AlertDescription>
-              {tracking.error instanceof PublicOrderTrackingError &&
-              tracking.error.code === "not_found"
-                ? t("notFound")
-                : t("unavailable")}
+              {!token
+                ? text("missingLink")
+                : tracking.error instanceof PublicOrderTrackingError &&
+                    tracking.error.code === "not_found"
+                  ? text("notFound")
+                  : text("unavailable")}
             </AlertDescription>
           </Alert>
-        ) : order ? (
-          <div className="customer-two-column grid min-w-0 items-start gap-10">
-            <div className="grid min-w-0 gap-8">
-              {order.status === "Cancelled" ? (
-                <Alert variant="destructive" role="status">
-                  <AlertDescription>
-                    {checkout("status.Cancelled")}
-                  </AlertDescription>
-                </Alert>
-              ) : (
-                <TrackingProgress status={order.status} />
-              )}
+        )}
+      </LiveCustomerShell>
+    )
 
-              {order.pickupAt && (
-                <section className="customer-rounded flex items-center gap-4 border px-5 py-4">
-                  <Clock3 size={22} className="shrink-0 text-primary" />
+  const summary = order.summary
+  const products = menu
+    ? customerMenu(menu, restaurantSlug).categories.flatMap(
+        (category) => category.items
+      )
+    : []
+  const presentation: CustomerOrder = {
+    id: order.id,
+    name: "",
+    pickup: order.pickupAt ?? "As soon as possible",
+    notes: "",
+    createdAt: order.createdAt,
+    lang: order.menuLocale ?? locale,
+    subtotal: summary?.subtotal ?? 0,
+    discount: summary?.discountAmount ?? 0,
+    total: summary?.total ?? 0,
+    lines:
+      summary?.lines.map((line) => ({
+        key: cartItemKey({
+          productId: line.productId,
+          optionIds: line.options.map((option) => option.optionId),
+        }),
+        qty: line.quantity,
+        unit: line.subtotal / line.quantity,
+        picks: line.options.map((option) => option.name),
+        product: {
+          id: line.productId,
+          n: line.productName,
+          d: "",
+          p: line.subtotal / line.quantity,
+          images:
+            products.find((product) => product.id === line.productId)?.images ??
+            [],
+          options: [],
+        },
+      })) ?? [],
+  }
+  const stage = ["Pending", "Preparing", "Ready", "Completed"].indexOf(
+    order.status
+  )
+  const pickup = order.pickupAt
+    ? new Intl.DateTimeFormat(locale, {
+        hour: "2-digit",
+        minute: "2-digit",
+        timeZone: order.pickupTimeZone ?? undefined,
+      }).format(new Date(order.pickupAt))
+    : checkout("asapPickup")
 
-                  <div>
-                    <p className="text-xs text-muted-foreground">
-                      {checkout("pickupTime")}
-                    </p>
-
-                    <p className="mt-1 text-lg font-bold">
-                      {checkout("pickupAt", {
-                        time: new Intl.DateTimeFormat(locale, {
-                          year: "numeric",
-                          month: "short",
-                          day: "numeric",
-                          hour: "numeric",
-                          minute: "2-digit",
-                          timeZone: order.pickupTimeZone ?? undefined,
-                          timeZoneName: "shortOffset",
-                        }).format(new Date(order.pickupAt)),
-                      })}
-                    </p>
-                  </div>
-                </section>
-              )}
-
-              <section className="border-t pt-6">
-                <h2 className="flex items-center gap-2 text-lg font-bold">
-                  <MapPin size={20} className="text-primary" />
-
-                  {collection("title")}
-                </h2>
-
-                <CurrentCollectionInformation
-                  locale={order.menuLocale ?? locale}
-                  restaurantSlug={restaurantSlug}
-                />
-              </section>
-            </div>
-
+  return (
+    <div className="lovable-surface">
+      <CustomerTracking
+        t={{
+          ...theme,
+          address: menu?.establishment
+            ? customerAddressLines(menu.establishment, locale).join(", ")
+            : theme.address,
+          phone: menu?.establishment?.phone ?? theme.phone,
+        }}
+        order={presentation}
+        binding={{
+          money: (value) =>
+            summary?.currency === "EUR"
+              ? `€${value.toFixed(2)}`
+              : new Intl.NumberFormat(locale, {
+                  style: "currency",
+                  currency: summary?.currency ?? "EUR",
+                }).format(value),
+          stage,
+          statusLabel: checkout(`status.${order.status}`),
+          heading:
+            order.status === "Cancelled"
+              ? checkout("status.Cancelled")
+              : text(`heading${order.status}`),
+          description:
+            order.status === "Cancelled"
+              ? text("cancelledDescription")
+              : order.status === "Preparing"
+                ? text("descriptionPreparing")
+                : redesign(`liveStageDescription${order.status}`),
+          pickup,
+          headerActions: menuAction,
+          taxAmount: summary?.taxAmount,
+          summary: summary ? undefined : (
             <aside className="customer-summary min-w-0 border-t pt-6">
-              <Card className="customer-rounded gap-0">
-                <CardHeader>
-                  <CardTitle>{t("orderDetails")}</CardTitle>
-                </CardHeader>
+              <h2 className="text-lg font-bold">{text("orderDetails")}</h2>
 
-                <CardContent className="grid gap-5">
-                  <dl className="grid gap-4 text-sm">
-                    <div>
-                      <dt className="text-muted-foreground">
-                        {t("currentStatus")}
-                      </dt>
+              <p className="mt-4 text-sm text-muted-foreground">
+                {text("summaryUnavailable")}
+              </p>
 
-                      <dd className="mt-1 font-semibold">
-                        {checkout(`status.${order.status}`)}
-                      </dd>
-                    </div>
-
-                    <div>
-                      <dt className="text-muted-foreground">
-                        {checkout("orderReference", { id: order.id })}
-                      </dt>
-
-                      <dd className="mt-1 font-semibold break-all">
-                        {order.id}
-                      </dd>
-                    </div>
-
-                    <div>
-                      <dt className="text-muted-foreground">
-                        {t("placedAt", {
-                          date: new Intl.DateTimeFormat(locale, {
-                            dateStyle: "medium",
-                            timeStyle: "short",
-                          }).format(new Date(order.createdAt)),
-                        })}
-                      </dt>
-                    </div>
-                  </dl>
-
-                  <div className="grid gap-3 border-t pt-5">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      disabled={tracking.isFetching}
-                      onClick={() => void tracking.refetch()}
-                    >
-                      {tracking.isFetching ? t("refreshing") : t("refresh")}
-                    </Button>
-
-                    <Button
-                      type="button"
-                      nativeButton={false}
-                      render={<Link href={menuHref} locale={locale} />}
-                    >
-                      {t("backToMenu")}
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+              <Button
+                variant="outline"
+                className="mt-6 w-full"
+                disabled={tracking.isFetching}
+                onClick={() => void tracking.refetch()}
+              >
+                {tracking.isFetching ? text("refreshing") : text("refresh")}
+              </Button>
             </aside>
-          </div>
-        ) : null}
-      </main>
-    </CustomerShell>
+          ),
+          location: (
+            <CustomerPickupLocation name={name} orderId={order.id}>
+              <CurrentCollectionInformation
+                locale={order.menuLocale ?? locale}
+                restaurantSlug={restaurantSlug}
+                customer
+                muted
+              />
+            </CustomerPickupLocation>
+          ),
+          actions: (
+            <div className="mt-6 grid gap-3">
+              <Button
+                variant="outline"
+                disabled={tracking.isFetching}
+                onClick={() => void tracking.refetch()}
+              >
+                {tracking.isFetching ? text("refreshing") : text("refresh")}
+              </Button>
+
+              <Button asChild variant="outline">
+                <Link href={menuHref} locale={locale}>
+                  {text("backToMenu")}
+                </Link>
+              </Button>
+            </div>
+          ),
+        }}
+      />
+    </div>
   )
 }

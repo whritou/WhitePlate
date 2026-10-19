@@ -13,6 +13,8 @@ it("renders saved localized preparation notes and accessible pickup timing", () 
       order: {
         id: "22222222-2222-4222-8222-222222222222",
         customerName: "Ada",
+        customerPhone: "+33123456789",
+        orderNotes: "Sonner à l’arrivée.",
         currency: "EUR",
         menuLocale: "fr",
         total: 19.25,
@@ -43,6 +45,8 @@ it("renders saved localized preparation notes and accessible pickup timing", () 
   )
 
   expect(html).toContain("Terminer à la commande.")
+  expect(html).toContain("+33123456789")
+  expect(html).toContain("Sonner à l’arrivée.")
   expect(html).not.toContain("Finish last.")
   expect(html).toContain('role="timer"')
   expect(html).toContain("pickupDueSoon")

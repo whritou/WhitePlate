@@ -58,6 +58,7 @@ export default async function Page({
     <OrderTracking
       orderId={orderId}
       name={restaurantName}
+      menu={menu.kind === "menu" ? menu.menu : undefined}
       theme={publishedStoreTheme(restaurantName, publication)}
     />
   )

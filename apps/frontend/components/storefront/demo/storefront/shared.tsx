@@ -3,6 +3,7 @@ import { SourceModal } from "@/components/ui/lovable-modal"
 import { Copy } from "@/components/shared/translated-copy"
 import { SourceButton } from "@/components/ui/lovable-controls"
 import { useState } from "react"
+import { useTranslations } from "next-intl"
 import { type StoreTheme } from "@/lib/lovable/storeTheme"
 import {
   tx,
@@ -10,64 +11,8 @@ import {
   type Option,
   type Product,
 } from "@/lib/lovable/menu"
-export const UI: Record<string, Record<string, string>> = {
-  en: {
-    basket: "Basket",
-    all: "All",
-    address: "Address",
-    hours: "Hours",
-    phone: "Phone",
-    open: "Open now · pickup in",
-    view: "View basket",
-    items: "items",
-    your: "Your basket",
-    empty: "Your basket is empty.",
-    pickup: "Pickup",
-    total: "Total",
-    subtotal: "Subtotal",
-    discount: "Discount",
-    place: "Place order",
-    code: "Discount code",
-    apply: "Apply",
-    placed: "Order placed!",
-    pickAt: "Pick it up at",
-    inAbout: "in about",
-    back: "Back to menu",
-    required: "Required · pick 1",
-    optional: "Optional",
-    add: "Add",
-    allergens: "Allergens",
-    none: "No listed allergens",
-  },
-  fr: {
-    basket: "Panier",
-    all: "Tout",
-    address: "Adresse",
-    hours: "Horaires",
-    phone: "Téléphone",
-    open: "Ouvert · retrait en",
-    view: "Voir le panier",
-    items: "articles",
-    your: "Votre panier",
-    empty: "Votre panier est vide.",
-    pickup: "Retrait",
-    total: "Total",
-    subtotal: "Sous-total",
-    discount: "Réduction",
-    place: "Commander",
-    code: "Code promo",
-    apply: "Appliquer",
-    placed: "Commande envoyée !",
-    pickAt: "À récupérer au",
-    inAbout: "dans environ",
-    back: "Retour au menu",
-    required: "Obligatoire · 1 choix",
-    optional: "Facultatif",
-    add: "Ajouter",
-    allergens: "Allergènes",
-    none: "Aucun allergène déclaré",
-  },
-}
+export { UI } from "./labels"
+
 export function ProductModal({
   p,
   t,
@@ -79,6 +24,8 @@ export function ProductModal({
   menu,
   onClose,
   onAdd,
+  locked = false,
+  money = (value: number) => `€${value.toFixed(2)}`,
 }: {
   p: Product
   t: StoreTheme
@@ -89,13 +36,24 @@ export function ProductModal({
   u: (k: string) => string
   menu: MenuData
   onClose: () => void
-  onAdd: (picks: string[], unit: number, qty: number) => void
+  onAdd: (
+    picks: string[],
+    unit: number,
+    qty: number,
+    optionIds?: string[]
+  ) => void
+  money?: (value: number) => string
+  locked?: boolean
 }) {
+  const checkout = useTranslations("Checkout")
+  const [selectionError, setSelectionError] = useState(false)
   const [sel, setSel] = useState<Record<number, number[]>>(() =>
     Object.fromEntries(
       p.options.map((o, i) => [
         i,
-        o.type === "one" && o.choices.length ? [0] : [],
+        o.type === "one" && (o.minimumSelections ?? 1) > 0 && o.choices.length
+          ? [0]
+          : [],
       ])
     )
   )
@@ -110,6 +68,20 @@ export function ProductModal({
     0
   )
   const unit = p.p + extra
+  const unavailable = p.options.some(
+    (o) =>
+      (o.minimumSelections ?? (o.type === "one" ? 1 : 0)) > 0 &&
+      !o.choices.length
+  )
+  const valid = p.options.every((o, gi) => {
+    const count = sel[gi]?.length ?? 0
+
+    return (
+      count >= (o.minimumSelections ?? (o.type === "one" ? 1 : 0)) &&
+      count <=
+        (o.maximumSelections ?? (o.type === "one" ? 1 : o.choices.length))
+    )
+  })
   const toggle = (o: Option, gi: number, ci: number) =>
     setSel((s) => {
       const cur = s[gi] ?? []
@@ -118,7 +90,9 @@ export function ProductModal({
         ...s,
         [gi]:
           o.type === "one"
-            ? [ci]
+            ? cur.includes(ci) && o.minimumSelections === 0
+              ? []
+              : [ci]
             : cur.includes(ci)
               ? cur.filter((x) => x !== ci)
               : [...cur, ci],
@@ -189,13 +163,19 @@ export function ProductModal({
         </div>
 
         <div className="max-h-[45vh] space-y-5 overflow-y-auto p-5">
+          {(unavailable || selectionError) && (
+            <p role="alert" className="text-sm text-destructive">
+              {checkout(unavailable ? "unavailableOptions" : "invalidOptions")}
+            </p>
+          )}
+
           <div>
             <h3 className="text-2xl font-bold">{tx(p, "n", lang)}</h3>
 
             <p style={{ color: muted }}>{tx(p, "d", lang)}</p>
 
             <p className="mt-1 font-bold" style={{ color: t.primary }}>
-              €<Copy>{p.p.toFixed(2)}</Copy>
+              <Copy>{money(p.p)}</Copy>
             </p>
           </div>
 
@@ -225,6 +205,12 @@ export function ProductModal({
             )}
           </div>
 
+          {p.details?.map((detail, index) => (
+            <p key={index} className="text-sm" style={{ color: muted }}>
+              {detail}
+            </p>
+          ))}
+
           {p.options.map((o, gi) => (
             <div key={gi}>
               <p className="mb-2 flex justify-between text-sm font-bold">
@@ -232,7 +218,9 @@ export function ProductModal({
 
                 <span style={{ color: muted }}>
                   <Copy>
-                    {o.type === "one" ? u("required") : u("optional")}
+                    {(o.minimumSelections ?? (o.type === "one" ? 1 : 0)) > 0
+                      ? u("required")
+                      : u("optional")}
                   </Copy>
                 </span>
               </p>
@@ -245,6 +233,7 @@ export function ProductModal({
                     return (
                       <SourceButton
                         key={ci}
+                        aria-pressed={on}
                         onClick={() => toggle(o, gi, ci)}
                         className="flex w-full items-center justify-between px-3 py-2.5 text-sm"
                         style={{
@@ -274,7 +263,7 @@ export function ProductModal({
                         <Copy>
                           {c.p > 0 && (
                             <span style={{ color: muted }}>
-                              +€<Copy>{c.p.toFixed(2)}</Copy>
+                              +<Copy>{money(c.p)}</Copy>
                             </span>
                           )}
                         </Copy>
@@ -307,7 +296,7 @@ export function ProductModal({
             </span>
 
             <SourceButton
-              onClick={() => setQty((q) => q + 1)}
+              onClick={() => setQty((q) => Math.min(99, q + 1))}
               className="w-10 text-lg font-bold"
             >
               +
@@ -315,20 +304,32 @@ export function ProductModal({
           </div>
 
           <SourceButton
-            onClick={() =>
+            disabled={locked || unavailable}
+            onClick={() => {
+              if (!valid) {
+                setSelectionError(true)
+
+                return
+              }
+
               onAdd(
                 p.options.flatMap((o, gi) =>
                   (sel[gi] ?? []).map((ci) => tx(o.choices[ci]!, "n", lang))
                 ),
                 unit,
-                qty
+                qty,
+                p.options.flatMap((o, gi) =>
+                  (sel[gi] ?? []).flatMap((ci) =>
+                    o.choices[ci]?.id ? [o.choices[ci]!.id!] : []
+                  )
+                )
               )
-            }
+            }}
             className="h-11 flex-1 font-bold"
             style={{ background: t.primary, color: t.bg, borderRadius: r }}
           >
-            <Copy>{u("add")}</Copy> <Copy>{qty}</Copy> · €
-            <Copy>{(unit * qty).toFixed(2)}</Copy>
+            <Copy>{u("add")}</Copy> <Copy>{qty}</Copy> ·{" "}
+            <Copy>{money(unit * qty)}</Copy>
           </SourceButton>
         </div>
       </SourceModal>

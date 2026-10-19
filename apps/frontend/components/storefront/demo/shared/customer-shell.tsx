@@ -9,10 +9,16 @@ export function CustomerShell({
   t,
   children,
   preview = false,
+  headerActions,
+  showCover = true,
+  footer,
 }: {
   t: StoreTheme
   children: ReactNode
   preview?: boolean
+  headerActions?: ReactNode
+  showCover?: boolean
+  footer?: ReactNode
 }) {
   return (
     <div
@@ -38,22 +44,23 @@ export function CustomerShell({
         </div>
 
         <Copy>
-          {preview ? (
-            <span className="flex items-center gap-2 text-sm">
-              <ShoppingBag size={16} /> <Copy> Click & collect</Copy>
-            </span>
-          ) : (
-            <Button asChild variant="ghost">
-              <Link to="/store">
-                <ArrowLeft /> <Copy> Menu</Copy>
-              </Link>
-            </Button>
-          )}
+          {headerActions ??
+            (preview ? (
+              <span className="flex items-center gap-2 text-sm">
+                <ShoppingBag size={16} /> <Copy> Click & collect</Copy>
+              </span>
+            ) : (
+              <Button asChild variant="ghost">
+                <Link to="/store">
+                  <ArrowLeft /> <Copy> Menu</Copy>
+                </Link>
+              </Button>
+            ))}
         </Copy>
       </header>
 
       <Copy>
-        {t.showBanner && t.banner && (
+        {showCover && t.showBanner && t.banner && (
           <div className="customer-cover overflow-hidden">
             <img
               src={t.banner}
@@ -68,22 +75,24 @@ export function CustomerShell({
         <Copy>{children}</Copy>
       </div>
 
-      <footer className="mx-auto flex max-w-5xl flex-wrap justify-between gap-4 border-t px-6 py-6 text-sm text-muted-foreground">
-        <span className="flex items-start gap-2">
-          <MapPin size={16} className="shrink-0" />
+      {footer ?? (
+        <footer className="mx-auto flex max-w-5xl flex-wrap justify-between gap-4 border-t px-6 py-6 text-sm text-muted-foreground">
+          <span className="flex items-start gap-2">
+            <MapPin size={16} className="shrink-0" />
 
-          <Copy>{t.address}</Copy>
-        </span>
+            <Copy>{t.address}</Copy>
+          </span>
 
-        <a
-          href={`tel:${t.phone.replace(/\s/g, "")}`}
-          className="flex items-center gap-2"
-        >
-          <Phone size={16} />
+          <a
+            href={`tel:${t.phone.replace(/\s/g, "")}`}
+            className="flex items-center gap-2"
+          >
+            <Phone size={16} />
 
-          <Copy>{t.phone}</Copy>
-        </a>
-      </footer>
+            <Copy>{t.phone}</Copy>
+          </a>
+        </footer>
+      )}
     </div>
   )
 }

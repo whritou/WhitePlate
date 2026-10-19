@@ -2,6 +2,7 @@ import { useDemoDraft, useDemoHydrated } from "@/hooks/lovable/use-demo-draft"
 import type { CartDraft, CustomerOrder } from "@/types/lovable/customerOrder"
 
 import { DEFAULT_MENU } from "@/lib/lovable/menu"
+import { previewPricing } from "@/lib/checkout/preview-pricing"
 export type {
   CartLine,
   CartDraft,
@@ -82,9 +83,7 @@ export const PREVIEW_CART: CartDraft = {
 export const PREVIEW_ORDER: CustomerOrder = {
   id: "WP-1048",
   lines: PREVIEW_CART.lines,
-  subtotal: 24,
-  discount: 0,
-  total: 24,
+  ...previewPricing(PREVIEW_CART.lines, 0),
   name: "Alex",
   pickup: "As soon as possible",
   notes: "",

@@ -9,9 +9,13 @@ import { CollectionInformation } from "./collection-information"
 export function CurrentCollectionInformation({
   locale,
   restaurantSlug,
+  customer = false,
+  muted = false,
 }: {
   locale: string
   restaurantSlug?: string
+  customer?: boolean
+  muted?: boolean
 }) {
   const t = useTranslations("CollectionInformation")
   const host = typeof window === "undefined" ? "" : window.location.host
@@ -24,9 +28,14 @@ export function CurrentCollectionInformation({
   })
 
   return (
-    <div className="mt-6 grid gap-3 border-t pt-6">
+    <div className={customer ? "mt-2" : "mt-6 grid gap-3 border-t pt-6"}>
       {query.data && (
-        <CollectionInformation establishment={query.data} current />
+        <CollectionInformation
+          establishment={query.data}
+          current={!customer}
+          customer={customer}
+          muted={muted}
+        />
       )}
 
       {query.isPending ? (

@@ -69,9 +69,10 @@ for (const locale of ["en", "fr"]) {
 
       await page.goto(`/${locale}/live-workspace-test?view=store&theme=parity`)
 
-      const store = page.locator(".lovable-live.storefront-page").first()
+      const store = page.locator(".storefront-page").first()
 
       await expect(store).toBeVisible()
+      await expect(store).toHaveAttribute("aria-busy", "false")
 
       const storeTheme = await store.evaluate((element, keys) => {
         const style = getComputedStyle(element)
@@ -100,24 +101,21 @@ for (const locale of ["en", "fr"]) {
         expect(storeTheme[key]).toBe(String(value))
       }
 
-      const outlineButton = store.locator("button.bg-primary").first()
+      const outlineButton = store.locator("header button").last()
 
       await expect(outlineButton).toBeVisible()
+      await expect(outlineButton).toBeEnabled()
       await expect(outlineButton).toHaveCSS("color", "rgb(179, 38, 30)")
       await outlineButton.hover()
       await expect(outlineButton).toHaveCSS(
         "background-color",
-        "rgb(255, 253, 247)"
+        "rgb(179, 38, 30)"
       )
-      await expect(outlineButton).toHaveCSS(
-        "box-shadow",
-        "rgb(179, 38, 30) 0px 0px 0px 2px inset"
-      )
+      await expect(outlineButton).toHaveCSS("color", "rgb(255, 253, 247)")
+      await expect(outlineButton).toHaveCSS("border-width", "1px")
+      await expect(outlineButton).toHaveCSS("box-shadow", "none")
       await page.mouse.down()
-      await expect(outlineButton).toHaveCSS(
-        "box-shadow",
-        "rgb(179, 38, 30) 0px 0px 0px 3px inset"
-      )
+      await expect(outlineButton).toHaveCSS("filter", "brightness(0.88)")
       await page.mouse.up()
     }
   })

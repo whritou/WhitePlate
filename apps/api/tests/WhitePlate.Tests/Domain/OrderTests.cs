@@ -6,6 +6,51 @@ namespace WhitePlate.Tests.Domain;
 public sealed class OrderTests
 {
     [Fact]
+    public void DifferentOptionVariantsOfOneProductKeepSeparateSnapshots()
+    {
+        var product = Guid.NewGuid();
+        var first = new OrderLineSnapshot(product, "Soup", 10m, 0m, 1,
+            [new OrderOptionSnapshot(Guid.NewGuid(), "Small", 0m)]);
+        var second = new OrderLineSnapshot(product, "Soup", 10m, 0m, 2,
+            [new OrderOptionSnapshot(Guid.NewGuid(), "Large", 2m)]);
+        var order = Order.Create(Guid.NewGuid(), "EUR", "Ada", [first, second], null, 0m, DateTimeOffset.UtcNow);
+        Assert.Equal(2, order.Lines.Count);
+        Assert.Equal(34m, order.Total);
+        Assert.Throws<DomainRuleException>(() => Order.Create(Guid.NewGuid(), "EUR", "Ada",
+            [first, first], null, 0m, DateTimeOffset.UtcNow));
+    }
+
+    [Fact]
+    public void CheckoutDetailsAreTrimmedAndOptional()
+    {
+        var order = Order.Create(Guid.NewGuid(), "EUR", "Ada", [
+            new OrderLineSnapshot(Guid.NewGuid(), "Soup", 10m, 0m, 1, [])
+        ], null, 0m, DateTimeOffset.UtcNow, customerPhone: " +33 1 23 45 67 89 ",
+            orderNotes: " Please ring when ready. ");
+        Assert.Equal("+33 1 23 45 67 89", order.CustomerPhone);
+        Assert.Equal("Please ring when ready.", order.OrderNotes);
+    }
+
+    [Theory]
+    [InlineData("abc", null)]
+    [InlineData("123456789012345678901", null)]
+    [InlineData("+33<script>123", null)]
+    public void CheckoutRejectsMalformedPhone(string phone, string? notes)
+    {
+        Assert.Throws<DomainRuleException>(() => Order.Create(Guid.NewGuid(), "EUR", "Ada", [
+            new OrderLineSnapshot(Guid.NewGuid(), "Soup", 10m, 0m, 1, [])
+        ], null, 0m, DateTimeOffset.UtcNow, customerPhone: phone, orderNotes: notes));
+    }
+
+    [Fact]
+    public void CheckoutRejectsOversizedNotes()
+    {
+        Assert.Throws<DomainRuleException>(() => Order.Create(Guid.NewGuid(), "EUR", "Ada", [
+            new OrderLineSnapshot(Guid.NewGuid(), "Soup", 10m, 0m, 1, [])
+        ], null, 0m, DateTimeOffset.UtcNow, orderNotes: new string('a', 501)));
+    }
+
+    [Fact]
     public void CreateRejectsPickupModeWithoutResolvedPickupTime()
     {
         Assert.Throws<DomainRuleException>(() => Order.Create(Guid.NewGuid(), "EUR", "Ada", [

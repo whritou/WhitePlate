@@ -7,7 +7,27 @@ import { CustomerShell } from "@/components/storefront/demo/shared/customer-shel
 import { useCustomerCheckoutView } from "./context"
 import { CustomerCheckoutSection1 } from "./section-1"
 export function CustomerCheckoutView() {
-  const { t, cart, preview } = useCustomerCheckoutView()
+  const { t, cart, preview, binding } = useCustomerCheckoutView()
+
+  if (binding && !cart.lines.length)
+    return (
+      <div className="py-16 text-center">
+        <ShoppingBag className="mx-auto mb-5 h-10 w-10 text-primary" />
+
+        <h1 className="text-3xl font-bold">
+          <Copy>Your basket is empty</Copy>
+        </h1>
+
+        <p className="mt-3 text-muted-foreground">
+          <Copy>Something delicious is waiting on the menu.</Copy>
+        </p>
+
+        <Button type="button" className="mt-6" onClick={binding.onEdit}>
+          <Copy>Browse menu</Copy>
+          <ArrowRight />
+        </Button>
+      </div>
+    )
 
   if (!cart.lines.length)
     return (
@@ -34,8 +54,8 @@ export function CustomerCheckoutView() {
       </CustomerShell>
     )
 
-  return (
-    <CustomerShell t={t} preview={preview}>
+  const content = (
+    <>
       <div className="mb-8 flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="mb-2 text-sm font-semibold text-primary">
@@ -57,6 +77,14 @@ export function CustomerCheckoutView() {
       </div>
 
       <CustomerCheckoutSection1 />
+    </>
+  )
+
+  return binding ? (
+    content
+  ) : (
+    <CustomerShell t={t} preview={preview}>
+      {content}
     </CustomerShell>
   )
 }

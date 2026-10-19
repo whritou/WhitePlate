@@ -67,7 +67,7 @@ export function applyDiscount(
 
   const amount =
     d.type === "percent"
-      ? (subtotal * d.value) / 100
+      ? Math.round((Math.round(subtotal * 100) * d.value) / 100) / 100
       : Math.min(d.value, subtotal)
 
   return {

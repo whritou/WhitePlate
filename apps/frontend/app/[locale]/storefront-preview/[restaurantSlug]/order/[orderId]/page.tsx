@@ -76,6 +76,7 @@ export default async function Page({
     <OrderTracking
       orderId={orderId}
       name={menu.menu.restaurantName}
+      menu={menu.menu}
       theme={publishedStoreTheme(
         menu.menu.restaurantName,
         publication,

@@ -1,5 +1,7 @@
 # Storefront–Studio theme parity
 
+Historical PR #137 token-application report. The 19 October [shared-renderer follow-up](storefront-studio-renderer-parity.md) supersedes its implementation boundary and validation counts. Studio now includes the user-approved consent fields and pricing-rule alignment; the earlier statement below that its source was unchanged applies only to PR #137. Neither report declares complete hosted visual acceptance.
+
 The real customer storefront now applies the Studio appearance tokens consistently to page, card and popover surfaces, text, button states, typography, scale, line height, spacing, corner radius, product layout and image ratio. Theme styles also cover checkout. Outline buttons keep the configured primary foreground against the store background; hover, pressed, selected and keyboard-focus states remain visible. The demo and Studio implementation remain unchanged; Studio is used as the comparison reference.
 
 The live product cards now use the selected body font and spacing, and customer product photos carry the restaurant slug through to their public image URLs. Checkout renders the real pickup-time selector and optional email and analytics consent controls, replacing the nonfunctional sample inputs. The collection details use the configured spacing and the real banner uses its selected overlay strength.

@@ -45,12 +45,23 @@ export function createTrackingToken(): string {
   return btoa(binary).replace(/=/g, "").replace(/\+/g, "-").replace(/\//g, "_")
 }
 
-export function updateCart(items: CartItem[], item: CartItem): CartItem[] {
-  const others = items.filter((line) => line.productId !== item.productId)
+export function cartItemKey(
+  item: Pick<CartItem, "productId" | "optionIds">
+): string {
+  return `${item.productId}|${[...item.optionIds].sort().join(",")}`
+}
 
-  return item.quantity === 0
-    ? others
-    : [...others, { ...item, optionIds: [...item.optionIds] }]
+export function updateCart(items: CartItem[], item: CartItem): CartItem[] {
+  const key = cartItemKey(item)
+
+  if (item.quantity === 0)
+    return items.filter((line) => cartItemKey(line) !== key)
+
+  const next = { ...item, optionIds: [...item.optionIds] }
+
+  return items.some((line) => cartItemKey(line) === key)
+    ? items.map((line) => (cartItemKey(line) === key ? next : line))
+    : [...items, next]
 }
 
 export function prepareCheckout(
@@ -61,6 +72,12 @@ export function prepareCheckout(
 ): CheckoutAttempt {
   const normalized = {
     customerName: input.customerName.trim(),
+    ...(input.customerPhone?.trim()
+      ? { customerPhone: input.customerPhone.trim() }
+      : {}),
+    ...(input.orderNotes?.trim()
+      ? { orderNotes: input.orderNotes.trim() }
+      : {}),
     customerEmail:
       input.emailUpdatesConsented || input.analyticsConsented
         ? input.customerEmail.trim()
@@ -81,11 +98,17 @@ export function prepareCheckout(
         quantity: item.quantity,
         optionIds: [...item.optionIds].sort(),
       }))
-      .sort((a, b) => a.productId.localeCompare(b.productId)),
+      .sort((a, b) => cartItemKey(a).localeCompare(cartItemKey(b))),
   }
   const previousInput = previous
     ? {
         customerName: previous.input.customerName,
+        ...(previous.input.customerPhone
+          ? { customerPhone: previous.input.customerPhone }
+          : {}),
+        ...(previous.input.orderNotes
+          ? { orderNotes: previous.input.orderNotes }
+          : {}),
         customerEmail: previous.input.customerEmail,
         emailUpdatesConsented: previous.input.emailUpdatesConsented,
         ...(previous.input.analyticsConsented
@@ -125,7 +148,16 @@ export function validateOrderInput(input: unknown): input is OrderInput {
   if (
     typeof value.customerName !== "string" ||
     !value.customerName.trim() ||
-    value.customerName.trim().length > 200 ||
+    value.customerName.trim().length > 160 ||
+    (value.customerPhone !== undefined &&
+      (typeof value.customerPhone !== "string" ||
+        (value.customerPhone.trim() !== "" &&
+          (!/^[0-9+(). -]{1,40}$/.test(value.customerPhone.trim()) ||
+            (value.customerPhone.match(/[0-9]/g)?.length ?? 0) < 3 ||
+            (value.customerPhone.match(/[0-9]/g)?.length ?? 0) > 20)))) ||
+    (value.orderNotes !== undefined &&
+      (typeof value.orderNotes !== "string" ||
+        value.orderNotes.trim().length > 500)) ||
     typeof value.customerEmail !== "string" ||
     value.customerEmail.length > 254 ||
     typeof value.emailUpdatesConsented !== "boolean" ||
@@ -156,7 +188,7 @@ export function validateOrderInput(input: unknown): input is OrderInput {
   )
     return false
 
-  const productIds = new Set<string>()
+  const variants = new Set<string>()
 
   return value.items.every((item: unknown) => {
     if (!item || typeof item !== "object") return false
@@ -165,7 +197,6 @@ export function validateOrderInput(input: unknown): input is OrderInput {
 
     if (
       !isUuid(line.productId) ||
-      productIds.has(line.productId) ||
       !Number.isInteger(line.quantity) ||
       Number(line.quantity) < 1 ||
       Number(line.quantity) > 99 ||
@@ -175,7 +206,11 @@ export function validateOrderInput(input: unknown): input is OrderInput {
       new Set(line.optionIds).size !== line.optionIds.length
     )
       return false
-    productIds.add(line.productId)
+
+    const key = cartItemKey(line as CartItem)
+
+    if (variants.has(key)) return false
+    variants.add(key)
 
     return true
   })

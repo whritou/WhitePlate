@@ -462,6 +462,11 @@
     "estimatedSubtotal": "Estimated subtotal",
     "customerName": "Your name",
     "customerDetails": "Your details",
+    "paymentTitle": "Payment",
+    "paymentAtCollection": "No online payment",
+    "paymentDescription": "Your order will be sent to the restaurant. No online payment will be taken.",
+    "collectionUnavailable": "Collection information is temporarily unavailable.",
+    "namePlaceholder": "Your name",
     "collectionAt": "Collect at {name}",
     "emailUpdatesConsent": "Email me updates about this order",
     "emailUpdatesPrivacy": "We’ll use your email only for updates about this order and delete it after the tracking period.",
@@ -470,6 +475,7 @@
     "customerEmail": "Email address",
     "pickupTime": "Pickup time",
     "asapPickup": "ASAP — earliest available",
+    "choosePickupTime": "Choose a time",
     "noPickupSlots": "Online pickup is unavailable right now. Please try again later.",
     "ordersPaused": "This restaurant has paused new online orders. Your cart is still here; please try again later.",
     "rushBufferNotice": "This restaurant is busy. New pickup times start at least {minutes} minutes later.",
@@ -498,7 +504,7 @@
       "Cancelled": "Cancelled"
     },
     "errors": {
-      "invalid": "Check your name, quantities, option choices, promo code, and pickup time, then try again.",
+      "invalid": "Check your contact details, notes, quantities, option choices, promo code, and pickup time, then try again.",
       "not_found": "An item or option is no longer available. Review your order before trying again.",
       "conflict": "That pickup time may have just filled, or this request key was already used for different order details. Choose another time and retry.",
       "rate_limited": "Too many orders were submitted recently. Wait a moment before trying again.",
@@ -506,7 +512,13 @@
       "unavailable": "We couldn’t confirm whether your order was received. Keep this page open and retry this same order to avoid placing it twice.",
       "forbidden": "This page cannot submit an order. Open the restaurant’s own storefront and try again.",
       "unauthorized": "This page cannot submit an order. Open the restaurant’s own storefront and try again."
-    }
+    },
+    "quoteTax": "Tax",
+    "quoteLoading": "Calculating your total…",
+    "quoteInvalid": "This code or selection is no longer valid. Change it and try again.",
+    "quoteUnavailable": "Your total could not be calculated. Please try again.",
+    "quoteRetry": "Recalculate total",
+    "analyticsPrivacyLink": "Manage analytics privacy"
   },
   "AnalyticsPrivacy": {
     "withdrawTitle": "Withdraw analytics consent",
@@ -626,6 +638,13 @@
     "unavailable": "This restaurant menu is temporarily unavailable. Please try again shortly."
   },
   "OrderTracking": {
+    "headingPending": "Order received.",
+    "headingPreparing": "Good food is on its way.",
+    "descriptionPreparing": "The kitchen is working on your order.",
+    "headingReady": "Your order is ready.",
+    "headingCompleted": "Enjoy your meal!",
+    "cancelledDescription": "The restaurant cancelled this order.",
+    "summaryUnavailable": "The order summary is temporarily unavailable.",
     "clickCollect": "Click & collect",
     "title": "Your order status",
     "orderDetails": "Order details",
@@ -3638,18 +3657,34 @@
       "Accountant": "Accountant"
     },
     "permissions": {
-      "orders": { "manage": "Manage orders" },
-      "kitchen": { "display": "Kitchen display" },
-      "catalog": { "manage": "Manage menu" },
-      "discounts": { "manage": "Manage discounts" },
-      "analytics": { "view": "View analytics" },
-      "storefront": { "manage": "Manage storefront" },
-      "staff": { "manage": "Manage staff" },
-      "billing": { "manage": "Manage billing" }
+      "orders": {
+        "manage": "Manage orders"
+      },
+      "kitchen": {
+        "display": "Kitchen display"
+      },
+      "catalog": {
+        "manage": "Manage menu"
+      },
+      "discounts": {
+        "manage": "Manage discounts"
+      },
+      "analytics": {
+        "view": "View analytics"
+      },
+      "storefront": {
+        "manage": "Manage storefront"
+      },
+      "staff": {
+        "manage": "Manage staff"
+      },
+      "billing": {
+        "manage": "Manage billing"
+      }
     }
   },
   "LiveWorkspace": {
-    "settingsSections": "Restaurant settings categories",
+    "settingsSections": "Settings sections",
     "establishmentSettingsCategory": "Establishment",
     "legalSettingsCategory": "Legal and tax",
     "openingHoursCategory": "Opening hours",
@@ -3666,7 +3701,6 @@
     "sampleNotice": "Fictitious data · This feature is not connected to the backend yet. Changes stay in this browser; no payment, email, DNS configuration or publication is performed.",
     "saveDraft": "Save local draft",
     "draftSaved": "Local draft saved. No backend changes.",
-    "settingsSections": "Settings sections",
     "realOrganization": "Organization name and archive/restore are connected to the API.",
     "legalPending": "Set the organization legal profile inherited by restaurants unless they use their own profile.",
     "realRestaurants": "Manage the real restaurants and memberships of this organization.",

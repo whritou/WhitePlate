@@ -15,6 +15,8 @@ public sealed class OrderConfiguration : IEntityTypeConfiguration<Order>
         builder.Property(order => order.Currency).HasMaxLength(3).IsRequired();
         builder.Property(order => order.CustomerName).HasMaxLength(160).IsRequired();
         builder.Property(order => order.CustomerEmail).HasMaxLength(254);
+        builder.Property(order => order.CustomerPhone).HasMaxLength(40);
+        builder.Property(order => order.OrderNotes).HasMaxLength(500);
         builder.Property(order => order.EmailTrackingTokenHash).HasMaxLength(64);
         builder.Property(order => order.AnalyticsSource).HasMaxLength(8);
         builder.Property(order => order.AnalyticsConsentedAt);

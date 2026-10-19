@@ -15,6 +15,8 @@ export type TenantSelectionState = {
 export type GuestCheckoutState = {
   cart: CartItem[]
   customerName: string
+  customerPhone: string
+  orderNotes: string
   customerEmail: string
   emailUpdatesConsented: boolean
   analyticsConsented?: boolean
@@ -27,6 +29,8 @@ export type GuestCheckoutState = {
   inFlight: boolean
   changeCart: (item: CartItem) => void
   changeCustomerName: (value: string) => void
+  changeCustomerPhone: (value: string) => void
+  changeOrderNotes: (value: string) => void
   changeCustomerEmail: (value: string) => void
   changeEmailUpdatesConsent: (value: boolean) => void
   changeAnalyticsConsent?: (value: boolean) => void

@@ -4,8 +4,10 @@ import { tx } from "@/lib/lovable/menu"
 import type { CustomerOrder } from "@/lib/lovable/customerOrder"
 export function OrderItems({
   order,
+  money = (value: number) => `€${value.toFixed(2)}`,
 }: {
   order: Pick<CustomerOrder, "lines" | "lang">
+  money?: (value: number) => string
 }) {
   return (
     <ul className="divide-y divide-border">
@@ -36,7 +38,7 @@ export function OrderItems({
           </div>
 
           <span className="shrink-0 text-sm font-semibold">
-            €<Copy>{(l.qty * l.unit).toFixed(2)}</Copy>
+            <Copy>{money(l.qty * l.unit)}</Copy>
           </span>
         </li>
       ))}

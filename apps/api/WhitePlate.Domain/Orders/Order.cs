@@ -11,6 +11,8 @@ public sealed class Order
     public string Currency { get; private set; } = null!;
     public string CustomerName { get; private set; } = null!;
     public string? CustomerEmail { get; private set; }
+    public string? CustomerPhone { get; private set; }
+    public string? OrderNotes { get; private set; }
     public DateTimeOffset? EmailUpdatesConsentedAt { get; private set; }
     public string? EmailTrackingTokenHash { get; private set; }
     public string? AnalyticsSource { get; private set; }
@@ -53,17 +55,24 @@ public sealed class Order
         DateTimeOffset? emailUpdatesConsentedAt = null, string? emailTrackingTokenHash = null,
         Guid? id = null, string? analyticsSource = null, DateTimeOffset? analyticsConsentedAt = null,
         bool analyticsReturningCustomer = false, IReadOnlyList<(string KeyVersion, string Hash)>? analyticsFingerprints = null,
-        IReadOnlyList<Guid>? analyticsPriorOrderIds = null)
+        IReadOnlyList<Guid>? analyticsPriorOrderIds = null, string? customerPhone = null, string? orderNotes = null)
     {
         var normalizedCurrency = currency?.ToUpperInvariant();
         var normalizedName = customerName?.Trim();
+        var normalizedPhone = string.IsNullOrWhiteSpace(customerPhone) ? null : customerPhone.Trim();
+        var normalizedNotes = string.IsNullOrWhiteSpace(orderNotes) ? null : orderNotes.Trim();
+        if (normalizedPhone is not null && (normalizedPhone.Length > 40 ||
+            normalizedPhone.Count(character => character is >= '0' and <= '9') is < 3 or > 20 ||
+            normalizedPhone.Any(character => !(character is >= '0' and <= '9' or '+' or '-' or '(' or ')' or ' ' or '.'))))
+            throw new DomainRuleException("invalid_customer_phone", "customerPhone", "Enter a valid phone number.");
+        if (normalizedNotes?.Length > 500)
+            throw new DomainRuleException("invalid_order_notes", "orderNotes", "Order notes must contain at most 500 characters.");
         if (tenantId == Guid.Empty) throw new DomainRuleException("invalid_tenant", "tenantId", "A restaurant is required.");
         if (normalizedCurrency is not ("EUR" or "USD" or "GBP")) throw new DomainRuleException("invalid_currency", "currency", "Currency must be EUR, USD, or GBP.");
         if (string.IsNullOrWhiteSpace(normalizedName) || normalizedName.Length > 160) throw new DomainRuleException("invalid_customer_name", "customerName", "Customer name must contain 1 to 160 characters.");
         if (lines is null || lines.Count is 0 or > 50) throw new DomainRuleException("invalid_lines", "items", "An order must contain 1 to 50 items.");
         if (pickupMode.HasValue && (!pickupAt.HasValue || !Enum.IsDefined(pickupMode.Value)))
             throw new DomainRuleException("invalid_pickup", "pickupAt", "A pickup mode requires a resolved pickup time and a valid mode.");
-        if (lines.GroupBy(line => line.ProductId).Any(group => group.Count() > 1)) throw new DomainRuleException("duplicate_product", "items", "Product lines must be unique.");
         if (lines.Any(line => line.ProductId == Guid.Empty || string.IsNullOrWhiteSpace(line.ProductName) || line.Quantity is < 1 or > 99 ||
             line.BaseUnitPrice < 0 || decimal.Round(line.BaseUnitPrice, 2) != line.BaseUnitPrice ||
             line.TaxRatePercent is < 0 or > 100 || decimal.Round(line.TaxRatePercent, 2) != line.TaxRatePercent ||
@@ -71,6 +80,9 @@ public sealed class Order
                 string.IsNullOrWhiteSpace(option.Name) || option.PriceAdjustment < 0 || decimal.Round(option.PriceAdjustment, 2) != option.PriceAdjustment)))
             throw new DomainRuleException("invalid_line", "items", "An order item is invalid.");
 
+        if (lines.GroupBy(line => (line.ProductId, Options: string.Join(',', line.Options.Select(option => option.OptionId).Order())))
+            .Any(group => group.Count() > 1))
+            throw new DomainRuleException("duplicate_variant", "items", "Product and option combinations must be unique.");
         var orderLines = lines.Select(line => new OrderLine(line)).ToList();
         var subtotal = orderLines.Sum(line => line.Subtotal);
         if (discountAmount < 0 || decimal.Round(discountAmount, 2) != discountAmount || discountAmount > subtotal)
@@ -124,6 +136,7 @@ public sealed class Order
         {
             Id = id ?? Guid.NewGuid(), TenantId = tenantId, Currency = normalizedCurrency, CustomerName = normalizedName,
             CustomerEmail = normalizedEmail, EmailUpdatesConsentedAt = emailUpdatesConsentedAt,
+            CustomerPhone = normalizedPhone, OrderNotes = normalizedNotes,
             EmailTrackingTokenHash = emailTrackingTokenHash?.ToLowerInvariant(),
             AnalyticsSource = analyticsConsentedAt.HasValue ? normalizedAnalyticsSource : null,
             AnalyticsConsentedAt = analyticsConsentedAt,

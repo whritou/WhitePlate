@@ -17,6 +17,7 @@ const reservedLocalizedPathSegments = new Set([
   "forgot-password",
   "invitations",
   "live-workspace-test",
+  "studio-parity-test",
   "order",
   "order-history-test",
   "orders-kanban-test",

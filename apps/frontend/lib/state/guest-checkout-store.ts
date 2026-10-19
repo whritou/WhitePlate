@@ -8,6 +8,8 @@ export const createGuestCheckoutStore = createStoreFactory<
 >((_tenantId, set) => ({
   cart: [],
   customerName: "",
+  customerPhone: "",
+  orderNotes: "",
   customerEmail: "",
   emailUpdatesConsented: false,
   analyticsConsented: false,
@@ -21,6 +23,8 @@ export const createGuestCheckoutStore = createStoreFactory<
   changeCart: (item) =>
     set((state) => ({ cart: updateCart(state.cart, item), error: null })),
   changeCustomerName: (customerName) => set({ customerName, error: null }),
+  changeCustomerPhone: (customerPhone) => set({ customerPhone, error: null }),
+  changeOrderNotes: (orderNotes) => set({ orderNotes, error: null }),
   changeCustomerEmail: (customerEmail) => set({ customerEmail, error: null }),
   changeEmailUpdatesConsent: (emailUpdatesConsented) =>
     set((state) => ({
@@ -53,6 +57,8 @@ export const createGuestCheckoutStore = createStoreFactory<
       attempt: null,
       error: null,
       customerName: "",
+      customerPhone: "",
+      orderNotes: "",
       customerEmail: "",
       emailUpdatesConsented: false,
       analyticsConsented: false,

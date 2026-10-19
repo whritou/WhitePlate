@@ -30,6 +30,8 @@ export function StorefrontSection9() {
     total,
     change,
     btn,
+    binding,
+    money,
   } = useStorefrontView()
 
   return (
@@ -100,13 +102,14 @@ export function StorefrontSection9() {
                   </Copy>
 
                   <p className="text-sm font-bold" style={{ color: t.primary }}>
-                    €<Copy>{(l.unit * l.qty).toFixed(2)}</Copy>
+                    <Copy>{money(l.unit * l.qty)}</Copy>
                   </p>
                 </div>
 
                 <div className="flex h-8 items-center self-center" style={btn}>
                   <SourceButton
                     onClick={() => change(l.key, -1)}
+                    disabled={binding?.locked}
                     className="w-8 font-bold"
                   >
                     −
@@ -118,6 +121,7 @@ export function StorefrontSection9() {
 
                   <SourceButton
                     onClick={() => change(l.key, 1)}
+                    disabled={binding?.locked || l.qty >= 99}
                     className="w-8 font-bold"
                   >
                     +
@@ -133,6 +137,7 @@ export function StorefrontSection9() {
           >
             <div className="flex gap-2">
               <SourceInput
+                disabled={binding?.locked}
                 value={code}
                 onChange={(e) => setCode(e.target.value.toUpperCase())}
                 placeholder={u("code")}
@@ -147,12 +152,15 @@ export function StorefrontSection9() {
 
               <SourceButton
                 onClick={() => setApplied(code)}
+                disabled={binding?.locked}
                 className="px-3 text-sm font-bold"
                 style={btn}
               >
                 <Copy>{u("apply")}</Copy>
               </SourceButton>
             </div>
+
+            {binding?.discountNote}
 
             <Copy>
               {disc && (
@@ -174,7 +182,7 @@ export function StorefrontSection9() {
               </span>
 
               <span>
-                €<Copy>{subtotal.toFixed(2)}</Copy>
+                <Copy>{money(subtotal)}</Copy>
               </span>
             </div>
 
@@ -189,7 +197,7 @@ export function StorefrontSection9() {
                   </span>
 
                   <span>
-                    −€<Copy>{disc.amount.toFixed(2)}</Copy>
+                    −<Copy>{money(disc.amount)}</Copy>
                   </span>
                 </div>
               )}
@@ -204,7 +212,14 @@ export function StorefrontSection9() {
               </span>
 
               <span>
-                ~<Copy>{t.prepTime}</Copy>
+                {t.prepTime ? (
+                  <>
+                    <Copy>~</Copy>
+                    <Copy>{t.prepTime}</Copy>
+                  </>
+                ) : (
+                  <Copy>Choose a time</Copy>
+                )}
               </span>
             </div>
 
@@ -214,7 +229,7 @@ export function StorefrontSection9() {
               </span>
 
               <span>
-                €<Copy>{total.toFixed(2)}</Copy>
+                <Copy>{money(total)}</Copy>
               </span>
             </div>
 
@@ -228,6 +243,12 @@ export function StorefrontSection9() {
 
             <Button
               onClick={() => {
+                if (binding) {
+                  binding.onCheckout()
+
+                  return
+                }
+
                 if (preview) {
                   setCheckoutError(
                     "Select Checkout above to preview the next page."
@@ -247,6 +268,7 @@ export function StorefrontSection9() {
                 navigate({ to: "/checkout" })
               }}
               className="h-12 w-full font-bold"
+              disabled={binding?.locked}
               style={{
                 background: t.primary,
                 color: t.bg,
@@ -254,7 +276,7 @@ export function StorefrontSection9() {
               }}
             >
               <Copy>{lang === "fr" ? "Passer au paiement" : "Checkout"}</Copy> ·
-              €<Copy>{total.toFixed(2)}</Copy>
+              <Copy>{money(total)}</Copy>
             </Button>
           </div>
         </>

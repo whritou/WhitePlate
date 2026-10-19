@@ -19,6 +19,29 @@ const input = {
 }
 
 describe("guest cart", () => {
+  it("normalizes phone and notes and rotates the retry key when they change", () => {
+    const details = {
+      ...input,
+      customerPhone: " +33 1 23 45 67 89 ",
+      orderNotes: " No cutlery ",
+    }
+    const first = prepareCheckout(details, null, () => "first")
+
+    expect(first.input.customerPhone).toBe("+33 1 23 45 67 89")
+    expect(first.input.orderNotes).toBe("No cutlery")
+    expect(prepareCheckout(details, first, () => "unused")).toBe(first)
+    expect(
+      prepareCheckout(
+        { ...details, orderNotes: "Call me" },
+        first,
+        () => "changed"
+      ).key
+    ).toBe("changed")
+    expect(validateOrderInput({ ...details, customerPhone: "abc" })).toBe(false)
+    expect(
+      validateOrderInput({ ...details, orderNotes: "a".repeat(501) })
+    ).toBe(false)
+  })
   it("creates a 256-bit URL-safe order tracking capability", () => {
     expect(createTrackingToken()).toMatch(/^[A-Za-z0-9_-]{43}$/)
   })
@@ -76,12 +99,15 @@ describe("guest cart", () => {
     ).toBe(false)
     expect(validProductSelection(product, ["missing-option"])).toBe(false)
   })
-  it("keeps one editable line per product as required by checkout", () => {
+  it("keeps distinct option variants and edits their quantities independently", () => {
     const cart = updateCart([], { productId, quantity: 1, optionIds: [] })
 
     expect(
       updateCart(cart, { productId, quantity: 3, optionIds: [optionId] })
-    ).toEqual([{ productId, quantity: 3, optionIds: [optionId] }])
+    ).toEqual([
+      { productId, quantity: 1, optionIds: [] },
+      { productId, quantity: 3, optionIds: [optionId] },
+    ])
   })
 
   it("removes a product when its quantity is zero without changing other lines", () => {
@@ -91,7 +117,7 @@ describe("guest cart", () => {
       updateCart([input.items[0], other], {
         productId,
         quantity: 0,
-        optionIds: [],
+        optionIds: [optionId],
       })
     ).toEqual([other])
   })

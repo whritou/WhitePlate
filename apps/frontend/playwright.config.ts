@@ -25,6 +25,9 @@ export default defineConfig({
       testMatch: [
         "storefront-customer-parity.spec.ts",
         "storefront-theme-parity.spec.ts",
+        "storefront-exact-parity.spec.ts",
+        "checkout-quote.spec.ts",
+        "storefront-feedback.spec.ts",
       ],
     },
     {

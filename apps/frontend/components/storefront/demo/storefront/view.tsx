@@ -10,6 +10,7 @@ import { tx } from "@/lib/lovable/menu"
 import { ProductModal } from "./shared"
 import { useStorefrontView } from "./context"
 import { StorefrontSection1 } from "./section-1"
+import { CustomerRestaurantInfo } from "@/components/storefront/customer-restaurant-info"
 import { StorefrontSection4 } from "./section-4"
 export function StorefrontView() {
   const {
@@ -33,12 +34,15 @@ export function StorefrontView() {
     total,
     add,
     btn,
+    binding,
+    money,
   } = useStorefrontView()
 
   return (
     <div
       style={themeVariables(t)}
       data-button-style={t.buttonStyle}
+      aria-busy={!cartLoaded}
       className="customer-page storefront-page relative min-h-full min-w-0 bg-background text-foreground"
     >
       <header
@@ -61,41 +65,44 @@ export function StorefrontView() {
           </span>
         </div>
 
-        <div className="flex max-w-full flex-wrap items-center gap-2">
-          <Copy>
-            {menu.languages.length > 1 && (
-              <SourceSelect
-                value={lang}
-                disabled={!cartLoaded}
-                onChange={(e) => setLang(e.target.value)}
-                aria-label="Language"
-                className="px-2 py-2 text-sm font-bold uppercase"
-                style={{
-                  border: `1px solid ${line}`,
-                  borderRadius: r,
-                  background: t.bg,
-                  color: t.text,
-                }}
-              >
-                <Copy>
-                  {menu.languages.map((l) => (
-                    <SourceOption key={l} value={l}>
-                      <Copy>{l.toUpperCase()}</Copy>
-                    </SourceOption>
-                  ))}
-                </Copy>
-              </SourceSelect>
-            )}
-          </Copy>
+        {binding?.headerActions ?? (
+          <div className="flex max-w-full flex-wrap items-center gap-2">
+            <Copy>
+              {menu.languages.length > 1 && (
+                <SourceSelect
+                  value={lang}
+                  disabled={!cartLoaded}
+                  onChange={(e) => setLang(e.target.value)}
+                  aria-label="Language"
+                  className="px-2 py-2 text-sm font-bold uppercase"
+                  style={{
+                    border: `1px solid ${line}`,
+                    borderRadius: r,
+                    background: t.bg,
+                    color: t.text,
+                  }}
+                >
+                  <Copy>
+                    {menu.languages.map((l) => (
+                      <SourceOption key={l} value={l}>
+                        <Copy>{l.toUpperCase()}</Copy>
+                      </SourceOption>
+                    ))}
+                  </Copy>
+                </SourceSelect>
+              )}
+            </Copy>
 
-          <SourceButton
-            onClick={() => setCartOpen(true)}
-            className="px-4 py-2 text-sm font-bold"
-            style={{ background: t.primary, color: t.bg, borderRadius: r }}
-          >
-            <Copy>{u("basket")}</Copy> · <Copy>{count}</Copy>
-          </SourceButton>
-        </div>
+            <SourceButton
+              onClick={() => setCartOpen(true)}
+              disabled={!cartLoaded}
+              className="px-4 py-2 text-sm font-bold"
+              style={{ background: t.primary, color: t.bg, borderRadius: r }}
+            >
+              <Copy>{u("basket")}</Copy> · <Copy>{count}</Copy>
+            </SourceButton>
+          </div>
+        )}
       </header>
 
       <Copy>
@@ -116,12 +123,20 @@ export function StorefrontView() {
             <div className="customer-banner-overlay absolute inset-0" />
 
             <div className="relative">
-              <p
-                className="inline-block px-2 py-1 text-xs font-bold tracking-widest uppercase"
-                style={{ background: t.accent, color: t.text, borderRadius: r }}
-              >
-                <Copy>{u("open")}</Copy> <Copy>{t.prepTime}</Copy>
-              </p>
+              {binding ? (
+                binding.bannerBadge
+              ) : (
+                <p
+                  className="inline-block px-2 py-1 text-xs font-bold tracking-widest uppercase"
+                  style={{
+                    background: t.accent,
+                    color: t.text,
+                    borderRadius: r,
+                  }}
+                >
+                  <Copy>{u("open")}</Copy> <Copy>{t.prepTime}</Copy>
+                </p>
+              )}
 
               <h1 className="mt-4 text-4xl leading-tight font-bold md:text-5xl">
                 <Copy>{t.name}</Copy>
@@ -136,33 +151,18 @@ export function StorefrontView() {
       </Copy>
 
       <Copy>
-        {t.showRestaurantInfo && (
-          <section
-            className="grid gap-px sm:grid-cols-3"
-            style={{ background: line, borderBottom: `1px solid ${line}` }}
-          >
-            <Copy>
-              {[
+        {t.showRestaurantInfo &&
+          (binding ? (
+            binding.restaurantInfo
+          ) : (
+            <CustomerRestaurantInfo
+              items={[
                 [u("address"), t.address],
                 [u("hours"), t.hours],
                 [u("phone"), t.phone],
-              ].map(([k, v]) => (
-                <div key={k} className="px-6 py-3" style={{ background: t.bg }}>
-                  <p
-                    className="text-xs font-bold tracking-wider uppercase"
-                    style={{ color: muted }}
-                  >
-                    <Copy>{k}</Copy>
-                  </p>
-
-                  <p className="text-sm font-semibold">
-                    <Copy>{v}</Copy>
-                  </p>
-                </div>
-              ))}
-            </Copy>
-          </section>
-        )}
+              ].map(([label, content]) => ({ label, content }))}
+            />
+          ))}
       </Copy>
 
       <nav className="flex gap-2 overflow-x-auto px-6 py-4">
@@ -172,6 +172,7 @@ export function StorefrontView() {
         ].map((c) => (
           <SourceButton
             key={c.id}
+            aria-pressed={c.id === cat}
             onClick={() => setCat(c.id)}
             className="px-4 py-1.5 text-sm font-semibold whitespace-nowrap"
             style={{
@@ -196,8 +197,8 @@ export function StorefrontView() {
             style={{ background: t.text, color: t.bg, borderRadius: r }}
           >
             <span>
-              <Copy>{count}</Copy> <Copy>{u("items")}</Copy> · €
-              <Copy>{total.toFixed(2)}</Copy>
+              <Copy>{count}</Copy> <Copy>{u("items")}</Copy> ·{" "}
+              <Copy>{money(total)}</Copy>
             </span>
 
             <span className="px-3 py-1" style={btn}>
@@ -219,8 +220,10 @@ export function StorefrontView() {
             u={u}
             menu={menu}
             onClose={() => setOpen(null)}
-            onAdd={(picks, unit, qty) => {
-              add(open, picks, unit, qty)
+            locked={binding?.locked}
+            money={money}
+            onAdd={(picks, unit, qty, optionIds) => {
+              add(open, picks, unit, qty, optionIds)
               setOpen(null)
             }}
           />

@@ -6,8 +6,22 @@ export type CartItem = {
   optionIds: string[]
 }
 
+export type OrderQuoteInput = {
+  menuLocale: string
+  discountCode: string | null
+  items: CartItem[]
+}
+
+export type PreviewPriceLine = {
+  unit: number
+  qty: number
+  product: { tax?: number }
+}
+
 export type OrderInput = {
   customerName: string
+  customerPhone?: string
+  orderNotes?: string
   customerEmail: string
   emailUpdatesConsented: boolean
   analyticsConsented?: boolean
@@ -39,6 +53,7 @@ export type PickupAvailability = {
 }
 
 export type PublicOrderTracking = {
+  summary?: PublicOrderSummary
   menuLocale?: string | null
   id: string
   status: "Pending" | "Preparing" | "Ready" | "Completed" | "Cancelled"
@@ -46,6 +61,22 @@ export type PublicOrderTracking = {
   createdAt: string
   pickupAt?: string | null
   pickupTimeZone?: string | null
+}
+
+export type PublicOrderSummary = {
+  currency: string
+  subtotal: number
+  discountAmount: number
+  taxAmount: number
+  total: number
+  lines: {
+    productId: string
+    productName: string
+    quantity: number
+    subtotal: number
+    total: number
+    options: { optionId: string; name: string; priceAdjustment: number }[]
+  }[]
 }
 
 export type CheckoutAttempt = { key: string; input: OrderInput }
@@ -121,6 +152,7 @@ export type CheckoutEmailUpdatesProps = {
 }
 
 export type CheckoutPickupSelectorProps = {
+  customer?: boolean
   pickupSlots: PickupSlot[]
   pickupSlotsLoading: boolean
   pickupAvailabilityState: PickupAvailability["state"]
