@@ -38,7 +38,7 @@ export function StorefrontSection3() {
               return (
                 <article
                   key={i.id}
-                  className={`min-w-0 overflow-hidden ${t.layout === "list" ? "customer-product-list flex" : ""}`}
+                  className={`customer-product-card min-w-0 overflow-hidden ${t.layout === "list" ? "customer-product-list flex" : ""}`}
                   style={{ border: `1px solid ${line}`, borderRadius: r }}
                 >
                   <SourceButton
