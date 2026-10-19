@@ -1,11 +1,24 @@
 import { getTenantSlug } from "./api/tenant-routing"
+import { getStorefrontPreviewRewrite } from "./storefront-preview-routing"
 
 export function restaurantShopUrl(
   slug: string | undefined,
   domain: string | undefined,
-  locale: string
+  locale: string,
+  pathBaseDomain?: string,
+  requestHost?: string | null
 ): string | null {
-  if (!slug || !domain || !["en", "fr"].includes(locale)) return null
+  if (!slug || !["en", "fr"].includes(locale)) return null
+
+  const previewPath = getStorefrontPreviewRewrite(
+    requestHost ?? null,
+    `/${locale}/${slug}`,
+    pathBaseDomain
+  )
+
+  if (previewPath) return `/${locale}/${slug}`
+
+  if (!domain) return null
 
   const host = `${slug}.${domain}`
 
