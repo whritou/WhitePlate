@@ -22,7 +22,8 @@ export function CustomerContactFields({
   return (
     <div className="space-y-4">
       <SourceLabel
-        className="block text-sm font-medium"
+        className="customer-contact-field block text-sm font-medium"
+        style={{ outline: "none" }}
         htmlFor="customer-name"
       >
         <span className="mb-2 block">
@@ -63,7 +64,8 @@ export function CustomerContactFields({
       )}
 
       <SourceLabel
-        className="block text-sm font-medium"
+        className="customer-contact-field block text-sm font-medium"
+        style={{ outline: "none" }}
         htmlFor="customer-phone"
       >
         <span className="mb-2 block">
@@ -84,7 +86,11 @@ export function CustomerContactFields({
         />
       </SourceLabel>
 
-      <SourceLabel className="block text-sm font-medium" htmlFor="order-notes">
+      <SourceLabel
+        className="customer-contact-field block text-sm font-medium"
+        style={{ outline: "none" }}
+        htmlFor="order-notes"
+      >
         <span className="mb-2 block">
           <Copy>Order notes </Copy>
           <span className="font-normal text-muted-foreground">

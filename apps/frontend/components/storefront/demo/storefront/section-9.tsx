@@ -110,7 +110,8 @@ export function StorefrontSection9() {
                   <SourceButton
                     onClick={() => change(l.key, -1)}
                     disabled={binding?.locked}
-                    className="w-8 font-bold"
+                    className="customer-quantity-button h-8 min-h-0 w-8 min-w-0 font-bold"
+                    style={{ borderRadius: 0, height: 32, width: 32 }}
                   >
                     −
                   </SourceButton>
@@ -122,7 +123,8 @@ export function StorefrontSection9() {
                   <SourceButton
                     onClick={() => change(l.key, 1)}
                     disabled={binding?.locked || l.qty >= 99}
-                    className="w-8 font-bold"
+                    className="customer-quantity-button h-8 min-h-0 w-8 min-w-0 font-bold"
+                    style={{ borderRadius: 0, height: 32, width: 32 }}
                   >
                     +
                   </SourceButton>

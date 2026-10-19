@@ -286,7 +286,8 @@ export function ProductModal({
           >
             <SourceButton
               onClick={() => setQty((q) => Math.max(1, q - 1))}
-              className="w-10 text-lg font-bold"
+              className="customer-quantity-button h-11 min-h-0 w-11 min-w-0 text-lg font-bold"
+              style={{ borderRadius: 0, height: 44, width: 44 }}
             >
               −
             </SourceButton>
@@ -297,7 +298,8 @@ export function ProductModal({
 
             <SourceButton
               onClick={() => setQty((q) => Math.min(99, q + 1))}
-              className="w-10 text-lg font-bold"
+              className="customer-quantity-button h-11 min-h-0 w-11 min-w-0 text-lg font-bold"
+              style={{ borderRadius: 0, height: 44, width: 44 }}
             >
               +
             </SourceButton>

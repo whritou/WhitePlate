@@ -507,6 +507,15 @@
     box-shadow var(--duration-feedback, 120ms) ease,
     filter var(--duration-feedback, 120ms) ease;
 }
+.customer-page .lovable-button {
+  transition: filter var(--duration-feedback, 120ms) ease;
+}
+.customer-page .customer-product-card {
+  transition: box-shadow var(--duration-feedback, 120ms) ease;
+}
+.customer-page button.customer-quantity-button {
+  border-radius: 0 !important;
+}
 @media (hover: hover) {
   .customer-page
     .lovable-source-button:hover:where(
@@ -516,6 +525,15 @@
     box-shadow: inset 0 0 0 999px
       color-mix(in srgb, currentColor 8%, transparent);
   }
+  .customer-page
+    .lovable-button:hover:where(:not(:disabled):not([aria-disabled="true"])) {
+    filter: brightness(0.94);
+  }
+  .customer-page .customer-product-card:hover {
+    box-shadow:
+      0 0 0 1px color-mix(in srgb, var(--primary) 55%, var(--border)),
+      0 6px 16px color-mix(in srgb, var(--foreground) 12%, transparent);
+  }
 }
 .customer-page
   .lovable-source-button:active:where(
@@ -523,8 +541,14 @@
   ) {
   filter: brightness(0.88);
 }
+.customer-page
+  .lovable-button:active:where(:not(:disabled):not([aria-disabled="true"])) {
+  filter: brightness(0.88);
+}
 @media (prefers-reduced-motion: reduce) {
-  .customer-page .lovable-source-button {
+  .customer-page .lovable-source-button,
+  .customer-page .lovable-button,
+  .customer-page .customer-product-card {
     transition: none;
   }
 }
