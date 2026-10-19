@@ -20,7 +20,8 @@ export default async function ShopPage({
     searchParams,
     getTranslations("LiveWorkspace"),
   ])
-  const session = await auth.api.getSession({ headers: await headers() })
+  const requestHeaders = await headers()
+  const session = await auth.api.getSession({ headers: requestHeaders })
 
   if (!session) redirect(`/${locale}/sign-in`)
   if (!session.user.emailVerified) redirect(`/${locale}/verify-email`)
@@ -32,7 +33,9 @@ export default async function ShopPage({
   const url = restaurantShopUrl(
     restaurant?.subdomain,
     process.env.STOREFRONT_BASE_DOMAIN,
-    locale
+    locale,
+    process.env.STOREFRONT_PATH_BASE_DOMAIN,
+    requestHeaders.get("host")
   )
 
   if (restaurant && url) redirect(url)
