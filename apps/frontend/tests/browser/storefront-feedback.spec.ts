@@ -42,15 +42,22 @@ for (const reference of [true, false]) {
     await expectHoverFeedback(
       page.getByRole("button", { name: "Entrées", exact: true })
     )
-    await expectHoverFeedback(
-      page.locator("article .customer-product-image").first()
-    )
-    await expectHoverFeedback(
-      page.locator("article .customer-product-details > button").first()
-    )
-    await expectHoverFeedback(
-      page.getByRole("button", { name: "Add Burrata", exact: true })
-    )
+
+    const productCard = page.locator("article").first()
+    const cardTrigger = productCard.locator(".customer-product-card-trigger")
+
+    await cardTrigger.hover()
+    await expect(productCard).not.toHaveCSS("box-shadow", "none")
+    await expect(cardTrigger).toHaveCSS("filter", "none")
+
+    const addProduct = page.getByRole("button", {
+      name: "Add Burrata",
+      exact: true,
+    })
+
+    await addProduct.hover()
+    await expect(addProduct).toHaveCSS("filter", "none")
+    await expect(productCard).not.toHaveCSS("box-shadow", "none")
     await page.getByRole("button", { name: "Add Burrata", exact: true }).click()
     await expectHoverFeedback(
       page.getByRole("button", { name: "Salade +€1.00", exact: true })
@@ -130,35 +137,81 @@ for (const reference of [true, false]) {
   })
 }
 
-for (const reference of [true, false]) {
-  test(`${reference ? "Studio" : "real store"}: product-card hover covers each area`, async ({
-    page,
-  }) => {
-    await page.setViewportSize({ width: 1024, height: 900 })
-    await installParityFixtures(page)
-    await page.goto(`/fr/studio-parity-test?reference=${reference ? 1 : 0}`)
-    await expect(page.locator(".storefront-page")).toHaveAttribute(
-      "aria-busy",
-      "false"
-    )
-
-    const productCard = page.locator("article").first()
-    const hoverAreas = [
-      productCard.locator(".customer-product-image"),
-      productCard.locator(".customer-product-details > button").first(),
-      productCard.getByRole("button", { name: "Add Burrata", exact: true }),
-    ]
-
-    for (const area of hoverAreas) {
-      await area.hover()
-
-      const shadow = await productCard.evaluate(
-        (element) => getComputedStyle(element).boxShadow
+for (const width of [1024, 390]) {
+  for (const reference of [true, false]) {
+    test(`${reference ? "Studio" : "real store"} (${width}px): product-card hover covers each area`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width, height: 900 })
+      await installParityFixtures(page)
+      await page.goto(`/fr/studio-parity-test?reference=${reference ? 1 : 0}`)
+      await expect(page.locator(".storefront-page")).toHaveAttribute(
+        "aria-busy",
+        "false"
       )
 
-      expect(shadow).not.toBe("none")
-    }
-  })
+      const productCard = page.locator("article").first()
+
+      await productCard.scrollIntoViewIfNeeded()
+
+      const cardTrigger = productCard.locator(".customer-product-card-trigger")
+
+      await expect(cardTrigger).toHaveCount(1)
+      await expect(
+        productCard.locator(".customer-product-image")
+      ).not.toHaveRole("button")
+      await expect(
+        productCard.locator(
+          ".customer-product-details > div:first-child button"
+        )
+      ).toHaveCount(0)
+
+      const cardBounds = await productCard.boundingBox()
+      const triggerBounds = await cardTrigger.boundingBox()
+
+      expect(triggerBounds).toEqual(cardBounds)
+
+      const hoverAreas = [
+        productCard.locator(".customer-product-image"),
+        productCard.locator(".customer-product-details p.font-bold").first(),
+        productCard.locator(".customer-product-details p.text-sm").first(),
+        productCard.locator(".customer-product-details"),
+      ]
+
+      for (const area of hoverAreas) {
+        const bounds = await area.boundingBox()
+
+        await page.mouse.move(
+          bounds!.x + bounds!.width / 2,
+          bounds!.y + bounds!.height / 2
+        )
+
+        const shadow = await productCard.evaluate(
+          (element) => getComputedStyle(element).boxShadow
+        )
+        const childEffects = await productCard
+          .locator(".customer-product-card-trigger")
+          .evaluate((element) => ({
+            filter: getComputedStyle(element).filter,
+            boxShadow: getComputedStyle(element).boxShadow,
+          }))
+
+        expect(shadow).not.toBe("none")
+        expect(childEffects).toEqual({ filter: "none", boxShadow: "none" })
+      }
+
+      const titleBounds = await productCard
+        .locator(".customer-product-details p.font-bold")
+        .first()
+        .boundingBox()
+
+      await page.mouse.click(
+        titleBounds!.x + titleBounds!.width / 2,
+        titleBounds!.y + titleBounds!.height / 2
+      )
+      await expect(page.getByRole("dialog")).toBeVisible()
+    })
+  }
 }
 
 for (const reference of [true, false]) {
@@ -183,16 +236,29 @@ for (const reference of [true, false]) {
       name: "+",
       exact: true,
     })
+    const modalControl = modalPlus.locator("xpath=..")
+    const modalRadii = await modalControl.evaluate((element) => {
+      const minus = element.querySelector("button:first-child")!
+      const plus = element.querySelector("button:last-child")!
+      const minusStyle = getComputedStyle(minus)
+      const plusStyle = getComputedStyle(plus)
+
+      return {
+        parent: getComputedStyle(element).borderTopLeftRadius,
+        minusOuter: minusStyle.borderTopLeftRadius,
+        minusInner: minusStyle.borderTopRightRadius,
+        plusInner: plusStyle.borderTopLeftRadius,
+        plusOuter: plusStyle.borderTopRightRadius,
+      }
+    })
+
+    expect(modalRadii.minusOuter).toBe(modalRadii.parent)
+    expect(modalRadii.minusInner).toBe("0px")
+    expect(modalRadii.plusInner).toBe("0px")
+    expect(modalRadii.plusOuter).toBe(modalRadii.parent)
 
     for (const modalControl of [modalMinus, modalPlus]) {
       await modalControl.hover()
-      expect
-        .soft(
-          await modalControl.evaluate(
-            (element) => getComputedStyle(element).borderRadius
-          )
-        )
-        .toBe("0px")
     }
 
     await page
@@ -214,22 +280,33 @@ for (const reference of [true, false]) {
     const plusBounds = await basketPlus.boundingBox()
     const minusBounds = await basketMinus.boundingBox()
 
+    await expect(counter).toHaveClass(/customer-quantity-control/)
+    expect(
+      await counter.evaluate((element) => getComputedStyle(element).overflow)
+    ).toBe("hidden")
+
     await basketPlus.hover()
-    expect
-      .soft(
-        await basketPlus.evaluate(
-          (element) => getComputedStyle(element).borderRadius
-        )
-      )
-      .toBe("0px")
+
+    const basketRadii = await counter.evaluate((element) => {
+      const minus = element.querySelector("button:first-child")!
+      const plus = element.querySelector("button:last-child")!
+      const minusStyle = getComputedStyle(minus)
+      const plusStyle = getComputedStyle(plus)
+
+      return {
+        parent: getComputedStyle(element).borderTopLeftRadius,
+        minusOuter: minusStyle.borderTopLeftRadius,
+        minusInner: minusStyle.borderTopRightRadius,
+        plusInner: plusStyle.borderTopLeftRadius,
+        plusOuter: plusStyle.borderTopRightRadius,
+      }
+    })
+
+    expect(basketRadii.minusOuter).toBe(basketRadii.parent)
+    expect(basketRadii.minusInner).toBe("0px")
+    expect(basketRadii.plusInner).toBe("0px")
+    expect(basketRadii.plusOuter).toBe(basketRadii.parent)
     await basketMinus.hover()
-    expect
-      .soft(
-        await basketMinus.evaluate(
-          (element) => getComputedStyle(element).borderRadius
-        )
-      )
-      .toBe("0px")
     expect.soft(plusBounds!.height).toBeLessThanOrEqual(counterBounds!.height)
     expect.soft(minusBounds!.height).toBeLessThanOrEqual(counterBounds!.height)
 

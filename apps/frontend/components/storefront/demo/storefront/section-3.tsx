@@ -38,14 +38,19 @@ export function StorefrontSection3() {
               return (
                 <article
                   key={i.id}
-                  className={`customer-product-card min-w-0 overflow-hidden ${t.layout === "list" ? "customer-product-list flex" : ""}`}
+                  className={`customer-product-card relative isolate min-w-0 overflow-hidden ${t.layout === "list" ? "customer-product-list flex" : ""}`}
                   style={{ border: `1px solid ${line}`, borderRadius: r }}
                 >
                   <SourceButton
                     onClick={() => setOpen(i)}
                     disabled={!cartLoaded || binding?.locked}
                     aria-label={tx(i, "n", lang)}
-                    className={`customer-product-image relative block shrink-0 ${t.layout === "list" ? "w-28 sm:w-32" : "customer-image-ratio w-full"}`}
+                    className="customer-product-card-trigger absolute -inset-px z-0 h-auto min-h-0 w-auto max-w-none min-w-0"
+                  />
+
+                  <div
+                    aria-hidden="true"
+                    className={`customer-product-image pointer-events-none relative z-10 block shrink-0 ${t.layout === "list" ? "w-28 sm:w-32" : "customer-image-ratio w-full"}`}
                   >
                     <Copy>
                       {i.images[0] ? (
@@ -88,14 +93,10 @@ export function StorefrontSection3() {
                         </span>
                       )}
                     </Copy>
-                  </SourceButton>
+                  </div>
 
-                  <div className="customer-product-details flex min-w-0 flex-1 flex-wrap items-end justify-between gap-3">
-                    <SourceButton
-                      onClick={() => setOpen(i)}
-                      disabled={!cartLoaded || binding?.locked}
-                      className="min-w-0 flex-1 basis-44 flex-col items-start text-left [overflow-wrap:anywhere]"
-                    >
+                  <div className="customer-product-details pointer-events-none relative z-10 flex min-w-0 flex-1 flex-wrap items-end justify-between gap-3">
+                    <div className="min-w-0 flex-1 basis-44 text-left [overflow-wrap:anywhere]">
                       <p className="font-bold">{tx(i, "n", lang)}</p>
 
                       <p className="text-sm" style={{ color: muted }}>
@@ -128,9 +129,9 @@ export function StorefrontSection3() {
                       >
                         <Copy>{money(i.p)}</Copy>
                       </p>
-                    </SourceButton>
+                    </div>
 
-                    <Copy>
+                    <div className="pointer-events-auto relative z-10">
                       {q === 0 ? (
                         <SourceButton
                           onClick={() => quickAdd(i)}
@@ -142,7 +143,14 @@ export function StorefrontSection3() {
                           +
                         </SourceButton>
                       ) : (
-                        <div className="flex shrink-0 items-center" style={btn}>
+                        <div
+                          className="customer-quantity-control flex shrink-0 items-center overflow-hidden"
+                          style={{
+                            ...btn,
+                            borderRadius: "var(--customer-button-radius)",
+                            overflow: "hidden",
+                          }}
+                        >
                           <SourceButton
                             onClick={() => quickRemove(i.id)}
                             aria-label="Remove one"
@@ -164,7 +172,7 @@ export function StorefrontSection3() {
                           </SourceButton>
                         </div>
                       )}
-                    </Copy>
+                    </div>
                   </div>
                 </article>
               )

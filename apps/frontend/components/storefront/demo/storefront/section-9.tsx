@@ -106,12 +106,19 @@ export function StorefrontSection9() {
                   </p>
                 </div>
 
-                <div className="flex h-8 items-center self-center" style={btn}>
+                <div
+                  className="customer-quantity-control flex h-8 items-center self-center overflow-hidden"
+                  style={{
+                    ...btn,
+                    borderRadius: "var(--customer-button-radius)",
+                    overflow: "hidden",
+                  }}
+                >
                   <SourceButton
                     onClick={() => change(l.key, -1)}
                     disabled={binding?.locked}
                     className="customer-quantity-button h-8 min-h-0 w-8 min-w-0 font-bold"
-                    style={{ borderRadius: 0, height: 32, width: 32 }}
+                    style={{ height: 32, width: 32 }}
                   >
                     −
                   </SourceButton>
@@ -124,7 +131,7 @@ export function StorefrontSection9() {
                     onClick={() => change(l.key, 1)}
                     disabled={binding?.locked || l.qty >= 99}
                     className="customer-quantity-button h-8 min-h-0 w-8 min-w-0 font-bold"
-                    style={{ borderRadius: 0, height: 32, width: 32 }}
+                    style={{ height: 32, width: 32 }}
                   >
                     +
                   </SourceButton>
