@@ -87,94 +87,12 @@ public sealed class CreateOrderCommandHandler(IOrderRepository orders, TimeProvi
         if (selectedSlot is null)
             return Result<OrderReceiptDto>.Failure(new ApplicationError(ErrorCode.Conflict));
 
-        if (command.Items is null || command.Items.Count is < 1 or > 50)
-            return Validation("items", "invalid_count", "An order must contain 1 to 50 items.");
-        if (command.Items.Any(item => item is null || item.ProductId == Guid.Empty || item.OptionIds is null))
-            return Validation("items", "invalid_value", "An order item is invalid.");
-        if (command.Items.GroupBy(item => item.ProductId).Any(group => group.Count() > 1))
-            return Validation("items", "duplicate_product", "Product lines must be unique.");
-
-        var normalizedCode = string.IsNullOrWhiteSpace(command.DiscountCode)
-            ? null
-            : command.DiscountCode.Trim().ToUpperInvariant();
-        var catalog = await orders.GetCheckoutCatalogAsync(command.TenantId, locale.Locale, locale.DefaultLocale,
-            command.Items.Select(item => item.ProductId).ToArray(), normalizedCode, cancellationToken);
-        if (catalog.Products.Count != command.Items.Count)
-            return Result<OrderReceiptDto>.Failure(new ApplicationError(ErrorCode.NotFound));
-
-        var products = catalog.Products.ToDictionary(product => product.Id);
-        var snapshots = new List<OrderLineSnapshot>(command.Items.Count);
-        foreach (var item in command.Items)
-        {
-            var product = products[item.ProductId];
-            if (item.Quantity is < 1 or > 99)
-                return Validation("items", "invalid_quantity", "Quantity must be between 1 and 99.");
-            if (item.OptionIds!.Count > 20 || item.OptionIds.Distinct().Count() != item.OptionIds.Count)
-                return Validation("items", "invalid_options", "Selected options are invalid.");
-
-            var selectedOptions = product.OptionGroups.SelectMany(group => group.Options
-                .Where(option => item.OptionIds.Contains(option.Id))
-                .Select(option => (Group: group, Option: option))).ToArray();
-            if (selectedOptions.Length != item.OptionIds.Count)
-                return Result<OrderReceiptDto>.Failure(new ApplicationError(ErrorCode.NotFound));
-
-            foreach (var group in product.OptionGroups)
-            {
-                var selectedCount = selectedOptions.Count(selection => selection.Group.Id == group.Id);
-                if (selectedCount < group.MinimumSelections || selectedCount > group.MaximumSelections)
-                    return Validation("items", "invalid_option_selection", "Selected options do not meet the product requirements.");
-            }
-
-            snapshots.Add(new OrderLineSnapshot(product.Id, product.Name, product.BasePrice,
-                product.TaxRatePercent, item.Quantity, selectedOptions.Select(selection =>
-                    new OrderOptionSnapshot(selection.Option.Id, selection.Option.Name,
-                        selection.Option.PriceAdjustment)).ToArray())
-            {
-                ContainsAllergens = product.ContainsAllergens,
-                MayContainAllergens = product.MayContainAllergens,
-                DietaryTags = product.DietaryTags,
-                PreparationMinutes = product.PreparationMinutes,
-                PreparationNotes = product.PreparationNotes
-            });
-        }
-
-        if (normalizedCode is not null && catalog.Discount is null)
-            return Validation("discountCode", "invalid_discount", "The discount code is not valid for this restaurant.");
-
+        var pricing = await CheckoutPricingReader.ReadAsync(orders, command.TenantId, locale, command.Items,
+            command.DiscountCode, now, cancellationToken);
+        if (!pricing.IsSuccess) return Result<OrderReceiptDto>.Failure(pricing.Error);
+        var (catalog, normalizedCode, snapshots, discountAmount) = pricing.Value;
         try
         {
-            var subtotal = snapshots.Sum(line =>
-                (line.BaseUnitPrice + line.Options.Sum(option => option.PriceAdjustment)) * line.Quantity);
-            if (catalog.Discount is { } eligibleDiscount)
-            {
-                DateOnly restaurantDate;
-                try
-                {
-                    var timeZone = TimeZoneInfo.FindSystemTimeZoneById(catalog.TimeZone);
-                    restaurantDate = DateOnly.FromDateTime(TimeZoneInfo.ConvertTime(now, timeZone).DateTime);
-                }
-                catch (TimeZoneNotFoundException)
-                {
-                    return Result<OrderReceiptDto>.Failure(new ApplicationError(ErrorCode.NotFound));
-                }
-                catch (InvalidTimeZoneException)
-                {
-                    return Result<OrderReceiptDto>.Failure(new ApplicationError(ErrorCode.NotFound));
-                }
-
-                if (eligibleDiscount.ExpiresOn is { } expiresOn && restaurantDate > expiresOn)
-                    return Validation("discountCode", "discount_expired", "This discount code has expired.");
-                if (subtotal < eligibleDiscount.MinimumOrderAmount)
-                    return Validation("discountCode", "discount_minimum_not_met",
-                        "The order subtotal does not meet this discount's minimum order amount.");
-            }
-            var discountAmount = catalog.Discount switch
-            {
-                { Kind: DiscountKind.FixedAmount } discount => Math.Min(subtotal, discount.Value),
-                { Kind: DiscountKind.Percentage } discount =>
-                    decimal.Round(subtotal * discount.Value / 100m, 2, MidpointRounding.AwayFromZero),
-                _ => 0m
-            };
             var orderId = Guid.NewGuid();
             var emailExpiry = DateTimeOffset.FromUnixTimeSeconds(now.AddDays(30).ToUnixTimeSeconds());
             var emailTrackingCapability = command.EmailUpdatesConsented
@@ -188,7 +106,7 @@ public sealed class CreateOrderCommandHandler(IOrderRepository orders, TimeProvi
                 command.EmailUpdatesConsented ? command.CustomerEmail : null,
                 command.EmailUpdatesConsented ? now : null, emailTrackingCapability?.TokenHash, orderId,
                 command.AnalyticsSource, command.AnalyticsConsented ? now : null, returningCustomer,
-                analyticsFingerprintKeys, analyticsPriorOrderIds);
+                analyticsFingerprintKeys, analyticsPriorOrderIds, command.CustomerPhone, command.OrderNotes);
             var receipt = order.ToReceipt();
             var result = await orders.CreateOrderAsync(order, receipt, keyHash, requestHash, now,
                 cancellationToken);
@@ -215,6 +133,8 @@ public sealed class CreateOrderCommandHandler(IOrderRepository orders, TimeProvi
         var canonical = new
         {
             customerName = command.CustomerName?.Trim(),
+            customerPhone = string.IsNullOrWhiteSpace(command.CustomerPhone) ? null : command.CustomerPhone.Trim(),
+            orderNotes = string.IsNullOrWhiteSpace(command.OrderNotes) ? null : command.OrderNotes.Trim(),
             customerEmail = command.EmailUpdatesConsented ? command.CustomerEmail?.Trim().ToLowerInvariant() : null,
             emailUpdatesConsented = command.EmailUpdatesConsented,
             analyticsConsented = command.AnalyticsConsented,

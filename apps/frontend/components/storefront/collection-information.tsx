@@ -1,33 +1,58 @@
 "use client"
 
 import { useLocale, useTranslations } from "next-intl"
+import {
+  customerAddressLines,
+  summarizeHours,
+} from "@/lib/collection-presentation"
 import { establishmentLinks } from "@/lib/establishment-links"
-import type {
-  OpeningHoursSchedule,
-  PublicEstablishment,
-} from "@/types/establishment-settings"
+import type { PublicEstablishment } from "@/types/establishment-settings"
 
 export function CollectionInformation({
   establishment,
   current = false,
   compact = false,
+  customer = false,
+  muted = false,
 }: {
   establishment: PublicEstablishment
   current?: boolean
   compact?: boolean
+  customer?: boolean
+  muted?: boolean
 }) {
   const t = useTranslations("CollectionInformation")
   const hours = useTranslations("OpeningHours")
   const locale = useLocale()
-  const countries = new Intl.DisplayNames([locale], { type: "region" })
   const links = establishmentLinks(establishment)
-  const lines = [
-    establishment.addressLine1,
-    establishment.addressLine2,
-    [establishment.postalCode, establishment.city].filter(Boolean).join(" "),
-    establishment.region,
-    establishment.countryCode ? countries.of(establishment.countryCode) : null,
-  ].filter(Boolean)
+  const lines = customerAddressLines(establishment, locale)
+
+  if (customer)
+    return (
+      <div>
+        <p className={muted ? "text-sm text-muted-foreground" : "text-sm"}>
+          {lines.join(", ") || t("missingAddress")}
+        </p>
+
+        <p className="mt-2 text-sm text-muted-foreground">
+          {summarizeHours(
+            establishment.openingHours,
+            locale,
+            hours("closed"),
+            hours("notConfigured")
+          )}
+        </p>
+
+        {establishment.pickupInstruction && (
+          <p
+            className="mt-4 text-sm"
+            lang={establishment.pickupLocale ?? undefined}
+          >
+            {establishment.pickupInstruction}
+          </p>
+        )}
+      </div>
+    )
 
   if (compact)
     return (
@@ -209,37 +234,4 @@ export function CollectionInformation({
       </div>
     </section>
   )
-}
-
-function summarizeHours(
-  schedule: OpeningHoursSchedule | null,
-  locale: string,
-  closedLabel: string,
-  notConfiguredLabel: string
-) {
-  if (!schedule) return notConfiguredLabel
-
-  const groups: { days: string[]; hours: string }[] = []
-
-  schedule.days.forEach((day, index) => {
-    const weekday = new Intl.DateTimeFormat(locale, {
-      weekday: "short",
-      timeZone: "UTC",
-    }).format(new Date(Date.UTC(2024, 0, index + 1)))
-    const hours = day.isClosed
-      ? closedLabel
-      : day.windows.map((window) => `${window.start}–${window.end}`).join(", ")
-    const previous = groups.at(-1)
-
-    if (previous?.hours === hours) previous.days.push(weekday)
-    else groups.push({ days: [weekday], hours })
-  })
-
-  return groups
-    .map(({ days, hours }) => {
-      const dayRange = days.length > 1 ? `${days[0]}–${days.at(-1)}` : days[0]
-
-      return `${dayRange} · ${hours}`
-    })
-    .join("\n")
 }

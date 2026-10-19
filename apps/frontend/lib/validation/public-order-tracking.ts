@@ -1,6 +1,7 @@
 import { isRecord } from "./common"
 import { isUuid } from "@/lib/checkout/cart"
 import type { PublicOrderTracking } from "@/types/checkout"
+import { parsePublicOrderSummary } from "./public-order-summary"
 
 const statuses = new Set([
   "Pending",
@@ -31,11 +32,17 @@ export function parsePublicOrderTracking(
   )
     return null
 
+  const summary =
+    value.summary == null ? undefined : parsePublicOrderSummary(value.summary)
+
+  if (summary === null) return null
+
   return {
     id: value.id,
     status: value.status as PublicOrderTracking["status"],
     version: value.version as number,
     createdAt: value.createdAt,
+    ...(summary ? { summary } : {}),
     ...(value.pickupAt !== undefined
       ? { pickupAt: typeof value.pickupAt === "string" ? value.pickupAt : null }
       : {}),

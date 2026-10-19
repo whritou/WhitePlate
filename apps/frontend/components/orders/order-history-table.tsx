@@ -153,7 +153,12 @@ export function OrderHistoryTable({
                     <TableCell>
                       <ul className="grid gap-1">
                         {order.lines.map((line) => (
-                          <li key={line.productId}>
+                          <li
+                            key={`${line.productId}|${line.options
+                              .map((option) => option.optionId)
+                              .sort()
+                              .join(",")}`}
+                          >
                             {t("lineItem", {
                               quantity: line.quantity,
                               product: line.productName,

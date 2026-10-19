@@ -20,7 +20,7 @@ for (const locale of ["en", "fr"]) {
       `/${locale}/live-workspace-test?view=store&theme=custom&photos=1`
     )
     await page
-      .locator("main [data-slot=card]")
+      .locator("main article")
       .first()
       .getByRole("button")
       .last()
@@ -29,13 +29,13 @@ for (const locale of ["en", "fr"]) {
     const gallery = page
       .getByRole("dialog")
       .last()
-      .locator(".customer-image-ratio")
+      .locator('[class~="aspect-[16/10]"]')
       .first()
 
     await expect(gallery).toBeVisible()
     expect(
       await gallery.evaluate((element) => getComputedStyle(element).aspectRatio)
-    ).toBe("1 / 1")
+    ).toBe("16 / 10")
   })
 
   test(`${locale}: live menu, checkout and tracking use the customer page recipes`, async ({
@@ -51,7 +51,7 @@ for (const locale of ["en", "fr"]) {
     await expect(banner).toBeVisible()
     expect(
       await banner.evaluate((element) => element.getBoundingClientRect().height)
-    ).toBeLessThan(220)
+    ).toBeGreaterThanOrEqual(300)
     await expect(
       page.getByRole("region", {
         name:
@@ -95,16 +95,19 @@ for (const locale of ["en", "fr"]) {
       )
     ).toBe("#b3261e")
 
-    const firstProductCard = page.locator("main [data-slot=card]").first()
+    const firstProductCard = page.locator("main article").first()
 
     await firstProductCard.getByRole("button").last().click()
 
     const productDialog = page.getByRole("dialog").last()
 
-    await expect(productDialog).toHaveAttribute("data-button-style", "outline")
-    await expect(productDialog.locator("button.bg-primary").last()).toHaveCSS(
+    await expect(page.locator(".storefront-page")).toHaveAttribute(
+      "data-button-style",
+      "outline"
+    )
+    await expect(productDialog.locator("button").last()).toHaveCSS(
       "background-color",
-      "rgb(247, 248, 244)"
+      "rgb(179, 38, 30)"
     )
     await expect(
       productDialog.getByRole("region", {
@@ -112,12 +115,12 @@ for (const locale of ["en", "fr"]) {
       })
     ).toHaveCount(0)
     await expect(
-      productDialog.getByRole("checkbox", { name: "Pommes de terre rôties" })
+      productDialog.getByRole("button", { name: /Pommes de terre rôties/ })
     ).toBeVisible()
     await productDialog
-      .getByRole("checkbox", { name: "Pommes de terre rôties" })
+      .getByRole("button", { name: /Pommes de terre rôties/ })
       .click()
-    await productDialog.locator("button.bg-primary").last().click()
+    await productDialog.locator("button").last().click()
     await expect(productDialog).toBeHidden()
 
     await page.goto(
@@ -125,7 +128,7 @@ for (const locale of ["en", "fr"]) {
     )
 
     await page
-      .locator("main [data-slot=card]")
+      .locator("main article")
       .first()
       .getByRole("button")
       .last()
@@ -139,7 +142,7 @@ for (const locale of ["en", "fr"]) {
         : "Les choix pour ce produit sont temporairement indisponibles. Réessayez plus tard."
     )
     await expect(
-      unavailableOptionsDialog.locator("button.bg-primary").last()
+      unavailableOptionsDialog.locator("button").last()
     ).toBeDisabled()
     await expect(
       unavailableOptionsDialog.getByText(
@@ -149,8 +152,8 @@ for (const locale of ["en", "fr"]) {
       )
     ).toHaveCount(0)
 
-    const productCard = page.locator("main [data-slot=card]").first()
-    const productImage = productCard.locator(":scope > div").first()
+    const productCard = page.locator("main article").first()
+    const productImage = productCard.locator(":scope > button").first()
     const productCardWidth = await productCard.evaluate(
       (element) => element.getBoundingClientRect().width
     )
@@ -160,11 +163,9 @@ for (const locale of ["en", "fr"]) {
 
     expect(productImageWidth).toBeGreaterThan(productCardWidth * 0.9)
 
-    await page.goto(
-      `/${locale}/live-workspace-test?view=store&step=checkout&theme=custom`
-    )
+    await page.goto(`/${locale}/studio-parity-test?screen=checkout`)
 
-    const checkout = page.locator(".live-checkout-layout.customer-two-column")
+    const checkout = page.locator("form.customer-two-column")
 
     await expect(checkout).toBeVisible()
     await expect(page.locator(".customer-page")).toHaveAttribute(
@@ -191,10 +192,9 @@ for (const locale of ["en", "fr"]) {
     expect(checkoutBounds.top).toBeGreaterThanOrEqual(
       checkoutBounds.previousBottom
     )
-    await expect(page.locator(".customer-summary button.bg-primary")).toHaveCSS(
-      "background-color",
-      "rgb(247, 248, 244)"
-    )
+    await expect(
+      page.locator(".customer-summary button[type=submit]")
+    ).toHaveCSS("background-color", "rgb(255, 253, 247)")
 
     const orderId = "44444444-4444-4444-8444-444444444444"
 
@@ -248,8 +248,8 @@ for (const locale of ["en", "fr"]) {
     await expect(page.getByText("12 rue de la Roquette")).toBeVisible()
     await expect(page.getByText(/product|produit/i)).toHaveCount(0)
     await expect(
-      page.locator(".customer-summary a.bg-primary").last()
-    ).toHaveCSS("background-color", "rgb(247, 248, 244)")
+      page.locator(".customer-page header a").last()
+    ).toHaveAttribute("href", /maison-verte/)
 
     const trackingBounds = await tracking
       .locator("aside")

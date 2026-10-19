@@ -7,6 +7,7 @@ import { Receipt } from "./receipt"
 
 vi.mock("next-intl", () => ({
   useLocale: () => "fr",
+  useMessages: () => ({}),
   useTranslations: () => (key: string) => key,
 }))
 
@@ -56,6 +57,7 @@ it("uses the customer two-column recipe for receipt details and order summary", 
       receipt,
       trackingToken: "a".repeat(43),
       restaurantSlug: "maison-verte",
+      restaurantPhone: "+33 9 87 65 43 21",
     })
   )
 
@@ -64,4 +66,15 @@ it("uses the customer two-column recipe for receipt details and order summary", 
   expect(html).toContain("orderConfirmed")
   expect(html).toContain("Burrata &amp; tomates anciennes")
   expect(html).toContain("trackOrder")
+  expect(html).toContain('href="tel:+33987654321"')
+
+  const withoutPhone = renderToStaticMarkup(
+    createElement(Receipt, {
+      receipt,
+      trackingToken: null,
+      restaurantPhone: null,
+    })
+  )
+
+  expect(withoutPhone).not.toContain('href="tel:')
 })

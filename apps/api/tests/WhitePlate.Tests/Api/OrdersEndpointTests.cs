@@ -50,6 +50,8 @@ public sealed partial class OrdersEndpointTests
         var payload = new
         {
             customerName = "Ada",
+            customerPhone = " +33 1 23 45 67 89 ",
+            orderNotes = " No cutlery ",
             discountCode = "save",
             items = new[] { new { productId = seeded.ProductId, quantity = 2, optionIds = new[] { seeded.OptionId } } }
         };
@@ -77,6 +79,12 @@ public sealed partial class OrdersEndpointTests
         using var retryJson = JsonDocument.Parse(await retry.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
         Assert.Equal(orderId, retryJson.RootElement.GetProperty("id").GetGuid());
 
+        using var changedNotes = await client.PostAsJsonAsync("https://bistro.example.test/api/v1/orders", new
+        {
+            payload.customerName, payload.customerPhone, orderNotes = "Please call", payload.discountCode, payload.items
+        }, TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.Conflict, changedNotes.StatusCode);
+
         using var conflictingRetry = await client.PostAsJsonAsync("https://bistro.example.test/api/v1/orders", new
         {
             customerName = "Grace",
@@ -88,6 +96,9 @@ public sealed partial class OrdersEndpointTests
         using var scope = factory.Services.CreateScope();
         var database = scope.ServiceProvider.GetRequiredService<WhitePlateDbContext>();
         Assert.Equal(1, await database.Orders.CountAsync(TestContext.Current.CancellationToken));
+        var savedOrder = await database.Orders.SingleAsync(TestContext.Current.CancellationToken);
+        Assert.Equal("+33 1 23 45 67 89", savedOrder.CustomerPhone);
+        Assert.Equal("No cutlery", savedOrder.OrderNotes);
         Assert.Equal(1, await database.PickupSlotReservations.CountAsync(TestContext.Current.CancellationToken));
         Assert.Equal(1, await database.PickupSlotUsages.SumAsync(usage => usage.ReservedCount,
             TestContext.Current.CancellationToken));
@@ -309,7 +320,7 @@ public sealed partial class OrdersEndpointTests
     }
 
     [Fact]
-    public async Task PublicTrackingRequiresTenantAndCapabilityAndReturnsOnlyOrderStatus()
+    public async Task PublicTrackingRequiresTenantAndCapabilityAndReturnsSummaryWithoutPersonalData()
     {
         using var factory = new OrdersFactory();
         var seeded = await factory.SeedAsync();
@@ -322,6 +333,8 @@ public sealed partial class OrdersEndpointTests
         {
             customerName = "Ada",
             trackingToken,
+            customerPhone = "+33123456789",
+            orderNotes = "Private kitchen instructions",
             items = new[] { new { productId = seeded.ProductId, quantity = 1, optionIds = new[] { seeded.OptionId } } }
         }, TestContext.Current.CancellationToken);
         Assert.Equal(HttpStatusCode.Created, created.StatusCode);
@@ -339,9 +352,28 @@ public sealed partial class OrdersEndpointTests
         Assert.Equal("en", trackingJson.RootElement.GetProperty("menuLocale").GetString());
         Assert.False(trackingJson.RootElement.TryGetProperty("customerName", out _));
         Assert.False(trackingJson.RootElement.TryGetProperty("total", out _));
+        var summary = trackingJson.RootElement.GetProperty("summary");
+        Assert.Equal("EUR", summary.GetProperty("currency").GetString());
+        Assert.Equal(9.75m, summary.GetProperty("subtotal").GetDecimal());
+        Assert.Equal(10.73m, summary.GetProperty("total").GetDecimal());
+        Assert.Equal("Soup", summary.GetProperty("lines")[0].GetProperty("productName").GetString());
+        Assert.Equal(1, summary.GetProperty("lines")[0].GetProperty("quantity").GetInt32());
+        Assert.Equal("Large", summary.GetProperty("lines")[0].GetProperty("options")[0].GetProperty("name").GetString());
+        Assert.False(summary.TryGetProperty("customerName", out _));
+        Assert.False(summary.TryGetProperty("customerEmail", out _));
+        Assert.False(summary.TryGetProperty("trackingToken", out _));
+        Assert.False(summary.TryGetProperty("customerPhone", out _));
+        Assert.False(summary.TryGetProperty("orderNotes", out _));
+        Assert.DoesNotContain("+33123456789", trackingJson.RootElement.GetRawText());
+        Assert.DoesNotContain("Private kitchen instructions", trackingJson.RootElement.GetRawText());
 
         await factory.SeedMembershipAsync(seeded.TenantId, "manager", RestaurantRole.Manager);
         client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", "manager");
+        using var staffOrders = await client.GetAsync($"/api/v1/tenants/{seeded.TenantId}/orders",
+            TestContext.Current.CancellationToken);
+        using var staffJson = JsonDocument.Parse(await staffOrders.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
+        Assert.Equal("+33123456789", staffJson.RootElement.GetProperty("items")[0].GetProperty("customerPhone").GetString());
+        Assert.Equal("Private kitchen instructions", staffJson.RootElement.GetProperty("items")[0].GetProperty("orderNotes").GetString());
         using var transition = new HttpRequestMessage(HttpMethod.Patch,
             $"/api/v1/tenants/{seeded.TenantId}/orders/{orderId}/status")
         {
@@ -1038,7 +1070,7 @@ public sealed partial class OrdersEndpointTests
 
         public async Task<(Guid TenantId, Guid ProductId, Guid OptionId, Guid OtherTenantId, Guid OtherProductId, Guid OrganizationId)> SeedAsync(
             bool includeOpeningHours = true, string timeZone = "UTC", decimal discountMinimumOrderAmount = 0m,
-            DateOnly? discountExpiresOn = null, bool enableFrenchLocale = false)
+            DateOnly? discountExpiresOn = null, bool enableFrenchLocale = false, bool includeVariantOption = false)
         {
             using var scope = Services.CreateScope();
             var database = scope.ServiceProvider.GetRequiredService<WhitePlateDbContext>();
@@ -1070,13 +1102,15 @@ public sealed partial class OrdersEndpointTests
             database.ProductOptionGroups.Add(group);
             var option = ProductOption.Create(tenant.Id, group.Id, "Large", 1.25m, 0);
             database.ProductOptions.Add(option);
+            var variant = includeVariantOption ? ProductOption.Create(tenant.Id, group.Id, "Small", 0.50m, 1) : null;
+            if (variant is not null) database.ProductOptions.Add(variant);
             var discount = PromotionDiscount.Create(tenant.Id, "SAVE", "Save two",
                 DiscountKind.FixedAmount, 2m, discountMinimumOrderAmount, discountExpiresOn);
             database.PromotionDiscounts.Add(discount);
             await database.SaveChangesAsync(TestContext.Current.CancellationToken);
 
             var baselinePublishedAt = DateTimeOffset.UtcNow;
-            SeedCatalogPublicationBaseline(tenant, category, product, [group], [option], [discount], baselinePublishedAt);
+            SeedCatalogPublicationBaseline(tenant, category, product, [group], variant is null ? [option] : [option, variant], [discount], baselinePublishedAt);
             SeedCatalogPublicationBaseline(otherTenant, otherCategory, otherProduct, [], [], [], baselinePublishedAt);
             await database.SaveChangesAsync(TestContext.Current.CancellationToken);
             return (tenant.Id, product.Id, option.Id, otherTenant.Id, otherProduct.Id, organization.Id);

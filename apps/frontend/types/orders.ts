@@ -52,6 +52,8 @@ export type OrderSummaryLine = {
 export type OrderSummary = {
   id: string
   customerName: string
+  customerPhone?: string | null
+  orderNotes?: string | null
   currency: string
   menuLocale: string | null
   total: number

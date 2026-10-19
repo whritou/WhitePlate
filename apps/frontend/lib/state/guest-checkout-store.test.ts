@@ -20,6 +20,8 @@ describe("guest checkout store", () => {
     const store = createGuestCheckoutStore("tenant-a")
 
     store.getState().changeCustomerName("Guest")
+    store.getState().changeCustomerPhone("+33123456789")
+    store.getState().changeOrderNotes("Call when ready")
     store.getState().changeCustomerEmail("ada@example.com")
     store.getState().changeEmailUpdatesConsent(true)
     store.getState().changeDiscountCode("SAVE")
@@ -39,6 +41,8 @@ describe("guest checkout store", () => {
     store.getState().startNewOrder()
 
     expect(store.getState().customerName).toBe("")
+    expect(store.getState().customerPhone).toBe("")
+    expect(store.getState().orderNotes).toBe("")
     expect(store.getState().customerEmail).toBe("")
     expect(store.getState().emailUpdatesConsented).toBe(false)
     expect(store.getState().discountCode).toBe("")

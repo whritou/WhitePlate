@@ -18,10 +18,14 @@ it("uses the real checkout consent and pickup controls", () => {
     cart: [{ productId: "product-1", quantity: 1, optionIds: [] }],
     locked: false,
     customerName: "Ada",
+    customerPhone: "+33123456789",
+    orderNotes: "Sans couverts",
     customerEmail: "",
     emailUpdatesConsented: false,
     analyticsConsented: false,
     changeCustomerName: vi.fn(),
+    changeCustomerPhone: vi.fn(),
+    changeOrderNotes: vi.fn(),
     changeCustomerEmail: vi.fn(),
     changeEmailUpdatesConsent: vi.fn(),
     changeAnalyticsConsent: vi.fn(),
@@ -46,5 +50,6 @@ it("uses the real checkout consent and pickup controls", () => {
   expect(html).toContain('id="pickup-time"')
   expect(html).toContain("rushBufferNotice")
   expect(html).not.toContain("client@example.test")
-  expect(html).not.toContain("Choose a time")
+  expect(html).toContain('id="customer-phone"')
+  expect(html).toContain('id="order-notes"')
 })

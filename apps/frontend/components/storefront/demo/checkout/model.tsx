@@ -1,9 +1,11 @@
 "use client"
-import { useDemoClock } from "@/hooks/lovable/use-demo-draft"
+import { useDemoClock, useDemoHydrated } from "@/hooks/lovable/use-demo-draft"
 import { useState } from "react"
 import { applyDiscount, type MenuData } from "@/lib/lovable/menu"
 import type { StoreTheme } from "@/lib/lovable/storeTheme"
 import type { CartDraft } from "@/lib/lovable/customerOrder"
+import type { CustomerCheckoutBinding } from "@/types/customer-presentation"
+import { previewPricing } from "@/lib/checkout/preview-pricing"
 export function useCustomerCheckoutModel({
   t,
   menu,
@@ -11,6 +13,7 @@ export function useCustomerCheckoutModel({
   onChange,
   onPlace,
   preview = false,
+  binding,
 }: {
   t: StoreTheme
   menu: MenuData
@@ -25,9 +28,23 @@ export function useCustomerCheckoutModel({
     total: number
   }) => void
   preview?: boolean
+  binding?: CustomerCheckoutBinding
 }) {
   const [name, setName] = useState(preview ? "Alex Martin" : "")
+  const ready = useDemoHydrated()
   const [email, setEmail] = useState("")
+  const [emailUpdatesConsented, setEmailUpdates] = useState(false)
+  const [analyticsConsented, setAnalytics] = useState(false)
+  const setEmailUpdatesConsented = (value: boolean) => {
+    setEmailUpdates(value)
+    if (!value && !analyticsConsented) setEmail("")
+  }
+
+  const setAnalyticsConsented = (value: boolean) => {
+    setAnalytics(value)
+    if (!value && !emailUpdatesConsented) setEmail("")
+  }
+
   const [phone, setPhone] = useState("")
   const [pickup, setPickup] = useState("asap")
   const clock = useDemoClock()
@@ -48,7 +65,7 @@ export function useCustomerCheckoutModel({
     ? applyDiscount(menu, cart.code, subtotal)
     : null
   const discount = discountResult?.ok ? discountResult.amount : 0
-  const total = Math.max(0, subtotal - discount)
+  const { total, taxAmount } = previewPricing(cart.lines, discount)
   const quantity = (key: string, delta: number) =>
     onChange({
       ...cart,
@@ -65,6 +82,8 @@ export function useCustomerCheckoutModel({
 
   return {
     t,
+    ready,
+    binding,
     menu,
     cart,
     onChange,
@@ -74,6 +93,10 @@ export function useCustomerCheckoutModel({
     setName,
     email,
     setEmail,
+    emailUpdatesConsented,
+    setEmailUpdatesConsented,
+    analyticsConsented,
+    setAnalyticsConsented,
     phone,
     setPhone,
     pickup,
@@ -90,6 +113,7 @@ export function useCustomerCheckoutModel({
     discountResult,
     discount,
     total,
+    taxAmount,
     quantity,
     apply,
   }

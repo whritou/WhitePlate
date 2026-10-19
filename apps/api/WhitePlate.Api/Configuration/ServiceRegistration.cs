@@ -111,6 +111,7 @@ public static class ServiceRegistration
         services.AddScoped<IOrderRepository, OrderRepository>();
         services.AddScoped<IAnalyticsRepository, AnalyticsRepository>();
         services.AddScoped<CreateOrderCommandHandler>();
+        services.AddScoped<QuoteOrderQueryHandler>();
         services.AddSingleton<IEmailTrackingCapability, HmacEmailTrackingCapability>();
         services.AddSingleton<IAnalyticsPrivacyService, AnalyticsPrivacyService>();
         services.AddSingleton<ResendOrderEmailSender>();

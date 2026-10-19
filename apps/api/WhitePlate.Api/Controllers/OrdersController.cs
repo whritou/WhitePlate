@@ -15,11 +15,36 @@ namespace WhitePlate.Api.Controllers;
 [ApiController]
 [Route("api/v1/orders")]
 public sealed class OrdersController(ICurrentTenant currentTenant, ICurrentIdentity currentIdentity,
-    CreateOrderCommandHandler createOrder, CheckoutRequestRateLimiter checkoutRateLimiter,
+    CreateOrderCommandHandler createOrder, QuoteOrderQueryHandler quoteOrder, CheckoutRequestRateLimiter checkoutRateLimiter,
     ListOrdersQueryHandler listOrders, ListOrderHistoryQueryHandler listOrderHistory,
     GetPublicOrderTrackingQueryHandler getPublicTracking,
     UpdateOrderStatusCommandHandler updateStatus, ApiErrorMapper errors) : ControllerBase
 {
+    [HttpPost("quote")]
+    [RequireTenant]
+    [RequestSizeLimit(16 * 1024)]
+    [AllowAnonymous]
+    public async Task<ActionResult<OrderQuoteDto>> Quote(QuoteOrderRequest request, CancellationToken cancellationToken)
+    {
+        var tenant = currentTenant.Tenant ?? throw new InvalidOperationException("Tenant resolution is required.");
+        var address = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+        using var lease = await checkoutRateLimiter.AcquireAsync($"{tenant.Id:N}|{address}", cancellationToken);
+        if (!lease.IsAcquired)
+            return errors.ToActionResult(errors.FromStatus(HttpContext, StatusCodes.Status429TooManyRequests));
+        var items = request.Items?.Select(item => new CreateOrderItem(item.ProductId, item.Quantity, item.OptionIds)).ToArray();
+        var result = await quoteOrder.HandleAsync(new QuoteOrderQuery(tenant.Id, request.MenuLocale,
+            request.DiscountCode, items), cancellationToken);
+        Response.Headers.CacheControl = "no-store";
+        return result.IsSuccess ? Ok(result.Value) : errors.ToActionResult(errors.Create(HttpContext, result.Error));
+    }
+
+    [HttpPost("/api/v1/public/restaurants/{restaurantSlug}/orders/quote")]
+    [RequireTenantBySlug]
+    [RequestSizeLimit(16 * 1024)]
+    [AllowAnonymous]
+    public Task<ActionResult<OrderQuoteDto>> QuoteBySlug(string restaurantSlug, QuoteOrderRequest request,
+        CancellationToken cancellationToken) => Quote(request, cancellationToken);
+
     [HttpPost]
     [RequireTenant]
     [RequestSizeLimit(16 * 1024)]
@@ -44,7 +69,7 @@ public sealed class OrdersController(ICurrentTenant currentTenant, ICurrentIdent
             request.MenuLocale, items,
             Request.Headers["Idempotency-Key"].FirstOrDefault(), request.TrackingToken, request.PickupAt,
             request.CustomerEmail, request.EmailUpdatesConsented, request.AnalyticsConsented,
-            request.AnalyticsSource?.Trim().ToLowerInvariant() ?? "web");
+            request.AnalyticsSource?.Trim().ToLowerInvariant() ?? "web", request.CustomerPhone, request.OrderNotes);
         var result = await createOrder.HandleAsync(command, cancellationToken);
         if (!result.IsSuccess)
             return errors.ToActionResult(errors.Create(HttpContext, result.Error));

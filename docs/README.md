@@ -1,5 +1,7 @@
 # Documentation index
 
+The 19 October customer renderer follow-up reuses Studio's store, modal, floating basket, checkout and tracking compositions. Phone/notes persistence, safe secret-link item/totals reads and separate option variants are implemented in source. The user approved showing real consent controls in Studio. The phone/notes migration and coordinated deployment remain outstanding; exact hosted parity is not declared. See [the renderer parity audit](audits/storefront-studio-renderer-parity.md) for comparisons and precise remaining differences.
+
 Production availability was restored on 2026-10-10 after correcting unreadable permissions on the API container's mounted public PostgreSQL CA. Health probes, authenticated organization loading, restaurant navigation and the orders page were verified. See the [incident, recovery and mounted-certificate checks](deployment/coolify.md#availability-incident-and-recovery--2026-10-10); older deployment evidence below remains historical.
 
 The approved Lovable design now also covers real workspaces, tenant customer shells and account screens, using the restored ZIP reference. See [real routes, connected operations and explicit fictitious drafts](lovable-live-workspace.md). Existing operations remain authoritative; the live analytics contract is expanded in this feature, and hosted acceptance remains separate.

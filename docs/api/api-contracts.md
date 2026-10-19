@@ -1,5 +1,11 @@
 # API contracts
 
+## Non-persisting customer quote — 19 October 2026
+
+User-approved source implementation: anonymous `POST /api/v1/orders/quote` on a validated tenant host and `POST /api/v1/public/restaurants/{restaurantSlug}/orders/quote` on the central API accept `{ menuLocale, discountCode, items: [{ productId, quantity, optionIds }] }`. They reuse checkout's 16 KiB body limit, tenant/client rate limiter, published-catalog selection, option constraints, discount eligibility and domain tax/rounding rules. No customer contact, consent, tracking token, idempotency key or pickup reservation is required. No order, idempotency, reservation, outbox or notification is written. The response is no-store and contains only currency, subtotal, discountAmount, taxAmount, total and public item/option summaries. It omits order identifiers and personal/internal preparation data.
+
+The frontend same-origin `/api/public/order-quote` adapter validates the fixed host/slug target, bounds input, forwards only pricing fields and parses the safe response. Interactive quotes are scoped by tenant, restaurant selector, locale, cart and applied code. Pending/failed quotes block new submission; retrying an already uncertain order retains its original idempotency attempt. A quote does not lock inventory, pickup capacity or prices: final checkout always validates again. The Studio sample calculator now mirrors per-line discount allocation and tax rounding; real orders always use API values. Coordinated deployment and hosted acceptance remain outstanding.
+
 ## Organization-managed restaurant roles
 
 `GET /api/v1/me` includes each restaurant membership's stable `roleId`, display `roleName`, compatibility `role`, and `permissions`. Organization owners receive every permission. Restaurant grants come from the persisted organization role and are evaluated server-side for protected operations; missing or archived grant data fails closed. The current permission keys are `orders.manage`, `kitchen.display`, `catalog.manage`, `discounts.manage`, `analytics.view`, `storefront.manage`, `staff.manage`, and `billing.manage`.
@@ -408,3 +414,12 @@ The temporary shared-host preview uses only explicitly public slug-scoped API ro
 | `POST /api/v1/public/restaurants/{restaurantSlug}/orders/{orderId}/tracking` | Existing capability-protected status-only tracking response; no-store |
 
 Existing host-based routes and protected membership checks remain unchanged. The API tests cover slug-scoped menu/localized establishment, pickup slots, product photos, published theme and brand media, checkout/tracking, unknown/inactive slug denial, and host-based public routes. No schema change or migration is required.
+## Customer renderer parity contracts — 2026-10-19
+
+The user-approved Studio parity work adds optional `customerPhone` and `orderNotes` to public checkout. Values trim; blank values become null. Phone is at most 40 characters, uses telephone punctuation and spaces, and contains 3–20 ASCII digits. Notes are at most 500 characters. Both values participate in the idempotency fingerprint. Authorized staff order/history DTOs include them; receipts, public tracking and event hints do not expose these fields. No SMS feature is implied.
+
+Order items are now unique by product plus the sorted selected-option ID set, allowing distinct variants of the same product. Each variant retains independent quantities, option validation and immutable pricing snapshots. Identical repeated combinations are rejected; client-side variant quantities combine before submission. The 50-line, 99-per-line, request-size, tenant, rate-limit and authoritative pricing rules remain in force.
+
+Capability-protected tracking may additionally return `summary: {currency, subtotal, discountAmount, taxAmount, total, lines}`. Each line contains `productId`, `productName`, `quantity`, `subtotal`, `total` and selected `{optionId, name, priceAdjustment}` snapshots. Customer name, email, phone, address, order notes and internal preparation notes are omitted. Existing host/token/expiry checks, indistinguishable 404s and no-store responses remain mandatory. The frontend accepts old status-only responses without inventing item or financial data. This supersedes the older status-only restriction below, following [decision 0006](../architecture/decisions/0006-public-order-tracking.md).
+
+The additive phone/notes migration must be applied before deploying the changed API. No shared migration or hosted deployment was performed in this implementation. See [verification and exact remaining differences](../audits/storefront-studio-renderer-parity.md).

@@ -462,6 +462,11 @@
     "estimatedSubtotal": "Sous-total estimé",
     "customerName": "Votre nom",
     "customerDetails": "Vos coordonnées",
+    "paymentTitle": "Paiement",
+    "paymentAtCollection": "Aucun paiement en ligne",
+    "paymentDescription": "Votre commande sera transmise au restaurant. Aucun paiement en ligne ne sera effectué.",
+    "collectionUnavailable": "Les informations de retrait sont temporairement indisponibles.",
+    "namePlaceholder": "Votre nom",
     "collectionAt": "Retrait chez {name}",
     "emailUpdatesConsent": "Recevoir les nouvelles de cette commande par e-mail",
     "emailUpdatesPrivacy": "Votre adresse sera utilisée uniquement pour cette commande et supprimée à la fin de la période de suivi.",
@@ -470,6 +475,7 @@
     "customerEmail": "Adresse e-mail",
     "pickupTime": "Heure de retrait",
     "asapPickup": "Dès que possible — premier créneau disponible",
+    "choosePickupTime": "Choisir un horaire",
     "noPickupSlots": "Le retrait en ligne est indisponible pour le moment. Réessayez plus tard.",
     "ordersPaused": "Ce restaurant a suspendu les nouvelles commandes en ligne. Votre panier est conservé ; réessayez plus tard.",
     "rushBufferNotice": "Le restaurant est très sollicité. Les nouveaux créneaux de retrait commencent au moins {minutes} minutes plus tard.",
@@ -498,7 +504,7 @@
       "Cancelled": "Annulée"
     },
     "errors": {
-      "invalid": "Vérifiez votre nom, les quantités, les options, le code promo et le créneau de retrait, puis réessayez.",
+      "invalid": "Vérifiez vos coordonnées, vos notes, les quantités, les options, le code promo et le créneau de retrait, puis réessayez.",
       "not_found": "Un article ou une option n’est plus disponible. Vérifiez votre commande avant de réessayer.",
       "conflict": "Ce créneau vient peut-être d’être complet, ou cette clé a déjà servi avec une autre commande. Choisissez un autre horaire et réessayez.",
       "rate_limited": "Trop de commandes ont été envoyées récemment. Patientez un instant avant de réessayer.",
@@ -506,7 +512,13 @@
       "unavailable": "Nous ne pouvons pas confirmer la réception de votre commande. Gardez cette page ouverte et réessayez la même commande pour éviter un doublon.",
       "forbidden": "Cette page ne peut pas envoyer de commande. Ouvrez le menu sur le site du restaurant et réessayez.",
       "unauthorized": "Cette page ne peut pas envoyer de commande. Ouvrez le menu sur le site du restaurant et réessayez."
-    }
+    },
+    "quoteTax": "TVA",
+    "quoteLoading": "Calcul de votre total…",
+    "quoteInvalid": "Ce code ou cette sélection n’est plus valide. Modifiez-le puis réessayez.",
+    "quoteUnavailable": "Votre total n’a pas pu être calculé. Veuillez réessayer.",
+    "quoteRetry": "Recalculer le total",
+    "analyticsPrivacyLink": "Gérer la confidentialité des statistiques"
   },
   "AnalyticsPrivacy": {
     "withdrawTitle": "Retirer le consentement analytics",
@@ -626,6 +638,13 @@
     "unavailable": "Le menu de ce restaurant est temporairement indisponible. Réessayez bientôt."
   },
   "OrderTracking": {
+    "headingPending": "Commande reçue.",
+    "headingPreparing": "Votre repas se prépare.",
+    "descriptionPreparing": "La cuisine prépare votre commande.",
+    "headingReady": "Votre commande est prête.",
+    "headingCompleted": "Bon appétit !",
+    "cancelledDescription": "Le restaurant a annulé cette commande.",
+    "summaryUnavailable": "Le récapitulatif est temporairement indisponible.",
     "clickCollect": "Click & collect",
     "title": "État de votre commande",
     "orderDetails": "Détails de la commande",
@@ -3638,18 +3657,34 @@
       "Accountant": "Comptable"
     },
     "permissions": {
-      "orders": { "manage": "Gérer les commandes" },
-      "kitchen": { "display": "Affichage cuisine" },
-      "catalog": { "manage": "Gérer le menu" },
-      "discounts": { "manage": "Gérer les réductions" },
-      "analytics": { "view": "Voir les statistiques" },
-      "storefront": { "manage": "Gérer la vitrine" },
-      "staff": { "manage": "Gérer l’équipe" },
-      "billing": { "manage": "Gérer la facturation" }
+      "orders": {
+        "manage": "Gérer les commandes"
+      },
+      "kitchen": {
+        "display": "Affichage cuisine"
+      },
+      "catalog": {
+        "manage": "Gérer le menu"
+      },
+      "discounts": {
+        "manage": "Gérer les réductions"
+      },
+      "analytics": {
+        "view": "Voir les statistiques"
+      },
+      "storefront": {
+        "manage": "Gérer la vitrine"
+      },
+      "staff": {
+        "manage": "Gérer l’équipe"
+      },
+      "billing": {
+        "manage": "Gérer la facturation"
+      }
     }
   },
   "LiveWorkspace": {
-    "settingsSections": "Catégories des paramètres du restaurant",
+    "settingsSections": "Sections des paramètres",
     "establishmentSettingsCategory": "Établissement",
     "legalSettingsCategory": "Juridique et fiscal",
     "openingHoursCategory": "Heures d’ouverture",
@@ -3666,7 +3701,6 @@
     "sampleNotice": "Données fictives · Cette fonction n’est pas encore raccordée au backend. Les modifications restent dans ce navigateur ; aucun paiement, e-mail, changement DNS ou publication n’est effectué.",
     "saveDraft": "Enregistrer le brouillon local",
     "draftSaved": "Brouillon local enregistré. Aucun changement dans le backend.",
-    "settingsSections": "Sections des paramètres",
     "realOrganization": "Le nom de l’organisation et son archivage/restauration sont raccordés à l’API.",
     "legalPending": "Définissez le profil juridique de l’organisation transmis aux restaurants qui ne le personnalisent pas.",
     "realRestaurants": "Gérez les restaurants réels et les membres de cette organisation.",

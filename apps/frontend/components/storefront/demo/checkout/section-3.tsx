@@ -6,7 +6,9 @@ import { ArrowRight, Check, Minus, Plus } from "lucide-react"
 import { Button } from "@/components/ui/lovable-button"
 import { tx } from "@/lib/lovable/menu"
 import { useCustomerCheckoutView } from "./context"
+import { useTranslations } from "next-intl"
 export function CustomerCheckoutSection3() {
+  const checkout = useTranslations("Checkout")
   const {
     cart,
     onChange,
@@ -18,9 +20,13 @@ export function CustomerCheckoutSection3() {
     discountResult,
     discount,
     total,
+    taxAmount,
     quantity,
     apply,
+    binding,
   } = useCustomerCheckoutView()
+
+  const money = binding?.money ?? ((value: number) => `€${value.toFixed(2)}`)
 
   return (
     <aside className="customer-summary min-w-0 border-t pt-6">
@@ -74,6 +80,7 @@ export function CustomerCheckoutSection3() {
                   className="h-7 w-7"
                   aria-label={`Remove one ${l.product.n}`}
                   onClick={() => quantity(l.key, -1)}
+                  disabled={binding?.locked}
                 >
                   <Minus />
                 </Button>
@@ -89,6 +96,7 @@ export function CustomerCheckoutSection3() {
                   className="h-7 w-7"
                   aria-label={`Add one ${l.product.n}`}
                   onClick={() => quantity(l.key, 1)}
+                  disabled={binding?.locked || l.qty >= 99}
                 >
                   <Plus />
                 </Button>
@@ -96,7 +104,7 @@ export function CustomerCheckoutSection3() {
             </div>
 
             <span className="shrink-0 text-sm font-semibold">
-              €<Copy>{(l.unit * l.qty).toFixed(2)}</Copy>
+              <Copy>{money(l.unit * l.qty)}</Copy>
             </span>
           </li>
         ))}
@@ -108,6 +116,7 @@ export function CustomerCheckoutSection3() {
           value={code}
           onChange={(e) => setCode(e.target.value)}
           placeholder="Discount code"
+          disabled={binding?.locked}
         />
 
         <Button
@@ -115,6 +124,7 @@ export function CustomerCheckoutSection3() {
           variant="secondary"
           className="h-auto"
           onClick={apply}
+          disabled={binding?.locked}
         >
           <Copy>Apply</Copy>
         </Button>
@@ -166,7 +176,7 @@ export function CustomerCheckoutSection3() {
           </dt>
 
           <dd>
-            €<Copy>{subtotal.toFixed(2)}</Copy>
+            <Copy>{money(subtotal)}</Copy>
           </dd>
         </div>
 
@@ -178,7 +188,7 @@ export function CustomerCheckoutSection3() {
               </dt>
 
               <dd>
-                −€<Copy>{discount.toFixed(2)}</Copy>
+                −<Copy>{money(discount)}</Copy>
               </dd>
             </div>
           )}
@@ -194,33 +204,47 @@ export function CustomerCheckoutSection3() {
           </dd>
         </div>
 
+        {(binding?.taxAmount ?? taxAmount) > 0 && (
+          <div className="flex justify-between text-muted-foreground">
+            <dt>{checkout("quoteTax")}</dt>
+
+            <dd>{money(binding?.taxAmount ?? taxAmount)}</dd>
+          </div>
+        )}
+
         <div className="flex justify-between border-t pt-4 text-xl font-bold">
           <dt>
             <Copy>Total</Copy>
           </dt>
 
           <dd>
-            €<Copy>{total.toFixed(2)}</Copy>
+            <Copy>{money(total)}</Copy>
           </dd>
         </div>
       </dl>
 
       <p className="mt-2 text-xs text-muted-foreground">
-        <Copy>Taxes included</Copy>
+        {binding?.priceNote ?? <Copy>Taxes included</Copy>}
       </p>
 
-      <Button
-        type={preview ? "button" : "submit"}
-        disabled={preview}
-        className="mt-6 h-12 w-full whitespace-normal"
-      >
-        <Copy>Place demo order · €</Copy>
-        <Copy>{total.toFixed(2)}</Copy> <ArrowRight />
-      </Button>
+      {binding ? (
+        binding.footer
+      ) : (
+        <>
+          <Button
+            type={preview ? "button" : "submit"}
+            disabled={preview}
+            className="mt-6 h-12 w-full whitespace-normal"
+          >
+            <Copy>Place demo order · €</Copy>
+            <Copy>{total.toFixed(2)}</Copy> <ArrowRight />
+          </Button>
 
-      <p className="mt-3 text-center text-xs text-muted-foreground">
-        <Copy>Demo only · No charge · No restaurant notification</Copy>
-      </p>
+          <p className="mt-3 text-center text-xs text-muted-foreground">
+            <Copy>Demo only · No charge · No restaurant notification</Copy>
+          </p>
+        </>
+      )}
     </aside>
   )
 }

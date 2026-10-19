@@ -32,7 +32,7 @@ public sealed record CreateOrderCommand(Guid TenantId, string? CustomerName, str
     string? MenuLocale, IReadOnlyList<CreateOrderItem>? Items, string? IdempotencyKey,
     string? TrackingToken = null, DateTimeOffset? PickupAt = null, string? CustomerEmail = null,
     bool EmailUpdatesConsented = false, bool AnalyticsConsented = false,
-    string AnalyticsSource = "web");
+    string AnalyticsSource = "web", string? CustomerPhone = null, string? OrderNotes = null);
 
 public sealed record AnalyticsFingerprint(string KeyVersion, string Hash, DateTimeOffset ExpiresAt);
 
@@ -81,6 +81,8 @@ public sealed record OrderSummaryLineDto(Guid ProductId, string ProductName, int
 public sealed record OrderSummaryDto(Guid Id, string CustomerName, string Currency, string? MenuLocale, decimal Total,
     string Status, int Version, DateTimeOffset CreatedAt, IReadOnlyList<OrderSummaryLineDto> Lines)
 {
+    public string? CustomerPhone { get; init; }
+    public string? OrderNotes { get; init; }
     public DateTimeOffset? PickupAt { get; init; }
     public string? PickupTimeZone { get; init; }
     public string? PickupMode { get; init; }
@@ -97,7 +99,12 @@ public sealed record PublicOrderTrackingDto(Guid Id, string Status, int Version,
 {
     public DateTimeOffset? PickupAt { get; init; }
     public string? PickupTimeZone { get; init; }
+    public PublicOrderSummaryDto? Summary { get; init; }
 }
+public sealed record PublicOrderSummaryDto(string Currency, decimal Subtotal, decimal DiscountAmount,
+    decimal TaxAmount, decimal Total, IReadOnlyList<PublicOrderLineDto> Lines);
+public sealed record PublicOrderLineDto(Guid ProductId, string ProductName, int Quantity, decimal Subtotal,
+    decimal Total, IReadOnlyList<OrderLineOptionDto> Options);
 public sealed record OrderPageCursor(long CreatedAtTicks, Guid Id);
 public sealed record ListOrdersQuery(Guid TenantId, OrderStatus? Status, string? Cursor, int? PageSize);
 public sealed record ListOrderHistoryQuery(Guid TenantId, OrderStatus? Status, string? Search, DateOnly? From,

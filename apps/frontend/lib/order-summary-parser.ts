@@ -25,6 +25,12 @@ export function parseOrderSummary(value: unknown): OrderSummary | null {
     pickupSnapshot === null ||
     !isUuid(value.id) ||
     typeof value.customerName !== "string" ||
+    (value.customerPhone != null &&
+      (typeof value.customerPhone !== "string" ||
+        value.customerPhone.length > 40)) ||
+    (value.orderNotes != null &&
+      (typeof value.orderNotes !== "string" ||
+        value.orderNotes.length > 500)) ||
     typeof value.currency !== "string" ||
     !/^[A-Z]{3}$/.test(value.currency) ||
     (value.menuLocale !== null &&
@@ -49,6 +55,12 @@ export function parseOrderSummary(value: unknown): OrderSummary | null {
   return {
     id: value.id,
     customerName: value.customerName,
+    ...(value.customerPhone !== undefined
+      ? { customerPhone: value.customerPhone as string | null }
+      : {}),
+    ...(value.orderNotes !== undefined
+      ? { orderNotes: value.orderNotes as string | null }
+      : {}),
     currency: value.currency,
     menuLocale: typeof value.menuLocale === "string" ? value.menuLocale : null,
     total: value.total,

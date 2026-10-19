@@ -286,23 +286,25 @@
   color: var(--primary);
   transition:
     background-color 120ms ease,
-    box-shadow 120ms ease,
-    transform 120ms ease;
+    color 120ms ease,
+    filter 120ms ease;
 }
 .customer-page[data-button-style="outline"]
   button.bg-primary:hover:not(:disabled),
 .customer-page[data-button-style="outline"] a.bg-primary:hover,
 .customer-page[data-button-style="outline"]
   button.bg-primary[aria-pressed="true"] {
-  background: var(--background);
-  box-shadow: inset 0 0 0 2px var(--primary);
+  background: var(--primary);
+  color: var(--primary-foreground);
+  box-shadow: none;
 }
 .customer-page[data-button-style="outline"]
   button.bg-primary:active:not(:disabled),
 .customer-page[data-button-style="outline"] a.bg-primary:active {
-  background: var(--background);
-  box-shadow: inset 0 0 0 3px var(--primary);
-  transform: scale(0.98);
+  background: var(--primary);
+  color: var(--primary-foreground);
+  box-shadow: none;
+  filter: brightness(0.88);
 }
 .customer-page[data-button-style="outline"] button.bg-primary:focus-visible,
 .customer-page[data-button-style="outline"] a.bg-primary:focus-visible {
@@ -320,15 +322,17 @@
 .storefront-page[data-button-style="outline"]
   > header
   button:last-child[aria-expanded="true"] {
-  background: var(--background) !important;
-  box-shadow: inset 0 0 0 2px var(--primary);
+  background: var(--primary) !important;
+  color: var(--primary-foreground) !important;
+  box-shadow: none;
 }
 .storefront-page[data-button-style="outline"]
   > header
   button:last-child:active:not(:disabled) {
-  background: var(--background) !important;
-  box-shadow: inset 0 0 0 3px var(--primary);
-  transform: scale(0.98);
+  background: var(--primary) !important;
+  color: var(--primary-foreground) !important;
+  box-shadow: none;
+  filter: brightness(0.88);
 }
 .customer-cover {
   height: calc(var(--customer-banner-height) * 0.48);
@@ -493,4 +497,34 @@
 .lovable-surface [data-slot="native-select"] {
   text-overflow: ellipsis;
   padding-inline-end: 2.5rem;
+}
+
+/* Shared customer feedback keeps inline theme colors and element geometry. */
+.customer-page .lovable-source-button {
+  transition:
+    background-color var(--duration-feedback, 120ms) ease,
+    color var(--duration-feedback, 120ms) ease,
+    box-shadow var(--duration-feedback, 120ms) ease,
+    filter var(--duration-feedback, 120ms) ease;
+}
+@media (hover: hover) {
+  .customer-page
+    .lovable-source-button:hover:where(
+      :not(:disabled):not([aria-disabled="true"])
+    ) {
+    filter: brightness(0.94);
+    box-shadow: inset 0 0 0 999px
+      color-mix(in srgb, currentColor 8%, transparent);
+  }
+}
+.customer-page
+  .lovable-source-button:active:where(
+    :not(:disabled):not([aria-disabled="true"])
+  ) {
+  filter: brightness(0.88);
+}
+@media (prefers-reduced-motion: reduce) {
+  .customer-page .lovable-source-button {
+    transition: none;
+  }
 }

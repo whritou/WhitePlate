@@ -1,47 +1,96 @@
 "use client"
 
-import { ArrowRight } from "lucide-react"
-import { useTranslations } from "next-intl"
+import { useLocale, useTranslations } from "next-intl"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { Button } from "@/components/ui/lovable-button"
+import { CustomerCheckoutProvider } from "./demo/checkout/context"
+import { useCustomerCheckoutModel } from "./demo/checkout/model"
+import { CustomerCheckoutView } from "./demo/checkout/view"
+import {
+  customerMenu,
+  customerCart,
+} from "@/lib/checkout/customer-presentation"
+import { DEFAULT_THEME } from "@/lib/lovable/storeTheme"
 import { AnalyticsWithdrawalForm } from "./analytics-withdrawal-form"
 import { Link } from "@/i18n/navigation"
 import type { PublicEstablishment } from "@/types/establishment-settings"
 import type { GuestCheckoutController } from "@/types/checkout"
+import type { StoreTheme } from "@/types/lovable/storeTheme"
 import { LiveCheckoutDetails } from "./live-checkout-details"
 import { Receipt } from "./receipt"
+import { ArrowRight } from "lucide-react"
+import { cartItemKey } from "@/lib/checkout/cart"
+import { useOrderQuote } from "@/hooks/use-order-quote"
+import { Copy } from "@/components/shared/translated-copy"
 
 export function LiveCheckout({
   state,
   name,
+  theme = DEFAULT_THEME,
   establishment,
   restaurantSlug,
   price,
-  estimate,
   onBack,
   onNewOrder,
 }: {
   state: GuestCheckoutController
   name: string
+  theme?: StoreTheme
   establishment?: PublicEstablishment | null
   restaurantSlug?: string
   price: Intl.NumberFormat
-  estimate: string
   onBack: () => void
   onNewOrder: () => void
 }) {
   const checkout = useTranslations("Checkout")
-  const tracking = useTranslations("OrderTracking")
+  const locale = useLocale()
+  const quote = useOrderQuote(
+    state.tenantId,
+    {
+      menuLocale: state.menuLocale,
+      discountCode: state.discountCode || null,
+      items: state.cart,
+    },
+    !state.receipt && !state.locked,
+    restaurantSlug
+  )
+  const quoteReady = !!quote.data && !quote.isFetching && !quote.isError
+  const menu = customerMenu(
+    {
+      tenantId: "",
+      restaurantName: name,
+      restaurantDescription: null,
+      currency: "EUR",
+      locale,
+      defaultLocale: locale,
+      availableLocales: [locale],
+      categories: [
+        { id: "menu", name: "", sortOrder: 0, products: state.products },
+      ],
+    },
+    restaurantSlug
+  )
+  const cart = customerCart(menu, state.cart, state.discountCode, locale)
+  const model = useCustomerCheckoutModel({
+    t: theme,
+    menu,
+    cart,
+    onChange: () => {},
+    preview: true,
+  })
 
   if (state.receipt)
     return (
-      <div className="mx-auto max-w-5xl py-8">
+      <>
         <Receipt
           receipt={state.receipt}
           trackingToken={state.trackingToken}
           restaurantSlug={restaurantSlug}
+          restaurantPhone={establishment?.phone}
+          theme={theme}
+          name={name}
+          products={state.products}
+          notes={state.orderNotes}
         />
 
         <div className="mt-8 border-t pt-6">
@@ -58,194 +107,127 @@ export function LiveCheckout({
         <div className="mt-8 flex justify-end">
           <Button onClick={onNewOrder}>{checkout("newOrder")}</Button>
         </div>
-      </div>
+      </>
     )
 
   return (
-    <div className="mx-auto max-w-5xl py-8">
-      <Button variant="ghost" onClick={onBack} disabled={state.locked}>
-        {checkout("backToMenu")}
-      </Button>
+    <CustomerCheckoutProvider
+      model={{
+        ...model,
+        quantity: (id, delta) => {
+          if (state.locked) return
 
-      <div className="mb-8 flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <p className="mb-2 text-sm font-semibold text-primary">
-            {tracking("clickCollect")}
-          </p>
+          const item = state.cart.find((item) => cartItemKey(item) === id)
 
-          <h1 className="text-3xl font-bold">{checkout("checkoutTitle")}</h1>
-        </div>
-
-        <ol
-          aria-label={checkout("checkoutTitle")}
-          className="flex items-center gap-2 text-sm text-muted-foreground"
-        >
-          <li>{checkout("cartTitle")}</li>
-
-          <ArrowRight size={14} aria-hidden="true" />
-
-          <li aria-current="step" className="font-semibold text-foreground">
-            {checkout("checkoutTitle")}
-          </li>
-        </ol>
-      </div>
-
-      <form
-        onSubmit={state.checkout}
-        aria-busy={state.submitting}
-        className="live-checkout-layout customer-two-column grid min-w-0 items-start gap-10"
-      >
-        <LiveCheckoutDetails
-          state={state}
-          name={name}
-          establishment={establishment}
-        />
-
-        <aside className="customer-summary min-w-0 border-t pt-6">
-          <h2 className="mb-5 text-lg font-bold">{checkout("cartTitle")}</h2>
-
-          {state.cart.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              {checkout("emptyCart")}
-            </p>
-          ) : (
-            <ul className="divide-y divide-border">
-              {state.cart.map((item) => {
-                const product = state.products.find(
-                  (candidate) => candidate.id === item.productId
-                )
-                const options =
-                  product?.optionGroups
-                    .flatMap((group) => group.options)
-                    .filter((option) => item.optionIds.includes(option.id)) ??
-                  []
-                const amount =
-                  ((product?.basePrice ?? 0) +
-                    options.reduce(
-                      (sum, option) => sum + option.priceAdjustment,
-                      0
-                    )) *
-                  item.quantity
-
-                return (
-                  <li key={item.productId} className="py-4 first:pt-0">
-                    <div className="flex justify-between gap-4 text-sm font-bold">
-                      <span>{product?.name}</span>
-
-                      <span>{price.format(amount)}</span>
-                    </div>
-
-                    {options.length > 0 && (
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        {options.map((option) => option.name).join(", ")}
-                      </p>
-                    )}
-
-                    <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
-                      <Label className="flex items-center gap-2 text-xs">
-                        {checkout("quantity")}
-
-                        <Input
-                          className="w-20"
-                          type="number"
-                          min={1}
-                          max={99}
-                          step={1}
-                          value={item.quantity}
-                          disabled={state.locked}
-                          aria-label={checkout("quantityFor", {
-                            product: product?.name ?? "",
-                          })}
-                          onChange={(event) => {
-                            const quantity = Number(event.target.value)
-
-                            if (
-                              Number.isInteger(quantity) &&
-                              quantity >= 1 &&
-                              quantity <= 99
-                            )
-                              state.changeCart({ ...item, quantity })
-                          }}
-                        />
-                      </Label>
-
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        disabled={state.locked}
-                        aria-label={checkout("removeProduct", {
-                          product: product?.name ?? "",
-                        })}
-                        onClick={() =>
-                          state.changeCart({ ...item, quantity: 0 })
-                        }
-                      >
-                        {checkout("remove")}
-                      </Button>
-                    </div>
-                  </li>
-                )
-              })}
-            </ul>
-          )}
-
-          <Label className="mt-4 grid gap-2 text-sm" htmlFor="discount-code">
-            {checkout("discountCode")}
-
-            <Input
-              id="discount-code"
-              name="discountCode"
-              maxLength={64}
-              disabled={state.locked}
-              value={state.discountCode}
-              onChange={(event) => state.changeDiscountCode(event.target.value)}
+          if (item && item.quantity + delta <= 99)
+            state.changeCart({ ...item, quantity: item.quantity + delta })
+        },
+        onChange: (cart) => {
+          if (!state.locked) {
+            state.changeDiscountCode(cart.code)
+            model.setCode(cart.code)
+          }
+        },
+        codeError: "",
+        discountResult:
+          state.discountCode && quoteReady
+            ? { ok: true, amount: quote.data!.discountAmount, msg: "" }
+            : null,
+        subtotal: quote.data?.subtotal ?? model.subtotal,
+        discount: quote.data?.discountAmount ?? 0,
+        total: quote.data?.total ?? model.subtotal,
+        apply: () => state.changeDiscountCode(model.code.trim().toUpperCase()),
+        binding: {
+          taxAmount: quote.data?.taxAmount,
+          money: (value) =>
+            !quoteReady && !state.locked
+              ? "—"
+              : price.resolvedOptions().currency === "EUR"
+                ? `€${value.toFixed(2)}`
+                : price.format(value),
+          locked: state.locked,
+          onEdit: onBack,
+          onSubmit: (event) => {
+            if (quoteReady || state.locked) return state.checkout(event)
+            event.preventDefault()
+          },
+          details: (
+            <LiveCheckoutDetails
+              state={state}
+              name={name}
+              establishment={establishment}
             />
-          </Label>
+          ),
+          priceNote: <Copy>Taxes included</Copy>,
+          footer: (
+            <>
+              {quote.isFetching && !state.locked && (
+                <p role="status" className="mt-2 text-sm">
+                  {checkout("quoteLoading")}
+                </p>
+              )}
 
-          <div className="mt-5 flex justify-between border-t pt-5 font-bold">
-            <span>{checkout("estimatedSubtotal")}</span>
+              {quote.isError && !state.locked && (
+                <div role="alert" className="mt-4 text-sm text-destructive">
+                  <p>
+                    {checkout(
+                      quote.error.message === "invalid"
+                        ? "quoteInvalid"
+                        : "quoteUnavailable"
+                    )}
+                  </p>
 
-            <span>{estimate}</span>
-          </div>
+                  <Button
+                    type="button"
+                    variant="link"
+                    className="h-auto px-0"
+                    onClick={() => quote.refetch()}
+                  >
+                    {checkout("quoteRetry")}
+                  </Button>
+                </div>
+              )}
 
-          <p className="mt-3 text-xs text-muted-foreground">
-            {checkout("priceNote")}
-          </p>
+              {state.error && (
+                <Alert variant="destructive" role="alert" className="mt-4">
+                  <AlertDescription>
+                    {checkout(`errors.${state.error}`)}
+                  </AlertDescription>
+                </Alert>
+              )}
 
-          {state.error && (
-            <Alert variant="destructive" role="alert" className="mt-4">
-              <AlertDescription>
-                {checkout(`errors.${state.error}`)}
-              </AlertDescription>
-            </Alert>
-          )}
+              <Button
+                type="submit"
+                className="mt-6 h-12 w-full whitespace-normal"
+                disabled={
+                  state.submitting ||
+                  (!quoteReady && !state.locked) ||
+                  state.changingLanguage ||
+                  state.cart.length === 0 ||
+                  state.pickupSlotsLoading ||
+                  state.pickupSlots.length === 0
+                }
+              >
+                {state.submitting
+                  ? checkout("placingOrder")
+                  : state.error === "unavailable"
+                    ? checkout("retryOrder")
+                    : checkout("placeOrder")}
 
-          <Button
-            type="submit"
-            className="mt-5 w-full"
-            disabled={
-              state.submitting ||
-              state.changingLanguage ||
-              state.cart.length === 0 ||
-              state.pickupSlotsLoading ||
-              state.pickupSlots.length === 0
-            }
-          >
-            {state.submitting
-              ? checkout("placingOrder")
-              : state.error === "unavailable"
-                ? checkout("retryOrder")
-                : checkout("placeOrder")}
-          </Button>
+                <ArrowRight />
+              </Button>
 
-          {state.submitting && (
-            <p role="status" className="mt-2 text-sm">
-              {checkout("placingOrder")}
-            </p>
-          )}
-        </aside>
-      </form>
-    </div>
+              {state.submitting && (
+                <p role="status" className="mt-2 text-sm">
+                  {checkout("placingOrder")}
+                </p>
+              )}
+            </>
+          ),
+        },
+      }}
+    >
+      <CustomerCheckoutView />
+    </CustomerCheckoutProvider>
   )
 }

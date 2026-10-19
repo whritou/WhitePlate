@@ -12,14 +12,17 @@ import {
   type Product,
 } from "@/lib/lovable/menu"
 import { UI } from "./shared"
+import type { CustomerStoreBinding } from "@/types/customer-presentation"
 export function useStorefrontModel({
   t,
   menu = DEFAULT_MENU,
   preview = false,
+  binding,
 }: {
   t: StoreTheme
   menu?: MenuData
   preview?: boolean
+  binding?: CustomerStoreBinding
 }) {
   const navigate = useNavigate()
   const locale = useLocale()
@@ -59,12 +62,22 @@ export function useStorefrontModel({
   const total = subtotal - (disc?.ok ? disc.amount : 0)
   const qtyOf = (id: string) =>
     lines.filter((l) => l.product.id === id).reduce((a, l) => a + l.qty, 0)
-  const add = (product: Product, picks: string[], unit: number, qty = 1) => {
+  const add = (
+    product: Product,
+    picks: string[],
+    unit: number,
+    qty = 1,
+    _optionIds?: string[]
+  ) => {
+    void _optionIds
+
     const key = product.id + "|" + picks.join(",")
 
     setLines((ls) =>
       ls.some((l) => l.key === key)
-        ? ls.map((l) => (l.key === key ? { ...l, qty: l.qty + qty } : l))
+        ? ls.map((l) =>
+            l.key === key ? { ...l, qty: Math.min(99, l.qty + qty) } : l
+          )
         : [...ls, { key, product, picks, unit, qty }]
     )
   }
@@ -72,7 +85,9 @@ export function useStorefrontModel({
   const change = (key: string, d: number) =>
     setLines((ls) =>
       ls
-        .map((l) => (l.key === key ? { ...l, qty: l.qty + d } : l))
+        .map((l) =>
+          l.key === key ? { ...l, qty: Math.min(99, l.qty + d) } : l
+        )
         .filter((l) => l.qty > 0)
     )
   const quickRemove = (id: string) => {
@@ -87,6 +102,8 @@ export function useStorefrontModel({
 
   return {
     t,
+    binding,
+    money: (value: number) => `€${value.toFixed(2)}`,
     menu,
     preview,
     navigate,

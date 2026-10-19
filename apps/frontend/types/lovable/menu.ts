@@ -1,9 +1,11 @@
 export type Tr = Record<string, Record<string, string>>
-export type Choice = { n: string; p: number; tr?: Tr }
+export type Choice = { id?: string; n: string; p: number; tr?: Tr }
 export type Option = {
   group: string
   type: "one" | "many"
   choices: Choice[]
+  minimumSelections?: number
+  maximumSelections?: number
   tr?: Tr
 }
 export type Product = {
@@ -17,6 +19,7 @@ export type Product = {
   available?: boolean
   tax?: number
   allergens?: string[]
+  details?: string[]
   tr?: Tr
 }
 export type Category = { id: string; cat: string; items: Product[]; tr?: Tr }
