@@ -86,7 +86,7 @@ def check_duplicates(findings):
 
 
 def enumerate_surface(repo_root):
-    """Return the audited surface keys: controller actions, hub methods, route handlers, server actions."""
+    """Return the audited surface keys: controller actions, hub methods, minimal endpoints, route handlers, server actions."""
     repo_root = Path(repo_root)
     surface = set()
     controllers = repo_root / "apps/api/WhitePlate.Api/Controllers"
@@ -113,9 +113,15 @@ def enumerate_surface(repo_root):
             if "override" in tokens or "static" in tokens:
                 continue
             surface.add("KitchenHub." + re.sub(r"<.*", "", tokens[-1]))
+    program = repo_root / "apps/api/WhitePlate.Api/Program.cs"
+    if program.exists():
+        for path in re.findall(r'\bapp\.Map(?:Get|HealthChecks)\(\s*"([^"]+)"', program.read_text(encoding="utf-8")):
+            surface.add(f"Program.cs#GET {path}")
     frontend = repo_root / "apps/frontend"
     methods_all = set(HTTP_METHODS.split("|"))
-    for path in sorted((frontend / "app/api").glob("**/route.ts")):
+    for path in sorted((frontend / "app").glob("**/route.ts")):
+        if {"node_modules", ".next"} & set(path.parts):
+            continue
         relative = path.relative_to(frontend).as_posix()
         text = path.read_text(encoding="utf-8")
         methods = set(re.findall(rf"^export\s+(?:async\s+)?function\s+({HTTP_METHODS})\b", text, re.M))

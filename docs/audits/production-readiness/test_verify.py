@@ -102,6 +102,17 @@ public sealed class KitchenHub : Hub
 export async function GET(request: Request) { return Response.json([]) }
 export async function POST(request: Request) { return Response.json([]) }
 """)
+            write(root, "apps/frontend/app/.well-known/openid-configuration/route.ts", """\
+export const dynamic = "force-dynamic"
+
+export function GET() { return Response.json({}) }
+""")
+            write(root, "apps/api/WhitePlate.Api/Program.cs", """\
+app.MapGet("/health/live", () => Results.Text("Healthy", "text/plain"))
+    .AllowAnonymous();
+app.MapHealthChecks("/health/ready", new HealthCheckOptions());
+app.MapHub<KitchenHub>("/hubs/orders");
+""")
             write(root, "apps/frontend/actions/checkout.ts", """\
 "use server"
 
@@ -117,7 +128,8 @@ export async function notAnAction() {}
             self.assertEqual(verify.enumerate_surface(Path(root)), {
                 "OrdersController.List", "OrdersController.Create", "KitchenHub.JoinRestaurant",
                 "app/api/kitchen/orders/route.ts#GET", "app/api/kitchen/orders/route.ts#POST",
-                "actions/checkout.ts#placeOrder",
+                "actions/checkout.ts#placeOrder", "app/.well-known/openid-configuration/route.ts#GET",
+                "Program.cs#GET /health/live", "Program.cs#GET /health/ready",
             })
 
     def test_route_handlers_declared_as_constants(self):
