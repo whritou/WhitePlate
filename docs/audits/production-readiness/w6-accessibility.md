@@ -8,20 +8,28 @@ Read first: `docs/design-system/README.md` (accessibility, localization and stat
 
 Runtime. A clean copy of `apps/frontend` at `55f31a5` (outside the repository, with its own `node_modules`) ran `next dev --webpack` on `127.0.0.1:3016` with Node 24.19.0 called by its full path. Process-only settings: `STOREFRONT_BASE_DOMAIN=localhost`, `PUBLIC_TENANT_API_URL_TEMPLATE=http://{tenant}.localhost:5189`, `NODE_OPTIONS=--require ./tests/fixtures/localhost-dns.cjs`, `BETTER_AUTH_URL=http://localhost:3016`, and loopback `DATABASE_URL` and `API_BASE_URL` values on port 1, which nothing listens on. The deterministic guest fixture `tests/fixtures/checkout-api.mjs` ran on `127.0.0.1:5189`. No database, real API or hosted service was contacted. Both processes were stopped afterwards, and ports 3016 and 5189 were confirmed closed. Screenshots were taken of fixture data only and kept in the scratchpad.
 
-Pages tested: landing `/{l}`; `sign-in`, `sign-up`, `forgot-password`, `reset-password`; `demo` and the 11 `demo/*` pages; the dev fixture routes `orders-kanban-test`, `catalog-design-test?view=builder` (with and without `shell=1`), `establishment-design-test`, `studio-parity-test`, `order-history-test` and `live-workspace-test`; and the fixture storefront `http://bistro.localhost:3016/{l}`, including its `?step=checkout` page.
+Pages tested: landing `/{l}`; `sign-in`, `sign-up`, `forgot-password`, `reset-password`; `demo` and the 10 `demo/*` pages (`menu`, `checkout`, `tracking`, `orders`, `dashboard`, `history`, `settings`, `staff`, `studio`, `analytics`); the dev fixture routes `orders-kanban-test`, `catalog-design-test?view=builder` (with and without `shell=1`), `establishment-design-test`, `studio-parity-test`, `order-history-test` and `live-workspace-test`; and the fixture storefront `http://bistro.localhost:3016/{l}`, including its `?step=checkout` page.
 
 Probes:
 
-1. **axe sweep.** Playwright (`@playwright/test` from the clean copy, installed Chrome via `channel: "chrome"`, headless) injected the transitive `axe-core` 4.13.0 (`node_modules/axe-core/axe.min.js`) with `page.addScriptTag`. `axe.run` used tags `wcag2a, wcag2aa, wcag21a, wcag21aa, wcag22aa`. The sweep covered 24 page templates × `en`/`fr` × `colorScheme` light/dark × 320 and 1280 px, which is 192 runs: 192 returned HTTP 200, 0 errors. Results by rule:
+1. **axe sweep.** Playwright (`@playwright/test` from the clean copy, installed Chrome via `channel: "chrome"`, headless) injected the transitive `axe-core` 4.13.0 (`node_modules/axe-core/axe.min.js`) with `page.addScriptTag`. `axe.run` used tags `wcag2a, wcag2aa, wcag21a, wcag21aa, wcag22aa`. The sweep covered 24 page templates × `en`/`fr` × `colorScheme` light/dark × 320 and 1280 px, which is 192 runs: 192 returned HTTP 200, and 0 probe errors occurred. That count is about the probe; it does not mean zero violations. The fixture storefront's `?step=checkout` page was tested by keyboard and accessibility tree but was not part of the axe sweep, which is why axe's `link-name` rule did not report A11Y-10. Results by rule:
 
    | Rule | Runs | Nodes | Pages | Outcome after manual verification |
    | --- | --- | --- | --- | --- |
-   | `document-title` | 176 | 176 | 21 of 24 templates (all but landing and storefront) | A11Y-01 |
+   | `document-title` | 176 | 176 | 22 of 24 templates (all but landing and storefront; 176 runs ÷ 8 combinations) | A11Y-01 |
    | `color-contrast` | 60 | 309 | storefront, `reset-password`, landing, `demo`, `demo/history`, `demo/orders`, `demo/staff`, `demo/studio` | A11Y-03, A11Y-04, A11Y-13 |
    | `label` | 8 | 8 | `demo/menu` | A11Y-13 |
    | `svg-img-alt` | 8 | 24 | `demo/analytics` | A11Y-12 |
    | `scrollable-region-focusable` | 2 | 2 | `fr/demo/analytics` at 320 px | A11Y-12 |
-   | needs review: `aria-prohibited-attr` | 11 runs | 88 | kanban (7 per run), landing, establishment | A11Y-17 for the kanban nodes |
+   | needs review: `aria-prohibited-attr` | 24 | 88 | landing (8 runs × 3), kanban (8 × 7), establishment (8 × 1) | A11Y-17 |
+   | needs review: `color-contrast` | 60 | 1,004 | landing and demo pages only | Triaged under Not covered |
+
+   The `aria-prohibited-attr` nodes were inspected in a later re-run (same build, `en`, 1280 px). All are `aria-label` on an element with no role, which assistive technology ignores:
+   - kanban: the lane-count and timer badges (A11Y-17);
+   - landing: three `div`s in the marketing theme preview (`components/marketing/landing/previews/product-theme-preview.tsx:33`, `:66`, `:91`: "Store theme presets", "Customer preview pages", "Themed customer experience");
+   - establishment: the "Opening hours" `div` in the saved collection information (`components/storefront/collection-information.tsx:160`), which already has a visible `h4` with the same text.
+
+   The landing and establishment nodes lose only a redundant label, so they are recorded as part of the A11Y-17 hygiene pattern rather than as separate findings.
 
    Light and dark results were identical. The runtime forces the light theme (`apps/frontend/app/[locale]/layout.tsx:31` sets `class="light"`; dark mode was removed by owner decision, per `docs/design-system/README.md:7`), so dark is recorded as not applicable rather than as a pass. `html[lang]` matched the URL locale in 192 of 192 runs, and no run had horizontal page scroll.
 2. **Keyboard journeys and accessibility tree** (Playwright keyboard only, `locator.ariaSnapshot()`, focused-element inspection of `outline` and `box-shadow`):
@@ -36,6 +44,8 @@ Probes:
 8. **Target size**: interactive elements under 24 × 24 px with the 24 px spacing-circle test.
 9. **Language**: `lang` of page and parts after a storefront menu-language switch.
 
+axe found only A11Y-01, 03, 04, 12, 13 and 17 (the last as "needs review"). A11Y-02, 05-11, 14-16, 18 and 19 come from manual, keyboard or accessibility-tree probes, which detect problems that axe does not.
+
 No Blocker was found. Every core journey could be completed with the keyboard up to the point where the fixture stops: the guest checkout fixture has no quote or pickup-slot endpoint, so "Place order" stays disabled (see Not covered).
 
 ## Findings
@@ -44,7 +54,7 @@ No Blocker was found. Every core journey could be completed with the keyboard up
 
 - **Workstream:** W6
 - **Location:** `apps/frontend/app/[locale]/layout.tsx:13-38` (no `metadata` or `generateMetadata`); titles exist only in `app/[locale]/page.tsx:10`, `app/[locale]/order/[orderId]/page.tsx:9` and the two `storefront-preview` pages
-- **Evidence:** axe `document-title` failed in 176 of 192 runs on 21 of 24 templates, in both locales and at both widths. `page.title()` returned `""` on `sign-in`, `sign-up`, `forgot-password`, `reset-password`, every `demo/*` page and every workspace fixture. A search of `apps/frontend` (excluding `node_modules`) for `document.title` and `<title` finds no client-side title either. The storefront (`Bistro fixture`) and landing pages do have titles.
+- **Evidence:** axe `document-title` failed in 176 of 192 runs on 22 of 24 templates, in both locales and at both widths. `page.title()` returned `""` on `sign-in`, `sign-up`, `forgot-password`, `reset-password`, every `demo/*` page and every workspace fixture. A search of `apps/frontend` (excluding `node_modules`) for `document.title` and `<title` finds no client-side title either. The storefront (`Bistro fixture`) and landing pages do have titles.
 - **Impact:** WCAG 2.4.2 Page Titled (level A). Screen-reader users hear no page name on load or in the tab list, and browser tabs, history and bookmarks show only the URL. The auth pages and every organization workspace route (which inherit the same layout) are affected. Users can still complete the journeys, so this is not a Blocker.
 - **Severity:** Should
 - **Fix direction:** Add a localized `title` template to the `[locale]` layout metadata (for example `%s · WhitePlate`), and `generateMetadata` per route family (auth, workspace sections, demo) using the existing translation catalogs in both locales.
@@ -97,7 +107,7 @@ Actual:   4.36-4.37:1 (descriptions, labels), 4.47:1 (price on tint)
 - **Workstream:** W6
 - **Location:** `apps/frontend/components/theme/landing-demo.css:58` (`--destructive: oklch(0.577 0.245 27.325)`, which overrides the global `#B91C1C` from `app/globals.css:43`); used by `components/ui/alert.tsx:11` and `components/ui/badge.tsx:13` (`bg-destructive-muted text-destructive`) and by `text-destructive` in `components/storefront/live-checkout.tsx:171`
 - **Evidence:** In the page, the `reset-password` alert "This reset link is invalid or expired…" is `#e7000b` on `#fee2e2` = 3.90:1 at 16 px (axe, all 8 combinations). The sign-in failure alert ("We couldn't complete that request…", reproduced by a submit that failed against the unreachable placeholder database) uses the same component. The checkout quote error "Your total could not be calculated. Please try again." is `#e7000b` on `#f7f8f4` = 4.47:1 at 14 px. The destructive badge on `demo/history` measures 3.9:1. With the global token `#B91C1C`, the same pairs pass. The scoped override is what breaks them.
-- **Impact:** WCAG 1.4.3 (AA). Error messages, the content users most need to read, fall below the minimum on sign-in, password reset and guest checkout.
+- **Impact:** WCAG 1.4.3 (AA). Error messages, the content users most need to read, fall below the minimum on sign-in, password reset and guest checkout. The same scoped override reaches the organization workspace, whose shell root uses `lovable-surface` (`components/workspace/shared/workspace-shell.tsx:94`). Destructive alerts and badges there inherit the same red. This was not measured on live workspace pages, which need the API.
 - **Severity:** Should
 - **Fix direction:** Set the scoped `--destructive` to a value that reaches 4.5:1 on both `--destructive-muted` and the customer and auth backgrounds (the global `#B91C1C` does), and add the scoped surfaces to the contrast validator.
 - **Regression test:** Sketch below
@@ -280,12 +290,12 @@ Expected: buttons "Remove one Soup", "Add one Soup", "Remove one Tart", ...
 Actual:   buttons "−" and "+" on every line
 ```
 
-### A11Y-15 — Selects that change the page as soon as a new value is chosen
+### A11Y-15 — Storefront menu-language select re-renders the menu as soon as a new value is chosen
 
 - **Workstream:** W6
-- **Location:** storefront "Menu language" select (`apps/frontend/components/storefront/live-storefront.tsx:192-212`, `router.replace` in `onChange`; the checkout header has the same pattern in `components/storefront/live-store-actions.tsx:33-38`); workspace "Workspace context" select (`apps/frontend/components/workspace/shared/workspace-shell.tsx:112-116`, `:77-90`, `router.push` in `onChange`)
-- **Evidence:** On the storefront, pressing ArrowDown once on the focused, closed "Menu language" select changed the value and navigated to `?menuLocale=fr`, which re-rendered the whole menu in French. The workspace context select calls `router.push` from `onChange`. In headless Chrome, ArrowDown did not change its value, so the keyboard effect on that select is unverified.
-- **Impact:** Borderline for WCAG 3.2.2 On Input (A). Re-rendering the menu in another language is arguably a change of content rather than of context, so it is recorded as hygiene. Keyboard users browsing the options with the arrow keys still trigger reloads they did not intend. For the workspace select, any change navigates to another workspace.
+- **Location:** storefront "Menu language" select (`apps/frontend/components/storefront/live-storefront.tsx:192-212`, `router.replace` in `onChange`; the checkout header has the same pattern in `components/storefront/live-store-actions.tsx:33-38`)
+- **Evidence:** On the storefront, pressing ArrowDown once on the focused, closed "Menu language" select changed the value and navigated to `?menuLocale=fr`, which re-rendered the whole menu in French.
+- **Impact:** Borderline for WCAG 3.2.2 On Input (A). The guest stays on the same page and the same menu, now in another language. That is arguably a change of content rather than of context, so it is recorded as hygiene. Keyboard users browsing the options with the arrow keys still trigger reloads they did not intend.
 - **Severity:** Could
 - **Fix direction:** Apply the change on an explicit confirmation (a button, or a menu-button pattern instead of a native select), or announce the behaviour in the label.
 - **Regression test:** None
@@ -306,7 +316,7 @@ Actual:   buttons "−" and "+" on every line
 
 - **Workstream:** W6
 - **Location:** `apps/frontend/components/orders/order-kanban.tsx:187-192` (lane count `Badge` with `aria-label` "{count} loaded orders"); `apps/frontend/components/orders/order-ticket.tsx:177-198` (elapsed and pickup timer `Badge`s with `aria-label`); `components/ui/badge.tsx` renders a `span` with no role
-- **Evidence:** axe "needs review" `aria-prohibited-attr` reported 7 nodes per kanban run. The accessibility snapshot shows the lane count as bare text `"1"` and the timer as `timer: 00:00`. The labels "1 loaded order" and "Elapsed 00:00" are not exposed, because a name is prohibited on a generic `span`.
+- **Evidence:** axe "needs review" `aria-prohibited-attr` reported 7 nodes per kanban run. The same pattern, with redundant labels only, appears on the landing theme preview (3 `div`s) and the establishment "Opening hours" `div` (see Scope and method). The accessibility snapshot shows the lane count as bare text `"1"` and the timer as `timer: 00:00`. The labels "1 loaded order" and "Elapsed 00:00" are not exposed, because a name is prohibited on a generic `span`.
 - **Impact:** Kitchen screen-reader users hear unexplained numbers. This is hygiene under WCAG 1.3.1. The headings and visible text still give partial context.
 - **Severity:** Could
 - **Fix direction:** Put the label text in visually hidden text inside the badge, or give the badge an appropriate role (`role="status"` is not appropriate here).
@@ -324,6 +334,23 @@ Actual:   buttons "−" and "+" on every line
 - **Regression test:** None
 - **Status:** Suspected
 
+### A11Y-19 — Workspace context select navigates to another workspace on change
+
+- **Workstream:** W6
+- **Location:** `apps/frontend/components/workspace/shared/workspace-shell.tsx:112-116` (native "Workspace context" select, `onChange={(event) => changeContext(event.target.value)}`) and `:77-90` (`changeContext` calls `router.push` to the selected restaurant or organization)
+- **Evidence:** Source: every value change immediately navigates to another workspace, with no confirmation and no warning in the label. Chrome on Windows usually commits a closed native select's value on ArrowUp or ArrowDown, and so does the storefront select in this run (A11Y-15). In this headless run, though, ArrowDown on the workspace select left its value at `""` and the URL unchanged. Only one organization and one restaurant exist in the fixture, so the keyboard behaviour is not reproduced.
+- **Impact:** WCAG 3.2.2 On Input (A), failure F37, if arrow keys commit the value. A keyboard owner or manager looking through the options would be taken to another restaurant's or organization's workspace on the first arrow press, losing the current page and any unsaved draft. The page can still be used through the native picker (Alt+ArrowDown, then Enter), so this is not a Blocker.
+- **Severity:** Should
+- **Fix direction:** Navigate only on explicit confirmation (a "Go" button, or a menu-button or listbox pattern that commits on Enter), or replace the select with a list of links.
+- **Regression test:** Sketch below
+- **Status:** Suspected
+
+```text
+Windows Chrome, headed, workspace with two or more restaurants: focus "Workspace context", press ArrowDown
+Expected: no navigation until the user confirms the choice
+Actual (source): onChange → router.push on the first value change
+```
+
 ## Checked, no finding
 
 - `html[lang]` matches the URL locale on every page tested (192/192 axe runs; `apps/frontend/app/[locale]/layout.tsx:31`). Kanban tickets mark menu-language parts (`components/orders/order-ticket.tsx:112`).
@@ -340,7 +367,12 @@ Actual:   buttons "−" and "+" on every line
 - Focus not obscured (2.4.11): at 320 × 640, no keyboard focus stop was fully covered on the storefront, kanban, builder, establishment or demo checkout pages.
 - Non-text contrast of inputs (1.4.11): auth and establishment field borders are 18.13:1 against their backgrounds. Exception: A11Y-02's menu highlight.
 - Labels (3.3.2, 4.1.2) on the real-product fixtures: no unlabeled input, select or textarea in the builder product editor, establishment form, auth forms or checkout. The discount code field is labelled with `aria-label` and a placeholder.
-- Keyboard operability (2.1.1, 2.1.2): the guest journey up to the disabled "Place order", kanban status moves, and builder tabs, dialogs, menus and editor are all keyboard-operable, with no traps (Tab cycles back to the top). No single-character shortcuts exist (2.1.4); the only key handlers are Escape and arrow keys.
+- Keyboard operability (2.1.1, 2.1.2): the guest journey up to the disabled "Place order", kanban status moves, and builder tabs, dialogs, menus and editor are all keyboard-operable, with no traps (Tab cycles back to the top). No single-character shortcuts exist (2.1.4). Every `onKeyDown` handler in `components` and `hooks` is scoped to a focused control and reacts only to non-character keys:
+  - Escape: `marketing-header.tsx:31`, `menu-builder-product.tsx:85`, `use-order-drag.ts:34`;
+  - arrows: the builder, option-group and photo-gallery handlers;
+  - Home and End: the Studio tabs, `studio/page/sections/section-02.tsx:22-26`;
+  - Backspace: `order-email-template-field.tsx:185`;
+  - Enter, in two handlers: `menu-language-settings-form.tsx:154` and `order-email-template-field.tsx:177`.
 - Dark theme: not applicable at runtime. Light and dark `colorScheme` runs gave identical axe results because the runtime forces light (`layout.tsx:31`; `docs/design-system/README.md:7`).
 - Reduced motion: the only perpetual animation on the landing page is a small decorative dot gated by `motion-safe:animate-pulse` (`components/marketing/landing-hero.tsx:23`). Global `prefers-reduced-motion` rules exist (`app/globals.css:248`, `components/theme/landing-demo.css:396`, `:559`).
 - No audio or video in `apps/frontend/components` (`<video`, `<audio`, YouTube or Vimeo: 0 matches).
@@ -353,6 +385,7 @@ Actual:   buttons "−" and "+" on every line
 - **Real zoom and OS settings.** Browser text-size settings, OS text scaling, Windows forced colours and high-contrast mode were not exercised. Text resize was emulated by root font size and zoom by a 640 CSS px viewport.
 - **Touch.** No touch-device or long-press testing. The kanban touch drag path (`use-order-drag.ts`) was not exercised.
 - **Navigation-dependent criteria.** 3.2.6 Consistent Help and 2.4.5 Multiple Ways depend on real navigation and establishment data, and were not assessed.
+- **axe needs-review contrast.** axe left 1,004 `color-contrast` nodes as "needs review" over 60 runs, all on the landing and demo pages; it cannot decide on text over images, gradients or overlapping layers. They were not triaged one by one. A11Y-13 and A11Y-03 already record the confirmed contrast failures on those renderers, and a manual pass over the remaining nodes is left for the remediation of A11Y-13.
 - **Lighthouse** not run (install not approved). Hosted pages were not probed for W6.
 - **Locales.** Keyboard and focus runs were made in `en`. `fr` was covered by the axe sweep, the language probe and the `fr` copies of every page, and none of the focus findings depends on locale.
 
@@ -405,7 +438,7 @@ ASVS 4.0.3 is not applicable to W6, which is the WCAG 2.2 accessibility workstre
 | 3.1.1 Language of Page | A | Pass |
 | 3.1.2 Language of Parts | AA | Fail (A11Y-06) |
 | 3.2.1 On Focus | A | Pass |
-| 3.2.2 On Input | A | Pass (borderline, A11Y-15) |
+| 3.2.2 On Input | A | Fail suspected (A11Y-19, workspace context select); Pass (borderline) for the storefront select only (A11Y-15) |
 | 3.2.3 Consistent Navigation | AA | Pass |
 | 3.2.4 Consistent Identification | AA | Fail (A11Y-14) |
 | 3.2.6 Consistent Help | A | Not tested |
