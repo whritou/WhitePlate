@@ -36,7 +36,7 @@ Order: the Blocker batch first, then security, accessibility, performance, data 
 - Findings: SEC-06 (Should), CODE-02 (Should, token-confinement part; the auth-configuration tests are B04), SEC-05 (Could)
 - Highest severity: Should
 - Size: M
-- Depends on: none. Complements B10 (CSP).
+- Depends on: B03 for the real-JwtBearer API test harness (AUTH-02). B02 and B03 may land in either order; whichever lands first builds the harness. Complements B10 (CSP).
 - Design: written spec (hub-only token audience and lifetime; updates ADR 0002, `tenancy-and-security.md` and `frontend-conventions.md`)
 - Acceptance criteria:
   - The Better Auth `jwt` plugin sets `disableSettingJwtHeader: true`. `GET /api/auth/get-session` returns 200 without a `set-auth-jwt` header (SEC-06 sketch).
@@ -50,7 +50,7 @@ Order: the Blocker batch first, then security, accessibility, performance, data 
 - Findings: AUTH-02 (Should), AUTH-01 (Should)
 - Highest severity: Should
 - Size: S
-- Depends on: B02 (for the hub audience), D5 (post-sign-out token window)
+- Depends on: B02 for the hub audience (shares the real-JwtBearer test harness with B02; whichever lands first builds it), D5 (post-sign-out token window)
 - Design: in-chat
 - Acceptance criteria:
   - `TokenValidationParameters` are explicit: `ValidAlgorithms = ["RS256"]`, issuer, audience and lifetime validation on, `RequireExpirationTime`, `RequireSignedTokens`, `ClockSkew` of 30 to 60 seconds.
@@ -115,7 +115,7 @@ Order: the Blocker batch first, then security, accessibility, performance, data 
 
 ## B08 — Public rate limiting and trusted client address
 
-- Findings: PUB-01 (Should), CODE-05 (Should), PUB-06 (Could), PUB-07 (Could)
+- Findings: PUB-01 (Should), CODE-05 (Should, rate-limit and checkout parts; the upload test is B13), PUB-06 (Could), PUB-07 (Could)
 - Highest severity: Should
 - Size: L
 - Depends on: D7 for PUB-06's withdrawal policy (the rate-limit part does not wait for it)
@@ -180,7 +180,7 @@ Order: the Blocker batch first, then security, accessibility, performance, data 
 
 ## B13 — API production configuration hardening
 
-- Findings: HOST-04 (Should), CFG-06 (Could), DATA-03 (Could), HOST-08 (Could)
+- Findings: HOST-04 (Should), CODE-05 (Should, upload body-limit test part; the rate-limit part is B08), CFG-06 (Could), DATA-03 (Could), HOST-08 (Could)
 - Highest severity: Should
 - Size: M
 - Depends on: B01
@@ -189,6 +189,7 @@ Order: the Blocker batch first, then security, accessibility, performance, data 
   - `Swagger__Enabled` is false or removed in the Production resource; `/openapi/v1.json` and `/swagger` return 404 problem+json once the API is healthy (HOST-04 sketch).
   - Production start-up fails, listing the missing settings, when `StripeConnect:ActiveMode` is unset, `Tenancy:BaseDomain` is `localhost`, the connection string is missing or lacks `SSL Mode=VerifyFull`/`VerifyCA`, or a tracking or analytics key is missing; `auth.ts` requires `DATABASE_SSL_CA` or `sslmode=verify-full` in production (CFG-06 sketch).
   - An unauthenticated upload returns 401 without the body being read; authenticated JSON endpoints have explicit `[RequestSizeLimit]` values (DATA-03 sketch).
+  - An oversize upload test runs with and without credentials: 401 without credentials before the body is read, 413 with credentials (CODE-05 upload part, DATA-03).
   - The API moves to an owned domain, with `API_BASE_URL`, `PUBLIC_API_BASE_URL` and CORS updated, or certificate expiry is monitored until then (HOST-08).
 
 ## B14 — Stripe Connect tests and callback binding
@@ -407,6 +408,7 @@ Each decision becomes a Backlog card. A batch that depends on one does not start
 | D10 | Breached-password check: external k-anonymity egress (Have I Been Pwned) or a local list | AUTH-03 | B04 (AUTH-03 part) |
 | D11 | Catalog drafts: per-entity concurrency tokens or recorded last-writer-wins | DATA-05 | B16 (DATA-05 part) |
 | D12 | `<img>` versus `next/image` per area | CODE-11 | B28 (CODE-11 part) |
+| D13 | Accept Partial coverage to close the audit, or schedule the blocked runtime checks (W1-W6, W8, W9) after B01 and the Neon `test` migrations. The audit spec closes the umbrella card only when every workstream is Covered or Not run; eight of nine are Partial | Coverage table in [README.md](README.md#coverage) | Umbrella card closure |
 
 ## Kanban cards (to create)
 
@@ -426,7 +428,7 @@ Not created yet: the GitHub token lacks the `project` scope, so the cards could 
 | B10 Security response headers | Backlog | HOST-03, CFG-05, HOST-07 |
 | B11 Database network exposure | Backlog | HOST-02, HOST-09 |
 | B12 Off-host backups and restore test | Backlog | DATA-07 |
-| B13 API production configuration hardening | Backlog | HOST-04, CFG-06, DATA-03, HOST-08 |
+| B13 API production configuration hardening | Backlog | HOST-04, CODE-05, CFG-06, DATA-03, HOST-08 |
 | B14 Stripe Connect tests and callback binding | Backlog | CODE-04, SEC-10, PUB-05 |
 | B15 BFF input and origin guards | Backlog | CODE-03, SEC-07, CODE-09 |
 | B16 Catalog publication consistency and PostgreSQL tests | Backlog | CODE-06, DATA-04, PUB-02, DATA-05 |
@@ -454,5 +456,6 @@ Not created yet: the GitHub token lacks the `project` scope, so the cards could 
 | Decision D10: breached-password check | Backlog | AUTH-03 |
 | Decision D11: catalog draft concurrency | Backlog | DATA-05 |
 | Decision D12: `<img>` versus `next/image` | Backlog | CODE-11 |
+| Decision D13: accept Partial coverage or schedule blocked runtime checks | Backlog | Coverage (W1-W6, W8, W9 Partial) |
 
-The umbrella audit card, once created, records the verdict, coverage gaps and verification results from [README.md](README.md) and moves to `In review` with the pull request.
+The umbrella audit card, once created, records the verdict, coverage gaps and verification results from [README.md](README.md) and stays open pending D13. It moves to `In review` with the pull request.

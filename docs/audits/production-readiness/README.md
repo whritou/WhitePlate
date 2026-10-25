@@ -23,7 +23,7 @@ Path to `Ready with conditions`: resolve HOST-01 under batch [B01](remediation-b
 9. B17 to B21: the 15 WCAG 2.2 AA failures (A11Y-01 to A11Y-14, A11Y-19).
 10. B14, B15, B16, B22 and B23: Stripe Connect, BFF and PostgreSQL test gaps, and the guest-path performance problems (CODE-03, CODE-04, CODE-06, PERF-01, PERF-03).
 
-Could findings are not conditions. The coverage gaps below limit the verdict: hosted API behaviour, PostgreSQL-specific behaviour and API-backed pages were not exercised at runtime, so those checks must be repeated once B01 holds and Neon `test` is migrated.
+Could findings are not conditions, with one exception: HOST-05 (Could) is part of condition 1 because recording the deployed SHAs is how B01's recovery is verified. The coverage gaps below limit the verdict: hosted API behaviour, PostgreSQL-specific behaviour and API-backed pages were not exercised at runtime, so those checks must be repeated once B01 holds and Neon `test` is migrated.
 
 ## Coverage
 
@@ -37,7 +37,7 @@ All nine workstreams ran. The audited source is `origin/main` `55f31a5`, which h
 | W4 | Partial | SQLite test host only; production migration and backup state from documentation; no `dotnet-ef`; no real object storage |
 | W5 | Partial | `npm audit` output from the automated sweep reused (lockfile unchanged); API headers and CORS not observed hosted (HOST-01); gitleaks and Semgrep not run (install not approved) |
 | W6 | Partial | Dev fixtures, demo and public pages swept; API-backed workspace pages, order placement, receipt, live tracking and the opening-hours editor not run; no screen reader, real zoom or touch testing |
-| W7 | Covered | Test-gap matrix built by negative search over both suites; no coverage tooling exists (CODE-14); Playwright specs listed but not run |
+| W7 | Covered | Test-gap matrix for the W1-W4 controls built by negative search over both suites; no coverage tooling exists (CODE-14). Not covered by W7 itself: W6 findings and tests were excluded (W6 was in progress), test gaps behind W5, W8 and W9 findings were not mapped, and the Playwright specs were listed but not read or run |
 | W8 | Partial | API unavailable (503), TLS interception on the audit workstation, ZAP not run |
 | W9 | Partial | Lighthouse not approved; no photo-bearing menu; no PostgreSQL plans or hosted timings |
 
@@ -161,14 +161,14 @@ By severity and status:
 | Should | 38 | 5 | Suspected: DATA-07, CFG-02, A11Y-19, HOST-04, HOST-06 |
 | Could | 38 | 9 | Suspected: SEC-05, AUTH-07, PUB-05, A11Y-18, HOST-05, HOST-09, PERF-05, PERF-07, PERF-08 |
 
-Every Blocker and Should finding is in a fix batch in [remediation-backlog.md](remediation-backlog.md) (28 batches, 12 owner decisions). Two Could findings wait for an owner decision and are listed there as unbatched.
+Every Blocker and Should finding is in a fix batch in [remediation-backlog.md](remediation-backlog.md) (28 batches, 13 owner decisions). Two Could findings wait for an owner decision and are listed there as unbatched.
 
 ## Owner actions
 
-1. Recover the production API (HOST-01) with the checks in its fix direction, after applying and verifying the three pending production migrations (DATA-01). Do not redeploy `main` before the schema matches.
+1. Recover the production API (HOST-01) with the checks in its fix direction, after applying and verifying the up to three pending production migrations (confirm with `__EFMigrationsHistory`; DATA-01, DATA-02). Do not redeploy `main` before the schema matches.
 2. Apply the 13 pending migrations to Neon `test` before the next acceptance run, so the blocked runtime probes (W1-W4, W6, W9) can be repeated.
 3. Grant the GitHub token the `project` scope so the cards in [Kanban cards (to create)](remediation-backlog.md#kanban-cards-to-create) and the umbrella card can be created.
-4. Record decisions D1-D12 in [Owner decisions](remediation-backlog.md#owner-decisions), starting with D1 (session lifetime, AUTH-04), D2 (photo caching versus ADR 0008, PERF-02), D3 (storefront name reservation, SEC-04) and D4 (Vercel-to-PostgreSQL network path, HOST-02).
+4. Record decisions D1-D13 in [Owner decisions](remediation-backlog.md#owner-decisions), starting with D1 (session lifetime, AUTH-04), D2 (photo caching versus ADR 0008, PERF-02), D3 (storefront name reservation, SEC-04) and D4 (Vercel-to-PostgreSQL network path, HOST-02).
 
 ## Documentation corrections
 
@@ -205,6 +205,8 @@ Run on 2026-10-25 from the repository root for the remediation-backlog and verdi
 | `py -3 docs/audits/production-readiness/verify.py` | Pass: `OK` (finding format, unique IDs, W1 matrix against the enumerated surface, README coverage table, and every Blocker and Should ID present in `remediation-backlog.md`) |
 | `py -3 docs/design-system/verify.py` | Pass: 119 contrast pairs across light and dark, CSS and token parity, palette parity, 10 documentation link scans |
 
+A citation-stability check compared every `file:line` citation (including `(lines N and M)` forms) in the audit files and in the corrected documents against the cited file at `0cf4121`: 164 cited lines checked, 0 mismatched, ignoring only the inline "Audit 2026-10-25" notes. Corrections are inline notes or a section at the end of a file, so no cited line moved.
+
 A relative-link check over the files changed by this task found every new link and anchor resolvable. It also found three anchors that were already broken before this change and are left as they are: `api/api-contracts.md#orders-and-history` (from `docs/README.md` and `database-schema.md`) and `../audits/establishment-settings.md#legal-profile-rollout--2026-10-12` (from `api-contracts.md`).
 
 Not done in this task: kanban cards (GitHub `project` scope not granted) and the push and pull request.
@@ -214,6 +216,6 @@ Not done in this task: kanban cards (GitHub `project` scope not granted) and the
 - Spec: [production-readiness audit design](../../superpowers/specs/2026-10-25-production-readiness-audit-design.md)
 - Plan: [production-readiness audit plan](../../superpowers/plans/2026-10-25-production-readiness-audit.md)
 - Remediation backlog: [remediation-backlog.md](remediation-backlog.md)
-- Kanban umbrella card: pending (gh project scope not yet granted); batch and decision cards are listed in [Kanban cards (to create)](remediation-backlog.md#kanban-cards-to-create)
+- Kanban umbrella card: pending (gh project scope not yet granted). Once created, it stays open pending decision D13: the audit spec closes it only when every workstream is Covered or Not run, and eight of nine are Partial; batch and decision cards are listed in [Kanban cards (to create)](remediation-backlog.md#kanban-cards-to-create)
 - Documentation index entry: [docs/README.md](../../README.md)
 - Audited code: origin/main 55f31a5 (2026-10-19); local main 7e5b2e3 was 178 commits behind; a fresh git fetch failed on this workstation (TLS interception), so origin may be newer
