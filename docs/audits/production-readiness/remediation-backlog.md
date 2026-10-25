@@ -19,10 +19,10 @@ Order: the Blocker batch first, then security, accessibility, performance, data 
 - Findings: HOST-01 (Blocker), DATA-01 (Should), HOST-06 (Should), CODE-06 (Should, readiness part only; the PostgreSQL stage is B16), HOST-05 (Could), DATA-02 (Could)
 - Highest severity: Blocker
 - Size: M
-- Depends on: none. Within the batch, DATA-01 is a hard precondition of HOST-01 recovery: apply and verify the pending migrations before, or together with, any redeploy of `main`.
+- Depends on: none. Within the batch, DATA-01 sets the HOST-01 recovery order. Diagnose first (HOST-01 owner checks 1-4 are read-only). If recovery restarts the existing build, do it without applying these migrations. Then, in one maintenance window: take a fresh off-host backup, apply the pending migrations, and deploy the matching `main` SHA (record it, HOST-05). The role migrations are not backward-compatible with the older build (DATA-01).
 - Design: in-chat
 - Acceptance criteria:
-  - Production `__EFMigrationsHistory` is read (read-only) and the result is recorded in `docs/deployment/coolify.md`. The missing migrations (documented as `20261017222900_OrganizationRoleGrants`, `20261018103516_CustomOrganizationRoles`, `20261019082708_OrderCustomerDetails`; possibly fewer, see DATA-02) are applied with the existing guarded procedure, after a fresh backup, and the rollout is recorded.
+  - Production `__EFMigrationsHistory` is read (read-only) and the result is recorded in `docs/deployment/coolify.md`. The missing migrations (documented as `20261017222900_OrganizationRoleGrants`, `20261018103516_CustomOrganizationRoles`, `20261019082708_OrderCustomerDetails`; possibly fewer, see DATA-02) are applied with the existing guarded procedure in one maintenance window, after a fresh off-host backup and together with the deploy of the matching `main` SHA, never under the older build; the rollout is recorded.
   - The owner-side Coolify checks from HOST-01's fix direction are run in order (resource status, container health and logs, mounted CA readability, internal `/health/ready`), the cause is recorded, and TLS verification is not weakened.
   - Externally, `/health/live` and `/health/ready` return 200 `Healthy` and anonymous `GET /api/v1/organizations` returns 401 problem+json with `x-request-id` (HOST-01 sketch).
   - `/health/ready` reports Unhealthy while any migration is pending (`Database.GetPendingMigrationsAsync()` non-empty, or a pinned latest migration ID). An API test proves it with a database whose history lacks the latest migration (DATA-01 and CODE-06 sketches).
@@ -36,7 +36,7 @@ Order: the Blocker batch first, then security, accessibility, performance, data 
 - Findings: SEC-06 (Should), CODE-02 (Should, token-confinement part; the auth-configuration tests are B04), SEC-05 (Could)
 - Highest severity: Should
 - Size: M
-- Depends on: B03 for the real-JwtBearer API test harness (AUTH-02). B02 and B03 may land in either order; whichever lands first builds the harness. Complements B10 (CSP).
+- Depends on: no ordering; shared real-JwtBearer test harness with B03 (whichever lands first builds it). Complements B10 (CSP).
 - Design: written spec (hub-only token audience and lifetime; updates ADR 0002, `tenancy-and-security.md` and `frontend-conventions.md`)
 - Acceptance criteria:
   - The Better Auth `jwt` plugin sets `disableSettingJwtHeader: true`. `GET /api/auth/get-session` returns 200 without a `set-auth-jwt` header (SEC-06 sketch).
@@ -50,7 +50,7 @@ Order: the Blocker batch first, then security, accessibility, performance, data 
 - Findings: AUTH-02 (Should), AUTH-01 (Should)
 - Highest severity: Should
 - Size: S
-- Depends on: B02 for the hub audience (shares the real-JwtBearer test harness with B02; whichever lands first builds it), D5 (post-sign-out token window)
+- Depends on: D5 (post-sign-out token window). No ordering with B02; shared real-JwtBearer test harness (whichever lands first builds it)
 - Design: in-chat
 - Acceptance criteria:
   - `TokenValidationParameters` are explicit: `ValidAlgorithms = ["RS256"]`, issuer, audience and lifetime validation on, `RequireExpirationTime`, `RequireSignedTokens`, `ClockSkew` of 30 to 60 seconds.
@@ -380,6 +380,7 @@ Order: the Blocker batch first, then security, accessibility, performance, data 
   - The `<img>` decision is recorded per area and lint runs with an agreed `--max-warnings` (CODE-11).
   - `AGENTS.md:37` and `docs/documentation-review.md` no longer ask contributors to report the resolved lint failure, and the weather-sample test file is renamed to `OpenApiAndHostingTests` (CODE-12). This audit added a resolution note to `documentation-review.md`; `AGENTS.md` is outside the audit's docs-only scope.
   - Catalog history returns an actor display name and no `actorSubject` or `actorIssuer`; a former member shows null (CODE-13 sketch).
+  - Audit tooling, needed before the D13 and B01 re-runs reuse it: `docs/audits/production-readiness/verify.py` `main` fails when no W1 matrix heading is found, scans multi-line attributes, does not collapse overloaded actions into one row, and flags matrix rows that no longer match the enumerated surface.
 
 ## Unbatched Could findings
 
@@ -408,7 +409,7 @@ Each decision becomes a Backlog card. A batch that depends on one does not start
 | D10 | Breached-password check: external k-anonymity egress (Have I Been Pwned) or a local list | AUTH-03 | B04 (AUTH-03 part) |
 | D11 | Catalog drafts: per-entity concurrency tokens or recorded last-writer-wins | DATA-05 | B16 (DATA-05 part) |
 | D12 | `<img>` versus `next/image` per area | CODE-11 | B28 (CODE-11 part) |
-| D13 | Accept Partial coverage to close the audit, or schedule the blocked runtime checks (W1-W6, W8, W9) after B01 and the Neon `test` migrations. The audit spec closes the umbrella card only when every workstream is Covered or Not run; eight of nine are Partial | Coverage table in [README.md](README.md#coverage) | Umbrella card closure |
+| D13 | Whether Partial coverage closes the audit card, or the card stays open until the remaining blocked runtime checks (W1-W6, W8, W9) run after B01 and the Neon `test` migrations. The audit spec closes the umbrella card only when every workstream is Covered or Not run; eight of nine are Partial. D13 does not decide whether the re-run is needed: the W1, W3 and W6 PostgreSQL and order-flow probes named in the README verdict are required before real tenants are onboarded | Coverage table in [README.md](README.md#coverage) | Umbrella card closure |
 
 ## Kanban cards (to create)
 
@@ -456,6 +457,6 @@ Not created yet: the GitHub token lacks the `project` scope, so the cards could 
 | Decision D10: breached-password check | Backlog | AUTH-03 |
 | Decision D11: catalog draft concurrency | Backlog | DATA-05 |
 | Decision D12: `<img>` versus `next/image` | Backlog | CODE-11 |
-| Decision D13: accept Partial coverage or schedule blocked runtime checks | Backlog | Coverage (W1-W6, W8, W9 Partial) |
+| Decision D13: whether Partial coverage closes the audit card | Backlog | Coverage (W1-W6, W8, W9 Partial) |
 
 The umbrella audit card, once created, records the verdict, coverage gaps and verification results from [README.md](README.md) and stays open pending D13. It moves to `In review` with the pull request.

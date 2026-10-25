@@ -6,11 +6,11 @@ Docs-only audit of WhitePlate across workstreams W1-W9. Findings live in the per
 
 **Not ready.**
 
-Rule (audit spec): `Not ready` while any Confirmed Blocker is unfixed; `Ready with conditions` when only Should and Could findings, or Suspected Blockers, remain; otherwise `Ready`.
+Rule (audit plan, Task 14 step 2): `Not ready` while any Confirmed Blocker is unfixed; `Ready with conditions` when only Should and Could findings, or Suspected Blockers, remain; otherwise `Ready`. HOST-01 is a Blocker by controller ruling (a total production outage of the core journey), since an outage is not one of the spec's listed Blocker categories.
 
 One Confirmed Blocker is unfixed: HOST-01, the production API returns 503 "no available server" on every route ([w8-hosted-posture.md](w8-hosted-posture.md)). Nothing else reached Blocker: no cross-tenant access, authentication bypass, price tampering, secret exposure or level A failure on a core journey was found.
 
-Path to `Ready with conditions`: resolve HOST-01 under batch [B01](remediation-backlog.md#b01--production-api-recovery-and-migration-guardrails). DATA-01 is a hard precondition: apply and verify the pending production migrations before, or together with, any redeploy of `main`, because readiness does not detect a schema that lags the code. Once HOST-01 is resolved, the 43 Should findings become the conditions. The most important, in order:
+Path to `Ready with conditions`: resolve HOST-01 under batch [B01](remediation-backlog.md#b01--production-api-recovery-and-migration-guardrails). Recovery order (DATA-01): Diagnose first (HOST-01 owner checks 1-4 are read-only). If recovery restarts the existing build, do it without applying these migrations. Then, in one maintenance window: take a fresh off-host backup, apply the pending migrations, and deploy the matching `main` SHA (record it, HOST-05). The role migrations are not backward-compatible with the older build, and readiness does not detect a schema that lags the code. Before real tenants are onboarded, the blocked runtime probes must also be re-run once B01 holds and Neon `test` is migrated: W1 cross-tenant, hub and custom-role replay on PostgreSQL, W3 checkout tampering on PostgreSQL, and W6 order placement, receipt and live tracking. This re-run is required whatever is decided under D13, which only settles whether Partial coverage closes the audit card. Once HOST-01 is resolved, the 43 Should findings become the conditions. The most important, in order:
 
 1. B01 completed in full: readiness fails on pending migrations, external health alerting is in place, and deployed SHAs are recorded (DATA-01, HOST-06, HOST-05).
 2. B09: upgrade `next` to 16.4.3 or later and `zod` to 4.6.6 or later (CFG-01, CFG-02). The pinned `next` 16.3.4 has a reachable High advisory and is in range of three Critical ones.
@@ -20,7 +20,7 @@ Path to `Ready with conditions`: resolve HOST-01 under batch [B01](remediation-b
 6. B11, B12 and B13: close the Internet-reachable PostgreSQL port, add off-host backups with a restore test, and disable production OpenAPI (HOST-02, DATA-07, HOST-04).
 7. B10: security headers on the frontend and the API (HOST-03, CFG-05).
 8. B04, B06 and B07: password, session and reset-token policy; membership removal; creation quotas and name reservation (AUTH-03, AUTH-04, AUTH-06, SEC-02, SEC-04), each after its owner decision.
-9. B17 to B21: the 15 WCAG 2.2 AA failures (A11Y-01 to A11Y-14, A11Y-19).
+9. B17 to B21: the 15 WCAG 2.2 A/AA findings (one Suspected) (A11Y-01 to A11Y-14, A11Y-19).
 10. B14, B15, B16, B22 and B23: Stripe Connect, BFF and PostgreSQL test gaps, and the guest-path performance problems (CODE-03, CODE-04, CODE-06, PERF-01, PERF-03).
 
 Could findings are not conditions, with one exception: HOST-05 (Could) is part of condition 1 because recording the deployed SHAs is how B01's recovery is verified. The coverage gaps below limit the verdict: hosted API behaviour, PostgreSQL-specific behaviour and API-backed pages were not exercised at runtime, so those checks must be repeated once B01 holds and Neon `test` is migrated.
@@ -79,7 +79,7 @@ Recorded 2026-10-25 on audited code `55f31a5` (HEAD `0ab8ba7`, branch `docs/prod
 | Secret scan, gitleaks | Not run | Install not approved by owner. Fallback below used instead. |
 | Secret scan, Git-history grep fallback (`7e5b2e3..HEAD`) plus tracked-filename check | Ran | No real secret found. 74 matching added/removed lines in 185 commits, all triaged as placeholder, test fixture, code reference or documentation. History before `7e5b2e3` was scanned earlier with the same method (427 commits, all refs): 215 matches, no real secret. One lead noted below. |
 | Semgrep (`p/csharp`, `p/typescript`, `p/react`, `p/nextjs`, `p/secrets`) | Not run | Install not approved by owner. |
-| axe through Playwright | Not run | Not part of this task (planned for a later task). |
+| axe through Playwright | Ran in W6 | Not part of this sweep; W6 ran it through Playwright (192 runs), see [w6-accessibility.md](w6-accessibility.md). |
 | Lighthouse | Not run | Install not approved by owner. |
 | ZAP passive baseline | Not run | Install not approved by owner. |
 
@@ -165,10 +165,12 @@ Every Blocker and Should finding is in a fix batch in [remediation-backlog.md](r
 
 ## Owner actions
 
-1. Recover the production API (HOST-01) with the checks in its fix direction, after applying and verifying the up to three pending production migrations (confirm with `__EFMigrationsHistory`; DATA-01, DATA-02). Do not redeploy `main` before the schema matches.
+1. Recover the production API (HOST-01). Diagnose first (HOST-01 owner checks 1-4 are read-only). If recovery restarts the existing build, do it without applying these migrations. Then, in one maintenance window: take a fresh off-host backup, apply the pending migrations, and deploy the matching `main` SHA (record it, HOST-05). Confirm the pending set with `__EFMigrationsHistory` first (up to three are documented; DATA-01, DATA-02). The role migrations are not backward-compatible with the older build, so do not apply them under it, and do not redeploy `main` before the schema matches.
 2. Apply the 13 pending migrations to Neon `test` before the next acceptance run, so the blocked runtime probes (W1-W4, W6, W9) can be repeated.
 3. Grant the GitHub token the `project` scope so the cards in [Kanban cards (to create)](remediation-backlog.md#kanban-cards-to-create) and the umbrella card can be created.
 4. Record decisions D1-D13 in [Owner decisions](remediation-backlog.md#owner-decisions), starting with D1 (session lifetime, AUTH-04), D2 (photo caching versus ADR 0008, PERF-02), D3 (storefront name reservation, SEC-04) and D4 (Vercel-to-PostgreSQL network path, HOST-02).
+5. Remove the audit probe accounts from Neon `test`: W1's second `.invalid` account and W2's `w2-probe-*@whiteplate.invalid` accounts (IDs in the ignored `apps/frontend/.acceptance/`).
+6. The main checkout's `apps/frontend/node_modules` predates `origin/main`; run `npm ci` before using the dev server.
 
 ## Documentation corrections
 

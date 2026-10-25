@@ -407,7 +407,7 @@ Actual (source): all 201.
   - Any script that runs on the frontend origin (an XSS or a compromised dependency) can take a bearer token valid for 15 minutes against every protected API route of the signed-in user. It can replay that token off-origin, outside the BFF's Origin and membership prechecks, after the page is closed.
   - The hosted frontend sends no Content-Security-Policy (HOST-03, W8).
   - Since `7e5b2e3`, path-based storefronts render tenant-authored storefront content on the same origin as the staff workspace (`proxy.ts:8-24`), which widens the code that shares that origin.
-  - No XSS was found in W1; the XSS posture is W5.
+  - No XSS was found in W1. W5 checked XSS sinks, link schemes and e-mail encoding in source and found none (`w5-supply-chain-config.md:177`).
   - Severity stays Should under the earlier ruling: a documented control is absent, and the token reaches JavaScript through two paths.
 - **Severity:** Should
 - **Fix direction:**
@@ -668,7 +668,7 @@ Actual (source): connection saved for T with the other account; redirect with st
 
 ## Not covered
 
-- **Runtime API, hub and BFF probes on this base.** The Neon `test` database is at migration `20261014150246_OrderingOperations`. The code needs `20261015171219_TenantThemeDraft` through `20261019082708_OrderCustomerDetails`, and `OrganizationRoleGrants` (read by every permission check), `CatalogPublicationHeads`, `StripeConnect*` and the analytics tables are absent. Applying migrations is a schema change outside the audit's constraints, so no local server was started.
+- **Runtime API, hub and BFF probes on this base.** The Neon `test` database is at migration `20261014150246_OrderingOperations`. The code needs the 13 migrations from `20261014211126_DiscountMinimumAndExpiration` through `20261019082708_OrderCustomerDetails`, and `OrganizationRoleGrants` (read by every permission check), `CatalogPublicationHeads`, `StripeConnect*` and the analytics tables are absent. Applying migrations is a schema change outside the audit's constraints, so no local server was started.
   - All 191 matrix rows rest on source review plus the 372 passing tests.
   - No foreign-tenant, cross-resource, custom-role or hub replay was run against the new permission model.
   - The SEC-08, SEC-09 and SEC-10 sketches are unexecuted.
@@ -679,7 +679,7 @@ Actual (source): connection saved for T with the other account; redirect with st
 - **Server actions over HTTP.** Action IDs are build-specific. All 43 actions were reviewed in source. Next's origin check was read in the installed 16.3.4 source, not exercised on this base.
 - **Multi-instance SignalR, token-expiry closure and reconnection.** These follow the documented single-instance design.
 - **Rate-limit keying.** The checkout, quote and withdrawal limiter keys on `Connection.RemoteIpAddress` (`OrdersController.cs:30`, `:62`; `AnalyticsController.cs:47`). `Program.cs` has no forwarded-headers middleware, and the BFF calls the API server-side. Whether limits are effectively per client or global per tenant behind Traefik and Vercel belongs to W5.
-- **XSS and Content-Security-Policy, which decide how far SEC-06 matters.** W5, with HOST-03 in W8.
+- **XSS and Content-Security-Policy, which decide how far SEC-06 matters.** Covered by W5 in source, no finding (`w5-supply-chain-config.md:177`); no CSP is HOST-03 in W8.
 - **Proxy access-log handling of the hub `access_token` query parameter (SEC-05).** W8; not observable while HOST-01 persists.
 
 ## ASVS / WCAG coverage
