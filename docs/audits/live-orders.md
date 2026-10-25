@@ -35,7 +35,7 @@
 
 ## K3 cancellation and service details
 
-**Status:** Implemented in source on `feat/k3-order-cancellation-details`. The nullable migration is generated but has not been applied to a shared database. API deployment and hosted PostgreSQL/browser/provider acceptance remain open.
+**Status:** Implemented in source on `feat/k3-order-cancellation-details`. The nullable migration is generated but has not been applied to a shared database. *(Audit 2026-10-25: the D5 preflight found this migration applied in Coolify Production as its latest migration (`docs/deployment/coolify.md:7`), with no rollout record; see [DATA-02](production-readiness/w4-input-media-data.md).)* API deployment and hosted PostgreSQL/browser/provider acceptance remain open.
 
 - New cancellations require `CustomerRequest`, `ItemUnavailable`, `RestaurantUnableToFulfill`, `DuplicateOrder`, or `Other`. The reason is saved with the terminal status, closed timestamp, version change and outbox event under the existing owner/manager and `If-Match` rules. Old cancelled rows remain null and show “not recorded.”
 - The ticket action and drag-to-cancel both request the same required reason before calling the server. Dismissing the dialog leaves the order unchanged.
@@ -58,4 +58,4 @@ Focused API tests cover required/invalid reasons and safe list/history email pro
 
 The isolated worktree used an offline install from the existing lockfile with Node 24.19.0 and cached npm 11.4.1. The project asks for npm 11.17.0, which was not cached, so strict engine enforcement was disabled for that temporary install only. No package manifest or lockfile changed; npm reported 0 vulnerabilities. The original checkout's dependency folder was left untouched.
 
-The generated migration `20261017170519_OrderCancellationReason` has not been applied. Production deployment, disposable/shared PostgreSQL migration checks, authenticated real-route browser acceptance, email-provider retries and delivery acceptance, and any guest-payment/refund ledger remain open. The project card is in `In review`; hosted acceptance and the future payment/refund design remain unchecked.
+The generated migration `20261017170519_OrderCancellationReason` has not been applied. *(Audit 2026-10-25: the D5 preflight found this migration applied in Coolify Production as its latest migration (`docs/deployment/coolify.md:7`), with no rollout record; see [DATA-02](production-readiness/w4-input-media-data.md).)* Production deployment, disposable/shared PostgreSQL migration checks, authenticated real-route browser acceptance, email-provider retries and delivery acceptance, and any guest-payment/refund ledger remain open. The project card is in `In review`; hosted acceptance and the future payment/refund design remain unchecked.

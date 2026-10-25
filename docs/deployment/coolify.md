@@ -2,6 +2,8 @@
 
 This is the runbook for the user-approved, single hosted development stack ([decision 0005](../architecture/decisions/0005-coolify-hosting.md)). Runtime credentials belong in Coolify/Vercel settings, never this file, client code or `NEXT_PUBLIC_*` variables. The migration is tracked in [issue #17](https://github.com/whritou/WhitePlate/issues/17).
 
+*Audit 2026-10-25: the production API returned 503 "no available server" (Coolify proxy, no healthy backend) on `/health/live`, `/health/ready` and `/api/v1/organizations` while the Vercel frontend served 200. The cause is not yet identified; see [HOST-01](../audits/production-readiness/w8-hosted-posture.md) for the recovery checks. The source is up to three migrations ahead of the production schema recorded here, and readiness does not detect pending migrations, so apply and verify them before redeploying `main` ([DATA-01](../audits/production-readiness/w4-input-media-data.md)). This runbook has no per-environment migration table and no rollout records for `20261016132000_ThemePublication` and `20261017170519_OrderCancellationReason` ([DATA-02](../audits/production-readiness/w4-input-media-data.md)).*
+
 ## D5 live analytics schema rollout — 2026-10-17
 
 Preflight on Coolify Production resource `whiteplate-postgresql-main` confirmed database `whiteplate`, latest migration `20261017170519_OrderCancellationReason`, two tenants, zero orders, no analytics order columns or tables, and the `whiteplate_api` role. A custom-format backup was created at `/tmp/whiteplate-before-analytics-live-20261017.dump` inside the PostgreSQL container (102,928 bytes); `pg_restore --list` recognized 225 entries. This temporary container-local backup is not an off-host copy or restore test.

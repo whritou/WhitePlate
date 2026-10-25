@@ -1,5 +1,7 @@
 # Documentation review baseline — 2026-09-28
 
+*Audit 2026-10-25: the ESLint failure `contextOrFilename.getFilename is not a function` recorded in the dated run logs below did not reproduce on a clean `npm ci` copy of `55f31a5` (0 errors, 19 warnings). Those entries are historical, not a current failure; see [CODE-12](audits/production-readiness/w7-code-health.md) and the [audit baseline](audits/production-readiness/README.md#baseline).*
+
 ## Custom organization staff roles — 2026-10-18
 
 Branch `feat/staff-role-permissions`, existing GitHub Project task: implement persisted, owner-managed staff roles and permission enforcement across the organization workspace. New organizations receive editable `Manager`, `Kitchen staff`, and `Accountant` defaults. Owners can customize grants, create and rename custom roles, and assign roles to members and invitations. Stable organization-scoped role IDs back server authorization and the frontend hides unavailable pages, tabs, sections, and actions while retaining the established UI style. Existing organizations retain their legacy `Staff` role and assignments. A role cannot be archived while an active member or pending invitation uses it; the synthetic owner role remains protected and has all permissions.

@@ -4,21 +4,42 @@ Docs-only audit of WhitePlate across workstreams W1-W9. Findings live in the per
 
 ## Verdict
 
-Pending
+**Not ready.**
+
+Rule (audit spec): `Not ready` while any Confirmed Blocker is unfixed; `Ready with conditions` when only Should and Could findings, or Suspected Blockers, remain; otherwise `Ready`.
+
+One Confirmed Blocker is unfixed: HOST-01, the production API returns 503 "no available server" on every route ([w8-hosted-posture.md](w8-hosted-posture.md)). Nothing else reached Blocker: no cross-tenant access, authentication bypass, price tampering, secret exposure or level A failure on a core journey was found.
+
+Path to `Ready with conditions`: resolve HOST-01 under batch [B01](remediation-backlog.md#b01--production-api-recovery-and-migration-guardrails). DATA-01 is a hard precondition: apply and verify the pending production migrations before, or together with, any redeploy of `main`, because readiness does not detect a schema that lags the code. Once HOST-01 is resolved, the 43 Should findings become the conditions. The most important, in order:
+
+1. B01 completed in full: readiness fails on pending migrations, external health alerting is in place, and deployed SHAs are recorded (DATA-01, HOST-06, HOST-05).
+2. B09: upgrade `next` to 16.4.3 or later and `zod` to 4.6.6 or later (CFG-01, CFG-02). The pinned `next` 16.3.4 has a reachable High advisory and is in range of three Critical ones.
+3. B02 and B03: stop exposing the general-purpose API token to browser JavaScript, and make JWT validation explicit and tested (SEC-06, AUTH-01, AUTH-02, CODE-02).
+4. B05: enforce the documented restaurant permissions and test every permission key (SEC-08, SEC-09, CODE-01).
+5. B08: per-client checkout and quote rate limiting behind the BFF (PUB-01, CODE-05).
+6. B11, B12 and B13: close the Internet-reachable PostgreSQL port, add off-host backups with a restore test, and disable production OpenAPI (HOST-02, DATA-07, HOST-04).
+7. B10: security headers on the frontend and the API (HOST-03, CFG-05).
+8. B04, B06 and B07: password, session and reset-token policy; membership removal; creation quotas and name reservation (AUTH-03, AUTH-04, AUTH-06, SEC-02, SEC-04), each after its owner decision.
+9. B17 to B21: the 15 WCAG 2.2 AA failures (A11Y-01 to A11Y-14, A11Y-19).
+10. B14, B15, B16, B22 and B23: Stripe Connect, BFF and PostgreSQL test gaps, and the guest-path performance problems (CODE-03, CODE-04, CODE-06, PERF-01, PERF-03).
+
+Could findings are not conditions. The coverage gaps below limit the verdict: hosted API behaviour, PostgreSQL-specific behaviour and API-backed pages were not exercised at runtime, so those checks must be repeated once B01 holds and Neon `test` is migrated.
 
 ## Coverage
 
+All nine workstreams ran. The audited source is `origin/main` `55f31a5`, which holds 40 EF migrations. Production is documented as three migrations behind (possibly fewer, see DATA-02) and Neon `test` is 13 behind, so no runtime probe could use the current schema on a shared database.
+
 | Workstream | Status | Reason |
 | --- | --- | --- |
-| W1 | Not run | Pending |
-| W2 | Not run | Pending |
-| W3 | Not run | Pending |
-| W4 | Not run | Pending |
-| W5 | Not run | Pending |
-| W6 | Not run | Pending |
-| W7 | Not run | Pending |
-| W8 | Partial | API unavailable (503), TLS interception on audit workstation, ZAP not run |
-| W9 | Not run | Pending |
+| W1 | Partial | Source review of all 191 matrix rows plus the 372 passing API tests; runtime cross-tenant, custom-role and hub replay blocked because Neon `test` is 13 migrations behind; Stripe OAuth end to end and hosted checks not run (HOST-01) |
+| W2 | Partial | Invitation runtime probes blocked by the Neon `test` schema; hosted session cookie attributes and rate limiting not observable without a hosted sign-in; live OAuth providers and JWKS rotation not exercised |
+| W3 | Partial | Neon `test` 13 migrations behind, so probes ran in the SQLite test host (no PostgreSQL locking or races); hosted API 503; no Stripe test keys, and no payment flow exists |
+| W4 | Partial | SQLite test host only; production migration and backup state from documentation; no `dotnet-ef`; no real object storage |
+| W5 | Partial | `npm audit` output from the automated sweep reused (lockfile unchanged); API headers and CORS not observed hosted (HOST-01); gitleaks and Semgrep not run (install not approved) |
+| W6 | Partial | Dev fixtures, demo and public pages swept; API-backed workspace pages, order placement, receipt, live tracking and the opening-hours editor not run; no screen reader, real zoom or touch testing |
+| W7 | Covered | Test-gap matrix built by negative search over both suites; no coverage tooling exists (CODE-14); Playwright specs listed but not run |
+| W8 | Partial | API unavailable (503), TLS interception on the audit workstation, ZAP not run |
+| W9 | Partial | Lighthouse not approved; no photo-bearing menu; no PostgreSQL plans or hosted timings |
 
 ## Baseline
 
@@ -117,19 +138,82 @@ Semgrep was not run (install not approved by owner), so there are no static-anal
 
 ## Findings by severity
 
-Interim: Task 14 recomputes this section across all workstreams. Per-workstream finding files are the source of truth. Workstreams written so far:
+Recomputed from the nine finding files with the verifier's parser. The finding files are the source of truth.
 
-| Severity | Count | Findings |
+| Workstream | Blocker | Should | Could | Confirmed | Suspected | Total |
+| --- | --- | --- | --- | --- | --- | --- |
+| [W1 tenant authorization](w1-tenant-authz.md) | 0 | 5 | 5 | 9 | 1 | 10 |
+| [W2 authentication and session](w2-auth-session.md) | 0 | 5 | 2 | 6 | 1 | 7 |
+| [W3 public surface](w3-public-surface.md) | 0 | 1 | 6 | 6 | 1 | 7 |
+| [W4 input, media and data](w4-input-media-data.md) | 0 | 2 | 5 | 6 | 1 | 7 |
+| [W5 supply chain and configuration](w5-supply-chain-config.md) | 0 | 3 | 7 | 9 | 1 | 10 |
+| [W6 accessibility](w6-accessibility.md) | 0 | 15 | 4 | 17 | 2 | 19 |
+| [W7 code health](w7-code-health.md) | 0 | 6 | 8 | 14 | 0 | 14 |
+| [W8 hosted posture](w8-hosted-posture.md) | 1 | 4 | 4 | 5 | 4 | 9 |
+| [W9 performance](w9-performance.md) | 0 | 2 | 6 | 5 | 3 | 8 |
+| **Total** | **1** | **43** | **47** | **77** | **14** | **91** |
+
+By severity and status:
+
+| Severity | Confirmed | Suspected | Findings |
+| --- | --- | --- | --- |
+| Blocker | 1 | 0 | HOST-01 (Confirmed) |
+| Should | 38 | 5 | Suspected: DATA-07, CFG-02, A11Y-19, HOST-04, HOST-06 |
+| Could | 38 | 9 | Suspected: SEC-05, AUTH-07, PUB-05, A11Y-18, HOST-05, HOST-09, PERF-05, PERF-07, PERF-08 |
+
+Every Blocker and Should finding is in a fix batch in [remediation-backlog.md](remediation-backlog.md) (28 batches, 12 owner decisions). Two Could findings wait for an owner decision and are listed there as unbatched.
+
+## Owner actions
+
+1. Recover the production API (HOST-01) with the checks in its fix direction, after applying and verifying the three pending production migrations (DATA-01). Do not redeploy `main` before the schema matches.
+2. Apply the 13 pending migrations to Neon `test` before the next acceptance run, so the blocked runtime probes (W1-W4, W6, W9) can be repeated.
+3. Grant the GitHub token the `project` scope so the cards in [Kanban cards (to create)](remediation-backlog.md#kanban-cards-to-create) and the umbrella card can be created.
+4. Record decisions D1-D12 in [Owner decisions](remediation-backlog.md#owner-decisions), starting with D1 (session lifetime, AUTH-04), D2 (photo caching versus ADR 0008, PERF-02), D3 (storefront name reservation, SEC-04) and D4 (Vercel-to-PostgreSQL network path, HOST-02).
+
+## Documentation corrections
+
+The audit corrected documentation that disagrees with source or with recorded production evidence. Each correction is a dated "Audit 2026-10-25" note next to the stale statement. Design intent is not rewritten, and no fix is claimed.
+
+| Document | Correction | Finding |
 | --- | --- | --- |
-| Blocker | 1 | HOST-01 (Confirmed) |
-| Should | 4 | HOST-02, HOST-03 (Confirmed); HOST-04, HOST-06 (Suspected) |
-| Could | 4 | HOST-07, HOST-08 (Confirmed); HOST-05, HOST-09 (Suspected) |
+| [docs/README.md](../../README.md) | Status paragraph with the verdict and HOST-01; reading-order row for this audit; note that the K3 cancellation-reason migration is applied in production | HOST-01, DATA-01, DATA-02 |
+| [tenancy-and-security.md](../../architecture/tenancy-and-security.md) | "keeps them server-side" is not currently true | SEC-06 |
+| [ADR 0002](../../architecture/decisions/0002-authentication.md) | "Do not expose API tokens to client-side JavaScript" is not currently true; recovery responses reveal account existence by timing | SEC-06, AUTH-05 |
+| [frontend-conventions.md](../../architecture/frontend-conventions.md) | The SignalR token route returns the general-purpose token | SEC-06 |
+| [api-contracts.md](../../api/api-contracts.md) | Analytics permission check; effective checkout rate-limit partition; ThemePublication applied in production | SEC-08, PUB-01, DATA-02 |
+| [database-schema.md](../../database/database-schema.md) | OrderCancellationReason applied in production | DATA-02 |
+| [Backend architecture](../../architecture/WHITEPLATE_BACKEND_ARCHITECTURE.md) | OrderCancellationReason and ThemePublication applied in production | DATA-02 |
+| [Restaurant management backlog](../../planning/restaurant-management-backlog.md) | ThemePublication applied in production | DATA-02 |
+| [Live Orders audit](../live-orders.md) | OrderCancellationReason applied in production (two statements) | DATA-02 |
+| [Coolify/Vercel runbook](../../deployment/coolify.md) | 2026-10-25 outage status, pending migrations, missing rollout records | HOST-01, DATA-01, DATA-02 |
+| [Documentation review](../../documentation-review.md) | The recorded ESLint failure did not reproduce at `55f31a5` | CODE-12 |
 
-Source: `w8-hosted-posture.md`. W1-W7 and W9 are not written yet.
+Checked and left unchanged:
+
+- The S2 opening-hours paragraph in `docs/README.md` already says the migration is applied to production and Neon `test`; no finding contradicts it.
+- `api-contracts.md:22` and `tenancy-and-security.md:3` still call the role migrations unapplied, which matches DATA-01.
+- `AGENTS.md:37` (CODE-12) is outside the audit's docs-only scope and is left to batch B28.
+- Other "source-only" migration statements outside DATA-02's list (for example `api-contracts.md:43`, `database-schema.md:48`, `:56` and `:113`) were not re-verified one by one. B01's per-environment migration table, built from `__EFMigrationsHistory`, is the place to settle them.
+
+## Verification
+
+Run on 2026-10-25 from the repository root for the remediation-backlog and verdict change (Task 14). Documentation only; no product command was re-run.
+
+| Command | Result |
+| --- | --- |
+| `py -3 -m unittest discover -s docs/audits/production-readiness -p "test_*.py"` | Pass: 13 tests, OK |
+| `py -3 docs/audits/production-readiness/verify.py` | Pass: `OK` (finding format, unique IDs, W1 matrix against the enumerated surface, README coverage table, and every Blocker and Should ID present in `remediation-backlog.md`) |
+| `py -3 docs/design-system/verify.py` | Pass: 119 contrast pairs across light and dark, CSS and token parity, palette parity, 10 documentation link scans |
+
+A relative-link check over the files changed by this task found every new link and anchor resolvable. It also found three anchors that were already broken before this change and are left as they are: `api/api-contracts.md#orders-and-history` (from `docs/README.md` and `database-schema.md`) and `../audits/establishment-settings.md#legal-profile-rollout--2026-10-12` (from `api-contracts.md`).
+
+Not done in this task: kanban cards (GitHub `project` scope not granted) and the push and pull request.
 
 ## Links
 
 - Spec: [production-readiness audit design](../../superpowers/specs/2026-10-25-production-readiness-audit-design.md)
 - Plan: [production-readiness audit plan](../../superpowers/plans/2026-10-25-production-readiness-audit.md)
-- Kanban umbrella card: pending (gh project scope not yet granted; created in Task 14)
+- Remediation backlog: [remediation-backlog.md](remediation-backlog.md)
+- Kanban umbrella card: pending (gh project scope not yet granted); batch and decision cards are listed in [Kanban cards (to create)](remediation-backlog.md#kanban-cards-to-create)
+- Documentation index entry: [docs/README.md](../../README.md)
 - Audited code: origin/main 55f31a5 (2026-10-19); local main 7e5b2e3 was 178 commits behind; a fresh git fetch failed on this workstation (TLS interception), so origin may be newer
