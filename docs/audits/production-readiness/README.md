@@ -169,7 +169,7 @@ Every Blocker and Should finding is in a fix batch in [remediation-backlog.md](r
 2. Apply the 13 pending migrations to Neon `test` before the next acceptance run, so the blocked runtime probes (W1-W4, W6, W9) can be repeated.
 3. Grant the GitHub token the `project` scope so the cards in [Kanban cards (to create)](remediation-backlog.md#kanban-cards-to-create) and the umbrella card can be created.
 4. Record decisions D1-D13 in [Owner decisions](remediation-backlog.md#owner-decisions), starting with D1 (session lifetime, AUTH-04), D2 (photo caching versus ADR 0008, PERF-02), D3 (storefront name reservation, SEC-04) and D4 (Vercel-to-PostgreSQL network path, HOST-02).
-5. Remove the audit probe accounts from Neon `test`: W1's second `.invalid` account and W2's `w2-probe-*@whiteplate.invalid` accounts (IDs in the ignored `apps/frontend/.acceptance/`).
+5. Remove the W2 audit probe accounts from Neon `test` (`w2-probe-*@whiteplate.invalid`; IDs in the ignored `apps/frontend/.acceptance/w2-probe-ids.json`). W1 created no accounts; its probe IDs are in `.acceptance/w1-probe-ids.json`.
 6. The main checkout's `apps/frontend/node_modules` predates `origin/main`; run `npm ci` before using the dev server.
 
 ## Documentation corrections
@@ -208,6 +208,8 @@ Run on 2026-10-25 from the repository root for the remediation-backlog and verdi
 | `py -3 docs/design-system/verify.py` | Pass: 119 contrast pairs across light and dark, CSS and token parity, palette parity, 10 documentation link scans |
 
 A citation-stability check compared every `file:line` citation (including `(lines N and M)` forms) in the audit files and in the corrected documents against the cited file at `0cf4121`: 164 cited lines checked, 0 mismatched, ignoring only the inline "Audit 2026-10-25" notes. Corrections are inline notes or a section at the end of a file, so no cited line moved.
+
+Final review corrections (`bdd4aab`), run on 2026-10-25 from the repository root: the unittest suite passed (13 tests, OK), `verify.py` printed `OK`, and `docs/design-system/verify.py` passed (119 contrast pairs, parity, 10 link scans). A citation-stability check of every `coolify.md` and `documentation-review.md` citation in the audit files against `85d832a` checked 53 cited lines (55 citations), 0 mismatched, ignoring only the inline audit notes.
 
 A relative-link check over the files changed by this task found every new link and anchor resolvable. It also found three anchors that were already broken before this change and are left as they are: `api/api-contracts.md#orders-and-history` (from `docs/README.md` and `database-schema.md`) and `../audits/establishment-settings.md#legal-profile-rollout--2026-10-12` (from `api-contracts.md`).
 
