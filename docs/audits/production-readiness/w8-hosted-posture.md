@@ -2,7 +2,7 @@
 
 ## Scope and method
 
-Audit date 2026-10-25, probes between 13:34 and 13:39 UTC, from the owner's Windows workstation. Source baseline is branch tip `58f15b1`, which descends from `7e5b2e3`; see HOST-07 for why that matters here.
+Audit date 2026-10-25, probes between 13:34 and 13:39 UTC, from the owner's Windows workstation. Audited source base is `origin/main` `55f31a5` (2026-10-19).
 
 Origins (owner-provided on 2026-10-25, the only hosts probed):
 
@@ -27,7 +27,7 @@ Probes run (`$FE` is the frontend origin):
 | `GET $FE/fr/organization` and `/en/organization`, signed out | 307 to `/fr/sign-in` and `/en/sign-in`. The 307 body is the app shell with a redirect marker; it contains no organization data. |
 | `GET $FE/en/order/<random uuid>` and `/en/order/not-a-uuid` | 200 with `<meta name="robots" content="noindex, nofollow"/>` and "This tracking link is incomplete" copy (random UUID); 404 (not-a-uuid). No order data. |
 | `GET $FE/en/some-restaurant`, `/en/nonexistent-zz` | 200, `X-Matched-Path: /[locale]/storefront-preview/[restaurantSlug]`, copy "This restaurant menu is temporarily unavailable" (consistent with the API outage). |
-| 11 fixture routes × `en` and `fr` (22 requests): `brand-design-test`, `catalog-design-test`, `design-system-test`, `establishment-design-test`, `live-workspace-test`, `order-history-test`, `orders-kanban-test`, `photo-design-test`, `photo-guest-design-test`, `workspace-toast-test`, `__test__` | All 22 return 404 (`X-Matched-Path: /[locale]/design-system-test` confirms the page's own `notFound()` ran). |
+| 12 fixture routes × `en` and `fr` (24 requests, the `studio-parity-test` pair by `HEAD`): `brand-design-test`, `catalog-design-test`, `design-system-test`, `establishment-design-test`, `live-workspace-test`, `order-history-test`, `orders-kanban-test`, `photo-design-test`, `photo-guest-design-test`, `studio-parity-test`, `workspace-toast-test`, `__test__` | All 24 return 404 (`X-Matched-Path: /[locale]/design-system-test` confirms the page's own `notFound()` ran). |
 | `GET $FE/.well-known/openid-configuration` | 200 JSON with `issuer`, `jwks_uri` and algorithm metadata only. |
 | `GET $FE/api/auth/jwks` | 200; one RSA key with members `alg`, `e`, `kid`, `kty`, `n` only (no private members). |
 | `GET $FE/api/auth/ok`, `/api/auth/get-session`, `/api/auth/token` | 200 `{"ok":true}`; 200 `null` with `Cache-Control: no-store`; 404. |
@@ -59,11 +59,11 @@ Security headers observed on `$FE` HTML responses (`/en`, `/fr`, `/en/sign-in`, 
 ### HOST-01 — Production API returns 503 "no available server" on every route
 
 - **Workstream:** W8
-- **Location:** `$API` (Coolify/Traefik in front of resource `wqyrztj6uyuwlveq75qrl68t`); healthcheck defined at `docs/deployment/coolify.md:172`; `/health/live` mapped with no dependencies at `apps/api/WhitePlate.Api/Program.cs:65`
-- **Evidence:** `curl -sS -D - $API/health/live`, `/health/ready`, `/api/v1/organizations` and an `OPTIONS` preflight all returned `HTTP/1.1 503 Service Unavailable`, body `no available server`, between 13:34:41 and 13:34:44 UTC; `/health/live` and `/health/ready` were still 503 at 13:39 UTC. The controller confirmed the same earlier on 2026-10-25. The responses carry no `x-request-id`, `x-error-code` or problem+json, so the request never reached Kestrel. The organization page renders `Auth.serviceError` ("We couldn't reach WhitePlate"), which the owner reported. The same signature is recorded for 2026-10-10 at `docs/deployment/coolify.md:5-27`. The cause is Suspected only (container failing its `/health/ready` database check so Traefik drops it, or a stopped or crash-looping container); Coolify access is needed to tell which.
+- **Location:** `$API` (Coolify/Traefik in front of resource `wqyrztj6uyuwlveq75qrl68t`); healthcheck defined at `docs/deployment/coolify.md:228`; `/health/live` mapped with no dependencies at `apps/api/WhitePlate.Api/Program.cs:65`
+- **Evidence:** `curl -sS -D - $API/health/live`, `/health/ready`, `/api/v1/organizations` and an `OPTIONS` preflight all returned `HTTP/1.1 503 Service Unavailable`, body `no available server`, between 13:34:41 and 13:34:44 UTC; `/health/live` and `/health/ready` were still 503 at 13:39 UTC. The controller confirmed the same earlier on 2026-10-25. The responses carry no `x-request-id`, `x-error-code` or problem+json, so the request never reached Kestrel. The organization page renders `Auth.serviceError` ("We couldn't reach WhitePlate"), which the owner reported. The same signature is recorded for 2026-10-10 at `docs/deployment/coolify.md:53-75`. The cause is Suspected only (container failing its `/health/ready` database check so Traefik drops it, or a stopped or crash-looping container); Coolify access is needed to tell which.
 - **Impact:** All API-backed behaviour is down in Production: sign-in organization lists, restaurant management, kitchen orders, public menus, checkout and order tracking. Guests cannot place orders; staff cannot see them.
 - **Severity:** Blocker
-- **Fix direction:** Owner-side Coolify checks, in this order. (1) Resource status (Running, Degraded, Exited, Restarting) and whether a deploy or reboot followed the 2026-10-12 rollout. (2) `docker inspect --format '{{json .State.Health}}'` and `docker logs --since 24h` for Npgsql errors: CA permission denied, `pg_hba` rejection, password failure. (3) Readability of the mounted CA (`/etc/ssl/certs/coolify-ca.crt`) as the application user, compared with the host file by fingerprint and inode, because the 2026-10-10 incident was an unreadable mounted CA and the process that rewrote the host inode was never identified (`docs/deployment/coolify.md:27`). (4) Internal `curl http://localhost:8080/health/ready`. (5) After recovery, verify externally: `/health/live` and `/health/ready` return 200 `Healthy` and anonymous `/api/v1/organizations` returns 401. Do not change TLS verification. Prevention is HOST-06.
+- **Fix direction:** Owner-side Coolify checks, in this order. (1) Resource status (Running, Degraded, Exited, Restarting) and whether a deploy or reboot followed the 2026-10-12 rollout. (2) `docker inspect --format '{{json .State.Health}}'` and `docker logs --since 24h` for Npgsql errors: CA permission denied, `pg_hba` rejection, password failure. (3) Readability of the mounted CA (`/etc/ssl/certs/coolify-ca.crt`) as the application user, compared with the host file by fingerprint and inode, because the 2026-10-10 incident was an unreadable mounted CA and the process that rewrote the host inode was never identified (`docs/deployment/coolify.md:75`). (4) Internal `curl http://localhost:8080/health/ready`. (5) After recovery, verify externally: `/health/live` and `/health/ready` return 200 `Healthy` and anonymous `/api/v1/organizations` returns 401. Do not change TLS verification. Prevention is HOST-06.
 - **Regression test:** Sketch below
 - **Status:** Confirmed
 
@@ -76,11 +76,11 @@ Actual:   503 "no available server", no x-request-id (2026-10-25 13:34-13:39 UTC
 ### HOST-02 — Documented PostgreSQL port 5433 is reachable from the Internet
 
 - **Workstream:** W8
-- **Location:** The documented Coolify PostgreSQL host, TCP port 5433 (`docs/deployment/coolify.md:55`, `:182`, `:189`; `docs/documentation-review.md:72`; `apps/frontend/lib/auth-database.test.ts:14`)
-- **Evidence:** `Test-NetConnection <documented Coolify PostgreSQL host> -Port 5433` returned `TcpTestSucceeded=True` from the audit workstation at about 13:37 UTC. This was a TCP connect only; no authentication, query or TLS negotiation was attempted. The docs describe this as a user-approved public proxy (`docs/deployment/coolify.md:189`) and record that plaintext and administrator connections are rejected, that TLS is verified, and that `pg_hba` cannot separate roles by source because the proxy appears as an internal address (`docs/documentation-review.md:72`). `docs/deployment/coolify.md:189` itself warns not to assume a host firewall protects a Docker-published port. The IPv4 address is also embedded in the API's `sslip.io` host name, so it is not a secret.
+- **Location:** The documented Coolify PostgreSQL host, TCP port 5433 (`docs/deployment/coolify.md:111`, `:238`, `:245`; `docs/documentation-review.md:90`; `apps/frontend/lib/auth-database.test.ts:14`)
+- **Evidence:** `Test-NetConnection <documented Coolify PostgreSQL host> -Port 5433` returned `TcpTestSucceeded=True` from the audit workstation at about 13:37 UTC. This was a TCP connect only; no authentication, query or TLS negotiation was attempted. The docs describe this as a user-approved public proxy (`docs/deployment/coolify.md:245`) and record that plaintext and administrator connections are rejected, that TLS is verified, and that `pg_hba` cannot separate roles by source because the proxy appears as an internal address (`docs/documentation-review.md:90`). `docs/deployment/coolify.md:245` itself warns not to assume a host firewall protects a Docker-published port. The IPv4 address is also embedded in the API's `sslip.io` host name, so it is not a secret.
 - **Impact:** Any Internet host can reach the database listener and attempt password guessing, connection exhaustion or pre-authentication protocol exploits against PostgreSQL. Credentials plus TLS are the only barrier. The database holds every tenant's data and the Better Auth tables.
 - **Severity:** Should
-- **Fix direction:** The frontend connects directly from Vercel functions (`apps/frontend/lib/auth-database.ts`), so restricting the port to the API host alone would break sign-in. Options: Vercel Static IPs or Secure Compute and allow-list those; or move the Better Auth database access behind a private channel (tunnel or private network); and meanwhile enforce a host firewall rule for the Docker-published port (for example in the `DOCKER-USER` chain), connection-rate limiting, SCRAM-only logins with long random passwords, and alerting on failed authentications. Remove the literal address from the test fixture and docs, or use a documentation-reserved address.
+- **Fix direction:** The frontend connects directly from Vercel functions (`apps/frontend/lib/auth-database.ts`), so restricting the port to the API host alone would break sign-in. Options: Vercel Static IPs or Secure Compute and allow-list those; or move the Better Auth database access behind a private channel (tunnel or private network); and meanwhile enforce a host firewall rule for the Docker-published port (for example in the `DOCKER-USER` chain), connection-rate limiting, SCRAM-only logins with long random passwords, and alerting on failed authentications. Avoid copying credential URLs that use the real host into fixtures (the address is also in the API host name, so this is hygiene only).
 - **Regression test:** Sketch below
 - **Status:** Confirmed
 
@@ -93,8 +93,8 @@ Actual:   TcpTestSucceeded=True (2026-10-25)
 ### HOST-03 — Frontend sends no CSP, Referrer-Policy, Permissions-Policy, framing or nosniff headers
 
 - **Workstream:** W8
-- **Location:** `apps/frontend/next.config.ts:1-11` and `apps/frontend/proxy.ts:1-7` (no `headers()` or header middleware); hosted `$FE` responses
-- **Evidence:** `curl -sSI $FE/en`, `/fr`, `/en/sign-in` returned only `Strict-Transport-Security` (Vercel default) among the expected security headers. `Content-Security-Policy`, `Referrer-Policy`, `Permissions-Policy`, `X-Frame-Options`/`frame-ancestors` were absent on every page. `X-Content-Type-Options: nosniff` appeared only on `/api/brand-assets`. Neither `next.config.ts` nor `proxy.ts` sets any header, at the audit baseline or at `origin/main` (`55f31a5`).
+- **Location:** `apps/frontend/next.config.ts:1-12` and `apps/frontend/proxy.ts:1-28` (no `headers()` or header middleware); hosted `$FE` responses
+- **Evidence:** `curl -sSI $FE/en`, `/fr`, `/en/sign-in` returned only `Strict-Transport-Security` (Vercel default) among the expected security headers. `Content-Security-Policy`, `Referrer-Policy`, `Permissions-Policy`, `X-Frame-Options`/`frame-ancestors` were absent on every page. `X-Content-Type-Options: nosniff` appeared only on `/api/brand-assets`. Neither `next.config.ts` nor `proxy.ts` sets any header.
 - **Impact:** The sign-in, sign-up, password-reset and workspace pages can be framed by any site (clickjacking). No CSP limits the impact of an injected script. The tracking page (a capability URL) and workspace URLs leak through `Referer`. Browser features are not restricted.
 - **Severity:** Should
 - **Fix direction:** Add a `headers()` block in `next.config.ts` (or middleware) with `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin` (or `no-referrer` on `/[locale]/order/*`), a `Permissions-Policy` that disables unused features, `frame-ancestors 'none'` plus `X-Frame-Options: DENY`, and a CSP (start in report-only; Next.js needs nonces for inline scripts). Keep Vercel's HSTS.
@@ -110,7 +110,7 @@ Actual:   none of the four present; only Strict-Transport-Security
 ### HOST-04 — Production API is configured to publish OpenAPI and Swagger UI
 
 - **Workstream:** W8
-- **Location:** `docs/deployment/coolify.md:161` (`Swagger__Enabled` = `true`); `apps/api/WhitePlate.Api/Program.cs:37-50` (`MapOpenApi` and `UseSwaggerUI` when `Swagger:Enabled`)
+- **Location:** `docs/deployment/coolify.md:217` (`Swagger__Enabled` = `true`); `apps/api/WhitePlate.Api/Program.cs:37-60` (`MapOpenApi` and `UseSwaggerUI` when `Swagger:Enabled`)
 - **Evidence:** The Production runtime variable table sets `Swagger__Enabled` to `true` "for current development verification; reassess before production use". Source maps `/openapi/v1.json` and Swagger UI when that flag is set. The hosted check could not be made: `GET $API/openapi/v1.json` and `/swagger` returned the proxy's 503 (HOST-01). Whether the flag is still set in the live resource is therefore unverified.
 - **Impact:** If still enabled, anyone can download the full contract (every route, DTO and error shape) and use Swagger UI against the production API, which lowers the cost of probing for authorization gaps.
 - **Severity:** Should
@@ -124,32 +124,32 @@ Expected: 404 problem+json
 Actual:   not testable (503 from proxy); documented configuration says enabled
 ```
 
-### HOST-05 — The deployed frontend is far ahead of the audited source baseline
+### HOST-05 — Deployed commits are not recorded or exposed, so "audited code is production code" is an assumption
 
 - **Workstream:** W8
-- **Location:** Hosted `$FE` route `/[locale]/storefront-preview/[restaurantSlug]`; audit baseline `58f15b1`
-- **Evidence:** `GET $FE/en/some-restaurant` returned `X-Matched-Path: /[locale]/storefront-preview/[restaurantSlug]`. That route and its rewrite in `proxy.ts` exist at `origin/main` (`55f31a5`, 2026-10-19) but not at the audit baseline: `git grep storefront-preview 58f15b1` has no match, while `git grep -l storefront-preview 55f31a5 -- apps/frontend` lists the page, order page and several `app/api/public/*` routes. `git rev-list --count 7e5b2e3..origin/main` is 178 commits. The production-incident investigation also treated `7e5b2e3` as the current `main`.
-- **Impact:** Production runs code that W1 to W7 did not review (new public routes, quote and pickup-slot endpoints, storefront preview, legal and settings work). Findings and "no finding" answers in those workstreams describe older code, so a clean audit result would not describe what customers use.
-- **Severity:** Should
-- **Fix direction:** Decide the audit baseline deliberately: fetch `origin/main`, re-base the audit branch, and re-run the enumeration in `verify.py` (new `app/api/public/*` routes will appear as missing matrix rows) before relying on the audit for a release decision. Record the deployed Vercel commit SHA and the deployed API SHA in `docs/deployment/coolify.md`.
+- **Location:** `docs/deployment/coolify.md:116` (Vercel `e13860e`) and the API rollout notes (`0732e79`, `d2738dc`); hosted `$FE` and `$API` responses
+- **Evidence:** The runbook records old deployed SHAs only (Vercel `e13860e`, API `d2738dc` and `0732e79`), none for the current releases. Neither origin exposes a build identifier: the `$FE` responses carry no version or commit header (headers table above) and the API could not be probed (HOST-01). The hosted frontend does serve `X-Matched-Path: /[locale]/storefront-preview/[restaurantSlug]`, which exists in the audited tree, so it is at least recent. This workstation's local `main` was 178 commits behind `origin/main`, and a fetch fails here on the TLS interception noted above (reported by the controller), so the deployed SHA could not be compared with the audited `55f31a5` by any other route. Suspected because the deployed SHAs may well match; that cannot be proven from here.
+- **Impact:** An audit, or an incident investigation, cannot show that the code reviewed is the code customers run. An earlier investigation compared the deployed API with a stale local `main`.
+- **Severity:** Could
+- **Fix direction:** Record the deployed Vercel and API commit SHAs for each release in `docs/deployment/coolify.md`. Expose a build or version identifier, for example an unauthenticated `/version` route or a response header carrying the commit SHA, on both the frontend and the API, so audits and incidents can confirm it.
 - **Regression test:** None
-- **Status:** Confirmed
+- **Status:** Suspected
 
 ### HOST-06 — No health alerting; the same outage signature has recurred
 
 - **Workstream:** W8
-- **Location:** `docs/deployment/coolify.md:5-27` (2026-10-10 incident, cause "has not been identified"); `docs/deployment/coolify.md:172` (Coolify routes on `/health/ready`)
+- **Location:** `docs/deployment/coolify.md:53-75` (2026-10-10 incident, cause "has not been identified"); `docs/deployment/coolify.md:228` (Coolify routes on `/health/ready`)
 - **Evidence:** The 2026-10-10 incident (unreadable mounted CA) and the 2026-10-25 outage (HOST-01) both present as proxy-level `no available server` on every route, including the dependency-free `/health/live`. The documentation lists no external uptime monitor or alert, and the owner discovered the 2026-10-25 outage through the organization page. Traefik drops the container when the readiness check, which includes a database connection, fails. Suspected because the absence of alerting outside the repository cannot be proven from here.
 - **Impact:** Outages are found by users, not by operators, and last until someone looks. A transient database fault takes the whole API out of routing rather than returning a diagnosable API error.
 - **Severity:** Should
-- **Fix direction:** Add an external uptime check on `$API/health/live` and `$API/health/ready` and on `$FE/en/sign-in`, with an alert to the owner. Identify and fix the process that rewrites the mounted CA file (`docs/deployment/coolify.md:27`), or mount the CA as a directory. Consider pointing Coolify's routing healthcheck at `/health/live` and alerting separately on `/health/ready` so a database fault returns an API problem response with a trace ID.
+- **Fix direction:** Add an external uptime check on `$API/health/live` and `$API/health/ready` and on `$FE/en/sign-in`, with an alert to the owner. Identify and fix the process that rewrites the mounted CA file (`docs/deployment/coolify.md:75`), or mount the CA as a directory. Consider pointing Coolify's routing healthcheck at `/health/live` and alerting separately on `/health/ready` so a database fault returns an API problem response with a trace ID.
 - **Regression test:** None
 - **Status:** Suspected
 
 ### HOST-07 — Frontend discloses `X-Powered-By: Next.js`
 
 - **Workstream:** W8
-- **Location:** `apps/frontend/next.config.ts:1-11` (no `poweredByHeader: false`); hosted `$FE` HTML responses
+- **Location:** `apps/frontend/next.config.ts:1-12` (no `poweredByHeader: false`); hosted `$FE` HTML responses
 - **Evidence:** `curl -sSI $FE/fr` returned `X-Powered-By: Next.js`. No version number is disclosed; `Server` is `Vercel`.
 - **Impact:** Names the framework, which helps targeted scanning. Low.
 - **Severity:** Could
@@ -160,7 +160,7 @@ Actual:   not testable (503 from proxy); documented configuration says enabled
 ### HOST-08 — Production API uses a temporary `sslip.io` host name
 
 - **Workstream:** W8
-- **Location:** `docs/deployment/coolify.md:148-151`; `$API`
+- **Location:** `docs/deployment/coolify.md:204-207`; `$API`
 - **Evidence:** The API is served at a `sslip.io` host name whose label embeds the VPS address. The runbook records that Coolify warns HTTPS on this temporary host name "is not recommended because Let's Encrypt may rate-limit certificate validation". The observed leaf is valid `2026-10-05` to `2027-01-03` (90 days; issuer not confirmable, see TLS limitation). `sslip.io` is a shared third-party domain.
 - **Impact:** Certificate renewal depends on shared-domain issuance limits and a third-party DNS service. The next renewal falls near 2027-01-03; a failure would break TLS for the API and so the whole product.
 - **Severity:** Could
@@ -171,7 +171,7 @@ Actual:   not testable (503 from proxy); documented configuration says enabled
 ### HOST-09 — Vercel Preview variables still reference the legacy database
 
 - **Workstream:** W8
-- **Location:** `docs/deployment/coolify.md:60`, `:189`, `:193`
+- **Location:** `docs/deployment/coolify.md:116`, `:245`, `:249`
 - **Evidence:** The runbook says Preview `DATABASE_URL` "still targets the old Render database" (operator-reported) and that "full Preview environment isolation remains to be reviewed". The owner states that no Preview environment is in use today, so the hosted Preview probe is Not applicable. The Vercel Preview variables themselves cannot be read from here; this is documentation only.
 - **Impact:** If the Vercel git integration builds a preview for any branch or pull request, the preview could connect to the legacy database with whatever credentials remain valid, or fail. The documented review of Preview isolation is still open.
 - **Severity:** Could
@@ -182,16 +182,17 @@ Actual:   not testable (503 from proxy); documented configuration says enabled
 ## Checked, no finding
 
 - Security headers, HSTS: Vercel sets `Strict-Transport-Security: max-age=63072000; includeSubDomains; preload` on every frontend response (`$FE/`, `/en`, `/en/sign-in`), and plain HTTP redirects to HTTPS (308).
-- Stack traces and internals: malformed paths, anonymous BFF reads and 404 pages returned no stack trace, framework version, file path or internal host name. `Server` is `Vercel`; the proxy 503 body is a fixed 19-character string.
-- Fixture routes absent in Production: all 22 `*-test` and `__test__` requests returned 404. The page's own gate ran (`apps/frontend/app/[locale]/design-system-test/page.tsx:7`, and the same `notFound()` guard in `brand-design-test/page.tsx:9`, `catalog-design-test/page.tsx:151`, `establishment-design-test/page.tsx:11`, `live-workspace-test/page.tsx:32`, `order-history-test/page.tsx:42`, `orders-kanban-test/page.tsx:12`, `photo-design-test/page.tsx:10`, `photo-guest-design-test/page.tsx:9`, `workspace-toast-test/page.tsx:8`); `__test__` does not exist in source.
+- Stack traces and internals: malformed paths, anonymous BFF reads and 404 pages returned no stack trace, framework version, file path or internal host name. `Server` is `Vercel`; the proxy 503 body is a fixed 19-character string (20 bytes with the newline).
+- Fixture routes absent in Production: all 24 `*-test` and `__test__` requests returned 404. The page's own gate ran (`apps/frontend/app/[locale]/design-system-test/page.tsx:7`, and the same `notFound()` guard in `brand-design-test/page.tsx:9`, `catalog-design-test/page.tsx:176`, `establishment-design-test/page.tsx:11`, `live-workspace-test/page.tsx:39`, `order-history-test/page.tsx:42`, `orders-kanban-test/page.tsx:12`, `photo-design-test/page.tsx:10`, `photo-guest-design-test/page.tsx:9`, `studio-parity-test/page.tsx:9`, `workspace-toast-test/page.tsx:8`); `__test__` does not exist in source.
+- Guard styles differ: `establishment-design-test`, `live-workspace-test` and `studio-parity-test` use `NODE_ENV === "production"`, while the others use `!== "development"`. Both return 404 on Vercel Production; the `=== "production"` form would render the fixture in any non-production, non-development environment (for example a test build), so the two styles are not equivalent.
 - Protected pages signed out: `/fr/organization` and `/en/organization` return 307 to the localized sign-in page; the body carries no organization data.
-- Public order tracking: a random UUID page shows only generic "tracking link incomplete" copy with `noindex, nofollow` (`/en/order/<uuid>`); a malformed ID is 404. The tracking API accepts only `POST` (`apps/frontend/app/api/public/orders/[orderId]/tracking/route.ts:12`) and returned 405 to `GET`. No order existence is revealed.
+- Public order tracking: a random UUID page shows only generic "tracking link incomplete" copy with `noindex, nofollow` (`/en/order/<uuid>`); a malformed ID is 404. The tracking API accepts only `POST` (`apps/frontend/app/api/public/orders/[orderId]/tracking/route.ts:15`) and returned 405 to `GET`. No order existence is revealed.
 - Public key material: `/.well-known/openid-configuration` carries issuer and algorithm metadata only (`apps/frontend/app/.well-known/openid-configuration/route.ts:6-18`). `/api/auth/jwks` returned one RS256 public key with `alg`, `e`, `kid`, `kty`, `n` only.
 - Frontend CORS: `OPTIONS` and `GET` with `Origin: https://evil.example` on `/api/kitchen/orders` and `/api/auth/get-session` returned no `Access-Control-Allow-Origin`. `Access-Control-Allow-Origin: *` appears only on Vercel-served static assets and prerendered public pages (`/en/demo`, `/_next/static/*`), which carry no per-user data.
 - Auth token endpoint: `/api/auth/token` returns 404 (the blocked route noted in W1).
 - Anonymous `get-session` returns `null` with `Cache-Control: no-store`.
-- API CORS policy in source: explicit origin list, no wildcard (`apps/api/WhitePlate.Api/Configuration/ServiceRegistration.cs:66-69`, `docs/deployment/coolify.md:159`). Hosted behaviour is Not covered (below).
-- Plain HTTP on the API host returned 404 with no content, not an HTTP application response; the runbook states HTTP-to-HTTPS redirect is enabled in Coolify (`docs/deployment/coolify.md:151`). While the API is unhealthy the router set may differ, so redirect behaviour is re-checked once HOST-01 is closed.
+- API CORS policy in source: explicit origin list, no wildcard (`apps/api/WhitePlate.Api/Configuration/ServiceRegistration.cs:76-80`, `docs/deployment/coolify.md:215`). Hosted behaviour is Not covered (below).
+- Plain HTTP on the API host returned 404 with no content, not an HTTP application response; the runbook states HTTP-to-HTTPS redirect is enabled in Coolify (`docs/deployment/coolify.md:207`). While the API is unhealthy the router set may differ, so redirect behaviour is re-checked once HOST-01 is closed.
 - Preview environment: Not applicable (owner: none exists); documented stale variables are HOST-09.
 
 ## Not covered
