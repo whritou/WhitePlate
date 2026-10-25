@@ -51,7 +51,7 @@ Run as input to manual review: `npm audit`, `dotnet list package --vulnerable --
 
 - W1 produces an **endpoint × role × tenant matrix** covering every API controller action, hub method and Next route handler or server action. Each cell cites the enforcing `file:line`, or is a finding.
 - W1, W3 and W4 include local runtime probes against the local development database, using test accounts from the project's seed or fixture files (cross-tenant requests, role escalation, tampered checkout payloads, upload abuse).
-- Where practical, a probe is written as a failing test kept outside the product change, so a later remediation can adopt it as its regression test.
+- Where practical, a probe is recorded in its finding as a test sketch (request, expected and actual result) that the later remediation adopts as its failing regression test. No test file is added to the product test suites during the audit.
 
 ### Phase 3: hosted read-only
 
