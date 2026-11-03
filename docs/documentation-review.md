@@ -526,3 +526,7 @@ The static preview was regenerated from `docs/design-system/tokens.json`. Plus J
 ## M1 combined workspace verification — 2026-10-08
 
 See [M1 handoff](audits/menu-builder.md) for exact frontend/browser/API checks, reference comparisons, migration rollout and outstanding shared/hosted acceptance. Scope is the combined catalog/language workspace plus category visibility; no M2–M5 services are represented as operational.
+
+## Audit note — 2026-10-25
+
+*Audit 2026-10-25: the ESLint failure `contextOrFilename.getFilename is not a function` recorded in the dated run logs above did not reproduce on a clean `npm ci` copy of `55f31a5` (0 errors, 19 warnings). Those entries are historical, not a current failure; see [CODE-12](audits/production-readiness/w7-code-health.md) and the [audit baseline](audits/production-readiness/README.md#baseline).*

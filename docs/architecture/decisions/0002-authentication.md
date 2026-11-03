@@ -14,10 +14,10 @@ WhitePlate has persisted organization ownership and restaurant memberships in it
 - Use Resend for verification, reset, and staff invitation mail.
 - Keep the organization, restaurant, and staff-role model in the .NET business database. Do not adopt Better Auth's organization plugin as a second source of authorization truth.
 - Store Better Auth's generated PostgreSQL tables in a separate `auth` schema managed by Better Auth CLI. EF Core owns only the business schema.
-- Keep the Better Auth session in an HttpOnly cookie. Next.js server actions validate the session, obtain a short-lived API JWT, and call the .NET API server-to-server. Do not expose API tokens to client-side JavaScript.
+- Keep the Better Auth session in an HttpOnly cookie. Next.js server actions validate the session, obtain a short-lived API JWT, and call the .NET API server-to-server. Do not expose API tokens to client-side JavaScript. *(Audit 2026-10-25: not currently true; the API token reaches browser JavaScript through `get-session` and the SignalR token route. See [SEC-06](../../audits/production-readiness/w1-tenant-authz.md).)*
 - Issue RS256 JWTs with the user's ID as `sub`, verified email claims, a 15-minute expiry, and a 30-day JWKS rotation/grace interval. The API discovers metadata/JWKS from the configured issuer and validates both issuer and audience.
 - Allow organization creation only for an authenticated, email-verified identity. Bind each staff invitation to a normalized intended email and require the accepted JWT's email to be verified and match.
-- Require provider and mail credentials in production; use generic recovery responses and server-side route rate limits.
+- Require provider and mail credentials in production; use generic recovery responses and server-side route rate limits. *(Audit 2026-10-25: responses are generic, but sign-up and password-reset timing still reveals whether an email has an account; see [AUTH-05](../../audits/production-readiness/w2-auth-session.md).)*
 
 ## Alternatives considered
 
