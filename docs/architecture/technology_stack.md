@@ -6,7 +6,7 @@ Reviewed on 2026-10-01 against source and manifests. The package manifest and lo
 
 | Area | Technology | Implemented role |
 | --- | --- | --- |
-| Web framework | Next.js 16.3.4, React 19.2.8 | App Router; server pages, route handlers and mutation actions |
+| Web framework | Next.js 16.4.6, React 19.2.8 | App Router; server pages, route handlers and mutation actions |
 | Language | Strict TypeScript | Named contracts in `types/`; runtime parsers validate untrusted JSON |
 | Localization | next-intl | en/fr interface, independent restaurant menu language |
 | Styling | Tailwind CSS 4, PostCSS, tw-animate-css, shadcn styles | Theme tokens and local system fonts |
