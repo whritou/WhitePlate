@@ -50,10 +50,9 @@ public sealed class ListOrderHistoryQueryHandler(IOrderRepository orders, IStaff
             return Result<OrderHistoryPageDto>.Failure(new ApplicationError(ErrorCode.ValidationFailed,
                 new ValidationIssue("query", "invalid_order_history_filter", "The order history filter is invalid.")));
 
-        var from = query.From?.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc);
-        DateTime? until = query.Through is null || query.Through == DateOnly.MaxValue
-            ? null
-            : query.Through.Value.AddDays(1).ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc);
+        // From/Through are restaurant-local calendar days; the repository resolves them in the tenant's time zone.
+        var from = query.From;
+        var until = query.Through;
         var requestedPage = query.Page;
         var pageSize = query.PageSize;
         var page = await orders.GetHistoryAsync(query.TenantId, query.Status, query.Search, from, until,
@@ -75,7 +74,7 @@ internal static class OrderCursorCodec
 {
     public static string Encode(OrderPageCursor cursor)
     {
-        var value = $"{cursor.CreatedAtTicks}:{cursor.Id:D}";
+        var value = $"{cursor.CreatedAtTicks}:{cursor.Id:D}:{(cursor.IsClosed ? 1 : 0)}";
         return Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(value)).TrimEnd('=').Replace('+', '-').Replace('/', '_');
     }
 
@@ -88,11 +87,13 @@ internal static class OrderCursorCodec
             var base64 = token.Replace('-', '+').Replace('_', '/');
             base64 = base64.PadRight(base64.Length + (4 - base64.Length % 4) % 4, '=');
             var parts = System.Text.Encoding.UTF8.GetString(Convert.FromBase64String(base64)).Split(':');
-            if (parts.Length != 2 || !long.TryParse(parts[0], out var ticks) ||
+            // Two-part cursors predate the open-orders-first ordering; they continue among closed orders.
+            if (parts.Length is not (2 or 3) || !long.TryParse(parts[0], out var ticks) ||
                 !Guid.TryParseExact(parts[1], "D", out var id) || id == Guid.Empty ||
-                ticks < DateTimeOffset.MinValue.UtcDateTime.Ticks || ticks > DateTimeOffset.MaxValue.UtcDateTime.Ticks)
+                ticks < DateTimeOffset.MinValue.UtcDateTime.Ticks || ticks > DateTimeOffset.MaxValue.UtcDateTime.Ticks ||
+                parts.Length == 3 && parts[2] is not ("0" or "1"))
                 return false;
-            cursor = new OrderPageCursor(ticks, id);
+            cursor = new OrderPageCursor(ticks, id, parts.Length == 2 || parts[2] == "1");
             return true;
         }
         catch (FormatException) { return false; }

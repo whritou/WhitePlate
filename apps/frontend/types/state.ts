@@ -41,5 +41,6 @@ export type GuestCheckoutState = {
   setAttempt: (attempt: CheckoutAttempt | null) => void
   setInFlight: (inFlight: boolean) => void
   clearCart: () => void
+  retainCart: (cart: CartItem[]) => void
   startNewOrder: () => void
 }

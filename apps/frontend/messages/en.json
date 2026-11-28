@@ -16,7 +16,11 @@
     "backToOrganizations": "All organizations",
     "notFoundTitle": "This page can’t be found",
     "notFoundDescription": "The address may be incorrect, or the page may have moved.",
-    "home": "Go to home"
+    "home": "Go to home",
+    "errorTitle": "Something went wrong",
+    "errorDescription": "This page couldn’t be displayed. Try again, or return to the home page. Changes you hadn’t saved may need to be entered again.",
+    "errorReference": "Reference: {digest}",
+    "retry": "Try again"
   },
   "Auth": {
     "asideEyebrow": "A good service starts here",
@@ -108,6 +112,7 @@
     "teamRosterDescription": "People with access to this organization and its restaurants.",
     "teamRosterEmpty": "No team members are available yet.",
     "teamMemberEmailUnavailable": "Email unavailable",
+    "retry": "Retry",
     "memberRoleUpdated": "Member role updated.",
     "memberRoleUpdateError": "We couldn’t update this member’s role. Refresh and try again.",
     "noAssignableRoles": "No active roles are available for this restaurant.",
@@ -564,6 +569,7 @@
     "commissionPaid": "Commission paid",
     "commissionNote": "0% fee forever",
     "vsPrevious": "vs previous",
+    "previousPeriod": "Previous period",
     "overTime": "over time",
     "peakHours": "Peak hours",
     "orderChannels": "Order channels",
@@ -658,6 +664,7 @@
     "missingLink": "This tracking link is incomplete. Open the full link from your order confirmation.",
     "notFound": "This order link is invalid or has expired. Ask the person who placed the order to share a current link.",
     "unavailable": "We couldn’t load the order status. Try refreshing in a moment.",
+    "stale": "We couldn’t refresh the status just now. This is the last update, and we’ll keep checking.",
     "backToMenu": "Back to the restaurant menu"
   },
   "Restaurants": {
@@ -3826,6 +3833,7 @@
     "emptyDashboard": "No active orders.",
     "loadError": "The API could not be loaded. Retry without substituting fictitious orders.",
     "retry": "Retry",
+    "unavailable": "This restaurant section is unavailable, or you no longer have access to it.",
     "legalName": "Legal name",
     "vat": "VAT number",
     "siret": "SIRET",

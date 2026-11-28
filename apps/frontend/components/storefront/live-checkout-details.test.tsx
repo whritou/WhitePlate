@@ -6,6 +6,7 @@ import { LiveCheckoutDetails } from "./live-checkout-details"
 
 vi.mock("next-intl", () => ({
   useTranslations: () => (key: string) => key,
+  useLocale: () => "en",
   useMessages: () => ({}),
 }))
 

@@ -1,6 +1,7 @@
 "use client"
 
 import { saveTenantLegalProfileAction } from "@/actions/establishment-settings"
+import { settleAction, unavailableActionResult } from "@/lib/api/settle-action"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -81,15 +82,19 @@ export function RestaurantLegalProfileEditor({
     event.preventDefault()
     if (!profile || pending) return
     startTransition(async () => {
-      const result = await saveTenantLegalProfileAction({
-        tenantId,
-        version: profile.version,
-        mode,
-        countryCode,
-        name,
-        registrationNumber,
-        taxIdentifier,
-      })
+      const result = await settleAction(
+        () =>
+          saveTenantLegalProfileAction({
+            tenantId,
+            version: profile.version,
+            mode,
+            countryCode,
+            name,
+            registrationNumber,
+            taxIdentifier,
+          }),
+        unavailableActionResult
+      )
 
       if (!result.ok || !result.data) {
         setError(result.ok ? "unavailable" : result.error)

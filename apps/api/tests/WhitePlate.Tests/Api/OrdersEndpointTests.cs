@@ -914,7 +914,7 @@ public sealed partial class OrdersEndpointTests
         await using (var scope = factory.Services.CreateAsyncScope())
         {
             var repository = scope.ServiceProvider.GetRequiredService<WhitePlate.Application.Orders.IOrderRepository>();
-            await repository.ArchiveClosedOrdersBeforeAsync(new DateTimeOffset(2026, 1, 2, 0, 0, 0, TimeSpan.Zero),
+            await repository.ArchiveClosedOrdersBeforeLocalDayStartAsync(new DateTimeOffset(2026, 1, 2, 0, 0, 0, TimeSpan.Zero),
                 TestContext.Current.CancellationToken);
         }
 

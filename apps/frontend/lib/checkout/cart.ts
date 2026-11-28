@@ -36,6 +36,32 @@ export function validProductSelection(
   )
 }
 
+/**
+ * Keeps cart items whose product and every chosen option still exist in the
+ * current menu. A republish or menu-language change can drop a product or
+ * option; such a line can no longer be shown or quoted, so it is removed.
+ */
+export function retainKnownCartItems(
+  items: CartItem[],
+  products: { id: string; optionGroups: { options: { id: string }[] }[] }[]
+): CartItem[] {
+  return items.filter((item) => {
+    const product = products.find(
+      (candidate) => candidate.id === item.productId
+    )
+
+    if (!product) return false
+
+    const known = new Set(
+      product.optionGroups.flatMap((group) =>
+        group.options.map((option) => option.id)
+      )
+    )
+
+    return item.optionIds.every((id) => known.has(id))
+  })
+}
+
 export function createTrackingToken(): string {
   const bytes = crypto.getRandomValues(new Uint8Array(32))
   let binary = ""

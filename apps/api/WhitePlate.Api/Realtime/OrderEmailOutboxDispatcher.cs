@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using WhitePlate.Api.Configuration;
+using WhitePlate.Api.Errors;
 using WhitePlate.Application.Orders;
 using WhitePlate.Infrastructure.Persistence;
 
@@ -42,7 +43,9 @@ public sealed class OrderEmailOutboxDispatcher(IServiceScopeFactory scopeFactory
             }
             catch (Exception exception)
             {
-                logger.LogError("Order email outbox polling failed ({ExceptionType}).", exception.GetType().Name);
+                // Raw exceptions may contain secrets; log the type plus a redacted root-cause message.
+                logger.LogError("Order email outbox polling failed ({ExceptionType}: {FailureReason}).",
+                    exception.GetType().Name, SafeExceptionDescription.Describe(exception));
             }
 
             if (!foundWork) await Delay(TimeSpan.FromSeconds(2), stoppingToken);

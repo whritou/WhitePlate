@@ -82,6 +82,48 @@ public sealed class OrderTests
     }
 
     [Fact]
+    public void DiscountNeverMakesAFreeLastLineNegative()
+    {
+        var order = Order.Create(Guid.NewGuid(), "EUR", "Ada", [
+            new OrderLineSnapshot(Guid.NewGuid(), "Soup", 1m, 0m, 1, []),
+            new OrderLineSnapshot(Guid.NewGuid(), "Salad", 1m, 0m, 1, []),
+            new OrderLineSnapshot(Guid.NewGuid(), "Bread", 1m, 0m, 1, []),
+            new OrderLineSnapshot(Guid.NewGuid(), "Water", 0m, 0m, 1, [])
+        ], "ONE", 1m, DateTimeOffset.UtcNow);
+
+        Assert.Equal(1m, order.Lines.Sum(line => line.DiscountAmount));
+        Assert.All(order.Lines, line =>
+        {
+            Assert.InRange(line.DiscountAmount, 0m, line.Subtotal);
+            Assert.True(line.Total >= 0m);
+        });
+        Assert.Equal(new[] { 0.34m, 0.33m, 0.33m, 0m }, order.Lines.Select(line => line.DiscountAmount).ToArray());
+        Assert.Equal(2m, order.Total);
+    }
+
+    [Theory]
+    [InlineData(3.00)]
+    [InlineData(2.99)]
+    [InlineData(0.05)]
+    public void DiscountAllocationStaysWithinEachLineAndSumsToTheDiscount(double discount)
+    {
+        var discountAmount = (decimal)discount;
+        var order = Order.Create(Guid.NewGuid(), "EUR", "Ada", [
+            new OrderLineSnapshot(Guid.NewGuid(), "Soup", 0.01m, 10m, 1, []),
+            new OrderLineSnapshot(Guid.NewGuid(), "Salad", 0.99m, 10m, 1, []),
+            new OrderLineSnapshot(Guid.NewGuid(), "Bread", 1.99m, 10m, 1, []),
+            new OrderLineSnapshot(Guid.NewGuid(), "Water", 0.01m, 10m, 1, [])
+        ], "SAVE", discountAmount, DateTimeOffset.UtcNow);
+
+        Assert.Equal(discountAmount, order.Lines.Sum(line => line.DiscountAmount));
+        Assert.All(order.Lines, line =>
+        {
+            Assert.InRange(line.DiscountAmount, 0m, line.Subtotal);
+            Assert.True(line.Total >= 0m);
+        });
+    }
+
+    [Fact]
     public void OrderLineRetainsProductDeclarationsAndPreparationGuidanceFromCheckout()
     {
         var order = Order.Create(Guid.NewGuid(), "EUR", "Ada", [

@@ -91,7 +91,7 @@ export function OrderTracking({
     </Link>
   )
 
-  if (!token || tracking.isPending || tracking.error || !order)
+  if (!token || tracking.isPending || !order)
     return (
       <LiveCustomerShell
         name={name}
@@ -231,6 +231,12 @@ export function OrderTracking({
           ),
           actions: (
             <div className="mt-6 grid gap-3">
+              {tracking.isError && (
+                <p role="status" className="text-sm text-muted-foreground">
+                  {text("stale")}
+                </p>
+              )}
+
               <Button
                 variant="outline"
                 disabled={tracking.isFetching}

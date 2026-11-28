@@ -16,7 +16,11 @@
     "backToOrganizations": "Toutes les organisations",
     "notFoundTitle": "Cette page est introuvable",
     "notFoundDescription": "L’adresse est peut-être incorrecte ou la page a été déplacée.",
-    "home": "Retour à l’accueil"
+    "home": "Retour à l’accueil",
+    "errorTitle": "Une erreur s’est produite",
+    "errorDescription": "Cette page n’a pas pu s’afficher. Réessayez ou revenez à l’accueil. Les modifications non enregistrées devront peut-être être saisies à nouveau.",
+    "errorReference": "Référence : {digest}",
+    "retry": "Réessayer"
   },
   "Auth": {
     "asideEyebrow": "Un bon service commence ici",
@@ -108,6 +112,7 @@
     "teamRosterDescription": "Personnes ayant accès à cette organisation et à ses restaurants.",
     "teamRosterEmpty": "Aucun membre de l’équipe n’est disponible pour le moment.",
     "teamMemberEmailUnavailable": "Adresse e-mail indisponible",
+    "retry": "Réessayer",
     "memberRoleUpdated": "Le rôle du membre a été modifié.",
     "memberRoleUpdateError": "Impossible de modifier le rôle. Actualisez la page puis réessayez.",
     "noAssignableRoles": "Aucun rôle actif n’est disponible pour ce restaurant.",
@@ -564,6 +569,7 @@
     "commissionPaid": "Commission payée",
     "commissionNote": "Commission de 0 % en permanence",
     "vsPrevious": "par rapport à la période précédente",
+    "previousPeriod": "Période précédente",
     "overTime": "dans le temps",
     "peakHours": "Heures de pointe",
     "orderChannels": "Canaux de commande",
@@ -658,6 +664,7 @@
     "missingLink": "Ce lien de suivi est incomplet. Ouvrez le lien complet depuis la confirmation de commande.",
     "notFound": "Ce lien est invalide ou a expiré. Demandez à la personne qui a passé la commande de partager un lien à jour.",
     "unavailable": "Impossible de charger l’état de la commande. Réessayez dans un instant.",
+    "stale": "Impossible d’actualiser le statut pour le moment. Voici la dernière mise à jour ; nous continuons à vérifier.",
     "backToMenu": "Retour au menu du restaurant"
   },
   "Restaurants": {
@@ -3826,6 +3833,7 @@
     "emptyDashboard": "Aucune commande active.",
     "loadError": "L’API n’a pas pu être chargée. Réessayez sans remplacer les commandes par des données fictives.",
     "retry": "Réessayer",
+    "unavailable": "Cette section du restaurant est indisponible, ou vous n’y avez plus accès.",
     "legalName": "Raison sociale",
     "vat": "Numéro de TVA",
     "siret": "SIRET",

@@ -13,6 +13,7 @@ import { useGuestCheckoutStore } from "@/components/storefront/guest-checkout-pr
 import {
   prepareCheckout,
   createTrackingToken,
+  retainKnownCartItems,
   validProductSelection,
   validateOrderInput,
 } from "@/lib/checkout/cart"
@@ -100,6 +101,18 @@ export function useGuestCheckout(
   const uncertain = error === "unavailable"
   const locked = submitting || uncertain || changingLanguage || receipt !== null
   const products = menu.categories.flatMap((category) => category.products)
+  const retainCart = state.retainCart
+
+  useEffect(() => {
+    if (locked) return
+
+    const kept = retainKnownCartItems(
+      cart,
+      menu.categories.flatMap((category) => category.products)
+    )
+
+    if (kept.length !== cart.length) retainCart(kept)
+  }, [cart, menu, locked, retainCart])
 
   function changeCart(item: CartItem) {
     state.changeCart(item)
