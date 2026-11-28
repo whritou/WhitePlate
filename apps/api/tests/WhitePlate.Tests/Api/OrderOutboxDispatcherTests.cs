@@ -112,13 +112,13 @@ public sealed class OrderOutboxDispatcherTests
         public Task<IdempotencyResult> CreateOrderAsync(Order order, OrderReceiptDto receipt, string keyHash, string requestHash, DateTimeOffset now, CancellationToken cancellationToken) => throw new NotSupportedException();
         public Task<OrderPageData> ListAsync(Guid tenantId, OrderStatus? status, OrderPageCursor? cursor, int pageSize, CancellationToken cancellationToken) => throw new NotSupportedException();
         public Task<OrderHistoryPageData> GetHistoryAsync(Guid tenantId, OrderStatus? status, string? search,
-            DateTimeOffset? createdAtFrom, DateTimeOffset? createdAtUntil, string sort, bool descending,
+            DateOnly? createdOnFrom, DateOnly? createdOnThrough, string sort, bool descending,
             int page, int pageSize, CancellationToken cancellationToken) => throw new NotSupportedException();
         public Task<DashboardMetricsDto?> GetDashboardMetricsAsync(Guid tenantId, DateTimeOffset now,
             bool includeOrderValue, CancellationToken cancellationToken) => throw new NotSupportedException();
         public Task<PublicOrderTrackingDto?> GetPublicTrackingAsync(Guid tenantId, Guid orderId, string tokenHash,
             DateTimeOffset now, CancellationToken cancellationToken) => throw new NotSupportedException();
-        public Task<int> ArchiveClosedOrdersBeforeAsync(DateTimeOffset cutoff, CancellationToken cancellationToken) => throw new NotSupportedException();
+        public Task<int> ArchiveClosedOrdersBeforeLocalDayStartAsync(DateTimeOffset now, CancellationToken cancellationToken) => throw new NotSupportedException();
         public Task<Result<OrderReceiptDto>> TransitionAsync(Guid tenantId, Guid orderId, int expectedVersion, OrderStatus status,
             OrderCancellationReason? cancellationReason, DateTimeOffset now, CancellationToken cancellationToken) => throw new NotSupportedException();
     }

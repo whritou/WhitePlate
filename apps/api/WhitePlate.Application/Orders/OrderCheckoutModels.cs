@@ -105,7 +105,8 @@ public sealed record PublicOrderSummaryDto(string Currency, decimal Subtotal, de
     decimal TaxAmount, decimal Total, IReadOnlyList<PublicOrderLineDto> Lines);
 public sealed record PublicOrderLineDto(Guid ProductId, string ProductName, int Quantity, decimal Subtotal,
     decimal Total, IReadOnlyList<OrderLineOptionDto> Options);
-public sealed record OrderPageCursor(long CreatedAtTicks, Guid Id);
+/// <summary>Kitchen-list keyset position. Open orders sort before closed ones, so the cursor records the tier.</summary>
+public sealed record OrderPageCursor(long CreatedAtTicks, Guid Id, bool IsClosed = false);
 public sealed record ListOrdersQuery(Guid TenantId, OrderStatus? Status, string? Cursor, int? PageSize);
 public sealed record ListOrderHistoryQuery(Guid TenantId, OrderStatus? Status, string? Search, DateOnly? From,
     DateOnly? Through, string Sort, string Direction, int Page, int PageSize);

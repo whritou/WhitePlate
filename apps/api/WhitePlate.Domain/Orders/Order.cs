@@ -87,16 +87,9 @@ public sealed class Order
         var subtotal = orderLines.Sum(line => line.Subtotal);
         if (discountAmount < 0 || decimal.Round(discountAmount, 2) != discountAmount || discountAmount > subtotal)
             throw new DomainRuleException("invalid_discount", "discountCode", "Discount cannot exceed the order subtotal.");
-        var remainingDiscount = discountAmount;
+        var allocations = AllocateDiscount(orderLines, discountAmount, subtotal);
         for (var index = 0; index < orderLines.Count; index++)
-        {
-            var line = orderLines[index];
-            var allocation = index == orderLines.Count - 1 ? remainingDiscount :
-                subtotal == 0 ? 0 : decimal.Round(discountAmount * line.Subtotal / subtotal, 2, MidpointRounding.AwayFromZero);
-            allocation = Math.Min(allocation, remainingDiscount);
-            line.SetCalculatedAmounts(allocation);
-            remainingDiscount -= allocation;
-        }
+            orderLines[index].SetCalculatedAmounts(allocations[index]);
         var normalizedMenuLocale = menuLocale is null ? null : WhitePlate.Domain.Tenants.MenuLocale.Create(menuLocale).Value;
         if (trackingTokenHash is not null && (trackingTokenHash.Length != 64 ||
             trackingTokenHash.Any(character => !Uri.IsHexDigit(character))))
@@ -221,6 +214,32 @@ public sealed class Order
     {
         CustomerEmail = null;
         EmailUpdatesConsentedAt = null;
+    }
+
+    // Splits an order-level discount across lines: proportional rounded shares for every line except
+    // the last, which takes the remainder. No line receives more than its own subtotal; any amount a
+    // line cannot absorb moves, in line order, to lines that still have headroom. The validated
+    // discount never exceeds the order subtotal, so the full discount is always allocated.
+    private static decimal[] AllocateDiscount(IReadOnlyList<OrderLine> lines, decimal discountAmount, decimal subtotal)
+    {
+        var allocations = new decimal[lines.Count];
+        var remaining = discountAmount;
+        for (var index = 0; index < lines.Count; index++)
+        {
+            var line = lines[index];
+            var allocation = index == lines.Count - 1 ? remaining :
+                subtotal == 0 ? 0 : decimal.Round(discountAmount * line.Subtotal / subtotal, 2, MidpointRounding.AwayFromZero);
+            allocation = Math.Min(Math.Min(allocation, remaining), line.Subtotal);
+            allocations[index] = allocation;
+            remaining -= allocation;
+        }
+        for (var index = 0; index < lines.Count && remaining > 0; index++)
+        {
+            var extra = Math.Min(lines[index].Subtotal - allocations[index], remaining);
+            allocations[index] += extra;
+            remaining -= extra;
+        }
+        return allocations;
     }
 
     private static string? NormalizeEmail(string? email)

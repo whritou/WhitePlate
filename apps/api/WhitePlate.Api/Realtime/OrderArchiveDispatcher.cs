@@ -1,12 +1,20 @@
 using Microsoft.Extensions.DependencyInjection;
+using WhitePlate.Api.Errors;
 using WhitePlate.Application.Orders;
 
 namespace WhitePlate.Api.Realtime;
 
+/// <summary>
+/// Archives terminal orders after each restaurant's local midnight. Restaurants use different saved time
+/// zones, so the worker runs on every UTC quarter hour (all current zone offsets are multiples of 15 minutes)
+/// and the repository archives, per tenant, orders closed before that tenant's current local day start.
+/// The query is idempotent, so a run after downtime catches up.
+/// </summary>
 public sealed class OrderArchiveDispatcher(IServiceScopeFactory scopeFactory, TimeProvider timeProvider,
     ILogger<OrderArchiveDispatcher> logger) : BackgroundService
 {
     private static readonly TimeSpan RetryDelay = TimeSpan.FromMinutes(1);
+    private static readonly TimeSpan RunInterval = TimeSpan.FromMinutes(15);
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -16,10 +24,9 @@ public sealed class OrderArchiveDispatcher(IServiceScopeFactory scopeFactory, Ti
             try
             {
                 var now = timeProvider.GetUtcNow();
-                var cutoff = UtcDayStart(now);
                 await using var scope = scopeFactory.CreateAsyncScope();
                 var orders = scope.ServiceProvider.GetRequiredService<IOrderRepository>();
-                var count = await orders.ArchiveClosedOrdersBeforeAsync(cutoff, stoppingToken);
+                var count = await orders.ArchiveClosedOrdersBeforeLocalDayStartAsync(now, stoppingToken);
                 archivedSuccessfully = true;
                 if (count > 0) logger.LogInformation("Archived {OrderCount} closed orders from the kitchen board.", count);
             }
@@ -29,22 +36,24 @@ public sealed class OrderArchiveDispatcher(IServiceScopeFactory scopeFactory, Ti
             }
             catch (Exception exception)
             {
-                logger.LogError("Daily order archive failed ({ExceptionType}); retrying shortly.", exception.GetType().Name);
+                // Raw exceptions may contain secrets; log the type plus a redacted root-cause message.
+                logger.LogError("Order archive failed ({ExceptionType}: {FailureReason}); retrying shortly.",
+                    exception.GetType().Name, SafeExceptionDescription.Describe(exception));
             }
 
             var nowAfterRun = timeProvider.GetUtcNow();
-            var nextRun = NextUtcMidnight(nowAfterRun);
-            var delay = archivedSuccessfully ? nextRun - nowAfterRun : RetryDelay;
+            var delay = archivedSuccessfully ? NextRun(nowAfterRun) - nowAfterRun : RetryDelay;
             try { await Task.Delay(delay, timeProvider, stoppingToken); }
             catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested) { break; }
         }
     }
 
-    public static DateTimeOffset UtcDayStart(DateTimeOffset value)
+    /// <summary>Returns the next UTC quarter-hour boundary strictly after <paramref name="value"/>.</summary>
+    public static DateTimeOffset NextRun(DateTimeOffset value)
     {
         var utc = value.UtcDateTime;
-        return new DateTimeOffset(utc.Year, utc.Month, utc.Day, 0, 0, 0, TimeSpan.Zero);
+        var intervalTicks = RunInterval.Ticks;
+        var next = (utc.Ticks / intervalTicks + 1) * intervalTicks;
+        return new DateTimeOffset(next, TimeSpan.Zero);
     }
-
-    public static DateTimeOffset NextUtcMidnight(DateTimeOffset value) => UtcDayStart(value).AddDays(1);
 }

@@ -96,12 +96,14 @@ public sealed class AnalyticsRepository(WhitePlateDbContext database) : IAnalyti
         var currentFrom = AtRestaurantMidnight(currentStart, timeZone);
         var endExclusive = AtRestaurantMidnight(today.AddDays(1), timeZone);
         var comparisonFrom = AtRestaurantMidnight(comparisonStart, timeZone);
+        var comparisonFromTicks = comparisonFrom.UtcDateTime.Ticks;
+        var endExclusiveTicks = endExclusive.UtcDateTime.Ticks;
         var orders = await database.Orders.AsNoTracking()
             .Include(order => order.Lines)
             .Include(order => order.AnalyticsFingerprints)
             .Include(order => order.AnalyticsRepeatLinks)
-            .Where(order => order.TenantId == tenantId && order.CreatedAt >= comparisonFrom &&
-                order.CreatedAt < endExclusive)
+            .Where(order => order.TenantId == tenantId && order.CreatedAtTicks >= comparisonFromTicks &&
+                order.CreatedAtTicks < endExclusiveTicks)
             .ToListAsync(cancellationToken);
         var current = orders.Where(order => order.CreatedAt >= currentFrom).ToArray();
         var previous = orders.Where(order => order.CreatedAt < currentFrom).ToArray();
@@ -145,18 +147,25 @@ public sealed class AnalyticsRepository(WhitePlateDbContext database) : IAnalyti
                 "qr" => order.AnalyticsSource == "qr",
                 _ => order.AnalyticsSource is null
             }), channel == "unattributed" ? "untracked" : "available")).ToArray();
-        var dishes = currentSales.SelectMany(order => order.Lines.Select(line => new
+        // Line names are snapshots in each guest's menu language, so group by product ID and display the
+        // catalog name (default menu locale), falling back to the most recent snapshot name.
+        var dishLines = currentSales.SelectMany(order => order.Lines.Select(line => new
             {
-                order.TenantId, tenant.Name, order.Currency, line.ProductName,
-                line.Quantity, line.Total
-            }))
-            .GroupBy(line => new { line.TenantId, line.Name, line.Currency, line.ProductName })
-            .Select(group => new AnalyticsDish(group.Key.TenantId, group.Key.Name, group.Key.ProductName,
+                order.TenantId, tenant.Name, order.Currency, line.ProductId, line.ProductName,
+                line.Quantity, line.Total, order.CreatedAt
+            })).ToArray();
+        var dishNames = await ProductDisplayNames.LoadAsync(database, tenantId,
+            dishLines.Select(line => line.ProductId).ToArray(), cancellationToken);
+        var dishes = dishLines
+            .GroupBy(line => new { line.TenantId, line.Name, line.Currency, line.ProductId })
+            .Select(group => new AnalyticsDish(group.Key.TenantId, group.Key.Name,
+                dishNames.GetValueOrDefault(group.Key.ProductId) ??
+                    group.OrderByDescending(line => line.CreatedAt).First().ProductName,
                 group.Sum(line => line.Quantity), group.Sum(line => line.Total), group.Key.Currency))
             .GroupBy(dish => dish.Currency, StringComparer.Ordinal)
             .OrderBy(group => group.Key, StringComparer.Ordinal)
             .SelectMany(group => group.OrderByDescending(dish => dish.Revenue)
-                .ThenByDescending(dish => dish.Quantity).Take(8))
+                .ThenByDescending(dish => dish.Quantity).ThenBy(dish => dish.Name, StringComparer.Ordinal).Take(8))
             .ToArray();
         var scheduled = current.Where(order => order.Status == OrderStatus.Completed &&
             order.PickupMode == PickupMode.Scheduled && order.PickupAt.HasValue && order.ClosedAt.HasValue &&
@@ -213,11 +222,9 @@ public sealed class AnalyticsRepository(WhitePlateDbContext database) : IAnalyti
 
     private static bool IsRevenueOrder(Order order) => order.Status != OrderStatus.Cancelled;
 
-    private static DateTimeOffset AtRestaurantMidnight(DateOnly date, TimeZoneInfo timeZone)
-    {
-        var local = DateTime.SpecifyKind(date.ToDateTime(TimeOnly.MinValue), DateTimeKind.Unspecified);
-        return new DateTimeOffset(TimeZoneInfo.ConvertTimeToUtc(local, timeZone), TimeSpan.Zero);
-    }
+    // Local midnight can be skipped by a daylight-saving change; use the first valid local minute instead.
+    private static DateTimeOffset AtRestaurantMidnight(DateOnly date, TimeZoneInfo timeZone) =>
+        RestaurantLocalDay.StartUtc(date, timeZone);
 
     private static DateOnly LocalDate(DateTimeOffset value, TimeZoneInfo timeZone) =>
         DateOnly.FromDateTime(TimeZoneInfo.ConvertTime(value, timeZone).DateTime);

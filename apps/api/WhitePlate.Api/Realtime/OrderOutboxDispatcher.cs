@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Microsoft.Extensions.DependencyInjection;
+using WhitePlate.Api.Errors;
 using WhitePlate.Application.Orders;
 
 namespace WhitePlate.Api.Realtime;
@@ -54,8 +55,8 @@ public sealed class OrderOutboxDispatcher(IServiceScopeFactory scopeFactory, Tim
                         operation = "schedule_retry";
                         await store.ScheduleRetryAsync(pending.Id, timeProvider.GetUtcNow().AddSeconds(delaySeconds),
                             stoppingToken);
-                        logger.LogWarning("Kitchen event {EventId} delivery failed ({ExceptionType}); retry scheduled.",
-                            pending.Id, exception.GetType().Name);
+                        logger.LogWarning("Kitchen event {EventId} delivery failed ({ExceptionType}: {FailureReason}); retry scheduled.",
+                            pending.Id, exception.GetType().Name, SafeExceptionDescription.Describe(exception));
                     }
                 }
             }
@@ -65,8 +66,9 @@ public sealed class OrderOutboxDispatcher(IServiceScopeFactory scopeFactory, Tim
             }
             catch (Exception exception)
             {
-                logger.LogError("Kitchen outbox polling failed during {Operation} ({ExceptionType}).",
-                    operation, exception.GetType().Name);
+                // Raw exceptions may contain secrets; log the type plus a redacted root-cause message.
+                logger.LogError("Kitchen outbox polling failed during {Operation} ({ExceptionType}: {FailureReason}).",
+                    operation, exception.GetType().Name, SafeExceptionDescription.Describe(exception));
             }
 
             if (!foundWork)

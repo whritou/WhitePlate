@@ -265,11 +265,28 @@ public sealed class OrderRepository(WhitePlateDbContext database,
     {
         var query = database.Orders.AsNoTracking().Where(order => order.TenantId == tenantId && order.ArchivedAt == null);
         if (status.HasValue) query = query.Where(order => order.Status == status.Value);
+        // Open orders (Pending/Preparing/Ready) sort before closed ones, newest first within each tier, so
+        // closed orders never push an open order off the first page of the live board. Only when more open
+        // orders exist than the page size do they continue on the next page, still ahead of any closed order.
         if (cursor is not null)
-            query = query.Where(order => order.CreatedAtTicks < cursor.CreatedAtTicks ||
-                order.CreatedAtTicks == cursor.CreatedAtTicks && order.Id.CompareTo(cursor.Id) < 0);
+        {
+            var cursorTicks = cursor.CreatedAtTicks;
+            var cursorId = cursor.Id;
+            query = cursor.IsClosed
+                ? query.Where(order => (order.Status == WhitePlate.Domain.Orders.OrderStatus.Completed ||
+                        order.Status == WhitePlate.Domain.Orders.OrderStatus.Cancelled) &&
+                    (order.CreatedAtTicks < cursorTicks ||
+                     order.CreatedAtTicks == cursorTicks && order.Id.CompareTo(cursorId) < 0))
+                : query.Where(order => order.Status == WhitePlate.Domain.Orders.OrderStatus.Completed ||
+                    order.Status == WhitePlate.Domain.Orders.OrderStatus.Cancelled ||
+                    order.CreatedAtTicks < cursorTicks ||
+                    order.CreatedAtTicks == cursorTicks && order.Id.CompareTo(cursorId) < 0);
+        }
 
-        var rows = await query.OrderByDescending(order => order.CreatedAtTicks).ThenByDescending(order => order.Id)
+        var rows = await query
+            .OrderBy(order => order.Status == WhitePlate.Domain.Orders.OrderStatus.Completed ||
+                order.Status == WhitePlate.Domain.Orders.OrderStatus.Cancelled ? 1 : 0)
+            .ThenByDescending(order => order.CreatedAtTicks).ThenByDescending(order => order.Id)
             .Take(pageSize + 1).Select(order => new
             {
                 Item = new OrderSummaryDto(order.Id, order.CustomerName, order.Currency, order.MenuLocale, order.Total,
@@ -294,13 +311,15 @@ public sealed class OrderRepository(WhitePlateDbContext database,
                             ? order.CancellationReason.Value.ToString()
                             : null
                     },
-                order.CreatedAtTicks
+                order.CreatedAtTicks,
+                IsClosed = order.Status == WhitePlate.Domain.Orders.OrderStatus.Completed ||
+                    order.Status == WhitePlate.Domain.Orders.OrderStatus.Cancelled
             })
             .ToListAsync(cancellationToken);
         var hasMore = rows.Count > pageSize;
         if (hasMore) rows.RemoveAt(rows.Count - 1);
         var nextCursor = hasMore && rows.Count > 0
-            ? new OrderPageCursor(rows[^1].CreatedAtTicks, rows[^1].Item.Id)
+            ? new OrderPageCursor(rows[^1].CreatedAtTicks, rows[^1].Item.Id, rows[^1].IsClosed)
             : null;
         var notifications = await GetEmailNotificationsAsync(tenantId,
             rows.Select(row => row.Item.Id).ToArray(), cancellationToken);
@@ -366,23 +385,30 @@ public sealed class OrderRepository(WhitePlateDbContext database,
             .Select(hour => new HourlyOrderMetricsDto(hour, hourlyCounts[0, hour], hourlyCounts[1, hour]))
             .ToArray();
 
-        var topSellingItemRows = await database.Orders.AsNoTracking()
+        // Line names are snapshots in each guest's menu language, so rank by product ID only.
+        var topSellingLineRows = await database.Orders.AsNoTracking()
             .Where(order => order.TenantId == tenantId && order.CreatedAtTicks >= businessStartTicks &&
                 order.CreatedAtTicks < followingStartTicks && order.Status != OrderStatus.Cancelled)
-            .SelectMany(order => order.Lines)
-            .GroupBy(line => new { line.ProductId, line.ProductName })
-            .Select(product => new
+            .SelectMany(order => order.Lines, (order, line) => new
             {
-                product.Key.ProductId,
-                product.Key.ProductName,
-                Quantity = product.Sum(line => line.Quantity)
+                line.ProductId,
+                line.ProductName,
+                line.Quantity,
+                order.CreatedAtTicks
             })
-            .OrderByDescending(product => product.Quantity)
-            .ThenBy(product => product.ProductName)
-            .Take(5)
             .ToListAsync(cancellationToken);
-        var topSellingItems = topSellingItemRows.Select(product =>
-            new TopSellingItemMetricsDto(product.ProductId, product.ProductName, product.Quantity)).ToArray();
+        var topSellingProducts = topSellingLineRows.GroupBy(line => line.ProductId).ToArray();
+        var topSellingNames = await ProductDisplayNames.LoadAsync(database, tenantId,
+            topSellingProducts.Select(product => product.Key).ToArray(), cancellationToken);
+        var topSellingItems = topSellingProducts.Select(product => new TopSellingItemMetricsDto(product.Key,
+                topSellingNames.GetValueOrDefault(product.Key) ?? product.OrderByDescending(line => line.CreatedAtTicks)
+                    .First().ProductName,
+                product.Sum(line => line.Quantity)))
+            .OrderByDescending(product => product.Quantity)
+            .ThenBy(product => product.ProductName, StringComparer.Ordinal)
+            .ThenBy(product => product.ProductId)
+            .Take(5)
+            .ToArray();
 
         var preparationRows = await database.Orders.AsNoTracking()
             .Where(order => order.TenantId == tenantId && order.ReadyAtTicks >= businessStartTicks &&
@@ -404,29 +430,35 @@ public sealed class OrderRepository(WhitePlateDbContext database,
             hourlyOrders, topSellingItems, averagePreparationMinutes, preparationMinutes.Length);
     }
 
-    private static DateTimeOffset LocalDayStartUtc(DateOnly date, TimeZoneInfo zone)
-    {
-        var localStart = DateTime.SpecifyKind(date.ToDateTime(TimeOnly.MinValue), DateTimeKind.Unspecified);
-        for (var minute = 0; zone.IsInvalidTime(localStart); minute++)
-        {
-            if (minute >= 24 * 60) throw new InvalidTimeZoneException("The time zone has no valid start for this local date.");
-            localStart = localStart.AddMinutes(1);
-        }
-
-        var offset = zone.IsAmbiguousTime(localStart)
-            ? zone.GetAmbiguousTimeOffsets(localStart).Max()
-            : zone.GetUtcOffset(localStart);
-        return new DateTimeOffset(localStart, offset).ToUniversalTime();
-    }
+    private static DateTimeOffset LocalDayStartUtc(DateOnly date, TimeZoneInfo zone) =>
+        RestaurantLocalDay.StartUtc(date, zone);
 
     public async Task<OrderHistoryPageData> GetHistoryAsync(Guid tenantId, WhitePlate.Domain.Orders.OrderStatus? status,
-        string? search, DateTimeOffset? createdAtFrom, DateTimeOffset? createdAtUntil, string sort,
+        string? search, DateOnly? createdOnFrom, DateOnly? createdOnThrough, string sort,
         bool descending, int page, int pageSize, CancellationToken cancellationToken)
     {
         var query = database.Orders.AsNoTracking().Where(order => order.TenantId == tenantId);
         if (status.HasValue) query = query.Where(order => order.Status == status.Value);
-        if (createdAtFrom.HasValue) query = query.Where(order => order.CreatedAtTicks >= createdAtFrom.Value.UtcDateTime.Ticks);
-        if (createdAtUntil.HasValue) query = query.Where(order => order.CreatedAtTicks < createdAtUntil.Value.UtcDateTime.Ticks);
+        // Date filters are restaurant-local calendar days. Dates at the edges of the calendar cannot be
+        // offset safely and already cover every stored order, so they leave that side unbounded.
+        var hasFrom = createdOnFrom is { Year: > 1 };
+        var hasThrough = createdOnThrough is { Year: < 9999 };
+        if (hasFrom || hasThrough)
+        {
+            var timeZoneId = await database.Tenants.AsNoTracking().Where(tenant => tenant.Id == tenantId)
+                .Select(tenant => tenant.TimeZone).SingleOrDefaultAsync(cancellationToken);
+            var zone = RestaurantLocalDay.ResolveZone(timeZoneId);
+            if (hasFrom)
+            {
+                var fromTicks = RestaurantLocalDay.StartUtc(createdOnFrom!.Value, zone).UtcDateTime.Ticks;
+                query = query.Where(order => order.CreatedAtTicks >= fromTicks);
+            }
+            if (hasThrough)
+            {
+                var untilTicks = RestaurantLocalDay.StartUtc(createdOnThrough!.Value.AddDays(1), zone).UtcDateTime.Ticks;
+                query = query.Where(order => order.CreatedAtTicks < untilTicks);
+            }
+        }
         if (!string.IsNullOrWhiteSpace(search))
         {
             var term = search.Trim();
@@ -531,14 +563,30 @@ public sealed class OrderRepository(WhitePlateDbContext database,
     private static bool MatchesTokenHash(string? stored, string supplied) => stored is not null &&
         CryptographicOperations.FixedTimeEquals(Convert.FromHexString(stored), Convert.FromHexString(supplied));
 
-    public Task<int> ArchiveClosedOrdersBeforeAsync(DateTimeOffset cutoff, CancellationToken cancellationToken)
+    public async Task<int> ArchiveClosedOrdersBeforeLocalDayStartAsync(DateTimeOffset now,
+        CancellationToken cancellationToken)
     {
-        var query = database.Orders.Where(order => order.ArchivedAt == null && order.ClosedAtTicks != null &&
-            order.ClosedAtTicks < cutoff.UtcDateTime.Ticks &&
+        var closedOrders = database.Orders.Where(order => order.ArchivedAt == null && order.ClosedAtTicks != null &&
             (order.Status == WhitePlate.Domain.Orders.OrderStatus.Completed ||
              order.Status == WhitePlate.Domain.Orders.OrderStatus.Cancelled));
-        return query.ExecuteUpdateAsync(update => update.SetProperty(order => order.ArchivedAt, cutoff),
-            cancellationToken);
+        var tenantIds = await closedOrders.Select(order => order.TenantId).Distinct().ToListAsync(cancellationToken);
+        if (tenantIds.Count == 0) return 0;
+        var timeZones = await database.Tenants.AsNoTracking().Where(tenant => tenantIds.Contains(tenant.Id))
+            .Select(tenant => new { tenant.Id, tenant.TimeZone })
+            .ToDictionaryAsync(tenant => tenant.Id, tenant => tenant.TimeZone, cancellationToken);
+
+        var archived = 0;
+        foreach (var tenantId in tenantIds)
+        {
+            // Each restaurant's board clears at its own local midnight (or first valid local minute).
+            var zone = RestaurantLocalDay.ResolveZone(timeZones.GetValueOrDefault(tenantId));
+            var cutoff = RestaurantLocalDay.StartUtc(RestaurantLocalDay.DateOf(now, zone), zone);
+            var cutoffTicks = cutoff.UtcDateTime.Ticks;
+            archived += await closedOrders.Where(order => order.TenantId == tenantId && order.ClosedAtTicks < cutoffTicks)
+                .ExecuteUpdateAsync(update => update.SetProperty(order => order.ArchivedAt, cutoff), cancellationToken);
+        }
+
+        return archived;
     }
 
     public async Task<Result<OrderReceiptDto>> TransitionAsync(Guid tenantId, Guid orderId,
