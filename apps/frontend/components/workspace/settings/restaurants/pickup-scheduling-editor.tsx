@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react"
 import { useTranslations } from "next-intl"
 import { savePickupSchedulingAction } from "@/actions/establishment-settings"
+import { settleAction, unavailableActionResult } from "@/lib/api/settle-action"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -46,11 +47,15 @@ export function PickupSchedulingEditor({
     setError(null)
     setSaved(false)
     startTransition(async () => {
-      const result = await savePickupSchedulingAction({
-        tenantId,
-        establishmentVersion: version,
-        pickupScheduling: settings,
-      })
+      const result = await settleAction(
+        () =>
+          savePickupSchedulingAction({
+            tenantId,
+            establishmentVersion: version,
+            pickupScheduling: settings,
+          }),
+        unavailableActionResult
+      )
 
       if (result.ok && result.data) {
         setSettings(result.data.pickupScheduling)

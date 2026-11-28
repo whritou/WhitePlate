@@ -6,6 +6,7 @@ import { CheckoutPanel } from "./checkout-panel"
 
 vi.mock("next-intl", () => ({
   useTranslations: () => (key: string) => key,
+  useLocale: () => "en",
 }))
 
 vi.mock("@/i18n/navigation", () => ({

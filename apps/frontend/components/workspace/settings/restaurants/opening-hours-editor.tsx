@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react"
 import { useTranslations } from "next-intl"
 import { saveOpeningHoursAction } from "@/actions/establishment-settings"
+import { settleAction, unavailableActionResult } from "@/lib/api/settle-action"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -70,11 +71,15 @@ export function OpeningHoursEditor({
     if (!schedule || pending) return
     setError(null)
     startTransition(async () => {
-      const result = await saveOpeningHoursAction({
-        tenantId,
-        establishmentVersion: settings.establishmentVersion,
-        openingHours: schedule,
-      })
+      const result = await settleAction(
+        () =>
+          saveOpeningHoursAction({
+            tenantId,
+            establishmentVersion: settings.establishmentVersion,
+            openingHours: schedule,
+          }),
+        unavailableActionResult
+      )
 
       if (result.ok && result.data) {
         setSchedule(result.data.openingHours)
@@ -89,11 +94,15 @@ export function OpeningHoursEditor({
     if (!window.confirm(t("clearConfirm"))) return
 
     startTransition(async () => {
-      const result = await saveOpeningHoursAction({
-        tenantId,
-        establishmentVersion: settings.establishmentVersion,
-        openingHours: null,
-      })
+      const result = await settleAction(
+        () =>
+          saveOpeningHoursAction({
+            tenantId,
+            establishmentVersion: settings.establishmentVersion,
+            openingHours: null,
+          }),
+        unavailableActionResult
+      )
 
       if (result.ok && result.data) {
         setSchedule(null)

@@ -6,6 +6,7 @@ import {
   getStripeConnectStatusAction,
   startStripeConnectOAuthAction,
 } from "@/actions/stripe-connect"
+import { settleAction, unavailableActionResult } from "@/lib/api/settle-action"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import {
@@ -53,7 +54,10 @@ export function StripeConnectPanel({
   function refreshStatus() {
     setError(null)
     startTransition(async () => {
-      const result = await getStripeConnectStatusAction({ tenantId })
+      const result = await settleAction(
+        () => getStripeConnectStatusAction({ tenantId }),
+        unavailableActionResult
+      )
 
       if (result.ok && result.data) {
         setStatus(result.data)
@@ -71,7 +75,10 @@ export function StripeConnectPanel({
   function connect() {
     setError(null)
     startTransition(async () => {
-      const result = await startStripeConnectOAuthAction({ tenantId, locale })
+      const result = await settleAction(
+        () => startStripeConnectOAuthAction({ tenantId, locale }),
+        unavailableActionResult
+      )
 
       if (result.ok && result.data) {
         window.location.assign(result.data.authorizationUrl)

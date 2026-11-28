@@ -254,7 +254,8 @@
   }
 }
 
-html.global-not-found {
+html.global-not-found,
+html.global-error {
   color-scheme: light;
 }
 

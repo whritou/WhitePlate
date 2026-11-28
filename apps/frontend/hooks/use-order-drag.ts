@@ -45,6 +45,23 @@ export function useOrderDrag(
     }
   }, [])
 
+  const touchDragging = drag?.pointerId === -1
+
+  useEffect(() => {
+    if (!touchDragging) return
+
+    // React attaches touchmove as a passive listener, so preventDefault there
+    // cannot stop the board from scrolling under the finger. Block scrolling
+    // with a non-passive listener only while a long-press drag is active.
+    function blockScroll(event: globalThis.TouchEvent) {
+      if (event.cancelable) event.preventDefault()
+    }
+
+    document.addEventListener("touchmove", blockScroll, { passive: false })
+
+    return () => document.removeEventListener("touchmove", blockScroll)
+  }, [touchDragging])
+
   function destination(x: number, y: number) {
     const lane = document.elementFromPoint(x, y)?.closest("[data-order-lane]")
 
@@ -175,8 +192,6 @@ export function useOrderDrag(
 
       return
     }
-
-    event.preventDefault()
 
     const next = {
       ...current.current,

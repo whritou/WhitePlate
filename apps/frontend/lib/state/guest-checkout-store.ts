@@ -51,6 +51,7 @@ export const createGuestCheckoutStore = createStoreFactory<
   setAttempt: (attempt) => set({ attempt }),
   setInFlight: (inFlight) => set({ inFlight }),
   clearCart: () => set({ cart: [] }),
+  retainCart: (cart) => set({ cart }),
   startNewOrder: () =>
     set((state) => ({
       receipt: null,

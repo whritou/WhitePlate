@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest"
 import {
   createTrackingToken,
   prepareCheckout,
+  retainKnownCartItems,
   updateCart,
   validateOrderInput,
   validProductSelection,
@@ -252,5 +253,45 @@ describe("guest cart", () => {
     },
   ])("rejects malformed or out-of-contract orders %#", (value) => {
     expect(validateOrderInput(value)).toBe(false)
+  })
+})
+
+describe("retainKnownCartItems", () => {
+  const products = [
+    {
+      id: productId,
+      optionGroups: [{ options: [{ id: optionId }] }],
+    },
+  ]
+
+  it("keeps items whose product and options are still on the menu", () => {
+    const cart = [{ productId, quantity: 2, optionIds: [optionId] }]
+
+    expect(retainKnownCartItems(cart, products)).toEqual(cart)
+  })
+
+  it("drops items whose product left the menu", () => {
+    const cart = [
+      { productId, quantity: 1, optionIds: [] },
+      {
+        productId: "33333333-3333-4333-8333-333333333333",
+        quantity: 1,
+        optionIds: [],
+      },
+    ]
+
+    expect(retainKnownCartItems(cart, products)).toEqual([cart[0]])
+  })
+
+  it("drops items whose chosen option left the menu", () => {
+    const cart = [
+      {
+        productId,
+        quantity: 1,
+        optionIds: ["44444444-4444-4444-8444-444444444444"],
+      },
+    ]
+
+    expect(retainKnownCartItems(cart, products)).toEqual([])
   })
 })

@@ -3,7 +3,7 @@
 import { Label } from "@/components/ui/label"
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
 import type { CheckoutPickupSelectorProps } from "@/types/checkout"
-import { useTranslations } from "next-intl"
+import { useLocale, useTranslations } from "next-intl"
 import { CustomerPickupChoices } from "./customer-pickup-choices"
 
 export function CheckoutPickupSelector({
@@ -15,6 +15,7 @@ export function CheckoutPickupSelector({
   customer = false,
 }: CheckoutPickupSelectorProps) {
   const c = useTranslations("Checkout")
+  const locale = useLocale()
   const disabled = pickupSlotsLoading || pickupSlots.length === 0
   const status =
     pickupSlots.length === 0 && !pickupSlotsLoading ? (
@@ -29,7 +30,7 @@ export function CheckoutPickupSelector({
       </p>
     ) : null
   const time = (slot: CheckoutPickupSelectorProps["pickupSlots"][number]) =>
-    new Intl.DateTimeFormat(undefined, {
+    new Intl.DateTimeFormat(locale, {
       weekday: "short",
       month: "short",
       day: "numeric",
@@ -74,15 +75,7 @@ export function CheckoutPickupSelector({
 
           {pickupSlots.map((slot) => (
             <NativeSelectOption key={slot.startsAt} value={slot.startsAt}>
-              {new Intl.DateTimeFormat(undefined, {
-                weekday: "short",
-                month: "short",
-                day: "numeric",
-                hour: "numeric",
-                minute: "2-digit",
-                timeZone: slot.timeZone,
-                timeZoneName: "shortOffset",
-              }).format(new Date(slot.startsAt))}
+              {time(slot)}
             </NativeSelectOption>
           ))}
         </NativeSelect>

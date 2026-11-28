@@ -1,6 +1,7 @@
 "use client"
 
 import { saveOrganizationLegalProfileAction } from "@/actions/organization"
+import { settleAction } from "@/lib/api/settle-action"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -55,14 +56,18 @@ export function OrganizationLegalProfileForm({
     const form = new FormData(event.currentTarget)
 
     startTransition(async () => {
-      const result = await saveOrganizationLegalProfileAction({
-        organizationId: organization.id,
-        version: organization.legalProfileVersion ?? 1,
-        legalCountryCode: form.get("legalCountryCode"),
-        legalName: legalName || null,
-        legalRegistrationNumber: registrationNumber || null,
-        taxIdentifier: taxIdentifier || null,
-      })
+      const result = await settleAction(
+        () =>
+          saveOrganizationLegalProfileAction({
+            organizationId: organization.id,
+            version: organization.legalProfileVersion ?? 1,
+            legalCountryCode: form.get("legalCountryCode"),
+            legalName: legalName || null,
+            legalRegistrationNumber: registrationNumber || null,
+            taxIdentifier: taxIdentifier || null,
+          }),
+        { ok: false, message: "unavailable" } as const
+      )
 
       setError(!result.ok)
       setSaved(result.ok)
